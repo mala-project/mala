@@ -270,7 +270,8 @@
                           <span class="n">naming_scheme</span><span class="o">=</span><span class="s2">&quot;ELEM_snapshot*.npy&quot;</span><span class="p">,</span> <span class="n">starts_at</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                           <span class="n">file_based_communication</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                           <span class="n">descriptor_calculation_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">target_calculator_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                          <span class="n">target_calculator_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">use_fp64</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the snapshots in the list to numpy arrays.</span>
 
@@ -316,6 +317,11 @@
 <span class="sd">        descriptor_calculation_kwargs : dict</span>
 <span class="sd">            Dictionary with additional keyword arguments for the calculation</span>
 <span class="sd">            or parsing of the descriptor quantities.</span>
+
+<span class="sd">        use_fp64 : bool</span>
+<span class="sd">            If True, data is saved with double precision. If False (default),</span>
+<span class="sd">            single precision (FP32) is used. This is advantageous, since</span>
+<span class="sd">            internally, torch models are constructed with FP32 anyway.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">naming_scheme</span><span class="p">:</span>
             <span class="n">file_ending</span> <span class="o">=</span> <span class="n">naming_scheme</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -460,7 +466,8 @@
                                            <span class="n">use_memmap</span><span class="o">=</span><span class="n">memmap</span><span class="p">,</span>
                                            <span class="n">input_iteration</span><span class="o">=</span><span class="n">input_iteration</span><span class="p">,</span>
                                            <span class="n">output_iteration</span><span class="o">=</span><span class="n">output_iteration</span><span class="p">,</span>
-                                           <span class="n">additional_info_path</span><span class="o">=</span><span class="n">info_path</span><span class="p">)</span>
+                                           <span class="n">additional_info_path</span><span class="o">=</span><span class="n">info_path</span><span class="p">,</span>
+                                           <span class="n">use_fp64</span><span class="o">=</span><span class="n">use_fp64</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> \
@@ -475,14 +482,15 @@
                 <span class="k">del</span> <span class="n">output_series</span></div>
 
     <span class="k">def</span> <span class="nf">__convert_single_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">,</span>
-                                <span class="n">descriptor_calculation_kwargs</span><span class="p">,</span>
-                                <span class="n">target_calculator_kwargs</span><span class="p">,</span>
-                                <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                <span class="n">additional_info_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                <span class="n">output_iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                <span class="n">input_iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                                  <span class="n">descriptor_calculation_kwargs</span><span class="p">,</span>
+                                  <span class="n">target_calculator_kwargs</span><span class="p">,</span>
+                                  <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">additional_info_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">output_iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">input_iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">use_fp64</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert single snapshot from the conversion lists.</span>
 
@@ -524,6 +532,11 @@
 <span class="sd">            OpenPMD iteration to be used to save the input data of the current</span>
 <span class="sd">            snapshot, as part of an OpenPMD Series.</span>
 
+<span class="sd">        use_fp64 : bool</span>
+<span class="sd">            If True, data is saved with double precision. If False (default),</span>
+<span class="sd">            single precision (FP32) is used. This is advantageous, since</span>
+<span class="sd">            internally, torch models are constructed with FP32 anyway.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        inputs : numpy.array , optional</span>
@@ -539,6 +552,8 @@
         <span class="c1"># Parse and/or calculate the input descriptors.</span>
         <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;espresso-out&quot;</span><span class="p">:</span>
             <span class="n">descriptor_calculation_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span>
+            <span class="n">descriptor_calculation_kwargs</span><span class="p">[</span><span class="s2">&quot;use_fp64&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_fp64</span>
+
             <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
                 <span class="n">calculate_from_qe_out</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">],</span>
                                       <span class="o">**</span><span class="n">descriptor_calculation_kwargs</span><span class="p">)</span>
@@ -578,6 +593,8 @@
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span>
                         <span class="s2">&quot;output&quot;</span><span class="p">]</span>
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_memmap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_memmap</span>
+                    <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_fp64&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_fp64</span>
+
                     <span class="c1"># If no units are provided we just assume standard units.</span>
                     <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
                         <span class="n">read_from_cube</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span>
@@ -587,6 +604,8 @@
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span>
                         <span class="s2">&quot;output&quot;</span><span class="p">]</span>
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_memmap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_memmap</span>
+                    <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_fp664&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_fp64</span>
+
                     <span class="c1"># If no units are provided we just assume standard units.</span>
                     <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
                         <span class="n">read_from_xsf</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span>

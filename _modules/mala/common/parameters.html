@@ -83,13 +83,15 @@
     <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="k">pass</span>
-
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">set_horovod_status</span><span class="p">,</span> \
     <span class="n">set_mpi_status</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_local_rank</span><span class="p">,</span> <span class="n">set_current_verbosity</span><span class="p">,</span> \
     <span class="n">parallel_warn</span>
 <span class="kn">from</span> <span class="nn">mala.common.json_serializable</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
+
+<span class="n">DEFAULT_NP_DATA_DTYPE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
 
 
 <div class="viewcode-block" id="ParametersBase"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersBase">[docs]</a><span class="k">class</span> <span class="nc">ParametersBase</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>

@@ -84,15 +84,13 @@
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">TensorDataset</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">barrier</span>
-<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
+<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.data_handler_base</span> <span class="kn">import</span> <span class="n">DataHandlerBase</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.data_scaler</span> <span class="kn">import</span> <span class="n">DataScaler</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.snapshot</span> <span class="kn">import</span> <span class="n">Snapshot</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.lazy_load_dataset</span> <span class="kn">import</span> <span class="n">LazyLoadDataset</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.lazy_load_dataset_clustered</span> <span class="kn">import</span> \
     <span class="n">LazyLoadDatasetClustered</span>
-<span class="kn">from</span> <span class="nn">mala.descriptors.descriptor</span> <span class="kn">import</span> <span class="n">Descriptor</span>
-<span class="kn">from</span> <span class="nn">mala.targets.target</span> <span class="kn">import</span> <span class="n">Target</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.fast_tensor_dataset</span> <span class="kn">import</span> <span class="n">FastTensorDataset</span>
 
 
@@ -521,26 +519,26 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">training_data_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span><span class="p">,</span>
                                                   <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">),</span>
-                                                 <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                                                 <span class="n">dtype</span><span class="o">=</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">training_data_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span><span class="p">,</span>
                                                    <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">),</span>
-                                                  <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                                                  <span class="n">dtype</span><span class="o">=</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_data</span><span class="p">,</span>
                                                     <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">),</span>
-                                                   <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                                                   <span class="n">dtype</span><span class="o">=</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_data</span><span class="p">,</span>
                                                      <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">),</span>
-                                                    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                                                    <span class="n">dtype</span><span class="o">=</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">test_data_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span><span class="p">,</span>
                                               <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">),</span>
-                                             <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                                             <span class="n">dtype</span><span class="o">=</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">test_data_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span><span class="p">,</span>
                                                <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">),</span>
-                                              <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                                              <span class="n">dtype</span><span class="o">=</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -788,7 +786,8 @@
                     <span class="c1"># follows does NOT load it into memory, see</span>
                     <span class="c1"># test/tensor_memory.py</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
-                    <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">tmp</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">:</span>
+                        <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">)</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
                                        <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">])</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
@@ -839,7 +838,8 @@
                     <span class="c1"># follows does NOT load it into memory, see</span>
                     <span class="c1"># test/tensor_memory.py</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
-                    <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">tmp</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">:</span>
+                        <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">)</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
                                        <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">])</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
@@ -881,7 +881,7 @@
 <span class="sd">        This tensor that can simply be put into a MALA network.</span>
 <span class="sd">        No unit conversion is done here.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">numpy_array</span> <span class="o">=</span> <span class="n">numpy_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">numpy_array</span> <span class="o">=</span> <span class="n">numpy_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">desired_dimensions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">numpy_array</span> <span class="o">=</span> <span class="n">numpy_array</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">desired_dimensions</span><span class="p">)</span>
         <span class="n">numpy_array</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">numpy_array</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>

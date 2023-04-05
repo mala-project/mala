@@ -76,6 +76,8 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
+<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span>
+
 
 <div class="viewcode-block" id="set_cmdlinevars"><a class="viewcode-back" href="../../../api/mala.descriptors.lammps_utils.html#mala.descriptors.lammps_utils.set_cmdlinevars">[docs]</a><span class="k">def</span> <span class="nf">set_cmdlinevars</span><span class="p">(</span><span class="n">cmdargs</span><span class="p">,</span> <span class="n">argdict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -102,7 +104,8 @@
 <span class="c1">#     return [x for x in string.splitlines() if x.strip() != &#39;&#39;]</span>
 
 
-<div class="viewcode-block" id="extract_compute_np"><a class="viewcode-back" href="../../../api/mala.descriptors.lammps_utils.html#mala.descriptors.lammps_utils.extract_compute_np">[docs]</a><span class="k">def</span> <span class="nf">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">compute_type</span><span class="p">,</span> <span class="n">result_type</span><span class="p">,</span> <span class="n">array_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="extract_compute_np"><a class="viewcode-back" href="../../../api/mala.descriptors.lammps_utils.html#mala.descriptors.lammps_utils.extract_compute_np">[docs]</a><span class="k">def</span> <span class="nf">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">compute_type</span><span class="p">,</span> <span class="n">result_type</span><span class="p">,</span> <span class="n">array_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">use_fp64</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a lammps compute to a numpy array.</span>
 
@@ -128,6 +131,10 @@
 <span class="sd">    array_shape</span>
 <span class="sd">        Array shape of the LAMMPS calculation.</span>
 
+<span class="sd">    use_fp64 : bool</span>
+<span class="sd">        If True, return the array with double precision. If False (default),</span>
+<span class="sd">        the array will be processed with single precision. Only has an effect</span>
+<span class="sd">        if result_type equals 2.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># 1,2: Style (1) is per-atom compute, returns array type (2).</span>
     <span class="n">ptr</span> <span class="o">=</span> <span class="n">lmp</span><span class="o">.</span><span class="n">extract_compute</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">compute_type</span><span class="p">,</span> <span class="n">result_type</span><span class="p">)</span>
@@ -140,7 +147,20 @@
                                                      <span class="n">total_size</span><span class="p">))</span>
         <span class="n">array_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">buffer_ptr</span><span class="o">.</span><span class="n">contents</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="n">array_np</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">array_shape</span>
-        <span class="k">return</span> <span class="n">array_np</span>
+        <span class="c1"># If I directly return the descriptors, this sometimes leads</span>
+        <span class="c1"># to errors, because presumably the python garbage collection</span>
+        <span class="c1"># deallocates memory too quickly. This copy is more memory</span>
+        <span class="c1"># hungry, and we might have to tackle this later on, but</span>
+        <span class="c1"># for now it works.</span>
+        <span class="c1"># I thought the transpose would take care of that, but apparently</span>
+        <span class="c1"># it does not necessarily do that - so we have do go down</span>
+        <span class="c1"># that route.</span>
+        <span class="c1"># If we have to modify the data type, the copy becomes redundant,</span>
+        <span class="c1"># since .astype always copies.</span>
+        <span class="k">if</span> <span class="n">use_fp64</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array_np</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array_np</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">result_type</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">or</span> <span class="n">result_type</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
         <span class="c1"># ptr is an int</span>
         <span class="k">return</span> <span class="n">ptr</span></div>

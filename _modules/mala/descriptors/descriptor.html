@@ -405,7 +405,7 @@
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">get_size</span><span class="p">()):</span>
                     <span class="n">all_descriptors_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">sendcounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">raw_feature_length</span><span class="p">,</span>
-                                 <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
+                                 <span class="n">dtype</span><span class="o">=</span><span class="n">descriptors_np</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
 
                 <span class="c1"># No MPI necessary for first rank. For all the others,</span>
                 <span class="c1"># collect the buffers.</span>

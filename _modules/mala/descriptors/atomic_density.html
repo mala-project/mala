@@ -192,11 +192,8 @@
 
     <span class="k">def</span> <span class="nf">_calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform actual Gaussian descriptor calculation.&quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">lammps</span>
-
-        <span class="n">return_directly</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="s2">&quot;return_directly&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">return_directly</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;return_directly&quot;</span><span class="p">]</span>
+        <span class="n">use_fp64</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_fp64&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">return_directly</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;return_directly&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="n">lammps_format</span> <span class="o">=</span> <span class="s2">&quot;lammps-data&quot;</span>
         <span class="n">ase_out_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;lammps_input.tmp&quot;</span><span class="p">)</span>
@@ -256,7 +253,8 @@
         <span class="n">gaussian_descriptors_np</span> <span class="o">=</span> \
             <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;ggrid&quot;</span><span class="p">,</span>
                                <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
-                               <span class="n">array_shape</span><span class="o">=</span><span class="p">(</span><span class="n">nrows_ggrid</span><span class="p">,</span> <span class="n">ncols_ggrid</span><span class="p">))</span>
+                               <span class="n">array_shape</span><span class="o">=</span><span class="p">(</span><span class="n">nrows_ggrid</span><span class="p">,</span> <span class="n">ncols_ggrid</span><span class="p">),</span>
+                               <span class="n">use_fp64</span><span class="o">=</span><span class="n">use_fp64</span><span class="p">)</span>
 
         <span class="c1"># In comparison to SNAP, the atomic density always returns</span>
         <span class="c1"># in the &quot;local mode&quot;. Thus we have to make some slight adjustments</span>

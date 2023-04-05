@@ -81,6 +81,7 @@
 
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_size</span><span class="p">,</span> \
     <span class="n">barrier</span>
+<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span>
 <span class="kn">from</span> <span class="nn">mala.targets.cube_parser</span> <span class="kn">import</span> <span class="n">read_cube</span>
 <span class="kn">from</span> <span class="nn">mala.targets.xsf_parser</span> <span class="kn">import</span> <span class="n">read_xsf</span>
 <span class="kn">from</span> <span class="nn">mala.targets.target</span> <span class="kn">import</span> <span class="n">Target</span>
@@ -1236,10 +1237,12 @@
                 <span class="n">dos_values</span> <span class="o">*=</span> <span class="n">grid_spacing_z</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">*</span> \
+                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                                    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="o">*</span> \
                              <span class="n">voxel</span><span class="o">.</span><span class="n">volume</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> \
+                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="o">*</span> \
                              <span class="n">voxel</span><span class="o">.</span><span class="n">volume</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">gather_dos</span><span class="p">:</span>
@@ -1417,9 +1420,9 @@
 <span class="sd">            Usage will reduce RAM footprint while SIGNIFICANTLY</span>
 <span class="sd">            impacting disk usage and</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">return_local</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="s2">&quot;return_local&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">return_local</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;return_local&quot;</span><span class="p">]</span>
+        <span class="n">use_fp64</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_fp64&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">return_local</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;return_local&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">ldos_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span> <span class="k">if</span> <span class="n">use_fp64</span> <span class="k">else</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span>
 
         <span class="c1"># Find out the number of digits that are needed to encode this</span>
         <span class="c1"># grid (by QE).</span>
@@ -1462,7 +1465,7 @@
                 <span class="n">data_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="n">ldos_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                                       <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">local_size</span><span class="p">),</span>
-                                     <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                                     <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">)</span>
 
             <span class="c1"># Convert and then append the LDOS data.</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
@@ -1483,7 +1486,7 @@
                                                       <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
                                                       <span class="n">ldos_gridsize</span><span class="p">),</span>
                                                <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w+&quot;</span><span class="p">,</span>
-                                               <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                                               <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">)</span>
                 <span class="n">barrier</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">ldos_data_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span><span class="n">use_memmap</span><span class="p">,</span>
@@ -1493,7 +1496,7 @@
                                                       <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
                                                       <span class="n">ldos_gridsize</span><span class="p">),</span>
                                                <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r+&quot;</span><span class="p">,</span>
-                                               <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                                               <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">)</span>
                 <span class="n">barrier</span><span class="p">()</span>
                 <span class="n">ldos_data_full</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">start_index</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">end_index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> \
                     <span class="n">ldos_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
@@ -1510,7 +1513,7 @@
                 <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">ldos_data_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                                                <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                               <span class="n">ldos_gridsize</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                                               <span class="n">ldos_gridsize</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">)</span>
                     <span class="n">ldos_data_full</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">start_index</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">end_index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> \
                         <span class="n">ldos_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
 
@@ -1522,7 +1525,7 @@
                         <span class="n">local_size</span> <span class="o">=</span> <span class="n">local_end</span><span class="o">-</span><span class="n">local_start</span>
                         <span class="n">ldos_local</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">local_size</span><span class="o">*</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span>
                                               <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                                              <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                                              <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">)</span>
                         <span class="n">comm</span><span class="o">.</span><span class="n">Recv</span><span class="p">(</span><span class="n">ldos_local</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">100</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span>
                         <span class="n">ldos_data_full</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">local_start</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">local_end</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> \
                             <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ldos_local</span><span class="p">,</span> <span class="p">(</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>

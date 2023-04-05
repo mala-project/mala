@@ -239,8 +239,6 @@
                                     <span class="s2">&quot; for parallel inference&quot;</span><span class="p">)</span>
 
                 <span class="n">snap_descriptors</span> <span class="o">=</span> \
-                    <span class="n">snap_descriptors</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-                <span class="n">snap_descriptors</span> <span class="o">=</span> \
                     <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span> \
@@ -251,8 +249,6 @@
                 <span class="n">snap_descriptors</span> <span class="o">=</span> <span class="n">snap_descriptors</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">:]</span>
                 <span class="n">feature_length</span> <span class="o">-=</span> <span class="mi">3</span>
 
-            <span class="n">snap_descriptors</span> <span class="o">=</span> \
-                <span class="n">snap_descriptors</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
             <span class="n">snap_descriptors</span> <span class="o">=</span> \
                 <span class="n">snap_descriptors</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
                     <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">feature_length</span><span class="p">])</span>
