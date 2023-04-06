@@ -78,7 +78,13 @@ class Target(PhysicalData):
         else:
             target = super(Target, cls).__new__(cls)
 
+        # For pickling
+        setattr(target, "params_arg", params)
         return target
+
+    # For pickling
+    def __getnewargs__(self):
+        return self.params_arg,
 
     def __init__(self, params):
         super(Target, self).__init__(params)

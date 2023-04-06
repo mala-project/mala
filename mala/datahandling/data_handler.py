@@ -525,7 +525,7 @@ class DataHandler(DataHandlerBase):
                 elif snapshot.snapshot_type == "openpmd":
                     getattr(self, array)[gs_old : gs_old + gs_new] = \
                         calculator.read_from_openpmd_file(file, units=units) \
-                        .reshape([gs_new, feature_dimensions])
+                        .reshape([gs_new, feature_dimension])
                 else:
                     raise Exception("Unknown snapshot file type.")
                 snapshot_counter += 1
