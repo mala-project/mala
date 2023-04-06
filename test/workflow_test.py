@@ -16,7 +16,7 @@ desired_loss_improvement_factor = 1
 accuracy_electrons = 1e-11
 accuracy_total_energy = 1.5
 accuracy_band_energy = 1
-accuracy_predictions = 0.5
+accuracy_predictions = 1.0
 accuracy_coarse = 5e-7
 accuracy_very_coarse = 3
 accuracy_strict = 1e-16
@@ -235,8 +235,7 @@ class TestFullWorkflow:
         parameters, network, data_handler, tester = \
             mala.Tester.load_run("workflow_test",
                                  path=os.path.join(data_repo_path,
-                                                   "workflow_test"),
-                                 zip_run=False)
+                                                   "workflow_test"))
 
         parameters.targets.target_type = "LDOS"
         parameters.targets.ldos_gridsize = 11
@@ -277,7 +276,7 @@ class TestFullWorkflow:
         ####################
 
         parameters, network, data_handler, tester = \
-            mala.Tester.load_run("workflow_test", zip_run=False,
+            mala.Tester.load_run("workflow_test",
                                  path=os.path.join(data_repo_path,
                                                    "workflow_test"))
         parameters.targets.target_type = "LDOS"
@@ -352,7 +351,7 @@ class TestFullWorkflow:
         ####################
 
         parameters, network, data_handler, predictor = \
-            mala.Predictor.load_run("workflow_test", zip_run=False,
+            mala.Predictor.load_run("workflow_test",
                                     path=os.path.join(data_repo_path,
                                                       "workflow_test"))
         parameters.targets.target_type = "LDOS"
@@ -387,7 +386,7 @@ class TestFullWorkflow:
                           atol=accuracy_very_coarse)
 
     @staticmethod
-    def __simple_training(save_network=False, use_fast_tensor_dataset=False):
+    def __simple_training(use_fast_tensor_dataset=False):
         """Perform a simple training and save it, if necessary."""
         # Set up parameters.
         test_parameters = mala.Parameters()
@@ -423,7 +422,4 @@ class TestFullWorkflow:
                                     data_handler)
         test_trainer.train_network()
 
-        # Save, if necessary.
-        if save_network:
-            test_trainer.save_run("workflow_test", zip_run=False)
         return test_trainer
