@@ -567,7 +567,7 @@ class DataHandler(DataHandlerBase):
                 
     def __build_datasets(self):
         """Build the DataSets that are used during training."""
-        if self.parameters.use_lazy_loading and not self.parameters.enable_lazy_loading_prefetch:
+        if self.parameters.use_lazy_loading and not self.parameters.use_lazy_loading_prefetch:
 
             # Create the lazy loading data sets.
             if self.parameters.use_clustering:
@@ -632,8 +632,8 @@ class DataHandler(DataHandlerBase):
             # self.training_data_set.mix_datasets()
             # self.validation_data_set.mix_datasets()
             # self.test_data_set.mix_datasets()
-        elif self.parameters.use_lazy_loading and self.parameters.enable_lazy_loading_prefetch:
-            printout("Using LazyLoadDatasetSingle with prefetching...", min_verbosity=2)
+        elif self.parameters.use_lazy_loading and self.parameters.use_lazy_loading_prefetch:
+            printout("Using pre fetching.", min_verbosity=2)
             # Create the lazy loading data sets.
             if self.parameters.use_clustering:
                 raise Exception("clustering not supported in this mode")

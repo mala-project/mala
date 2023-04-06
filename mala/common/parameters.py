@@ -559,7 +559,7 @@ class ParametersData(ParametersBase):
         currently needed will be kept in memory. This greatly reduces memory
         demands, but adds additional computational time.
 
-    enable_lazy_loading_prefetch : bool
+    use_lazy_loading_prefetch : bool
         If True, will use alternative lazy loading path with prefetching
         for higher performance
 
@@ -596,7 +596,7 @@ class ParametersData(ParametersBase):
         self.input_rescaling_type = "None"
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False
-        self.enable_lazy_loading_prefetch = False
+        self.use_lazy_loading_prefetch = False
         self.use_clustering = False
         self.number_of_clusters = 40
         self.train_ratio = 0.1
