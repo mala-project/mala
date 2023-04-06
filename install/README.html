@@ -217,10 +217,13 @@ data repository, that can be obtained from
 <a class="reference external" href="https://github.com/mala-project/test-data">https://github.com/mala-project/test-data</a>. Please be sure to check out the
 correct tag for the data repository, since the data repository itself is
 subject to ongoing development as well.</p>
-<p>Download data repository and check out correct tag.</p>
+<p>Also make sure to have the <a class="reference external" href="https://git-lfs.com/">Git LFS</a> installed on your
+machine, since the data repository operates using Git LFS to handle large
+binary files for example training data.</p>
+<p>Download data repository and check out correct tag:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/mala-project/test-data<span class="w"> </span>~/path/to/data/repo
 $<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>~/path/to/data/repo
-$<span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>v1.4.0
+$<span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>v1.6.0
 </pre></div>
 </div>
 <p>Export the path to that repo by</p>
