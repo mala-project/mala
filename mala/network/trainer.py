@@ -16,6 +16,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from mala.common.parameters import printout
+from mala.common.parallelizer import parallel_warn
 from mala.datahandling.fast_tensor_dataset import FastTensorDataset
 from mala.network.network import Network
 from mala.network.runner import Runner
@@ -45,6 +46,13 @@ class Trainer(Runner):
     def __init__(self, params, network, data, optimizer_dict=None):
         # copy the parameters into the class.
         super(Trainer, self).__init__(params, network, data)
+        if data.parameters.use_lazy_loading_prefetch and \
+                self.parameters.after_before_training_metric != "ldos":
+            parallel_warn("Pre-fetching lazy-loading can only be used with "
+                          "LDOS as validation metric. You have selected"
+                          " a different metric; MALA will default to LDOS"
+                          " now.")
+            self.parameters.after_before_training_metric = "ldos"
         self.final_test_loss = float("inf")
         self.initial_test_loss = float("inf")
         self.final_validation_loss = float("inf")
@@ -449,6 +457,13 @@ class Trainer(Runner):
                 tloss = self.__average_validation(tloss, 'average_loss')
             printout("Final test data loss: ", tloss, min_verbosity=0)
         self.final_test_loss = tloss
+
+        # Clean-up for pre-fetching lazy loading.
+        if self.data.parameters.use_lazy_loading_prefetch:
+            self.training_data_loaders.cleanup()
+            self.validation_data_loaders.cleanup()
+            if len(self.data.test_data_sets) > 0:
+                self.test_data_loaders.cleanup()
 
     def __prepare_to_train(self, optimizer_dict):
         """Prepare everything for training."""

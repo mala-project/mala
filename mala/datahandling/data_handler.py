@@ -633,7 +633,7 @@ class DataHandler(DataHandlerBase):
             # self.validation_data_set.mix_datasets()
             # self.test_data_set.mix_datasets()
         elif self.parameters.use_lazy_loading and self.parameters.use_lazy_loading_prefetch:
-            printout("Using pre fetching.", min_verbosity=2)
+            printout("Using lazy loading pre-fetching.", min_verbosity=2)
             # Create the lazy loading data sets.
             if self.parameters.use_clustering:
                 raise Exception("clustering not supported in this mode")

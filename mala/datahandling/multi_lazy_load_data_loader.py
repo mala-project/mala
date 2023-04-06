@@ -72,6 +72,14 @@ class MultiLazyLoadDataLoader:
             # Return current
             return self.loaders[self.count - 1]
 
+    # TODO: Without this function, I get 2 times the number of snapshots
+    # memory leaks after shutdown. With it, I get 1 times the number of
+    # snapshots. So using this function seems to be correct; just simply not
+    # enough? I am not sure where the memory leak is coming from.
+    def cleanup(self):
+        for dset in self.datasets:
+            dset.delete_data()
+
     # Worker function to load data into shared memory (limited to numpy files
     # only for now)
     @staticmethod

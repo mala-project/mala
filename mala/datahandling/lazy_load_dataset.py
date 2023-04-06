@@ -11,7 +11,6 @@ import torch
 from torch.utils.data import Dataset
 
 from mala.common.parallelizer import barrier
-from mala.common.parallelizer import barrier
 from mala.common.parameters import DEFAULT_NP_DATA_DTYPE
 from mala.datahandling.snapshot import Snapshot
 
@@ -251,6 +250,8 @@ class LazyLoadDataset(torch.utils.data.Dataset):
                 self.get_new_data(file_index)
             return self.input_data[index_in_file_start:index_in_file_stop], \
                 self.output_data[index_in_file_start:index_in_file_stop]
+        else:
+            raise Exception("Invalid idx provided.")
 
     def __len__(self):
         """
