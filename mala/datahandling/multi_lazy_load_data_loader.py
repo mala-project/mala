@@ -1,3 +1,4 @@
+"""Class for loading multiple data sets with pre-fetching."""
 import os
 
 import numpy as np
@@ -6,11 +7,17 @@ from torch.utils.data import DataLoader
 from multiprocessing import shared_memory
 import concurrent.futures
 
-# Class to handle loading multiple LazyLoadDatasetSingle objects with
-# prefetching
-
 
 class MultiLazyLoadDataLoader:
+    """
+    Class for loading multiple data sets with pre-fetching.
+
+    Parameters
+    ----------
+    datasets : list
+        A list of data sets to be used in this class.
+    """
+
     def __init__(self, datasets, **kwargs):
         self.datasets = datasets
         self.loaders = []
@@ -37,13 +44,38 @@ class MultiLazyLoadDataLoader:
                                             dset.output_shm_name)
 
     def __len__(self):
+        """
+        Access number of datasets/snapshots contained within this loader.
+
+        Returns
+        -------
+        length : int
+            Number of datasets/snapshots contained within this loader.
+        """
         return len(self.loaders)
 
     def __iter__(self):
+        """
+        Generate an iterator.
+
+        Returns
+        -------
+        iterator: MultiLazyLoadDataLoader
+            An iterator over the individual datasets/snapshots in this
+            object.
+        """
         self.count = 0
         return self
 
     def __next__(self):
+        """
+        Access the next data loader.
+
+        Returns
+        -------
+        iterator: DataLoader
+            The next data loader.
+        """
         self.count += 1
         if self.count > len(self.loaders):
             raise StopIteration
@@ -77,6 +109,7 @@ class MultiLazyLoadDataLoader:
     # snapshots. So using this function seems to be correct; just simply not
     # enough? I am not sure where the memory leak is coming from.
     def cleanup(self):
+        """Deallocate arrays still left in memory."""
         for dset in self.datasets:
             dset.delete_data()
 
@@ -85,6 +118,28 @@ class MultiLazyLoadDataLoader:
     @staticmethod
     def load_snapshot_to_shm(snapshot, descriptor_calculator, target_calculator,
                              input_shm_name, output_shm_name):
+        """
+        Load a snapshot into shared memory.
+
+        Limited to numpy files for now.
+
+        Parameters
+        ----------
+        snapshot : mala.datahandling.snapshot.Snapshot
+            Snapshot to be loaded.
+
+        descriptor_calculator : mala.descriptors.descriptor.Descriptor
+            Used to do unit conversion on input data.
+
+        target_calculator : mala.targets.target.Target or derivative
+            Used to do unit conversion on output data.
+
+        input_shm_name : str
+            Name of the input shared memory buffer.
+
+        output_shm_name : str
+            Name of the output shared memory buffer.
+        """
         # Get shared mem
         input_shm = shared_memory.SharedMemory(name=input_shm_name)
         output_shm = shared_memory.SharedMemory(name=output_shm_name)

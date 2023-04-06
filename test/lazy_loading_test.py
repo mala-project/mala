@@ -13,7 +13,6 @@ data_path = os.path.join(data_repo_path, "Be2")
 # This test compares the data scaling using the regular scaling procedure and
 # the lazy-loading one (incremental fitting).
 
-accuracy_strict = 1e-3
 accuracy_coarse = 1e-3
 
 
@@ -171,6 +170,37 @@ class TestLazyLoading:
         assert np.isclose(training_tester[0], training_tester[1],
                           atol=accuracy_coarse)
 
+    def test_prefetching(self):
+        # Comparing the results of pre-fetch and without pre-fetch
+        # is not entirely easy. There are two main differences:
+        # 1. In prefetch, the data is shuffled on the in-snapshot level.
+        #    This is possible due to the shared memory approach and leads to
+        #    different (better!) accuracies.
+        # 2. Even when shuffling would be disabled, there is another
+        #    difference. Without prefetching, since each data point is loaded
+        #    one at a time by the torch loader, we can move over snapshot
+        #    boundaries. This is not possible for the prefetching algorithm,
+        #    where the snapshot boundaries are absolutely respected.
+        #    Imagine if you have 8748 data points per snapshot and 2 snapshots,
+        #    and want to use a batch size of 40.
+        #    Then without pre-fetching, we get 437 full batches and one
+        #    residual batch with 16 data points (40*437 = 17480; 8748*2=17496)
+        #    With pre-fetching, we get 218 full batches per snapshot,
+        #    meaning 8720 data points, so for both snapshots one residual
+        #    batch with 28 data points. The amount of uneven batches has an
+        #    ever so subtle influence on the network training.
+        #    One could make these behaviors consistent by writing a custom
+        #    DataLoader for the regular LazyLoading case, but I don't see
+        #    the merit in that. The pre-fetching works better and faster,
+        #    and the differences are barely noticeable at all.
+
+        without_prefetching = self._train_lazy_loading(False)
+        with_prefetching = self._train_lazy_loading(True)
+        assert np.isclose(with_prefetching, without_prefetching,
+                          atol=accuracy_coarse)
+        assert with_prefetching < without_prefetching
+
+
     @pytest.mark.skipif(importlib.util.find_spec("horovod") is None,
                         reason="Horovod is currently not part of the pipeline")
     def test_performance_horovod(self):
@@ -275,4 +305,44 @@ class TestLazyLoading:
         diff = np.array(diff)
 
         # The loss improvements should be comparable.
-        assert np.std(diff) < accuracy_strict
+        assert np.std(diff) < accuracy_coarse
+
+    @staticmethod
+    def _train_lazy_loading(prefetching):
+        test_parameters = Parameters()
+        test_parameters.data.data_splitting_type = "by_snapshot"
+        test_parameters.data.input_rescaling_type = "feature-wise-standard"
+        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.manual_seed = 1234
+        test_parameters.running.max_number_epochs = 100
+        test_parameters.running.mini_batch_size = 40
+        test_parameters.running.learning_rate = 0.00001
+        test_parameters.running.trainingtype = "Adam"
+        test_parameters.verbosity = 2
+        test_parameters.data.use_lazy_loading = True
+        test_parameters.data.use_lazy_loading_prefetch = prefetching
+
+        data_handler = DataHandler(test_parameters)
+
+        # Add a snapshot we want to use in to the list.
+        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                  "Be_snapshot0.out.npy", data_path, "tr")
+        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                  "Be_snapshot1.out.npy", data_path, "tr")
+        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                  "Be_snapshot2.out.npy", data_path, "va")
+        data_handler.add_snapshot("Be_snapshot3.in.npy", data_path,
+                                  "Be_snapshot3.out.npy", data_path, "va")
+        data_handler.prepare_data()
+
+        test_parameters.network.layer_sizes = [data_handler.input_dimension,
+                                               100,
+                                               data_handler.output_dimension]
+
+        # Setup network and trainer.
+        test_network = Network(test_parameters)
+        test_trainer = Trainer(test_parameters, test_network,
+                                    data_handler)
+        test_trainer.train_network()
+        return test_trainer.final_validation_loss

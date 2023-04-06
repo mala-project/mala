@@ -88,9 +88,12 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
     def return_outputs_directly(self, value):
         self._return_outputs_directly = value
 
-    # This method allocates the shared memory buffer for use by prefetching
-    # process. It sizes the buffer from the numpy file metadata.
     def allocate_shared_mem(self):
+        """
+        Allocate the shared memory buffer for use by prefetching process.
+
+        Buffer is sized via numpy metadata.
+        """
         # Get array shape and data types
         self.input_shape, self.input_dtype = self.descriptor_calculator. \
             read_dimensions_and_dtype_from_numpy_file(
@@ -121,8 +124,8 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         input_shm.close()
         output_shm.close()
 
-    # Free the shared memory buffers
     def delete_data(self):
+        """Free the shared memory buffers."""
         if self.loaded:
             self.input_data = None
             self.output_data = None
@@ -160,8 +163,11 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         output_data = np.ndarray(shape=[self.snapshot.grid_size,
                                         self.output_dimension],
                                  dtype=np.float32, buffer=output_shm.buf)
-
-        batch = self.indices[idx*self.batch_size:(idx+1)*self.batch_size]
+        if idx == self.len-1:
+            batch = self.indices[idx * self.batch_size:]
+        else:
+            batch = self.indices[idx*self.batch_size:(idx+1)*self.batch_size]
+        # print(batch.shape)
 
         input_batch = input_data[batch, ...]
         output_batch = output_data[batch, ...]
@@ -191,12 +197,20 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         """
         return self.len
 
-    # For this class, instead of mixing the datasets, we just shuffle the
-    # indices and leave the dataset order unchanged
     def mix_datasets(self):
-        # NOTE: It seems that the shuffled access to the shared memory performance is much reduced (relative to the FastTensorDataset).
-        # To regain performance, can rewrite to shuffle the datasets like in the existing LazyLoadDataset. Another option might be
-        # to try loading the numpy file in permuted order to avoid the shuffled reads; however, this might require some care to
-        # avoid erroneously overwriting shared memory data in cases where a single dataset object is used back to back.
+        """
+        Shuffle the data in this data set.
+
+        For this class, instead of mixing the datasets, we just shuffle the
+        indices and leave the dataset order unchanged.
+        NOTE: It seems that the shuffled access to the shared memory
+        performance is much reduced (relative to the FastTensorDataset).
+        To regain performance, can rewrite to shuffle the datasets like in
+        the existing LazyLoadDataset. Another option might be
+        to try loading the numpy file in permuted order to avoid the shuffled
+        reads; however, this might require some care to
+        avoid erroneously overwriting shared memory data in cases where a
+        single dataset object is used back to back.
+        """
         np.random.shuffle(self.indices)
 

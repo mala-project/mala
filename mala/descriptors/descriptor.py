@@ -71,8 +71,18 @@ class Descriptor(PhysicalData):
         setattr(descriptors, "params_arg", params)
         return descriptors
 
-    # For pickling
     def __getnewargs__(self):
+        """
+        Get the necessary arguments to call __new__.
+
+        Used for pickling.
+
+
+        Returns
+        -------
+        params : mala.Parameters
+            The parameters object with which this object was created.
+        """
         return self.params_arg,
 
     def __init__(self, parameters):
