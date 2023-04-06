@@ -68,7 +68,7 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         self.input_requires_grad = input_requires_grad
 
         self.batch_size = batch_size
-        self.len = snapshot.grid_size // self.batch_size
+        self.len = int(np.ceil(snapshot.grid_size / self.batch_size))
         self.indices = np.arange(snapshot.grid_size)
         self.input_shm_name = None
         self.output_shm_name = None
