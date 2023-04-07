@@ -31,9 +31,19 @@ class Tester(Runner):
         DataHandler holding the test data.
 
     observables_to_test : list
-        List of observables to test. Supported are "ldos", "band_energy",
-        "number_of_electrons" and "total_energy". For the LDOS, the loss mean
-        squared error per snapshot is calculated.
+        List of observables to test. Supported are:
+
+            - "ldos": Calculate the MSE loss of the LDOS.
+            - "band_energy": Band energy error
+            - "band_energy_full": Band energy absolute values (only works with
+              list, as both actual and predicted are returned)
+            - "total_energy": Total energy error
+            - "total_energy_full": Total energy absolute values (only works
+              with list, as both actual and predicted are returned)
+            - "number_of_electrons": Number of electrons (Fermi energy is not
+              determined dynamically for this quantity.
+            - "density": MAPE of the density prediction
+            - "dos": MAPE of the DOS prediction
 
     output_format : string
         Can be "list" or "mae". If "list", then a list of results across all
@@ -230,6 +240,43 @@ class Tester(Runner):
             predicted = target_calculator.total_energy
             return [actual, predicted,
                     target_calculator.total_energy_dft_calculation]
+
+        elif observable == "density":
+            target_calculator = self.data.target_calculator
+            if not isinstance(target_calculator, LDOS) and \
+                    not isinstance(target_calculator, Density):
+                raise Exception("Cannot calculate the total energy from this "
+                                "observable.")
+            target_calculator.\
+                read_additional_calculation_data(
+                self.data.get_snapshot_calculation_output(snapshot_number))
+
+            target_calculator.read_from_array(actual_target)
+            actual = target_calculator.density
+
+            target_calculator.read_from_array(predicted_target)
+            predicted = target_calculator.density
+            return np.mean(np.abs((actual - predicted) / actual)) * 100
+
+        elif observable == "dos":
+            target_calculator = self.data.target_calculator
+            if not isinstance(target_calculator, LDOS) and \
+                    not isinstance(target_calculator, DOS):
+                raise Exception("Cannot calculate the total energy from this "
+                                "observable.")
+            target_calculator.\
+                read_additional_calculation_data(
+                self.data.get_snapshot_calculation_output(snapshot_number))
+
+            target_calculator.read_from_array(actual_target)
+            actual = target_calculator.density_of_states
+
+            target_calculator.read_from_array(predicted_target)
+            predicted = target_calculator.density_of_states
+            return np.mean(np.abs((actual - predicted) / actual)) * 100
+
+
+
 
     def __prepare_to_test(self, snapshot_number):
         """Prepare the tester class to for test run."""
