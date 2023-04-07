@@ -223,7 +223,7 @@ class DataHandler:
     # Preparing data
     ######################
 
-    def prepare_data(self, reparametrize_scaler=True, refresh=False, from_arrays_dict=None):
+    def prepare_data(self, reparametrize_scaler=True, from_arrays_dict=None):
         """
         Prepare the data to be used in a training process.
 
@@ -239,6 +239,14 @@ class DataHandler:
             If True (default), the DataScalers are parametrized based on the
             training data.
 
+        from_arrays_dict : dict or None
+            (Allows user to provide data directly from memory)
+            Dictionary which assigns an array (values) to each snapshot, e.g.,
+            {(0,'inputs') : fp_array, (0, 'outputs') : ldos_array, ...} where 0
+            is the index of the snapshot (absolute, not relative to data
+            partition) and inputs/outputs indicates the nature of the array.         
+            None value indicates the data should be pulled from disk according
+            to the snapshot objects.
         """
         # During data loading, there is no need to save target data to
         # calculators.
@@ -252,7 +260,7 @@ class DataHandler:
         # an exception.
         printout("Checking the snapshots and your inputs for consistency.",
                  min_verbosity=1)
-        self.__check_snapshots(refresh=refresh, from_arrays_dict=from_arrays_dict)
+        self.__check_snapshots(from_arrays_dict=from_arrays_dict)
         printout("Consistency check successful.", min_verbosity=0)
 
         # If the DataHandler is used for inference, i.e. no training or
@@ -279,11 +287,10 @@ class DataHandler:
             self.__load_data("training", "inputs",  from_arrays_dict=from_arrays_dict)
             self.__load_data("training", "outputs", from_arrays_dict=from_arrays_dict)
 
-        # Build Datasets (unless we are just refreshing the selection)
-        if not refresh:
-            printout("Build datasets.", min_verbosity=1)
-            self.__build_datasets(from_arrays_dict=from_arrays_dict)
-            printout("Build dataset: Done.", min_verbosity=0)
+        # Build Datasets
+        printout("Build datasets.", min_verbosity=1)
+        self.__build_datasets(from_arrays_dict=from_arrays_dict)
+        printout("Build dataset: Done.", min_verbosity=0)
 
         # After the loading is done, target data can safely be saved again.
         self.target_calculator.save_target_data = True
@@ -303,14 +310,18 @@ class DataHandler:
 
         Parameters
         ----------
+
         from_arrays_dict : dict or None
-            If None, load new data from files, if not None, has the form
-            {(i, data_type): data} where i is the index of the snapshot
-            for to slice data of data_type (inputs or outputs) from data.
+            (Allows user to provide data directly from memory)
+            Dictionary which assigns an array (values) to each snapshot, e.g.,
+            {(0,'inputs') : fp_array, (0, 'outputs') : ldos_array, ...} where 0
+            is the index of the snapshot (absolute, not relative to data
+            partition) and inputs/outputs indicates the nature of the array.         
+            None value indicates the data should be pulled from disk according
+            to the snapshot objects.
 
         partitions: list
             Specifies the partitions for which to reload data
-
         """
         # During data loading, there is no need to save target data to
         # calculators.
@@ -587,7 +598,7 @@ class DataHandler:
     # Loading data
     ######################
 
-    def __check_snapshots(self, refresh=False, from_arrays_dict=None):
+    def __check_snapshots(self, from_arrays_dict=None):
         """Check the snapshots for consistency."""
         self.nr_snapshots = len(self.parameters.snapshot_directories_list)
 
@@ -692,11 +703,6 @@ class DataHandler:
         # Now we need to confirm that the snapshot list has some inner
         # consistency.
         if self.parameters.data_splitting_type == "by_snapshot":
-            if refresh: # if we're reloading data, don't recount nrs
-                self.nr_training_snapshots, self.nr_training_data, \
-                self.nr_test_snapshots, self.nr_test_data, \
-                self.nr_validation_snapshots, self.nr_validation_data \
-                = 0, 0, 0, 0, 0, 0 
             #pprint(vars(self))
             #pprint(vars(self.parameters))
             snapshot: Snapshot
@@ -746,7 +752,7 @@ class DataHandler:
         else:
             raise Exception("Wrong parameter for data splitting provided.")
 
-        if not self.parameters.use_lazy_loading:# and not refresh:
+        if not self.parameters.use_lazy_loading:
             self.__allocate_arrays()        
 
         # Reordering the lists.
