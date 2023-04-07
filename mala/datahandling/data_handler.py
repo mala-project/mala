@@ -295,6 +295,7 @@ class DataHandler:
         # allows for parallel I/O.
         barrier()
 
+
     def refresh_data(self, from_arrays_dict=None, partitions=['tr','va','te']):
         """
         Replace tr, va, te data for next generation of active learning.
@@ -394,7 +395,12 @@ class DataHandler:
 
         # After the loading is done, target data can safely be saved again.
         self.target_calculator.save_target_data = True
-        
+
+        printout("Build datasets.", min_verbosity=1)
+        self.__build_datasets(from_arrays_dict=from_arrays_dict)
+        printout("Build dataset: Done.", min_verbosity=0)
+        printout(f'ttt build_dataset:                    {time.time()-start}s')
+
         # Wait until all ranks are finished with data preparation.
         # It is not uncommon that ranks might be asynchronous in their
         # data preparation by a small amount of minutes. If you notice

@@ -258,6 +258,9 @@ class Trainer(Runner):
                     # data copy in
                     torch.cuda.nvtx.range_pop()
 
+                    ### DEBUG - check data
+                    #printout(f'DDDD ing_data_set - prepare_to_train:\n{self.data.training_data_set} ')
+
                     loss = self.__process_mini_batch(self.network,
                                                      inputs,
                                                      outputs)
@@ -491,6 +494,11 @@ class Trainer(Runner):
                                                rank=hvd.rank(),
                                                shuffle=False)
 
+            ### DEBUG: Check dataset to ensure selection_mask is working
+            #printout(f'DDDD training_data_set - prepare_to_train:\n{self.data.training_data_set[0][:,0]} ')
+            #printout(f'DDDD training_data_set [0] - prepare_to_train:\n{[t[0] for t in self.data.training_data_set.tensors[0]]} ')
+            
+
             if self.data.test_data_set is not None:
                 self.test_sampler = torch.utils.data.\
                     distributed.DistributedSampler(self.data.test_data_set,
@@ -579,6 +587,11 @@ class Trainer(Runner):
 
     def __process_mini_batch(self, network, input_data, target_data):
         """Process a mini batch."""
+            
+        ### DEBUG
+        #printout(f'DDDD input_data: \n {input_data[:,0]}')
+        #printout(f'DDDD input_data sum: {torch.sum(input_data)}')
+ 
         if self.parameters._configuration["gpu"]:
             if self.parameters.use_graphs and self.train_graph is None:
                 printout("Capturing CUDA graph for training.", min_verbosity=2)
