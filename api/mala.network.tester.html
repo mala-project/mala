@@ -124,9 +124,23 @@
 <li><p><strong>params</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this Tester object.</p></li>
 <li><p><strong>network</strong> (<a class="reference internal" href="mala.network.network.html#mala.network.network.Network" title="mala.network.network.Network"><em>mala.network.network.Network</em></a>) – Network which is being tested.</p></li>
 <li><p><strong>data</strong> (<a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – DataHandler holding the test data.</p></li>
-<li><p><strong>observables_to_test</strong> (<em>list</em>) – List of observables to test. Supported are “ldos”, “band_energy”,
-“number_of_electrons” and “total_energy”. For the LDOS, the loss mean
-squared error per snapshot is calculated.</p></li>
+<li><p><strong>observables_to_test</strong> (<em>list</em>) – <p>List of observables to test. Supported are:</p>
+<blockquote>
+<div><ul>
+<li><p>”ldos”: Calculate the MSE loss of the LDOS.</p></li>
+<li><p>”band_energy”: Band energy error</p></li>
+<li><p>”band_energy_full”: Band energy absolute values (only works with
+list, as both actual and predicted are returned)</p></li>
+<li><p>”total_energy”: Total energy error</p></li>
+<li><p>”total_energy_full”: Total energy absolute values (only works
+with list, as both actual and predicted are returned)</p></li>
+<li><p>”number_of_electrons”: Number of electrons (Fermi energy is not
+determined dynamically for this quantity.</p></li>
+<li><p>”density”: MAPE of the density prediction</p></li>
+<li><p>”dos”: MAPE of the DOS prediction</p></li>
+</ul>
+</div></blockquote>
+</p></li>
 <li><p><strong>output_format</strong> (<em>string</em>) – Can be “list” or “mae”. If “list”, then a list of results across all
 snapshots is returned. If “mae”, then the MAE across all snapshots
 will be calculated and returned.</p></li>

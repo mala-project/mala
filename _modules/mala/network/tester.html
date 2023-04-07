@@ -104,9 +104,19 @@
 <span class="sd">        DataHandler holding the test data.</span>
 
 <span class="sd">    observables_to_test : list</span>
-<span class="sd">        List of observables to test. Supported are &quot;ldos&quot;, &quot;band_energy&quot;,</span>
-<span class="sd">        &quot;number_of_electrons&quot; and &quot;total_energy&quot;. For the LDOS, the loss mean</span>
-<span class="sd">        squared error per snapshot is calculated.</span>
+<span class="sd">        List of observables to test. Supported are:</span>
+
+<span class="sd">            - &quot;ldos&quot;: Calculate the MSE loss of the LDOS.</span>
+<span class="sd">            - &quot;band_energy&quot;: Band energy error</span>
+<span class="sd">            - &quot;band_energy_full&quot;: Band energy absolute values (only works with</span>
+<span class="sd">              list, as both actual and predicted are returned)</span>
+<span class="sd">            - &quot;total_energy&quot;: Total energy error</span>
+<span class="sd">            - &quot;total_energy_full&quot;: Total energy absolute values (only works</span>
+<span class="sd">              with list, as both actual and predicted are returned)</span>
+<span class="sd">            - &quot;number_of_electrons&quot;: Number of electrons (Fermi energy is not</span>
+<span class="sd">              determined dynamically for this quantity.</span>
+<span class="sd">            - &quot;density&quot;: MAPE of the density prediction</span>
+<span class="sd">            - &quot;dos&quot;: MAPE of the DOS prediction</span>
 
 <span class="sd">    output_format : string</span>
 <span class="sd">        Can be &quot;list&quot; or &quot;mae&quot;. If &quot;list&quot;, then a list of results across all</span>
@@ -303,6 +313,43 @@
             <span class="n">predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">total_energy</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">actual</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span>
                     <span class="n">target_calculator</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">observable</span> <span class="o">==</span> <span class="s2">&quot;density&quot;</span><span class="p">:</span>
+            <span class="n">target_calculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span><span class="p">)</span> <span class="ow">and</span> \
+                    <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">Density</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot calculate the total energy from this &quot;</span>
+                                <span class="s2">&quot;observable.&quot;</span><span class="p">)</span>
+            <span class="n">target_calculator</span><span class="o">.</span>\
+                <span class="n">read_additional_calculation_data</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">))</span>
+
+            <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">actual_target</span><span class="p">)</span>
+            <span class="n">actual</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density</span>
+
+            <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_target</span><span class="p">)</span>
+            <span class="n">predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">actual</span> <span class="o">-</span> <span class="n">predicted</span><span class="p">)</span> <span class="o">/</span> <span class="n">actual</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span>
+
+        <span class="k">elif</span> <span class="n">observable</span> <span class="o">==</span> <span class="s2">&quot;dos&quot;</span><span class="p">:</span>
+            <span class="n">target_calculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span><span class="p">)</span> <span class="ow">and</span> \
+                    <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">DOS</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot calculate the total energy from this &quot;</span>
+                                <span class="s2">&quot;observable.&quot;</span><span class="p">)</span>
+            <span class="n">target_calculator</span><span class="o">.</span>\
+                <span class="n">read_additional_calculation_data</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">))</span>
+
+            <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">actual_target</span><span class="p">)</span>
+            <span class="n">actual</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density_of_states</span>
+
+            <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_target</span><span class="p">)</span>
+            <span class="n">predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density_of_states</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">actual</span> <span class="o">-</span> <span class="n">predicted</span><span class="p">)</span> <span class="o">/</span> <span class="n">actual</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span>
+
+
+
 
     <span class="k">def</span> <span class="nf">__prepare_to_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the tester class to for test run.&quot;&quot;&quot;</span>
