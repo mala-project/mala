@@ -98,7 +98,8 @@ class MultiPredictor(Predictor):
             raise Exception("Multi model prediction always requires Runner to"
                             " be loaded to manage multiple models.")
 
-        runs = glob.glob(run_name)
+        runs = [os.path.basename(x) for x in
+                glob.glob(os.path.join(path, run_name))]
         networks = []
         for idx, run in enumerate(runs):
             run = run.split(".zip")[0]
