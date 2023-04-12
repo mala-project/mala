@@ -7,7 +7,7 @@ from mala import printout
 from tensorboard import program
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Al36")
+data_path = os.path.join(data_repo_path, "Be2")
 
 
 """
@@ -36,7 +36,7 @@ test_parameters.data.output_rescaling_type = "normal"
 test_parameters.network.layer_activations = ["ReLU"]
 
 # Specify the training parameters.
-test_parameters.running.max_number_epochs = 400
+test_parameters.running.max_number_epochs = 100
 test_parameters.running.mini_batch_size = 40
 test_parameters.running.learning_rate = 0.001
 test_parameters.running.trainingtype = "Adam"
@@ -54,15 +54,12 @@ test_parameters.running.visualisation_dir = "ex10_vis"
 data_handler = mala.DataHandler(test_parameters)
 
 # Add a snapshot we want to use in to the list.
-data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                          "Al_debug_2k_nr0.out.npy", data_path, "tr",
-                          output_units="1/(Ry*Bohr^3)")
-data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                          "Al_debug_2k_nr1.out.npy", data_path, "va",
-                          output_units="1/(Ry*Bohr^3)")
-data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                          "Al_debug_2k_nr2.out.npy", data_path, "te",
-                          output_units="1/(Ry*Bohr^3)")
+data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                          "Be_snapshot0.out.npy", data_path, "tr")
+data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                          "Be_snapshot1.out.npy", data_path, "va")
+data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                          "Be_snapshot2.out.npy", data_path, "te")
 data_handler.prepare_data()
 printout("Read data: DONE.")
 

@@ -11,6 +11,7 @@ import torch
 from torch.utils.data import Dataset
 
 from mala.common.parallelizer import barrier
+from mala.common.parameters import DEFAULT_NP_DATA_DTYPE
 from mala.datahandling.snapshot import Snapshot
 
 
@@ -45,13 +46,6 @@ class LazyLoadDataset(torch.utils.data.Dataset):
     target_calculator : mala.targets.target.Target or derivative
         Used to do unit conversion on output data.
 
-    grid_dimensions : list
-        Dimensions of the grid (x,y,z).
-
-    grid_size : int
-        Size of the grid (x*y*z), i.e. the number of datapoints per
-        snapshot.
-
     use_horovod : bool
         If true, it is assumed that horovod is used.
 
@@ -61,7 +55,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
 
     def __init__(self, input_dimension, output_dimension, input_data_scaler,
                  output_data_scaler, descriptor_calculator,
-                 target_calculator, grid_dimensions, grid_size, use_horovod,
+                 target_calculator, use_horovod,
                  input_requires_grad=False):
         self.snapshot_list = []
         self.input_dimension = input_dimension
@@ -70,8 +64,6 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.output_data_scaler = output_data_scaler
         self.descriptor_calculator = descriptor_calculator
         self.target_calculator = target_calculator
-        self.grid_dimensions = grid_dimensions
-        self.grid_size = grid_size
         self.number_of_snapshots = 0
         self.total_size = 0
         self.descriptors_contain_xyz = self.descriptor_calculator.\
@@ -111,7 +103,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         """
         self.snapshot_list.append(snapshot)
         self.number_of_snapshots += 1
-        self.total_size = self.number_of_snapshots*self.grid_size
+        self.total_size += snapshot.grid_size
 
     def mix_datasets(self):
         """
@@ -148,7 +140,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
                              self.snapshot_list[file_index].output_npy_file),
                              units=self.snapshot_list[file_index].output_units)
 
-        elif self.snapshot_list[file_index].snapshot_type == "hdf5":
+        elif self.snapshot_list[file_index].snapshot_type == "openpmd":
             self.input_data = self.descriptor_calculator. \
                 read_from_openpmd_file(
                 os.path.join(self.snapshot_list[file_index].input_npy_directory,
@@ -160,22 +152,52 @@ class LazyLoadDataset(torch.utils.data.Dataset):
 
         # Transform the data.
         self.input_data = \
-            self.input_data.reshape([self.grid_size, self.input_dimension])
-        self.input_data = self.input_data.astype(np.float32)
+            self.input_data.reshape([self.snapshot_list[file_index].grid_size,
+                                     self.input_dimension])
+        if self.input_data.dtype != DEFAULT_NP_DATA_DTYPE:
+            self.input_data = self.input_data.astype(DEFAULT_NP_DATA_DTYPE)
         self.input_data = torch.from_numpy(self.input_data).float()
         self.input_data_scaler.transform(self.input_data)
         self.input_data.requires_grad = self.input_requires_grad
 
         self.output_data = \
-            self.output_data.reshape([self.grid_size, self.output_dimension])
+            self.output_data.reshape([self.snapshot_list[file_index].grid_size,
+                                      self.output_dimension])
         if self.return_outputs_directly is False:
             self.output_data = np.array(self.output_data)
-            self.output_data = self.output_data.astype(np.float32)
+            if self.output_data.dtype != DEFAULT_NP_DATA_DTYPE:
+                self.output_data = self.output_data.astype(DEFAULT_NP_DATA_DTYPE)
             self.output_data = torch.from_numpy(self.output_data).float()
             self.output_data_scaler.transform(self.output_data)
 
         # Save which data we have currently loaded.
         self.currently_loaded_file = file_index
+
+    def _get_file_index(self, idx, is_slice=False, is_start=False):
+        file_index = None
+        index_in_file = idx
+        if is_slice:
+            for i in range(len(self.snapshot_list)):
+                if index_in_file - self.snapshot_list[i].grid_size <= 0:
+                    file_index = i
+
+                    # From the end of previous file to beginning of new.
+                    if index_in_file == self.snapshot_list[i].grid_size and \
+                       is_start:
+                        file_index = i+1
+                        index_in_file = 0
+                    break
+                else:
+                    index_in_file -= self.snapshot_list[i].grid_size
+            return file_index, index_in_file
+        else:
+            for i in range(len(self.snapshot_list)):
+                if index_in_file - self.snapshot_list[i].grid_size < 0:
+                    file_index = i
+                    break
+                else:
+                    index_in_file -= self.snapshot_list[i].grid_size
+            return file_index, index_in_file
 
     def __getitem__(self, idx):
         """
@@ -194,8 +216,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         """
         # Get item can be called with an int or a slice.
         if isinstance(idx, int):
-            file_index = idx // self.grid_size
-            index_in_file = idx % self.grid_size
+            file_index, index_in_file = self._get_file_index(idx)
 
             # Find out if new data is needed.
             if file_index != self.currently_loaded_file:
@@ -204,18 +225,19 @@ class LazyLoadDataset(torch.utils.data.Dataset):
                 self.output_data[index_in_file]
 
         elif isinstance(idx, slice):
-            # If a slice is requested, we have to find out if t spans files.
-            file_index_start = idx.start // self.grid_size
-            index_in_file_start = idx.start % self.grid_size
-            file_index_stop = idx.stop // self.grid_size
-            index_in_file_stop = idx.stop % self.grid_size
+            # If a slice is requested, we have to find out if it spans files.
+            file_index_start, index_in_file_start = self.\
+                _get_file_index(idx.start, is_slice=True, is_start=True)
+            file_index_stop, index_in_file_stop = self.\
+                _get_file_index(idx.stop, is_slice=True)
 
             # If it does, we cannot deliver.
             # Take care though, if a full snapshot is requested,
             # the stop index will point to the wrong file.
             if file_index_start != file_index_stop:
                 if index_in_file_stop == 0:
-                    index_in_file_stop = self.grid_size
+                    index_in_file_stop = self.snapshot_list[file_index_stop].\
+                        grid_size
                 else:
                     raise Exception("Lazy loading currently only supports "
                                     "slices in one file. "

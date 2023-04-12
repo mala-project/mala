@@ -4,7 +4,7 @@ import mala
 from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
+data_path = os.path.join(data_repo_path, "Be2")
 
 """
 ex09_distributed_hyperopt.py: Shows how a hyperparameter 
@@ -45,7 +45,7 @@ test_parameters.running.trainingtype = "Adam"
 
 # Specify the number of trials, the hyperparameter optimizer should run
 # and the type of hyperparameter.
-test_parameters.hyperparameters.n_trials = 20
+test_parameters.hyperparameters.n_trials = 10
 test_parameters.hyperparameters.checkpoints_each_trial = -1
 test_parameters.hyperparameters.checkpoint_name = "ex09"
 test_parameters.hyperparameters.hyper_opt_method = "optuna"
@@ -59,7 +59,7 @@ test_parameters.hyperparameters.rdb_storage = 'sqlite:///ex09.db'
 test_parameters.targets.ldos_gridsize = 11
 test_parameters.targets.ldos_gridspacing_ev = 2.5
 test_parameters.targets.ldos_gridoffset_ev = -5
-test_parameters.hyperparameters.number_training_per_trial = 5
+test_parameters.hyperparameters.number_training_per_trial = 3
 test_parameters.running.after_before_training_metric = "band_energy"
 
 ####################
@@ -72,13 +72,11 @@ data_handler = mala.DataHandler(test_parameters)
 data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
                           "Be_snapshot1.out.npy", data_path, "tr",
                           calculation_output_file=
-                          os.path.join(data_path, "Be_snapshot1.out"),
-                          output_units="1/(eV*Bohr^3)")
+                          os.path.join(data_path, "Be_snapshot1.out"))
 data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
                           "Be_snapshot2.out.npy", data_path, "va",
                           calculation_output_file=
-                          os.path.join(data_path, "Be_snapshot2.out"),
-                          output_units="1/(eV*Bohr^3)")
+                          os.path.join(data_path, "Be_snapshot2.out"))
 data_handler.prepare_data()
 printout("Read data: DONE.")
 

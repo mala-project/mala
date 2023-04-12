@@ -44,6 +44,11 @@ class AtomicDensity(Descriptor):
         """Get a string that describes the target (for e.g. metadata)."""
         return "AtomicDensity"
 
+    @property
+    def feature_size(self):
+        """Get the feature dimension of this data."""
+        return self.fingerprint_length
+
     @staticmethod
     def convert_units(array, in_units="None"):
         """
@@ -114,11 +119,8 @@ class AtomicDensity(Descriptor):
 
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         """Perform actual Gaussian descriptor calculation."""
-        from lammps import lammps
-
-        return_directly = False
-        if "return_directly" in kwargs.keys():
-            return_directly = kwargs["return_directly"]
+        use_fp64 = kwargs.get("use_fp64", False)
+        return_directly = kwargs.get("return_directly", False)
 
         lammps_format = "lammps-data"
         ase_out_path = os.path.join(outdir, "lammps_input.tmp")
@@ -178,7 +180,8 @@ class AtomicDensity(Descriptor):
         gaussian_descriptors_np = \
             extract_compute_np(lmp, "ggrid",
                                lammps_constants.LMP_STYLE_LOCAL, 2,
-                               array_shape=(nrows_ggrid, ncols_ggrid))
+                               array_shape=(nrows_ggrid, ncols_ggrid),
+                               use_fp64=use_fp64)
 
         # In comparison to SNAP, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments

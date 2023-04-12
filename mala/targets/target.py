@@ -97,7 +97,6 @@ class Target(PhysicalData):
         self.number_of_electrons_from_eigenvals = None
         self.band_energy_dft_calculation = None
         self.total_energy_dft_calculation = None
-        self.grid_dimensions = [0, 0, 0]
         self.atoms = None
         self.electrons_per_atom = None
         self.qe_input_data = {
@@ -422,6 +421,11 @@ class Target(PhysicalData):
                 self.number_of_electrons_exact = self.electrons_per_atom * \
                                                  len(self.atoms)
         elif data_type == "json":
+            if isinstance(data, str):
+                json_dict = json.load(open(data, encoding="utf-8"))
+            else:
+                json_dict = json.load(data)
+
             self.fermi_energy_dft = None
             self.temperature = None
             self.number_of_electrons_exact = None
@@ -431,8 +435,6 @@ class Target(PhysicalData):
             self.grid_dimensions = [0, 0, 0]
             self.atoms = None
 
-            with open(data, encoding="utf-8") as json_file:
-                json_dict = json.load(json_file)
             for key in json_dict:
                 if not isinstance(json_dict[key], dict):
                     setattr(self, key, json_dict[key])
@@ -519,7 +521,7 @@ class Target(PhysicalData):
         else:
             super(Target, self).write_to_numpy_file(path, target_data)
 
-    def write_to_openpmd_file(self, path, target_data=None):
+    def write_to_openpmd_file(self, path, target_data=None, additional_attributes={}):
         """
         Write data to a numpy file.
 
@@ -531,11 +533,20 @@ class Target(PhysicalData):
         target_data : numpy.ndarray
             Target data to save. If None, the data stored in the calculator
             will be used.
+
+        additional_attributes : dict
+            Dict containing additional attributes to be saved.
         """
         if target_data is None:
-            super(Target, self).write_to_openpmd_file(path, self.get_target())
+            # The feature dimension may be undefined.
+            super(Target, self).write_to_openpmd_file(path, self.get_target(),
+                                                      additional_attributes=
+                                                      additional_attributes)
         else:
-            super(Target, self).write_to_openpmd_file(path, target_data)
+            # The feature dimension may be undefined.
+            super(Target, self).write_to_openpmd_file(path, target_data,
+                                                      additional_attributes=
+                                                      additional_attributes)
 
     # Accessing target data
     ########################

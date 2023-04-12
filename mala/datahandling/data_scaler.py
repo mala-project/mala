@@ -44,6 +44,7 @@ class DataScaler:
         self.scale_standard = False
         self.scale_normal = False
         self.feature_wise = False
+        self.cantransform = False
         self.__parse_typestring()
 
         self.means = torch.empty(0)
@@ -54,7 +55,6 @@ class DataScaler:
         self.total_std = torch.tensor(0)
         self.total_max = torch.tensor(float('-inf'))
         self.total_min = torch.tensor(float('inf'))
-        self.cantransform = False
 
         self.total_data_count = 0
 
@@ -72,6 +72,7 @@ class DataScaler:
             self.feature_wise = True
         if self.scale_standard is False and self.scale_normal is False:
             printout("No data rescaling will be performed.", min_verbosity=1)
+            self.cantransform = True
             return
         if self.scale_standard is True and self.scale_normal is True:
             raise Exception("Invalid input data rescaling.")
@@ -403,13 +404,13 @@ class DataScaler:
             raise Exception("Unsupported parameter save format.")
 
     @classmethod
-    def load_from_file(cls, filename, save_format="pickle"):
+    def load_from_file(cls, file, save_format="pickle"):
         """
         Load a saved Scaler object.
 
         Parameters
         ----------
-        filename : string
+        file : string or ZipExtFile
             File from which the parameters will be read.
 
         save_format :
@@ -421,8 +422,10 @@ class DataScaler:
             DataScaler which was read from the file.
         """
         if save_format == "pickle":
-            with open(filename, 'rb') as handle:
-                loaded_scaler = pickle.load(handle)
+            if isinstance(file, str):
+                loaded_scaler = pickle.load(open(file, 'rb'))
+            else:
+                loaded_scaler = pickle.load(file)
         else:
             raise Exception("Unsupported parameter save format.")
 

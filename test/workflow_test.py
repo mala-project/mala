@@ -6,8 +6,7 @@ import numpy as np
 import pytest
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Al36")
-data_path_ldos = os.path.join(data_repo_path, "Be2")
+data_path = os.path.join(data_repo_path, "Be2")
 # Control how much the loss should be better after training compared to
 # before. This value is fairly high, but we're training on absolutely
 # minimal amounts of data.
@@ -17,7 +16,10 @@ desired_loss_improvement_factor = 1
 accuracy_electrons = 1e-11
 accuracy_total_energy = 1.5
 accuracy_band_energy = 1
-accuracy_predictions = 5e-2
+accuracy_predictions = 1.0
+accuracy_coarse = 5e-7
+accuracy_very_coarse = 3
+accuracy_strict = 1e-16
 
 
 class TestFullWorkflow:
@@ -27,6 +29,13 @@ class TestFullWorkflow:
         """Test whether MALA can train a NN."""
 
         test_trainer = self.__simple_training()
+        assert desired_loss_improvement_factor * \
+               test_trainer.initial_test_loss > test_trainer.final_test_loss
+
+    def test_network_training_fast_dataset(self):
+        """Test whether MALA can train a NN."""
+
+        test_trainer = self.__simple_training(use_fast_tensor_dataset=True)
         assert desired_loss_improvement_factor * \
                test_trainer.initial_test_loss > test_trainer.final_test_loss
 
@@ -56,11 +65,11 @@ class TestFullWorkflow:
         data_converter = mala.DataConverter(test_parameters)
         data_converter.add_snapshot(descriptor_input_type="espresso-out",
                                     descriptor_input_path=
-                                    os.path.join(data_path_ldos,
-                                                 "Be.pw.scf.out"),
+                                    os.path.join(data_path,
+                                                 "Be_snapshot0.out"),
                                     target_input_type=".cube",
                                     target_input_path=
-                                    os.path.join(data_path_ldos, "cubes",
+                                    os.path.join(data_path, "cubes",
                                                  "tmp.pp*Be_ldos.cube"),
                                     target_units="1/(Ry*Bohr^3)")
         data_converter.convert_snapshots(complete_save_path="./",
@@ -87,26 +96,22 @@ class TestFullWorkflow:
         # Set up parameters.
         test_parameters = mala.Parameters()
         test_parameters.targets.target_type = "DOS"
-        test_parameters.targets.ldos_gridsize = 250
-        test_parameters.targets.ldos_gridspacing_ev = 0.1
-        test_parameters.targets.ldos_gridoffset_ev = -10
+        test_parameters.targets.ldos_gridsize = 11
+        test_parameters.targets.ldos_gridspacing_ev = 2.5
+        test_parameters.targets.ldos_gridoffset_ev = -5
 
         # Create a target calculator to perform postprocessing.
         dos = mala.Target(test_parameters)
         dos.read_additional_calculation_data(os.path.join(
-                                             data_path, "Al.pw.scf.out"),
+                                             data_path, "Be_snapshot0.out"),
                                              "espresso-out")
-        dos_data = np.load(os.path.join(data_path, "Al_dos.npy"))
+        dos_data = np.load(os.path.join(data_path, "Be_snapshot0.dos.npy"))
 
         # Calculate energies
-        self_consistent_fermi_energy = dos. \
-            get_self_consistent_fermi_energy(dos_data)
-        number_of_electrons = dos. \
-            get_number_of_electrons(dos_data, fermi_energy=
-                                    self_consistent_fermi_energy)
-        band_energy = dos.get_band_energy(dos_data,
-                                          fermi_energy=
-                                          self_consistent_fermi_energy)
+        self_consistent_fermi_energy = dos.get_self_consistent_fermi_energy(dos_data)
+        number_of_electrons = dos.get_number_of_electrons(dos_data, fermi_energy=
+                                                          self_consistent_fermi_energy)
+        band_energy = dos.get_band_energy(dos_data)
 
         assert np.isclose(number_of_electrons, dos.number_of_electrons_exact,
                           atol=accuracy_electrons)
@@ -130,12 +135,10 @@ class TestFullWorkflow:
         # Create a target calculator to perform postprocessing.
         ldos = mala.Target(test_parameters)
         ldos.read_additional_calculation_data(os.path.join(
-                                              data_path_ldos,
-                                               "Be.pw.scf.out"),
+                                              data_path,
+                                               "Be_snapshot0.out"),
                                               "espresso-out")
-        ldos_data = ldos.convert_units(
-            np.load(os.path.join(data_path_ldos, "Be_ldos.npy")),
-            "1/(eV*Bohr^3)")
+        ldos_data = np.load(os.path.join(data_path, "Be_snapshot0.out.npy"))
 
         # Calculate energies
         self_consistent_fermi_energy = ldos. \
@@ -166,18 +169,14 @@ class TestFullWorkflow:
         test_parameters.targets.ldos_gridsize = 11
         test_parameters.targets.ldos_gridspacing_ev = 2.5
         test_parameters.targets.ldos_gridoffset_ev = -5
-        test_parameters.targets.pseudopotential_path = data_path_ldos
+        test_parameters.targets.pseudopotential_path = data_path
         # Create a target calculator to perform postprocessing.
         ldos = mala.Target(test_parameters)
-        dens = mala.Density.from_ldos_calculator(ldos)
         ldos.read_additional_calculation_data(os.path.join(
-                                              data_path_ldos, "Be.pw.scf.out"),
+                                              data_path, "Be_snapshot0.out"),
                                               "espresso-out")
-        dos_data = np.load(os.path.join(data_path_ldos, "Be_dos.npy"))
-        dens_data = dens.convert_units(
-            np.load(os.path.join(data_path_ldos, "Be_dens.npy")),
-            "1/Bohr^3")
-        dens_data = np.reshape(dens_data, list(np.shape(dens_data)) + [1])
+        dos_data = np.load(os.path.join(data_path, "Be_snapshot0.dos.npy"))
+        dens_data = np.load(os.path.join(data_path, "Be_snapshot0.dens.npy"))
 
         dos = mala.DOS.from_ldos_calculator(ldos)
 
@@ -206,16 +205,14 @@ class TestFullWorkflow:
         test_parameters.targets.ldos_gridsize = 11
         test_parameters.targets.ldos_gridspacing_ev = 2.5
         test_parameters.targets.ldos_gridoffset_ev = -5
-        test_parameters.targets.pseudopotential_path = data_path_ldos
+        test_parameters.targets.pseudopotential_path = data_path
 
         # Create a target calculator to perform postprocessing.
         ldos = mala.Target(test_parameters)
         ldos.read_additional_calculation_data(os.path.join(
-                                              data_path_ldos,
-                                              "Be.pw.scf.out"), "espresso-out")
-        ldos_data = ldos.convert_units(
-            np.load(os.path.join(data_path_ldos, "Be_ldos.npy")),
-            in_units="1/(eV*Bohr^3)")
+                                              data_path,
+                                              "Be_snapshot0.out"), "espresso-out")
+        ldos_data = np.load(os.path.join(data_path, "Be_snapshot0.out.npy"))
 
         # Calculate energies
         self_consistent_fermi_energy = ldos. \
@@ -226,11 +223,6 @@ class TestFullWorkflow:
         assert np.isclose(total_energy, ldos.total_energy_dft_calculation,
                           atol=accuracy_total_energy)
 
-    def test_training_with_postprocessing(self):
-        """Test if a trained network can be loaded for postprocessing."""
-        self.__simple_training(save_network=True)
-        self.__use_trained_network()
-
     def test_training_with_postprocessing_data_repo(self):
         """
         Test if a trained network can be loaded for postprocessing.
@@ -239,12 +231,162 @@ class TestFullWorkflow:
         If this does not work, it's most likely because someting in the MALA
         parameters changed.
         """
-        self.__simple_training(save_network=True)
-        self.__use_trained_network(os.path.join(data_repo_path,
-                                                "workflow_test/"))
+        # Load parameters, network and data scalers.
+        parameters, network, data_handler, tester = \
+            mala.Tester.load_run("workflow_test",
+                                 path=os.path.join(data_repo_path,
+                                                   "workflow_test"))
+
+        parameters.targets.target_type = "LDOS"
+        parameters.targets.ldos_gridsize = 11
+        parameters.targets.ldos_gridspacing_ev = 2.5
+        parameters.targets.ldos_gridoffset_ev = -5
+        parameters.data.use_lazy_loading = True
+
+        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                  "Be_snapshot2.out.npy", data_path, "te",
+                                  calculation_output_file=os.path.join(
+                                                         data_path,
+                                                         "Be_snapshot2.out"))
+        data_handler.prepare_data(reparametrize_scaler=False)
+
+        # Instantiate and use a Tester object.
+        tester.observables_to_test = ["band_energy", "number_of_electrons"]
+        errors = tester.test_snapshot(0)
+
+        # Check whether the prediction is accurate enough.
+        assert np.isclose(errors["band_energy"], 0,
+                          atol=accuracy_predictions)
+        assert np.isclose(errors["number_of_electrons"], 0,
+                          atol=accuracy_predictions)
+
+    @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
+                        reason="LAMMPS is currently not part of the pipeline.")
+    def test_predictions(self):
+        """
+        Test that Predictor class and Tester class give the same results.
+
+        They in principle do the same, but use slightly different routines
+        under the hood. To test this, a small network is trained, and
+        afterwards, objects from bot classes are used to predict the
+        number of electrons and band energy.
+        """
+        ####################
+        # Set up and train a network to be used for the tests.
+        ####################
+
+        parameters, network, data_handler, tester = \
+            mala.Tester.load_run("workflow_test",
+                                 path=os.path.join(data_repo_path,
+                                                   "workflow_test"))
+        parameters.targets.target_type = "LDOS"
+        parameters.targets.ldos_gridsize = 11
+        parameters.targets.ldos_gridspacing_ev = 2.5
+        parameters.targets.ldos_gridoffset_ev = -5
+        parameters.running.inference_data_grid = [18, 18, 27]
+        parameters.descriptors.descriptor_type = "Bispectrum"
+        parameters.descriptors.bispectrum_twojmax = 10
+        parameters.descriptors.bispectrum_cutoff = 4.67637
+        parameters.data.use_lazy_loading = True
+
+        data_handler.add_snapshot("Be_snapshot3.in.npy",
+                                  data_path,
+                                  "Be_snapshot3.out.npy",
+                                  data_path, "te")
+        data_handler.prepare_data(reparametrize_scaler=False)
+
+        actual_ldos, predicted_ldos = tester.predict_targets(0)
+        ldos_calculator = data_handler.target_calculator
+        ldos_calculator.read_additional_calculation_data(os.path.join(
+                                                         data_path,
+                                                         "Be_snapshot3.out"),
+                                                         "espresso-out")
+
+        band_energy_tester_class = ldos_calculator.get_band_energy(predicted_ldos)
+        nr_electrons_tester_class = ldos_calculator.\
+            get_number_of_electrons(predicted_ldos)
+
+        ####################
+        # Now, use the predictor class to make the same prediction.
+        ####################
+
+        predictor = mala.Predictor(parameters, network, data_handler)
+        predicted_ldos = predictor.predict_from_qeout(os.path.join(
+                                                         data_path,
+                                                         "Be_snapshot3.out"))
+
+        # In order for the results to be the same, we have to use the same
+        # parameters.
+        ldos_calculator.read_additional_calculation_data(os.path.join(
+                                                         data_path,
+                                                         "Be_snapshot3.out"),
+                                                         "espresso-out")
+
+        nr_electrons_predictor_class = data_handler.\
+            target_calculator.get_number_of_electrons(predicted_ldos)
+        band_energy_predictor_class = data_handler.\
+            target_calculator.get_band_energy(predicted_ldos)
+
+        assert np.isclose(band_energy_predictor_class,
+                          band_energy_tester_class,
+                          atol=accuracy_strict)
+        assert np.isclose(nr_electrons_predictor_class,
+                          nr_electrons_tester_class,
+                          atol=accuracy_strict)
+
+    @pytest.mark.skipif(importlib.util.find_spec("total_energy") is None
+                        or importlib.util.find_spec("lammps") is None,
+                        reason="QE and LAMMPS are currently not part of the "
+                               "pipeline.")
+    def test_total_energy_predictions(self):
+        """
+        Test that total energy predictions are in principle correct.
+
+        And of course that it does not affect accuarcy if the atomic density
+        based N-scaling formula is used in the calculation.
+        """
+
+        ####################
+        # Set up and train a network to be used for the tests.
+        ####################
+
+        parameters, network, data_handler, predictor = \
+            mala.Predictor.load_run("workflow_test",
+                                    path=os.path.join(data_repo_path,
+                                                      "workflow_test"))
+        parameters.targets.target_type = "LDOS"
+        parameters.targets.ldos_gridsize = 11
+        parameters.targets.ldos_gridspacing_ev = 2.5
+        parameters.targets.ldos_gridoffset_ev = -5
+        parameters.running.inference_data_grid = [18, 18, 27]
+        parameters.descriptors.descriptor_type = "Bispectrum"
+        parameters.descriptors.bispectrum_twojmax = 10
+        parameters.descriptors.bispectrum_cutoff = 4.67637
+        parameters.targets.pseudopotential_path = data_path
+
+        predicted_ldos = predictor. \
+            predict_from_qeout(os.path.join(data_path,
+                                            "Be_snapshot3.out"))
+
+        ldos_calculator: mala.LDOS
+        ldos_calculator = data_handler.target_calculator
+        ldos_calculator. \
+            read_additional_calculation_data(os.path.join(data_path,
+                                                          "Be_snapshot3.out"),
+                                             "espresso-out")
+        ldos_calculator.read_from_array(predicted_ldos)
+        total_energy_traditional = ldos_calculator.total_energy
+        parameters.descriptors.use_atomic_density_energy_formula = True
+        ldos_calculator.read_from_array(predicted_ldos)
+        total_energy_atomic_density = ldos_calculator.total_energy
+        assert np.isclose(total_energy_traditional, total_energy_atomic_density,
+                          atol=accuracy_coarse)
+        assert np.isclose(total_energy_traditional,
+                          ldos_calculator.total_energy_dft_calculation,
+                          atol=accuracy_very_coarse)
 
     @staticmethod
-    def __simple_training(save_network=False):
+    def __simple_training(use_fast_tensor_dataset=False):
         """Perform a simple training and save it, if necessary."""
         # Set up parameters.
         test_parameters = mala.Parameters()
@@ -256,18 +398,16 @@ class TestFullWorkflow:
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
         test_parameters.running.trainingtype = "Adam"
+        test_parameters.data.use_fast_tensor_data_set = use_fast_tensor_dataset
 
         # Load data.
         data_handler = mala.DataHandler(test_parameters)
-        data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                  "Al_debug_2k_nr0.out.npy", data_path, "tr",
-                                  output_units="1/(Ry*Bohr^3)")
-        data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                  "Al_debug_2k_nr1.out.npy", data_path, "va",
-                                  output_units="1/(Ry*Bohr^3)")
-        data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                  "Al_debug_2k_nr2.out.npy", data_path, "te",
-                                  output_units="1/(Ry*Bohr^3)")
+        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                  "Be_snapshot0.out.npy", data_path, "tr")
+        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                  "Be_snapshot1.out.npy", data_path, "va")
+        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                  "Be_snapshot2.out.npy", data_path, "te")
         data_handler.prepare_data()
 
         # Train a network.
@@ -282,69 +422,4 @@ class TestFullWorkflow:
                                     data_handler)
         test_trainer.train_network()
 
-        # Save, if necessary.
-        if save_network:
-            params_path = "workflow_test_params.json"
-            network_path = "workflow_test_network.pth"
-            input_scaler_path = "workflow_test_iscaler.pkl"
-            output_scaler_path = "workflow_test_oscaler.pkl"
-            test_parameters.save(params_path)
-            test_network.save_network(network_path)
-            data_handler.input_data_scaler.save(input_scaler_path)
-            data_handler.output_data_scaler.save(output_scaler_path)
-
         return test_trainer
-
-    @staticmethod
-    def __use_trained_network(save_path="./"):
-        """Use a trained network to make a prediction."""
-
-        params_path = os.path.join(save_path, "workflow_test_params.json")
-        network_path = os.path.join(save_path, "workflow_test_network.pth")
-        input_scaler_path = os.path.join(save_path, "workflow_test_iscaler.pkl")
-        output_scaler_path = os.path.join(save_path, "workflow_test_oscaler.pkl")
-
-        # Load parameters, network and data scalers.
-        new_parameters = mala.Parameters.load_from_file(params_path,
-                                                        no_snapshots=True)
-        new_parameters.targets.target_type = "LDOS"
-        new_parameters.targets.ldos_gridsize = 250
-        new_parameters.targets.ldos_gridspacing_ev = 0.1
-        new_parameters.targets.ldos_gridoffset_ev = -10
-        new_parameters.data.use_lazy_loading = True
-        new_network = mala.Network.load_from_file(new_parameters, network_path)
-        iscaler = mala.DataScaler.load_from_file(input_scaler_path)
-        oscaler = mala.DataScaler.load_from_file(output_scaler_path)
-
-        # Load data.
-        inference_data_handler = mala.DataHandler(new_parameters,
-                                                  input_data_scaler=iscaler,
-                                                  output_data_scaler=oscaler)
-        inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy",
-                                            data_path,
-                                            "Al_debug_2k_nr2.out.npy",
-                                            data_path, "te",
-                                            output_units="1/(Ry*Bohr^3)")
-        inference_data_handler.prepare_data(reparametrize_scaler=False)
-
-        # Instantiate and use a Tester object.
-        tester = mala.Tester(new_parameters, new_network,
-                             inference_data_handler)
-        actual_ldos, predicted_ldos = tester.test_snapshot(0)
-        ldos_calculator = inference_data_handler.target_calculator
-        ldos_calculator.read_additional_calculation_data(os.path.join(
-                                                         data_path,
-                                                         "Al.pw.scf.out"),
-                                                         "espresso-out")
-        band_energy_predicted = ldos_calculator.get_band_energy(predicted_ldos)
-        band_energy_actual = ldos_calculator.get_band_energy(actual_ldos)
-        nr_electrons_predicted = ldos_calculator.\
-            get_number_of_electrons(predicted_ldos)
-        nr_electrons_actual = ldos_calculator.\
-            get_number_of_electrons(actual_ldos)
-
-        # Check whether the prediction is accurate enough.
-        assert np.isclose(band_energy_predicted, band_energy_actual,
-                          atol=accuracy_predictions)
-        assert np.isclose(nr_electrons_predicted, nr_electrons_actual,
-                          atol=accuracy_predictions)

@@ -19,10 +19,10 @@ from mala.datahandling.data_repo import data_repo_path
 # in the data repo.
 
 data_path = os.path.join(data_repo_path, "Be2")
-path_to_out = os.path.join(data_path, "Be.pw.scf.out")
-path_to_ldos_npy = os.path.join(data_path, "Be_ldos.npy")
-path_to_dos_npy = os.path.join(data_path, "Be_dos.npy")
-path_to_dens_npy = os.path.join(data_path, "Be_dens.npy")
+path_to_out = os.path.join(data_path, "Be_snapshot0.out")
+path_to_ldos_npy = os.path.join(data_path, "Be_snapshot0.out.npy")
+path_to_dos_npy = os.path.join(data_path, "Be_snapshot0.dos.npy")
+path_to_dens_npy = os.path.join(data_path, "Be_snapshot0.dens.npy")
 
 # We can read from numpy arrays or directly from QE data.
 # In the later case, numpy arrays will be saved for the subsqeuent run.
@@ -108,12 +108,7 @@ class TestMALAIntegration:
                                                          "espresso-out")
 
         # Read the input data.
-        density_dft = dens_calculator.convert_units(np.load(path_to_dens_npy),
-                                                    "1/Bohr^3")
-
-        # Density shape has recently been changed.
-        density_dft = np.reshape(density_dft, list(np.shape(density_dft)) +
-                                 [1])
+        density_dft = np.load(path_to_dens_npy)
 
         # Calculate the quantities we want to compare.
         nr_mala = dens_calculator.get_number_of_electrons(density_dft)
@@ -141,11 +136,8 @@ class TestMALAIntegration:
         dens_calculator = Density.from_ldos_calculator(ldos_calculator)
 
         # Read the input data.
-        density_dft = dens_calculator.convert_units(np.load(path_to_dens_npy),
-                                                    "1/Bohr^3")
-
-        ldos_dft = ldos_calculator.convert_units(np.load(path_to_ldos_npy),
-                                                 "1/(eV*Bohr^3)")
+        density_dft = np.load(path_to_dens_npy)
+        ldos_dft = np.load(path_to_ldos_npy)
 
         # Calculate the quantities we want to compare.
         self_consistent_fermi_energy = ldos_calculator. \
@@ -177,8 +169,7 @@ class TestMALAIntegration:
         dos_calculator.read_additional_calculation_data(path_to_out, "espresso-out")
 
         # Read the input data.
-        ldos_dft = ldos_calculator.convert_units(np.load(path_to_ldos_npy),
-                                                 "1/(eV*Bohr^3)")
+        ldos_dft = np.load(path_to_ldos_npy)
         dos_dft = np.load(path_to_dos_npy)
 
         # Calculate the quantities we want to compare.

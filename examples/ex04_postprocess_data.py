@@ -9,7 +9,7 @@ data_path = os.path.join(data_repo_path, "Be2")
 
 
 """
-ex03_postprocess_data.py: Shows how this framework can be used to
+ex04_postprocess_data.py: Shows how this framework can be used to
 postprocess data. Usually, this framework outputs LDOS data, thefore,
 post processing of LDOS data will be shown in the following. 
 Set do_total_energy to False, if you don't have the QuantumEspresso
@@ -48,14 +48,14 @@ test_parameters.targets.pseudopotential_path = data_path
 # Read in LDOS data. For actual workflows, this part will come
 # from a network.
 ldos = mala.LDOS.from_numpy_file(test_parameters,
-                                 os.path.join(data_path, "Be_ldos.npy"),
-                                 units="1/(eV*Bohr^3)")
+                                 os.path.join(data_path,
+                                              "Be_snapshot0.out.npy"))
 
 # Read additional information about the calculation.
 # By doing this, the calculator is able to know e.g. the temperature
 # at which the calculation took place or the lattice constant used.
 ldos.read_additional_calculation_data(os.path.join(data_path,
-                                                   "Be.pw.scf.out"))
+                                                   "Be_snapshot0.out"))
 
 # Get quantities of interest.
 # For better values in the post processing, it is recommended to

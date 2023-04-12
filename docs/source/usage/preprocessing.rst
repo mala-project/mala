@@ -30,6 +30,9 @@ Data Conversion
 
 MALA can be used to process raw data into ready-to-use data fro the surrogate models
 For this, the ``DataConverter`` class can be used; see example ``ex02_preprocess_data``.
+If you are not sure which descriptor hyperparameters to use (e.g.: "Which cutoff
+radius do I need?") MALA provides a fast analysis that does not involve
+model tuning. See ``ex13_acsd``
 
 Using input and output data
 ###########################

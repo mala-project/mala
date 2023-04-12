@@ -7,7 +7,7 @@ from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
-ex02_preprocess_data.py: Shows how this framework can be used to preprocess
+ex03_preprocess_data.py: Shows how this framework can be used to preprocess
 data. Preprocessing here means converting raw DFT calculation output into 
 numpy arrays of the correct size. For the input data, this means descriptor
 calculation.
@@ -30,7 +30,7 @@ test_parameters = mala.Parameters()
 # with which parameters. These parameters are slightly modified for better
 # performance.
 test_parameters.descriptors.descriptor_type = "Bispectrum"
-test_parameters.descriptors.bispectrum_twojmax = 6
+test_parameters.descriptors.bispectrum_twojmax = 10
 test_parameters.descriptors.bispectrum_cutoff = 4.67637
 test_parameters.descriptors.descriptors_contain_xyz = True
 
@@ -49,7 +49,7 @@ test_parameters.targets.ldos_gridoffset_ev = -5
 
 data_converter = mala.DataConverter(test_parameters)
 
-outfile = os.path.join(data_path, "Be.pw.scf.out")
+outfile = os.path.join(data_path, "Be_snapshot0.out")
 ldosfile = os.path.join(data_path, "cubes/tmp.pp*Be_ldos.cube")
 # The add_snapshot function can be called with a lot of options to reflect
 # the data to be processed.

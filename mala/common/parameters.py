@@ -10,13 +10,15 @@ try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     pass
-
+import numpy as np
 import torch
 
 from mala.common.parallelizer import printout, set_horovod_status, \
     set_mpi_status, get_rank, get_local_rank, set_current_verbosity, \
     parallel_warn
 from mala.common.json_serializable import JSONSerializable
+
+DEFAULT_NP_DATA_DTYPE = np.float32
 
 
 class ParametersBase(JSONSerializable):
@@ -291,11 +293,6 @@ class ParametersDescriptors(ParametersBase):
         Bispectrum descriptors. If this string is empty, the standard LAMMPS input
         file found in this repository will be used (recommended).
 
-    acsd_points : int
-        Number of points used to calculate the ACSD.
-        The actual number of distances will be acsd_points x acsd_points,
-        since the cosine similarity is only defined for pairs.
-
     descriptors_contain_xyz : bool
         Legacy option. If True, it is assumed that the first three entries of
         the descriptor vector are the xyz coordinates and they are cut from the
@@ -335,9 +332,6 @@ class ParametersDescriptors(ParametersBase):
         self.use_atomic_density_energy_formula = False
         self.atomic_density_sigma = None
         self.atomic_density_cutoff = None
-
-        # For accelerated hyperparameter optimization.
-        self.acsd_points = 100
 
     @property
     def use_z_splitting(self):
@@ -407,6 +401,13 @@ class ParametersDescriptors(ParametersBase):
             self._snap_switchflag = value
         if _int_value > 0:
             self._snap_switchflag = 1
+
+    def _update_mpi(self, new_mpi):
+        self._configuration["mpi"] = new_mpi
+
+        # There may have been a serial or parallel run before that is now
+        # no longer valid.
+        self.lammps_compute_file = ""
 
 
 class ParametersTargets(ParametersBase):
@@ -574,11 +575,18 @@ class ParametersData(ParametersBase):
     sample_ratio : float
         If use_clustering is True, this is the ratio of training data used
         for sampling per snapshot (according to clustering then, of course).
+
+    use_fast_tensor_data_set : bool
+        If True, then the new, fast TensorDataSet implemented by Josh Romero
+        will be used.
+
+    shuffling_seed : int
+        If not None, a seed that will be used to make the shuffling of the data
+        in the DataShuffler class deterministic.
     """
 
     def __init__(self):
         super(ParametersData, self).__init__()
-        self.descriptors_contain_xyz = True
         self.snapshot_directories_list = []
         self.data_splitting_type = "by_snapshot"
         self.input_rescaling_type = "None"
@@ -588,6 +596,9 @@ class ParametersData(ParametersBase):
         self.number_of_clusters = 40
         self.train_ratio = 0.1
         self.sample_ratio = 0.5
+        self.use_fast_tensor_data_set = False
+        self.shuffling_seed = None
+
 
 class ParametersRunning(ParametersBase):
     """
@@ -623,12 +634,15 @@ class ParametersRunning(ParametersBase):
         early stopping is performed. Default: 0.
 
     early_stopping_threshold : float
-        If the validation accuracy does not improve by at least threshold for
-        early_stopping_epochs epochs, training is terminated:
-        validation_loss < validation_loss_old * (1+early_stopping_threshold),
-        or patience counter will go up.
+        Minimum fractional reduction in validation loss required to avoid
+        early stopping, e.g. a value of 0.05 means that validation loss must
+        decrease by 5% within early_stopping_epochs epochs or the training
+        will be stopped early. More explicitly,
+        validation_loss < validation_loss_old * (1-early_stopping_threshold)
+        or the patience counter goes up.
         Default: 0. Numbers bigger than 0 can make early stopping very
-        aggresive.
+        aggresive, while numbers less than 0 make the trainer very forgiving
+        of loss increase.
 
     learning_rate_scheduler : string
         Learning rate scheduler to be used. If not None, an instance of the
@@ -687,6 +701,18 @@ class ParametersRunning(ParametersBase):
     inference_data_grid : list
         List holding the grid to be used for inference in the form of
         [x,y,z].
+
+    use_mixed_precision : bool
+        If True, mixed precision computation (via AMP) will be used.
+
+    training_report_frequency : int
+        Determines how often detailed performance info is printed during
+        training (only has an effect if the verbosity is high enough).
+
+    profiler_range : list
+        List with two entries determining with which batch/iteration number
+         the CUDA profiler will start and stop profiling. Please note that
+         this option only holds significance if the nsys profiler is used.
     """
 
     def __init__(self):
@@ -713,6 +739,10 @@ class ParametersRunning(ParametersBase):
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
         self.inference_data_grid = [0, 0, 0]
+        self.use_mixed_precision = False
+        self.use_graphs = False
+        self.training_report_frequency = 1000
+        self.profiler_range = [1000, 2000]
 
     def _update_horovod(self, new_horovod):
         super(ParametersRunning, self)._update_horovod(new_horovod)
@@ -764,6 +794,37 @@ class ParametersRunning(ParametersBase):
                 raise Exception("Currently, MALA can only operate with the "
                                 "\"ldos\" metric for horovod runs.")
         self._after_before_training_metric = value
+
+    @during_training_metric.setter
+    def during_training_metric(self, value):
+        if value != "ldos":
+            if self._configuration["horovod"]:
+                raise Exception("Currently, MALA can only operate with the "
+                                "\"ldos\" metric for horovod runs.")
+        self._during_training_metric = value
+
+    @property
+    def use_graphs(self):
+        """
+        Decide whether CUDA graphs are used during training.
+
+        Doing so will improve performance, but CUDA graphs are only available
+        from CUDA 11.0 upwards.
+        """
+        return self._use_graphs
+
+    @use_graphs.setter
+    def use_graphs(self, value):
+        if value is True:
+            if self._configuration["gpu"] is False or \
+                    torch.version.cuda is None:
+                parallel_warn("No CUDA or GPU found, cannot use CUDA graphs.")
+                value = False
+            else:
+                if float(torch.version.cuda) < 11.0:
+                    raise Exception("Cannot use CUDA graphs with a CUDA"
+                                    " version below 11.0")
+        self._use_graphs = value
 
 
 class ParametersHyperparameterOptimization(ParametersBase):
@@ -915,6 +976,9 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.naswot_pruner_batch_size = 0
         self.number_bad_trials_before_stopping = None
         self.sqlite_timeout = 600
+
+        # For accelerated hyperparameter optimization.
+        self.acsd_points = 100
 
     @property
     def rdb_storage_heartbeat(self):
@@ -1400,14 +1464,14 @@ class Parameters:
         self.hyperparameters._update_device(device_temp)
 
     @classmethod
-    def load_from_file(cls, filename, save_format="json",
+    def load_from_file(cls, file, save_format="json",
                        no_snapshots=False):
         """
         Load a Parameters object from a file.
 
         Parameters
         ----------
-        filename : string
+        file : string or ZipExtFile
             File to which the parameters will be saved to.
 
         save_format : string
@@ -1425,13 +1489,18 @@ class Parameters:
 
         """
         if save_format == "pickle":
-            with open(filename, 'rb') as handle:
-                loaded_parameters = pickle.load(handle)
-                if no_snapshots is True:
-                    loaded_parameters.data.snapshot_directories_list = []
+            if isinstance(file, str):
+                loaded_parameters = pickle.load(open(file, 'rb'))
+            else:
+                loaded_parameters = pickle.load(file)
+            if no_snapshots is True:
+                loaded_parameters.data.snapshot_directories_list = []
         elif save_format == "json":
-            with open(filename, encoding="utf-8") as json_file:
-                json_dict = json.load(json_file)
+            if isinstance(file, str):
+                json_dict = json.load(open(file, encoding="utf-8"))
+            else:
+                json_dict = json.load(file)
+
             loaded_parameters = cls()
             for key in json_dict:
                 if isinstance(json_dict[key], dict) and key \
@@ -1456,13 +1525,13 @@ class Parameters:
         return loaded_parameters
 
     @classmethod
-    def load_from_pickle(cls, filename, no_snapshots=False):
+    def load_from_pickle(cls, file, no_snapshots=False):
         """
         Load a Parameters object from a pickle file.
 
         Parameters
         ----------
-        filename : string
+        file : string or ZipExtFile
             File to which the parameters will be saved to.
 
         no_snapshots : bool
@@ -1475,17 +1544,17 @@ class Parameters:
             The loaded Parameters object.
 
         """
-        return Parameters.load_from_file(filename, save_format="pickle",
+        return Parameters.load_from_file(file, save_format="pickle",
                                          no_snapshots=no_snapshots)
 
     @classmethod
-    def load_from_json(cls, filename, no_snapshots=False):
+    def load_from_json(cls, file, no_snapshots=False):
         """
         Load a Parameters object from a json file.
 
         Parameters
         ----------
-        filename : string
+        file : string or ZipExtFile
             File to which the parameters will be saved to.
 
         no_snapshots : bool
@@ -1498,5 +1567,5 @@ class Parameters:
             The loaded Parameters object.
 
         """
-        return Parameters.load_from_file(filename, save_format="json",
+        return Parameters.load_from_file(file, save_format="json",
                                          no_snapshots=no_snapshots)

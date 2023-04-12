@@ -6,9 +6,9 @@ import numpy as np
 
 from mala.datahandling.data_repo import data_repo_path
 density_path = os.path.join(os.path.join(data_repo_path, "Be2"),
-                          "Be_dens.npy")
+                          "Be_snapshot0.dens.npy")
 atoms_path = os.path.join(os.path.join(data_repo_path, "Be2"),
-                          "Be.pw.scf.out")
+                          "Be_snapshot0.out")
 """
 ex17_visualize_electronic_structure.py : Show how MALA can output
 prediction results in a file format that can be processed by electronic 
