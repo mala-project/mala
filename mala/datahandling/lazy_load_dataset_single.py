@@ -74,20 +74,6 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         self.output_shm_name = None
         self.loaded = False
 
-    @property
-    def return_outputs_directly(self):
-        """
-        Control whether outputs are actually transformed.
-
-        Has to be False for training. In the testing case,
-        Numerical errors are smaller if set to True.
-        """
-        return self._return_outputs_directly
-
-    @return_outputs_directly.setter
-    def return_outputs_directly(self, value):
-        self._return_outputs_directly = value
-
     def allocate_shared_mem(self):
         """
         Allocate the shared memory buffer for use by prefetching process.

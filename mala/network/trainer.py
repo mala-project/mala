@@ -46,13 +46,6 @@ class Trainer(Runner):
     def __init__(self, params, network, data, optimizer_dict=None):
         # copy the parameters into the class.
         super(Trainer, self).__init__(params, network, data)
-        if data.parameters.use_lazy_loading_prefetch and \
-                self.parameters.after_before_training_metric != "ldos":
-            parallel_warn("Pre-fetching lazy-loading can only be used with "
-                          "LDOS as validation metric. You have selected"
-                          " a different metric; MALA will default to LDOS"
-                          " now.")
-            self.parameters.after_before_training_metric = "ldos"
         self.final_test_loss = float("inf")
         self.initial_test_loss = float("inf")
         self.final_validation_loss = float("inf")
@@ -817,109 +810,122 @@ class Trainer(Runner):
 
             validation_loss = validation_loss_sum.item() / batchid
             return validation_loss
-        elif validation_type == "band_energy":
+        elif validation_type == "band_energy" or \
+                validation_type == "total_energy":
             errors = []
-            for snapshot_number in range(offset_snapshots,
-                                         number_of_snapshots+offset_snapshots):
-                # Get optimal batch size and number of batches per snapshotss
-                grid_size = self.data.parameters.\
-                    snapshot_directories_list[snapshot_number].grid_size
+            if isinstance(self.validation_data_loaders,
+                          MultiLazyLoadDataLoader):
+                loader_id = 0
+                for loader in data_loaders:
+                    grid_size = self.data.parameters. \
+                        snapshot_directories_list[loader_id +
+                                                  offset_snapshots].grid_size
 
-                optimal_batch_size = self. \
-                    _correct_batch_size_for_testing(grid_size,
-                                                    self.parameters.
-                                                    mini_batch_size)
-                number_of_batches_per_snapshot = int(grid_size /
-                                                     optimal_batch_size)
+                    actual_outputs = np.zeros(
+                        (grid_size, self.data.output_dimension))
+                    predicted_outputs = np.zeros(
+                        (grid_size, self.data.output_dimension))
+                    last_start = 0
 
-                actual_outputs, \
-                predicted_outputs = self.\
-                    _forward_entire_snapshot(snapshot_number,
-                                             data_sets[0], data_set_type[0:2],
-                                             number_of_batches_per_snapshot,
-                                             optimal_batch_size)
-                calculator = self.data.target_calculator
+                    for (x, y) in loader:
 
-                # This works because the list is always guaranteed to be
-                # ordered.
-                calculator.\
-                    read_additional_calculation_data(self.data.get_snapshot_calculation_output(snapshot_number))
+                        x = x.to(self.parameters._configuration["device"])
+                        length = int(x.size()[0])
+                        predicted_outputs[last_start:last_start + length,
+                        :] = \
+                            self.data.output_data_scaler. \
+                                inverse_transform(self.network(x).
+                                                  to('cpu'), as_numpy=True)
+                        actual_outputs[last_start:last_start + length, :] = \
+                            self.data.output_data_scaler. \
+                                inverse_transform(y, as_numpy=True)
 
-                try:
-                    fe_actual = calculator. \
-                        get_self_consistent_fermi_energy(actual_outputs)
-                    be_actual = calculator. \
-                        get_band_energy(actual_outputs, fermi_energy=fe_actual)
+                        last_start += length
+                    errors.append(self._calculate_energy_errors(actual_outputs,
+                                                                predicted_outputs,
+                                                                validation_type,
+                                                                loader_id+offset_snapshots))
+                    loader_id += 1
 
-                    fe_predicted = calculator.\
-                        get_self_consistent_fermi_energy(predicted_outputs)
-                    be_predicted = calculator.\
-                        get_band_energy(predicted_outputs,
-                                        fermi_energy=fe_predicted)
-                    errors.append(np.abs(be_predicted - be_actual) *
-                                  (1000 / len(calculator.atoms)))
-                except ValueError:
-                    # If the training went badly, it might be that the above
-                    # code results in an error, due to the LDOS being so wrong
-                    # that the estimation of the self consistent Fermi energy
-                    # fails.
-                    errors.append(float("inf"))
+            else:
+                for snapshot_number in range(offset_snapshots,
+                                             number_of_snapshots+offset_snapshots):
+                    # Get optimal batch size and number of batches per snapshotss
+                    grid_size = self.data.parameters.\
+                        snapshot_directories_list[snapshot_number].grid_size
 
+                    optimal_batch_size = self. \
+                        _correct_batch_size_for_testing(grid_size,
+                                                        self.parameters.
+                                                        mini_batch_size)
+                    number_of_batches_per_snapshot = int(grid_size /
+                                                         optimal_batch_size)
+
+                    actual_outputs, \
+                    predicted_outputs = self.\
+                        _forward_entire_snapshot(snapshot_number,
+                                                 data_sets[0], data_set_type[0:2],
+                                                 number_of_batches_per_snapshot,
+                                                 optimal_batch_size)
+
+                    errors.append(self._calculate_energy_errors(actual_outputs,
+                                                                predicted_outputs,
+                                                                validation_type,
+                                                                snapshot_number))
             return np.mean(errors)
-        elif validation_type == "total_energy":
-            # Get optimal batch size and number of batches per snapshots.
-
-            errors = []
-            for snapshot_number in range(offset_snapshots,
-                                         number_of_snapshots+offset_snapshots):
-                # Get optimal batch size and number of batches per snapshotss
-                grid_size = self.data.parameters.\
-                    snapshot_directories_list[snapshot_number].grid_size
-
-                optimal_batch_size = self. \
-                    _correct_batch_size_for_testing(grid_size,
-                                                    self.parameters.
-                                                    mini_batch_size)
-                number_of_batches_per_snapshot = int(grid_size /
-                                                     optimal_batch_size)
-
-                actual_outputs, predicted_outputs = self.\
-                    _forward_entire_snapshot(snapshot_number-offset_snapshots,
-                                             data_sets[0], data_set_type[0:2],
-                                             number_of_batches_per_snapshot,
-                                             optimal_batch_size)
-                calculator = self.data.target_calculator
-
-                # This works because the list is always guaranteed to be
-                # ordered.
-                calculator.\
-                    read_additional_calculation_data(self.data.get_snapshot_calculation_output(snapshot_number))
-
-                try:
-                    fe_actual = calculator. \
-                        get_self_consistent_fermi_energy(actual_outputs)
-                    te_actual = calculator. \
-                        get_total_energy(ldos_data=actual_outputs,
-                                         fermi_energy=fe_actual)
-
-                    fe_predicted = calculator.\
-                        get_self_consistent_fermi_energy(predicted_outputs)
-                    te_predicted = calculator.\
-                        get_total_energy(ldos_data=actual_outputs,
-                                         fermi_energy=fe_predicted)
-                    errors.append(np.abs(te_predicted - te_actual) *
-                                  (1000 / len(calculator.atoms)))
-
-                except ValueError:
-                    # If the training went badly, it might be that the above
-                    # code results in an error, due to the LDOS being so wrong
-                    # that the estimation of the self consistent Fermi energy
-                    # fails.
-                    errors.append(float("inf"))
-            return np.mean(errors)
-
         else:
             raise Exception("Selected validation method not supported.")
+
+    def _calculate_energy_errors(self, actual_outputs, predicted_outputs,
+                                 energy_type, snapshot_number):
+        self.data.target_calculator.\
+            read_additional_calculation_data(self.data.
+                                             get_snapshot_calculation_output(snapshot_number))
+        if energy_type == "band_energy":
+            try:
+                fe_actual = self.data.target_calculator. \
+                    get_self_consistent_fermi_energy(actual_outputs)
+                be_actual = self.data.target_calculator. \
+                    get_band_energy(actual_outputs, fermi_energy=fe_actual)
+
+                fe_predicted = self.data.target_calculator. \
+                    get_self_consistent_fermi_energy(predicted_outputs)
+                be_predicted = self.data.target_calculator. \
+                    get_band_energy(predicted_outputs,
+                                    fermi_energy=fe_predicted)
+                return np.abs(be_predicted - be_actual) * \
+                       (1000 / len(self.data.target_calculator.atoms))
+            except ValueError:
+                # If the training went badly, it might be that the above
+                # code results in an error, due to the LDOS being so wrong
+                # that the estimation of the self consistent Fermi energy
+                # fails.
+                return float("inf")
+        elif energy_type == "total_energy":
+            try:
+                fe_actual = self.data.target_calculator. \
+                    get_self_consistent_fermi_energy(actual_outputs)
+                be_actual = self.data.target_calculator. \
+                    get_total_energy(ldos_data=actual_outputs,
+                                     fermi_energy=fe_actual)
+
+                fe_predicted = self.data.target_calculator. \
+                    get_self_consistent_fermi_energy(predicted_outputs)
+                be_predicted = self.data.target_calculator. \
+                    get_total_energy(ldos_data=predicted_outputs,
+                                    fermi_energy=fe_predicted)
+                return np.abs(be_predicted - be_actual) * \
+                       (1000 / len(self.data.target_calculator.atoms))
+            except ValueError:
+                # If the training went badly, it might be that the above
+                # code results in an error, due to the LDOS being so wrong
+                # that the estimation of the self consistent Fermi energy
+                # fails.
+                return float("inf")
+
+        else:
+            raise Exception("Invalid energy type requested.")
+
 
     def __create_training_checkpoint(self):
         """
