@@ -112,6 +112,7 @@ class MultiLazyLoadDataLoader:
         """Deallocate arrays still left in memory."""
         for dset in self.datasets:
             dset.delete_data()
+        self.pool.shutdown()
 
     # Worker function to load data into shared memory (limited to numpy files
     # only for now)
