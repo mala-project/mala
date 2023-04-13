@@ -632,6 +632,10 @@
 <span class="sd">        currently needed will be kept in memory. This greatly reduces memory</span>
 <span class="sd">        demands, but adds additional computational time.</span>
 
+<span class="sd">    use_lazy_loading_prefetch : bool</span>
+<span class="sd">        If True, will use alternative lazy loading path with prefetching</span>
+<span class="sd">        for higher performance</span>
+
 <span class="sd">    use_clustering : bool</span>
 <span class="sd">        If True, and use_lazy_loading is True as well, the data is clustered,</span>
 <span class="sd">        i.e. not the entire training data is used by rather only a subset</span>
@@ -665,6 +669,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">input_rescaling_type</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_rescaling_type</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_lazy_loading</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_lazy_loading_prefetch</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_clustering</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span> <span class="o">=</span> <span class="mi">40</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">train_ratio</span> <span class="o">=</span> <span class="mf">0.1</span>

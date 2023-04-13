@@ -91,6 +91,7 @@
 <span class="kn">from</span> <span class="nn">mala.datahandling.lazy_load_dataset</span> <span class="kn">import</span> <span class="n">LazyLoadDataset</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.lazy_load_dataset_clustered</span> <span class="kn">import</span> \
     <span class="n">LazyLoadDatasetClustered</span>
+<span class="kn">from</span> <span class="nn">mala.datahandling.lazy_load_dataset_single</span> <span class="kn">import</span> <span class="n">LazyLoadDatasetSingle</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.fast_tensor_dataset</span> <span class="kn">import</span> <span class="n">FastTensorDataset</span>
 
 
@@ -168,9 +169,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">training_data_outputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_outputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">test_data_outputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">training_data_set</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_set</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">test_data_set</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_data_sets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_sets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_data_sets</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Needed for the fast tensor data sets.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">mini_batch_size</span>
@@ -190,9 +191,9 @@
 
 <span class="sd">        Useful when doing multiple investigations in the same python file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">training_data_set</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_set</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">test_data_set</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_data_sets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_sets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_data_sets</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_data</span> <span class="o">=</span> <span class="mi">0</span>
@@ -296,7 +297,8 @@
 <span class="sd">        test set it does not matter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">training_data_set</span><span class="o">.</span><span class="n">mix_datasets</span><span class="p">()</span></div>
+            <span class="k">for</span> <span class="n">dset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">:</span>
+                <span class="n">dset</span><span class="o">.</span><span class="n">mix_datasets</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="DataHandler.get_test_input_gradient"><a class="viewcode-back" href="../../../api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.get_test_input_gradient">[docs]</a>    <span class="k">def</span> <span class="nf">get_test_input_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -325,10 +327,10 @@
         
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span><span class="p">:</span>
             <span class="c1"># This fails if an incorrect snapshot was loaded.</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data_set</span><span class="o">.</span><span class="n">currently_loaded_file</span> <span class="o">!=</span> <span class="n">snapshot_number</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">currently_loaded_file</span> <span class="o">!=</span> <span class="n">snapshot_number</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot calculate gradients, wrong file &quot;</span>
                                 <span class="s2">&quot;was lazily loaded.&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data_set</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">grad</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">grad</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data_inputs</span><span class="o">.</span>\
                        <span class="n">grad</span><span class="p">[</span><span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="o">*</span><span class="n">snapshot_number</span><span class="p">:</span>
@@ -638,85 +640,116 @@
                 
     <span class="k">def</span> <span class="nf">__build_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Build the DataSets that are used during training.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading_prefetch</span><span class="p">:</span>
 
             <span class="c1"># Create the lazy loading data sets.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_clustering</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">training_data_set</span> <span class="o">=</span> <span class="n">LazyLoadDatasetClustered</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">training_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LazyLoadDatasetClustered</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">number_of_clusters</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">train_ratio</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">sample_ratio</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_set</span> <span class="o">=</span> <span class="n">LazyLoadDataset</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">sample_ratio</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LazyLoadDataset</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">))</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">test_data_set</span> <span class="o">=</span> <span class="n">LazyLoadDataset</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">test_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LazyLoadDataset</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">,</span>
-                        <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">training_data_set</span> <span class="o">=</span> <span class="n">LazyLoadDataset</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">training_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LazyLoadDataset</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_set</span> <span class="o">=</span> <span class="n">LazyLoadDataset</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LazyLoadDataset</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">))</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">test_data_set</span> <span class="o">=</span> <span class="n">LazyLoadDataset</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">test_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LazyLoadDataset</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">,</span>
-                        <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 
             <span class="c1"># Add snapshots to the lazy loading data sets.</span>
             <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;tr&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">training_data_set</span><span class="o">.</span><span class="n">add_snapshot_to_dataset</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">add_snapshot_to_dataset</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;va&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_set</span><span class="o">.</span><span class="n">add_snapshot_to_dataset</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">add_snapshot_to_dataset</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;te&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">test_data_set</span><span class="o">.</span><span class="n">add_snapshot_to_dataset</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">add_snapshot_to_dataset</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_clustering</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">training_data_set</span><span class="o">.</span><span class="n">cluster_dataset</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cluster_dataset</span><span class="p">()</span>
             <span class="c1"># I don&#39;t think we need to mix them here. We can use the standard</span>
             <span class="c1"># ordering for the first epoch</span>
             <span class="c1"># and mix it up after.</span>
             <span class="c1"># self.training_data_set.mix_datasets()</span>
             <span class="c1"># self.validation_data_set.mix_datasets()</span>
             <span class="c1"># self.test_data_set.mix_datasets()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading_prefetch</span><span class="p">:</span>
+            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Using lazy loading pre-fetching.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="c1"># Create the lazy loading data sets.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_clustering</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;clustering not supported in this mode&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Create LazyLoadDatasetSingle instances per snapshot and add to list</span>
+                <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;tr&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">training_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LazyLoadDatasetSingle</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;va&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LazyLoadDatasetSingle</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;te&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">test_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LazyLoadDatasetSingle</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">,</span>
+                            <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_data_inputs</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_data_outputs</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_fast_tensor_data_set</span><span class="p">:</span>
                     <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Using FastTensorDataset.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">training_data_set</span> <span class="o">=</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">training_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> \
                         <span class="n">FastTensorDataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">,</span>
                                           <span class="bp">self</span><span class="o">.</span><span class="n">training_data_inputs</span><span class="p">,</span>
-                                          <span class="bp">self</span><span class="o">.</span><span class="n">training_data_outputs</span><span class="p">)</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">training_data_outputs</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">training_data_set</span> <span class="o">=</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">training_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> \
                         <span class="n">TensorDataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_data_inputs</span><span class="p">,</span>
-                                      <span class="bp">self</span><span class="o">.</span><span class="n">training_data_outputs</span><span class="p">)</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">training_data_outputs</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__load_data</span><span class="p">(</span><span class="s2">&quot;validation&quot;</span><span class="p">,</span> <span class="s2">&quot;inputs&quot;</span><span class="p">)</span>
@@ -726,14 +759,14 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_data_outputs</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_fast_tensor_data_set</span><span class="p">:</span>
                     <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Using FastTensorDataset.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_set</span> <span class="o">=</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> \
                         <span class="n">FastTensorDataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">,</span>
                                           <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_inputs</span><span class="p">,</span>
-                                          <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_outputs</span><span class="p">)</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_outputs</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_set</span> <span class="o">=</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> \
                         <span class="n">TensorDataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_data_inputs</span><span class="p">,</span>
-                                      <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_outputs</span><span class="p">)</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_outputs</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__load_data</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;inputs&quot;</span><span class="p">)</span>
@@ -742,9 +775,9 @@
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">__load_data</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;outputs&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_data_outputs</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">test_data_set</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">test_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> \
                     <span class="n">TensorDataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_data_inputs</span><span class="p">,</span>
-                                  <span class="bp">self</span><span class="o">.</span><span class="n">test_data_outputs</span><span class="p">)</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">test_data_outputs</span><span class="p">))</span>
 
     <span class="c1"># Scaling</span>
     <span class="c1">######################</span>

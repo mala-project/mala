@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.datahandling.multi_lazy_load_data_loader &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>mala.datahandling.multi_lazy_load_data_loader</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.datahandling.multi_lazy_load_data_loader</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Class for loading multiple data sets with pre-fetching.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">shared_memory</span>
+<span class="kn">import</span> <span class="nn">concurrent.futures</span>
+
+
+<div class="viewcode-block" id="MultiLazyLoadDataLoader"><a class="viewcode-back" href="../../../api/mala.datahandling.multi_lazy_load_data_loader.html#mala.datahandling.multi_lazy_load_data_loader.MultiLazyLoadDataLoader">[docs]</a><span class="k">class</span> <span class="nc">MultiLazyLoadDataLoader</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for loading multiple data sets with pre-fetching.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    datasets : list</span>
+<span class="sd">        A list of data sets to be used in this class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="n">datasets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loaders</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">d</span><span class="p">,</span>
+                                          <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                          <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                                          <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+        <span class="c1"># Create single process pool for prefetching</span>
+        <span class="c1"># Can use ThreadPoolExecutor for debugging.</span>
+        <span class="c1">#self.pool = concurrent.futures.ThreadPoolExecutor(1)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ProcessPoolExecutor</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Allocate shared memory and commence file load for first</span>
+        <span class="c1"># dataset in list</span>
+        <span class="n">dset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dset</span><span class="o">.</span><span class="n">allocate_shared_mem</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_snapshot_to_shm</span><span class="p">,</span>
+                                            <span class="n">dset</span><span class="o">.</span><span class="n">snapshot</span><span class="p">,</span>
+                                            <span class="n">dset</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span>
+                                            <span class="n">dset</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
+                                            <span class="n">dset</span><span class="o">.</span><span class="n">input_shm_name</span><span class="p">,</span>
+                                            <span class="n">dset</span><span class="o">.</span><span class="n">output_shm_name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Access number of datasets/snapshots contained within this loader.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        length : int</span>
+<span class="sd">            Number of datasets/snapshots contained within this loader.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loaders</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate an iterator.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        iterator: MultiLazyLoadDataLoader</span>
+<span class="sd">            An iterator over the individual datasets/snapshots in this</span>
+<span class="sd">            object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Access the next data loader.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        iterator: DataLoader</span>
+<span class="sd">            The next data loader.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loaders</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Wait on last prefetch</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">load_future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">loaded</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="c1"># Delete last</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">delete_data</span><span class="p">()</span>
+
+            <span class="c1"># Prefetch next file (looping around epoch boundary)</span>
+            <span class="n">dset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loaders</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">dset</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
+              <span class="n">dset</span><span class="o">.</span><span class="n">allocate_shared_mem</span><span class="p">()</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">load_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_snapshot_to_shm</span><span class="p">,</span>
+                                                  <span class="n">dset</span><span class="o">.</span><span class="n">snapshot</span><span class="p">,</span>
+                                                  <span class="n">dset</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span>
+                                                  <span class="n">dset</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
+                                                  <span class="n">dset</span><span class="o">.</span><span class="n">input_shm_name</span><span class="p">,</span>
+                                                  <span class="n">dset</span><span class="o">.</span><span class="n">output_shm_name</span><span class="p">)</span>
+
+            <span class="c1"># Return current</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaders</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># TODO: Without this function, I get 2 times the number of snapshots</span>
+    <span class="c1"># memory leaks after shutdown. With it, I get 1 times the number of</span>
+    <span class="c1"># snapshots. So using this function seems to be correct; just simply not</span>
+    <span class="c1"># enough? I am not sure where the memory leak is coming from.</span>
+<div class="viewcode-block" id="MultiLazyLoadDataLoader.cleanup"><a class="viewcode-back" href="../../../api/mala.datahandling.multi_lazy_load_data_loader.html#mala.datahandling.multi_lazy_load_data_loader.MultiLazyLoadDataLoader.cleanup">[docs]</a>    <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deallocate arrays still left in memory.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">dset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">:</span>
+            <span class="n">dset</span><span class="o">.</span><span class="n">deallocate_shared_mem</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span></div>
+
+    <span class="c1"># Worker function to load data into shared memory (limited to numpy files</span>
+    <span class="c1"># only for now)</span>
+<div class="viewcode-block" id="MultiLazyLoadDataLoader.load_snapshot_to_shm"><a class="viewcode-back" href="../../../api/mala.datahandling.multi_lazy_load_data_loader.html#mala.datahandling.multi_lazy_load_data_loader.MultiLazyLoadDataLoader.load_snapshot_to_shm">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">load_snapshot_to_shm</span><span class="p">(</span><span class="n">snapshot</span><span class="p">,</span> <span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">target_calculator</span><span class="p">,</span>
+                             <span class="n">input_shm_name</span><span class="p">,</span> <span class="n">output_shm_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a snapshot into shared memory.</span>
+
+<span class="sd">        Limited to numpy files for now.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        snapshot : mala.datahandling.snapshot.Snapshot</span>
+<span class="sd">            Snapshot to be loaded.</span>
+
+<span class="sd">        descriptor_calculator : mala.descriptors.descriptor.Descriptor</span>
+<span class="sd">            Used to do unit conversion on input data.</span>
+
+<span class="sd">        target_calculator : mala.targets.target.Target or derivative</span>
+<span class="sd">            Used to do unit conversion on output data.</span>
+
+<span class="sd">        input_shm_name : str</span>
+<span class="sd">            Name of the input shared memory buffer.</span>
+
+<span class="sd">        output_shm_name : str</span>
+<span class="sd">            Name of the output shared memory buffer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get shared mem</span>
+        <span class="n">input_shm</span> <span class="o">=</span> <span class="n">shared_memory</span><span class="o">.</span><span class="n">SharedMemory</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">input_shm_name</span><span class="p">)</span>
+        <span class="n">output_shm</span> <span class="o">=</span> <span class="n">shared_memory</span><span class="o">.</span><span class="n">SharedMemory</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">output_shm_name</span><span class="p">)</span>
+
+        <span class="n">input_shape</span><span class="p">,</span> <span class="n">input_dtype</span> <span class="o">=</span> <span class="n">descriptor_calculator</span><span class="o">.</span> \
+            <span class="n">read_dimensions_and_dtype_from_numpy_file</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
+                         <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">))</span>
+
+        <span class="n">output_shape</span><span class="p">,</span> <span class="n">output_dtype</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span> \
+            <span class="n">read_dimensions_and_dtype_from_numpy_file</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                         <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">))</span>
+
+        <span class="c1"># Form numpy arrays from shm buffers</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">input_dtype</span><span class="p">,</span>
+                                <span class="n">buffer</span><span class="o">=</span><span class="n">input_shm</span><span class="o">.</span><span class="n">buf</span><span class="p">)</span>
+        <span class="n">output_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">output_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">output_dtype</span><span class="p">,</span>
+                                 <span class="n">buffer</span><span class="o">=</span><span class="n">output_shm</span><span class="o">.</span><span class="n">buf</span><span class="p">)</span>
+
+        <span class="c1"># Load numpy data into shm buffers</span>
+        <span class="n">descriptor_calculator</span><span class="o">.</span> \
+            <span class="n">read_from_numpy_file</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
+                         <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">),</span>
+            <span class="n">units</span><span class="o">=</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_units</span><span class="p">,</span>
+            <span class="n">array</span><span class="o">=</span><span class="n">input_data</span><span class="p">)</span>
+        <span class="n">target_calculator</span><span class="o">.</span> \
+            <span class="n">read_from_numpy_file</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                         <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">),</span>
+            <span class="n">units</span><span class="o">=</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_units</span><span class="p">,</span>
+            <span class="n">array</span><span class="o">=</span><span class="n">output_data</span><span class="p">)</span>
+
+        <span class="c1"># This function only loads the numpy data with scaling. Remaining data</span>
+        <span class="c1"># preprocessing occurs in __getitem__ of LazyLoadDatasetSingle</span>
+        <span class="n">input_shm</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">output_shm</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

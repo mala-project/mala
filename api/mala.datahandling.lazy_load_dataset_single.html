@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>lazy_load_dataset &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>lazy_load_dataset_single &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
@@ -20,8 +20,8 @@
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="lazy_load_dataset_clustered" href="mala.datahandling.lazy_load_dataset_clustered.html" />
-    <link rel="prev" title="fast_tensor_dataset" href="mala.datahandling.fast_tensor_dataset.html" /> 
+    <link rel="next" title="multi_lazy_load_data_loader" href="mala.datahandling.multi_lazy_load_data_loader.html" />
+    <link rel="prev" title="lazy_load_dataset_clustered" href="mala.datahandling.lazy_load_dataset_clustered.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -56,9 +56,9 @@
 <li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_scaler.html">data_scaler</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_shuffler.html">data_shuffler</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.datahandling.fast_tensor_dataset.html">fast_tensor_dataset</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">lazy_load_dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html">lazy_load_dataset</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_clustered.html">lazy_load_dataset_clustered</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html">lazy_load_dataset_single</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">lazy_load_dataset_single</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.datahandling.multi_lazy_load_data_loader.html">multi_lazy_load_data_loader</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.datahandling.snapshot.html">snapshot</a></li>
 </ul>
@@ -92,9 +92,9 @@
           <li><a href="modules.html">API reference</a> &raquo;</li>
           <li><a href="mala.html">mala</a> &raquo;</li>
           <li><a href="mala.datahandling.html">datahandling</a> &raquo;</li>
-      <li>lazy_load_dataset</li>
+      <li>lazy_load_dataset_single</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.datahandling.lazy_load_dataset.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.datahandling.lazy_load_dataset_single.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -102,12 +102,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="module-mala.datahandling.lazy_load_dataset">
-<span id="lazy-load-dataset"></span><h1>lazy_load_dataset<a class="headerlink" href="#module-mala.datahandling.lazy_load_dataset" title="Permalink to this headline"></a></h1>
+  <div class="section" id="module-mala.datahandling.lazy_load_dataset_single">
+<span id="lazy-load-dataset-single"></span><h1>lazy_load_dataset_single<a class="headerlink" href="#module-mala.datahandling.lazy_load_dataset_single" title="Permalink to this headline"></a></h1>
 <p>DataSet for lazy-loading.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset.LazyLoadDataset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LazyLoadDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LazyLoadDatasetSingle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_single.html#LazyLoadDatasetSingle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.Dataset</span></code></p>
 <p>DataSet class for lazy loading.</p>
 <p>Only loads snapshots in the memory that are currently being processed.
@@ -131,41 +131,38 @@ at all.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset">
-<span class="sig-name descname"><span class="pre">add_snapshot_to_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot" title="mala.datahandling.snapshot.Snapshot"><span class="pre">mala.datahandling.snapshot.Snapshot</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset.add_snapshot_to_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset" title="Permalink to this definition"></a></dt>
-<dd><p>Add a snapshot to a DataSet.</p>
-<p>Afterwards, the DataSet can and will load this snapshot as needed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>snapshot</strong> (<a class="reference internal" href="mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot" title="mala.datahandling.snapshot.Snapshot"><em>mala.datahandling.snapshot.Snapshot</em></a>) – Snapshot that is to be added to this DataSet.</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.allocate_shared_mem">
+<span class="sig-name descname"><span class="pre">allocate_shared_mem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_single.html#LazyLoadDatasetSingle.allocate_shared_mem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.allocate_shared_mem" title="Permalink to this definition"></a></dt>
+<dd><p>Allocate the shared memory buffer for use by prefetching process.</p>
+<p>Buffer is sized via numpy metadata.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data">
-<span class="sig-name descname"><span class="pre">get_new_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset.get_new_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data" title="Permalink to this definition"></a></dt>
-<dd><p>Read a new snapshot into RAM.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>file_index</strong> (<em>i</em>) – File to be read.</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.deallocate_shared_mem">
+<span class="sig-name descname"><span class="pre">deallocate_shared_mem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_single.html#LazyLoadDatasetSingle.deallocate_shared_mem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.deallocate_shared_mem" title="Permalink to this definition"></a></dt>
+<dd><p>Deallocate the shared memory buffer used by prefetching process.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets">
-<span class="sig-name descname"><span class="pre">mix_datasets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset.mix_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets" title="Permalink to this definition"></a></dt>
-<dd><p>Mix the order of the snapshots.</p>
-<p>With this, there can be some variance between runs.</p>
+<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.delete_data">
+<span class="sig-name descname"><span class="pre">delete_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_single.html#LazyLoadDatasetSingle.delete_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.delete_data" title="Permalink to this definition"></a></dt>
+<dd><p>Free the shared memory buffers.</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset.LazyLoadDataset.return_outputs_directly">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">return_outputs_directly</span></span><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.return_outputs_directly" title="Permalink to this definition"></a></dt>
-<dd><p>Control whether outputs are actually transformed.</p>
-<p>Has to be False for training. In the testing case,
-Numerical errors are smaller if set to True.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.mix_datasets">
+<span class="sig-name descname"><span class="pre">mix_datasets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_single.html#LazyLoadDatasetSingle.mix_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.mix_datasets" title="Permalink to this definition"></a></dt>
+<dd><p>Shuffle the data in this data set.</p>
+<p>For this class, instead of mixing the datasets, we just shuffle the
+indices and leave the dataset order unchanged.
+NOTE: It seems that the shuffled access to the shared memory
+performance is much reduced (relative to the FastTensorDataset).
+To regain performance, can rewrite to shuffle the datasets like in
+the existing LazyLoadDataset. Another option might be
+to try loading the numpy file in permuted order to avoid the shuffled
+reads; however, this might require some care to
+avoid erroneously overwriting shared memory data in cases where a
+single dataset object is used back to back.</p>
 </dd></dl>
 
 </dd></dl>
@@ -176,8 +173,8 @@ Numerical errors are smaller if set to True.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="mala.datahandling.fast_tensor_dataset.html" class="btn btn-neutral float-left" title="fast_tensor_dataset" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mala.datahandling.lazy_load_dataset_clustered.html" class="btn btn-neutral float-right" title="lazy_load_dataset_clustered" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.datahandling.lazy_load_dataset_clustered.html" class="btn btn-neutral float-left" title="lazy_load_dataset_clustered" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.datahandling.multi_lazy_load_data_loader.html" class="btn btn-neutral float-right" title="multi_lazy_load_data_loader" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

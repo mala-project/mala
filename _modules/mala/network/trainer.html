@@ -88,13 +88,14 @@
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">torch.utils.tensorboard</span> <span class="kn">import</span> <span class="n">SummaryWriter</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">printout</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.data_handler</span> <span class="kn">import</span> <span class="n">DataHandler</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.data_scaler</span> <span class="kn">import</span> <span class="n">DataScaler</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">parallel_warn</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.fast_tensor_dataset</span> <span class="kn">import</span> <span class="n">FastTensorDataset</span>
 <span class="kn">from</span> <span class="nn">mala.network.network</span> <span class="kn">import</span> <span class="n">Network</span>
 <span class="kn">from</span> <span class="nn">mala.network.runner</span> <span class="kn">import</span> <span class="n">Runner</span>
+<span class="kn">from</span> <span class="nn">mala.datahandling.lazy_load_dataset_single</span> <span class="kn">import</span> <span class="n">LazyLoadDatasetSingle</span>
+<span class="kn">from</span> <span class="nn">mala.datahandling.multi_lazy_load_data_loader</span> <span class="kn">import</span> \
+    <span class="n">MultiLazyLoadDataLoader</span>
 
 
 <div class="viewcode-block" id="Trainer"><a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer">[docs]</a><span class="k">class</span> <span class="nc">Trainer</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
@@ -127,9 +128,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">patience_counter</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_loss</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loaders</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loaders</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Samplers for the horovod case.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span> <span class="o">=</span> <span class="kc">None</span>
@@ -295,7 +296,7 @@
                                         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
                                         <span class="n">after_before_training_metric</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">:</span>
             <span class="n">tloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__validate_network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
                                             <span class="s2">&quot;test&quot;</span><span class="p">,</span>
                                             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
@@ -311,7 +312,7 @@
 
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Initial Guess - validation data loss: &quot;</span><span class="p">,</span> <span class="n">vloss</span><span class="p">,</span>
                  <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">:</span>
             <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Initial Guess - test data loss: &quot;</span><span class="p">,</span> <span class="n">tloss</span><span class="p">,</span>
                      <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
@@ -347,67 +348,69 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span><span class="o">.</span><span class="n">set_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
 
             <span class="c1"># shuffle dataset if necessary</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_set</span><span class="p">,</span> <span class="n">FastTensorDataset</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_set</span><span class="o">.</span><span class="n">shuffle</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">FastTensorDataset</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shuffle</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]:</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
                 <span class="n">tsample</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
                 <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-                <span class="k">for</span> <span class="n">batchid</span><span class="p">,</span> <span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span> <span class="ow">in</span> \
-                        <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_data_loader</span><span class="p">):</span>
+                <span class="n">batchid</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">:</span>
 
-                    <span class="k">if</span> <span class="n">batchid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">profiler_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="n">batchid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">profiler_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-                        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">batchid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">profiler_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">batchid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">profiler_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 
-                    <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step </span><span class="si">{</span><span class="n">batchid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step </span><span class="si">{</span><span class="n">batchid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-                    <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;data copy in&quot;</span><span class="p">)</span>
-                    <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">],</span>
-                                       <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                    <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">],</span>
-                                         <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                    <span class="c1"># data copy in</span>
-                    <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;data copy in&quot;</span><span class="p">)</span>
+                        <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">],</span>
+                                           <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">],</span>
+                                             <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="c1"># data copy in</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
 
-                    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__process_mini_batch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
-                                                     <span class="n">inputs</span><span class="p">,</span>
-                                                     <span class="n">outputs</span><span class="p">)</span>
-                    <span class="c1"># step</span>
-                    <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
-                    <span class="n">training_loss_sum</span> <span class="o">+=</span> <span class="n">loss</span>
+                        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__process_mini_batch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
+                                                         <span class="n">inputs</span><span class="p">,</span>
+                                                         <span class="n">outputs</span><span class="p">)</span>
+                        <span class="c1"># step</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+                        <span class="n">training_loss_sum</span> <span class="o">+=</span> <span class="n">loss</span>
 
-                    <span class="k">if</span> <span class="n">batchid</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">batchid</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">training_report_frequency</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-                        <span class="n">sample_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tsample</span>
-                        <span class="n">avg_sample_time</span> <span class="o">=</span> <span class="n">sample_time</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">training_report_frequency</span>
-                        <span class="n">avg_sample_tput</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">training_report_frequency</span> <span class="o">*</span> <span class="n">inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">sample_time</span>
-                        <span class="n">printout</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;batch </span><span class="si">{</span><span class="n">batchid</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_data_loader</span><span class="p">)</span><span class="si">}</span><span class="s2">, &quot;</span>
-                                 <span class="sa">f</span><span class="s2">&quot;train avg time: </span><span class="si">{</span><span class="n">avg_sample_time</span><span class="si">}</span><span class="s2"> &quot;</span>
-                                 <span class="sa">f</span><span class="s2">&quot;train avg throughput: </span><span class="si">{</span><span class="n">avg_sample_tput</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                                 <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-                        <span class="n">tsample</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">batchid</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">batchid</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">training_report_frequency</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+                            <span class="n">sample_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tsample</span>
+                            <span class="n">avg_sample_time</span> <span class="o">=</span> <span class="n">sample_time</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">training_report_frequency</span>
+                            <span class="n">avg_sample_tput</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">training_report_frequency</span> <span class="o">*</span> <span class="n">inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">sample_time</span>
+                            <span class="n">printout</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;batch </span><span class="si">{</span><span class="n">batchid</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">, &quot;</span><span class="c1">#/{total_samples}, &quot;</span>
+                                     <span class="sa">f</span><span class="s2">&quot;train avg time: </span><span class="si">{</span><span class="n">avg_sample_time</span><span class="si">}</span><span class="s2"> &quot;</span>
+                                     <span class="sa">f</span><span class="s2">&quot;train avg throughput: </span><span class="si">{</span><span class="n">avg_sample_tput</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                                     <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                            <span class="n">tsample</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                        <span class="n">batchid</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
                 <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
                 <span class="n">printout</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;training time: </span><span class="si">{</span><span class="n">t1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
-                <span class="n">training_loss</span> <span class="o">=</span> <span class="n">training_loss_sum</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> \
-                                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_data_loader</span><span class="p">)</span>
+                <span class="n">training_loss</span> <span class="o">=</span> <span class="n">training_loss_sum</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> <span class="n">batchid</span>
 
                 <span class="c1"># Calculate the validation loss. and output it.</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">batchid</span><span class="p">,</span> <span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span> <span class="ow">in</span> \
-                        <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_data_loader</span><span class="p">):</span>
-                    <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
-                    <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
-                    <span class="n">training_loss_sum</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__process_mini_batch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
-                <span class="n">training_loss</span> <span class="o">=</span> <span class="n">training_loss_sum</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> \
-                                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_data_loader</span><span class="p">)</span>
+                <span class="n">batchid</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">:</span>
+                        <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
+                        <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
+                        <span class="n">training_loss_sum</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__process_mini_batch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
+                        <span class="n">batchid</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">training_loss</span> <span class="o">=</span> <span class="n">training_loss_sum</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> <span class="n">batchid</span>
 
             <span class="n">vloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__validate_network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
                                             <span class="s2">&quot;validation&quot;</span><span class="p">,</span>
@@ -511,7 +514,7 @@
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Final validation data loss: &quot;</span><span class="p">,</span> <span class="n">vloss</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="n">tloss</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">tloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__validate_network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
                                             <span class="s2">&quot;test&quot;</span><span class="p">,</span>
                                             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
@@ -519,7 +522,14 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
                 <span class="n">tloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span><span class="n">tloss</span><span class="p">,</span> <span class="s1">&#39;average_loss&#39;</span><span class="p">)</span>
             <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Final test data loss: &quot;</span><span class="p">,</span> <span class="n">tloss</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">final_test_loss</span> <span class="o">=</span> <span class="n">tloss</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">final_test_loss</span> <span class="o">=</span> <span class="n">tloss</span>
+
+        <span class="c1"># Clean-up for pre-fetching lazy loading.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading_prefetch</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loaders</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loaders</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">__prepare_to_train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare everything for training.&quot;&quot;&quot;</span>
@@ -588,20 +598,20 @@
                 <span class="n">do_shuffle</span> <span class="o">=</span> <span class="kc">False</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span>\
-                <span class="n">distributed</span><span class="o">.</span><span class="n">DistributedSampler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_set</span><span class="p">,</span>
+                <span class="n">distributed</span><span class="o">.</span><span class="n">DistributedSampler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                                                <span class="n">num_replicas</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span>
                                                <span class="n">rank</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">rank</span><span class="p">(),</span>
                                                <span class="n">shuffle</span><span class="o">=</span><span class="n">do_shuffle</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">validation_sampler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span>\
-                <span class="n">distributed</span><span class="o">.</span><span class="n">DistributedSampler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_set</span><span class="p">,</span>
+                <span class="n">distributed</span><span class="o">.</span><span class="n">DistributedSampler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                                                <span class="n">num_replicas</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span>
                                                <span class="n">rank</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">rank</span><span class="p">(),</span>
                                                <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">test_sampler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span>\
-                    <span class="n">distributed</span><span class="o">.</span><span class="n">DistributedSampler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_set</span><span class="p">,</span>
+                    <span class="n">distributed</span><span class="o">.</span><span class="n">DistributedSampler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                                                    <span class="n">num_replicas</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span>
                                                    <span class="n">rank</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">rank</span><span class="p">(),</span>
                                                    <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -648,42 +658,51 @@
             <span class="n">do_shuffle</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># Prepare data loaders.(look into mini-batch size)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_set</span><span class="p">,</span> <span class="n">FastTensorDataset</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">FastTensorDataset</span><span class="p">):</span>
             <span class="c1"># Not shuffling in loader.</span>
             <span class="c1"># I manually shuffle the data set each epoch.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_set</span><span class="p">,</span>
-                                                   <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                                   <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span><span class="p">,</span>
-                                                   <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-                                                   <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                         <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                                         <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span><span class="p">,</span>
+                                                         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                                                         <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_set</span><span class="p">,</span>
-                                                   <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                                   <span class="n">mini_batch_size</span><span class="p">,</span>
-                                                   <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span><span class="p">,</span>
-                                                   <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-                                                   <span class="n">shuffle</span><span class="o">=</span><span class="n">do_shuffle</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">LazyLoadDatasetSingle</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span> <span class="o">=</span> <span class="n">MultiLazyLoadDataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                             <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                                             <span class="n">mini_batch_size</span><span class="p">,</span>
+                                                             <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span><span class="p">,</span>
+                                                             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                                                             <span class="n">shuffle</span><span class="o">=</span><span class="n">do_shuffle</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_set</span><span class="p">,</span> <span class="n">FastTensorDataset</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_set</span><span class="p">,</span>
-                                                     <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                                     <span class="n">sampler</span><span class="o">=</span>
-                                                     <span class="bp">self</span><span class="o">.</span><span class="n">validation_sampler</span><span class="p">,</span>
-                                                     <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">FastTensorDataset</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                           <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                                           <span class="n">sampler</span><span class="o">=</span>
+                                                           <span class="bp">self</span><span class="o">.</span><span class="n">validation_sampler</span><span class="p">,</span>
+                                                           <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_set</span><span class="p">,</span>
-                                                     <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                                     <span class="n">mini_batch_size</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,</span>
-                                                     <span class="n">sampler</span><span class="o">=</span>
-                                                     <span class="bp">self</span><span class="o">.</span><span class="n">validation_sampler</span><span class="p">,</span>
-                                                     <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">LazyLoadDatasetSingle</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loaders</span> <span class="o">=</span> <span class="n">MultiLazyLoadDataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                               <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                                               <span class="n">mini_batch_size</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,</span>
+                                                               <span class="n">sampler</span><span class="o">=</span>
+                                                               <span class="bp">self</span><span class="o">.</span><span class="n">validation_sampler</span><span class="p">,</span>
+                                                               <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_set</span><span class="p">,</span>
-                                               <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                               <span class="n">mini_batch_size</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,</span>
-                                               <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_sampler</span><span class="p">,</span>
-                                               <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">LazyLoadDatasetSingle</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loaders</span> <span class="o">=</span> <span class="n">MultiLazyLoadDataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                         <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                                         <span class="n">mini_batch_size</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,</span>
+                                                         <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_sampler</span><span class="p">,</span>
+                                                         <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__process_mini_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">input_data</span><span class="p">,</span> <span class="n">target_data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process a mini batch.&quot;&quot;&quot;</span>
@@ -774,15 +793,15 @@
     <span class="k">def</span> <span class="nf">__validate_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data_set_type</span><span class="p">,</span> <span class="n">validation_type</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate a network, using test or validation data.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">data_set_type</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
-            <span class="n">data_loader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loader</span>
-            <span class="n">data_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_set</span>
+            <span class="n">data_loaders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loaders</span>
+            <span class="n">data_sets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_sets</span>
             <span class="n">number_of_snapshots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nr_test_snapshots</span>
             <span class="n">offset_snapshots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nr_validation_snapshots</span> <span class="o">+</span> \
                                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nr_training_snapshots</span>
 
         <span class="k">elif</span> <span class="n">data_set_type</span> <span class="o">==</span> <span class="s2">&quot;validation&quot;</span><span class="p">:</span>
-            <span class="n">data_loader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loader</span>
-            <span class="n">data_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_set</span>
+            <span class="n">data_loaders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loaders</span>
+            <span class="n">data_sets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span>
             <span class="n">number_of_snapshots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nr_validation_snapshots</span>
             <span class="n">offset_snapshots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nr_training_snapshots</span>
 
@@ -798,169 +817,188 @@
                     <span class="n">report_freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">training_report_frequency</span>
                     <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
                     <span class="n">tsample</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-                    <span class="k">for</span> <span class="n">batchid</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data_loader</span><span class="p">):</span>
-                        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">],</span>
-                                 <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">],</span>
-                                 <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">batchid</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="n">data_loaders</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">:</span>
+                            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">],</span>
+                                     <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">],</span>
+                                     <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_graphs</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_graph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Capturing CUDA graph for validation.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-                            <span class="n">s</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
-                            <span class="n">s</span><span class="o">.</span><span class="n">wait_stream</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_stream</span><span class="p">())</span>
-                            <span class="c1"># Warmup for graphs</span>
-                            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">stream</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-                                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_graphs</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_graph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Capturing CUDA graph for validation.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                                <span class="n">s</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
+                                <span class="n">s</span><span class="o">.</span><span class="n">wait_stream</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_stream</span><span class="p">())</span>
+                                <span class="c1"># Warmup for graphs</span>
+                                <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">stream</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+                                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+                                        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">amp</span><span class="o">.</span><span class="n">autocast</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mixed_precision</span><span class="p">):</span>
+                                            <span class="n">prediction</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                                            <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                                <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_stream</span><span class="p">()</span><span class="o">.</span><span class="n">wait_stream</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+                                <span class="c1"># Create static entry point tensors to graph</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">static_input_validation</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">static_target_validation</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+                                <span class="c1"># Capture graph</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">validation_graph</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">CUDAGraph</span><span class="p">()</span>
+                                <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_graph</span><span class="p">):</span>
                                     <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">amp</span><span class="o">.</span><span class="n">autocast</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mixed_precision</span><span class="p">):</span>
-                                        <span class="n">prediction</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-                                        <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-                            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_stream</span><span class="p">()</span><span class="o">.</span><span class="n">wait_stream</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">static_prediction_validation</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_input_validation</span><span class="p">)</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">static_loss_validation</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_prediction_validation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_target_validation</span><span class="p">)</span>
 
-                            <span class="c1"># Create static entry point tensors to graph</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">static_input_validation</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">static_target_validation</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-
-                            <span class="c1"># Capture graph</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">validation_graph</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">CUDAGraph</span><span class="p">()</span>
-                            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_graph</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_graph</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">static_input_validation</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">static_target_validation</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">validation_graph</span><span class="o">.</span><span class="n">replay</span><span class="p">()</span>
+                                <span class="n">validation_loss_sum</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_loss_validation</span>
+                            <span class="k">else</span><span class="p">:</span>
                                 <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">amp</span><span class="o">.</span><span class="n">autocast</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mixed_precision</span><span class="p">):</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">static_prediction_validation</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_input_validation</span><span class="p">)</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">static_loss_validation</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_prediction_validation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_target_validation</span><span class="p">)</span>
-
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_graph</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">static_input_validation</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">static_target_validation</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">validation_graph</span><span class="o">.</span><span class="n">replay</span><span class="p">()</span>
-                            <span class="n">validation_loss_sum</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_loss_validation</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">amp</span><span class="o">.</span><span class="n">autocast</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mixed_precision</span><span class="p">):</span>
-                                <span class="n">prediction</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-                                <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-                                <span class="n">validation_loss_sum</span> <span class="o">+=</span> <span class="n">loss</span>
-                        <span class="k">if</span> <span class="n">batchid</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">batchid</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">report_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-                            <span class="n">sample_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tsample</span>
-                            <span class="n">avg_sample_time</span> <span class="o">=</span> <span class="n">sample_time</span> <span class="o">/</span> <span class="n">report_freq</span>
-                            <span class="n">avg_sample_tput</span> <span class="o">=</span> <span class="n">report_freq</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">sample_time</span>
-                            <span class="n">printout</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;batch </span><span class="si">{</span><span class="n">batchid</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_loader</span><span class="p">)</span><span class="si">}</span><span class="s2">, &quot;</span>
-                                     <span class="sa">f</span><span class="s2">&quot;validation avg time: </span><span class="si">{</span><span class="n">avg_sample_time</span><span class="si">}</span><span class="s2"> &quot;</span>
-                                     <span class="sa">f</span><span class="s2">&quot;validation avg throughput: </span><span class="si">{</span><span class="n">avg_sample_tput</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                                     <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-                            <span class="n">tsample</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                                    <span class="n">prediction</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                                    <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                                    <span class="n">validation_loss_sum</span> <span class="o">+=</span> <span class="n">loss</span>
+                            <span class="k">if</span> <span class="n">batchid</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">batchid</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">report_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+                                <span class="n">sample_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tsample</span>
+                                <span class="n">avg_sample_time</span> <span class="o">=</span> <span class="n">sample_time</span> <span class="o">/</span> <span class="n">report_freq</span>
+                                <span class="n">avg_sample_tput</span> <span class="o">=</span> <span class="n">report_freq</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">sample_time</span>
+                                <span class="n">printout</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;batch </span><span class="si">{</span><span class="n">batchid</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">, &quot;</span> <span class="c1">#/{total_samples}, &quot;</span>
+                                         <span class="sa">f</span><span class="s2">&quot;validation avg time: </span><span class="si">{</span><span class="n">avg_sample_time</span><span class="si">}</span><span class="s2"> &quot;</span>
+                                         <span class="sa">f</span><span class="s2">&quot;validation avg throughput: </span><span class="si">{</span><span class="n">avg_sample_tput</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                                         <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                                <span class="n">tsample</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                            <span class="n">batchid</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">data_loader</span><span class="p">:</span>
-                        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
-                        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
-                        <span class="n">prediction</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-                        <span class="n">validation_loss_sum</span> <span class="o">+=</span> \
-                            <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                    <span class="n">batchid</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="n">data_loaders</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">:</span>
+                            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
+                            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
+                            <span class="n">prediction</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                            <span class="n">validation_loss_sum</span> <span class="o">+=</span> \
+                                <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                            <span class="n">batchid</span> <span class="o">+=</span> <span class="mi">1</span>
 
-            <span class="n">validation_loss</span> <span class="o">=</span> <span class="n">validation_loss_sum</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_loader</span><span class="p">)</span>
+            <span class="n">validation_loss</span> <span class="o">=</span> <span class="n">validation_loss_sum</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> <span class="n">batchid</span>
             <span class="k">return</span> <span class="n">validation_loss</span>
-        <span class="k">elif</span> <span class="n">validation_type</span> <span class="o">==</span> <span class="s2">&quot;band_energy&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">validation_type</span> <span class="o">==</span> <span class="s2">&quot;band_energy&quot;</span> <span class="ow">or</span> \
+                <span class="n">validation_type</span> <span class="o">==</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">:</span>
             <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">snapshot_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">offset_snapshots</span><span class="p">,</span>
-                                         <span class="n">number_of_snapshots</span><span class="o">+</span><span class="n">offset_snapshots</span><span class="p">):</span>
-                <span class="c1"># Get optimal batch size and number of batches per snapshotss</span>
-                <span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>\
-                    <span class="n">snapshot_directories_list</span><span class="p">[</span><span class="n">snapshot_number</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loaders</span><span class="p">,</span>
+                          <span class="n">MultiLazyLoadDataLoader</span><span class="p">):</span>
+                <span class="n">loader_id</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="n">data_loaders</span><span class="p">:</span>
+                    <span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span> \
+                        <span class="n">snapshot_directories_list</span><span class="p">[</span><span class="n">loader_id</span> <span class="o">+</span>
+                                                  <span class="n">offset_snapshots</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span>
 
-                <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span> \
-                    <span class="n">_correct_batch_size_for_testing</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span>
-                                                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                                    <span class="n">mini_batch_size</span><span class="p">)</span>
-                <span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">grid_size</span> <span class="o">/</span>
-                                                     <span class="n">optimal_batch_size</span><span class="p">)</span>
+                    <span class="n">actual_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">))</span>
+                    <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">))</span>
+                    <span class="n">last_start</span> <span class="o">=</span> <span class="mi">0</span>
 
-                <span class="n">actual_outputs</span><span class="p">,</span> \
-                <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
-                    <span class="n">_forward_entire_snapshot</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">,</span>
-                                             <span class="n">data_set</span><span class="p">,</span> <span class="n">data_set_type</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span>
-                                             <span class="n">number_of_batches_per_snapshot</span><span class="p">,</span>
-                                             <span class="n">optimal_batch_size</span><span class="p">)</span>
-                <span class="n">calculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
+                    <span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">:</span>
 
-                <span class="c1"># This works because the list is always guaranteed to be</span>
-                <span class="c1"># ordered.</span>
-                <span class="n">calculator</span><span class="o">.</span>\
-                    <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">))</span>
+                        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
+                        <span class="n">length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">predicted_outputs</span><span class="p">[</span><span class="n">last_start</span><span class="p">:</span><span class="n">last_start</span> <span class="o">+</span> <span class="n">length</span><span class="p">,</span>
+                        <span class="p">:]</span> <span class="o">=</span> \
+                            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span> \
+                                <span class="n">inverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span>
+                                                  <span class="n">to</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">),</span> <span class="n">as_numpy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">actual_outputs</span><span class="p">[</span><span class="n">last_start</span><span class="p">:</span><span class="n">last_start</span> <span class="o">+</span> <span class="n">length</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> \
+                            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span> \
+                                <span class="n">inverse_transform</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">as_numpy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">fe_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span> \
-                        <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
-                    <span class="n">be_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span> \
-                        <span class="n">get_band_energy</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span><span class="p">)</span>
+                        <span class="n">last_start</span> <span class="o">+=</span> <span class="n">length</span>
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calculate_energy_errors</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">,</span>
+                                                                <span class="n">predicted_outputs</span><span class="p">,</span>
+                                                                <span class="n">validation_type</span><span class="p">,</span>
+                                                                <span class="n">loader_id</span><span class="o">+</span><span class="n">offset_snapshots</span><span class="p">))</span>
+                    <span class="n">loader_id</span> <span class="o">+=</span> <span class="mi">1</span>
 
-                    <span class="n">fe_predicted</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
-                        <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
-                    <span class="n">be_predicted</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
-                        <span class="n">get_band_energy</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">,</span>
-                                        <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_predicted</span><span class="p">)</span>
-                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">be_predicted</span> <span class="o">-</span> <span class="n">be_actual</span><span class="p">)</span> <span class="o">*</span>
-                                  <span class="p">(</span><span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)))</span>
-                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                    <span class="c1"># If the training went badly, it might be that the above</span>
-                    <span class="c1"># code results in an error, due to the LDOS being so wrong</span>
-                    <span class="c1"># that the estimation of the self consistent Fermi energy</span>
-                    <span class="c1"># fails.</span>
-                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">snapshot_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">offset_snapshots</span><span class="p">,</span>
+                                             <span class="n">number_of_snapshots</span><span class="o">+</span><span class="n">offset_snapshots</span><span class="p">):</span>
+                    <span class="c1"># Get optimal batch size and number of batches per snapshotss</span>
+                    <span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>\
+                        <span class="n">snapshot_directories_list</span><span class="p">[</span><span class="n">snapshot_number</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span>
 
+                    <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span> \
+                        <span class="n">_correct_batch_size_for_testing</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span>
+                                                        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                                        <span class="n">mini_batch_size</span><span class="p">)</span>
+                    <span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">grid_size</span> <span class="o">/</span>
+                                                         <span class="n">optimal_batch_size</span><span class="p">)</span>
+
+                    <span class="n">actual_outputs</span><span class="p">,</span> \
+                    <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
+                        <span class="n">_forward_entire_snapshot</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">,</span>
+                                                 <span class="n">data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data_set_type</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span>
+                                                 <span class="n">number_of_batches_per_snapshot</span><span class="p">,</span>
+                                                 <span class="n">optimal_batch_size</span><span class="p">)</span>
+
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calculate_energy_errors</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">,</span>
+                                                                <span class="n">predicted_outputs</span><span class="p">,</span>
+                                                                <span class="n">validation_type</span><span class="p">,</span>
+                                                                <span class="n">snapshot_number</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">validation_type</span> <span class="o">==</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">:</span>
-            <span class="c1"># Get optimal batch size and number of batches per snapshots.</span>
-
-            <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">snapshot_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">offset_snapshots</span><span class="p">,</span>
-                                         <span class="n">number_of_snapshots</span><span class="o">+</span><span class="n">offset_snapshots</span><span class="p">):</span>
-                <span class="c1"># Get optimal batch size and number of batches per snapshotss</span>
-                <span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>\
-                    <span class="n">snapshot_directories_list</span><span class="p">[</span><span class="n">snapshot_number</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span>
-
-                <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span> \
-                    <span class="n">_correct_batch_size_for_testing</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span>
-                                                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                                    <span class="n">mini_batch_size</span><span class="p">)</span>
-                <span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">grid_size</span> <span class="o">/</span>
-                                                     <span class="n">optimal_batch_size</span><span class="p">)</span>
-
-                <span class="n">actual_outputs</span><span class="p">,</span> <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
-                    <span class="n">_forward_entire_snapshot</span><span class="p">(</span><span class="n">snapshot_number</span><span class="o">-</span><span class="n">offset_snapshots</span><span class="p">,</span>
-                                             <span class="n">data_set</span><span class="p">,</span> <span class="n">data_set_type</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span>
-                                             <span class="n">number_of_batches_per_snapshot</span><span class="p">,</span>
-                                             <span class="n">optimal_batch_size</span><span class="p">)</span>
-                <span class="n">calculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
-
-                <span class="c1"># This works because the list is always guaranteed to be</span>
-                <span class="c1"># ordered.</span>
-                <span class="n">calculator</span><span class="o">.</span>\
-                    <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">))</span>
-
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">fe_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span> \
-                        <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
-                    <span class="n">te_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span> \
-                        <span class="n">get_total_energy</span><span class="p">(</span><span class="n">ldos_data</span><span class="o">=</span><span class="n">actual_outputs</span><span class="p">,</span>
-                                         <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span><span class="p">)</span>
-
-                    <span class="n">fe_predicted</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
-                        <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
-                    <span class="n">te_predicted</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
-                        <span class="n">get_total_energy</span><span class="p">(</span><span class="n">ldos_data</span><span class="o">=</span><span class="n">actual_outputs</span><span class="p">,</span>
-                                         <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_predicted</span><span class="p">)</span>
-                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">te_predicted</span> <span class="o">-</span> <span class="n">te_actual</span><span class="p">)</span> <span class="o">*</span>
-                                  <span class="p">(</span><span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)))</span>
-
-                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                    <span class="c1"># If the training went badly, it might be that the above</span>
-                    <span class="c1"># code results in an error, due to the LDOS being so wrong</span>
-                    <span class="c1"># that the estimation of the self consistent Fermi energy</span>
-                    <span class="c1"># fails.</span>
-                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
-
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Selected validation method not supported.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_calculate_energy_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actual_outputs</span><span class="p">,</span> <span class="n">predicted_outputs</span><span class="p">,</span>
+                                 <span class="n">energy_type</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+            <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span>
+                                             <span class="n">get_snapshot_calculation_output</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">energy_type</span> <span class="o">==</span> <span class="s2">&quot;band_energy&quot;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fe_actual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
+                    <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
+                <span class="n">be_actual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
+                    <span class="n">get_band_energy</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span><span class="p">)</span>
+
+                <span class="n">fe_predicted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
+                    <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+                <span class="n">be_predicted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
+                    <span class="n">get_band_energy</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">,</span>
+                                    <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_predicted</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">be_predicted</span> <span class="o">-</span> <span class="n">be_actual</span><span class="p">)</span> <span class="o">*</span> \
+                       <span class="p">(</span><span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="c1"># If the training went badly, it might be that the above</span>
+                <span class="c1"># code results in an error, due to the LDOS being so wrong</span>
+                <span class="c1"># that the estimation of the self consistent Fermi energy</span>
+                <span class="c1"># fails.</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">energy_type</span> <span class="o">==</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fe_actual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
+                    <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
+                <span class="n">be_actual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
+                    <span class="n">get_total_energy</span><span class="p">(</span><span class="n">ldos_data</span><span class="o">=</span><span class="n">actual_outputs</span><span class="p">,</span>
+                                     <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span><span class="p">)</span>
+
+                <span class="n">fe_predicted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
+                    <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+                <span class="n">be_predicted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
+                    <span class="n">get_total_energy</span><span class="p">(</span><span class="n">ldos_data</span><span class="o">=</span><span class="n">predicted_outputs</span><span class="p">,</span>
+                                    <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_predicted</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">be_predicted</span> <span class="o">-</span> <span class="n">be_actual</span><span class="p">)</span> <span class="o">*</span> \
+                       <span class="p">(</span><span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="c1"># If the training went badly, it might be that the above</span>
+                <span class="c1"># code results in an error, due to the LDOS being so wrong</span>
+                <span class="c1"># that the estimation of the self consistent Fermi energy</span>
+                <span class="c1"># fails.</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid energy type requested.&quot;</span><span class="p">)</span>
+
 
     <span class="k">def</span> <span class="nf">__create_training_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

@@ -1,0 +1,7 @@
+multi\_lazy\_load\_data\_loader
+===============================
+
+.. automodule:: mala.datahandling.multi_lazy_load_data_loader
+   :members:
+   :undoc-members:
+   :show-inheritance:
