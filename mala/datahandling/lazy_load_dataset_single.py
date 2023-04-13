@@ -73,6 +73,7 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         self.input_shm_name = None
         self.output_shm_name = None
         self.loaded = False
+        self.allocated = False
 
     def allocate_shared_mem(self):
         """
@@ -109,20 +110,27 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
 
         input_shm.close()
         output_shm.close()
+        self.allocated = True
+
+    def deallocate_shared_mem(self):
+        """Deallocate the shared memory buffer used by prefetching process."""
+        if self.allocated:
+            input_shm = shared_memory.SharedMemory(name=self.input_shm_name)
+            output_shm = shared_memory.SharedMemory(name=self.output_shm_name)
+            input_shm.close()
+            input_shm.unlink()
+
+            output_shm.close()
+            output_shm.unlink()
+
+        self.allocated = False
 
     def delete_data(self):
         """Free the shared memory buffers."""
         if self.loaded:
             self.input_data = None
             self.output_data = None
-            input_shm = shared_memory.SharedMemory(name=self.input_shm_name)
-            output_shm = shared_memory.SharedMemory(name=self.output_shm_name)
-
-            input_shm.close()
-            input_shm.unlink()
-
-            output_shm.close()
-            output_shm.unlink()
+            self.deallocate_shared_mem()
         self.loaded = False
 
     def __getitem__(self, idx):
