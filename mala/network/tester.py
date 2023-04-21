@@ -119,7 +119,7 @@ class Tester(Runner):
                                              actual_outputs)
         return results
 
-    def predict_targets(self, snapshot_number):
+    def predict_targets(self, snapshot_number, data_type):
         """
         Get actual and predicted output for a snapshot.
 
@@ -127,6 +127,9 @@ class Tester(Runner):
         ----------
         snapshot_number : int
             Snapshot for which the prediction is done.
+        
+        data_type : str
+            'tr', 'va', or 'te' indicating the partition to be tested
 
         Returns
         -------
@@ -140,15 +143,23 @@ class Tester(Runner):
         self.__prepare_to_test(snapshot_number)
         # Make sure no data lingers in the target calculator.
         self.data.target_calculator.invalidate_target()
+        
+        # Select the inputs used for prediction
+        offset_snapshots = 0
+        if data_type == 'va':
+            offset_snapshots += self.data.nr_training_snapshots
+        elif data_type == 'te':
+            offset_snapshots += self.data.nr_validation_snapshots + \
+                                self.data.nr_training_snapshots
+        data_sets = {'tr': self.data.training_data_set,
+                     'va': self.data.validation_data_set,
+                     'te': self.data.test_data_set}
 
         # Forward through network.
-        offset_snapshots = self.data.nr_validation_snapshots + \
-                           self.data.nr_training_snapshots
-
         return self.\
             _forward_entire_snapshot(offset_snapshots+snapshot_number,
-                                     self.data.test_data_sets[0],
-                                     "te",
+                                     data_sets[data_type],
+                                     data_type,
                                      self.number_of_batches_per_snapshot,
                                      self.parameters.mini_batch_size)
 
