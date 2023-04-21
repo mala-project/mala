@@ -108,7 +108,7 @@ class Tester(Runner):
                                              actual_outputs)
         return results
 
-    def predict_targets(self, snapshot_number, data_type):
+    def predict_targets(self, snapshot_number, data_type='te'):
         """
         Get actual and predicted output for a snapshot.
 
