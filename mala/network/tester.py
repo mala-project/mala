@@ -83,7 +83,7 @@ class Tester(Runner):
         else:
             raise Exception("Wrong output format for testing selected.")
 
-    def test_snapshot(self, snapshot_number):
+    def test_snapshot(self, snapshot_number, data_type='te'):
         """
         Test the selected observables for a single snapshot.
 
@@ -98,7 +98,7 @@ class Tester(Runner):
             A dictionary containing the errors for the selected observables.
         """
         actual_outputs, predicted_outputs = \
-            self.predict_targets(snapshot_number)
+            self.predict_targets(snapshot_number, data_type=data_type)
 
         results = {}
         for observable in self.observables_to_test:
