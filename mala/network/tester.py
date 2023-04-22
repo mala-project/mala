@@ -154,9 +154,9 @@ class Tester(Runner):
         elif data_type == 'te':
             offset_snapshots += self.data.nr_validation_snapshots + \
                                 self.data.nr_training_snapshots
-        data_sets = {'tr': self.data.training_data_set,
-                     'va': self.data.validation_data_set,
-                     'te': self.data.test_data_set}
+        data_sets = {'tr': self.data.training_data_sets[0],
+                     'va': self.data.validation_data_sets[0],
+                     'te': self.data.test_data_sets[0]}
 
         # Forward through network.
         return self.\
