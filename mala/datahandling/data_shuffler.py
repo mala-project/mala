@@ -72,109 +72,9 @@ class DataShuffler(DataHandlerBase):
                          calculation_output_file="",
                          snapshot_type=snapshot_type)
 
-    def shuffle_snapshots(self,
-                          complete_save_path=None,
-                          descriptor_save_path=None,
-                          target_save_path=None,
-                          save_name="mala_shuffled_snapshot*",
-                          number_of_shuffled_snapshots=None):
-        """
-        Shuffle the snapshots into new snapshots.
-
-        This saves them to file.
-
-        Parameters
-        ----------
-        complete_save_path : string
-            If not None: the directory in which all snapshots will be saved.
-            Overwrites descriptor_save_path, target_save_path and
-            additional_info_save_path if set.
-
-        descriptor_save_path : string
-            Directory in which to save descriptor data.
-
-        target_save_path : string
-            Directory in which to save target data.
-
-        save_name : string
-            Name of the snapshots to be shuffled.
-
-        number_of_shuffled_snapshots : int
-            If not None, this class will attempt to redistribute the data
-            to this amount of snapshots. If None, then the same number of
-            snapshots provided will be used.
-        """
-        # Check the paths.
-        if complete_save_path is not None:
-            descriptor_save_path = complete_save_path
-            target_save_path = complete_save_path
-        else:
-            if target_save_path is None or descriptor_save_path is None:
-                raise Exception("No paths to save shuffled data provided.")
-
-        # Check the file format.
-        if "." in save_name:
-            file_ending = save_name.split(".")[-1]
-            save_name = save_name.split(".")[0]
-            if file_ending != "npy":
-                import openpmd_api as io
-
-                if file_ending not in io.file_extensions:
-                    raise Exception("Invalid file ending selected: " +
-                                    file_ending)
-        else:
-            file_ending = "npy"
-
-        # Check the dimensions of the snapshots.
-        self._check_snapshots()
-        snapshot_size_list = [snapshot.grid_size for snapshot in
-                              self.parameters.snapshot_directories_list]
-        number_of_data_points = np.sum(snapshot_size_list)
-
-        if number_of_shuffled_snapshots is None:
-            # If the user does not tell us how many snapshots to use,
-            # we have to check if the number of snapshots is straightforward.
-            # If all snapshots have the same size, we can just replicate the
-            # snapshot structure.
-            if np.max(snapshot_size_list) == np.min(snapshot_size_list):
-                shuffle_dimensions = self.parameters.\
-                    snapshot_directories_list[0].grid_dimension
-                number_of_new_snapshots = self.nr_snapshots
-            else:
-                # If the snapshots have different sizes we simply create
-                # (x, 1, 1) snapshots big enough to hold the data.
-                number_of_new_snapshots = self.nr_snapshots
-                while number_of_data_points % number_of_new_snapshots != 0:
-                    number_of_new_snapshots += 1
-
-                # If they do have different sizes, we start with the smallest
-                # snapshot, there is some padding down below anyhow.
-                shuffle_dimensions = [int(number_of_data_points /
-                                          number_of_new_snapshots), 1, 1]
-        else:
-            number_of_new_snapshots = number_of_shuffled_snapshots
-            if number_of_data_points % number_of_new_snapshots != 0:
-                raise Exception("Cannot create this number of snapshots "
-                                "from data provided.")
-            else:
-                shuffle_dimensions = [int(number_of_data_points /
-                                          number_of_new_snapshots), 1, 1]
-
-        printout("Data shuffler will generate", number_of_new_snapshots,
-                 "new snapshots.")
-        printout("Shuffled snapshot dimension will be ", shuffle_dimensions)
-
-        # Prepare permutations.
-        permutations = []
-        seeds = []
-        for i in range(0, number_of_new_snapshots):
-
-            # This makes the shuffling deterministic, if specified by the user.
-            if self.parameters.shuffling_seed is not None:
-                np.random.seed(i*self.parameters.shuffling_seed)
-            permutations.append(np.random.permutation(
-                int(np.prod(shuffle_dimensions))))
-
+    def __shuffle_numpy(self, number_of_new_snapshots, shuffle_dimensions,
+                        descriptor_save_path, save_name, target_save_path,
+                        permutations, file_ending):
         # Load the data (via memmap).
         descriptor_data = []
         target_data = []
@@ -255,4 +155,127 @@ class DataShuffler(DataHandlerBase):
 
         # Since no training will be done with this class, we should always
         # clear the data at the end.
+        return new_targets
+
+    def shuffle_snapshots(self,
+                          complete_save_path=None,
+                          descriptor_save_path=None,
+                          target_save_path=None,
+                          save_name="mala_shuffled_snapshot*",
+                          number_of_shuffled_snapshots=None):
+        """
+        Shuffle the snapshots into new snapshots.
+
+        This saves them to file.
+
+        Parameters
+        ----------
+        complete_save_path : string
+            If not None: the directory in which all snapshots will be saved.
+            Overwrites descriptor_save_path, target_save_path and
+            additional_info_save_path if set.
+
+        descriptor_save_path : string
+            Directory in which to save descriptor data.
+
+        target_save_path : string
+            Directory in which to save target data.
+
+        save_name : string
+            Name of the snapshots to be shuffled.
+
+        number_of_shuffled_snapshots : int
+            If not None, this class will attempt to redistribute the data
+            to this amount of snapshots. If None, then the same number of
+            snapshots provided will be used.
+        """
+        # Check the paths.
+        if complete_save_path is not None:
+            descriptor_save_path = complete_save_path
+            target_save_path = complete_save_path
+        else:
+            if target_save_path is None or descriptor_save_path is None:
+                raise Exception("No paths to save shuffled data provided.")
+
+        # Check the file format.
+        if "." in save_name:
+            file_ending = save_name.split(".")[-1]
+            save_name = save_name.split(".")[0]
+            if file_ending != "npy":
+                import openpmd_api as io
+
+                if file_ending not in io.file_extensions:
+                    raise Exception("Invalid file ending selected: " +
+                                    file_ending)
+        else:
+            file_ending = "npy"
+
+        # Check the dimensions of the snapshots.
+        self._check_snapshots()
+
+        snapshot_types = {
+            snapshot.snapshot_type
+            for snapshot in self.parameters.snapshot_directories_list
+        }
+        if len(snapshot_types) > 1:
+            raise Exception(
+                "[data_shuffler] Can only deal with one type of input snapshot"
+                + " at once (openPMD or numpy).")
+        snapshot_type = snapshot_types.pop()
+        del snapshot_types
+
+        snapshot_size_list = [snapshot.grid_size for snapshot in
+                              self.parameters.snapshot_directories_list]
+        number_of_data_points = np.sum(snapshot_size_list)
+
+        if number_of_shuffled_snapshots is None:
+            # If the user does not tell us how many snapshots to use,
+            # we have to check if the number of snapshots is straightforward.
+            # If all snapshots have the same size, we can just replicate the
+            # snapshot structure.
+            if np.max(snapshot_size_list) == np.min(snapshot_size_list):
+                shuffle_dimensions = self.parameters.\
+                    snapshot_directories_list[0].grid_dimension
+                number_of_new_snapshots = self.nr_snapshots
+            else:
+                # If the snapshots have different sizes we simply create
+                # (x, 1, 1) snapshots big enough to hold the data.
+                number_of_new_snapshots = self.nr_snapshots
+                while number_of_data_points % number_of_new_snapshots != 0:
+                    number_of_new_snapshots += 1
+
+                # If they do have different sizes, we start with the smallest
+                # snapshot, there is some padding down below anyhow.
+                shuffle_dimensions = [int(number_of_data_points /
+                                          number_of_new_snapshots), 1, 1]
+        else:
+            number_of_new_snapshots = number_of_shuffled_snapshots
+            if number_of_data_points % number_of_new_snapshots != 0:
+                raise Exception("Cannot create this number of snapshots "
+                                "from data provided.")
+            else:
+                shuffle_dimensions = [int(number_of_data_points /
+                                          number_of_new_snapshots), 1, 1]
+
+        printout("Data shuffler will generate", number_of_new_snapshots,
+                 "new snapshots.")
+        printout("Shuffled snapshot dimension will be ", shuffle_dimensions)
+
+        # Prepare permutations.
+        permutations = []
+        seeds = []
+        for i in range(0, number_of_new_snapshots):
+
+            # This makes the shuffling deterministic, if specified by the user.
+            if self.parameters.shuffling_seed is not None:
+                np.random.seed(i*self.parameters.shuffling_seed)
+            permutations.append(np.random.permutation(
+                int(np.prod(shuffle_dimensions))))
+
+        new_targets = self.__shuffle_numpy(number_of_new_snapshots,
+                                           shuffle_dimensions,
+                                           descriptor_save_path, save_name,
+                                           target_save_path, permutations,
+                                           file_ending)
+
         self.clear_data()
