@@ -1470,6 +1470,7 @@
             <span class="c1"># Convert and then append the LDOS data.</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
             <span class="n">ldos_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">i</span><span class="o">-</span><span class="n">start_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
 
         <span class="c1"># We have to gather the LDOS either file based or not.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
