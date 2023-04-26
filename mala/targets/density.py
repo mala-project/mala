@@ -396,6 +396,7 @@ class Density(Target):
         data, meta = read_cube(path)
         data *= self.convert_units(1, in_units=units)
         self.density = data
+        self.grid_dimensions = np.shape(data)[0:3]
         return data
 
     def read_from_xsf(self, path, units="1/A^3", **kwargs):
