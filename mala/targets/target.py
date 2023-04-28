@@ -550,7 +550,11 @@ class Target(PhysicalData):
         else:
             super(Target, self).write_to_numpy_file(path, target_data)
 
-    def write_to_openpmd_file(self, path, target_data=None, additional_attributes={}):
+    def write_to_openpmd_file(self,
+                              path,
+                              target_data=None,
+                              additional_attributes={},
+                              write_array_data=True):
         """
         Write data to a numpy file.
 
@@ -566,16 +570,18 @@ class Target(PhysicalData):
         additional_attributes : dict
             Dict containing additional attributes to be saved.
         """
-        if target_data is None:
+        if write_array_data and target_data is None:
             # The feature dimension may be undefined.
-            super(Target, self).write_to_openpmd_file(path, self.get_target(),
-                                                      additional_attributes=
-                                                      additional_attributes)
+            return super(Target, self).write_to_openpmd_file(
+                path,
+                self.get_target(),
+                additional_attributes=additional_attributes)
         else:
             # The feature dimension may be undefined.
-            super(Target, self).write_to_openpmd_file(path, target_data,
-                                                      additional_attributes=
-                                                      additional_attributes)
+            return super(Target, self).write_to_openpmd_file(
+                path,
+                target_data,
+                additional_attributes=additional_attributes)
 
     # Accessing target data
     ########################
@@ -743,7 +749,7 @@ class Target(PhysicalData):
         else:
             raise Exception("Unknown RDF method selected.")
         return rdf[1:], rr
-        
+
     @staticmethod
     def three_particle_correlation_function_from_atoms(atoms: ase.Atoms,
                                                        number_of_bins,

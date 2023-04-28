@@ -300,7 +300,10 @@ class PhysicalData(ABC):
         """
         np.save(path, array)
 
-    def write_to_openpmd_file(self, path, array, additional_attributes={}):
+    def write_to_openpmd_file(self,
+                              path,
+                              array,
+                              additional_attributes={}):
         """
         Write data to an OpenPMD file.
 
@@ -348,16 +351,21 @@ class PhysicalData(ABC):
         # This function may be called without the feature dimension
         # explicitly set (i.e. during testing or post-processing).
         # We have to check for that.
-        if self.feature_size == 0:
+        if self.feature_size == 0 and array is not None:
             self._set_feature_size_from_array(array)
 
-        self.write_to_openpmd_iteration(iteration, array)
+        self.write_to_openpmd_iteration(iteration,
+                                        array)
+        return series
 
-    def write_to_openpmd_iteration(self, iteration, array,
+    def write_to_openpmd_iteration(self,
+                                   iteration,
+                                   array,
                                    local_offset=None,
                                    local_reach=None,
                                    additional_metadata=None,
-                                   feature_from=0, feature_to=None):
+                                   feature_from=0,
+                                   feature_to=None):
         """
         Write a file within an OpenPMD iteration.
 
@@ -429,6 +437,9 @@ class PhysicalData(ABC):
                 # Positions are stored in Angstrom.
                 atoms_openpmd["position"][str(atom)].unit_SI = 1.0e-10
                 atoms_openpmd["positionOffset"][str(atom)].unit_SI = 1.0e-10
+
+        if not array:
+            return
 
         dataset = io.Dataset(array.dtype, self.grid_dimensions)
 

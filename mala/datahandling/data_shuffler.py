@@ -153,9 +153,86 @@ class DataShuffler(DataHandlerBase):
                                           additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
                                                                  "local_shuffling_seed": i*self.parameters.shuffling_seed})
 
-        # Since no training will be done with this class, we should always
-        # clear the data at the end.
-        return new_targets
+    def __shuffle_openpmd(self, number_of_new_snapshots, shuffle_dimensions,
+                          descriptor_save_path, save_name, target_save_path,
+                          permutations, file_ending):
+        import openpmd_api as io
+        # Load the data
+        descriptor_data = []
+        target_data = []
+        for idx, snapshot in enumerate(
+                self.parameters.snapshot_directories_list):
+            # TODO: Use descriptor and target calculator for this.
+            descriptor_data.append(
+                io.Series(
+                    os.path.join(snapshot.input_npy_directory,
+                                 snapshot.input_npy_file),
+                    io.Access.read_only))
+            target_data.append(
+                io.Series(
+                    os.path.join(snapshot.output_npy_directory,
+                                 snapshot.output_npy_file),
+                    io.Access.read_only))
+
+        for series in descriptor_data:
+            for _, iteration in series.iterations.items():
+                mesh = iteration.meshes[self.descriptor_calculator.data_name]
+                descriptor_feature_size = len(mesh)
+                for _, component in mesh.items():
+                    descriptor_dataset = io.Dataset(component.dtype,
+                                                    component.shape)
+                    break
+                break
+            break
+        for series in target_data:
+            for _, iteration in series.iterations.items():
+                mesh = iteration.meshes[self.target_calculator.data_name]
+                target_feature_size = len(mesh)
+                for _, component in mesh.items():
+                    target_dataset = io.Dataset(component.dtype,
+                                                component.shape)
+                    break
+                break
+            break
+
+        # Do the actual shuffling.
+        for i in range(0, number_of_new_snapshots):
+            # We check above that in the non-numpy case, OpenPMD will work.
+            self.descriptor_calculator.grid_dimensions = shuffle_dimensions
+            self.target_calculator.grid_dimensions = shuffle_dimensions
+            descriptor_name = os.path.join(descriptor_save_path,
+                                           save_name.replace("*", str(i)))
+            target_name = os.path.join(target_save_path,
+                                       save_name.replace("*", str(i)))
+            new_descriptors = self.descriptor_calculator.\
+                    write_to_openpmd_file(descriptor_name+".in."+file_ending,
+                                          None,
+                                          additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
+                                                                 "local_shuffling_seed": i*self.parameters.shuffling_seed})
+            descriptor_mesh = new_descriptors.write_iterations()[0].meshes[
+                self.descriptor_calculator.data_name]
+            new_targets = self.target_calculator.\
+                write_to_openpmd_file(target_name+".out."+file_ending,
+                                        target_data=None,
+                                        additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
+                                                                "local_shuffling_seed": i*self.parameters.shuffling_seed},
+                                                                write_array_data=False)
+            target_mesh = new_targets.write_iterations()[0].meshes[
+                self.target_calculator.data_name]
+
+            for i in range(descriptor_feature_size):
+                rc = descriptor_mesh[str(i)]
+                rc.reset_dataset(descriptor_dataset)
+                span = rc.store_chunk([0 for _ in descriptor_dataset.extent],
+                                      descriptor_dataset.extent)
+            for i in range(target_feature_size):
+                rc = target_mesh[str(i)]
+                rc.reset_dataset(target_dataset)
+                span = rc.store_chunk([0 for _ in target_dataset.extent],
+                                      target_dataset.extent)
+
+            # @todo implement shuffling
+
 
     def shuffle_snapshots(self,
                           complete_save_path=None,
@@ -272,10 +349,18 @@ class DataShuffler(DataHandlerBase):
             permutations.append(np.random.permutation(
                 int(np.prod(shuffle_dimensions))))
 
-        new_targets = self.__shuffle_numpy(number_of_new_snapshots,
-                                           shuffle_dimensions,
-                                           descriptor_save_path, save_name,
-                                           target_save_path, permutations,
-                                           file_ending)
+        if snapshot_type == 'numpy':
+            self.__shuffle_numpy(number_of_new_snapshots, shuffle_dimensions,
+                                 descriptor_save_path, save_name,
+                                 target_save_path, permutations, file_ending)
+        elif snapshot_type == 'openpmd':
+            self.__shuffle_openpmd(number_of_new_snapshots, shuffle_dimensions,
+                                   descriptor_save_path, save_name,
+                                   target_save_path, permutations, file_ending)
+        else:
+            raise Exception("Unknown snapshot type: {}".format(snapshot_type))
 
+
+        # Since no training will be done with this class, we should always
+        # clear the data at the end.
         self.clear_data()
