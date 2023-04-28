@@ -220,13 +220,13 @@ class DataShuffler(DataHandlerBase):
             target_mesh = new_targets.write_iterations()[0].meshes[
                 self.target_calculator.data_name]
 
-            for i in range(descriptor_feature_size):
-                rc = descriptor_mesh[str(i)]
+            for j in range(descriptor_feature_size):
+                rc = descriptor_mesh[str(j)]
                 rc.reset_dataset(descriptor_dataset)
                 span = rc.store_chunk([0 for _ in descriptor_dataset.extent],
                                       descriptor_dataset.extent)
-            for i in range(target_feature_size):
-                rc = target_mesh[str(i)]
+            for j in range(target_feature_size):
+                rc = target_mesh[str(j)]
                 rc.reset_dataset(target_dataset)
                 span = rc.store_chunk([0 for _ in target_dataset.extent],
                                       target_dataset.extent)
