@@ -300,6 +300,12 @@ class PhysicalData(ABC):
         """
         np.save(path, array)
 
+    class SkipArrayWriting:
+
+        def __init__(self, dataset, feature_size):
+            self.dataset = dataset
+            self.feature_size = feature_size
+
     def write_to_openpmd_file(self,
                               path,
                               array,
@@ -351,11 +357,11 @@ class PhysicalData(ABC):
         # This function may be called without the feature dimension
         # explicitly set (i.e. during testing or post-processing).
         # We have to check for that.
-        if self.feature_size == 0 and array is not None:
+        if self.feature_size == 0 and array is not None and not isinstance(
+                array, self.SkipArrayWriting):
             self._set_feature_size_from_array(array)
 
-        self.write_to_openpmd_iteration(iteration,
-                                        array)
+        self.write_to_openpmd_iteration(iteration, array)
         return series
 
     def write_to_openpmd_iteration(self,
@@ -438,10 +444,31 @@ class PhysicalData(ABC):
                 atoms_openpmd["position"][str(atom)].unit_SI = 1.0e-10
                 atoms_openpmd["positionOffset"][str(atom)].unit_SI = 1.0e-10
 
-        if not array:
-            return
+        dataset = array.dataset if isinstance(
+            array, self.SkipArrayWriting) else io.Dataset(
+                array.dtype, self.grid_dimensions)
 
-        dataset = io.Dataset(array.dtype, self.grid_dimensions)
+        # Global feature sizes:
+        feature_global_from = 0
+        feature_global_to = self.feature_size
+        if feature_global_to == 0 and isinstance(array, self.SkipArrayWriting):
+            feature_global_to = array.feature_size
+
+        # First loop: Only metadata, write metadata equivalently across ranks
+        for current_feature in range(feature_global_from, feature_global_to):
+            mesh_component = mesh[str(current_feature)]
+            mesh_component.reset_dataset(dataset)
+            # All data is assumed to be saved in
+            # MALA units, so the SI conversion factor we save
+            # here is the one for MALA (ASE) units
+            mesh_component.unit_SI = self.si_unit_conversion
+            # position: which relative point within the cell is
+            # represented by the stored values
+            # ([0.5, 0.5, 0.5] represents the middle)
+            mesh_component.position = [0.5, 0.5, 0.5]
+
+        if isinstance(array, self.SkipArrayWriting):
+            return
 
         if feature_to is None:
             feature_to = array.shape[3]
@@ -475,22 +502,6 @@ match the array dimensions (extent {} in the feature dimension)""".format(
             extra_flushes = highest_iteration_count - my_iteration_count
         else:
             extra_flushes = 0
-
-        # Global feature sizes:
-        feature_global_from = 0
-        feature_global_to = self.feature_size
-        # First loop: Only metadata, write metadata equivalently across ranks
-        for current_feature in range(feature_global_from, feature_global_to):
-            mesh_component = mesh[str(current_feature)]
-            mesh_component.reset_dataset(dataset)
-            # All data is assumed to be saved in
-            # MALA units, so the SI conversion factor we save
-            # here is the one for MALA (ASE) units
-            mesh_component.unit_SI = self.si_unit_conversion
-            # position: which relative point within the cell is
-            # represented by the stored values
-            # ([0.5, 0.5, 0.5] represents the middle)
-            mesh_component.position = [0.5, 0.5, 0.5]
 
         # Second loop: Write heavy data
         for base in range(0, array.shape[3], granularity):

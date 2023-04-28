@@ -553,8 +553,7 @@ class Target(PhysicalData):
     def write_to_openpmd_file(self,
                               path,
                               target_data=None,
-                              additional_attributes={},
-                              write_array_data=True):
+                              additional_attributes={}):
         """
         Write data to a numpy file.
 
@@ -570,7 +569,7 @@ class Target(PhysicalData):
         additional_attributes : dict
             Dict containing additional attributes to be saved.
         """
-        if write_array_data and target_data is None:
+        if target_data is None:
             # The feature dimension may be undefined.
             return super(Target, self).write_to_openpmd_file(
                 path,

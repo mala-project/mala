@@ -5,6 +5,7 @@ import numpy as np
 
 from mala.common.parameters import ParametersData, Parameters
 from mala.common.parallelizer import printout
+from mala.common.physical_data import PhysicalData
 from mala.datahandling.data_handler_base import DataHandlerBase
 
 
@@ -206,17 +207,16 @@ class DataShuffler(DataHandlerBase):
                                        save_name.replace("*", str(i)))
             new_descriptors = self.descriptor_calculator.\
                     write_to_openpmd_file(descriptor_name+".in."+file_ending,
-                                          None,
+                                          PhysicalData.SkipArrayWriting(descriptor_dataset, descriptor_feature_size),
                                           additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
                                                                  "local_shuffling_seed": i*self.parameters.shuffling_seed})
             descriptor_mesh = new_descriptors.write_iterations()[0].meshes[
                 self.descriptor_calculator.data_name]
             new_targets = self.target_calculator.\
                 write_to_openpmd_file(target_name+".out."+file_ending,
-                                        target_data=None,
+                                        target_data=PhysicalData.SkipArrayWriting(target_dataset, target_feature_size),
                                         additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
-                                                                "local_shuffling_seed": i*self.parameters.shuffling_seed},
-                                                                write_array_data=False)
+                                                                "local_shuffling_seed": i*self.parameters.shuffling_seed})
             target_mesh = new_targets.write_iterations()[0].meshes[
                 self.target_calculator.data_name]
 
