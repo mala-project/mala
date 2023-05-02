@@ -196,6 +196,28 @@ class DataShuffler(DataHandlerBase):
                 break
             break
 
+        def from_chunk_i(i, n, dataset, slice_dimension=0):
+            if isinstance(dataset, io.Dataset):
+                dataset = dataset.extent
+            offset = [0 for _ in dataset]
+            extent = dataset
+            extent_dim_0 = dataset[slice_dimension]
+            if extent_dim_0 % n != 0:
+                raise Exception(
+                    "Dataset {} cannot be split into {} chunks on dimension {}."
+                    .format(dataset, n, slice_dimension))
+            single_chunk_len = extent_dim_0 // n
+            offset[slice_dimension] = i * single_chunk_len
+            extent[slice_dimension] = single_chunk_len
+            return offset, extent
+
+        def to_chunk_j(j, n, length):
+            if length % n != 0:
+                raise Exception("Cannot split {} items into {} chunks.".format(
+                    n, j))
+            single_chunk_len = length // n
+            return j * single_chunk_len, (j+1) * single_chunk_len
+
         # Do the actual shuffling.
         for i in range(0, number_of_new_snapshots):
             # We check above that in the non-numpy case, OpenPMD will work.
@@ -205,31 +227,58 @@ class DataShuffler(DataHandlerBase):
                                            save_name.replace("*", str(i)))
             target_name = os.path.join(target_save_path,
                                        save_name.replace("*", str(i)))
-            new_descriptors = self.descriptor_calculator.\
+            new_descriptors_series = self.descriptor_calculator.\
                     write_to_openpmd_file(descriptor_name+".in."+file_ending,
                                           PhysicalData.SkipArrayWriting(descriptor_dataset, descriptor_feature_size),
                                           additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
                                                                  "local_shuffling_seed": i*self.parameters.shuffling_seed})
-            descriptor_mesh = new_descriptors.write_iterations()[0].meshes[
+            descriptor_mesh = new_descriptors_series.write_iterations()[0].meshes[
                 self.descriptor_calculator.data_name]
-            new_targets = self.target_calculator.\
+            new_descriptors = np.zeros(
+                (self.input_dimension, int(np.prod(shuffle_dimensions))))
+            new_targets_series = self.target_calculator.\
                 write_to_openpmd_file(target_name+".out."+file_ending,
                                         target_data=PhysicalData.SkipArrayWriting(target_dataset, target_feature_size),
                                         additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
                                                                 "local_shuffling_seed": i*self.parameters.shuffling_seed})
-            target_mesh = new_targets.write_iterations()[0].meshes[
+            target_mesh = new_targets_series.write_iterations()[0].meshes[
                 self.target_calculator.data_name]
+            new_targets = np.zeros(
+                (self.output_dimension, int(np.prod(shuffle_dimensions))))
 
-            for j in range(descriptor_feature_size):
-                rc = descriptor_mesh[str(j)]
+            for k in range(descriptor_feature_size):
+                rc = descriptor_mesh[str(k)]
                 rc.reset_dataset(descriptor_dataset)
-                span = rc.store_chunk([0 for _ in descriptor_dataset.extent],
-                                      descriptor_dataset.extent)
-            for j in range(target_feature_size):
-                rc = target_mesh[str(j)]
+            for k in range(target_feature_size):
+                rc = target_mesh[str(k)]
                 rc.reset_dataset(target_dataset)
-                span = rc.store_chunk([0 for _ in target_dataset.extent],
-                                      target_dataset.extent)
+
+
+            for j in range(0, self.nr_snapshots):
+                descriptor_mesh_in = descriptor_data[j].iterations[0].meshes[
+                    self.descriptor_calculator.data_name]
+                target_mesh_in = target_data[j].iterations[0].meshes[
+                    self.target_calculator.data_name]
+
+                from_chunk_offset, from_chunk_extent = from_chunk_i(
+                    i, number_of_new_snapshots, descriptor_dataset)
+                to_chunk_offset, to_chunk_extent = to_chunk_j(
+                    j, number_of_new_snapshots, np.prod(shuffle_dimensions))
+                for dimension in range(len(descriptor_mesh_in)):
+                    descriptor_mesh_in[str(dimension)].load_chunk(
+                        new_descriptors[dimension,
+                                        to_chunk_offset:to_chunk_extent],
+                        from_chunk_offset, from_chunk_extent)
+                descriptor_mesh_in.series_flush()
+
+            print(new_descriptors[0, :])
+
+            for k in range(descriptor_feature_size):
+                rc = descriptor_mesh[str(k)]
+                rc[:, :, :] = new_descriptors[k, :][permutations[i]].reshape(
+                    shuffle_dimensions)
+            new_descriptors_series.close()
+
 
             # @todo implement shuffling
 
