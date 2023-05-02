@@ -271,13 +271,27 @@ class DataShuffler(DataHandlerBase):
                         from_chunk_offset, from_chunk_extent)
                 descriptor_mesh_in.series_flush()
 
-            print(new_descriptors[0, :])
+                from_chunk_offset, from_chunk_extent = from_chunk_i(
+                    i, number_of_new_snapshots, target_dataset)
+                to_chunk_offset, to_chunk_extent = to_chunk_j(
+                    j, number_of_new_snapshots, np.prod(shuffle_dimensions))
+                for dimension in range(len(target_mesh_in)):
+                    target_mesh_in[str(dimension)].load_chunk(
+                        new_targets[dimension,
+                                        to_chunk_offset:to_chunk_extent],
+                        from_chunk_offset, from_chunk_extent)
+                target_mesh_in.series_flush()
 
             for k in range(descriptor_feature_size):
                 rc = descriptor_mesh[str(k)]
                 rc[:, :, :] = new_descriptors[k, :][permutations[i]].reshape(
                     shuffle_dimensions)
             new_descriptors_series.close()
+            for k in range(target_feature_size):
+                rc = target_mesh[str(k)]
+                rc[:, :, :] = new_targets[k, :][permutations[i]].reshape(
+                    shuffle_dimensions)
+            new_targets_series.close()
 
 
             # @todo implement shuffling
