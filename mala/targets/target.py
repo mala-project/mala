@@ -305,6 +305,7 @@ class Target(PhysicalData):
             self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
+            self.entropy_contribution_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms = None
 
@@ -318,6 +319,7 @@ class Target(PhysicalData):
             total_energy = None
             past_calculation_part = False
             bands_included = True
+            entropy_contribution = None
             with open(data) as out:
                 pseudolinefound = False
                 lastpseudo = None
@@ -361,6 +363,10 @@ class Target(PhysicalData):
                         if total_energy is None:
                             total_energy \
                                 = float((line.split('=')[1]).split('Ry')[0])
+                    if "smearing contrib." in line and past_calculation_part:
+                        if entropy_contribution is None:
+                            entropy_contribution \
+                                = float((line.split('=')[1]).split('Ry')[0])
                     if "set verbosity='high' to print them." in line:
                         bands_included = False
 
@@ -381,6 +387,8 @@ class Target(PhysicalData):
 
             # Unit conversion
             self.total_energy_dft_calculation = total_energy*Rydberg
+            if entropy_contribution is not None:
+                self.entropy_contribution_dft_calculation = entropy_contribution * Rydberg
 
             # Calculate band energy, if the necessary data is included in
             # the output file.
@@ -406,6 +414,7 @@ class Target(PhysicalData):
             self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
+            self.entropy_contribution_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms: ase.Atoms = data[0]
 
@@ -449,6 +458,7 @@ class Target(PhysicalData):
             self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
+            self.entropy_contribution_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms = None
 
@@ -496,7 +506,8 @@ class Target(PhysicalData):
             "ecutwfc": self.qe_input_data["ecutwfc"],
             "ecutrho": self.qe_input_data["ecutrho"],
             "degauss": self.qe_input_data["degauss"],
-            "pseudopotentials": self.qe_pseudopotentials
+            "pseudopotentials": self.qe_pseudopotentials,
+            "entropy_contribution_dft_calculation": self.entropy_contribution_dft_calculation
         }
         if self.voxel is not None:
             additional_calculation_data["voxel"] = self.voxel.todict()
