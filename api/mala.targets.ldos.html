@@ -458,6 +458,47 @@ and only one for network pass.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_entropy_contribution">
+<span class="sig-name descname"><span class="pre">get_entropy_contribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_entropy_contribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_entropy_contribution" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the entropy contribution from given LDOS data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
+[gridx,gridy,gridz,energygrid]. If None, the cached LDOS
+will be used for the calculation.</p></li>
+<li><p><strong>fermi_energy</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
+<li><p><strong>temperature</strong> (<em>float</em>) – Temperature in K.</p></li>
+<li><p><strong>grid_integration_method</strong> (<em>str</em>) – <p>Integration method used to integrate the LDOS on the grid.
+Currently supported:</p>
+<ul>
+<li><p>”trapz” for trapezoid method (only for cubic grids).</p></li>
+<li><p>”simps” for Simpson method (only for cubic grids).</p></li>
+<li><p>”summation” for summation and scaling of the values (recommended)</p></li>
+</ul>
+</p></li>
+<li><p><strong>energy_integration_method</strong> (<em>string</em>) – <p>Integration method to integrate the DOS. Currently supported:</p>
+<blockquote>
+<div><ul>
+<li><p>”trapz” for trapezoid method</p></li>
+<li><p>”simps” for Simpson method.</p></li>
+<li><p>”analytical” for analytical integration. (recommended)</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>voxel</strong> (<em>ase.cell.Cell</em>) – Voxel to be used for grid intergation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>band_energy</strong> – Band energy in eV.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_number_of_electrons">
 <span class="sig-name descname"><span class="pre">get_number_of_electrons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_number_of_electrons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_number_of_electrons" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the number of electrons from given LDOS data.</p>
@@ -708,6 +749,12 @@ impacting disk usage and</p></li>
 <dt class="sig sig-object py" id="mala.targets.ldos.LDOS.energy_grid">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">energy_grid</span></span><a class="headerlink" href="#mala.targets.ldos.LDOS.energy_grid" title="Permalink to this definition"></a></dt>
 <dd><p>Energy grid on which the LDOS is expressed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.entropy_contribution">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">entropy_contribution</span></span><a class="headerlink" href="#mala.targets.ldos.LDOS.entropy_contribution" title="Permalink to this definition"></a></dt>
+<dd><p>Band energy of the system, calculated via cached LDOS.</p>
 </dd></dl>
 
 <dl class="py property">
