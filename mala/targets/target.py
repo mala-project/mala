@@ -332,7 +332,7 @@ class Target(PhysicalData):
                     if "Fermi-Dirac smearing, width (Ry)=" in line:
                         self.temperature = np.float64(line.split('=')[2]) * \
                                            Rydberg / kB
-                    if "xc contribution" in line:
+                    if "convergence has been achieved" in line:
                         break
                     if "FFT dimensions" in line:
                         dims = line.split("(")[1]
