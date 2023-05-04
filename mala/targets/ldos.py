@@ -280,6 +280,15 @@ class LDOS(Target):
                             "property.")
 
     @cached_property
+    def entropy_contribution(self):
+        """Band energy of the system, calculated via cached LDOS."""
+        if self.local_density_of_states is not None:
+            return self.get_entropy_contribution()
+        else:
+            raise Exception("No cached LDOS available to calculate this "
+                            "property.")
+
+    @cached_property
     def number_of_electrons(self):
         """
         Number of electrons in the system, calculated via cached LDOS.
@@ -691,8 +700,7 @@ class LDOS(Target):
             e_band = self.band_energy
 
             # Smearing / Entropy contribution
-            e_entropy_contribution = self._density_of_states_calculator.\
-                entropy_contribution
+            e_entropy_contribution = self.entropy_contribution
 
             # Density based energy contributions (via QE)
             density_contributions = self._density_calculator.\
@@ -785,6 +793,74 @@ class LDOS(Target):
                                 integration_method=energy_integration_method)
         else:
             return self._density_of_states_calculator.band_energy
+
+    def get_entropy_contribution(self, ldos_data=None, fermi_energy=None,
+                                 temperature=None, voxel=None,
+                                 grid_integration_method="summation",
+                                 energy_integration_method="analytical"):
+        """
+        Calculate the entropy contribution from given LDOS data.
+
+        Parameters
+        ----------
+        ldos_data : numpy.array
+            LDOS data, either as [gridsize, energygrid] or
+            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
+            will be used for the calculation.
+
+        fermi_energy : float
+            Fermi energy level in eV.
+
+        temperature : float
+            Temperature in K.
+
+        grid_integration_method : str
+            Integration method used to integrate the LDOS on the grid.
+            Currently supported:
+
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
+            - "summation" for summation and scaling of the values (recommended)
+
+        energy_integration_method : string
+            Integration method to integrate the DOS. Currently supported:
+
+                - "trapz" for trapezoid method
+                - "simps" for Simpson method.
+                - "analytical" for analytical integration. (recommended)
+
+        voxel : ase.cell.Cell
+            Voxel to be used for grid intergation.
+
+        Returns
+        -------
+        band_energy : float
+            Band energy in eV.
+        """
+        if ldos_data is None and self.local_density_of_states is None:
+            raise Exception("No LDOS data provided, cannot calculate"
+                            " this quantity.")
+
+        # Here we check whether we will use our internal, cached
+        # LDOS, or calculate everything from scratch.
+        if ldos_data is not None:
+            # The band energy is calculated using the DOS.
+            if voxel is None:
+                voxel = self.voxel
+
+            dos_data = self.get_density_of_states(ldos_data, voxel,
+                                                  integration_method=
+                                                  grid_integration_method)
+
+            # Once we have the DOS, we can use a DOS object to calculate
+            # the band energy.
+            dos_calculator = DOS.from_ldos_calculator(self)
+            return dos_calculator. \
+                get_entropy_contribution(dos_data, fermi_energy=fermi_energy,
+                                         temperature=temperature,
+                                         integration_method=energy_integration_method)
+        else:
+            return self._density_of_states_calculator.entropy_contribution
 
     def get_number_of_electrons(self, ldos_data=None, voxel=None,
                                 fermi_energy=None, temperature=None,
