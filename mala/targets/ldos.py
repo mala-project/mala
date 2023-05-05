@@ -255,6 +255,8 @@ class LDOS(Target):
             del self._density_calculator
         if self._is_property_cached("_density_of_states_calculator"):
             del self._density_of_states_calculator
+        if self._is_property_cached("entropy_contribution"):
+            del self.entropy_contribution
 
     @cached_property
     def energy_grid(self):
