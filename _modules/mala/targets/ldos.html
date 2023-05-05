@@ -327,7 +327,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;_density_calculator&quot;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_calculator</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;_density_of_states_calculator&quot;</span><span class="p">):</span>
-            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states_calculator</span></div>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states_calculator</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;entropy_contribution&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy_contribution</span></div>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
