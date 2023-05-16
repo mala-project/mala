@@ -64,10 +64,14 @@ class Runner:
             is unnecessary for most use cases, but used internally when
             a checkpoint is created during model training.
 
-        additional_calculation_data : string
-            If not None, then additional calculation data will be copied
-            from this file and included in the saved model. Only has an effect
-            in the .zip mode.
+        additional_calculation_data : string or bool
+            If this variable is a string, then additional calculation data will
+            be copied from the file this variable points to and included in
+            the saved model. If a a bool (and True), additional calculation
+            data will be saved directly from the DataHandler object.
+            Only has an effect in the .zip mode. If additional calculation
+            data is already present in the DataHandler object, it can be saved
+            by setting.
         """
         model_file = run_name + ".network.pth"
         iscaler_file = run_name + ".iscaler.pkl"
@@ -88,10 +92,18 @@ class Runner:
         if zip_run:
             if additional_calculation_data is not None:
                 additional_calculation_file = run_name+".info.json"
-                self.data.target_calculator.\
-                    read_additional_calculation_data(additional_calculation_data)
-                self.data.target_calculator.\
-                    write_additional_calculation_data(additional_calculation_file)
+                if isinstance(additional_calculation_data, str):
+                    self.data.target_calculator.\
+                        read_additional_calculation_data(additional_calculation_data)
+                    self.data.target_calculator.\
+                        write_additional_calculation_data(os.path.join(save_path,
+                                                          additional_calculation_file))
+                elif isinstance(additional_calculation_data, bool):
+                    if additional_calculation_data:
+                        self.data.target_calculator. \
+                            write_additional_calculation_data(os.path.join(save_path,
+                                                              additional_calculation_file))
+
                 files.append(additional_calculation_file)
             with ZipFile(os.path.join(save_path, run_name+".zip"), 'w',
                          compression=ZIP_STORED) as zip_obj:
