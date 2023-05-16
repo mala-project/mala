@@ -195,9 +195,13 @@ then the model will be saved as separate files.</p></li>
 <li><p><strong>save_runner</strong> (<em>bool</em>) – If True, the Runner object will also be saved as object. This
 is unnecessary for most use cases, but used internally when
 a checkpoint is created during model training.</p></li>
-<li><p><strong>additional_calculation_data</strong> (<em>string</em>) – If not None, then additional calculation data will be copied
-from this file and included in the saved model. Only has an effect
-in the .zip mode.</p></li>
+<li><p><strong>additional_calculation_data</strong> (<em>string</em><em> or </em><em>bool</em>) – If this variable is a string, then additional calculation data will
+be copied from the file this variable points to and included in
+the saved model. If a a bool (and True), additional calculation
+data will be saved directly from the DataHandler object.
+Only has an effect in the .zip mode. If additional calculation
+data is already present in the DataHandler object, it can be saved
+by setting.</p></li>
 </ul>
 </dd>
 </dl>

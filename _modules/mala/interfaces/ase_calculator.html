@@ -255,7 +255,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;ion_ion_energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
                 <span class="n">last_energy_contributions</span><span class="p">[</span><span class="s2">&quot;e_ewald&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="MALA.save_calculator"><a class="viewcode-back" href="../../../api/mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.save_calculator">[docs]</a>    <span class="k">def</span> <span class="nf">save_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="MALA.save_calculator"><a class="viewcode-back" href="../../../api/mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.save_calculator">[docs]</a>    <span class="k">def</span> <span class="nf">save_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save parameters used for this calculator.</span>
 
@@ -264,15 +264,14 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        filename : string</span>
-<span class="sd">            Path to file in which to store the Calculator.</span>
+<span class="sd">            Name of the file in which to store the calculator.</span>
+
+<span class="sd">        save_path : string</span>
+<span class="sd">            Path where the calculator should be saved.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mala_parameters</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s2">&quot;.params.json&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">save_network</span><span class="p">(</span><span class="n">filename</span><span class="o">+</span><span class="s2">&quot;.network.pth&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="o">+</span><span class="s2">&quot;.iscaler.pkl&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="o">+</span><span class="s2">&quot;.oscaler.pkl&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
-            <span class="n">write_additional_calculation_data</span><span class="p">(</span><span class="n">filename</span><span class="o">+</span><span class="s2">&quot;.reference.json&quot;</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="o">.</span><span class="n">save_run</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="n">save_path</span><span class="p">,</span>
+                                <span class="n">additional_calculation_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
 
 </pre></div>
 

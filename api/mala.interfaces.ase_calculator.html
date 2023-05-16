@@ -177,12 +177,15 @@ models supported.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.interfaces.ase_calculator.MALA.save_calculator">
-<span class="sig-name descname"><span class="pre">save_calculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/interfaces/ase_calculator.html#MALA.save_calculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.interfaces.ase_calculator.MALA.save_calculator" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">save_calculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/interfaces/ase_calculator.html#MALA.save_calculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.interfaces.ase_calculator.MALA.save_calculator" title="Permalink to this definition"></a></dt>
 <dd><p>Save parameters used for this calculator.</p>
 <p>This is useful for e.g. checkpointing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>filename</strong> (<em>string</em>) – Path to file in which to store the Calculator.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>string</em>) – Name of the file in which to store the calculator.</p></li>
+<li><p><strong>save_path</strong> (<em>string</em>) – Path where the calculator should be saved.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

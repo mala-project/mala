@@ -137,10 +137,14 @@
 <span class="sd">            is unnecessary for most use cases, but used internally when</span>
 <span class="sd">            a checkpoint is created during model training.</span>
 
-<span class="sd">        additional_calculation_data : string</span>
-<span class="sd">            If not None, then additional calculation data will be copied</span>
-<span class="sd">            from this file and included in the saved model. Only has an effect</span>
-<span class="sd">            in the .zip mode.</span>
+<span class="sd">        additional_calculation_data : string or bool</span>
+<span class="sd">            If this variable is a string, then additional calculation data will</span>
+<span class="sd">            be copied from the file this variable points to and included in</span>
+<span class="sd">            the saved model. If a a bool (and True), additional calculation</span>
+<span class="sd">            data will be saved directly from the DataHandler object.</span>
+<span class="sd">            Only has an effect in the .zip mode. If additional calculation</span>
+<span class="sd">            data is already present in the DataHandler object, it can be saved</span>
+<span class="sd">            by setting.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">model_file</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.network.pth&quot;</span>
         <span class="n">iscaler_file</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.iscaler.pkl&quot;</span>
@@ -161,10 +165,18 @@
         <span class="k">if</span> <span class="n">zip_run</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">additional_calculation_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">additional_calculation_file</span> <span class="o">=</span> <span class="n">run_name</span><span class="o">+</span><span class="s2">&quot;.info.json&quot;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
-                    <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">additional_calculation_data</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
-                    <span class="n">write_additional_calculation_data</span><span class="p">(</span><span class="n">additional_calculation_file</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">additional_calculation_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+                        <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">additional_calculation_data</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+                        <span class="n">write_additional_calculation_data</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span>
+                                                          <span class="n">additional_calculation_file</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">additional_calculation_data</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">additional_calculation_data</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
+                            <span class="n">write_additional_calculation_data</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span>
+                                                              <span class="n">additional_calculation_file</span><span class="p">))</span>
+
                 <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">additional_calculation_file</span><span class="p">)</span>
             <span class="k">with</span> <span class="n">ZipFile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">run_name</span><span class="o">+</span><span class="s2">&quot;.zip&quot;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
                          <span class="n">compression</span><span class="o">=</span><span class="n">ZIP_STORED</span><span class="p">)</span> <span class="k">as</span> <span class="n">zip_obj</span><span class="p">:</span>
