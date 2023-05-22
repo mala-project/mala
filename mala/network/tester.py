@@ -31,9 +31,19 @@ class Tester(Runner):
         DataHandler holding the test data.
 
     observables_to_test : list
-        List of observables to test. Supported are "ldos", "band_energy",
-        "number_of_electrons" and "total_energy". For the LDOS, the loss mean
-        squared error per snapshot is calculated.
+        List of observables to test. Supported are:
+
+            - "ldos": Calculate the MSE loss of the LDOS.
+            - "band_energy": Band energy error
+            - "band_energy_full": Band energy absolute values (only works with
+              list, as both actual and predicted are returned)
+            - "total_energy": Total energy error
+            - "total_energy_full": Total energy absolute values (only works
+              with list, as both actual and predicted are returned)
+            - "number_of_electrons": Number of electrons (Fermi energy is not
+              determined dynamically for this quantity.
+            - "density": MAPE of the density prediction
+            - "dos": MAPE of the DOS prediction
 
     output_format : string
         Can be "list" or "mae". If "list", then a list of results across all
@@ -84,7 +94,7 @@ class Tester(Runner):
         else:
             raise Exception("Wrong output format for testing selected.")
 
-    def test_snapshot(self, snapshot_number):
+    def test_snapshot(self, snapshot_number, data_type='te'):
         """
         Test the selected observables for a single snapshot.
 
@@ -93,13 +103,16 @@ class Tester(Runner):
         snapshot_number : int
             Snapshot which to test.
 
+        data_type : str
+            'tr', 'va', or 'te' indicating the partition to be tested
+
         Returns
         -------
         results : dict
             A dictionary containing the errors for the selected observables.
         """
         actual_outputs, predicted_outputs = \
-            self.predict_targets(snapshot_number)
+            self.predict_targets(snapshot_number, data_type=data_type)
 
         results = {}
         for observable in self.observables_to_test:
@@ -109,7 +122,7 @@ class Tester(Runner):
                                              actual_outputs)
         return results
 
-    def predict_targets(self, snapshot_number):
+    def predict_targets(self, snapshot_number, data_type='te'):
         """
         Get actual and predicted output for a snapshot.
 
@@ -117,6 +130,9 @@ class Tester(Runner):
         ----------
         snapshot_number : int
             Snapshot for which the prediction is done.
+        
+        data_type : str
+            'tr', 'va', or 'te' indicating the partition to be tested
 
         Returns
         -------
@@ -130,15 +146,24 @@ class Tester(Runner):
         self.__prepare_to_test(snapshot_number)
         # Make sure no data lingers in the target calculator.
         self.data.target_calculator.invalidate_target()
-
+        # Select the inputs used for prediction
+        if data_type == 'tr':
+            offset_snapshots = 0
+            data_set = self.data.training_data_sets[0]
+        elif data_type == 'va':
+            offset_snapshots = self.data.nr_training_snapshots
+            data_set = self.data.validation_data_sets[0]
+        elif data_type == 'te':
+            offset_snapshots = self.data.nr_validation_snapshots + \
+                               self.data.nr_training_snapshots
+            data_set = self.data.test_data_sets[0]
+        else:
+            raise ValueError(f"Invalid data_type: {data_type} -- Valid options are tr, va, te.")
         # Forward through network.
-        offset_snapshots = self.data.nr_validation_snapshots + \
-                           self.data.nr_training_snapshots
-
         return self.\
             _forward_entire_snapshot(offset_snapshots+snapshot_number,
-                                     self.data.test_data_set,
-                                     "te",
+                                     data_set,
+                                     data_type,
                                      self.number_of_batches_per_snapshot,
                                      self.parameters.mini_batch_size)
 
@@ -230,6 +255,43 @@ class Tester(Runner):
             predicted = target_calculator.total_energy
             return [actual, predicted,
                     target_calculator.total_energy_dft_calculation]
+
+        elif observable == "density":
+            target_calculator = self.data.target_calculator
+            if not isinstance(target_calculator, LDOS) and \
+                    not isinstance(target_calculator, Density):
+                raise Exception("Cannot calculate the total energy from this "
+                                "observable.")
+            target_calculator.\
+                read_additional_calculation_data(
+                self.data.get_snapshot_calculation_output(snapshot_number))
+
+            target_calculator.read_from_array(actual_target)
+            actual = target_calculator.density
+
+            target_calculator.read_from_array(predicted_target)
+            predicted = target_calculator.density
+            return np.mean(np.abs((actual - predicted) / actual)) * 100
+
+        elif observable == "dos":
+            target_calculator = self.data.target_calculator
+            if not isinstance(target_calculator, LDOS) and \
+                    not isinstance(target_calculator, DOS):
+                raise Exception("Cannot calculate the total energy from this "
+                                "observable.")
+            target_calculator.\
+                read_additional_calculation_data(
+                self.data.get_snapshot_calculation_output(snapshot_number))
+
+            target_calculator.read_from_array(actual_target)
+            actual = target_calculator.density_of_states
+
+            target_calculator.read_from_array(predicted_target)
+            predicted = target_calculator.density_of_states
+            return np.mean(np.abs((actual - predicted) / actual)) * 100
+
+
+
 
     def __prepare_to_test(self, snapshot_number):
         """Prepare the tester class to for test run."""

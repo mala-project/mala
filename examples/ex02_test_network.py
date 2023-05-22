@@ -19,6 +19,9 @@ assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
 parameters, network, data_handler, tester = mala.Tester.load_run("be_model")
 tester.observables_to_test = ["band_energy", "number_of_electrons"]
 
+# Could also be "mae" if only one value across all snapshots is desired.
+tester.output_format = "list"
+
 # Specify the correct LDOS parameters.
 parameters.targets.target_type = "LDOS"
 parameters.targets.ldos_gridsize = 11

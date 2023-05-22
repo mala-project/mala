@@ -73,7 +73,7 @@ class ObjectiveNASWOT(ObjectiveBase):
                 do_shuffle = False
             if self.params.running.use_shuffling_for_samplers:
                 self.data_handler.mix_datasets()
-            loader = DataLoader(self.data_handler.training_data_set,
+            loader = DataLoader(self.data_handler.training_data_sets[0],
                                 batch_size=self.batch_size,
                                 shuffle=do_shuffle)
             jac = ObjectiveNASWOT.__get_batch_jacobian(net, loader, device)

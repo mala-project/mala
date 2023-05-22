@@ -250,6 +250,8 @@ class LazyLoadDataset(torch.utils.data.Dataset):
                 self.get_new_data(file_index)
             return self.input_data[index_in_file_start:index_in_file_stop], \
                 self.output_data[index_in_file_start:index_in_file_stop]
+        else:
+            raise Exception("Invalid idx provided.")
 
     def __len__(self):
         """
