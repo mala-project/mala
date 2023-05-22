@@ -10,13 +10,15 @@ try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     pass
-
+import numpy as np
 import torch
 
 from mala.common.parallelizer import printout, set_horovod_status, \
     set_mpi_status, get_rank, get_local_rank, set_current_verbosity, \
     parallel_warn
 from mala.common.json_serializable import JSONSerializable
+
+DEFAULT_NP_DATA_DTYPE = np.float32
 
 
 class ParametersBase(JSONSerializable):
@@ -406,6 +408,13 @@ class ParametersDescriptors(ParametersBase):
         if _int_value > 0:
             self._snap_switchflag = 1
 
+    def _update_mpi(self, new_mpi):
+        self._configuration["mpi"] = new_mpi
+
+        # There may have been a serial or parallel run before that is now
+        # no longer valid.
+        self.lammps_compute_file = ""
+
 
 class ParametersTargets(ParametersBase):
     """
@@ -556,6 +565,10 @@ class ParametersData(ParametersBase):
         currently needed will be kept in memory. This greatly reduces memory
         demands, but adds additional computational time.
 
+    use_lazy_loading_prefetch : bool
+        If True, will use alternative lazy loading path with prefetching
+        for higher performance
+
     use_clustering : bool
         If True, and use_lazy_loading is True as well, the data is clustered,
         i.e. not the entire training data is used by rather only a subset
@@ -589,6 +602,7 @@ class ParametersData(ParametersBase):
         self.input_rescaling_type = "None"
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False
+        self.use_lazy_loading_prefetch = False
         self.use_clustering = False
         self.number_of_clusters = 40
         self.train_ratio = 0.1
@@ -631,12 +645,15 @@ class ParametersRunning(ParametersBase):
         early stopping is performed. Default: 0.
 
     early_stopping_threshold : float
-        If the validation accuracy does not improve by at least threshold for
-        early_stopping_epochs epochs, training is terminated:
-        validation_loss < validation_loss_old * (1+early_stopping_threshold),
-        or patience counter will go up.
+        Minimum fractional reduction in validation loss required to avoid
+        early stopping, e.g. a value of 0.05 means that validation loss must
+        decrease by 5% within early_stopping_epochs epochs or the training
+        will be stopped early. More explicitly,
+        validation_loss < validation_loss_old * (1-early_stopping_threshold)
+        or the patience counter goes up.
         Default: 0. Numbers bigger than 0 can make early stopping very
-        aggresive.
+        aggresive, while numbers less than 0 make the trainer very forgiving
+        of loss increase.
 
     learning_rate_scheduler : string
         Learning rate scheduler to be used. If not None, an instance of the

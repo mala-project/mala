@@ -78,7 +78,24 @@ class Target(PhysicalData):
         else:
             target = super(Target, cls).__new__(cls)
 
+        # For pickling
+        setattr(target, "params_arg", params)
         return target
+
+    # For pickling
+    def __getnewargs__(self):
+        """
+        Get the necessary arguments to call __new__.
+
+        Used for pickling.
+
+
+        Returns
+        -------
+        params : mala.Parameters
+            The parameters object with which this object was created.
+        """
+        return self.params_arg,
 
     def __init__(self, params):
         super(Target, self).__init__(params)
@@ -288,6 +305,7 @@ class Target(PhysicalData):
             self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
+            self.entropy_contribution_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms = None
 
@@ -301,6 +319,7 @@ class Target(PhysicalData):
             total_energy = None
             past_calculation_part = False
             bands_included = True
+            entropy_contribution = None
             with open(data) as out:
                 pseudolinefound = False
                 lastpseudo = None
@@ -313,7 +332,7 @@ class Target(PhysicalData):
                     if "Fermi-Dirac smearing, width (Ry)=" in line:
                         self.temperature = np.float64(line.split('=')[2]) * \
                                            Rydberg / kB
-                    if "xc contribution" in line:
+                    if "convergence has been achieved" in line:
                         break
                     if "FFT dimensions" in line:
                         dims = line.split("(")[1]
@@ -344,6 +363,10 @@ class Target(PhysicalData):
                         if total_energy is None:
                             total_energy \
                                 = float((line.split('=')[1]).split('Ry')[0])
+                    if "smearing contrib." in line and past_calculation_part:
+                        if entropy_contribution is None:
+                            entropy_contribution \
+                                = float((line.split('=')[1]).split('Ry')[0])
                     if "set verbosity='high' to print them." in line:
                         bands_included = False
 
@@ -364,6 +387,8 @@ class Target(PhysicalData):
 
             # Unit conversion
             self.total_energy_dft_calculation = total_energy*Rydberg
+            if entropy_contribution is not None:
+                self.entropy_contribution_dft_calculation = entropy_contribution * Rydberg
 
             # Calculate band energy, if the necessary data is included in
             # the output file.
@@ -389,6 +414,7 @@ class Target(PhysicalData):
             self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
+            self.entropy_contribution_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms: ase.Atoms = data[0]
 
@@ -421,17 +447,21 @@ class Target(PhysicalData):
                 self.number_of_electrons_exact = self.electrons_per_atom * \
                                                  len(self.atoms)
         elif data_type == "json":
+            if isinstance(data, str):
+                json_dict = json.load(open(data, encoding="utf-8"))
+            else:
+                json_dict = json.load(data)
+
             self.fermi_energy_dft = None
             self.temperature = None
             self.number_of_electrons_exact = None
             self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
+            self.entropy_contribution_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms = None
 
-            with open(data, encoding="utf-8") as json_file:
-                json_dict = json.load(json_file)
             for key in json_dict:
                 if not isinstance(json_dict[key], dict):
                     setattr(self, key, json_dict[key])
@@ -476,7 +506,8 @@ class Target(PhysicalData):
             "ecutwfc": self.qe_input_data["ecutwfc"],
             "ecutrho": self.qe_input_data["ecutrho"],
             "degauss": self.qe_input_data["degauss"],
-            "pseudopotentials": self.qe_pseudopotentials
+            "pseudopotentials": self.qe_pseudopotentials,
+            "entropy_contribution_dft_calculation": self.entropy_contribution_dft_calculation
         }
         if self.voxel is not None:
             additional_calculation_data["voxel"] = self.voxel.todict()
