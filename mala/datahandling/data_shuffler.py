@@ -175,13 +175,14 @@ class DataShuffler(DataHandlerBase):
                                  snapshot.output_npy_file),
                     io.Access.read_only))
 
+        # Peek into the input snapshots to determine the datatypes.
         for series in descriptor_data:
             for _, iteration in series.iterations.items():
                 mesh = iteration.meshes[self.descriptor_calculator.data_name]
                 descriptor_feature_size = len(mesh)
                 for _, component in mesh.items():
-                    descriptor_dataset = io.Dataset(component.dtype,
-                                                    component.shape)
+                    descriptor_  = io.Dataset(component.dtype,
+                                                    shuffle_dimensions)
                     break
                 break
             break
@@ -191,7 +192,7 @@ class DataShuffler(DataHandlerBase):
                 target_feature_size = len(mesh)
                 for _, component in mesh.items():
                     target_dataset = io.Dataset(component.dtype,
-                                                component.shape)
+                                                shuffle_dimensions)
                     break
                 break
             break
@@ -257,13 +258,6 @@ class DataShuffler(DataHandlerBase):
                 self.target_calculator.data_name]
             new_targets = np.zeros(
                 (self.output_dimension, int(np.prod(shuffle_dimensions))))
-
-            for k in range(descriptor_feature_size):
-                rc = descriptor_mesh[str(k)]
-                rc.reset_dataset(descriptor_dataset)
-            for k in range(target_feature_size):
-                rc = target_mesh[str(k)]
-                rc.reset_dataset(target_dataset)
 
 
             for j in range(0, self.nr_snapshots):
@@ -359,6 +353,7 @@ class DataShuffler(DataHandlerBase):
         else:
             file_ending = "npy"
 
+        # TODO: This opens each input Series, change this for parallelization
         # Check the dimensions of the snapshots.
         self._check_snapshots()
 
