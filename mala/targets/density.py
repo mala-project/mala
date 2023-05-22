@@ -396,6 +396,7 @@ class Density(Target):
         data, meta = read_cube(path)
         data *= self.convert_units(1, in_units=units)
         self.density = data
+        self.grid_dimensions = np.shape(data)[0:3]
         return data
 
     def read_from_xsf(self, path, units="1/A^3", **kwargs):
@@ -1057,6 +1058,6 @@ class Density(Target):
 
     def _get_gaussian_descriptors_for_structure_factors(self, atoms, grid):
         descriptor_calculator = AtomicDensity(self._parameters_full)
-        kwargs = {"return_directly": True}
+        kwargs = {"return_directly": True, "use_fp64": True}
         return descriptor_calculator.\
             calculate_from_atoms(atoms, grid, **kwargs)[:, 6:]

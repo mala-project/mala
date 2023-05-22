@@ -43,7 +43,7 @@ class Runner:
         self.__prepare_to_run()
 
     def save_run(self, run_name, save_path="./", zip_run=True,
-                 save_runner=False):
+                 save_runner=False, additional_calculation_data=None):
         """
         Save the current run.
 
@@ -63,6 +63,15 @@ class Runner:
             If True, the Runner object will also be saved as object. This
             is unnecessary for most use cases, but used internally when
             a checkpoint is created during model training.
+
+        additional_calculation_data : string or bool
+            If this variable is a string, then additional calculation data will
+            be copied from the file this variable points to and included in
+            the saved model. If a a bool (and True), additional calculation
+            data will be saved directly from the DataHandler object.
+            Only has an effect in the .zip mode. If additional calculation
+            data is already present in the DataHandler object, it can be saved
+            by setting.
         """
         model_file = run_name + ".network.pth"
         iscaler_file = run_name + ".iscaler.pkl"
@@ -81,6 +90,21 @@ class Runner:
         if save_runner:
             files += [optimizer_file]
         if zip_run:
+            if additional_calculation_data is not None:
+                additional_calculation_file = run_name+".info.json"
+                if isinstance(additional_calculation_data, str):
+                    self.data.target_calculator.\
+                        read_additional_calculation_data(additional_calculation_data)
+                    self.data.target_calculator.\
+                        write_additional_calculation_data(os.path.join(save_path,
+                                                          additional_calculation_file))
+                elif isinstance(additional_calculation_data, bool):
+                    if additional_calculation_data:
+                        self.data.target_calculator. \
+                            write_additional_calculation_data(os.path.join(save_path,
+                                                              additional_calculation_file))
+
+                files.append(additional_calculation_file)
             with ZipFile(os.path.join(save_path, run_name+".zip"), 'w',
                          compression=ZIP_STORED) as zip_obj:
                 for file in files:
@@ -128,15 +152,17 @@ class Runner:
         new_datahandler : mala.datahandling.data_handler.DataHandler
             The data handler reconstructed from file.
 
-        new_runner : Runner
+        new_runner : cls
             (Optional) The runner reconstructed from file. For Tester and
             Predictor class, this is just a newly instantiated object.
         """
+        loaded_info = None
         if zip_run is True:
             loaded_network = run_name + ".network.pth"
             loaded_iscaler = run_name + ".iscaler.pkl"
             loaded_oscaler = run_name + ".oscaler.pkl"
             loaded_params = run_name + ".params."+params_format
+            loaded_info = run_name + ".info.json"
 
             zip_path = os.path.join(path, run_name + ".zip")
             with ZipFile(zip_path, 'r') as zip_obj:
@@ -144,6 +170,11 @@ class Runner:
                 loaded_network = zip_obj.open(loaded_network)
                 loaded_iscaler = zip_obj.open(loaded_iscaler)
                 loaded_oscaler = zip_obj.open(loaded_oscaler)
+                if loaded_info in zip_obj.namelist():
+                    loaded_info = zip_obj.open(loaded_info)
+                else:
+                    loaded_info = None
+
         else:
             loaded_network = os.path.join(path, run_name + ".network.pth")
             loaded_iscaler = os.path.join(path, run_name + ".iscaler.pkl")
@@ -158,7 +189,13 @@ class Runner:
         loaded_oscaler = DataScaler.load_from_file(loaded_oscaler)
         new_datahandler = DataHandler(loaded_params,
                                       input_data_scaler=loaded_iscaler,
-                                      output_data_scaler=loaded_oscaler)
+                                      output_data_scaler=loaded_oscaler,
+                                      clear_data=(not prepare_data))
+        if loaded_info is not None:
+            new_datahandler.target_calculator.\
+                read_additional_calculation_data(loaded_info,
+                                                 data_type="json")
+
         if prepare_data:
             new_datahandler.prepare_data(reparametrize_scaler=False)
 

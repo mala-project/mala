@@ -93,6 +93,8 @@ class Bispectrum(Descriptor):
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         """Perform actual bispectrum calculation."""
         from lammps import lammps
+        use_fp64 = kwargs.get("use_fp64", False)
+
         lammps_format = "lammps-data"
         ase_out_path = os.path.join(outdir, "lammps_input.tmp")
         ase.io.write(ase_out_path, atoms, format=lammps_format)
@@ -165,37 +167,25 @@ class Bispectrum(Descriptor):
             snap_descriptors_np = \
                 extract_compute_np(lmp, "bgridlocal",
                                    lammps_constants.LMP_STYLE_LOCAL, 2,
-                                   array_shape=(nrows_local, ncols_local))
+                                   array_shape=(nrows_local, ncols_local),
+                                   use_fp64=use_fp64)
 
             # Copy the grid dimensions only at the end.
             self.grid_dimensions = [nx, ny, nz]
-
-            # If I directly return the descriptors, this sometimes leads
-            # to errors, because presumably the python garbage collection
-            # deallocates memory too quickly. This copy is more memory
-            # hungry, and we might have to tackle this later on, but
-            # for now it works.
-            return snap_descriptors_np.copy(), nrows_local
+            return snap_descriptors_np, nrows_local
 
         else:
             # Extract data from LAMMPS calculation.
             snap_descriptors_np = \
                 extract_compute_np(lmp, "bgrid", 0, 2,
-                                   (nz, ny, nx, self.fingerprint_length))
+                                   (nz, ny, nx, self.fingerprint_length),
+                                   use_fp64=use_fp64)
             # switch from x-fastest to z-fastest order (swaps 0th and 2nd
             # dimension)
             snap_descriptors_np = snap_descriptors_np.transpose([2, 1, 0, 3])
             # Copy the grid dimensions only at the end.
             self.grid_dimensions = [nx, ny, nz]
-            # If I directly return the descriptors, this sometimes leads
-            # to errors, because presumably the python garbage collection
-            # deallocates memory too quickly. This copy is more memory
-            # hungry, and we might have to tackle this later on, but
-            # for now it works.
-            # I thought the transpose would take care of that, but apparently
-            # it does not necessarily do that - so we have do go down
-            # that route.
             if self.parameters.descriptors_contain_xyz:
-                return snap_descriptors_np.copy(), nx*ny*nz
+                return snap_descriptors_np, nx*ny*nz
             else:
-                return snap_descriptors_np[:, :, :, 3:].copy(), nx*ny*nz
+                return snap_descriptors_np[:, :, :, 3:], nx*ny*nz

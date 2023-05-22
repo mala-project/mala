@@ -1,4 +1,5 @@
 """Class for performing a full ACSD analysis."""
+import itertools
 import os
 
 import numpy as np
@@ -62,6 +63,8 @@ class ACSDAnalyzer(HyperOpt):
         # Filled after the analysis.
         self.labels = []
         self.study = []
+        self.reduced_study = None
+        self.internal_hyperparam_list = None
 
     def add_snapshot(self, descriptor_input_type=None,
                      descriptor_input_path=None,
@@ -139,16 +142,15 @@ class ACSDAnalyzer(HyperOpt):
         choices :
             List of possible choices.
         """
-        if name != "bispectrum_twojmax" and \
-           name != "bispectrum_cutoff" and \
-           name != "atomic_density_sigma" and \
-           name != "atomic_density_cutoff":
+        if name not in ["bispectrum_twojmax", "bispectrum_cutoff",
+                        "atomic_density_sigma", "atomic_density_cutoff"]:
             raise Exception("Unkown hyperparameter for ACSD analysis entered.")
 
-        self.params.hyperparameters.hlist.append(Hyperparameter(hotype="acsd",
-                                                                name=name,
-                                                                choices=choices,
-                                                                opttype="categorical"))
+        self.params.hyperparameters.\
+            hlist.append(Hyperparameter(hotype="acsd",
+                                        name=name,
+                                        choices=choices,
+                                        opttype="categorical"))
 
     def perform_study(self, file_based_communication=False,
                       return_plotting=False):
@@ -158,7 +160,122 @@ class ACSDAnalyzer(HyperOpt):
         This is done by sampling different descriptors, calculated with
         different hyperparameters and then calculating the ACSD.
         """
-        # The individual loops depend on the type of descriptors.
+        # Prepare the hyperparameter lists.
+        self._construct_hyperparam_list()
+        hyperparameter_tuples = list(itertools.product(
+            *self.internal_hyperparam_list))
+
+        # Perform the ACSD analysis separately for each snapshot.
+        best_acsd = None
+        best_trial = None
+        for i in range(0, len(self.__snapshots)):
+            printout("Starting ACSD analysis of snapshot", str(i),
+                     min_verbosity=1)
+            current_list = []
+            target = self._load_target(self.__snapshots[i],
+                                       self.__snapshot_description[i],
+                                       self.__snapshot_units[i],
+                                       file_based_communication)
+
+            for idx, hyperparameter_tuple in enumerate(hyperparameter_tuples):
+                if isinstance(self.descriptor_calculator, Bispectrum):
+                    self.params.descriptors.bispectrum_cutoff = \
+                        hyperparameter_tuple[0]
+                    self.params.descriptors.bispectrum_twojmax = \
+                        hyperparameter_tuple[1]
+                elif isinstance(self.descriptor_calculator, AtomicDensity):
+                    self.params.descriptors.atomic_density_cutoff = \
+                        hyperparameter_tuple[0]
+                    self.params.descriptors.atomic_density_sigma = \
+                        hyperparameter_tuple[1]
+
+                descriptor = \
+                    self._calculate_descriptors(self.__snapshots[i],
+                                                self.__snapshot_description[i],
+                                                self.__snapshot_units[i])
+                if get_rank() == 0:
+                    acsd = self._calculate_acsd(descriptor, target,
+                                                self.params.hyperparameters.acsd_points,
+                                                descriptor_vectors_contain_xyz=
+                                                self.params.descriptors.descriptors_contain_xyz)
+                    if not np.isnan(acsd):
+                        if best_acsd is None:
+                            best_acsd = acsd
+                            best_trial = idx
+                        elif acsd < best_acsd:
+                            best_acsd = acsd
+                            best_trial = idx
+                        current_list.append(list(hyperparameter_tuple) + [acsd])
+                    else:
+                        current_list.append(list(hyperparameter_tuple) + [np.inf])
+
+                    outstring = "["
+                    for label_id, label in enumerate(self.labels):
+                        outstring += label + ": " + \
+                                     str(hyperparameter_tuple[label_id])
+                        if label_id < len(self.labels) - 1:
+                            outstring += ", "
+                    outstring += "]"
+                    best_trial_string = ". No suitable trial found yet."
+                    if best_acsd is not None:
+                        best_trial_string = ". Best trial is "+str(best_trial) \
+                                            + " with "+str(best_acsd)
+
+                    printout("Trial", idx, "finished with ACSD="+str(acsd),
+                             "and parameters:", outstring+best_trial_string,
+                             min_verbosity=1)
+
+            if get_rank() == 0:
+                self.study.append(current_list)
+
+        if get_rank() == 0:
+            self.study = np.mean(self.study, axis=0)
+
+            if return_plotting:
+                results_to_plot = []
+                if len(self.internal_hyperparam_list) == 2:
+                    len_first_dim = len(self.internal_hyperparam_list[0])
+                    len_second_dim = len(self.internal_hyperparam_list[1])
+                    for i in range(0, len_first_dim):
+                        results_to_plot.append(
+                            self.study[i*len_second_dim:(i+1)*len_second_dim, 2:])
+
+                    if isinstance(self.descriptor_calculator, Bispectrum):
+                        return results_to_plot, {"twojmax": self.internal_hyperparam_list[1],
+                                                 "cutoff": self.internal_hyperparam_list[0]}
+                    if isinstance(self.descriptor_calculator, AtomicDensity):
+                        return results_to_plot, {"sigma": self.internal_hyperparam_list[1],
+                                                 "cutoff": self.internal_hyperparam_list[0]}
+
+    def set_optimal_parameters(self):
+        """
+        Set the optimal parameters found in the present study.
+
+        The parameters will be written to the parameter object with which the
+        hyperparameter optimizer was created.
+        """
+        if get_rank() == 0:
+            minimum_acsd = self.study[np.argmin(self.study[:, -1])]
+            if len(self.internal_hyperparam_list) == 2:
+                if isinstance(self.descriptor_calculator, Bispectrum):
+                    self.params.descriptors.bispectrum_cutoff = minimum_acsd[0]
+                    self.params.descriptors.bispectrum_twojmax = int(minimum_acsd[1])
+                    printout("ACSD analysis finished, optimal parameters: ", )
+                    printout("Bispectrum twojmax: ", self.params.descriptors.
+                             bispectrum_twojmax)
+                    printout("Bispectrum cutoff: ", self.params.descriptors.
+                             bispectrum_cutoff)
+                if isinstance(self.descriptor_calculator, AtomicDensity):
+                    self.params.descriptors.atomic_density_cutoff = minimum_acsd[0]
+                    self.params.descriptors.atomic_density_sigma = minimum_acsd[1]
+                    printout("ACSD analysis finished, optimal parameters: ", )
+                    printout("Atomic density sigma: ", self.params.descriptors.
+                             atomic_density_sigma)
+                    printout("Atomic density cutoff: ", self.params.descriptors.
+                             atomic_density_cutoff)
+
+
+    def _construct_hyperparam_list(self):
         if isinstance(self.descriptor_calculator, Bispectrum):
             if list(map(lambda p: "bispectrum_cutoff" in p.name,
                          self.params.hyperparameters.hlist)).count(True) == 0:
@@ -179,7 +296,8 @@ class ACSDAnalyzer(HyperOpt):
                         list(map(lambda p: "bispectrum_twojmax" in p.name,
                          self.params.hyperparameters.hlist)).index(True)].choices
 
-            self.labels = ["cutoff", "twojmax", "acsd"]
+            self.internal_hyperparam_list = [first_dim_list, second_dim_list]
+            self.labels = ["cutoff", "twojmax"]
 
         elif isinstance(self.descriptor_calculator, AtomicDensity):
             if list(map(lambda p: "atomic_density_cutoff" in p.name,
@@ -201,85 +319,12 @@ class ACSDAnalyzer(HyperOpt):
                         list(map(lambda p: "atomic_density_sigma" in p.name,
                                  self.params.hyperparameters.hlist)).index(
                             True)].choices
-
-            self.labels = ["cutoff", "sigma", "acsd"]
+            self.internal_hyperparam_list = [first_dim_list, second_dim_list]
+            self.labels = ["cutoff", "sigma"]
 
         else:
             raise Exception("Unkown descriptor calculator selected. Cannot "
                             "calculate ACSD.")
-
-            # Perform the ACSD analysis separately for each snapshot.
-        for i in range(0, len(self.__snapshots)):
-            current_list = []
-            target = self._load_target(self.__snapshots[i],
-                                       self.__snapshot_description[i],
-                                       self.__snapshot_units[i],
-                                       file_based_communication)
-            for first_dim in first_dim_list:
-                for second_dim in second_dim_list:
-                    if isinstance(self.descriptor_calculator, Bispectrum):
-                        self.params.descriptors.bispectrum_cutoff = first_dim
-                        self.params.descriptors.bispectrum_twojmax = second_dim
-                    if isinstance(self.descriptor_calculator, AtomicDensity):
-                        self.params.descriptors.atomic_density_cutoff = first_dim
-                        self.params.descriptors.atomic_density_sigma = \
-                            second_dim
-
-                    descriptor = \
-                        self._calculate_descriptors(self.__snapshots[i],
-                                                    self.__snapshot_description[i],
-                                                    self.__snapshot_units[i])
-                    if get_rank() == 0:
-                        acsd = self._calculate_acsd(descriptor, target,
-                                             self.params.hyperparameters.acsd_points,
-                                             descriptor_vectors_contain_xyz=
-                                             self.params.descriptors.descriptors_contain_xyz)
-                        current_list.append([first_dim, second_dim, acsd])
-            if get_rank() == 0:
-                self.study.append(current_list)
-
-        if get_rank() == 0:
-            self.study = np.mean(self.study, axis=0)
-            if return_plotting:
-                results_to_plot = []
-                len_first_dim = len(first_dim_list)
-                len_second_dim = len(second_dim_list)
-                for i in range(0, len_first_dim):
-                    results_to_plot.append(
-                        self.study[i*len_second_dim:(i+1)*len_second_dim, 2:])
-
-                if isinstance(self.descriptor_calculator, Bispectrum):
-                    return results_to_plot, {"twojmax": second_dim_list,
-                                             "cutoff": first_dim_list}
-                if isinstance(self.descriptor_calculator, AtomicDensity):
-                    return results_to_plot, {"sigma": second_dim_list,
-                                             "cutoff": first_dim_list}
-
-    def set_optimal_parameters(self):
-        """
-        Set the optimal parameters found in the present study.
-
-        The parameters will be written to the parameter object with which the
-        hyperparameter optimizer was created.
-        """
-        if get_rank() == 0:
-            minimum_acsd = self.study[np.argmin(self.study[:, 2])]
-            if isinstance(self.descriptor_calculator, Bispectrum):
-                self.params.descriptors.bispectrum_cutoff = minimum_acsd[0]
-                self.params.descriptors.bispectrum_twojmax = int(minimum_acsd[1])
-                printout("ACSD analysis, optimal parameters: ", )
-                printout("Bispectrum twojmax: ", self.params.descriptors.
-                         bispectrum_twojmax)
-                printout("Bispectrum cutoff: ", self.params.descriptors.
-                         bispectrum_cutoff)
-            if isinstance(self.descriptor_calculator, AtomicDensity):
-                self.params.descriptors.atomic_density_cutoff = minimum_acsd[0]
-                self.params.descriptors.atomic_density_sigma = minimum_acsd[1]
-                printout("ACSD analysis, optimal parameters: ", )
-                printout("Atomic density sigma: ", self.params.descriptors.
-                         bispectrum_twojmax)
-                printout("Atomic density cutoff: ", self.params.descriptors.
-                         bispectrum_cutoff)
 
     def _calculate_descriptors(self, snapshot, description, original_units):
         descriptor_calculation_kwargs = {}

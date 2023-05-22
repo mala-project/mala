@@ -40,6 +40,7 @@ class Predictor(Runner):
                               self.data.grid_dimension[2]
         self.test_data_loader = None
         self.number_of_batches_per_snapshot = 0
+        self.target_calculator = data.target_calculator
 
     def predict_from_qeout(self, path_to_file, gather_ldos=False):
         """
@@ -71,7 +72,7 @@ class Predictor(Runner):
         return self.predict_for_atoms(self.data.target_calculator.atoms,
                                       gather_ldos=gather_ldos)
 
-    def predict_for_atoms(self, atoms, gather_ldos=False):
+    def predict_for_atoms(self, atoms, gather_ldos=False, temperature=None):
         """
         Get predicted LDOS for an atomic configuration.
 
@@ -86,15 +87,39 @@ class Predictor(Runner):
             Helpful for using multiple CPUs for descriptor calculations
             and only one for network pass.
 
+        temperature : float
+            If not None, this temperature value will be set in the internal
+            target calculator and can be used in subsequent integrations.
+            If None, the default temperature loaded from the model will be
+            used. Temperature has to be given in K.
+
         Returns
         -------
         predicted_ldos : numpy.array
             Precicted LDOS for these atomic positions.
         """
-        self.data.grid_dimension = self.parameters.inference_data_grid
-        self.data.grid_size = self.data.grid_dimension[0] * \
-                              self.data.grid_dimension[1] * \
-                              self.data.grid_dimension[2]
+        # If there is no inference data grid, we will try to get the grid
+        # dimensions from the target calculator, because some data may
+        # have been saved there.
+
+        if np.prod(self.parameters.inference_data_grid) > 0:
+            self.data.grid_dimension = self.parameters.inference_data_grid
+        else:
+            # We need to check if we're in size transfer mode.
+            old_cell = self.data.target_calculator.atoms.get_cell()
+            new_cell = atoms.get_cell()
+
+            # We only need the diagonal elements.
+            factor = np.diag(new_cell)/np.diag(old_cell)
+            factor = factor.astype(int)
+            self.data.grid_dimension = \
+                factor * self.data.target_calculator.grid_dimensions
+
+        self.data.grid_size = np.prod(self.data.grid_dimension)
+
+        # Set the tempetature, if necessary.
+        if temperature is not None:
+            self.data.target_calculator.temperature = temperature
 
         # Make sure no data lingers in the target calculator.
         self.data.target_calculator.invalidate_target()
@@ -141,8 +166,6 @@ class Predictor(Runner):
                                     " for parallel inference")
 
                 snap_descriptors = \
-                    snap_descriptors.astype(np.float32)
-                snap_descriptors = \
                     torch.from_numpy(snap_descriptors).float()
                 self.data.input_data_scaler.transform(snap_descriptors)
                 return self. \
@@ -153,8 +176,6 @@ class Predictor(Runner):
                 snap_descriptors = snap_descriptors[:, :, :, 3:]
                 feature_length -= 3
 
-            snap_descriptors = \
-                snap_descriptors.astype(np.float32)
             snap_descriptors = \
                 snap_descriptors.reshape(
                     [self.data.grid_size, feature_length])
