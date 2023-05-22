@@ -154,7 +154,7 @@ class DataShuffler(DataHandlerBase):
                                           additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
                                                                  "local_shuffling_seed": i*self.parameters.shuffling_seed})
 
-    class DescriptorOrTarget:
+    class __DescriptorOrTarget:
 
         def __init__(self, save_path, npy_directory, npy_file, calculator,
                      name_infix, dimension):
@@ -407,14 +407,14 @@ class DataShuffler(DataHandlerBase):
                                  descriptor_save_path, save_name,
                                  target_save_path, permutations, file_ending)
         elif snapshot_type == 'openpmd':
-            descriptor = self.DescriptorOrTarget(
+            descriptor = self.__DescriptorOrTarget(
                 descriptor_save_path, lambda x: x.input_npy_directory,
                 lambda x: x.input_npy_file, self.descriptor_calculator, ".in.",
                 self.input_dimension)
             self.__shuffle_openpmd(descriptor, number_of_new_snapshots,
                                    shuffle_dimensions, save_name, permutations,
                                    file_ending)
-            target = self.DescriptorOrTarget(target_save_path,
+            target = self.__DescriptorOrTarget(target_save_path,
                                              lambda x: x.output_npy_directory,
                                              lambda x: x.output_npy_file,
                                              self.target_calculator, ".out.",

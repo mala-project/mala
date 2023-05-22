@@ -300,24 +300,28 @@ class PhysicalData(ABC):
         """
         np.save(path, array)
 
-    # The function `write_to_openpmd_file` can be used:
-    #
-    # 1. either for writing the entire openPMD file, as the name implies
-    # 2. or for preparing and initializing the structure of an openPMD file,
-    #    without actually having the array data at hand yet.
-    #    This means writing attributes, creating the hierarchy and specifying
-    #    the dataset extents and types.
-    #
-    # In the latter case, no numpy array is provided at the call site, but two
-    # kinds of information are still required for preparing the structure, that
-    # would normally be extracted from the numpy array:
-    #
-    # 1. The dataset extent and type.
-    # 2. The feature size.
-    #
-    # In order to provide this data, the numpy array can be replaced with an
-    # instance of the class SkipArrayWriting.
     class SkipArrayWriting:
+        """
+        Optional/alternative parameter for `write_to_openpmd_file` function.
+
+        The function `write_to_openpmd_file` can be used:
+
+        1. either for writing the entire openPMD file, as the name implies
+        2. or for preparing and initializing the structure of an openPMD file,
+           without actually having the array data at hand yet.
+           This means writing attributes, creating the hierarchy and specifying
+           the dataset extents and types.
+
+        In the latter case, no numpy array is provided at the call site, but two
+        kinds of information are still required for preparing the structure, that
+        would normally be extracted from the numpy array:
+
+        1. The dataset extent and type.
+        2. The feature size.
+
+        In order to provide this data, the numpy array can be replaced with an
+        instance of the class SkipArrayWriting.
+        """
 
         # dataset has type openpmd_api.Dataset (not adding a type hint to avoid
         # needing to import here)
