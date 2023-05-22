@@ -182,7 +182,7 @@ class MALA(Calculator):
             self.results["ion_ion_energy"] = self.\
                 last_energy_contributions["e_ewald"]
 
-    def save_calculator(self, filename):
+    def save_calculator(self, filename, save_path="./"):
         """
         Save parameters used for this calculator.
 
@@ -191,13 +191,12 @@ class MALA(Calculator):
         Parameters
         ----------
         filename : string
-            Path to file in which to store the Calculator.
+            Name of the file in which to store the calculator.
+
+        save_path : string
+            Path where the calculator should be saved.
 
         """
-        self.mala_parameters.save(filename + ".params.json")
-        self.network.save_network(filename+".network.pth")
-        self.data_handler.input_data_scaler.save(filename+".iscaler.pkl")
-        self.data_handler.output_data_scaler.save(filename+".oscaler.pkl")
-        self.data_handler.target_calculator.\
-            write_additional_calculation_data(filename+".reference.json")
+        self.predictor.save_run(filename, save_path=save_path,
+                                additional_calculation_data=True)
 
