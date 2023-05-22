@@ -300,16 +300,32 @@ class PhysicalData(ABC):
         """
         np.save(path, array)
 
+    # The function `write_to_openpmd_file` can be used:
+    #
+    # 1. either for writing the entire openPMD file, as the name implies
+    # 2. or for preparing and initializing the structure of an openPMD file,
+    #    without actually having the array data at hand yet.
+    #    This means writing attributes, creating the hierarchy and specifying
+    #    the dataset extents and types.
+    #
+    # In the latter case, no numpy array is provided at the call site, but two
+    # kinds of information are still required for preparing the structure, that
+    # would normally be extracted from the numpy array:
+    #
+    # 1. The dataset extent and type.
+    # 2. The feature size.
+    #
+    # In order to provide this data, the numpy array can be replaced with an
+    # instance of the class SkipArrayWriting.
     class SkipArrayWriting:
 
+        # dataset has type openpmd_api.Dataset (not adding a type hint to avoid
+        # needing to import here)
         def __init__(self, dataset, feature_size):
             self.dataset = dataset
             self.feature_size = feature_size
 
-    def write_to_openpmd_file(self,
-                              path,
-                              array,
-                              additional_attributes={}):
+    def write_to_openpmd_file(self, path, array, additional_attributes={}):
         """
         Write data to an OpenPMD file.
 
@@ -318,8 +334,9 @@ class PhysicalData(ABC):
         path : string
             File to save into. If no file ending is given, .h5 is assumed.
 
-        array : numpy.ndarray
-            Array to save.
+        array : Either numpy.ndarray or an SkipArrayWriting object
+            Either the array to save or the meta information needed to create
+            the openPMD structure.
 
         additional_attributes : dict
             Dict containing additional attributes to be saved.
@@ -357,8 +374,8 @@ class PhysicalData(ABC):
         # This function may be called without the feature dimension
         # explicitly set (i.e. during testing or post-processing).
         # We have to check for that.
-        if self.feature_size == 0 and array is not None and not isinstance(
-                array, self.SkipArrayWriting):
+        if self.feature_size == 0 and not isinstance(array,
+                                                     self.SkipArrayWriting):
             self._set_feature_size_from_array(array)
 
         self.write_to_openpmd_iteration(iteration, array)

@@ -196,6 +196,11 @@ class DataShuffler(DataHandlerBase):
                 break
             break
 
+        # Input datasets are split into n slices where n is the number of output
+        # (shuffled) checkpoints.
+        # This gets the offset and extent of the i'th such slice.
+        # The extent is given as in openPMD, i.e. the size of the block
+        # (not its upper coordinate).
         def from_chunk_i(i, n, dataset, slice_dimension=0):
             if isinstance(dataset, io.Dataset):
                 dataset = dataset.extent
@@ -211,6 +216,10 @@ class DataShuffler(DataHandlerBase):
             extent[slice_dimension] = single_chunk_len
             return offset, extent
 
+        # This determines the placement of the j'th of n chunks into a flattened
+        # 1D array of a certain length by offset and extent.
+        # The extent is given as in Python slices, i.e. the upper coordinate of
+        # the block (not its size).
         def to_chunk_j(j, n, length):
             if length % n != 0:
                 raise Exception("Cannot split {} items into {} chunks.".format(
@@ -219,6 +228,9 @@ class DataShuffler(DataHandlerBase):
             return j * single_chunk_len, (j+1) * single_chunk_len
 
         # Do the actual shuffling.
+        # TODO: Parallelize into `number_of_new_snapshots` workers
+        # Each worker would write the i'th snapshot in serial, the input
+        # snapshots would be opened one after another in parallel
         for i in range(0, number_of_new_snapshots):
             # We check above that in the non-numpy case, OpenPMD will work.
             self.descriptor_calculator.grid_dimensions = shuffle_dimensions
@@ -292,9 +304,6 @@ class DataShuffler(DataHandlerBase):
                 rc[:, :, :] = new_targets[k, :][permutations[i]].reshape(
                     shuffle_dimensions)
             new_targets_series.close()
-
-
-            # @todo implement shuffling
 
 
     def shuffle_snapshots(self,
