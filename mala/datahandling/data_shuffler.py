@@ -397,8 +397,33 @@ class DataShuffler(DataHandlerBase):
                 # snapshot, there is some padding down below anyhow.
                 shuffle_dimensions = [int(number_of_data_points /
                                           number_of_new_snapshots), 1, 1]
+            if snapshot_type == 'openpmd':
+                import math
+                import functools
+                number_of_new_snapshots = functools.reduce(
+                    math.gcd, [
+                        snapshot.grid_dimension[0] for snapshot in
+                        self.parameters.snapshot_directories_list
+                    ], number_of_new_snapshots)
         else:
             number_of_new_snapshots = number_of_shuffled_snapshots
+
+            if snapshot_type == 'openpmd':
+                import math
+                import functools
+                specified_number_of_new_snapshots = number_of_new_snapshots
+                number_of_new_snapshots = functools.reduce(
+                    math.gcd, [
+                        snapshot.grid_dimension[0] for snapshot in
+                        self.parameters.snapshot_directories_list
+                    ], number_of_new_snapshots)
+                if number_of_new_snapshots != specified_number_of_new_snapshots:
+                    print(
+                        f"[openPMD shuffling] Reduced the number of output snapshots to "
+                        f"{number_of_new_snapshots} because of the dataset dimensions."
+                    )
+                del specified_number_of_new_snapshots
+
             if number_of_data_points % number_of_new_snapshots != 0:
                 raise Exception("Cannot create this number of snapshots "
                                 "from data provided.")
