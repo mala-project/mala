@@ -199,6 +199,7 @@ class DataShuffler(DataHandlerBase):
         def from_chunk_i(i, n, dset, slice_dimension=0):
             if isinstance(dset, io.Dataset):
                 dset = dset.extent
+            dset = list(dset)
             offset = [0 for _ in dset]
             extent = dset
             extent_dim_0 = dset[slice_dimension]
@@ -210,17 +211,6 @@ class DataShuffler(DataHandlerBase):
             offset[slice_dimension] = i * single_chunk_len
             extent[slice_dimension] = single_chunk_len
             return offset, extent
-
-        # This determines the placement of the j'th of n chunks into a flattened
-        # 1D array of a certain length by offset and extent.
-        # The extent is given as in Python slices, i.e. the upper coordinate of
-        # the block (not its size).
-        def to_chunk_j(j, n, length):
-            if length % n != 0:
-                raise Exception("Cannot split {} items into {} chunks.".format(
-                    n, j))
-            single_chunk_len = length // n
-            return j * single_chunk_len, (j + 1) * single_chunk_len
 
         # Do the actual shuffling.
         # TODO: Parallelize into `number_of_new_snapshots` workers
@@ -241,14 +231,23 @@ class DataShuffler(DataHandlerBase):
             new_array = np.zeros(
                 (dot.dimension, int(np.prod(shuffle_dimensions))))
 
+            # Need to add to these in the loop as the single chunks might have
+            # different sizes
+            to_chunk_offset, to_chunk_extent = 0, 0
             for j in range(0, self.nr_snapshots):
+                extent_in = self.parameters.snapshot_directories_list[j].grid_dimension
                 mesh_in = input_series_list[j].iterations[0].meshes[
                     dot.calculator.data_name]
 
+                # Note that the semantics of from_chunk_extent and
+                # to_chunk_extent are not the same.
+                # from_chunk_extent describes the size of the chunk, as is usual
+                # in openPMD, to_chunk_extent describes the upper coordinate of
+                # the slice, as is usual in Python.
                 from_chunk_offset, from_chunk_extent = from_chunk_i(
-                    i, number_of_new_snapshots, dataset)
-                to_chunk_offset, to_chunk_extent = to_chunk_j(
-                    j, number_of_new_snapshots, np.prod(shuffle_dimensions))
+                    i, number_of_new_snapshots, extent_in)
+                to_chunk_offset = to_chunk_extent
+                to_chunk_extent = to_chunk_offset + np.prod(from_chunk_extent)
                 for dimension in range(len(mesh_in)):
                     mesh_in[str(dimension)].load_chunk(
                         new_array[dimension, to_chunk_offset:to_chunk_extent],
@@ -349,11 +348,11 @@ class DataShuffler(DataHandlerBase):
                 number_of_new_snapshots = self.nr_snapshots
                 while number_of_data_points % number_of_new_snapshots != 0:
                     number_of_new_snapshots += 1
-
                 # If they do have different sizes, we start with the smallest
                 # snapshot, there is some padding down below anyhow.
                 shuffle_dimensions = [int(number_of_data_points /
-                                          number_of_new_snapshots), 1, 1]
+                                            number_of_new_snapshots), 1, 1]
+
             if snapshot_type == 'openpmd':
                 import math
                 import functools
