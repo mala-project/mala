@@ -329,7 +329,8 @@ class PhysicalData(ABC):
             self.dataset = dataset
             self.feature_size = feature_size
 
-    def write_to_openpmd_file(self, path, array, additional_attributes={}):
+    def write_to_openpmd_file(self, path, array, additional_attributes={},
+                              internal_iteration_number=0):
         """
         Write data to an OpenPMD file.
 
@@ -344,6 +345,11 @@ class PhysicalData(ABC):
 
         additional_attributes : dict
             Dict containing additional attributes to be saved.
+
+        internal_iteration_number : int
+            Internal OpenPMD iteration number. Ideally, this number should
+            match any number present in the file name, if this data is part
+            of a larger data set.
         """
         import openpmd_api as io
 
@@ -373,7 +379,7 @@ class PhysicalData(ABC):
         for entry in additional_attributes:
             series.set_attribute(entry, additional_attributes[entry])
 
-        iteration = series.write_iterations()[0]
+        iteration = series.write_iterations()[internal_iteration_number]
 
         # This function may be called without the feature dimension
         # explicitly set (i.e. during testing or post-processing).

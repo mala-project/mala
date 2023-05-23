@@ -229,8 +229,9 @@ class DataShuffler(DataHandlerBase):
                     write_to_openpmd_file(name_prefix+dot.name_infix+file_ending,
                                           PhysicalData.SkipArrayWriting(dataset, feature_size),
                                           additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
-                                                                 "local_shuffling_seed": i*self.parameters.shuffling_seed})
-            mesh_out = shuffled_snapshot_series.write_iterations()[0].meshes[
+                                                                 "local_shuffling_seed": i*self.parameters.shuffling_seed},
+                                          internal_iteration_number=i)
+            mesh_out = shuffled_snapshot_series.write_iterations()[i].meshes[
                 dot.calculator.data_name]
             new_array = np.zeros(
                 (dot.dimension, int(np.prod(shuffle_dimensions))))
@@ -240,7 +241,7 @@ class DataShuffler(DataHandlerBase):
             to_chunk_offset, to_chunk_extent = 0, 0
             for j in range(0, self.nr_snapshots):
                 extent_in = self.parameters.snapshot_directories_list[j].grid_dimension
-                mesh_in = input_series_list[j].iterations[0].meshes[
+                mesh_in = input_series_list[j].iterations[i].meshes[
                     dot.calculator.data_name]
 
                 # Note that the semantics of from_chunk_extent and

@@ -432,7 +432,9 @@ class Density(Target):
         self.density = array
         return array
 
-    def write_to_openpmd_file(self, path, target_data=None):
+    def write_to_openpmd_file(self, path, array=None,
+                              additional_attributes={},
+                              internal_iteration_number=0):
         """
         Write data to a numpy file.
 
@@ -441,20 +443,36 @@ class Density(Target):
         path : string
             File to save into. If no file ending is given, .h5 is assumed.
 
-        target_data : numpy.ndarray
+        array : numpy.ndarray
             Target data to save. If None, the data stored in the calculator
             will be used.
+
+        additional_attributes : dict
+            Dict containing additional attributes to be saved.
+
+        internal_iteration_number : int
+            Internal OpenPMD iteration number. Ideally, this number should
+            match any number present in the file name, if this data is part
+            of a larger data set.
         """
-        if target_data is None:
+        if array is None:
             if len(self.density.shape) == 2:
                 super(Target, self).\
                     write_to_openpmd_file(path, np.reshape(self.density,
                                                            self.grid_dimensions
-                                                           + [1]))
+                                                           + [1]),
+                                          internal_iteration_number=
+                                          internal_iteration_number)
             elif len(self.density.shape) == 4:
-                super(Target, self).write_to_openpmd_file(path, self.density)
+                super(Target, self).\
+                    write_to_openpmd_file(path, self.density,
+                                          internal_iteration_number=
+                                          internal_iteration_number)
         else:
-            super(Target, self).write_to_openpmd_file(path, target_data)
+            super(Target, self).\
+                write_to_openpmd_file(path, array,
+                                      internal_iteration_number=
+                                      internal_iteration_number)
 
     def write_to_cube(self, file_name, density_data=None, atoms=None,
                       grid_dimensions=None):
