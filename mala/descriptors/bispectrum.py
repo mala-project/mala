@@ -104,11 +104,10 @@ class Bispectrum(Descriptor):
         nz = grid_dimensions[2]
 
         # Build LAMMPS arguments from the data we read.
-        lmp_cmdargs = ["-screen", "none", "-log",
-                       os.path.join(outdir, "lammps_bgrid_log.tmp")]
 
         # LAMMPS processor grid filled by parent class.
-        lammps_dict = self._setup_lammps_processors(nx, ny, nz)
+        lammps_dict, lmp_cmdargs = self._setup_lammps(nx, ny, nz,
+                                                      outdir)
 
         # Set the values not already filled in the LAMMPS setup.
         lammps_dict["twojmax"] = self.parameters.bispectrum_twojmax

@@ -1,5 +1,6 @@
 """Base class for all descriptor calculators."""
 from abc import abstractmethod
+import os
 
 import ase
 from ase.units import m
@@ -509,12 +510,22 @@ class Descriptor(PhysicalData):
         else:
             return 0
 
-    def _setup_lammps_processors(self, nx, ny, nz):
+    def _setup_lammps(self, nx, ny, nz, outdir):
         """
         Set up the lammps processor grid.
 
         Takes into account y/z-splitting.
         """
+        if self.parameters._configuration["mpi"] and \
+           self.parameters._configuration["gpu"]:
+            raise Exception("LAMMPS can currently only work with multiple "
+                            "ranks or GPU on one rank - but not multiple GPUs "
+                            "across ranks.")
+
+        # Build LAMMPS arguments from the data we read.
+        lmp_cmdargs = ["-screen", "none", "-log",
+                       os.path.join(outdir, "lammps_bgrid_log.tmp")]
+
         if self.parameters._configuration["mpi"]:
             size = get_size()
             # for parallel tem need to set lammps commands: processors and
@@ -684,7 +695,12 @@ class Descriptor(PhysicalData):
                            "ngridy": ny,
                            "ngridz": nz,
                            "switch": self.parameters.bispectrum_switchflag}
-        return lammps_dict
+            if self.parameters._configuration["gpu"]:
+                # Tell Kokkos to use one GPU.
+                lmp_cmdargs.append("-k")
+                lmp_cmdargs.append("on g 1")
+
+        return lammps_dict, lmp_cmdargs
 
     @abstractmethod
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):

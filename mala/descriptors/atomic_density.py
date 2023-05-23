@@ -140,12 +140,8 @@ class AtomicDensity(Descriptor):
             self.parameters.atomic_density_sigma = self.\
                 get_optimal_sigma(voxel)
 
-        # Build LAMMPS arguments from the data we read.
-        lmp_cmdargs = ["-screen", "none", "-log",
-                       os.path.join(outdir, "lammps_ggrid_log.tmp")]
-
         # LAMMPS processor grid filled by parent class.
-        lammps_dict = self._setup_lammps_processors(nx, ny, nz)
+        lammps_dict, lmp_cmdargs = self._setup_lammps(nx, ny, nz, outdir)
 
         # Set the values not already filled in the LAMMPS setup.
         lammps_dict["sigma"] = self.parameters.atomic_density_sigma
