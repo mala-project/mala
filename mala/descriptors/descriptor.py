@@ -697,8 +697,9 @@ class Descriptor(PhysicalData):
                            "switch": self.parameters.bispectrum_switchflag}
             if self.parameters._configuration["gpu"]:
                 # Tell Kokkos to use one GPU.
-                lmp_cmdargs.append("-k")
-                lmp_cmdargs.append("on g 1")
+                # lmp_cmdargs.append("-k")
+                # lmp_cmdargs.append("on g 1")
+                pass
 
         return lammps_dict, lmp_cmdargs
 

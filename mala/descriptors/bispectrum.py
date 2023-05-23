@@ -132,8 +132,12 @@ class Bispectrum(Descriptor):
                         os.path.join(filepath,
                                      "in.bgridlocal_defaultproc.python")
             else:
-                self.parameters.lammps_compute_file = \
-                    os.path.join(filepath, "in.bgrid.python")
+                if self.parameters._configuration["gpu"]:
+                    self.parameters.lammps_compute_file = \
+                        os.path.join(filepath, "in.bgrid_kokkos.python")
+                else:
+                    self.parameters.lammps_compute_file = \
+                        os.path.join(filepath, "in.bgrid.python")
 
         # Do the LAMMPS calculation.
         lmp.file(self.parameters.lammps_compute_file)

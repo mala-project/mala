@@ -23,7 +23,7 @@ variable 	radelem equal 0.5
 variable 	bzero equal 0
 variable 	quadratic equal 0
 
-compute bgrid all sna/grid grid ${ngridx} ${ngridy} ${ngridz} ${rcutfac} ${rfac0} ${twojmax} ${radelem} ${wj} rmin0 ${rmin0} bzeroflag ${bzero} quadraticflag ${quadratic} switchflag ${switch}
+compute bgrid all sna/grid/kk grid ${ngridx} ${ngridy} ${ngridz} ${rcutfac} ${rfac0} ${twojmax} ${radelem} ${wj} rmin0 ${rmin0} bzeroflag ${bzero} quadraticflag ${quadratic} switchflag ${switch}
 
 # is this important? or does it just need to be big enough?
 
