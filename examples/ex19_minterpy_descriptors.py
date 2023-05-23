@@ -1,5 +1,6 @@
 import os
 import mala
+import numpy as np
 from mala.datahandling.data_repo import data_repo_path
 
 data_path = os.path.join(data_repo_path, "Be2")
@@ -17,4 +18,4 @@ descriptor_calculator = mala.MinterpyDescriptors(params)
 data = descriptor_calculator.calculate_from_qe_out(outfile)[0]
 
 print(data.shape)
-
+np.save('Be_snapshot0.in.npy', data)

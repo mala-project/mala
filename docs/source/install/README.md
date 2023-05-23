@@ -102,6 +102,7 @@ used with:
             packages as installation may be very specific to your setup)
 * `horovod`: Enables training parallelization (not installed alongside other
             packages as installation may be very specific to your setup)
+* `minterpy`: Enables the calculation of minterpy descriptor using the [minterpy](https://github.com/casus/minterpy) code.
   
 MALA can be used without these packages, an error will only occur when attempting
 perform an operation these packages are crucial for. With the exception

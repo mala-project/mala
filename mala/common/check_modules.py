@@ -23,7 +23,9 @@ def check_modules():
         "asap3": {"available": False, "description":
                   "Enables trajectory analysis."},
         "dftpy": {"available": False, "description":
-                  "Enables OF-DFT-MD initialization."}
+                  "Enables OF-DFT-MD initialization."},
+        "minterpy": {"available": False, "description":
+            "Enables minterpy descriptor calculation for data preprocessing."}
     }
 
     # Find out if libs are available.

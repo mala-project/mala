@@ -19,7 +19,7 @@ extras = {
     'opt': ['oapackage', 'pqkmeans', 'openpmd-api'],
     'test': ['pytest'],
     'doc': open('docs/requirements.txt').read().splitlines(),
-    'experimental': ['asap3', 'dftpy']
+    'experimental': ['asap3', 'dftpy', 'minterpy']
 }
 
 setup(
