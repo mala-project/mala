@@ -550,10 +550,7 @@ class Target(PhysicalData):
         else:
             super(Target, self).write_to_numpy_file(path, target_data)
 
-    def write_to_openpmd_file(self,
-                              path,
-                              target_data=None,
-                              additional_attributes={}):
+    def write_to_openpmd_file(self, path, target_data=None, additional_attributes={}):
         """
         Write data to a numpy file.
 
