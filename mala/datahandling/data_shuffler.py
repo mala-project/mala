@@ -154,6 +154,10 @@ class DataShuffler(DataHandlerBase):
                                           additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
                                                                  "local_shuffling_seed": i*self.parameters.shuffling_seed})
 
+    # The function __shuffle_openpmd can be used to shuffle descriptor data and
+    # target data.
+    # It will be executed one after another for both of them.
+    # Use this class to parameterize which of both should be shuffled.
     class __DescriptorOrTarget:
 
         def __init__(self, save_path, npy_directory, npy_file, calculator,
@@ -166,9 +170,9 @@ class DataShuffler(DataHandlerBase):
             self.dimension = dimension
 
 
-    def __shuffle_openpmd(self, dot, number_of_new_snapshots,
-                          shuffle_dimensions, save_name, permutations,
-                          file_ending):
+    def __shuffle_openpmd(self, dot: __DescriptorOrTarget,
+                          number_of_new_snapshots, shuffle_dimensions,
+                          save_name, permutations, file_ending):
         import openpmd_api as io
         # Load the data
         input_series_list = []
