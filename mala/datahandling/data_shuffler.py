@@ -241,8 +241,14 @@ class DataShuffler(DataHandlerBase):
             to_chunk_offset, to_chunk_extent = 0, 0
             for j in range(0, self.nr_snapshots):
                 extent_in = self.parameters.snapshot_directories_list[j].grid_dimension
-                mesh_in = input_series_list[j].iterations[i].meshes[
-                    dot.calculator.data_name]
+                if len(input_series_list[j].iterations) != 1:
+                    raise Exception(
+                        "Input Series '{}' has {} iterations (needs exactly one)."
+                        .format(input_series_list[j].name,
+                                len(input_series_list[j].iterations)))
+                for iteration in input_series_list[j].read_iterations():
+                    mesh_in = iteration.meshes[dot.calculator.data_name]
+                    break
 
                 # Note that the semantics of from_chunk_extent and
                 # to_chunk_extent are not the same.
