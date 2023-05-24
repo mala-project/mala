@@ -550,7 +550,8 @@ class Target(PhysicalData):
         else:
             super(Target, self).write_to_numpy_file(path, target_data)
 
-    def write_to_openpmd_file(self, path, target_data=None, additional_attributes={}):
+    def write_to_openpmd_file(self, path, array=None, additional_attributes={},
+                              internal_iteration_number=0):
         """
         Write data to a numpy file.
 
@@ -559,23 +560,32 @@ class Target(PhysicalData):
         path : string
             File to save into. If no file ending is given, .h5 is assumed.
 
-        target_data : numpy.ndarray
+        array : numpy.ndarray
             Target data to save. If None, the data stored in the calculator
             will be used.
 
         additional_attributes : dict
             Dict containing additional attributes to be saved.
+
+        internal_iteration_number : int
+            Internal OpenPMD iteration number. Ideally, this number should
+            match any number present in the file name, if this data is part
+            of a larger data set.
         """
-        if target_data is None:
+        if array is None:
             # The feature dimension may be undefined.
-            super(Target, self).write_to_openpmd_file(path, self.get_target(),
-                                                      additional_attributes=
-                                                      additional_attributes)
+            return super(Target, self).write_to_openpmd_file(
+                path,
+                self.get_target(),
+                additional_attributes=additional_attributes,
+                internal_iteration_number=internal_iteration_number)
         else:
             # The feature dimension may be undefined.
-            super(Target, self).write_to_openpmd_file(path, target_data,
-                                                      additional_attributes=
-                                                      additional_attributes)
+            return super(Target, self).write_to_openpmd_file(
+                path,
+                array,
+                additional_attributes=additional_attributes,
+                internal_iteration_number=internal_iteration_number)
 
     # Accessing target data
     ########################
@@ -743,7 +753,7 @@ class Target(PhysicalData):
         else:
             raise Exception("Unknown RDF method selected.")
         return rdf[1:], rr
-        
+
     @staticmethod
     def three_particle_correlation_function_from_atoms(atoms: ase.Atoms,
                                                        number_of_bins,
