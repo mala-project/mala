@@ -373,7 +373,37 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PhysicalData.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{}):</span>
+<div class="viewcode-block" id="PhysicalData.SkipArrayWriting"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.SkipArrayWriting">[docs]</a>    <span class="k">class</span> <span class="nc">SkipArrayWriting</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Optional/alternative parameter for `write_to_openpmd_file` function.</span>
+
+<span class="sd">        The function `write_to_openpmd_file` can be used:</span>
+
+<span class="sd">        1. either for writing the entire openPMD file, as the name implies</span>
+<span class="sd">        2. or for preparing and initializing the structure of an openPMD file,</span>
+<span class="sd">           without actually having the array data at hand yet.</span>
+<span class="sd">           This means writing attributes, creating the hierarchy and specifying</span>
+<span class="sd">           the dataset extents and types.</span>
+
+<span class="sd">        In the latter case, no numpy array is provided at the call site, but two</span>
+<span class="sd">        kinds of information are still required for preparing the structure, that</span>
+<span class="sd">        would normally be extracted from the numpy array:</span>
+
+<span class="sd">        1. The dataset extent and type.</span>
+<span class="sd">        2. The feature size.</span>
+
+<span class="sd">        In order to provide this data, the numpy array can be replaced with an</span>
+<span class="sd">        instance of the class SkipArrayWriting.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># dataset has type openpmd_api.Dataset (not adding a type hint to avoid</span>
+        <span class="c1"># needing to import here)</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">feature_size</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">=</span> <span class="n">feature_size</span></div>
+
+<div class="viewcode-block" id="PhysicalData.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{},</span>
+                              <span class="n">internal_iteration_number</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write data to an OpenPMD file.</span>
 
@@ -382,11 +412,17 @@
 <span class="sd">        path : string</span>
 <span class="sd">            File to save into. If no file ending is given, .h5 is assumed.</span>
 
-<span class="sd">        array : numpy.ndarray</span>
-<span class="sd">            Array to save.</span>
+<span class="sd">        array : Either numpy.ndarray or an SkipArrayWriting object</span>
+<span class="sd">            Either the array to save or the meta information needed to create</span>
+<span class="sd">            the openPMD structure.</span>
 
 <span class="sd">        additional_attributes : dict</span>
 <span class="sd">            Dict containing additional attributes to be saved.</span>
+
+<span class="sd">        internal_iteration_number : int</span>
+<span class="sd">            Internal OpenPMD iteration number. Ideally, this number should</span>
+<span class="sd">            match any number present in the file name, if this data is part</span>
+<span class="sd">            of a larger data set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
 
@@ -416,15 +452,17 @@
         <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">additional_attributes</span><span class="p">:</span>
             <span class="n">series</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">additional_attributes</span><span class="p">[</span><span class="n">entry</span><span class="p">])</span>
 
-        <span class="n">iteration</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">write_iterations</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">iteration</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">write_iterations</span><span class="p">()[</span><span class="n">internal_iteration_number</span><span class="p">]</span>
 
         <span class="c1"># This function may be called without the feature dimension</span>
         <span class="c1"># explicitly set (i.e. during testing or post-processing).</span>
         <span class="c1"># We have to check for that.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span>
+                                                     <span class="bp">self</span><span class="o">.</span><span class="n">SkipArrayWriting</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_feature_size_from_array</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">write_to_openpmd_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_to_openpmd_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">series</span></div>
 
 <div class="viewcode-block" id="PhysicalData.write_to_openpmd_iteration"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span>
                                    <span class="n">local_offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -503,7 +541,31 @@
                 <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="mf">1.0e-10</span>
                 <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;positionOffset&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="mf">1.0e-10</span>
 
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">)</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">dataset</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkipArrayWriting</span><span class="p">)</span> <span class="k">else</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
+                <span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">)</span>
+
+        <span class="c1"># Global feature sizes:</span>
+        <span class="n">feature_global_from</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">feature_global_to</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span>
+        <span class="k">if</span> <span class="n">feature_global_to</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkipArrayWriting</span><span class="p">):</span>
+            <span class="n">feature_global_to</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">feature_size</span>
+
+        <span class="c1"># First loop: Only metadata, write metadata equivalently across ranks</span>
+        <span class="k">for</span> <span class="n">current_feature</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">feature_global_from</span><span class="p">,</span> <span class="n">feature_global_to</span><span class="p">):</span>
+            <span class="n">mesh_component</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">current_feature</span><span class="p">)]</span>
+            <span class="n">mesh_component</span><span class="o">.</span><span class="n">reset_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+            <span class="c1"># All data is assumed to be saved in</span>
+            <span class="c1"># MALA units, so the SI conversion factor we save</span>
+            <span class="c1"># here is the one for MALA (ASE) units</span>
+            <span class="n">mesh_component</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">si_unit_conversion</span>
+            <span class="c1"># position: which relative point within the cell is</span>
+            <span class="c1"># represented by the stored values</span>
+            <span class="c1"># ([0.5, 0.5, 0.5] represents the middle)</span>
+            <span class="n">mesh_component</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkipArrayWriting</span><span class="p">):</span>
+            <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">feature_to</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">feature_to</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
@@ -537,22 +599,6 @@
             <span class="n">extra_flushes</span> <span class="o">=</span> <span class="n">highest_iteration_count</span> <span class="o">-</span> <span class="n">my_iteration_count</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">extra_flushes</span> <span class="o">=</span> <span class="mi">0</span>
-
-        <span class="c1"># Global feature sizes:</span>
-        <span class="n">feature_global_from</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">feature_global_to</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span>
-        <span class="c1"># First loop: Only metadata, write metadata equivalently across ranks</span>
-        <span class="k">for</span> <span class="n">current_feature</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">feature_global_from</span><span class="p">,</span> <span class="n">feature_global_to</span><span class="p">):</span>
-            <span class="n">mesh_component</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">current_feature</span><span class="p">)]</span>
-            <span class="n">mesh_component</span><span class="o">.</span><span class="n">reset_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
-            <span class="c1"># All data is assumed to be saved in</span>
-            <span class="c1"># MALA units, so the SI conversion factor we save</span>
-            <span class="c1"># here is the one for MALA (ASE) units</span>
-            <span class="n">mesh_component</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">si_unit_conversion</span>
-            <span class="c1"># position: which relative point within the cell is</span>
-            <span class="c1"># represented by the stored values</span>
-            <span class="c1"># ([0.5, 0.5, 0.5] represents the middle)</span>
-            <span class="n">mesh_component</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
 
         <span class="c1"># Second loop: Write heavy data</span>
         <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">granularity</span><span class="p">):</span>

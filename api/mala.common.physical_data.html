@@ -105,6 +105,30 @@
 <p>Base class for physical data.</p>
 <p>Implements general framework to read and write such data to and from
 files.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mala.common.physical_data.PhysicalData.SkipArrayWriting">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SkipArrayWriting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/physical_data.html#PhysicalData.SkipArrayWriting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.physical_data.PhysicalData.SkipArrayWriting" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Optional/alternative parameter for <cite>write_to_openpmd_file</cite> function.</p>
+<p>The function <cite>write_to_openpmd_file</cite> can be used:</p>
+<ol class="arabic simple">
+<li><p>either for writing the entire openPMD file, as the name implies</p></li>
+<li><p>or for preparing and initializing the structure of an openPMD file,
+without actually having the array data at hand yet.
+This means writing attributes, creating the hierarchy and specifying
+the dataset extents and types.</p></li>
+</ol>
+<p>In the latter case, no numpy array is provided at the call site, but two
+kinds of information are still required for preparing the structure, that
+would normally be extracted from the numpy array:</p>
+<ol class="arabic simple">
+<li><p>The dataset extent and type.</p></li>
+<li><p>The feature size.</p></li>
+</ol>
+<p>In order to provide this data, the numpy array can be replaced with an
+instance of the class SkipArrayWriting.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.common.physical_data.PhysicalData.read_dimensions_and_dtype_from_numpy_file">
 <span class="sig-name descname"><span class="pre">read_dimensions_and_dtype_from_numpy_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/physical_data.html#PhysicalData.read_dimensions_and_dtype_from_numpy_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.physical_data.PhysicalData.read_dimensions_and_dtype_from_numpy_file" title="Permalink to this definition"></a></dt>
@@ -202,14 +226,18 @@ array.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.common.physical_data.PhysicalData.write_to_openpmd_file">
-<span class="sig-name descname"><span class="pre">write_to_openpmd_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/physical_data.html#PhysicalData.write_to_openpmd_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.physical_data.PhysicalData.write_to_openpmd_file" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write_to_openpmd_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">internal_iteration_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/physical_data.html#PhysicalData.write_to_openpmd_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.physical_data.PhysicalData.write_to_openpmd_file" title="Permalink to this definition"></a></dt>
 <dd><p>Write data to an OpenPMD file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>string</em>) – File to save into. If no file ending is given, .h5 is assumed.</p></li>
-<li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Array to save.</p></li>
+<li><p><strong>array</strong> (<em>Either numpy.ndarray</em><em> or </em><em>an SkipArrayWriting object</em>) – Either the array to save or the meta information needed to create
+the openPMD structure.</p></li>
 <li><p><strong>additional_attributes</strong> (<em>dict</em>) – Dict containing additional attributes to be saved.</p></li>
+<li><p><strong>internal_iteration_number</strong> (<em>int</em>) – Internal OpenPMD iteration number. Ideally, this number should
+match any number present in the file name, if this data is part
+of a larger data set.</p></li>
 </ul>
 </dd>
 </dl>

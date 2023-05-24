@@ -505,7 +505,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="n">array</span>
         <span class="k">return</span> <span class="n">array</span></div>
 
-<div class="viewcode-block" id="Density.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">target_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Density.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{},</span>
+                              <span class="n">internal_iteration_number</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write data to a numpy file.</span>
 
@@ -514,20 +516,36 @@
 <span class="sd">        path : string</span>
 <span class="sd">            File to save into. If no file ending is given, .h5 is assumed.</span>
 
-<span class="sd">        target_data : numpy.ndarray</span>
+<span class="sd">        array : numpy.ndarray</span>
 <span class="sd">            Target data to save. If None, the data stored in the calculator</span>
 <span class="sd">            will be used.</span>
+
+<span class="sd">        additional_attributes : dict</span>
+<span class="sd">            Dict containing additional attributes to be saved.</span>
+
+<span class="sd">        internal_iteration_number : int</span>
+<span class="sd">            Internal OpenPMD iteration number. Ideally, this number should</span>
+<span class="sd">            match any number present in the file name, if this data is part</span>
+<span class="sd">            of a larger data set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">target_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span>\
                     <span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">,</span>
                                                            <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span>
-                                                           <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                                                           <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                          <span class="n">internal_iteration_number</span><span class="o">=</span>
+                                          <span class="n">internal_iteration_number</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">)</span>
+                <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span>\
+                    <span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">,</span>
+                                          <span class="n">internal_iteration_number</span><span class="o">=</span>
+                                          <span class="n">internal_iteration_number</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">target_data</span><span class="p">)</span></div>
+            <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span>
+                                      <span class="n">internal_iteration_number</span><span class="o">=</span>
+                                      <span class="n">internal_iteration_number</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Density.write_to_cube"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.write_to_cube">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                       <span class="n">grid_dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
