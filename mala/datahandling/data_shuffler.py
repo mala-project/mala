@@ -150,7 +150,7 @@ class DataShuffler(DataHandlerBase):
                                                                  "local_shuffling_seed": i*self.parameters.shuffling_seed})
                 self.target_calculator.\
                     write_to_openpmd_file(target_name+".out."+file_ending,
-                                          target_data=new_targets,
+                                          array=new_targets,
                                           additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
                                                                  "local_shuffling_seed": i*self.parameters.shuffling_seed})
 
@@ -234,7 +234,8 @@ class DataShuffler(DataHandlerBase):
             mesh_out = shuffled_snapshot_series.write_iterations()[i].meshes[
                 dot.calculator.data_name]
             new_array = np.zeros(
-                (dot.dimension, int(np.prod(shuffle_dimensions))))
+                (dot.dimension, int(np.prod(shuffle_dimensions))),
+                dtype=dataset.dtype)
 
             # Need to add to these in the loop as the single chunks might have
             # different sizes
