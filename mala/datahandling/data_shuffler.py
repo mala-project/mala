@@ -3,7 +3,8 @@ import os
 
 import numpy as np
 
-from mala.common.parameters import ParametersData, Parameters
+import mala
+from mala.common.parameters import ParametersData, Parameters, DEFAULT_NP_DATA_DTYPE
 from mala.common.parallelizer import printout
 from mala.common.physical_data import PhysicalData
 from mala.datahandling.data_handler_base import DataHandlerBase
@@ -94,9 +95,11 @@ class DataShuffler(DataHandlerBase):
         # Do the actual shuffling.
         for i in range(0, number_of_new_snapshots):
             new_descriptors = np.zeros((int(np.prod(shuffle_dimensions)),
-                                        self.input_dimension))
+                                        self.input_dimension),
+                                       dtype=DEFAULT_NP_DATA_DTYPE)
             new_targets = np.zeros((int(np.prod(shuffle_dimensions)),
-                                    self.output_dimension))
+                                    self.output_dimension),
+                                   dtype=DEFAULT_NP_DATA_DTYPE)
             last_start = 0
             descriptor_name = os.path.join(descriptor_save_path,
                                            save_name.replace("*", str(i)))
@@ -147,12 +150,14 @@ class DataShuffler(DataHandlerBase):
                     write_to_openpmd_file(descriptor_name+".in."+file_ending,
                                           new_descriptors,
                                           additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
-                                                                 "local_shuffling_seed": i*self.parameters.shuffling_seed})
+                                                                 "local_shuffling_seed": i*self.parameters.shuffling_seed},
+                                          internal_iteration_number=i)
                 self.target_calculator.\
                     write_to_openpmd_file(target_name+".out."+file_ending,
                                           array=new_targets,
                                           additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
-                                                                 "local_shuffling_seed": i*self.parameters.shuffling_seed})
+                                                                 "local_shuffling_seed": i*self.parameters.shuffling_seed},
+                                          internal_iteration_number=i)
 
     # The function __shuffle_openpmd can be used to shuffle descriptor data and
     # target data.
