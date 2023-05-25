@@ -338,6 +338,7 @@ class PhysicalData(ABC):
         ----------
         path : string
             File to save into. If no file ending is given, .h5 is assumed.
+            Alternatively: A Series, opened already.
 
         array : Either numpy.ndarray or an SkipArrayWriting object
             Either the array to save or the meta information needed to create
@@ -353,26 +354,30 @@ class PhysicalData(ABC):
         """
         import openpmd_api as io
 
-        file_name = os.path.basename(path)
-        file_ending = file_name.split(".")[-1]
-        if file_name == file_ending:
-            path += ".h5"
-        elif file_ending not in io.file_extensions:
-            raise Exception("Invalid file ending selected: " +
-                            file_ending)
-        if self.parameters._configuration["mpi"]:
-            series = io.Series(
-                path,
-                io.Access.create,
-                get_comm(),
-                options=json.dumps(
-                    self.parameters._configuration["openpmd_configuration"]))
-        else:
-            series = io.Series(
-                path,
-                io.Access.create,
-                options=json.dumps(
-                    self.parameters._configuration["openpmd_configuration"]))
+        if isinstance(path, str):
+            file_name = os.path.basename(path)
+            file_ending = file_name.split(".")[-1]
+            if file_name == file_ending:
+                path += ".h5"
+            elif file_ending not in io.file_extensions:
+                raise Exception("Invalid file ending selected: " +
+                                file_ending)
+            if self.parameters._configuration["mpi"]:
+                series = io.Series(
+                    path,
+                    io.Access.create,
+                    get_comm(),
+                    options=json.dumps(
+                        self.parameters._configuration["openpmd_configuration"]))
+            else:
+                series = io.Series(
+                    path,
+                    io.Access.create,
+                    options=json.dumps(
+                        self.parameters._configuration["openpmd_configuration"]))
+        elif isinstance(path, io.Series):
+            series = path
+
         series.set_attribute("is_mala_data", 1)
         series.set_software(name="MALA", version=mala_version)
         series.author = "..."

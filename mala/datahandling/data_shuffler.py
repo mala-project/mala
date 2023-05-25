@@ -8,6 +8,7 @@ from mala.common.parameters import ParametersData, Parameters, DEFAULT_NP_DATA_D
 from mala.common.parallelizer import printout
 from mala.common.physical_data import PhysicalData
 from mala.datahandling.data_handler_base import DataHandlerBase
+from mala.common.parallelizer import get_comm
 
 
 class DataShuffler(DataHandlerBase):
@@ -174,20 +175,40 @@ class DataShuffler(DataHandlerBase):
             self.name_infix = name_infix
             self.dimension = dimension
 
+    class __MockedMPIComm:
+
+        def __init__(self):
+            self.rank = 0
+            self.size = 1
+
 
     def __shuffle_openpmd(self, dot: __DescriptorOrTarget,
                           number_of_new_snapshots, shuffle_dimensions,
                           save_name, permutations, file_ending):
         import openpmd_api as io
+
+        if self.parameters._configuration["mpi"]:
+            comm = get_comm()
+        else:
+            comm = self.__MockedMPIComm()
+
         # Load the data
         input_series_list = []
         for idx, snapshot in enumerate(
                 self.parameters.snapshot_directories_list):
             # TODO: Use descriptor and target calculator for this.
-            input_series_list.append(
-                io.Series(
-                    os.path.join(dot.npy_directory(snapshot),
-                                 dot.npy_file(snapshot)), io.Access.read_only))
+            if isinstance(comm, self.__MockedMPIComm):
+                input_series_list.append(
+                    io.Series(
+                        os.path.join(dot.npy_directory(snapshot),
+                                     dot.npy_file(snapshot)),
+                        io.Access.read_only))
+            else:
+                input_series_list.append(
+                    io.Series(
+                        os.path.join(dot.npy_directory(snapshot),
+                                     dot.npy_file(snapshot)),
+                        io.Access.read_only, comm))
 
         # Peek into the input snapshots to determine the datatypes.
         for series in input_series_list:
@@ -221,21 +242,32 @@ class DataShuffler(DataHandlerBase):
             extent[slice_dimension] = single_chunk_len
             return offset, extent
 
+        import math
+        items_per_process = math.ceil(number_of_new_snapshots / comm.size)
+        my_items_start = comm.rank * items_per_process
+        my_items_end = min((comm.rank + 1) * items_per_process, number_of_new_snapshots)
+        my_items_count = my_items_end - my_items_start
+
+        import json
+
         # Do the actual shuffling.
-        # TODO: Parallelize into `number_of_new_snapshots` workers
-        # Each worker would write the i'th snapshot in serial, the input
-        # snapshots would be opened one after another in parallel
-        for i in range(0, number_of_new_snapshots):
+        for i in range(my_items_start, my_items_end):
             # We check above that in the non-numpy case, OpenPMD will work.
             dot.calculator.grid_dimensions = shuffle_dimensions
             name_prefix = os.path.join(dot.save_path,
                                        save_name.replace("*", str(i)))
-            shuffled_snapshot_series = dot.calculator.\
-                    write_to_openpmd_file(name_prefix+dot.name_infix+file_ending,
-                                          PhysicalData.SkipArrayWriting(dataset, feature_size),
-                                          additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
-                                                                 "local_shuffling_seed": i*self.parameters.shuffling_seed},
-                                          internal_iteration_number=i)
+            # do NOT open with MPI
+            shuffled_snapshot_series = io.Series(
+                name_prefix + dot.name_infix + file_ending,
+                io.Access.create,
+                options=json.dumps(
+                    self.parameters._configuration["openpmd_configuration"]))
+            dot.calculator.\
+                write_to_openpmd_file(shuffled_snapshot_series,
+                                        PhysicalData.SkipArrayWriting(dataset, feature_size),
+                                        additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
+                                                                "local_shuffling_seed": i*self.parameters.shuffling_seed},
+                                        internal_iteration_number=i)
             mesh_out = shuffled_snapshot_series.write_iterations()[i].meshes[
                 dot.calculator.data_name]
             new_array = np.zeros(
@@ -276,6 +308,9 @@ class DataShuffler(DataHandlerBase):
                 rc[:, :, :] = new_array[k, :][permutations[i]].reshape(
                     shuffle_dimensions)
             shuffled_snapshot_series.close()
+
+        for series in input_series_list:
+            series.close()
 
 
     def shuffle_snapshots(self,
