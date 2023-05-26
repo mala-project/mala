@@ -378,9 +378,10 @@ class DataShuffler(DataHandlerBase):
         else:
             file_ending = "npy"
 
-        # TODO: This opens each input Series, change this for parallelization
-        # Check the dimensions of the snapshots.
-        self._check_snapshots()
+        if self.parameters._configuration["mpi"]:
+            self._check_snapshots(comm=get_comm())
+        else:
+            self._check_snapshots()
 
         snapshot_types = {
             snapshot.snapshot_type
