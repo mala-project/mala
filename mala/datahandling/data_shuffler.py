@@ -192,6 +192,24 @@ class DataShuffler(DataHandlerBase):
         else:
             comm = self.__MockedMPIComm()
 
+        import math
+        items_per_process = math.ceil(number_of_new_snapshots / comm.size)
+        my_items_start = comm.rank * items_per_process
+        my_items_end = min((comm.rank + 1) * items_per_process,
+                           number_of_new_snapshots)
+        my_items_count = my_items_end - my_items_start
+
+        if self.parameters._configuration["mpi"]:
+            # imagine we have 20 new snapshots to create, but 100 ranks
+            # it's sufficient to let only the first 20 ranks participate in the
+            # following code
+            num_of_participating_ranks = math.ceil(number_of_new_snapshots /
+                                                   items_per_process)
+            color = comm.rank < num_of_participating_ranks
+            comm = comm.Split(color=int(color), key=comm.rank)
+            if not color:
+                return
+
         # Load the data
         input_series_list = []
         for idx, snapshot in enumerate(
@@ -241,12 +259,6 @@ class DataShuffler(DataHandlerBase):
             offset[slice_dimension] = i * single_chunk_len
             extent[slice_dimension] = single_chunk_len
             return offset, extent
-
-        import math
-        items_per_process = math.ceil(number_of_new_snapshots / comm.size)
-        my_items_start = comm.rank * items_per_process
-        my_items_end = min((comm.rank + 1) * items_per_process, number_of_new_snapshots)
-        my_items_count = my_items_end - my_items_start
 
         import json
 
