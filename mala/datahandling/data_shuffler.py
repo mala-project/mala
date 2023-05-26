@@ -379,7 +379,7 @@ class DataShuffler(DataHandlerBase):
             file_ending = "npy"
 
         if self.parameters._configuration["mpi"]:
-            self._check_snapshots(comm=get_comm())
+            self._check_snapshots() #comm=get_comm())
         else:
             self._check_snapshots()
 
