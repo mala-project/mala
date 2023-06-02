@@ -321,6 +321,8 @@ class DataShuffler(DataHandlerBase):
                     shuffle_dimensions)
             shuffled_snapshot_series.close()
 
+        # Ensure consistent parallel destruction
+        # Closing a series is a collective operation
         for series in input_series_list:
             series.close()
 
