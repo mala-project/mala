@@ -178,6 +178,7 @@ class AtomicDensity(Descriptor):
                                lammps_constants.LMP_STYLE_LOCAL, 2,
                                array_shape=(nrows_ggrid, ncols_ggrid),
                                use_fp64=use_fp64)
+        lmp.finalize()
 
         # In comparison to SNAP, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments
@@ -185,17 +186,17 @@ class AtomicDensity(Descriptor):
         self.grid_dimensions = [nx, ny, nz]
         if self.parameters._configuration["mpi"]:
             if return_directly:
-                return gaussian_descriptors_np.copy()
+                return gaussian_descriptors_np
             else:
                 self.fingerprint_length = 4
-                return gaussian_descriptors_np.copy(), nrows_ggrid
+                return gaussian_descriptors_np, nrows_ggrid
         else:
             # Since the atomic density may be directly fed back into QE
             # during the total energy calculation, we may have to return
             # the descriptors, even in serial mode, without any further
             # reordering.
             if return_directly:
-                return gaussian_descriptors_np.copy()
+                return gaussian_descriptors_np
             else:
                 # Here, we want to do something else with the atomic density,
                 # and thus have to properly reorder it.
@@ -209,10 +210,10 @@ class AtomicDensity(Descriptor):
                     gaussian_descriptors_np.transpose([2, 1, 0, 3])
                 if self.parameters.descriptors_contain_xyz:
                     self.fingerprint_length = 4
-                    return gaussian_descriptors_np[:, :, :, 3:].copy(), \
+                    return gaussian_descriptors_np[:, :, :, 3:], \
                            nx*ny*nz
                 else:
                     self.fingerprint_length = 1
-                    return gaussian_descriptors_np[:, :, :, 6:].copy(), \
+                    return gaussian_descriptors_np[:, :, :, 6:], \
                            nx*ny*nz
 

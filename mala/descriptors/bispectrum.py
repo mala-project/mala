@@ -132,12 +132,8 @@ class Bispectrum(Descriptor):
                         os.path.join(filepath,
                                      "in.bgridlocal_defaultproc.python")
             else:
-                if self.parameters._configuration["gpu"]:
-                    self.parameters.lammps_compute_file = \
-                        os.path.join(filepath, "in.bgrid_kokkos.python")
-                else:
-                    self.parameters.lammps_compute_file = \
-                        os.path.join(filepath, "in.bgrid.python")
+                self.parameters.lammps_compute_file = \
+                    os.path.join(filepath, "in.bgrid.python")
 
         # Do the LAMMPS calculation.
         lmp.file(self.parameters.lammps_compute_file)
@@ -172,6 +168,7 @@ class Bispectrum(Descriptor):
                                    lammps_constants.LMP_STYLE_LOCAL, 2,
                                    array_shape=(nrows_local, ncols_local),
                                    use_fp64=use_fp64)
+            lmp.finalize()
 
             # Copy the grid dimensions only at the end.
             self.grid_dimensions = [nx, ny, nz]
@@ -183,6 +180,7 @@ class Bispectrum(Descriptor):
                 extract_compute_np(lmp, "bgrid", 0, 2,
                                    (nz, ny, nx, self.fingerprint_length),
                                    use_fp64=use_fp64)
+            lmp.finalize()
             # switch from x-fastest to z-fastest order (swaps 0th and 2nd
             # dimension)
             snap_descriptors_np = snap_descriptors_np.transpose([2, 1, 0, 3])
