@@ -77,7 +77,12 @@ printout("Network setup: DONE.")
 
 printout("Starting training.")
 test_trainer.train_network()
-test_trainer.save_run("be_model")
+
+# Additional calculation data, i.e., a simulation output, may be saved
+# along side the model. This makes future inference easier.
+additional_calculation_data = os.path.join(data_path, "Be_snapshot0.out")
+test_trainer.save_run("be_model",
+                      additional_calculation_data=additional_calculation_data)
 printout("Training: DONE.")
 
 ####################

@@ -102,6 +102,7 @@ used with:
             packages as installation may be very specific to your setup)
 * `horovod`: Enables training parallelization (not installed alongside other
             packages as installation may be very specific to your setup)
+* `minterpy`: Enables the calculation of minterpy descriptor using the [minterpy](https://github.com/casus/minterpy) code.
   
 MALA can be used without these packages, an error will only occur when attempting
 perform an operation these packages are crucial for. With the exception
@@ -116,12 +117,16 @@ data repository, that can be obtained from
 correct tag for the data repository, since the data repository itself is
 subject to ongoing development as well.
 
-Download data repository and check out correct tag.
+Also make sure to have the [Git LFS](https://git-lfs.com/) installed on your
+machine, since the data repository operates using Git LFS to handle large
+binary files for example training data. 
+
+Download data repository and check out correct tag:
 
 ```sh
 $ git clone https://github.com/mala-project/test-data ~/path/to/data/repo
 $ cd ~/path/to/data/repo
-$ git checkout v1.4.0
+$ git checkout v1.6.0
 ```
 
 Export the path to that repo by

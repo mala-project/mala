@@ -20,16 +20,14 @@ class TestInference:
     def test_unit_conversion(self):
         """Test that RAM inexpensive unit conversion works."""
         parameters, network, data_handler = Runner.load_run("workflow_test",
-                                                            zip_run=False,
                                                             load_runner=False,
                                                             path=param_path)
         parameters.data.use_lazy_loading = False
         parameters.running.mini_batch_size = 50
 
-        data_handler.clear_data()
         data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                                            "Be_snapshot0.out.npy", data_path,
-                                            "te")
+                                  "Be_snapshot0.out.npy", data_path,
+                                  "te")
 
         data_handler.prepare_data()
 
@@ -43,7 +41,10 @@ class TestInference:
                                            ".out.npy"))\
             * data_handler.target_calculator.convert_units(1, in_units="1/(eV*Bohr^3)")
 
-        assert from_file_1.sum() == from_file_2.sum()
+        # Since we are now in FP32 mode, the accuracy is a bit reduced
+        # here.
+        assert np.isclose(from_file_1.sum(), from_file_2.sum(),
+                          rtol=accuracy_coarse)
 
     def test_inference_ram(self):
         """
@@ -87,11 +88,10 @@ class TestInference:
     def __run(use_lazy_loading=False, batchsize=46):
         # First we load Parameters and network.
         parameters, network, data_handler, tester = \
-            Tester.load_run("workflow_test", path=param_path, zip_run=False)
+            Tester.load_run("workflow_test", path=param_path)
         parameters.data.use_lazy_loading = use_lazy_loading
         parameters.running.mini_batch_size = batchsize
 
-        data_handler.clear_data()
         data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
                                   "Be_snapshot0.out.npy", data_path,
                                   "te")

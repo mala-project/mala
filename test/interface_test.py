@@ -119,10 +119,8 @@ class TestInterfaces:
         atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
         calculator = mala.MALA(test_parameters, test_network,
                                data_handler,
-                               reference_data=
-                                        ["espresso-out",
-                                         os.path.join(data_path,
-                                                      "Be_snapshot1.out")])
+                               reference_data=os.path.join(data_path,
+                                                      "Be_snapshot1.out"))
         total_energy_dft_calculation = calculator.data_handler.\
             target_calculator.total_energy_dft_calculation
         calculator.calculate(atoms, properties=["energy"])
