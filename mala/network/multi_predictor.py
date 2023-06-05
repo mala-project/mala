@@ -155,6 +155,7 @@ class SimpleEnsemblePredictor(Predictor):
                loaded_runner
 
     def _forward_snap_descriptors(self, snap_descriptors,
+                                  network,
                                   local_data_size=None):
         """Forward a scaled tensor of descriptors through the NN."""
         all_predicted_outputs = []

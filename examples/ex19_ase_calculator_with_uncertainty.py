@@ -20,7 +20,7 @@ assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
 
 # Set up the ASE objects.
 atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
-calculator = mala.MALASimpleEnsemble.load_model("be_test_model*")
+calculator = mala.MALASimpleEnsemble.load_model("be_model_test*")
 
 ####################
 # PARAMETERS
@@ -40,5 +40,5 @@ calculator.mala_parameters.targets.pseudopotential_path = data_path
 atoms.set_calculator(calculator)
 atoms.get_potential_energy()
 print(calculator.results["energy"],
-      calculator.results["energy_uncertainty"])
+      calculator.results["energy_std"])
 
