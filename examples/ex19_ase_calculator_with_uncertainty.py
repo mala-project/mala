@@ -8,8 +8,8 @@ from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
-ex15_ase_calculator.py: Shows how MALA can be used as an ASE calculator. 
-Currently, calculation of forces is not supported. 
+ex19_ase_calculator_with_uncertainty.py: Shows how MALA can be used as an ASE 
+calculator. Currently, calculation of forces is not supported. 
 
 REQUIRES LAMMPS AND QUANTUM ESPRESSO (TOTAL ENERGY MODULE).
 """
@@ -20,7 +20,7 @@ assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
 
 # Set up the ASE objects.
 atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
-calculator = mala.MALAUncertainty.load_model("be_test_model*")
+calculator = mala.MALASimpleEnsemble.load_model("be_test_model*")
 
 ####################
 # PARAMETERS

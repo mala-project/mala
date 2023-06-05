@@ -146,7 +146,8 @@ class Predictor(Runner):
                 # Just entering the forwarding function to wait for the
                 # main rank further down.
                 if get_rank() != 0:
-                    self._forward_snap_descriptors(snap_descriptors, 0)
+                    self._forward_snap_descriptors(snap_descriptors,
+                                                   self.network, 0)
                     return None
 
             else:
@@ -169,7 +170,8 @@ class Predictor(Runner):
                     torch.from_numpy(snap_descriptors).float()
                 self.data.input_data_scaler.transform(snap_descriptors)
                 return self. \
-                    _forward_snap_descriptors(snap_descriptors, local_size)
+                    _forward_snap_descriptors(snap_descriptors, self.network,
+                                              local_size)
 
         if get_rank() == 0:
             if self.data.descriptor_calculator.descriptors_contain_xyz:
@@ -182,9 +184,11 @@ class Predictor(Runner):
             snap_descriptors = \
                 torch.from_numpy(snap_descriptors).float()
             self.data.input_data_scaler.transform(snap_descriptors)
-            return self._forward_snap_descriptors(snap_descriptors)
+            return self._forward_snap_descriptors(snap_descriptors,
+                                                  self.network)
 
     def _forward_snap_descriptors(self, snap_descriptors,
+                                  network,
                                   local_data_size=None):
         """Forward a scaled tensor of descriptors through the NN."""
         if local_data_size is None:
@@ -216,7 +220,7 @@ class Predictor(Runner):
                 predicted_outputs[i * self.parameters.mini_batch_size:
                                           (i+1)*self.parameters.mini_batch_size] \
                     = self.data.output_data_scaler.\
-                    inverse_transform(self.network(inputs).
+                    inverse_transform(network(inputs).
                                       to('cpu'), as_numpy=True)
 
             # Restricting the actual quantities to physical meaningful values,

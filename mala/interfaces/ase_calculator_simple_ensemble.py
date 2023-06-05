@@ -3,12 +3,12 @@
 from ase.calculators.calculator import Calculator, all_changes
 import numpy as np
 
-from mala import Parameters, Network, DataHandler, LDOS, MultiPredictor
+from mala import Parameters, Network, DataHandler, LDOS, SimpleEnsemblePredictor
 from mala.common.parallelizer import get_rank, get_comm, barrier
 from mala.interfaces.ase_calculator import MALA
 
 
-class MALAUncertainty(MALA):
+class MALASimpleEnsemble(MALA):
     """
     Implements an ASE calculator based on MALA predictions.
 
@@ -38,7 +38,7 @@ class MALAUncertainty(MALA):
         from the atomic positions.
     """
 
-    implemented_properties = ['energy', 'forces']
+    implemented_properties = ['energy']
 
     def __init__(self, params: Parameters, networks: list,
                  data: DataHandler, reference_data=None,
@@ -49,14 +49,14 @@ class MALAUncertainty(MALA):
                             "LDOS.")
 
         if predictor is None:
-            predictor = MultiPredictor(params, networks, data)
+            predictor = SimpleEnsemblePredictor(params, networks, data)
         else:
             predictor = predictor
 
-        super(MALAUncertainty, self).__init__(params, networks[0],
-                                              data,
-                                              reference_data=reference_data,
-                                              predictor=predictor)
+        super(MALASimpleEnsemble, self).__init__(params, networks[0],
+                                                 data,
+                                                 reference_data=reference_data,
+                                                 predictor=predictor)
 
     @classmethod
     def load_model(cls, run_name, path="./"):
@@ -75,7 +75,7 @@ class MALAUncertainty(MALA):
             Path where the model is saved.
         """
         loaded_params, loaded_network, \
-            new_datahandler, loaded_runner = MultiPredictor.\
+            new_datahandler, loaded_runner = SimpleEnsemblePredictor.\
             load_run(run_name, path=path)
         calculator = cls(loaded_params, loaded_network, new_datahandler,
                          predictor=loaded_runner)
@@ -134,10 +134,9 @@ class MALAUncertainty(MALA):
             energies.append(energy)
             barrier()
 
-
-        # Use the LDOS determined DOS and density to get energy and forces.
         self.results["energy"] = np.mean(energies)
-        self.results["energy_uncertainty"] = np.std(energies)
+        self.results["energy_std"] = np.std(energies)
+        self.results["energy_samples"] = energies
         # if "forces" in properties:
         #     self.results["forces"] = forces
 

@@ -7,7 +7,7 @@ from .hyper_opt_optuna import HyperOptOptuna
 from .hyper_opt_naswot import HyperOptNASWOT
 from .hyper_opt_oat import HyperOptOAT
 from .predictor import Predictor
-from .multi_predictor import MultiPredictor
+from .multi_predictor import SimpleEnsemblePredictor
 from .hyperparameter_oat import HyperparameterOAT
 from .hyperparameter_naswot import HyperparameterNASWOT
 from .hyperparameter_optuna import HyperparameterOptuna

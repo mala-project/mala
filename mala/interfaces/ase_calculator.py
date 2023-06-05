@@ -38,7 +38,7 @@ class MALA(Calculator):
         from the atomic positions.
     """
 
-    implemented_properties = ['energy', 'forces']
+    implemented_properties = ['energy']
 
     def __init__(self, params: Parameters, network: Network,
                  data: DataHandler, reference_data=None,
@@ -143,7 +143,6 @@ class MALA(Calculator):
                                                True)
         barrier()
 
-        # Use the LDOS determined DOS and density to get energy and forces.
         self.results["energy"] = energy
         # if "forces" in properties:
         #     self.results["forces"] = forces
