@@ -28,7 +28,7 @@ class Descriptor(PhysicalData):
     # Constructors
     ##############################
 
-    def __new__(cls, params: Parameters):
+    def __new__(cls, params: Parameters=None):
         """
         Create a Descriptor instance.
 
@@ -67,7 +67,23 @@ class Descriptor(PhysicalData):
         else:
             descriptors = super(Descriptor, cls).__new__(cls)
 
+        # For pickling
+        setattr(descriptors, "params_arg", params)
         return descriptors
+
+    def __getnewargs__(self):
+        """
+        Get the necessary arguments to call __new__.
+
+        Used for pickling.
+
+
+        Returns
+        -------
+        params : mala.Parameters
+            The parameters object with which this object was created.
+        """
+        return self.params_arg,
 
     def __init__(self, parameters):
         super(Descriptor, self).__init__(parameters)

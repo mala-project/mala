@@ -78,7 +78,24 @@ class Target(PhysicalData):
         else:
             target = super(Target, cls).__new__(cls)
 
+        # For pickling
+        setattr(target, "params_arg", params)
         return target
+
+    # For pickling
+    def __getnewargs__(self):
+        """
+        Get the necessary arguments to call __new__.
+
+        Used for pickling.
+
+
+        Returns
+        -------
+        params : mala.Parameters
+            The parameters object with which this object was created.
+        """
+        return self.params_arg,
 
     def __init__(self, params):
         super(Target, self).__init__(params)
@@ -97,6 +114,7 @@ class Target(PhysicalData):
         self.number_of_electrons_from_eigenvals = None
         self.band_energy_dft_calculation = None
         self.total_energy_dft_calculation = None
+        self.entropy_contribution_dft_calculation = None
         self.atoms = None
         self.electrons_per_atom = None
         self.qe_input_data = {
@@ -288,6 +306,7 @@ class Target(PhysicalData):
             self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
+            self.entropy_contribution_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms = None
 
@@ -301,6 +320,7 @@ class Target(PhysicalData):
             total_energy = None
             past_calculation_part = False
             bands_included = True
+            entropy_contribution = None
             with open(data) as out:
                 pseudolinefound = False
                 lastpseudo = None
@@ -313,7 +333,7 @@ class Target(PhysicalData):
                     if "Fermi-Dirac smearing, width (Ry)=" in line:
                         self.temperature = np.float64(line.split('=')[2]) * \
                                            Rydberg / kB
-                    if "xc contribution" in line:
+                    if "convergence has been achieved" in line:
                         break
                     if "FFT dimensions" in line:
                         dims = line.split("(")[1]
@@ -344,6 +364,10 @@ class Target(PhysicalData):
                         if total_energy is None:
                             total_energy \
                                 = float((line.split('=')[1]).split('Ry')[0])
+                    if "smearing contrib." in line and past_calculation_part:
+                        if entropy_contribution is None:
+                            entropy_contribution \
+                                = float((line.split('=')[1]).split('Ry')[0])
                     if "set verbosity='high' to print them." in line:
                         bands_included = False
 
@@ -364,6 +388,8 @@ class Target(PhysicalData):
 
             # Unit conversion
             self.total_energy_dft_calculation = total_energy*Rydberg
+            if entropy_contribution is not None:
+                self.entropy_contribution_dft_calculation = entropy_contribution * Rydberg
 
             # Calculate band energy, if the necessary data is included in
             # the output file.
@@ -389,6 +415,7 @@ class Target(PhysicalData):
             self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
+            self.entropy_contribution_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms: ase.Atoms = data[0]
 
@@ -432,6 +459,7 @@ class Target(PhysicalData):
             self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
+            self.entropy_contribution_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms = None
 
@@ -479,7 +507,8 @@ class Target(PhysicalData):
             "ecutwfc": self.qe_input_data["ecutwfc"],
             "ecutrho": self.qe_input_data["ecutrho"],
             "degauss": self.qe_input_data["degauss"],
-            "pseudopotentials": self.qe_pseudopotentials
+            "pseudopotentials": self.qe_pseudopotentials,
+            "entropy_contribution_dft_calculation": self.entropy_contribution_dft_calculation
         }
         if self.voxel is not None:
             additional_calculation_data["voxel"] = self.voxel.todict()
@@ -521,7 +550,8 @@ class Target(PhysicalData):
         else:
             super(Target, self).write_to_numpy_file(path, target_data)
 
-    def write_to_openpmd_file(self, path, target_data=None, additional_attributes={}):
+    def write_to_openpmd_file(self, path, array=None, additional_attributes={},
+                              internal_iteration_number=0):
         """
         Write data to a numpy file.
 
@@ -530,23 +560,32 @@ class Target(PhysicalData):
         path : string
             File to save into. If no file ending is given, .h5 is assumed.
 
-        target_data : numpy.ndarray
+        array : numpy.ndarray
             Target data to save. If None, the data stored in the calculator
             will be used.
 
         additional_attributes : dict
             Dict containing additional attributes to be saved.
+
+        internal_iteration_number : int
+            Internal OpenPMD iteration number. Ideally, this number should
+            match any number present in the file name, if this data is part
+            of a larger data set.
         """
-        if target_data is None:
+        if array is None:
             # The feature dimension may be undefined.
-            super(Target, self).write_to_openpmd_file(path, self.get_target(),
-                                                      additional_attributes=
-                                                      additional_attributes)
+            return super(Target, self).write_to_openpmd_file(
+                path,
+                self.get_target(),
+                additional_attributes=additional_attributes,
+                internal_iteration_number=internal_iteration_number)
         else:
             # The feature dimension may be undefined.
-            super(Target, self).write_to_openpmd_file(path, target_data,
-                                                      additional_attributes=
-                                                      additional_attributes)
+            return super(Target, self).write_to_openpmd_file(
+                path,
+                array,
+                additional_attributes=additional_attributes,
+                internal_iteration_number=internal_iteration_number)
 
     # Accessing target data
     ########################
@@ -714,7 +753,7 @@ class Target(PhysicalData):
         else:
             raise Exception("Unknown RDF method selected.")
         return rdf[1:], rr
-        
+
     @staticmethod
     def three_particle_correlation_function_from_atoms(atoms: ase.Atoms,
                                                        number_of_bins,

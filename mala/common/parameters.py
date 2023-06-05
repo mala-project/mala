@@ -559,6 +559,10 @@ class ParametersData(ParametersBase):
         currently needed will be kept in memory. This greatly reduces memory
         demands, but adds additional computational time.
 
+    use_lazy_loading_prefetch : bool
+        If True, will use alternative lazy loading path with prefetching
+        for higher performance
+
     use_clustering : bool
         If True, and use_lazy_loading is True as well, the data is clustered,
         i.e. not the entire training data is used by rather only a subset
@@ -592,6 +596,7 @@ class ParametersData(ParametersBase):
         self.input_rescaling_type = "None"
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False
+        self.use_lazy_loading_prefetch = False
         self.use_clustering = False
         self.number_of_clusters = 40
         self.train_ratio = 0.1
