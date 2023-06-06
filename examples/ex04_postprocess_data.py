@@ -50,6 +50,11 @@ test_parameters.targets.pseudopotential_path = data_path
 ldos = mala.LDOS.from_numpy_file(test_parameters,
                                  os.path.join(data_path,
                                               "Be_snapshot0.out.npy"))
+# New feature: You can switch the lines above for these to use the new,
+# more powerful OpenPMD interface for MALA!
+# ldos = mala.LDOS.from_numpy_file(test_parameters,
+#                                  os.path.join(data_path,
+#                                               "Be_snapshot0.out.h5"))
 
 # Read additional information about the calculation.
 # By doing this, the calculator is able to know e.g. the temperature

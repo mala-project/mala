@@ -44,6 +44,19 @@ data_handler.add_snapshot("Be_snapshot3.in.npy", data_path,
                           "Be_snapshot3.out.npy", data_path, "te",
                           calculation_output_file=
                           os.path.join(data_path, "Be_snapshot3.out"))
+# New feature: You can switch the lines above for these to use the new,
+# more powerful OpenPMD interface for MALA!
+# data_handler.add_snapshot("Be_snapshot2.in.h5", data_path,
+#                           "Be_snapshot2.out.h5", data_path, "te",
+#                           calculation_output_file=
+#                           os.path.join(data_path, "Be_snapshot2.out"),
+#                           snapshot_type="openpmd")
+# data_handler.add_snapshot("Be_snapshot3.in.h5", data_path,
+#                           "Be_snapshot3.out.h5", data_path, "te",
+#                           calculation_output_file=
+#                           os.path.join(data_path, "Be_snapshot3.out"),
+#                           snapshot_type="openpmd")
+
 data_handler.prepare_data(reparametrize_scaler=False)
 
 
