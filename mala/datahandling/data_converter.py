@@ -502,11 +502,18 @@ class DataConverter:
                     self.descriptor_calculator.\
                         write_to_numpy_file(input_path, tmp_input)
             else:
-                tmp_input, local_offset, local_reach = \
-                    self.descriptor_calculator.convert_local_to_3d(tmp_input)
-                self.descriptor_calculator.\
-                    write_to_openpmd_iteration(input_iteration,
-                                               tmp_input, local_offset=local_offset, local_reach=local_reach)
+                if self.parameters._configuration["mpi"]:
+                    tmp_input, local_offset, local_reach = \
+                        self.descriptor_calculator.convert_local_to_3d(tmp_input)
+                    self.descriptor_calculator. \
+                        write_to_openpmd_iteration(input_iteration,
+                                                   tmp_input,
+                                                   local_offset=local_offset,
+                                                   local_reach=local_reach)
+                else:
+                    self.descriptor_calculator. \
+                        write_to_openpmd_iteration(input_iteration,
+                                                   tmp_input)
             del tmp_input
 
         ###########

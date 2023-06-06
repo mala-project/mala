@@ -86,6 +86,53 @@ class TestFullWorkflow:
         assert output_data_shape[0] == 18 and output_data_shape[1] == 18 and\
                output_data_shape[2] == 27 and output_data_shape[3] == 11
 
+    def test_preprocessing_openpmd(self):
+        """
+        Test whether MALA can preprocess data.
+
+        This means reading the LDOS from cube files and calculating
+        bispectrum descriptors.
+        The data necessary for this is currently not in the data repo!
+        """
+
+        # Set up parameters.
+        test_parameters = mala.Parameters()
+        test_parameters.descriptors.descriptor_type = "Bispectrum"
+        test_parameters.descriptors.bispectrum_twojmax = 6
+        test_parameters.descriptors.bispectrum_cutoff = 4.67637
+        test_parameters.descriptors.descriptors_contain_xyz = True
+        test_parameters.targets.target_type = "LDOS"
+        test_parameters.targets.ldos_gridsize = 11
+        test_parameters.targets.ldos_gridspacing_ev = 2.5
+        test_parameters.targets.ldos_gridoffset_ev = -5
+
+        # Create a DataConverter, and add snapshots to it.
+        data_converter = mala.DataConverter(test_parameters)
+        data_converter.add_snapshot(descriptor_input_type="espresso-out",
+                                    descriptor_input_path=
+                                    os.path.join(data_path,
+                                                 "Be_snapshot0.out"),
+                                    target_input_type=".cube",
+                                    target_input_path=
+                                    os.path.join(data_path, "cubes",
+                                                 "tmp.pp*Be_ldos.cube"),
+                                    target_units="1/(Ry*Bohr^3)")
+        data_converter.convert_snapshots(complete_save_path="./",
+                                         naming_scheme="Be_snapshot*.h5")
+
+        # Compare against
+        input_data = data_converter.descriptor_calculator.\
+            read_from_openpmd_file("Be_snapshot0.in.h5")
+        input_data_shape = np.shape(input_data)
+        assert input_data_shape[0] == 18 and input_data_shape[1] == 18 and \
+               input_data_shape[2] == 27 and input_data_shape[3] == 30
+
+        output_data = data_converter.target_calculator.\
+            read_from_openpmd_file("Be_snapshot0.out.h5")
+        output_data_shape = np.shape(output_data)
+        assert output_data_shape[0] == 18 and output_data_shape[1] == 18 and\
+               output_data_shape[2] == 27 and output_data_shape[3] == 11
+
     def test_postprocessing_from_dos(self):
         """
         Test whether MALA can postprocess data (DOS).
