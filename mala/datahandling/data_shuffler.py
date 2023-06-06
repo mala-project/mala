@@ -144,8 +144,10 @@ class DataShuffler(DataHandlerBase):
                                         new_targets)
             else:
                 # We check above that in the non-numpy case, OpenPMD will work.
-                self.descriptor_calculator.grid_dimensions = shuffle_dimensions
-                self.target_calculator.grid_dimensions = shuffle_dimensions
+                self.descriptor_calculator.grid_dimensions = \
+                    list(shuffle_dimensions)
+                self.target_calculator.grid_dimensions = \
+                    list(shuffle_dimensions)
                 self.descriptor_calculator.\
                     write_to_openpmd_file(descriptor_name+".in."+file_ending,
                                           new_descriptors,
@@ -173,7 +175,6 @@ class DataShuffler(DataHandlerBase):
             self.calculator = calculator
             self.name_infix = name_infix
             self.dimension = dimension
-
 
     def __shuffle_openpmd(self, dot: __DescriptorOrTarget,
                           number_of_new_snapshots, shuffle_dimensions,
@@ -227,7 +228,7 @@ class DataShuffler(DataHandlerBase):
         # snapshots would be opened one after another in parallel
         for i in range(0, number_of_new_snapshots):
             # We check above that in the non-numpy case, OpenPMD will work.
-            dot.calculator.grid_dimensions = shuffle_dimensions
+            dot.calculator.grid_dimensions = list(shuffle_dimensions)
             name_prefix = os.path.join(dot.save_path,
                                        save_name.replace("*", str(i)))
             shuffled_snapshot_series = dot.calculator.\
@@ -276,7 +277,6 @@ class DataShuffler(DataHandlerBase):
                 rc[:, :, :] = new_array[k, :][permutations[i]].reshape(
                     shuffle_dimensions)
             shuffled_snapshot_series.close()
-
 
     def shuffle_snapshots(self,
                           complete_save_path=None,

@@ -31,6 +31,7 @@ class TestDataShuffling:
         # for lazily loaded training-
         data_shuffler.shuffle_snapshots("./", save_name="Be_shuffled*")
 
+        test_parameters = mala.Parameters()
         test_parameters.data.shuffling_seed = 1234
         data_shuffler = mala.DataShuffler(test_parameters)
 
@@ -46,6 +47,64 @@ class TestDataShuffling:
 
         old = np.load("Be_shuffled1.out.npy")
         new = np.load("Be_REshuffled1.out.npy")
+        assert np.isclose(np.sum(np.abs(old-new)), 0.0, atol=accuracy)
+
+    def test_seed_openpmd(self):
+        """Test that the shuffling is handled correctly internally."""
+        test_parameters = mala.Parameters()
+        test_parameters.openpmd_configuration = {
+            'adios2': {
+                'engine': {
+                    'parameters': {
+                        'StatsLevel': 1
+                    }
+                }
+            }
+        }
+        test_parameters.data.shuffling_seed = 1234
+        data_shuffler = mala.DataShuffler(test_parameters)
+
+        # Add a snapshot we want to use in to the list.
+        data_shuffler.add_snapshot("Be_snapshot0.in.h5", data_path,
+                                   "Be_snapshot0.out.h5", data_path,
+                                   snapshot_type="openpmd")
+        data_shuffler.add_snapshot("Be_snapshot1.in.h5", data_path,
+                                   "Be_snapshot1.out.h5", data_path,
+                                   snapshot_type="openpmd")
+
+        # After shuffling, these snapshots can be loaded as regular snapshots
+        # for lazily loaded training-
+        data_shuffler.shuffle_snapshots("./", save_name="Be_shuffled*.h5")
+
+        test_parameters = mala.Parameters()
+        test_parameters.openpmd_configuration = {
+            'adios2': {
+                'engine': {
+                    'parameters': {
+                        'StatsLevel': 1
+                    }
+                }
+            }
+        }
+        test_parameters.data.shuffling_seed = 1234
+        data_shuffler = mala.DataShuffler(test_parameters)
+
+        # Add a snapshot we want to use in to the list.
+        data_shuffler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                   "Be_snapshot0.out.npy", data_path,
+                                   snapshot_type="numpy")
+        data_shuffler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                   "Be_snapshot1.out.npy", data_path,
+                                   snapshot_type="numpy")
+
+        # After shuffling, these snapshots can be loaded as regular snapshots
+        # for lazily loaded training-
+        data_shuffler.shuffle_snapshots("./", save_name="Be_REshuffled*.h5")
+
+        old = data_shuffler.target_calculator.\
+            read_from_openpmd_file("Be_shuffled1.out.h5")
+        new = data_shuffler.target_calculator.\
+            read_from_openpmd_file("Be_REshuffled1.out.h5")
         assert np.isclose(np.sum(np.abs(old-new)), 0.0, atol=accuracy)
 
     def test_training(self):
@@ -79,6 +138,7 @@ class TestDataShuffling:
         old_loss = test_trainer.final_validation_loss
 
         # Shuffle.
+        test_parameters = mala.Parameters()
         test_parameters.data.shuffling_seed = 1234
         data_shuffler = mala.DataShuffler(test_parameters)
 
@@ -101,6 +161,106 @@ class TestDataShuffling:
         data_handler.add_snapshot("Be_shuffled1.in.npy", ".",
                                   "Be_shuffled1.out.npy", ".", "va")
         data_handler.prepare_data()
+
+        test_network = mala.Network(test_parameters)
+        test_trainer = mala.Trainer(test_parameters, test_network,
+                                    data_handler)
+        test_trainer.train_network()
+        new_loss = test_trainer.final_validation_loss
+        assert old_loss > new_loss
+
+    def test_training_openpmd(self):
+        test_parameters = mala.Parameters()
+        test_parameters.openpmd_configuration = {
+            'adios2': {
+                'engine': {
+                    'parameters': {
+                        'StatsLevel': 1
+                    }
+                }
+            }
+        }
+        test_parameters.data.data_splitting_type = "by_snapshot"
+        test_parameters.data.input_rescaling_type = "feature-wise-standard"
+        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.running.max_number_epochs = 50
+        test_parameters.running.mini_batch_size = 40
+        test_parameters.running.learning_rate = 0.00001
+        test_parameters.running.trainingtype = "Adam"
+        test_parameters.verbosity = 1
+        test_parameters.data.use_lazy_loading = True
+
+        # Train without shuffling.
+        data_handler = mala.DataHandler(test_parameters)
+        data_handler.add_snapshot("Be_snapshot0.in.h5", data_path,
+                                  "Be_snapshot0.out.h5", data_path, "tr",
+                                  snapshot_type="openpmd")
+        data_handler.add_snapshot("Be_snapshot1.in.h5", data_path,
+                                  "Be_snapshot1.out.h5", data_path, "va",
+                                  snapshot_type="openpmd")
+        data_handler.prepare_data()
+
+        test_parameters.network.layer_sizes = [data_handler.input_dimension,
+                                               100,
+                                               data_handler.output_dimension]
+        test_network = mala.Network(test_parameters)
+        test_trainer = mala.Trainer(test_parameters, test_network,
+                                    data_handler)
+        test_trainer.train_network()
+        old_loss = test_trainer.final_validation_loss
+
+        # Shuffle.
+        test_parameters = mala.Parameters()
+        test_parameters.openpmd_configuration = {
+            'adios2': {
+                'engine': {
+                    'parameters': {
+                        'StatsLevel': 1
+                    }
+                }
+            }
+        }
+        test_parameters.data.shuffling_seed = 1234
+        test_parameters.data.data_splitting_type = "by_snapshot"
+        test_parameters.data.input_rescaling_type = "feature-wise-standard"
+        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.running.max_number_epochs = 50
+        test_parameters.running.mini_batch_size = 40
+        test_parameters.running.learning_rate = 0.00001
+        test_parameters.running.trainingtype = "Adam"
+        test_parameters.verbosity = 1
+        test_parameters.data.use_lazy_loading = True
+
+        data_shuffler = mala.DataShuffler(test_parameters)
+
+        # Add a snapshot we want to use in to the list.
+        data_shuffler.add_snapshot("Be_snapshot0.in.h5", data_path,
+                                   "Be_snapshot0.out.h5", data_path,
+                                   snapshot_type="openpmd")
+        data_shuffler.add_snapshot("Be_snapshot1.in.h5", data_path,
+                                   "Be_snapshot1.out.h5", data_path,
+                                   snapshot_type="openpmd")
+
+        # After shuffling, these snapshots can be loaded as regular snapshots
+        # for lazily loaded training-
+        data_shuffler.shuffle_snapshots("./", save_name="Be_shuffled*.h5")
+        test_parameters.descriptors.descriptors_contain_xyz = True
+
+        # Train with shuffling.
+        data_handler = mala.DataHandler(test_parameters)
+        # Add a snapshot we want to use in to the list.
+        data_handler.add_snapshot("Be_shuffled0.in.h5", ".",
+                                  "Be_shuffled0.out.h5", ".", "tr",
+                                  snapshot_type="openpmd")
+        data_handler.add_snapshot("Be_shuffled1.in.h5", ".",
+                                  "Be_shuffled1.out.h5", ".", "va",
+                                  snapshot_type="openpmd")
+        data_handler.prepare_data()
+        test_parameters.network.layer_sizes = [data_handler.input_dimension,
+                                               100,
+                                               data_handler.output_dimension]
 
         test_network = mala.Network(test_parameters)
         test_trainer = mala.Trainer(test_parameters, test_network,
