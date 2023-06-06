@@ -277,6 +277,38 @@ class TestFullWorkflow:
         assert np.isclose(total_energy, ldos.total_energy_dft_calculation,
                           atol=accuracy_total_energy)
 
+    def test_total_energy_from_ldos_openpmd(self):
+        """
+        Test whether MALA can calculate the total energy using the LDOS.
+
+        This means calculating energies from the LDOS.
+        """
+        # Set up parameters.
+        test_parameters = mala.Parameters()
+        test_parameters.targets.target_type = "LDOS"
+        test_parameters.targets.ldos_gridsize = 11
+        test_parameters.targets.ldos_gridspacing_ev = 2.5
+        test_parameters.targets.ldos_gridoffset_ev = -5
+        test_parameters.targets.pseudopotential_path = data_path
+
+        # Create a target calculator to perform postprocessing.
+        ldos = mala.Target(test_parameters)
+        ldos_data = ldos.\
+            read_from_openpmd_file(os.path.join(data_path,
+                                                "Be_snapshot0.out.h5"))
+        ldos.read_additional_calculation_data(os.path.join(
+                                              data_path,
+                                              "Be_snapshot0.out"), "espresso-out")
+
+        # Calculate energies
+        self_consistent_fermi_energy = ldos. \
+            get_self_consistent_fermi_energy(ldos_data)
+        total_energy = ldos.get_total_energy(ldos_data,
+                                             fermi_energy=
+                                             self_consistent_fermi_energy)
+        assert np.isclose(total_energy, ldos.total_energy_dft_calculation,
+                          atol=accuracy_total_energy)
+
     def test_training_with_postprocessing_data_repo(self):
         """
         Test if a trained network can be loaded for postprocessing.
