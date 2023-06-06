@@ -148,7 +148,7 @@ class DataHandlerBase(ABC):
     # Loading data
     ######################
 
-    def _check_snapshots(self):
+    def _check_snapshots(self, comm=None):
         """Check the snapshots for consistency."""
         self.nr_snapshots = len(self.parameters.snapshot_directories_list)
 
@@ -170,7 +170,7 @@ class DataHandlerBase(ABC):
                 tmp_dimension = self.descriptor_calculator. \
                     read_dimensions_from_openpmd_file(
                     os.path.join(snapshot.input_npy_directory,
-                                 snapshot.input_npy_file))
+                                 snapshot.input_npy_file), comm=comm)
             else:
                 raise Exception("Unknown snapshot file type.")
 
@@ -204,7 +204,7 @@ class DataHandlerBase(ABC):
                 tmp_dimension = self.target_calculator. \
                     read_dimensions_from_openpmd_file(
                     os.path.join(snapshot.output_npy_directory,
-                                 snapshot.output_npy_file))
+                                 snapshot.output_npy_file), comm=comm)
             else:
                 raise Exception("Unknown snapshot file type.")
 
