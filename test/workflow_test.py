@@ -32,6 +32,13 @@ class TestFullWorkflow:
         assert desired_loss_improvement_factor * \
                test_trainer.initial_test_loss > test_trainer.final_test_loss
 
+    def test_network_training_openpmd(self):
+        """Test whether MALA can train a NN."""
+
+        test_trainer = self.__simple_training(use_openpmd_data=True)
+        assert desired_loss_improvement_factor * \
+               test_trainer.initial_test_loss > test_trainer.final_test_loss
+
     def test_network_training_fast_dataset(self):
         """Test whether MALA can train a NN."""
 
@@ -433,7 +440,8 @@ class TestFullWorkflow:
                           atol=accuracy_very_coarse)
 
     @staticmethod
-    def __simple_training(use_fast_tensor_dataset=False):
+    def __simple_training(use_fast_tensor_dataset=False,
+                          use_openpmd_data=False):
         """Perform a simple training and save it, if necessary."""
         # Set up parameters.
         test_parameters = mala.Parameters()
@@ -449,12 +457,23 @@ class TestFullWorkflow:
 
         # Load data.
         data_handler = mala.DataHandler(test_parameters)
-        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                                  "Be_snapshot0.out.npy", data_path, "tr")
-        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                  "Be_snapshot1.out.npy", data_path, "va")
-        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                  "Be_snapshot2.out.npy", data_path, "te")
+        if use_openpmd_data:
+            data_handler.add_snapshot("Be_snapshot0.in.h5", data_path,
+                                      "Be_snapshot0.out.h5", data_path, "tr",
+                                      snapshot_type="openpmd")
+            data_handler.add_snapshot("Be_snapshot1.in.h5", data_path,
+                                      "Be_snapshot1.out.h5", data_path, "va",
+                                      snapshot_type="openpmd")
+            data_handler.add_snapshot("Be_snapshot2.in.h5", data_path,
+                                      "Be_snapshot2.out.h5", data_path, "te",
+                                      snapshot_type="openpmd")
+        else:
+            data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                      "Be_snapshot0.out.npy", data_path, "tr")
+            data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                      "Be_snapshot1.out.npy", data_path, "va")
+            data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                      "Be_snapshot2.out.npy", data_path, "te")
         data_handler.prepare_data()
 
         # Train a network.
