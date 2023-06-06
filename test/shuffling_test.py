@@ -52,15 +52,6 @@ class TestDataShuffling:
     def test_seed_openpmd(self):
         """Test that the shuffling is handled correctly internally."""
         test_parameters = mala.Parameters()
-        test_parameters.openpmd_configuration = {
-            'adios2': {
-                'engine': {
-                    'parameters': {
-                        'StatsLevel': 1
-                    }
-                }
-            }
-        }
         test_parameters.data.shuffling_seed = 1234
         data_shuffler = mala.DataShuffler(test_parameters)
 
@@ -77,15 +68,6 @@ class TestDataShuffling:
         data_shuffler.shuffle_snapshots("./", save_name="Be_shuffled*.h5")
 
         test_parameters = mala.Parameters()
-        test_parameters.openpmd_configuration = {
-            'adios2': {
-                'engine': {
-                    'parameters': {
-                        'StatsLevel': 1
-                    }
-                }
-            }
-        }
         test_parameters.data.shuffling_seed = 1234
         data_shuffler = mala.DataShuffler(test_parameters)
 
@@ -171,15 +153,6 @@ class TestDataShuffling:
 
     def test_training_openpmd(self):
         test_parameters = mala.Parameters()
-        test_parameters.openpmd_configuration = {
-            'adios2': {
-                'engine': {
-                    'parameters': {
-                        'StatsLevel': 1
-                    }
-                }
-            }
-        }
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "normal"
@@ -212,15 +185,6 @@ class TestDataShuffling:
 
         # Shuffle.
         test_parameters = mala.Parameters()
-        test_parameters.openpmd_configuration = {
-            'adios2': {
-                'engine': {
-                    'parameters': {
-                        'StatsLevel': 1
-                    }
-                }
-            }
-        }
         test_parameters.data.shuffling_seed = 1234
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
