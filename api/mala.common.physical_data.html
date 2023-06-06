@@ -153,7 +153,7 @@ instance of the class SkipArrayWriting.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.common.physical_data.PhysicalData.read_dimensions_from_openpmd_file">
-<span class="sig-name descname"><span class="pre">read_dimensions_from_openpmd_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/physical_data.html#PhysicalData.read_dimensions_from_openpmd_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.physical_data.PhysicalData.read_dimensions_from_openpmd_file" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">read_dimensions_from_openpmd_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/physical_data.html#PhysicalData.read_dimensions_from_openpmd_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.physical_data.PhysicalData.read_dimensions_from_openpmd_file" title="Permalink to this definition"></a></dt>
 <dd><p>Read only the dimensions from a openPMD file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -231,7 +231,8 @@ array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>string</em>) – File to save into. If no file ending is given, .h5 is assumed.</p></li>
+<li><p><strong>path</strong> (<em>string</em>) – File to save into. If no file ending is given, .h5 is assumed.
+Alternatively: A Series, opened already.</p></li>
 <li><p><strong>array</strong> (<em>Either numpy.ndarray</em><em> or </em><em>an SkipArrayWriting object</em>) – Either the array to save or the meta information needed to create
 the openPMD structure.</p></li>
 <li><p><strong>additional_attributes</strong> (<em>dict</em>) – Dict containing additional attributes to be saved.</p></li>

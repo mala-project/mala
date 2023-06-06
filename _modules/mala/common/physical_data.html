@@ -315,7 +315,7 @@
         <span class="n">loaded_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mmap_mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_dimensions</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">loaded_array</span><span class="p">)),</span> <span class="n">loaded_array</span><span class="o">.</span><span class="n">dtype</span></div>
 
-<div class="viewcode-block" id="PhysicalData.read_dimensions_from_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_dimensions_from_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_dimensions_from_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="PhysicalData.read_dimensions_from_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_dimensions_from_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_dimensions_from_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read only the dimensions from a openPMD file.</span>
 
@@ -324,40 +324,50 @@
 <span class="sd">        path : string</span>
 <span class="sd">            Path to the openPMD file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
-        <span class="c1"># The union operator for dicts is only supported starting with</span>
-        <span class="c1"># python 3.9. Currently, MALA works down to python 3.8; For now,</span>
-        <span class="c1"># I think it is good to keep it that way.</span>
-        <span class="c1"># I will leave this code in for now, because that may change in the</span>
-        <span class="c1"># future.</span>
-        <span class="c1"># series = io.Series(path, io.Access.read_only,</span>
-        <span class="c1">#                    options=json.dumps(</span>
-        <span class="c1">#                         {&quot;defer_iteration_parsing&quot;: True} |</span>
-        <span class="c1">#                         self.parameters.</span>
-        <span class="c1">#                             _configuration[&quot;openpmd_configuration&quot;]))</span>
-        <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">options</span><span class="p">[</span><span class="s2">&quot;defer_iteration_parsing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">read_only</span><span class="p">,</span>
-                           <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">options</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">comm</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+            <span class="c1"># The union operator for dicts is only supported starting with</span>
+            <span class="c1"># python 3.9. Currently, MALA works down to python 3.8; For now,</span>
+            <span class="c1"># I think it is good to keep it that way.</span>
+            <span class="c1"># I will leave this code in for now, because that may change in the</span>
+            <span class="c1"># future.</span>
+            <span class="c1"># series = io.Series(path, io.Access.read_only,</span>
+            <span class="c1">#                    options=json.dumps(</span>
+            <span class="c1">#                         {&quot;defer_iteration_parsing&quot;: True} |</span>
+            <span class="c1">#                         self.parameters.</span>
+            <span class="c1">#                             _configuration[&quot;openpmd_configuration&quot;]))</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span>
+                <span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">options</span><span class="p">[</span><span class="s2">&quot;defer_iteration_parsing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">path</span><span class="p">,</span>
+                               <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">read_only</span><span class="p">,</span>
+                               <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">options</span><span class="p">))</span>
 
-        <span class="c1"># Check if this actually MALA compatible data.</span>
-        <span class="k">if</span> <span class="n">series</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;is_mala_data&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Non-MALA data detected, cannot work with this &quot;</span>
-                            <span class="s2">&quot;data.&quot;</span><span class="p">)</span>
+            <span class="c1"># Check if this actually MALA compatible data.</span>
+            <span class="k">if</span> <span class="n">series</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;is_mala_data&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Non-MALA data detected, cannot work with this &quot;</span>
+                    <span class="s2">&quot;data.&quot;</span><span class="p">)</span>
 
-        <span class="c1"># A bit clanky, but this way only the FIRST iteration is loaded,</span>
-        <span class="c1"># which is what we need for loading from a single file that</span>
-        <span class="c1"># may be whatever iteration in its series.</span>
-        <span class="c1"># Also, in combination with `defer_iteration_parsing`, specified as</span>
-        <span class="c1"># default above, this opens and parses the first iteration,</span>
-        <span class="c1"># and no others.</span>
-        <span class="k">for</span> <span class="n">current_iteration</span> <span class="ow">in</span> <span class="n">series</span><span class="o">.</span><span class="n">read_iterations</span><span class="p">():</span>
-            <span class="n">mesh</span> <span class="o">=</span> <span class="n">current_iteration</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_name</span><span class="p">]</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span>\
-                <span class="n">_process_loaded_dimensions</span><span class="p">((</span><span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                            <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                            <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                                            <span class="nb">len</span><span class="p">(</span><span class="n">mesh</span><span class="p">)))</span></div>
+            <span class="c1"># A bit clanky, but this way only the FIRST iteration is loaded,</span>
+            <span class="c1"># which is what we need for loading from a single file that</span>
+            <span class="c1"># may be whatever iteration in its series.</span>
+            <span class="c1"># Also, in combination with `defer_iteration_parsing`, specified as</span>
+            <span class="c1"># default above, this opens and parses the first iteration,</span>
+            <span class="c1"># and no others.</span>
+            <span class="k">for</span> <span class="n">current_iteration</span> <span class="ow">in</span> <span class="n">series</span><span class="o">.</span><span class="n">read_iterations</span><span class="p">():</span>
+                <span class="n">mesh</span> <span class="o">=</span> <span class="n">current_iteration</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_name</span><span class="p">]</span>
+                <span class="n">tuple_from_file</span> <span class="o">=</span> <span class="p">[</span><span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                   <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">mesh</span><span class="p">)]</span>
+                <span class="k">break</span>
+            <span class="n">series</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tuple_from_file</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">comm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tuple_from_file</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">tuple_from_file</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_dimensions</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">tuple_from_file</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="PhysicalData.write_to_numpy_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_numpy_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_numpy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -411,6 +421,7 @@
 <span class="sd">        ----------</span>
 <span class="sd">        path : string</span>
 <span class="sd">            File to save into. If no file ending is given, .h5 is assumed.</span>
+<span class="sd">            Alternatively: A Series, opened already.</span>
 
 <span class="sd">        array : Either numpy.ndarray or an SkipArrayWriting object</span>
 <span class="sd">            Either the array to save or the meta information needed to create</span>
@@ -426,26 +437,30 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
 
-        <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="n">file_ending</span> <span class="o">=</span> <span class="n">file_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">file_name</span> <span class="o">==</span> <span class="n">file_ending</span><span class="p">:</span>
-            <span class="n">path</span> <span class="o">+=</span> <span class="s2">&quot;.h5&quot;</span>
-        <span class="k">elif</span> <span class="n">file_ending</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">io</span><span class="o">.</span><span class="n">file_extensions</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid file ending selected: &quot;</span> <span class="o">+</span>
-                            <span class="n">file_ending</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
-            <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                <span class="n">path</span><span class="p">,</span>
-                <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
-                <span class="n">get_comm</span><span class="p">(),</span>
-                <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                <span class="n">path</span><span class="p">,</span>
-                <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
-                <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">file_ending</span> <span class="o">=</span> <span class="n">file_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">file_name</span> <span class="o">==</span> <span class="n">file_ending</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">+=</span> <span class="s2">&quot;.h5&quot;</span>
+            <span class="k">elif</span> <span class="n">file_ending</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">io</span><span class="o">.</span><span class="n">file_extensions</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid file ending selected: &quot;</span> <span class="o">+</span>
+                                <span class="n">file_ending</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+                <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span>
+                    <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
+                    <span class="n">get_comm</span><span class="p">(),</span>
+                    <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span>
+                    <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
+                    <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+            <span class="n">series</span> <span class="o">=</span> <span class="n">path</span>
+
         <span class="n">series</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;is_mala_data&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">series</span><span class="o">.</span><span class="n">set_software</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MALA&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">mala_version</span><span class="p">)</span>
         <span class="n">series</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span>

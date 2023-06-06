@@ -81,6 +81,7 @@
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
 <span class="kn">from</span> <span class="nn">mala.common.physical_data</span> <span class="kn">import</span> <span class="n">PhysicalData</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.data_handler_base</span> <span class="kn">import</span> <span class="n">DataHandlerBase</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span>
 
 
 <div class="viewcode-block" id="DataShuffler"><a class="viewcode-back" href="../../../api/mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler">[docs]</a><span class="k">class</span> <span class="nc">DataShuffler</span><span class="p">(</span><span class="n">DataHandlerBase</span><span class="p">):</span>
@@ -247,20 +248,58 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">name_infix</span> <span class="o">=</span> <span class="n">name_infix</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">dimension</span>
 
+    <span class="k">class</span> <span class="nc">__MockedMPIComm</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="mi">1</span>
+
 
     <span class="k">def</span> <span class="nf">__shuffle_openpmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dot</span><span class="p">:</span> <span class="n">__DescriptorOrTarget</span><span class="p">,</span>
                           <span class="n">number_of_new_snapshots</span><span class="p">,</span> <span class="n">shuffle_dimensions</span><span class="p">,</span>
                           <span class="n">save_name</span><span class="p">,</span> <span class="n">permutations</span><span class="p">,</span> <span class="n">file_ending</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+            <span class="n">comm</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">comm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MockedMPIComm</span><span class="p">()</span>
+
+        <span class="kn">import</span> <span class="nn">math</span>
+        <span class="n">items_per_process</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">number_of_new_snapshots</span> <span class="o">/</span> <span class="n">comm</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">my_items_start</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">*</span> <span class="n">items_per_process</span>
+        <span class="n">my_items_end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">((</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">items_per_process</span><span class="p">,</span>
+                           <span class="n">number_of_new_snapshots</span><span class="p">)</span>
+        <span class="n">my_items_count</span> <span class="o">=</span> <span class="n">my_items_end</span> <span class="o">-</span> <span class="n">my_items_start</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+            <span class="c1"># imagine we have 20 new snapshots to create, but 100 ranks</span>
+            <span class="c1"># it&#39;s sufficient to let only the first 20 ranks participate in the</span>
+            <span class="c1"># following code</span>
+            <span class="n">num_of_participating_ranks</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">number_of_new_snapshots</span> <span class="o">/</span>
+                                                   <span class="n">items_per_process</span><span class="p">)</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">&lt;</span> <span class="n">num_of_participating_ranks</span>
+            <span class="n">comm</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">Split</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">color</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">color</span><span class="p">:</span>
+                <span class="k">return</span>
+
         <span class="c1"># Load the data</span>
         <span class="n">input_series_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">):</span>
             <span class="c1"># TODO: Use descriptor and target calculator for this.</span>
-            <span class="n">input_series_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dot</span><span class="o">.</span><span class="n">npy_directory</span><span class="p">(</span><span class="n">snapshot</span><span class="p">),</span>
-                                 <span class="n">dot</span><span class="o">.</span><span class="n">npy_file</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)),</span> <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">read_only</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">comm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MockedMPIComm</span><span class="p">):</span>
+                <span class="n">input_series_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dot</span><span class="o">.</span><span class="n">npy_directory</span><span class="p">(</span><span class="n">snapshot</span><span class="p">),</span>
+                                     <span class="n">dot</span><span class="o">.</span><span class="n">npy_file</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)),</span>
+                        <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">read_only</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">input_series_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dot</span><span class="o">.</span><span class="n">npy_directory</span><span class="p">(</span><span class="n">snapshot</span><span class="p">),</span>
+                                     <span class="n">dot</span><span class="o">.</span><span class="n">npy_file</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)),</span>
+                        <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">read_only</span><span class="p">,</span> <span class="n">comm</span><span class="p">))</span>
 
         <span class="c1"># Peek into the input snapshots to determine the datatypes.</span>
         <span class="k">for</span> <span class="n">series</span> <span class="ow">in</span> <span class="n">input_series_list</span><span class="p">:</span>
@@ -294,21 +333,26 @@
             <span class="n">extent</span><span class="p">[</span><span class="n">slice_dimension</span><span class="p">]</span> <span class="o">=</span> <span class="n">single_chunk_len</span>
             <span class="k">return</span> <span class="n">offset</span><span class="p">,</span> <span class="n">extent</span>
 
+        <span class="kn">import</span> <span class="nn">json</span>
+
         <span class="c1"># Do the actual shuffling.</span>
-        <span class="c1"># TODO: Parallelize into `number_of_new_snapshots` workers</span>
-        <span class="c1"># Each worker would write the i&#39;th snapshot in serial, the input</span>
-        <span class="c1"># snapshots would be opened one after another in parallel</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_new_snapshots</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">my_items_start</span><span class="p">,</span> <span class="n">my_items_end</span><span class="p">):</span>
             <span class="c1"># We check above that in the non-numpy case, OpenPMD will work.</span>
             <span class="n">dot</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="n">shuffle_dimensions</span>
             <span class="n">name_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dot</span><span class="o">.</span><span class="n">save_path</span><span class="p">,</span>
                                        <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
-            <span class="n">shuffled_snapshot_series</span> <span class="o">=</span> <span class="n">dot</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span>\
-                    <span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">name_prefix</span><span class="o">+</span><span class="n">dot</span><span class="o">.</span><span class="n">name_infix</span><span class="o">+</span><span class="n">file_ending</span><span class="p">,</span>
-                                          <span class="n">PhysicalData</span><span class="o">.</span><span class="n">SkipArrayWriting</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">feature_size</span><span class="p">),</span>
-                                          <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;global_shuffling_seed&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">,</span>
-                                                                 <span class="s2">&quot;local_shuffling_seed&quot;</span><span class="p">:</span> <span class="n">i</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">},</span>
-                                          <span class="n">internal_iteration_number</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+            <span class="c1"># do NOT open with MPI</span>
+            <span class="n">shuffled_snapshot_series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                <span class="n">name_prefix</span> <span class="o">+</span> <span class="n">dot</span><span class="o">.</span><span class="n">name_infix</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">,</span>
+                <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
+                <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]))</span>
+            <span class="n">dot</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span>\
+                <span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">shuffled_snapshot_series</span><span class="p">,</span>
+                                        <span class="n">PhysicalData</span><span class="o">.</span><span class="n">SkipArrayWriting</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">feature_size</span><span class="p">),</span>
+                                        <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;global_shuffling_seed&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">,</span>
+                                                                <span class="s2">&quot;local_shuffling_seed&quot;</span><span class="p">:</span> <span class="n">i</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">},</span>
+                                        <span class="n">internal_iteration_number</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
             <span class="n">mesh_out</span> <span class="o">=</span> <span class="n">shuffled_snapshot_series</span><span class="o">.</span><span class="n">write_iterations</span><span class="p">()[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span>
                 <span class="n">dot</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">data_name</span><span class="p">]</span>
             <span class="n">new_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
@@ -349,6 +393,11 @@
                 <span class="n">rc</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">new_array</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:][</span><span class="n">permutations</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
                     <span class="n">shuffle_dimensions</span><span class="p">)</span>
             <span class="n">shuffled_snapshot_series</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># Ensure consistent parallel destruction</span>
+        <span class="c1"># Closing a series is a collective operation</span>
+        <span class="k">for</span> <span class="n">series</span> <span class="ow">in</span> <span class="n">input_series_list</span><span class="p">:</span>
+            <span class="n">series</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="DataShuffler.shuffle_snapshots"><a class="viewcode-back" href="../../../api/mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler.shuffle_snapshots">[docs]</a>    <span class="k">def</span> <span class="nf">shuffle_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -404,9 +453,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">file_ending</span> <span class="o">=</span> <span class="s2">&quot;npy&quot;</span>
 
-        <span class="c1"># TODO: This opens each input Series, change this for parallelization</span>
-        <span class="c1"># Check the dimensions of the snapshots.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_snapshots</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_snapshots</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="n">get_comm</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_snapshots</span><span class="p">()</span>
 
         <span class="n">snapshot_types</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span>
