@@ -242,7 +242,7 @@ class PhysicalData(ABC):
         loaded_array = np.load(path, mmap_mode="r")
         return self._process_loaded_dimensions(np.shape(loaded_array)), loaded_array.dtype
 
-    def read_dimensions_from_openpmd_file(self, path):
+    def read_dimensions_from_openpmd_file(self, path, comm=None):
         """
         Read only the dimensions from a openPMD file.
 
@@ -251,40 +251,50 @@ class PhysicalData(ABC):
         path : string
             Path to the openPMD file.
         """
-        import openpmd_api as io
-        # The union operator for dicts is only supported starting with
-        # python 3.9. Currently, MALA works down to python 3.8; For now,
-        # I think it is good to keep it that way.
-        # I will leave this code in for now, because that may change in the
-        # future.
-        # series = io.Series(path, io.Access.read_only,
-        #                    options=json.dumps(
-        #                         {"defer_iteration_parsing": True} |
-        #                         self.parameters.
-        #                             _configuration["openpmd_configuration"]))
-        options = self.parameters._configuration["openpmd_configuration"].copy()
-        options["defer_iteration_parsing"] = True
-        series = io.Series(path, io.Access.read_only,
-                           options=json.dumps(options))
+        if comm is None or comm.rank == 0:
+            import openpmd_api as io
+            # The union operator for dicts is only supported starting with
+            # python 3.9. Currently, MALA works down to python 3.8; For now,
+            # I think it is good to keep it that way.
+            # I will leave this code in for now, because that may change in the
+            # future.
+            # series = io.Series(path, io.Access.read_only,
+            #                    options=json.dumps(
+            #                         {"defer_iteration_parsing": True} |
+            #                         self.parameters.
+            #                             _configuration["openpmd_configuration"]))
+            options = self.parameters._configuration[
+                "openpmd_configuration"].copy()
+            options["defer_iteration_parsing"] = True
+            series = io.Series(path,
+                               io.Access.read_only,
+                               options=json.dumps(options))
 
-        # Check if this actually MALA compatible data.
-        if series.get_attribute("is_mala_data") != 1:
-            raise Exception("Non-MALA data detected, cannot work with this "
-                            "data.")
+            # Check if this actually MALA compatible data.
+            if series.get_attribute("is_mala_data") != 1:
+                raise Exception(
+                    "Non-MALA data detected, cannot work with this "
+                    "data.")
 
-        # A bit clanky, but this way only the FIRST iteration is loaded,
-        # which is what we need for loading from a single file that
-        # may be whatever iteration in its series.
-        # Also, in combination with `defer_iteration_parsing`, specified as
-        # default above, this opens and parses the first iteration,
-        # and no others.
-        for current_iteration in series.read_iterations():
-            mesh = current_iteration.meshes[self.data_name]
-            return self.\
-                _process_loaded_dimensions((mesh["0"].shape[0],
-                                            mesh["0"].shape[1],
-                                            mesh["0"].shape[2],
-                                            len(mesh)))
+            # A bit clanky, but this way only the FIRST iteration is loaded,
+            # which is what we need for loading from a single file that
+            # may be whatever iteration in its series.
+            # Also, in combination with `defer_iteration_parsing`, specified as
+            # default above, this opens and parses the first iteration,
+            # and no others.
+            for current_iteration in series.read_iterations():
+                mesh = current_iteration.meshes[self.data_name]
+                tuple_from_file = [mesh["0"].shape[0], mesh["0"].shape[1],
+                                   mesh["0"].shape[2], len(mesh)]
+                break
+            series.close()
+        else:
+            tuple_from_file = None
+
+        if comm is not None:
+            tuple_from_file = comm.bcast(tuple_from_file, root=0)
+
+        return self._process_loaded_dimensions(tuple(tuple_from_file))
 
     def write_to_numpy_file(self, path, array):
         """
@@ -338,6 +348,7 @@ class PhysicalData(ABC):
         ----------
         path : string
             File to save into. If no file ending is given, .h5 is assumed.
+            Alternatively: A Series, opened already.
 
         array : Either numpy.ndarray or an SkipArrayWriting object
             Either the array to save or the meta information needed to create
@@ -353,26 +364,30 @@ class PhysicalData(ABC):
         """
         import openpmd_api as io
 
-        file_name = os.path.basename(path)
-        file_ending = file_name.split(".")[-1]
-        if file_name == file_ending:
-            path += ".h5"
-        elif file_ending not in io.file_extensions:
-            raise Exception("Invalid file ending selected: " +
-                            file_ending)
-        if self.parameters._configuration["mpi"]:
-            series = io.Series(
-                path,
-                io.Access.create,
-                get_comm(),
-                options=json.dumps(
-                    self.parameters._configuration["openpmd_configuration"]))
-        else:
-            series = io.Series(
-                path,
-                io.Access.create,
-                options=json.dumps(
-                    self.parameters._configuration["openpmd_configuration"]))
+        if isinstance(path, str):
+            file_name = os.path.basename(path)
+            file_ending = file_name.split(".")[-1]
+            if file_name == file_ending:
+                path += ".h5"
+            elif file_ending not in io.file_extensions:
+                raise Exception("Invalid file ending selected: " +
+                                file_ending)
+            if self.parameters._configuration["mpi"]:
+                series = io.Series(
+                    path,
+                    io.Access.create,
+                    get_comm(),
+                    options=json.dumps(
+                        self.parameters._configuration["openpmd_configuration"]))
+            else:
+                series = io.Series(
+                    path,
+                    io.Access.create,
+                    options=json.dumps(
+                        self.parameters._configuration["openpmd_configuration"]))
+        elif isinstance(path, io.Series):
+            series = path
+
         series.set_attribute("is_mala_data", 1)
         series.set_software(name="MALA", version=mala_version)
         series.author = "..."
