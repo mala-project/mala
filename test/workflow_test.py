@@ -93,6 +93,8 @@ class TestFullWorkflow:
         assert output_data_shape[0] == 18 and output_data_shape[1] == 18 and\
                output_data_shape[2] == 27 and output_data_shape[3] == 11
 
+    @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
+                        reason="LAMMPS is currently not part of the pipeline.")
     def test_preprocessing_openpmd(self):
         """
         Test whether MALA can preprocess data.
@@ -277,6 +279,8 @@ class TestFullWorkflow:
         assert np.isclose(total_energy, ldos.total_energy_dft_calculation,
                           atol=accuracy_total_energy)
 
+    @pytest.mark.skipif(importlib.util.find_spec("total_energy") is None,
+                        reason="QE is currently not part of the pipeline.")
     def test_total_energy_from_ldos_openpmd(self):
         """
         Test whether MALA can calculate the total energy using the LDOS.

@@ -129,6 +129,16 @@ class TestDataShuffling:
         # Shuffle.
         test_parameters = mala.Parameters()
         test_parameters.data.shuffling_seed = 1234
+        test_parameters.data.data_splitting_type = "by_snapshot"
+        test_parameters.data.input_rescaling_type = "feature-wise-standard"
+        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.running.max_number_epochs = 50
+        test_parameters.running.mini_batch_size = 40
+        test_parameters.running.learning_rate = 0.00001
+        test_parameters.running.trainingtype = "Adam"
+        test_parameters.verbosity = 1
+        test_parameters.data.use_lazy_loading = True
         data_shuffler = mala.DataShuffler(test_parameters)
 
         # Add a snapshot we want to use in to the list.
@@ -150,6 +160,10 @@ class TestDataShuffling:
         data_handler.add_snapshot("Be_shuffled1.in.npy", ".",
                                   "Be_shuffled1.out.npy", ".", "va")
         data_handler.prepare_data()
+
+        test_parameters.network.layer_sizes = [data_handler.input_dimension,
+                                               100,
+                                               data_handler.output_dimension]
 
         test_network = mala.Network(test_parameters)
         test_trainer = mala.Trainer(test_parameters, test_network,
