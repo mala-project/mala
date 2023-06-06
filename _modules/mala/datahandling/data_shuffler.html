@@ -218,8 +218,10 @@
                                         <span class="n">new_targets</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># We check above that in the non-numpy case, OpenPMD will work.</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="n">shuffle_dimensions</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="n">shuffle_dimensions</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> \
+                    <span class="nb">list</span><span class="p">(</span><span class="n">shuffle_dimensions</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> \
+                    <span class="nb">list</span><span class="p">(</span><span class="n">shuffle_dimensions</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
                     <span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">descriptor_name</span><span class="o">+</span><span class="s2">&quot;.in.&quot;</span><span class="o">+</span><span class="n">file_ending</span><span class="p">,</span>
                                           <span class="n">new_descriptors</span><span class="p">,</span>
@@ -338,7 +340,7 @@
         <span class="c1"># Do the actual shuffling.</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">my_items_start</span><span class="p">,</span> <span class="n">my_items_end</span><span class="p">):</span>
             <span class="c1"># We check above that in the non-numpy case, OpenPMD will work.</span>
-            <span class="n">dot</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="n">shuffle_dimensions</span>
+            <span class="n">dot</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">shuffle_dimensions</span><span class="p">)</span>
             <span class="n">name_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dot</span><span class="o">.</span><span class="n">save_path</span><span class="p">,</span>
                                        <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
             <span class="c1"># do NOT open with MPI</span>
@@ -398,7 +400,6 @@
         <span class="c1"># Closing a series is a collective operation</span>
         <span class="k">for</span> <span class="n">series</span> <span class="ow">in</span> <span class="n">input_series_list</span><span class="p">:</span>
             <span class="n">series</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
 
 <div class="viewcode-block" id="DataShuffler.shuffle_snapshots"><a class="viewcode-back" href="../../../api/mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler.shuffle_snapshots">[docs]</a>    <span class="k">def</span> <span class="nf">shuffle_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                           <span class="n">complete_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>

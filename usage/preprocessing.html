@@ -121,7 +121,14 @@ the LDOS with <code class="docutils literal notranslate"><span class="pre">pp.x<
 For this, the <code class="docutils literal notranslate"><span class="pre">DataConverter</span></code> class can be used; see example <code class="docutils literal notranslate"><span class="pre">ex02_preprocess_data</span></code>.
 If you are not sure which descriptor hyperparameters to use (e.g.: “Which cutoff
 radius do I need?”) MALA provides a fast analysis that does not involve
-model tuning. See <code class="docutils literal notranslate"><span class="pre">ex13_acsd</span></code></p>
+model tuning. See <code class="docutils literal notranslate"><span class="pre">ex13_acsd</span></code>.</p>
+<p>By default, MALA saves its data files to numpy <code class="docutils literal notranslate"><span class="pre">.npy</span></code> files. However, for
+storing large amounts of volumetric data (plus metadata), libraries such as
+<a class="reference external" href="https://github.com/openPMD/openPMD-api">OpenPMD</a> are more suitable.
+MALA provides a full OpenPMD interface that is currently tested in production.
+We recommend usage of the OpenPMD interface, which will become the new default
+in upcoming versions. Examples related to data processing and general workflow
+usage include lines that showcase the usage of OpenPMD within MALA.</p>
 </div>
 <div class="section" id="using-input-and-output-data">
 <h2>Using input and output data<a class="headerlink" href="#using-input-and-output-data" title="Permalink to this headline"></a></h2>

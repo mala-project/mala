@@ -575,11 +575,18 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
                         <span class="n">write_to_numpy_file</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="n">tmp_input</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_offset</span><span class="p">,</span> <span class="n">local_reach</span> <span class="o">=</span> \
-                    <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">convert_local_to_3d</span><span class="p">(</span><span class="n">tmp_input</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
-                    <span class="n">write_to_openpmd_iteration</span><span class="p">(</span><span class="n">input_iteration</span><span class="p">,</span>
-                                               <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_offset</span><span class="o">=</span><span class="n">local_offset</span><span class="p">,</span> <span class="n">local_reach</span><span class="o">=</span><span class="n">local_reach</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+                    <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_offset</span><span class="p">,</span> <span class="n">local_reach</span> <span class="o">=</span> \
+                        <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">convert_local_to_3d</span><span class="p">(</span><span class="n">tmp_input</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
+                        <span class="n">write_to_openpmd_iteration</span><span class="p">(</span><span class="n">input_iteration</span><span class="p">,</span>
+                                                   <span class="n">tmp_input</span><span class="p">,</span>
+                                                   <span class="n">local_offset</span><span class="o">=</span><span class="n">local_offset</span><span class="p">,</span>
+                                                   <span class="n">local_reach</span><span class="o">=</span><span class="n">local_reach</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
+                        <span class="n">write_to_openpmd_iteration</span><span class="p">(</span><span class="n">input_iteration</span><span class="p">,</span>
+                                                   <span class="n">tmp_input</span><span class="p">)</span>
             <span class="k">del</span> <span class="n">tmp_input</span>
 
         <span class="c1">###########</span>
