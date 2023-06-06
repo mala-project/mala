@@ -74,6 +74,12 @@ data_converter.convert_snapshots(descriptor_save_path="./",
                                  target_save_path="./",
                                  additional_info_save_path="./",
                                  naming_scheme="Be_snapshot*.npy")
+# New feature: You can switch the lines above for these to use the new,
+# more powerful OpenPMD interface for MALA!
+# data_converter.convert_snapshots(descriptor_save_path="./",
+#                                  target_save_path="./",
+#                                  additional_info_save_path="./",
+#                                  naming_scheme="Be_snapshot*.h5")
 
 # If parts of the data have already been processed, the DataConverter class can
 # also be used to convert the rest.
