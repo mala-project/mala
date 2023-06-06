@@ -50,7 +50,14 @@ class TestDataShuffling:
         assert np.isclose(np.sum(np.abs(old-new)), 0.0, atol=accuracy)
 
     def test_seed_openpmd(self):
-        """Test that the shuffling is handled correctly internally."""
+        """
+        Test that the shuffling is handled correctly internally.
+
+        This function tests the shuffling for OpenPMD and confirms that
+        shuffling both from numpy and openpmd into openpmd always gives the
+        same results. The first shuffling shuffles from openpmd to openpmd
+        format, the second from numpy to openpmd.
+        """
         test_parameters = mala.Parameters()
         test_parameters.data.shuffling_seed = 1234
         data_shuffler = mala.DataShuffler(test_parameters)
