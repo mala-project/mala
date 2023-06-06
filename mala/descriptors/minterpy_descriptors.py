@@ -14,7 +14,6 @@ try:
 except ModuleNotFoundError:
     pass
 import numpy as np
-import minterpy as mp
 
 from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
 from mala.descriptors.descriptor import Descriptor
@@ -237,6 +236,8 @@ class MinterpyDescriptors(Descriptor):
         nodes : numpy.array
             Two-dimensional array containing the nodes.
         """
+        import minterpy as mp
+
         # Calculate the unisolvent nodes.
         mi = mp.MultiIndexSet.from_degree(spatial_dimension=dimension,
                                           poly_degree=self.parameters.minterpy_polynomial_degree,
