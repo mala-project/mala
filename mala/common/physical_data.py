@@ -218,7 +218,7 @@ class PhysicalData(ABC):
         else:
             self._process_loaded_array(array, units=units)
 
-    def read_dimensions_from_numpy_file(self, path):
+    def read_dimensions_from_numpy_file(self, path, read_dtype=False):
         """
         Read only the dimensions from a numpy file.
 
@@ -226,23 +226,19 @@ class PhysicalData(ABC):
         ----------
         path : string
             Path to the numpy file.
+
+        read_dtype : bool
+            If True, the dtype is read alongside the dimensions.
         """
         loaded_array = np.load(path, mmap_mode="r")
-        return self._process_loaded_dimensions(np.shape(loaded_array))
+        if read_dtype:
+            return self._process_loaded_dimensions(np.shape(loaded_array)), \
+                   loaded_array.dtype
+        else:
+            return self._process_loaded_dimensions(np.shape(loaded_array))
 
-    def read_dimensions_and_dtype_from_numpy_file(self, path):
-        """
-        Read only the dimensions and dtype from a numpy file.
-
-        Parameters
-        ----------
-        path : string
-            Path to the numpy file.
-        """
-        loaded_array = np.load(path, mmap_mode="r")
-        return self._process_loaded_dimensions(np.shape(loaded_array)), loaded_array.dtype
-
-    def read_dimensions_from_openpmd_file(self, path, comm=None):
+    def read_dimensions_from_openpmd_file(self, path, comm=None,
+                                          read_dtype=False):
         """
         Read only the dimensions from a openPMD file.
 
@@ -250,6 +246,9 @@ class PhysicalData(ABC):
         ----------
         path : string
             Path to the openPMD file.
+
+        read_dtype : bool
+            If True, the dtype is read alongside the dimensions.
         """
         if comm is None or comm.rank == 0:
             import openpmd_api as io
@@ -286,6 +285,7 @@ class PhysicalData(ABC):
                 mesh = current_iteration.meshes[self.data_name]
                 tuple_from_file = [mesh["0"].shape[0], mesh["0"].shape[1],
                                    mesh["0"].shape[2], len(mesh)]
+                loaded_dtype = mesh["0"].dtype
                 break
             series.close()
         else:
@@ -293,8 +293,11 @@ class PhysicalData(ABC):
 
         if comm is not None:
             tuple_from_file = comm.bcast(tuple_from_file, root=0)
-
-        return self._process_loaded_dimensions(tuple(tuple_from_file))
+        if read_dtype:
+            return self._process_loaded_dimensions(tuple(tuple_from_file)), \
+                   loaded_dtype
+        else:
+            return self._process_loaded_dimensions(tuple(tuple_from_file))
 
     def write_to_numpy_file(self, path, array):
         """

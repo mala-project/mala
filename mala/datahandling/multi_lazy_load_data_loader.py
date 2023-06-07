@@ -145,15 +145,28 @@ class MultiLazyLoadDataLoader:
         input_shm = shared_memory.SharedMemory(name=input_shm_name)
         output_shm = shared_memory.SharedMemory(name=output_shm_name)
 
-        input_shape, input_dtype = descriptor_calculator. \
-            read_dimensions_and_dtype_from_numpy_file(
-            os.path.join(snapshot.input_npy_directory,
-                         snapshot.input_npy_file))
+        if snapshot.snapshot_type == "numpy":
+            input_shape, input_dtype = descriptor_calculator. \
+                read_dimensions_from_numpy_file(
+                os.path.join(snapshot.input_npy_directory,
+                             snapshot.input_npy_file), read_dtype=True)
 
-        output_shape, output_dtype = target_calculator. \
-            read_dimensions_and_dtype_from_numpy_file(
-            os.path.join(snapshot.output_npy_directory,
-                         snapshot.output_npy_file))
+            output_shape, output_dtype = target_calculator. \
+                read_dimensions_from_numpy_file(
+                os.path.join(snapshot.output_npy_directory,
+                             snapshot.output_npy_file), read_dtype=True)
+        elif snapshot.snapshot_type == "openpmd":
+            input_shape, input_dtype = descriptor_calculator. \
+                read_dimensions_from_openpmd_file(
+                os.path.join(snapshot.input_npy_directory,
+                             snapshot.input_npy_file), read_dtype=True)
+
+            output_shape, output_dtype = target_calculator. \
+                read_dimensions_from_openpmd_file(
+                os.path.join(snapshot.output_npy_directory,
+                             snapshot.output_npy_file), read_dtype=True)
+        else:
+            raise Exception("Invalid snapshot type selected.")
 
         # Form numpy arrays from shm buffers
         input_data = np.ndarray(shape=input_shape, dtype=input_dtype,
@@ -162,18 +175,32 @@ class MultiLazyLoadDataLoader:
                                  buffer=output_shm.buf)
 
         # Load numpy data into shm buffers
-        descriptor_calculator. \
-            read_from_numpy_file(
-            os.path.join(snapshot.input_npy_directory,
-                         snapshot.input_npy_file),
-            units=snapshot.input_units,
-            array=input_data)
-        target_calculator. \
-            read_from_numpy_file(
-            os.path.join(snapshot.output_npy_directory,
-                         snapshot.output_npy_file),
-            units=snapshot.output_units,
-            array=output_data)
+        if snapshot.snapshot_type == "numpy":
+            descriptor_calculator. \
+                read_from_numpy_file(
+                os.path.join(snapshot.input_npy_directory,
+                             snapshot.input_npy_file),
+                units=snapshot.input_units,
+                array=input_data)
+            target_calculator. \
+                read_from_numpy_file(
+                os.path.join(snapshot.output_npy_directory,
+                             snapshot.output_npy_file),
+                units=snapshot.output_units,
+                array=output_data)
+        else :
+            descriptor_calculator. \
+                read_from_openpmd_file(
+                os.path.join(snapshot.input_npy_directory,
+                             snapshot.input_npy_file),
+                units=snapshot.input_units,
+                array=input_data)
+            target_calculator. \
+                read_from_openpmd_file(
+                os.path.join(snapshot.output_npy_directory,
+                             snapshot.output_npy_file),
+                units=snapshot.output_units,
+                array=output_data)
 
         # This function only loads the numpy data with scaling. Remaining data
         # preprocessing occurs in __getitem__ of LazyLoadDatasetSingle
