@@ -162,22 +162,12 @@ class MinterpyDescriptors(Descriptor):
             ase_out_path = os.path.join(outdir, "lammps_input.tmp")
             ase.io.write(ase_out_path, atoms_copied, format=lammps_format)
 
-            # Build LAMMPS arguments from the data we read.
-            lmp_cmdargs = ["-screen", "none", "-log",
-                           os.path.join(outdir, "lammps_ggrid_log.tmp")]
-
-            # LAMMPS processor grid filled by parent class.
-            lammps_dict = self._setup_lammps_processors(nx, ny, nz)
-
-            # Set the values not already filled in the LAMMPS setup.
+            # Create LAMMPS instance.
+            lammps_dict = {}
             lammps_dict["sigma"] = self.parameters.atomic_density_sigma
             lammps_dict["rcutfac"] = self.parameters.atomic_density_cutoff
             lammps_dict["atom_config_fname"] = ase_out_path
-
-            lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
-
-            # Build the LAMMPS object.
-            lmp = lammps(cmdargs=lmp_cmdargs)
+            lmp = self._setup_lammps(nx, ny, nz, outdir, lammps_dict)
 
             # For now the file is chosen automatically, because this is used
             # mostly under the hood anyway.
@@ -205,6 +195,8 @@ class MinterpyDescriptors(Descriptor):
                 extract_compute_np(lmp, "ggrid",
                                    lammps_constants.LMP_STYLE_LOCAL, 2,
                                    array_shape=(nrows_ggrid, ncols_ggrid))
+
+            lmp.close()
 
             gaussian_descriptors_np = \
                 gaussian_descriptors_np.reshape((grid_dimensions[2],

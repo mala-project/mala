@@ -172,7 +172,7 @@ class AtomicDensity(Descriptor):
                                lammps_constants.LMP_STYLE_LOCAL, 2,
                                array_shape=(nrows_ggrid, ncols_ggrid),
                                use_fp64=use_fp64)
-        lmp.finalize()
+        lmp.close()
 
         # In comparison to SNAP, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments
