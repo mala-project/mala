@@ -33,10 +33,10 @@ hyperoptimizer.add_hyperparameter("bispectrum_cutoff", [1.0, 2.0])
 # Add raw snapshots to the hyperoptimizer. For the targets, numpy files are
 # okay as well.
 hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path, "Be_snapshot1.out"),
-                            "numpy", os.path.join(data_path, "Be_snapshot1.in.npy"),
+                            "numpy", os.path.join(data_path, "Be_snapshot1.out.npy"),
                             target_units="1/(Ry*Bohr^3)")
 hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path, "Be_snapshot2.out"),
-                            "numpy", os.path.join(data_path, "Be_snapshot2.in.npy"),
+                            "numpy", os.path.join(data_path, "Be_snapshot2.out.npy"),
                             target_units="1/(Ry*Bohr^3)")
 
 # If you plan to plot the results (recommended for exploratory searches),

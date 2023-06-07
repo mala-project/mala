@@ -54,7 +54,11 @@ Descriptors
 Descriptors give, per grid-point, information about the
 local environment around that grid-point. In most cases, users will not have
 to interact with a ``Descriptor`` object. Yet, these objects can be created
-by themselves if needed.
+by themselves if needed. The default option for descriptor calculation
+is ``Bispectrum``, i.e., the bispectrum descriptors used in all current MALA
+publications. Experimental options include ``AtomicDensity`` (i.e. the raw
+atomic density, e.g. for convolutional approaches) and ``MinterpyDescriptors``
+(currently experimental).
 
       .. code-block:: python
 
