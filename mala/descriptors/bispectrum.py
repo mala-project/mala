@@ -92,7 +92,6 @@ class Bispectrum(Descriptor):
 
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         """Perform actual bispectrum calculation."""
-        from lammps import lammps
         use_fp64 = kwargs.get("use_fp64", False)
 
         lammps_format = "lammps-data"
@@ -103,22 +102,12 @@ class Bispectrum(Descriptor):
         ny = grid_dimensions[1]
         nz = grid_dimensions[2]
 
-        # Build LAMMPS arguments from the data we read.
-        lmp_cmdargs = ["-screen", "none", "-log",
-                       os.path.join(outdir, "lammps_bgrid_log.tmp")]
-
-        # LAMMPS processor grid filled by parent class.
-        lammps_dict = self._setup_lammps_processors(nx, ny, nz)
-
-        # Set the values not already filled in the LAMMPS setup.
+        # Create LAMMPS instance.
+        lammps_dict = {}
         lammps_dict["twojmax"] = self.parameters.bispectrum_twojmax
         lammps_dict["rcutfac"] = self.parameters.bispectrum_cutoff
         lammps_dict["atom_config_fname"] = ase_out_path
-
-        lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
-
-        # Build the LAMMPS object.
-        lmp = lammps(cmdargs=lmp_cmdargs)
+        lmp = self._setup_lammps(nx, ny, nz, outdir, lammps_dict)
 
         # An empty string means that the user wants to use the standard input.
         # What that is differs depending on serial/parallel execution.
@@ -169,6 +158,7 @@ class Bispectrum(Descriptor):
                                    lammps_constants.LMP_STYLE_LOCAL, 2,
                                    array_shape=(nrows_local, ncols_local),
                                    use_fp64=use_fp64)
+            lmp.close()
 
             # Copy the grid dimensions only at the end.
             self.grid_dimensions = [nx, ny, nz]
@@ -180,6 +170,8 @@ class Bispectrum(Descriptor):
                 extract_compute_np(lmp, "bgrid", 0, 2,
                                    (nz, ny, nx, self.fingerprint_length),
                                    use_fp64=use_fp64)
+            lmp.close()
+
             # switch from x-fastest to z-fastest order (swaps 0th and 2nd
             # dimension)
             snap_descriptors_np = snap_descriptors_np.transpose([2, 1, 0, 3])

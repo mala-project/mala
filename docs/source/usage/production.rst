@@ -1,5 +1,5 @@
-MALA production runs
-====================
+MALA production inference runs
+==============================
 
 Optimal performance
 *******************
@@ -7,7 +7,8 @@ Optimal performance
 When running MALA for large systems or extended periods of time, performance
 becomes crucial. Most parts of MALA are either designed in a way to run as
 efficient as possible by default. Enabling MPI and GPU accordingly naturally
-boost performance by giving MALA access to more computational power.
+boost performance by giving MALA access to more computational power. Currently,
+only MPI **or** GPU acceleration can be used at the same time.
 
 There are a few other options that can help with performance but need to be
 handled with care to avoid numerical inaccuracies.

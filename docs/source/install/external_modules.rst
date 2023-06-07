@@ -60,16 +60,50 @@ Use and test the Python extension module
 LAMMPS (descriptor calculation)
 *******************************
 
+We provide a LAMMPS version compatible with the most recent MALA version
+`here <https://github.com/mala-project/lammps/tree/mala>`_.
+
+Building the LAMMPS interface for MALA consists of two steps:
+
+1. Build a LAMMPS instance
+2. Build the python bindings to it
+
+The second part is mostly trivial. The first part is a bit more involved, since
+there are few choices to be made here. For a full overview of how to build
+LAMMPS, please refer to the `official instructions <https://docs.lammps.org/Build.html>`_.
+The MALA team recommends to build LAMMPS with ``cmake``. To do so
+
 * Checkout https://github.com/mala-project/lammps/tree/mala
 * Make sure the ``mala`` tree is checked out locally via ``git branch``!
-* Compile the LAMMPS shared library with the SNAP package installed
+* Inside the LAMMPS folder create a build folder (named, e.g., ``build``)
+* In the ``build`` folder, configure your ``cmake`` build:
+  ``cmake ../cmake -D OPTION1 -D OPTION2 ...``; Options for a typical LAMMPS
+  build for usage with MALA:
 
-  - Change into the source folder of LAMMPS ``cd /path/to/lammps/src``
-  - ``make yes-ml-snap``
-  - (optional: check with ``make ps`` that ``ml-snap`` was correctly added)
-  - ``make mode=shlib mpi``
+  * ``BUILD_SHARED_LIBS=yes``: Necessary to link the LAMMPS library to python
+  * ``PKG_ML-SNAP=yes``: Enables the calculation of SNAP descriptors with LAMMPS
+  * ``BUILD_MPI=yes``: Enables MPI aware calculations; set this option if
+    plan to use MPI and have an MPI aware compiler loaded
+  * ``PKG_KOKKOS=yes``: Enables the Kokkos package which is needed to calculate
+    bispectrum descriptors on a GPU. Without this option, bispectrum descriptor
+    calculation will solely be performed on CPU. If you want to use a GPU via
+    Kokkos, further options you will have to set further options:
 
-* Make the LAMMPS library visible in python
+      * ``Kokkos_ENABLE_CUDA=yes``: Tells Kokkos to use CUDA
+      * ``Kokkos_ARCH_HOSTARCH=???``: Your CPU architecture (see `Kokkos instructions <https://docs.lammps.org/Build_extras.html#kokkos-package>`_)
+      * ``Kokkos_ARCH_GPUARCH=???``: Your GPU architecture (see see `Kokkos instructions <https://docs.lammps.org/Build_extras.html#kokkos-package>`_)
+      * ``CMAKE_CXX_COMPILER=???``: Path to the ``nvcc_wrapper`` executable
+        shipped with the LAMMPS code, should be at ``/your/path/to/lammps/lib/kokkos/bin/nvcc_wrapper``
 
-  - Change into the python path of LAMMPS ``cd /path/to/lammps/python``
-  - ``python3 install.py -p lammps -l ../src/liblammps.so``
+* Build the library and executable with ``cmake --build .``
+  (Add ``--parallel=8`` for a faster build)
+
+This should create a shared library called ``liblammps.so`` in your build
+folder. To then build the python library
+
+* Change into the ``python`` folder of the LAMMPS code
+* ``python3 install.py -p lammps -l ../<build_folder>/liblammps.so``, where
+  ``<build_folder>`` is whatever folder you performed the ``cmake`` build in
+* Note: The python installation process may give an ``shutil.SameFileError``
+  after successful installation; this is LAMMPS related and can be ignored
+  here.
