@@ -13,6 +13,7 @@ from mala.network.hyper_opt import HyperOpt
 from mala.common.parallelizer import get_rank, printout
 from mala.descriptors.bispectrum import Bispectrum
 from mala.descriptors.atomic_density import AtomicDensity
+from mala.descriptors.minterpy_descriptors import MinterpyDescriptors
 
 descriptor_input_types_acsd = descriptor_input_types+["numpy", "openpmd"]
 target_input_types_acsd = target_input_types+["numpy", "openpmd"]
@@ -51,7 +52,8 @@ class ACSDAnalyzer(HyperOpt):
         if self.descriptor_calculator is None:
             self.descriptor_calculator = Descriptor(params)
         if not isinstance(self.descriptor_calculator, Bispectrum) and \
-           not isinstance(self.descriptor_calculator, AtomicDensity):
+           not isinstance(self.descriptor_calculator, AtomicDensity) and \
+           not isinstance(self.descriptor_calculator, MinterpyDescriptors):
             raise Exception("Cannot calculate ACSD for the selected "
                             "descriptors.")
 
@@ -143,7 +145,10 @@ class ACSDAnalyzer(HyperOpt):
             List of possible choices.
         """
         if name not in ["bispectrum_twojmax", "bispectrum_cutoff",
-                        "atomic_density_sigma", "atomic_density_cutoff"]:
+                        "atomic_density_sigma", "atomic_density_cutoff",
+                        "minterpy_cutoff_cube_size",
+                        "minterpy_polynomial_degree",
+                        "minterpy_lp_norm"]:
             raise Exception("Unkown hyperparameter for ACSD analysis entered.")
 
         self.params.hyperparameters.\
@@ -188,6 +193,21 @@ class ACSDAnalyzer(HyperOpt):
                         hyperparameter_tuple[0]
                     self.params.descriptors.atomic_density_sigma = \
                         hyperparameter_tuple[1]
+                elif isinstance(self.descriptor_calculator,
+                              MinterpyDescriptors):
+                    self.params.descriptors. \
+                        atomic_density_cutoff = hyperparameter_tuple[0]
+                    self.params.descriptors. \
+                        atomic_density_sigma = hyperparameter_tuple[1]
+                    self.params.descriptors. \
+                        minterpy_cutoff_cube_size = \
+                        hyperparameter_tuple[2]
+                    self.params.descriptors. \
+                        minterpy_polynomial_degree = \
+                        hyperparameter_tuple[3]
+                    self.params.descriptors. \
+                        minterpy_lp_norm = \
+                        hyperparameter_tuple[4]
 
                 descriptor = \
                     self._calculate_descriptors(self.__snapshots[i],
@@ -218,8 +238,8 @@ class ACSDAnalyzer(HyperOpt):
                     outstring += "]"
                     best_trial_string = ". No suitable trial found yet."
                     if best_acsd is not None:
-                        best_trial_string = ". Best trial is "+str(best_trial) \
-                                            + " with "+str(best_acsd)
+                        best_trial_string = ". Best trial is"+str(best_trial) \
+                                            + "with"+str(best_acsd)
 
                     printout("Trial", idx, "finished with ACSD="+str(acsd),
                              "and parameters:", outstring+best_trial_string,
@@ -231,6 +251,7 @@ class ACSDAnalyzer(HyperOpt):
         if get_rank() == 0:
             self.study = np.mean(self.study, axis=0)
 
+            # TODO: Does this even make sense for the minterpy descriptors?
             if return_plotting:
                 results_to_plot = []
                 if len(self.internal_hyperparam_list) == 2:
@@ -273,7 +294,24 @@ class ACSDAnalyzer(HyperOpt):
                              atomic_density_sigma)
                     printout("Atomic density cutoff: ", self.params.descriptors.
                              atomic_density_cutoff)
-
+            elif len(self.internal_hyperparam_list) == 5:
+                if isinstance(self.descriptor_calculator, MinterpyDescriptors):
+                    self.params.descriptors.atomic_density_cutoff = minimum_acsd[0]
+                    self.params.descriptors.atomic_density_sigma = minimum_acsd[1]
+                    self.params.descriptors.minterpy_cutoff_cube_size = minimum_acsd[2]
+                    self.params.descriptors.minterpy_polynomial_degree = int(minimum_acsd[3])
+                    self.params.descriptors.minterpy_lp_norm = int(minimum_acsd[4])
+                    printout("ACSD analysis finished, optimal parameters: ", )
+                    printout("Atomic density sigma: ", self.params.descriptors.
+                             atomic_density_sigma)
+                    printout("Atomic density cutoff: ", self.params.descriptors.
+                             atomic_density_cutoff)
+                    printout("Minterpy cube cutoff: ", self.params.descriptors.
+                             minterpy_cutoff_cube_size)
+                    printout("Minterpy polynomial degree: ", self.params.descriptors.
+                             minterpy_polynomial_degree)
+                    printout("Minterpy LP norm degree: ", self.params.descriptors.
+                             minterpy_lp_norm)
 
     def _construct_hyperparam_list(self):
         if isinstance(self.descriptor_calculator, Bispectrum):
@@ -321,6 +359,63 @@ class ACSDAnalyzer(HyperOpt):
                             True)].choices
             self.internal_hyperparam_list = [first_dim_list, second_dim_list]
             self.labels = ["cutoff", "sigma"]
+
+        elif isinstance(self.descriptor_calculator, MinterpyDescriptors):
+            if list(map(lambda p: "atomic_density_cutoff" in p.name,
+                        self.params.hyperparameters.hlist)).count(True) == 0:
+                first_dim_list = [self.params.descriptors.atomic_density_cutoff]
+            else:
+                first_dim_list = \
+                    self.params.hyperparameters.hlist[
+                        list(map(lambda p: "atomic_density_cutoff" in p.name,
+                                 self.params.hyperparameters.hlist)).index(
+                            True)].choices
+
+            if list(map(lambda p: "atomic_density_sigma" in p.name,
+                        self.params.hyperparameters.hlist)).count(True) == 0:
+                second_dim_list = [self.params.descriptors.atomic_density_sigma]
+            else:
+                second_dim_list = \
+                    self.params.hyperparameters.hlist[
+                        list(map(lambda p: "atomic_density_sigma" in p.name,
+                                 self.params.hyperparameters.hlist)).index(
+                            True)].choices
+
+            if list(map(lambda p: "minterpy_cutoff_cube_size" in p.name,
+                        self.params.hyperparameters.hlist)).count(True) == 0:
+                third_dim_list = [self.params.descriptors.minterpy_cutoff_cube_size]
+            else:
+                third_dim_list = \
+                    self.params.hyperparameters.hlist[
+                        list(map(lambda p: "minterpy_cutoff_cube_size" in p.name,
+                                 self.params.hyperparameters.hlist)).index(
+                            True)].choices
+
+            if list(map(lambda p: "minterpy_polynomial_degree" in p.name,
+                        self.params.hyperparameters.hlist)).count(True) == 0:
+                fourth_dim_list = [self.params.descriptors.minterpy_polynomial_degree]
+            else:
+                fourth_dim_list = \
+                    self.params.hyperparameters.hlist[
+                        list(map(lambda p: "minterpy_polynomial_degree" in p.name,
+                                 self.params.hyperparameters.hlist)).index(
+                            True)].choices
+
+            if list(map(lambda p: "minterpy_lp_norm" in p.name,
+                        self.params.hyperparameters.hlist)).count(True) == 0:
+                fifth_dim_list = [self.params.descriptors.minterpy_lp_norm]
+            else:
+                fifth_dim_list = \
+                    self.params.hyperparameters.hlist[
+                        list(map(lambda p: "minterpy_lp_norm" in p.name,
+                                 self.params.hyperparameters.hlist)).index(
+                            True)].choices
+
+            self.internal_hyperparam_list = [first_dim_list, second_dim_list,
+                                             third_dim_list, fourth_dim_list,
+                                             fifth_dim_list]
+            self.labels = ["cutoff", "sigma", "minterpy_cutoff",
+                           "minterpy_polynomial_degree", "minterpy_lp_norm"]
 
         else:
             raise Exception("Unkown descriptor calculator selected. Cannot "

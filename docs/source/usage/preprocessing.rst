@@ -32,7 +32,15 @@ MALA can be used to process raw data into ready-to-use data fro the surrogate mo
 For this, the ``DataConverter`` class can be used; see example ``ex02_preprocess_data``.
 If you are not sure which descriptor hyperparameters to use (e.g.: "Which cutoff
 radius do I need?") MALA provides a fast analysis that does not involve
-model tuning. See ``ex13_acsd``
+model tuning. See ``ex13_acsd``.
+
+By default, MALA saves its data files to numpy ``.npy`` files. However, for
+storing large amounts of volumetric data (plus metadata), libraries such as
+`OpenPMD <https://github.com/openPMD/openPMD-api>`_ are more suitable.
+MALA provides a full OpenPMD interface that is currently tested in production.
+We recommend usage of the OpenPMD interface, which will become the new default
+in upcoming versions. Examples related to data processing and general workflow
+usage include lines that showcase the usage of OpenPMD within MALA.
 
 Using input and output data
 ###########################
@@ -46,7 +54,11 @@ Descriptors
 Descriptors give, per grid-point, information about the
 local environment around that grid-point. In most cases, users will not have
 to interact with a ``Descriptor`` object. Yet, these objects can be created
-by themselves if needed.
+by themselves if needed. The default option for descriptor calculation
+is ``Bispectrum``, i.e., the bispectrum descriptors used in all current MALA
+publications. Experimental options include ``AtomicDensity`` (i.e. the raw
+atomic density, e.g. for convolutional approaches) and ``MinterpyDescriptors``
+(currently experimental).
 
       .. code-block:: python
 

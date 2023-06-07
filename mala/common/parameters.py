@@ -333,6 +333,12 @@ class ParametersDescriptors(ParametersBase):
         self.atomic_density_sigma = None
         self.atomic_density_cutoff = None
 
+        # Everything concerning the minterpy descriptors.
+        self.minterpy_point_list = []
+        self.minterpy_cutoff_cube_size = 0.0
+        self.minterpy_polynomial_degree = 4
+        self.minterpy_lp_norm = 2
+
     @property
     def use_z_splitting(self):
         """

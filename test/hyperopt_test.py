@@ -21,7 +21,10 @@ desired_std_ho = 0.1
 targeted_acsd_value = 0.04
 
 # For the NASWOT comparison
-naswot_accuracy = 1e-16
+# Since the values we are comparing here are dependent on the eigensolver
+# implementation and numerical noise effects, I think it is reasonable
+# to not require strict accuracy.
+naswot_accuracy = 0.01
 
 
 class TestHyperparameterOptimization:

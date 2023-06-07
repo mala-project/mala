@@ -32,6 +32,13 @@ class TestFullWorkflow:
         assert desired_loss_improvement_factor * \
                test_trainer.initial_test_loss > test_trainer.final_test_loss
 
+    def test_network_training_openpmd(self):
+        """Test whether MALA can train a NN."""
+
+        test_trainer = self.__simple_training(use_openpmd_data=True)
+        assert desired_loss_improvement_factor * \
+               test_trainer.initial_test_loss > test_trainer.final_test_loss
+
     def test_network_training_fast_dataset(self):
         """Test whether MALA can train a NN."""
 
@@ -82,6 +89,55 @@ class TestFullWorkflow:
                input_data_shape[2] == 27 and input_data_shape[3] == 33
 
         output_data = np.load("Be_snapshot0.out.npy")
+        output_data_shape = np.shape(output_data)
+        assert output_data_shape[0] == 18 and output_data_shape[1] == 18 and\
+               output_data_shape[2] == 27 and output_data_shape[3] == 11
+
+    @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
+                        reason="LAMMPS is currently not part of the pipeline.")
+    def test_preprocessing_openpmd(self):
+        """
+        Test whether MALA can preprocess data.
+
+        This means reading the LDOS from cube files and calculating
+        bispectrum descriptors.
+        The data necessary for this is currently not in the data repo!
+        """
+
+        # Set up parameters.
+        test_parameters = mala.Parameters()
+        test_parameters.descriptors.descriptor_type = "Bispectrum"
+        test_parameters.descriptors.bispectrum_twojmax = 6
+        test_parameters.descriptors.bispectrum_cutoff = 4.67637
+        test_parameters.descriptors.descriptors_contain_xyz = True
+        test_parameters.targets.target_type = "LDOS"
+        test_parameters.targets.ldos_gridsize = 11
+        test_parameters.targets.ldos_gridspacing_ev = 2.5
+        test_parameters.targets.ldos_gridoffset_ev = -5
+
+        # Create a DataConverter, and add snapshots to it.
+        data_converter = mala.DataConverter(test_parameters)
+        data_converter.add_snapshot(descriptor_input_type="espresso-out",
+                                    descriptor_input_path=
+                                    os.path.join(data_path,
+                                                 "Be_snapshot0.out"),
+                                    target_input_type=".cube",
+                                    target_input_path=
+                                    os.path.join(data_path, "cubes",
+                                                 "tmp.pp*Be_ldos.cube"),
+                                    target_units="1/(Ry*Bohr^3)")
+        data_converter.convert_snapshots(complete_save_path="./",
+                                         naming_scheme="Be_snapshot*.h5")
+
+        # Compare against
+        input_data = data_converter.descriptor_calculator.\
+            read_from_openpmd_file("Be_snapshot0.in.h5")
+        input_data_shape = np.shape(input_data)
+        assert input_data_shape[0] == 18 and input_data_shape[1] == 18 and \
+               input_data_shape[2] == 27 and input_data_shape[3] == 30
+
+        output_data = data_converter.target_calculator.\
+            read_from_openpmd_file("Be_snapshot0.out.h5")
         output_data_shape = np.shape(output_data)
         assert output_data_shape[0] == 18 and output_data_shape[1] == 18 and\
                output_data_shape[2] == 27 and output_data_shape[3] == 11
@@ -213,6 +269,40 @@ class TestFullWorkflow:
                                               data_path,
                                               "Be_snapshot0.out"), "espresso-out")
         ldos_data = np.load(os.path.join(data_path, "Be_snapshot0.out.npy"))
+
+        # Calculate energies
+        self_consistent_fermi_energy = ldos. \
+            get_self_consistent_fermi_energy(ldos_data)
+        total_energy = ldos.get_total_energy(ldos_data,
+                                             fermi_energy=
+                                             self_consistent_fermi_energy)
+        assert np.isclose(total_energy, ldos.total_energy_dft_calculation,
+                          atol=accuracy_total_energy)
+
+    @pytest.mark.skipif(importlib.util.find_spec("total_energy") is None,
+                        reason="QE is currently not part of the pipeline.")
+    def test_total_energy_from_ldos_openpmd(self):
+        """
+        Test whether MALA can calculate the total energy using the LDOS.
+
+        This means calculating energies from the LDOS.
+        """
+        # Set up parameters.
+        test_parameters = mala.Parameters()
+        test_parameters.targets.target_type = "LDOS"
+        test_parameters.targets.ldos_gridsize = 11
+        test_parameters.targets.ldos_gridspacing_ev = 2.5
+        test_parameters.targets.ldos_gridoffset_ev = -5
+        test_parameters.targets.pseudopotential_path = data_path
+
+        # Create a target calculator to perform postprocessing.
+        ldos = mala.Target(test_parameters)
+        ldos_data = ldos.\
+            read_from_openpmd_file(os.path.join(data_path,
+                                                "Be_snapshot0.out.h5"))
+        ldos.read_additional_calculation_data(os.path.join(
+                                              data_path,
+                                              "Be_snapshot0.out"), "espresso-out")
 
         # Calculate energies
         self_consistent_fermi_energy = ldos. \
@@ -386,7 +476,8 @@ class TestFullWorkflow:
                           atol=accuracy_very_coarse)
 
     @staticmethod
-    def __simple_training(use_fast_tensor_dataset=False):
+    def __simple_training(use_fast_tensor_dataset=False,
+                          use_openpmd_data=False):
         """Perform a simple training and save it, if necessary."""
         # Set up parameters.
         test_parameters = mala.Parameters()
@@ -402,12 +493,23 @@ class TestFullWorkflow:
 
         # Load data.
         data_handler = mala.DataHandler(test_parameters)
-        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                                  "Be_snapshot0.out.npy", data_path, "tr")
-        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                  "Be_snapshot1.out.npy", data_path, "va")
-        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                  "Be_snapshot2.out.npy", data_path, "te")
+        if use_openpmd_data:
+            data_handler.add_snapshot("Be_snapshot0.in.h5", data_path,
+                                      "Be_snapshot0.out.h5", data_path, "tr",
+                                      snapshot_type="openpmd")
+            data_handler.add_snapshot("Be_snapshot1.in.h5", data_path,
+                                      "Be_snapshot1.out.h5", data_path, "va",
+                                      snapshot_type="openpmd")
+            data_handler.add_snapshot("Be_snapshot2.in.h5", data_path,
+                                      "Be_snapshot2.out.h5", data_path, "te",
+                                      snapshot_type="openpmd")
+        else:
+            data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                      "Be_snapshot0.out.npy", data_path, "tr")
+            data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                      "Be_snapshot1.out.npy", data_path, "va")
+            data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                      "Be_snapshot2.out.npy", data_path, "te")
         data_handler.prepare_data()
 
         # Train a network.

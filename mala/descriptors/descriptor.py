@@ -64,6 +64,12 @@ class Descriptor(PhysicalData):
                 descriptors = super(Descriptor, AtomicDensity).\
                     __new__(AtomicDensity)
 
+            if params.descriptors.descriptor_type == "MinterpyDescriptors":
+                from mala.descriptors.minterpy_descriptors import \
+                    MinterpyDescriptors
+                descriptors = super(Descriptor, MinterpyDescriptors).\
+                    __new__(MinterpyDescriptors)
+
             if descriptors is None:
                 raise Exception("Unsupported descriptor calculator.")
         else:

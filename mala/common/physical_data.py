@@ -218,7 +218,7 @@ class PhysicalData(ABC):
         else:
             self._process_loaded_array(array, units=units)
 
-    def read_dimensions_from_numpy_file(self, path):
+    def read_dimensions_from_numpy_file(self, path, read_dtype=False):
         """
         Read only the dimensions from a numpy file.
 
@@ -226,23 +226,19 @@ class PhysicalData(ABC):
         ----------
         path : string
             Path to the numpy file.
+
+        read_dtype : bool
+            If True, the dtype is read alongside the dimensions.
         """
         loaded_array = np.load(path, mmap_mode="r")
-        return self._process_loaded_dimensions(np.shape(loaded_array))
+        if read_dtype:
+            return self._process_loaded_dimensions(np.shape(loaded_array)), \
+                   loaded_array.dtype
+        else:
+            return self._process_loaded_dimensions(np.shape(loaded_array))
 
-    def read_dimensions_and_dtype_from_numpy_file(self, path):
-        """
-        Read only the dimensions and dtype from a numpy file.
-
-        Parameters
-        ----------
-        path : string
-            Path to the numpy file.
-        """
-        loaded_array = np.load(path, mmap_mode="r")
-        return self._process_loaded_dimensions(np.shape(loaded_array)), loaded_array.dtype
-
-    def read_dimensions_from_openpmd_file(self, path):
+    def read_dimensions_from_openpmd_file(self, path, comm=None,
+                                          read_dtype=False):
         """
         Read only the dimensions from a openPMD file.
 
@@ -250,41 +246,58 @@ class PhysicalData(ABC):
         ----------
         path : string
             Path to the openPMD file.
+
+        read_dtype : bool
+            If True, the dtype is read alongside the dimensions.
         """
-        import openpmd_api as io
-        # The union operator for dicts is only supported starting with
-        # python 3.9. Currently, MALA works down to python 3.8; For now,
-        # I think it is good to keep it that way.
-        # I will leave this code in for now, because that may change in the
-        # future.
-        # series = io.Series(path, io.Access.read_only,
-        #                    options=json.dumps(
-        #                         {"defer_iteration_parsing": True} |
-        #                         self.parameters.
-        #                             _configuration["openpmd_configuration"]))
-        options = self.parameters._configuration["openpmd_configuration"].copy()
-        options["defer_iteration_parsing"] = True
-        series = io.Series(path, io.Access.read_only,
-                           options=json.dumps(options))
+        if comm is None or comm.rank == 0:
+            import openpmd_api as io
+            # The union operator for dicts is only supported starting with
+            # python 3.9. Currently, MALA works down to python 3.8; For now,
+            # I think it is good to keep it that way.
+            # I will leave this code in for now, because that may change in the
+            # future.
+            # series = io.Series(path, io.Access.read_only,
+            #                    options=json.dumps(
+            #                         {"defer_iteration_parsing": True} |
+            #                         self.parameters.
+            #                             _configuration["openpmd_configuration"]))
+            options = self.parameters._configuration[
+                "openpmd_configuration"].copy()
+            options["defer_iteration_parsing"] = True
+            series = io.Series(path,
+                               io.Access.read_only,
+                               options=json.dumps(options))
 
-        # Check if this actually MALA compatible data.
-        if series.get_attribute("is_mala_data") != 1:
-            raise Exception("Non-MALA data detected, cannot work with this "
-                            "data.")
+            # Check if this actually MALA compatible data.
+            if series.get_attribute("is_mala_data") != 1:
+                raise Exception(
+                    "Non-MALA data detected, cannot work with this "
+                    "data.")
 
-        # A bit clanky, but this way only the FIRST iteration is loaded,
-        # which is what we need for loading from a single file that
-        # may be whatever iteration in its series.
-        # Also, in combination with `defer_iteration_parsing`, specified as
-        # default above, this opens and parses the first iteration,
-        # and no others.
-        for current_iteration in series.read_iterations():
-            mesh = current_iteration.meshes[self.data_name]
-            return self.\
-                _process_loaded_dimensions((mesh["0"].shape[0],
-                                            mesh["0"].shape[1],
-                                            mesh["0"].shape[2],
-                                            len(mesh)))
+            # A bit clanky, but this way only the FIRST iteration is loaded,
+            # which is what we need for loading from a single file that
+            # may be whatever iteration in its series.
+            # Also, in combination with `defer_iteration_parsing`, specified as
+            # default above, this opens and parses the first iteration,
+            # and no others.
+            for current_iteration in series.read_iterations():
+                mesh = current_iteration.meshes[self.data_name]
+                tuple_from_file = [mesh["0"].shape[0], mesh["0"].shape[1],
+                                   mesh["0"].shape[2], len(mesh)]
+                loaded_dtype = mesh["0"].dtype
+                break
+            series.close()
+        else:
+            tuple_from_file = None
+
+        if comm is not None:
+            tuple_from_file = comm.bcast(tuple_from_file, root=0)
+        if read_dtype:
+            return self._process_loaded_dimensions(tuple(tuple_from_file)), \
+                   loaded_dtype
+        else:
+            return self._process_loaded_dimensions(tuple(tuple_from_file))
 
     def write_to_numpy_file(self, path, array):
         """
@@ -300,7 +313,37 @@ class PhysicalData(ABC):
         """
         np.save(path, array)
 
-    def write_to_openpmd_file(self, path, array, additional_attributes={}):
+    class SkipArrayWriting:
+        """
+        Optional/alternative parameter for `write_to_openpmd_file` function.
+
+        The function `write_to_openpmd_file` can be used:
+
+        1. either for writing the entire openPMD file, as the name implies
+        2. or for preparing and initializing the structure of an openPMD file,
+           without actually having the array data at hand yet.
+           This means writing attributes, creating the hierarchy and specifying
+           the dataset extents and types.
+
+        In the latter case, no numpy array is provided at the call site, but two
+        kinds of information are still required for preparing the structure, that
+        would normally be extracted from the numpy array:
+
+        1. The dataset extent and type.
+        2. The feature size.
+
+        In order to provide this data, the numpy array can be replaced with an
+        instance of the class SkipArrayWriting.
+        """
+
+        # dataset has type openpmd_api.Dataset (not adding a type hint to avoid
+        # needing to import here)
+        def __init__(self, dataset, feature_size):
+            self.dataset = dataset
+            self.feature_size = feature_size
+
+    def write_to_openpmd_file(self, path, array, additional_attributes={},
+                              internal_iteration_number=0):
         """
         Write data to an OpenPMD file.
 
@@ -308,50 +351,63 @@ class PhysicalData(ABC):
         ----------
         path : string
             File to save into. If no file ending is given, .h5 is assumed.
+            Alternatively: A Series, opened already.
 
-        array : numpy.ndarray
-            Array to save.
+        array : Either numpy.ndarray or an SkipArrayWriting object
+            Either the array to save or the meta information needed to create
+            the openPMD structure.
 
         additional_attributes : dict
             Dict containing additional attributes to be saved.
+
+        internal_iteration_number : int
+            Internal OpenPMD iteration number. Ideally, this number should
+            match any number present in the file name, if this data is part
+            of a larger data set.
         """
         import openpmd_api as io
 
-        file_name = os.path.basename(path)
-        file_ending = file_name.split(".")[-1]
-        if file_name == file_ending:
-            path += ".h5"
-        elif file_ending not in io.file_extensions:
-            raise Exception("Invalid file ending selected: " +
-                            file_ending)
-        if self.parameters._configuration["mpi"]:
-            series = io.Series(
-                path,
-                io.Access.create,
-                get_comm(),
-                options=json.dumps(
-                    self.parameters._configuration["openpmd_configuration"]))
-        else:
-            series = io.Series(
-                path,
-                io.Access.create,
-                options=json.dumps(
-                    self.parameters._configuration["openpmd_configuration"]))
+        if isinstance(path, str):
+            file_name = os.path.basename(path)
+            file_ending = file_name.split(".")[-1]
+            if file_name == file_ending:
+                path += ".h5"
+            elif file_ending not in io.file_extensions:
+                raise Exception("Invalid file ending selected: " +
+                                file_ending)
+            if self.parameters._configuration["mpi"]:
+                series = io.Series(
+                    path,
+                    io.Access.create,
+                    get_comm(),
+                    options=json.dumps(
+                        self.parameters._configuration["openpmd_configuration"]))
+            else:
+                series = io.Series(
+                    path,
+                    io.Access.create,
+                    options=json.dumps(
+                        self.parameters._configuration["openpmd_configuration"]))
+        elif isinstance(path, io.Series):
+            series = path
+
         series.set_attribute("is_mala_data", 1)
         series.set_software(name="MALA", version=mala_version)
         series.author = "..."
         for entry in additional_attributes:
             series.set_attribute(entry, additional_attributes[entry])
 
-        iteration = series.write_iterations()[0]
+        iteration = series.write_iterations()[internal_iteration_number]
 
         # This function may be called without the feature dimension
         # explicitly set (i.e. during testing or post-processing).
         # We have to check for that.
-        if self.feature_size == 0:
+        if self.feature_size == 0 and not isinstance(array,
+                                                     self.SkipArrayWriting):
             self._set_feature_size_from_array(array)
 
         self.write_to_openpmd_iteration(iteration, array)
+        return series
 
     def write_to_openpmd_iteration(self, iteration, array,
                                    local_offset=None,
@@ -430,7 +486,31 @@ class PhysicalData(ABC):
                 atoms_openpmd["position"][str(atom)].unit_SI = 1.0e-10
                 atoms_openpmd["positionOffset"][str(atom)].unit_SI = 1.0e-10
 
-        dataset = io.Dataset(array.dtype, self.grid_dimensions)
+        dataset = array.dataset if isinstance(
+            array, self.SkipArrayWriting) else io.Dataset(
+                array.dtype, self.grid_dimensions)
+
+        # Global feature sizes:
+        feature_global_from = 0
+        feature_global_to = self.feature_size
+        if feature_global_to == 0 and isinstance(array, self.SkipArrayWriting):
+            feature_global_to = array.feature_size
+
+        # First loop: Only metadata, write metadata equivalently across ranks
+        for current_feature in range(feature_global_from, feature_global_to):
+            mesh_component = mesh[str(current_feature)]
+            mesh_component.reset_dataset(dataset)
+            # All data is assumed to be saved in
+            # MALA units, so the SI conversion factor we save
+            # here is the one for MALA (ASE) units
+            mesh_component.unit_SI = self.si_unit_conversion
+            # position: which relative point within the cell is
+            # represented by the stored values
+            # ([0.5, 0.5, 0.5] represents the middle)
+            mesh_component.position = [0.5, 0.5, 0.5]
+
+        if isinstance(array, self.SkipArrayWriting):
+            return
 
         if feature_to is None:
             feature_to = array.shape[3]
@@ -464,22 +544,6 @@ match the array dimensions (extent {} in the feature dimension)""".format(
             extra_flushes = highest_iteration_count - my_iteration_count
         else:
             extra_flushes = 0
-
-        # Global feature sizes:
-        feature_global_from = 0
-        feature_global_to = self.feature_size
-        # First loop: Only metadata, write metadata equivalently across ranks
-        for current_feature in range(feature_global_from, feature_global_to):
-            mesh_component = mesh[str(current_feature)]
-            mesh_component.reset_dataset(dataset)
-            # All data is assumed to be saved in
-            # MALA units, so the SI conversion factor we save
-            # here is the one for MALA (ASE) units
-            mesh_component.unit_SI = self.si_unit_conversion
-            # position: which relative point within the cell is
-            # represented by the stored values
-            # ([0.5, 0.5, 0.5] represents the middle)
-            mesh_component.position = [0.5, 0.5, 0.5]
 
         # Second loop: Write heavy data
         for base in range(0, array.shape[3], granularity):

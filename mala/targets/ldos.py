@@ -1475,7 +1475,7 @@ class LDOS(Target):
             # Convert and then append the LDOS data.
             data = data*self.convert_units(1, in_units=units)
             ldos_data[:, :, :, i-start_index] = data[:, :, :]
-            self.grid_dimensions = np.shape(ldos_data)[0:3]
+            self.grid_dimensions = list(np.shape(ldos_data)[0:3])
 
         # We have to gather the LDOS either file based or not.
         if self.parameters._configuration["mpi"]:
