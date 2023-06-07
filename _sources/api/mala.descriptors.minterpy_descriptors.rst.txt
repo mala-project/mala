@@ -1,0 +1,7 @@
+minterpy\_descriptors
+=====================
+
+.. automodule:: mala.descriptors.minterpy_descriptors
+   :members:
+   :undoc-members:
+   :show-inheritance:

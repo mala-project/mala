@@ -406,6 +406,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">atomic_density_sigma</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atomic_density_cutoff</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="c1"># Everything concerning the minterpy descriptors.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minterpy_point_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minterpy_cutoff_cube_size</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minterpy_polynomial_degree</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minterpy_lp_norm</span> <span class="o">=</span> <span class="mi">2</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_z_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

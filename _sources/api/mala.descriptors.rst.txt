@@ -20,4 +20,5 @@ descriptors
    mala.descriptors.bispectrum
    mala.descriptors.descriptor
    mala.descriptors.lammps_utils
+   mala.descriptors.minterpy_descriptors
 

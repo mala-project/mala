@@ -139,7 +139,11 @@ and <code class="docutils literal notranslate"><span class="pre">Target</span></
 <p>Descriptors give, per grid-point, information about the
 local environment around that grid-point. In most cases, users will not have
 to interact with a <code class="docutils literal notranslate"><span class="pre">Descriptor</span></code> object. Yet, these objects can be created
-by themselves if needed.</p>
+by themselves if needed. The default option for descriptor calculation
+is <code class="docutils literal notranslate"><span class="pre">Bispectrum</span></code>, i.e., the bispectrum descriptors used in all current MALA
+publications. Experimental options include <code class="docutils literal notranslate"><span class="pre">AtomicDensity</span></code> (i.e. the raw
+atomic density, e.g. for convolutional approaches) and <code class="docutils literal notranslate"><span class="pre">MinterpyDescriptors</span></code>
+(currently experimental).</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mala</span>
 
