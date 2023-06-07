@@ -218,15 +218,28 @@
         <span class="n">input_shm</span> <span class="o">=</span> <span class="n">shared_memory</span><span class="o">.</span><span class="n">SharedMemory</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">input_shm_name</span><span class="p">)</span>
         <span class="n">output_shm</span> <span class="o">=</span> <span class="n">shared_memory</span><span class="o">.</span><span class="n">SharedMemory</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">output_shm_name</span><span class="p">)</span>
 
-        <span class="n">input_shape</span><span class="p">,</span> <span class="n">input_dtype</span> <span class="o">=</span> <span class="n">descriptor_calculator</span><span class="o">.</span> \
-            <span class="n">read_dimensions_and_dtype_from_numpy_file</span><span class="p">(</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
-                         <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
+            <span class="n">input_shape</span><span class="p">,</span> <span class="n">input_dtype</span> <span class="o">=</span> <span class="n">descriptor_calculator</span><span class="o">.</span> \
+                <span class="n">read_dimensions_from_numpy_file</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
+                             <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">),</span> <span class="n">read_dtype</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">output_shape</span><span class="p">,</span> <span class="n">output_dtype</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span> \
-            <span class="n">read_dimensions_and_dtype_from_numpy_file</span><span class="p">(</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
-                         <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">))</span>
+            <span class="n">output_shape</span><span class="p">,</span> <span class="n">output_dtype</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span> \
+                <span class="n">read_dimensions_from_numpy_file</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                             <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">),</span> <span class="n">read_dtype</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span><span class="p">:</span>
+            <span class="n">input_shape</span><span class="p">,</span> <span class="n">input_dtype</span> <span class="o">=</span> <span class="n">descriptor_calculator</span><span class="o">.</span> \
+                <span class="n">read_dimensions_from_openpmd_file</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
+                             <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">),</span> <span class="n">read_dtype</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">output_shape</span><span class="p">,</span> <span class="n">output_dtype</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span> \
+                <span class="n">read_dimensions_from_openpmd_file</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                             <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">),</span> <span class="n">read_dtype</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid snapshot type selected.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Form numpy arrays from shm buffers</span>
         <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">input_dtype</span><span class="p">,</span>
@@ -235,18 +248,32 @@
                                  <span class="n">buffer</span><span class="o">=</span><span class="n">output_shm</span><span class="o">.</span><span class="n">buf</span><span class="p">)</span>
 
         <span class="c1"># Load numpy data into shm buffers</span>
-        <span class="n">descriptor_calculator</span><span class="o">.</span> \
-            <span class="n">read_from_numpy_file</span><span class="p">(</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
-                         <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">),</span>
-            <span class="n">units</span><span class="o">=</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_units</span><span class="p">,</span>
-            <span class="n">array</span><span class="o">=</span><span class="n">input_data</span><span class="p">)</span>
-        <span class="n">target_calculator</span><span class="o">.</span> \
-            <span class="n">read_from_numpy_file</span><span class="p">(</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
-                         <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">),</span>
-            <span class="n">units</span><span class="o">=</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_units</span><span class="p">,</span>
-            <span class="n">array</span><span class="o">=</span><span class="n">output_data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
+            <span class="n">descriptor_calculator</span><span class="o">.</span> \
+                <span class="n">read_from_numpy_file</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
+                             <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">),</span>
+                <span class="n">units</span><span class="o">=</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_units</span><span class="p">,</span>
+                <span class="n">array</span><span class="o">=</span><span class="n">input_data</span><span class="p">)</span>
+            <span class="n">target_calculator</span><span class="o">.</span> \
+                <span class="n">read_from_numpy_file</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                             <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">),</span>
+                <span class="n">units</span><span class="o">=</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_units</span><span class="p">,</span>
+                <span class="n">array</span><span class="o">=</span><span class="n">output_data</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="n">descriptor_calculator</span><span class="o">.</span> \
+                <span class="n">read_from_openpmd_file</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
+                             <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">),</span>
+                <span class="n">units</span><span class="o">=</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_units</span><span class="p">,</span>
+                <span class="n">array</span><span class="o">=</span><span class="n">input_data</span><span class="p">)</span>
+            <span class="n">target_calculator</span><span class="o">.</span> \
+                <span class="n">read_from_openpmd_file</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                             <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">),</span>
+                <span class="n">units</span><span class="o">=</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_units</span><span class="p">,</span>
+                <span class="n">array</span><span class="o">=</span><span class="n">output_data</span><span class="p">)</span>
 
         <span class="c1"># This function only loads the numpy data with scaling. Remaining data</span>
         <span class="c1"># preprocessing occurs in __getitem__ of LazyLoadDatasetSingle</span>
