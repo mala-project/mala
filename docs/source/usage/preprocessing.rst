@@ -50,7 +50,7 @@ by themselves if needed. The default option for descriptor calculation
 is ``Bispectrum``, i.e., the bispectrum descriptors used in all current MALA
 publications. Experimental options include ``AtomicDensity`` (i.e. the raw
 atomic density, e.g. for convolutional approaches) and ``MinterpyDescriptors``
- (currently experimental).
+(currently experimental).
 
       .. code-block:: python
 

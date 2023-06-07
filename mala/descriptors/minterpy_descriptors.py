@@ -224,7 +224,7 @@ class MinterpyDescriptors(Descriptor):
 
     def _build_unisolvent_nodes(self, dimension=3):
         """
-        Build the unisolvent nodes
+        Build the unisolvent nodes.
 
         Parameters
         ----------
