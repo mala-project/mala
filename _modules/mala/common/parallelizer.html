@@ -87,6 +87,7 @@
 <span class="n">comm</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="n">local_mpi_rank</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="n">current_verbosity</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">lammps_instance</span> <span class="o">=</span> <span class="kc">None</span>
 
 
 <div class="viewcode-block" id="set_current_verbosity"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_current_verbosity">[docs]</a><span class="k">def</span> <span class="nf">set_current_verbosity</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
@@ -151,6 +152,26 @@
     <span class="c1"># else:</span>
     <span class="c1">#     global comm</span>
     <span class="c1">#     comm = MockCommunicator()</span>
+
+
+<div class="viewcode-block" id="set_lammps_instance"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_lammps_instance">[docs]</a><span class="k">def</span> <span class="nf">set_lammps_instance</span><span class="p">(</span><span class="n">new_instance</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set a new LAMMPS instance to be targeted during the finalize call.</span>
+
+<span class="sd">    This currently has to be done in order for Kokkos to not through an</span>
+<span class="sd">    error when operating in GPU descriptor calculation mode.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    new_instance : lammps.LAMMPS</span>
+<span class="sd">        A LAMMPS instance currently in memory to be properly finalized at the</span>
+<span class="sd">        end of the script.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">lammps</span>
+    <span class="k">global</span> <span class="n">lammps_instance</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_instance</span><span class="p">,</span> <span class="n">lammps</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">lammps</span><span class="p">):</span>
+        <span class="n">lammps_instance</span> <span class="o">=</span> <span class="n">new_instance</span></div>
 
 
 <div class="viewcode-block" id="get_rank"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.get_rank">[docs]</a><span class="k">def</span> <span class="nf">get_rank</span><span class="p">():</span>
@@ -306,6 +327,12 @@
     <span class="k">if</span> <span class="n">current_verbosity</span> <span class="o">&gt;=</span> <span class="n">min_verbosity</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">warning</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="finalize"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.finalize">[docs]</a><span class="k">def</span> <span class="nf">finalize</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Properly shut down lingering Kokkos/GPU instances.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">lammps_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lammps_instance</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span></div>
 </pre></div>
 
            </div>

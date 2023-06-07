@@ -105,6 +105,12 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="mala.common.parallelizer.finalize">
+<span class="sig-name descname"><span class="pre">finalize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#finalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.finalize" title="Permalink to this definition"></a></dt>
+<dd><p>Properly shut down lingering Kokkos/GPU instances.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="mala.common.parallelizer.get_comm">
 <span class="sig-name descname"><span class="pre">get_comm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#get_comm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.get_comm" title="Permalink to this definition"></a></dt>
 <dd><p>Return the MPI communicator, if MPI is being used.</p>
@@ -230,6 +236,20 @@ printing works in parallel. The Parameters class does that for the user.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>new_value</strong> (<em>bool</em>) – Value the horovod status has.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.common.parallelizer.set_lammps_instance">
+<span class="sig-name descname"><span class="pre">set_lammps_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_instance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#set_lammps_instance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.set_lammps_instance" title="Permalink to this definition"></a></dt>
+<dd><p>Set a new LAMMPS instance to be targeted during the finalize call.</p>
+<p>This currently has to be done in order for Kokkos to not through an
+error when operating in GPU descriptor calculation mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>new_instance</strong> (<em>lammps.LAMMPS</em>) – A LAMMPS instance currently in memory to be properly finalized at the
+end of the script.</p>
 </dd>
 </dl>
 </dd></dl>

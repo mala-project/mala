@@ -153,23 +153,57 @@ path, e.g. via <code class="docutils literal notranslate"><span class="pre">expo
 </div>
 <div class="section" id="lammps-descriptor-calculation">
 <h2>LAMMPS (descriptor calculation)<a class="headerlink" href="#lammps-descriptor-calculation" title="Permalink to this headline"></a></h2>
-<ul class="simple">
+<p>We provide a LAMMPS version compatible with the most recent MALA version
+<a class="reference external" href="https://github.com/mala-project/lammps/tree/mala">here</a>.</p>
+<p>Building the LAMMPS interface for MALA consists of two steps:</p>
+<ol class="arabic simple">
+<li><p>Build a LAMMPS instance</p></li>
+<li><p>Build the python bindings to it</p></li>
+</ol>
+<p>The second part is mostly trivial. The first part is a bit more involved, since
+there are few choices to be made here. For a full overview of how to build
+LAMMPS, please refer to the <a class="reference external" href="https://docs.lammps.org/Build.html">official instructions</a>.
+The MALA team recommends to build LAMMPS with <code class="docutils literal notranslate"><span class="pre">cmake</span></code>. To do so</p>
+<ul>
 <li><p>Checkout <a class="reference external" href="https://github.com/mala-project/lammps/tree/mala">https://github.com/mala-project/lammps/tree/mala</a></p></li>
 <li><p>Make sure the <code class="docutils literal notranslate"><span class="pre">mala</span></code> tree is checked out locally via <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">branch</span></code>!</p></li>
-<li><p>Compile the LAMMPS shared library with the SNAP package installed</p>
+<li><p>Inside the LAMMPS folder create a build folder (named, e.g., <code class="docutils literal notranslate"><span class="pre">build</span></code>)</p></li>
+<li><p>In the <code class="docutils literal notranslate"><span class="pre">build</span></code> folder, configure your <code class="docutils literal notranslate"><span class="pre">cmake</span></code> build:
+<code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">../cmake</span> <span class="pre">-D</span> <span class="pre">OPTION1</span> <span class="pre">-D</span> <span class="pre">OPTION2</span> <span class="pre">...</span></code>; Options for a typical LAMMPS
+build for usage with MALA:</p>
 <ul>
-<li><p>Change into the source folder of LAMMPS <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">/path/to/lammps/src</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">yes-ml-snap</span></code></p></li>
-<li><p>(optional: check with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">ps</span></code> that <code class="docutils literal notranslate"><span class="pre">ml-snap</span></code> was correctly added)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">mode=shlib</span> <span class="pre">mpi</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BUILD_SHARED_LIBS=yes</span></code>: Necessary to link the LAMMPS library to python</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PKG_ML-SNAP=yes</span></code>: Enables the calculation of SNAP descriptors with LAMMPS</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BUILD_MPI=yes</span></code>: Enables MPI aware calculations; set this option if
+plan to use MPI and have an MPI aware compiler loaded</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PKG_KOKKOS=yes</span></code>: Enables the Kokkos package which is needed to calculate
+bispectrum descriptors on a GPU. Without this option, bispectrum descriptor
+calculation will solely be performed on CPU. If you want to use a GPU via
+Kokkos, further options you will have to set further options:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Kokkos_ENABLE_CUDA=yes</span></code>: Tells Kokkos to use CUDA</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Kokkos_ARCH_HOSTARCH=???</span></code>: Your CPU architecture (see <a class="reference external" href="https://docs.lammps.org/Build_extras.html#kokkos-package">Kokkos instructions</a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Kokkos_ARCH_GPUARCH=???</span></code>: Your GPU architecture (see see <a class="reference external" href="https://docs.lammps.org/Build_extras.html#kokkos-package">Kokkos instructions</a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CMAKE_CXX_COMPILER=???</span></code>: Path to the <code class="docutils literal notranslate"><span class="pre">nvcc_wrapper</span></code> executable
+shipped with the LAMMPS code, should be at <code class="docutils literal notranslate"><span class="pre">/your/path/to/lammps/lib/kokkos/bin/nvcc_wrapper</span></code></p></li>
+</ul>
+</div></blockquote>
+</li>
 </ul>
 </li>
-<li><p>Make the LAMMPS library visible in python</p>
-<ul>
-<li><p>Change into the python path of LAMMPS <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">/path/to/lammps/python</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">install.py</span> <span class="pre">-p</span> <span class="pre">lammps</span> <span class="pre">-l</span> <span class="pre">../src/liblammps.so</span></code></p></li>
+<li><p>Build the library and executable with <code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">--build</span> <span class="pre">.</span></code>
+(Add <code class="docutils literal notranslate"><span class="pre">--parallel=8</span></code> for a faster build)</p></li>
 </ul>
-</li>
+<p>This should create a shared library called <code class="docutils literal notranslate"><span class="pre">liblammps.so</span></code> in your build
+folder. To then build the python library</p>
+<ul class="simple">
+<li><p>Change into the <code class="docutils literal notranslate"><span class="pre">python</span></code> folder of the LAMMPS code</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">install.py</span> <span class="pre">-p</span> <span class="pre">lammps</span> <span class="pre">-l</span> <span class="pre">../&lt;build_folder&gt;/liblammps.so</span></code>, where
+<code class="docutils literal notranslate"><span class="pre">&lt;build_folder&gt;</span></code> is whatever folder you performed the <code class="docutils literal notranslate"><span class="pre">cmake</span></code> build in</p></li>
+<li><p>Note: The python installation process may give an <code class="docutils literal notranslate"><span class="pre">shutil.SameFileError</span></code>
+after successful installation; this is LAMMPS related and can be ignored
+here.</p></li>
 </ul>
 </div>
 </div>

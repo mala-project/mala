@@ -165,7 +165,6 @@
 
     <span class="k">def</span> <span class="nf">_calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform actual bispectrum calculation.&quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">lammps</span>
         <span class="n">use_fp64</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_fp64&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="n">lammps_format</span> <span class="o">=</span> <span class="s2">&quot;lammps-data&quot;</span>
@@ -176,22 +175,12 @@
         <span class="n">ny</span> <span class="o">=</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">nz</span> <span class="o">=</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
-        <span class="c1"># Build LAMMPS arguments from the data we read.</span>
-        <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;-screen&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;-log&quot;</span><span class="p">,</span>
-                       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;lammps_bgrid_log.tmp&quot;</span><span class="p">)]</span>
-
-        <span class="c1"># LAMMPS processor grid filled by parent class.</span>
-        <span class="n">lammps_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_lammps_processors</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">)</span>
-
-        <span class="c1"># Set the values not already filled in the LAMMPS setup.</span>
+        <span class="c1"># Create LAMMPS instance.</span>
+        <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;twojmax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span>
         <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;rcutfac&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span>
         <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;atom_config_fname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ase_out_path</span>
-
-        <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="n">set_cmdlinevars</span><span class="p">(</span><span class="n">lmp_cmdargs</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">)</span>
-
-        <span class="c1"># Build the LAMMPS object.</span>
-        <span class="n">lmp</span> <span class="o">=</span> <span class="n">lammps</span><span class="p">(</span><span class="n">cmdargs</span><span class="o">=</span><span class="n">lmp_cmdargs</span><span class="p">)</span>
+        <span class="n">lmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_lammps</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">)</span>
 
         <span class="c1"># An empty string means that the user wants to use the standard input.</span>
         <span class="c1"># What that is differs depending on serial/parallel execution.</span>
@@ -242,6 +231,7 @@
                                    <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
                                    <span class="n">array_shape</span><span class="o">=</span><span class="p">(</span><span class="n">nrows_local</span><span class="p">,</span> <span class="n">ncols_local</span><span class="p">),</span>
                                    <span class="n">use_fp64</span><span class="o">=</span><span class="n">use_fp64</span><span class="p">)</span>
+            <span class="n">lmp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
             <span class="c1"># Copy the grid dimensions only at the end.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">]</span>
@@ -253,6 +243,8 @@
                 <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;bgrid&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
                                    <span class="p">(</span><span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span><span class="p">),</span>
                                    <span class="n">use_fp64</span><span class="o">=</span><span class="n">use_fp64</span><span class="p">)</span>
+            <span class="n">lmp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
             <span class="c1"># switch from x-fastest to z-fastest order (swaps 0th and 2nd</span>
             <span class="c1"># dimension)</span>
             <span class="n">snap_descriptors_np</span> <span class="o">=</span> <span class="n">snap_descriptors_np</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>

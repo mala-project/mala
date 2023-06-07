@@ -73,6 +73,7 @@
   <h1>Source code for mala.descriptors.descriptor</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Base class for all descriptor calculators.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">ase</span>
 <span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">m</span>
@@ -80,8 +81,9 @@
 
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">ParametersDescriptors</span><span class="p">,</span> <span class="n">Parameters</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_size</span><span class="p">,</span> \
-    <span class="n">barrier</span><span class="p">,</span> <span class="n">parallel_warn</span>
+    <span class="n">barrier</span><span class="p">,</span> <span class="n">parallel_warn</span><span class="p">,</span> <span class="n">set_lammps_instance</span>
 <span class="kn">from</span> <span class="nn">mala.common.physical_data</span> <span class="kn">import</span> <span class="n">PhysicalData</span>
+<span class="kn">from</span> <span class="nn">mala.descriptors.lammps_utils</span> <span class="kn">import</span> <span class="n">set_cmdlinevars</span>
 
 
 <div class="viewcode-block" id="Descriptor"><a class="viewcode-back" href="../../../api/mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor">[docs]</a><span class="k">class</span> <span class="nc">Descriptor</span><span class="p">(</span><span class="n">PhysicalData</span><span class="p">):</span>
@@ -588,12 +590,24 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="nf">_setup_lammps_processors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setup_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set up the lammps processor grid.</span>
 
 <span class="sd">        Takes into account y/z-splitting.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">lammps</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> \
+           <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;LAMMPS can currently only work with multiple &quot;</span>
+                            <span class="s2">&quot;ranks or GPU on one rank - but not multiple GPUs &quot;</span>
+                            <span class="s2">&quot;across ranks.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Build LAMMPS arguments from the data we read.</span>
+        <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;-screen&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;-log&quot;</span><span class="p">,</span>
+                       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;lammps_bgrid_log.tmp&quot;</span><span class="p">)]</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
             <span class="n">size</span> <span class="o">=</span> <span class="n">get_size</span><span class="p">()</span>
             <span class="c1"># for parallel tem need to set lammps commands: processors and</span>
@@ -693,13 +707,14 @@
                     <span class="c1">#     zvals = ((i+1+zrem)*zcut)-0.00000001</span>
                     <span class="c1">#     zint += format(zvals, &quot;.8f&quot;)</span>
                     <span class="c1">#     zint += &#39; &#39;</span>
-                <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lammps_procs&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;processors </span><span class="si">{</span><span class="n">lammps_procs</span><span class="si">}</span><span class="s2"> &quot;</span>
-                                               <span class="sa">f</span><span class="s2">&quot;map xyz&quot;</span><span class="p">,</span>
-                               <span class="s2">&quot;zbal&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;balance 1.0 y </span><span class="si">{</span><span class="n">yint</span><span class="si">}</span><span class="s2"> z </span><span class="si">{</span><span class="n">zint</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                               <span class="s2">&quot;ngridx&quot;</span><span class="p">:</span> <span class="n">nx</span><span class="p">,</span>
-                               <span class="s2">&quot;ngridy&quot;</span><span class="p">:</span> <span class="n">ny</span><span class="p">,</span>
-                               <span class="s2">&quot;ngridz&quot;</span><span class="p">:</span> <span class="n">nz</span><span class="p">,</span>
-                               <span class="s2">&quot;switch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_switchflag</span><span class="p">}</span>
+                <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;lammps_procs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;processors </span><span class="si">{</span><span class="n">lammps_procs</span><span class="si">}</span><span class="s2"> &quot;</span> \
+                                              <span class="sa">f</span><span class="s2">&quot;map xyz&quot;</span>
+                <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;zbal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;balance 1.0 y </span><span class="si">{</span><span class="n">yint</span><span class="si">}</span><span class="s2"> z </span><span class="si">{</span><span class="n">zint</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;ngridx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nx</span>
+                <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;ngridy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ny</span>
+                <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;ngridz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nz</span>
+                <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;switch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_switchflag</span>
+
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_z_splitting</span><span class="p">:</span>
                     <span class="c1"># when nyfft is not used only split processors along z axis</span>
@@ -745,25 +760,47 @@
                             <span class="n">zvals</span> <span class="o">=</span> <span class="p">(((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">nz</span><span class="o">/</span><span class="n">zprocs</span><span class="p">)</span><span class="o">+</span><span class="n">zrem</span><span class="p">)</span><span class="o">*</span><span class="n">zcut</span><span class="p">)</span><span class="o">-</span><span class="mf">0.00000001</span>
                             <span class="n">zint</span> <span class="o">+=</span> <span class="nb">format</span><span class="p">(</span><span class="n">zvals</span><span class="p">,</span> <span class="s2">&quot;.8f&quot;</span><span class="p">)</span>
                             <span class="n">zint</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
-                    <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lammps_procs&quot;</span><span class="p">:</span>
-                                   <span class="sa">f</span><span class="s2">&quot;processors </span><span class="si">{</span><span class="n">lammps_procs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;zbal&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;balance 1.0 z </span><span class="si">{</span><span class="n">zint</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                                   <span class="s2">&quot;ngridx&quot;</span><span class="p">:</span> <span class="n">nx</span><span class="p">,</span>
-                                   <span class="s2">&quot;ngridy&quot;</span><span class="p">:</span> <span class="n">ny</span><span class="p">,</span>
-                                   <span class="s2">&quot;ngridz&quot;</span><span class="p">:</span> <span class="n">nz</span><span class="p">,</span>
-                                   <span class="s2">&quot;switch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_switchflag</span><span class="p">}</span>
+
+                    <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;lammps_procs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;processors </span><span class="si">{</span><span class="n">lammps_procs</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;zbal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;balance 1.0 z </span><span class="si">{</span><span class="n">zint</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;ngridx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nx</span>
+                    <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;ngridy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ny</span>
+                    <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;ngridz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nz</span>
+                    <span class="n">lammps_dict</span><span class="p">[</span>
+                        <span class="s2">&quot;switch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_switchflag</span>
+
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ngridx&quot;</span><span class="p">:</span> <span class="n">nx</span><span class="p">,</span>
-                                   <span class="s2">&quot;ngridy&quot;</span><span class="p">:</span> <span class="n">ny</span><span class="p">,</span>
-                                   <span class="s2">&quot;ngridz&quot;</span><span class="p">:</span> <span class="n">nz</span><span class="p">,</span>
-                                   <span class="s2">&quot;switch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_switchflag</span><span class="p">}</span>
+                    <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;ngridx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nx</span>
+                    <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;ngridy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ny</span>
+                    <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;ngridz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nz</span>
+                    <span class="n">lammps_dict</span><span class="p">[</span>
+                        <span class="s2">&quot;switch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_switchflag</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ngridx&quot;</span><span class="p">:</span> <span class="n">nx</span><span class="p">,</span>
-                           <span class="s2">&quot;ngridy&quot;</span><span class="p">:</span> <span class="n">ny</span><span class="p">,</span>
-                           <span class="s2">&quot;ngridz&quot;</span><span class="p">:</span> <span class="n">nz</span><span class="p">,</span>
-                           <span class="s2">&quot;switch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_switchflag</span><span class="p">}</span>
-        <span class="k">return</span> <span class="n">lammps_dict</span>
+            <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;ngridx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nx</span>
+            <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;ngridy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ny</span>
+            <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;ngridz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nz</span>
+            <span class="n">lammps_dict</span><span class="p">[</span>
+                <span class="s2">&quot;switch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_switchflag</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]:</span>
+                <span class="c1"># Tell Kokkos to use one GPU.</span>
+                <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-k&quot;</span><span class="p">)</span>
+                <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;on&quot;</span><span class="p">)</span>
+                <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;g&quot;</span><span class="p">)</span>
+                <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Tell LAMMPS to use Kokkos versions of those commands for</span>
+                <span class="c1"># which a Kokkos version exists.</span>
+                <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-sf&quot;</span><span class="p">)</span>
+                <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;kk&quot;</span><span class="p">)</span>
+                <span class="k">pass</span>
+
+        <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="n">set_cmdlinevars</span><span class="p">(</span><span class="n">lmp_cmdargs</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">)</span>
+
+        <span class="n">lmp</span> <span class="o">=</span> <span class="n">lammps</span><span class="p">(</span><span class="n">cmdargs</span><span class="o">=</span><span class="n">lmp_cmdargs</span><span class="p">)</span>
+        <span class="n">set_lammps_instance</span><span class="p">(</span><span class="n">lmp</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lmp</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">_calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>

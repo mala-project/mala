@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MALA production runs &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>MALA production inference runs &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
@@ -50,7 +50,7 @@
 <li class="toctree-l2"><a class="reference internal" href="postprocessing.html">Postprocessing the LDOS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hyperparameters.html">Tuning the hyperparameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="predictions.html">Predict electronic structures</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">MALA production runs</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">MALA production inference runs</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#optimal-performance">Optimal performance</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#gaussian-descriptor-based-ewald-sum">Gaussian descriptor based Ewald sum</a></li>
 </ul>
@@ -78,7 +78,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../usage.html">Usage</a> &raquo;</li>
-      <li>MALA production runs</li>
+      <li>MALA production inference runs</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/usage/production.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -88,14 +88,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="mala-production-runs">
-<h1>MALA production runs<a class="headerlink" href="#mala-production-runs" title="Permalink to this headline"></a></h1>
+  <div class="section" id="mala-production-inference-runs">
+<h1>MALA production inference runs<a class="headerlink" href="#mala-production-inference-runs" title="Permalink to this headline"></a></h1>
 <div class="section" id="optimal-performance">
 <h2>Optimal performance<a class="headerlink" href="#optimal-performance" title="Permalink to this headline"></a></h2>
 <p>When running MALA for large systems or extended periods of time, performance
 becomes crucial. Most parts of MALA are either designed in a way to run as
 efficient as possible by default. Enabling MPI and GPU accordingly naturally
-boost performance by giving MALA access to more computational power.</p>
+boost performance by giving MALA access to more computational power. Currently,
+only MPI <strong>or</strong> GPU acceleration can be used at the same time.</p>
 <p>There are a few other options that can help with performance but need to be
 handled with care to avoid numerical inaccuracies.</p>
 <div class="section" id="gaussian-descriptor-based-ewald-sum">

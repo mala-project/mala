@@ -76,6 +76,8 @@ atomic density, e.g. for convolutional approaches) and ``MinterpyDescriptors``
             # Use the bispectrum object to calculate descriptors from QE calculation.
             bispectrum_descriptors = bispectrum.calculate_from_qe_out(...)
 
+Please note that bispectrum descriptors can be calculated on GPUs - for more
+information see :doc:`MALA publications <production>`.
 
 Targets
 *******
