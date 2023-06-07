@@ -8,8 +8,9 @@ import numpy as np
 
 from mala.common.parameters import ParametersDescriptors, Parameters
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
-    barrier, parallel_warn
+    barrier, parallel_warn, set_lammps_instance
 from mala.common.physical_data import PhysicalData
+from mala.descriptors.lammps_utils import set_cmdlinevars
 
 
 class Descriptor(PhysicalData):
@@ -510,12 +511,14 @@ class Descriptor(PhysicalData):
         else:
             return 0
 
-    def _setup_lammps(self, nx, ny, nz, outdir):
+    def _setup_lammps(self, nx, ny, nz, outdir, lammps_dict):
         """
         Set up the lammps processor grid.
 
         Takes into account y/z-splitting.
         """
+        from lammps import lammps
+
         if self.parameters._configuration["mpi"] and \
            self.parameters._configuration["gpu"]:
             raise Exception("LAMMPS can currently only work with multiple "
@@ -625,13 +628,14 @@ class Descriptor(PhysicalData):
                     #     zvals = ((i+1+zrem)*zcut)-0.00000001
                     #     zint += format(zvals, ".8f")
                     #     zint += ' '
-                lammps_dict = {"lammps_procs": f"processors {lammps_procs} "
-                                               f"map xyz",
-                               "zbal": f"balance 1.0 y {yint} z {zint}",
-                               "ngridx": nx,
-                               "ngridy": ny,
-                               "ngridz": nz,
-                               "switch": self.parameters.bispectrum_switchflag}
+                lammps_dict["lammps_procs"] = f"processors {lammps_procs} " \
+                                              f"map xyz"
+                lammps_dict["zbal"] = f"balance 1.0 y {yint} z {zint}"
+                lammps_dict["ngridx"] = nx
+                lammps_dict["ngridy"] = ny
+                lammps_dict["ngridz"] = nz
+                lammps_dict["switch"] = self.parameters.bispectrum_switchflag
+
             else:
                 if self.parameters.use_z_splitting:
                     # when nyfft is not used only split processors along z axis
@@ -677,24 +681,28 @@ class Descriptor(PhysicalData):
                             zvals = (((i+1)*int(nz/zprocs)+zrem)*zcut)-0.00000001
                             zint += format(zvals, ".8f")
                             zint += ' '
-                    lammps_dict = {"lammps_procs":
-                                   f"processors {lammps_procs}",
-                                   "zbal": f"balance 1.0 z {zint}",
-                                   "ngridx": nx,
-                                   "ngridy": ny,
-                                   "ngridz": nz,
-                                   "switch": self.parameters.bispectrum_switchflag}
+
+                    lammps_dict["lammps_procs"] = f"processors {lammps_procs}"
+                    lammps_dict["zbal"] = f"balance 1.0 z {zint}"
+                    lammps_dict["ngridx"] = nx
+                    lammps_dict["ngridy"] = ny
+                    lammps_dict["ngridz"] = nz
+                    lammps_dict[
+                        "switch"] = self.parameters.bispectrum_switchflag
+
                 else:
-                    lammps_dict = {"ngridx": nx,
-                                   "ngridy": ny,
-                                   "ngridz": nz,
-                                   "switch": self.parameters.bispectrum_switchflag}
+                    lammps_dict["ngridx"] = nx
+                    lammps_dict["ngridy"] = ny
+                    lammps_dict["ngridz"] = nz
+                    lammps_dict[
+                        "switch"] = self.parameters.bispectrum_switchflag
 
         else:
-            lammps_dict = {"ngridx": nx,
-                           "ngridy": ny,
-                           "ngridz": nz,
-                           "switch": self.parameters.bispectrum_switchflag}
+            lammps_dict["ngridx"] = nx
+            lammps_dict["ngridy"] = ny
+            lammps_dict["ngridz"] = nz
+            lammps_dict[
+                "switch"] = self.parameters.bispectrum_switchflag
             if self.parameters._configuration["gpu"]:
                 # Tell Kokkos to use one GPU.
                 lmp_cmdargs.append("-k")
@@ -708,7 +716,12 @@ class Descriptor(PhysicalData):
                 lmp_cmdargs.append("kk")
                 pass
 
-        return lammps_dict, lmp_cmdargs
+        lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
+
+        lmp = lammps(cmdargs=lmp_cmdargs)
+        set_lammps_instance(lmp)
+
+        return lmp
 
     @abstractmethod
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):

@@ -140,18 +140,12 @@ class AtomicDensity(Descriptor):
             self.parameters.atomic_density_sigma = self.\
                 get_optimal_sigma(voxel)
 
-        # LAMMPS processor grid filled by parent class.
-        lammps_dict, lmp_cmdargs = self._setup_lammps(nx, ny, nz, outdir)
-
-        # Set the values not already filled in the LAMMPS setup.
+        # Create LAMMPS instance.
+        lammps_dict = {}
         lammps_dict["sigma"] = self.parameters.atomic_density_sigma
         lammps_dict["rcutfac"] = self.parameters.atomic_density_cutoff
         lammps_dict["atom_config_fname"] = ase_out_path
-
-        lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
-
-        # Build the LAMMPS object.
-        lmp = lammps(cmdargs=lmp_cmdargs)
+        lmp = self._setup_lammps(nx, ny, nz, outdir, lammps_dict)
 
         # For now the file is chosen automatically, because this is used
         # mostly under the hood anyway.
