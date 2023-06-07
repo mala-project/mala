@@ -82,15 +82,28 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         Buffer is sized via numpy metadata.
         """
         # Get array shape and data types
-        self.input_shape, self.input_dtype = self.descriptor_calculator. \
-            read_dimensions_and_dtype_from_numpy_file(
-            os.path.join(self.snapshot.input_npy_directory,
-                         self.snapshot.input_npy_file))
+        if self.snapshot.snapshot_type == "numpy":
+            self.input_shape, self.input_dtype = self.descriptor_calculator. \
+                read_dimensions_from_numpy_file(
+                os.path.join(self.snapshot.input_npy_directory,
+                             self.snapshot.input_npy_file), read_dtype=True)
 
-        self.output_shape, self.output_dtype = self.target_calculator. \
-            read_dimensions_and_dtype_from_numpy_file(
-            os.path.join(self.snapshot.output_npy_directory,
-                         self.snapshot.output_npy_file))
+            self.output_shape, self.output_dtype = self.target_calculator. \
+                read_dimensions_from_numpy_file(
+                os.path.join(self.snapshot.output_npy_directory,
+                             self.snapshot.output_npy_file), read_dtype=True)
+        elif self.snapshot.snapshot_type == "openpmd":
+            self.input_shape, self.input_dtype = self.descriptor_calculator. \
+                read_dimensions_from_openpmd_file(
+                os.path.join(self.snapshot.input_npy_directory,
+                             self.snapshot.input_npy_file), read_dtype=True)
+
+            self.output_shape, self.output_dtype = self.target_calculator. \
+                read_dimensions_from_openpmd_file(
+                os.path.join(self.snapshot.output_npy_directory,
+                             self.snapshot.output_npy_file), read_dtype=True)
+        else:
+            raise Exception("Invalid snapshot type selected.")
 
         # To avoid copies and dealing with in-place casting from FP64, restrict
         # usage to data in FP32 type (which is a good idea anyway to save
