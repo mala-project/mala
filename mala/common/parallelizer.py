@@ -257,5 +257,6 @@ def parallel_warn(warning, min_verbosity=0, category=UserWarning):
 
 
 def finalize():
+    """Properly shut down lingering Kokkos/GPU instances."""
     if lammps_instance is not None:
         lammps_instance.finalize()
