@@ -49,21 +49,32 @@ printout("Predicted band energy: ",
          dos_calculator.band_energy)
 printout("Predicted band energy derivative: ",
          dos_calculator.d_band_energy_d_dos)
+printout("Predicted entropy contribution: ",
+         dos_calculator.entropy_contribution)
+printout("Predicted entropy contribution derivative: ",
+         dos_calculator.d_entropy_contribution_d_dos)
 
 delta_numerical = 1e-10
 d_band_energy_d_dos_numerical = []
+d_entropy_d_dos_numerical = []
 
 for i in range(0, parameters.targets.ldos_gridsize):
     dos_plus = dos.copy()
     dos_plus[i] += delta_numerical*0.5
     dos_calculator.read_from_array(dos_plus)
     derivative_plus = dos_calculator.band_energy
+    derivative2_plus = dos_calculator.entropy_contribution
 
     dos_minus = dos.copy()
     dos_minus[i] -= delta_numerical*0.5
     dos_calculator.read_from_array(dos_minus)
     derivative_minus = dos_calculator.band_energy
+    derivative2_minus = dos_calculator.entropy_contribution
+
     d_band_energy_d_dos_numerical.append((derivative_plus-derivative_minus) /
                                          delta_numerical)
+    d_entropy_d_dos_numerical.append((derivative2_plus-derivative2_minus) /
+                                     delta_numerical)
 
-print(d_band_energy_d_dos_numerical)
+print(np.array(d_band_energy_d_dos_numerical))
+print(np.array(d_entropy_d_dos_numerical))
