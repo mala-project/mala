@@ -40,41 +40,32 @@ atoms = read(os.path.join(data_path, "Be_snapshot3.out"))
 ldos = predictor.predict_for_atoms(atoms)
 ldos_calculator: mala.LDOS = predictor.target_calculator
 ldos_calculator.read_from_array(ldos)
-dos = ldos_calculator.density_of_states
-dos_calculator = mala.DOS.from_ldos_calculator(ldos_calculator)
+ldos_calculator.temperature = 4000
+mala_forces = ldos_calculator.atomic_forces.copy()
 
-dos_calculator.read_from_array(dos)
 
-printout("Predicted band energy: ",
-         dos_calculator.band_energy)
-printout("Predicted band energy derivative: ",
-         dos_calculator.d_band_energy_d_dos)
-printout("Predicted entropy contribution: ",
-         dos_calculator.entropy_contribution)
-printout("Predicted entropy contribution derivative: ",
-         dos_calculator.d_entropy_contribution_d_dos)
 
-delta_numerical = 1e-10
-d_band_energy_d_dos_numerical = []
-d_entropy_d_dos_numerical = []
+delta_numerical = 1e-14
+numerical_forces = []
 
 for i in range(0, parameters.targets.ldos_gridsize):
-    dos_plus = dos.copy()
-    dos_plus[i] += delta_numerical*0.5
-    dos_calculator.read_from_array(dos_plus)
-    derivative_plus = dos_calculator.band_energy
-    derivative2_plus = dos_calculator.entropy_contribution
+    ldos_plus = ldos.copy()
+    ldos_plus[0, i] += delta_numerical*0.5
+    ldos_calculator.read_from_array(ldos_plus)
+    derivative_plus = ldos_calculator.band_energy + \
+                      ldos_calculator.entropy_contribution
 
-    dos_minus = dos.copy()
-    dos_minus[i] -= delta_numerical*0.5
-    dos_calculator.read_from_array(dos_minus)
-    derivative_minus = dos_calculator.band_energy
-    derivative2_minus = dos_calculator.entropy_contribution
+    ldos_minus = ldos.copy()
+    ldos_minus[0, i] -= delta_numerical*0.5
+    ldos_calculator.read_from_array(ldos_minus)
+    derivative_minus = ldos_calculator.band_energy + \
+                       ldos_calculator.entropy_contribution
 
-    d_band_energy_d_dos_numerical.append((derivative_plus-derivative_minus) /
-                                         delta_numerical)
-    d_entropy_d_dos_numerical.append((derivative2_plus-derivative2_minus) /
-                                     delta_numerical)
+    numerical_forces.append((derivative_plus-derivative_minus) /
+                            delta_numerical)
 
-print(np.array(d_band_energy_d_dos_numerical))
-print(np.array(d_entropy_d_dos_numerical))
+print(mala_forces[0, :])
+print(mala_forces[2000, :])
+print(mala_forces[4000, :])
+print(np.array(numerical_forces))
+print(mala_forces[4000, :]/np.array(numerical_forces))

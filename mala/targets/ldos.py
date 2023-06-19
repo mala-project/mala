@@ -257,6 +257,8 @@ class LDOS(Target):
             del self._density_of_states_calculator
         if self._is_property_cached("entropy_contribution"):
             del self.entropy_contribution
+        if self._is_property_cached("atomic_forces"):
+            del self.atomic_forces
 
     @cached_property
     def energy_grid(self):
@@ -268,6 +270,15 @@ class LDOS(Target):
         """Total energy of the system, calculated via cached LDOS."""
         if self.local_density_of_states is not None:
             return self.get_total_energy()
+        else:
+            raise Exception("No cached LDOS available to calculate this "
+                            "property.")
+
+    @cached_property
+    def atomic_forces(self):
+        """Atomic forces of the system, calculated via cached LDOS."""
+        if self.local_density_of_states is not None:
+            return self.get_atomic_forces()
         else:
             raise Exception("No cached LDOS available to calculate this "
                             "property.")
@@ -1265,45 +1276,60 @@ class LDOS(Target):
         else:
             return dos_values
 
-    def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler,
-                          snapshot_number=0):
-        r"""
-        Get the atomic forces, currently work in progress.
+    def get_atomic_forces(self, ldos_data=None, dos_data=None,
+                         density_data=None, fermi_energy=None,
+                         temperature=None, voxel=None,
+                         grid_integration_method="summation",
+                         energy_integration_method="analytical",
+                         atoms_Angstrom=None, qe_input_data=None,
+                         qe_pseudopotentials=None, create_qe_file=True,
+                         return_energy_contributions=False):
+        """   """
+        if voxel is None:
+            voxel = self.voxel
+        if fermi_energy is None:
+            if ldos_data is None:
+                fermi_energy = self.fermi_energy
+            if fermi_energy is None:
+                printout("Warning: No fermi energy was provided or could be "
+                         "calculated from electronic structure data. "
+                         "Using the DFT fermi energy, this may "
+                         "yield unexpected results", min_verbosity=1)
+                fermi_energy = self.fermi_energy_dft
+        if temperature is None:
+            temperature = self.temperature
 
-        Will eventually give :math:`\frac{dE}{d \underline{\boldsymbol{R}}}`.
-        Will currently only give :math:`\frac{dd}{dB}`.
+        # Here we check whether we will use our internal, cached
+        # LDOS, or calculate everything from scratch.
+        if ldos_data is not None or (dos_data is not None
+                                     and density_data is not None):
+            pass
+        else:
+            # In this case, we use cached propeties wherever possible.
+            ldos_data = self.local_density_of_states
+            if ldos_data is None:
+                raise Exception("No input data provided to caculate "
+                                "total energy. Provide EITHER LDOS"
+                                " OR DOS and density.")
 
-        Parameters
-        ----------
-        ldos_data: torch.Tensor
-            Scaled (!) torch tensor holding the LDOS data for the snapshot
-            for which the atomic force should be calculated.
+            d_E_d_D = (self._density_of_states_calculator.d_band_energy_d_dos
+                     + self._density_of_states_calculator.
+                     d_entropy_contribution_d_dos) * voxel.volume
 
-        dE_dd: np.array
-            (WIP) Derivative of the total energy w.r.t the LDOS.
-            Later on, this will be evaluated within this subroutine. For now
-            it is provided from outside.
+            d_E_d_d = np.zeros_like(self.local_density_of_states)
+            if len(np.shape(self.local_density_of_states)) == 4:
+                d_E_d_d[:, :, :] = d_E_d_D
+            elif len(np.shape(self.local_density_of_states)) == 2:
+                d_E_d_d[:] = d_E_d_D
+            else:
+                raise Exception("Invalid LDOS shape provided.")
 
-        used_data_handler: mala.data.data_handler.DataHandler
-            DataHandler that was used to predict the LDOS for which the
-            atomic forces are supposed to be calculated.
-
-        snapshot_number:
-            Snapshot number (number within the data handler) for which this
-            LDOS prediction was performed. Always 0 in the inference case.
-
-        Returns
-        -------
-        dd_dB: torch.tensor
-            (WIP) Returns the scaled (!) derivative of the LDOS w.r.t to
-            the descriptors.
-
-        """
+            return d_E_d_d
         # For now this only works with ML generated LDOS.
         # Gradient of the LDOS respect to the descriptors.
-        ldos_data.backward(dE_dd)
-        dd_dB = used_data_handler.get_test_input_gradient(snapshot_number)
-        return dd_dB
+        # ldos_data.backward(dE_dd)
+        # dd_dB = used_data_handler.get_test_input_gradient(snapshot_number)
+        # return dd_dB
 
     # Private methods
     #################
