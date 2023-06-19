@@ -40,12 +40,10 @@ atoms = read(os.path.join(data_path, "Be_snapshot3.out"))
 ldos = predictor.predict_for_atoms(atoms)
 ldos_calculator: mala.LDOS = predictor.target_calculator
 ldos_calculator.read_from_array(ldos)
-ldos_calculator.temperature = 4000
 mala_forces = ldos_calculator.atomic_forces.copy()
 
 
-
-delta_numerical = 1e-14
+delta_numerical = 1e-8
 numerical_forces = []
 
 for i in range(0, parameters.targets.ldos_gridsize):
