@@ -13,7 +13,8 @@ from mala.targets.cube_parser import read_cube
 from mala.targets.xsf_parser import read_xsf
 from mala.targets.target import Target
 from mala.targets.calculation_helpers import fermi_function, \
-    analytical_integration, integrate_values_on_spacing
+    analytical_integration, integrate_values_on_spacing, \
+    analytical_integration_weights
 from mala.targets.dos import DOS
 from mala.targets.density import Density
 
@@ -1299,6 +1300,8 @@ class LDOS(Target):
         if temperature is None:
             temperature = self.temperature
 
+        energy_grid = self.get_energy_grid()
+
         # Here we check whether we will use our internal, cached
         # LDOS, or calculate everything from scratch.
         if ldos_data is not None or (dos_data is not None
@@ -1312,6 +1315,7 @@ class LDOS(Target):
                                 "total energy. Provide EITHER LDOS"
                                 " OR DOS and density.")
 
+            # DOS dependent energy terms.
             d_E_d_D = (self._density_of_states_calculator.d_band_energy_d_dos
                      + self._density_of_states_calculator.
                      d_entropy_contribution_d_dos) * voxel.volume
@@ -1324,7 +1328,13 @@ class LDOS(Target):
             else:
                 raise Exception("Invalid LDOS shape provided.")
 
-            return d_E_d_d
+            # Density dependent energy terms.
+            print(self._density_calculator.force_contributions.shape)
+            d_E_d_n = self._density_calculator.force_contributions * \
+                      analytical_integration_weights("F0", "F1", fermi_energy,
+                                                     energy_grid, temperature)
+            d_E_d_d += d_E_d_n
+            return d_E_d_n #d_E_d_d
         # For now this only works with ML generated LDOS.
         # Gradient of the LDOS respect to the descriptors.
         # ldos_data.backward(dE_dd)

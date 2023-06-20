@@ -799,11 +799,20 @@ class Density(Target):
         else:
             raise Exception("Density data has wrong dimensions. ")
 
-        hartree_potential = np.zeros([number_of_gridpoints, 1])
         spin = te.get_nspin()
 
+
+        # Hartree potential
+        hartree_potential = np.zeros([number_of_gridpoints, 1])
         te.v_h_wrapper(hartree_potential, number_of_gridpoints, spin)
-        print(hartree_potential)
+        hartree_potential = np.reshape(hartree_potential,
+                                       self.grid_dimensions+[1], order="F")
+        force_contribution = np.reshape(hartree_potential,
+                                        [number_of_gridpoints_mala, 1],
+                                        order="C") * Rydberg * \
+                                        self.voxel.volume
+
+        return force_contribution
 
     @staticmethod
     def get_scaled_positions_for_qe(atoms):

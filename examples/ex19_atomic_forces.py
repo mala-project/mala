@@ -33,6 +33,7 @@ parameters.targets.ldos_gridoffset_ev = -5
 parameters.descriptors.descriptor_type = "Bispectrum"
 parameters.descriptors.bispectrum_twojmax = 10
 parameters.descriptors.bispectrum_cutoff = 4.67637
+parameters.targets.pseudopotential_path = data_path
 
 # First, read atoms from some source, we'll simply use the simulation outputs
 # of the training data.
@@ -42,28 +43,24 @@ ldos_calculator: mala.LDOS = predictor.target_calculator
 ldos_calculator.read_from_array(ldos)
 mala_forces = ldos_calculator.atomic_forces.copy()
 
+delta_numerical = 1e-6
+points = [0, 2000, 4000]
 
-delta_numerical = 1e-8
-numerical_forces = []
+for point in points:
+    numerical_forces = []
+    for i in range(0, parameters.targets.ldos_gridsize):
+        ldos_plus = ldos.copy()
+        ldos_plus[point, i] += delta_numerical*0.5
+        ldos_calculator.read_from_array(ldos_plus)
+        density_calculator = ldos_calculator._density_calculator
+        derivative_plus = density_calculator.total_energy_contributions["e_hartree"]
 
-for i in range(0, parameters.targets.ldos_gridsize):
-    ldos_plus = ldos.copy()
-    ldos_plus[0, i] += delta_numerical*0.5
-    ldos_calculator.read_from_array(ldos_plus)
-    derivative_plus = ldos_calculator.band_energy + \
-                      ldos_calculator.entropy_contribution
+        ldos_minus = ldos.copy()
+        ldos_minus[point, i] -= delta_numerical*0.5
+        ldos_calculator.read_from_array(ldos_minus)
+        density_calculator = ldos_calculator._density_calculator
+        derivative_minus = density_calculator.total_energy_contributions["e_hartree"]
 
-    ldos_minus = ldos.copy()
-    ldos_minus[0, i] -= delta_numerical*0.5
-    ldos_calculator.read_from_array(ldos_minus)
-    derivative_minus = ldos_calculator.band_energy + \
-                       ldos_calculator.entropy_contribution
-
-    numerical_forces.append((derivative_plus-derivative_minus) /
-                            delta_numerical)
-
-print(mala_forces[0, :])
-print(mala_forces[2000, :])
-print(mala_forces[4000, :])
-print(np.array(numerical_forces))
-print(mala_forces[4000, :]/np.array(numerical_forces))
+        numerical_forces.append((derivative_plus-derivative_minus) /
+                                delta_numerical)
+    print(mala_forces[point, :]/np.array(numerical_forces))
