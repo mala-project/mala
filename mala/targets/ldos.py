@@ -1284,7 +1284,8 @@ class LDOS(Target):
                          energy_integration_method="analytical",
                          atoms_Angstrom=None, qe_input_data=None,
                          qe_pseudopotentials=None, create_qe_file=True,
-                         return_energy_contributions=False):
+                         return_energy_contributions=False,
+                          delta=None):
         """   """
         if voxel is None:
             voxel = self.voxel
@@ -1299,6 +1300,8 @@ class LDOS(Target):
                 fermi_energy = self.fermi_energy_dft
         if temperature is None:
             temperature = self.temperature
+        if delta is None:
+            delta = self.parameters.delta_forces
 
         energy_grid = self.get_energy_grid()
 
@@ -1330,9 +1333,23 @@ class LDOS(Target):
 
             # Density dependent energy terms.
             print(self._density_calculator.force_contributions.shape)
-            d_E_d_n = self._density_calculator.force_contributions * \
-                      analytical_integration_weights("F0", "F1", fermi_energy,
+            d_n_d_d = analytical_integration_weights("F0", "F1", fermi_energy,
                                                      energy_grid, temperature)
+
+            d_f01_d_mu = (analytical_integration_weights("F0", "F1", fermi_energy+delta,
+                                                     energy_grid, temperature)
+                        - analytical_integration_weights("F0", "F1", fermi_energy-delta,
+                                                             energy_grid, temperature)) / \
+                       (2.0*delta)
+            d_n_d_mu = np.dot(ldos_data, d_f01_d_mu)
+            d_E_h_d_mu = np.dot(self._density_calculator.force_contributions[:,0],
+                                d_n_d_mu)
+            d_mu_d_d = np.zeros_like(ldos_data)
+            d_mu_d_d[:] = -(-1.0) * (d_n_d_d*self.voxel.volume)
+            d_mu_d_d /= (self._density_of_states_calculator.
+                         d_number_of_electrons_d_mu)
+            d_E_d_n = self._density_calculator.force_contributions * \
+                      d_n_d_d + d_E_h_d_mu * d_mu_d_d
             d_E_d_d += d_E_d_n
             return d_E_d_n #d_E_d_d
         # For now this only works with ML generated LDOS.

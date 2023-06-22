@@ -496,6 +496,7 @@ class ParametersTargets(ParametersBase):
         self.rdf_parameters = {"number_of_bins": 500, "rMax": "mic"}
         self.tpcf_parameters = {"number_of_bins": 20, "rMax": "mic"}
         self.ssf_parameters = {"number_of_bins": 100, "kMax": 12.0}
+        self.delta_forces = 0.001
 
     @property
     def restrict_targets(self):

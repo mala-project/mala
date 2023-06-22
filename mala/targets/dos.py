@@ -330,6 +330,15 @@ class DOS(Target):
             raise Exception("No cached DOS available to calculate this "
                             "property.")
 
+    @cached_property
+    def d_number_of_electrons_d_mu(self):
+        """   """
+        if self.density_of_states is not None:
+            return self.get_d_number_of_electrons_d_mu()
+        else:
+            raise Exception("No cached DOS available to calculate this "
+                            "property.")
+
     def uncache_properties(self):
         """Uncache all cached properties of this calculator."""
         if self._is_property_cached("number_of_electrons"):
@@ -346,6 +355,8 @@ class DOS(Target):
             del self.d_band_energy_d_dos
         if self._is_property_cached("d_entropy_contribution_d_dos"):
             del self.d_entropy_contribution_d_dos
+        if self._is_property_cached("d_number_of_electrons_d_mu"):
+            del self.d_number_of_electrons_d_mu
 
     ##############################
     # Methods
@@ -888,6 +899,60 @@ class DOS(Target):
                 __d_entropy_contribution_d_dos_from_dos(dos_data, energy_grid,
                                                 fermi_energy, temperature)
 
+    def get_d_number_of_electrons_d_mu(self, dos_data=None,
+                                       fermi_energy=None,
+                                       temperature=None,
+                                       broadcast_derivative=True,
+                                       delta=None):
+        """
+
+        Returns
+        -------
+
+        """
+        # Parse the parameters.
+        if dos_data is None and self.density_of_states is None:
+            raise Exception("No DOS data provided, cannot calculate"
+                            " this quantity.")
+
+        # Here we check whether we will use our internal, cached
+        # DOS, or calculate everything from scratch.
+        if dos_data is not None:
+            if fermi_energy is None:
+                printout("Warning: No fermi energy was provided or could be "
+                         "calculated from electronic structure data. "
+                         "Using the DFT fermi energy, this may "
+                         "yield unexpected results", min_verbosity=1)
+                fermi_energy = self.fermi_energy_dft
+        else:
+            dos_data = self.density_of_states
+            fermi_energy = self.fermi_energy
+        if temperature is None:
+            temperature = self.temperature
+
+        if delta is None:
+            delta = self.parameters.delta_forces
+
+        if self.parameters._configuration["mpi"] and broadcast_derivative:
+            if get_rank() == 0:
+                energy_grid = self.energy_grid
+                derivative = self. \
+                    __d_number_of_electrons_d_mu(dos_data, energy_grid,
+                                                 fermi_energy, temperature,
+                                                 delta)
+            else:
+                derivative = None
+
+            derivative = get_comm().bcast(derivative, root=0)
+            barrier()
+            return derivative
+        else:
+            energy_grid = self.energy_grid
+            return self. \
+                __d_number_of_electrons_d_mu(dos_data, energy_grid,
+                                                fermi_energy, temperature,
+                                             delta)
+
     def get_self_consistent_fermi_energy(self, dos_data=None, temperature=None,
                                          integration_method="analytical",
                                          broadcast_fermi_energy=True):
@@ -1226,4 +1291,22 @@ class DOS(Target):
         d_entropy_contribution_d_dos = d_entropy_contribution_d_dos \
                                        - d_number_of_electrons_d_dos * d_entropy_contribution_d_mu / d_number_of_electrons_d_mu
         return d_entropy_contribution_d_dos
+
+    @staticmethod
+    def __d_number_of_electrons_d_mu(dos_data, energy_grid, fermi_energy,
+                                     temperature, delta):
+        d_number_of_electrons_d_mu = (analytical_integration(dos_data, "F0",
+                                                             "F1",
+                                                             fermi_energy +
+                                                             delta,
+                                                             energy_grid,
+                                                             temperature)
+                                      - analytical_integration(dos_data, "F0",
+                                                               "F1",
+                                                               fermi_energy -
+                                                               delta,
+                                                               energy_grid,
+                                                               temperature)) /\
+                                     (2.0*delta)
+        return d_number_of_electrons_d_mu
 
