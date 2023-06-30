@@ -517,7 +517,8 @@ class Descriptor(PhysicalData):
         else:
             return 0
 
-    def _setup_lammps(self, nx, ny, nz, outdir, lammps_dict):
+    def _setup_lammps(self, nx, ny, nz, outdir, lammps_dict,
+                      log_file_name="lammps_log.tmp"):
         """
         Set up the lammps processor grid.
 
@@ -533,7 +534,7 @@ class Descriptor(PhysicalData):
 
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = ["-screen", "none", "-log",
-                       os.path.join(outdir, "lammps_bgrid_log.tmp")]
+                       os.path.join(outdir, log_file_name)]
 
         if self.parameters._configuration["mpi"]:
             size = get_size()
