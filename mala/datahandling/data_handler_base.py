@@ -32,7 +32,7 @@ class DataHandlerBase(ABC):
     def __init__(self, parameters: Parameters, target_calculator=None,
                  descriptor_calculator=None):
         self.parameters: ParametersData = parameters.data
-        self.use_horovod = parameters.use_horovod
+        self.use_ddp = parameters.use_ddp
 
         # Calculators used to parse data from compatible files.
         self.target_calculator = target_calculator

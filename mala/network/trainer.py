@@ -4,13 +4,10 @@ import time
 from datetime import datetime
 from packaging import version
 
-try:
-    import horovod.torch as hvd
-except ModuleNotFoundError:
-    # Warning is thrown by Parameters class
-    pass
 import numpy as np
 import torch
+import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel as DDP
 from torch import optim
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
@@ -46,6 +43,16 @@ class Trainer(Runner):
     def __init__(self, params, network, data, optimizer_dict=None):
         # copy the parameters into the class.
         super(Trainer, self).__init__(params, network, data)
+
+        if self.parameters_full.use_ddp:
+                print("wrapping model in ddp..")
+                # JOSHR: using streams here to maintain compatibility with 
+                # graph capture
+                s = torch.cuda.Stream()
+                with torch.cuda.stream(s):
+                    self.network = DDP(self.network)
+                torch.cuda.current_stream().wait_stream(s)
+
         self.final_test_loss = float("inf")
         self.initial_test_loss = float("inf")
         self.final_validation_loss = float("inf")
@@ -59,7 +66,7 @@ class Trainer(Runner):
         self.validation_data_loaders = []
         self.test_data_loaders = []
 
-        # Samplers for the horovod case.
+        # Samplers for the ddp case.
         self.train_sampler = None
         self.test_sampler = None
         self.validation_sampler = None
@@ -230,11 +237,13 @@ class Trainer(Runner):
                                             after_before_training_metric)
 
         # Collect and average all the losses from all the devices
-        if self.parameters_full.use_horovod:
-            vloss = self.__average_validation(vloss, 'average_loss')
+        if self.parameters_full.use_ddp:
+            vloss = self.__average_validation(vloss, 'average_loss',
+                                              self.parameters._configuration["device"])
             self.initial_validation_loss = vloss
             if self.data.test_data_set is not None:
-                tloss = self.__average_validation(tloss, 'average_loss')
+                tloss = self.__average_validation(tloss, 'average_loss',
+                                                  self.parameters._configuration["device"])
                 self.initial_test_loss = tloss
 
         printout("Initial Guess - validation data loss: ", vloss,
@@ -271,7 +280,7 @@ class Trainer(Runner):
             training_loss_sum = torch.zeros(1, device=self.parameters._configuration["device"])
 
             # train sampler
-            if self.parameters_full.use_horovod:
+            if self.train_sampler:
                 self.train_sampler.set_epoch(epoch)
 
             # shuffle dataset if necessary
@@ -344,8 +353,9 @@ class Trainer(Runner):
                                             self.parameters.
                                             during_training_metric)
 
-            if self.parameters_full.use_horovod:
-                vloss = self.__average_validation(vloss, 'average_loss')
+            if self.parameters_full.use_ddp:
+                vloss = self.__average_validation(vloss, 'average_loss',
+                                                  self.parameters._configuration["device"])
             if self.parameters_full.verbosity > 1:
                 printout("Epoch {0}: validation data loss: {1}, "
                          "training data loss: {2}".format(epoch, vloss,
@@ -433,8 +443,9 @@ class Trainer(Runner):
                                             "validation",
                                             self.parameters.
                                             after_before_training_metric)
-            if self.parameters_full.use_horovod:
-                vloss = self.__average_validation(vloss, 'average_loss')
+            if self.parameters_full.use_ddp:
+                vloss = self.__average_validation(vloss, 'average_loss',
+                                                  self.parameters._configuration["device"])
 
         # Calculate final loss.
         self.final_validation_loss = vloss
@@ -446,8 +457,9 @@ class Trainer(Runner):
                                             "test",
                                             self.parameters.
                                             after_before_training_metric)
-            if self.parameters_full.use_horovod:
-                tloss = self.__average_validation(tloss, 'average_loss')
+            if self.parameters_full.use_ddp:
+                tloss = self.__average_validation(tloss, 'average_loss',
+                                                  self.parameters._configuration["device"])
             printout("Final test data loss: ", tloss, min_verbosity=0)
         self.final_test_loss = tloss
 
@@ -470,13 +482,13 @@ class Trainer(Runner):
         if optimizer_dict is not None: 
             self.last_epoch = optimizer_dict['epoch']+1
 
-        # Scale the learning rate according to horovod.
-        if self.parameters_full.use_horovod:
-            if hvd.size() > 1 and self.last_epoch == 0:
+        # Scale the learning rate according to ddp.
+        if self.parameters_full.use_ddp:
+            if dist.get_world_size() > 1 and self.last_epoch == 0:
                 printout("Rescaling learning rate because multiple workers are"
                          " used for training.", min_verbosity=1)
                 self.parameters.learning_rate = self.parameters.learning_rate \
-                    * hvd.size()
+                    * dist.get_world_size()
 
         # Choose an optimizer to use.
         if self.parameters.trainingtype == "SGD":
@@ -508,12 +520,9 @@ class Trainer(Runner):
             self.patience_counter = optimizer_dict['early_stopping_counter']
             self.last_loss = optimizer_dict['early_stopping_last_loss']
 
-        if self.parameters_full.use_horovod:
+        if self.parameters_full.use_ddp:
             # scaling the batch size for multiGPU per node
             # self.batch_size= self.batch_size*hvd.local_size()
-
-            compression = hvd.Compression.fp16 if self.parameters_full.\
-                running.use_compression else hvd.Compression.none
 
             # If lazy loading is used we do not shuffle the data points on
             # their own, but rather shuffle them
@@ -524,37 +533,26 @@ class Trainer(Runner):
             if self.data.parameters.use_lazy_loading:
                 do_shuffle = False
 
-            self.train_sampler = torch.utils.data.\
-                distributed.DistributedSampler(self.data.training_data_sets[0],
-                                               num_replicas=hvd.size(),
-                                               rank=hvd.rank(),
-                                               shuffle=do_shuffle)
-
-            self.validation_sampler = torch.utils.data.\
-                distributed.DistributedSampler(self.data.validation_data_sets[0],
-                                               num_replicas=hvd.size(),
-                                               rank=hvd.rank(),
-                                               shuffle=False)
-
-            if self.data.test_data_sets:
-                self.test_sampler = torch.utils.data.\
-                    distributed.DistributedSampler(self.data.test_data_sets[0],
-                                                   num_replicas=hvd.size(),
-                                                   rank=hvd.rank(),
+            if self.parameters_full.use_distributed_sampler_train:
+                self.train_sampler = torch.utils.data.\
+                    distributed.DistributedSampler(self.data.training_data_set,
+                                                   num_replicas=dist.get_world_size(),
+                                                   rank=dist.get_rank(),
+                                                   shuffle=do_shuffle)
+            if self.parameters_full.use_distributed_sampler_val:
+                self.validation_sampler = torch.utils.data.\
+                    distributed.DistributedSampler(self.data.validation_data_set,
+                                                   num_replicas=dist.get_world_size(),
+                                                   rank=dist.get_rank(),
                                                    shuffle=False)
 
-            # broadcaste parameters and optimizer state from root device to
-            # other devices
-            hvd.broadcast_parameters(self.network.state_dict(), root_rank=0)
-            hvd.broadcast_optimizer_state(self.optimizer, root_rank=0)
-
-            # Wraps the opimizer for multiGPU operation
-            self.optimizer = hvd.DistributedOptimizer(self.optimizer,
-                                                      named_parameters=
-                                                      self.network.
-                                                      named_parameters(),
-                                                      compression=compression,
-                                                      op=hvd.Average)
+            if self.parameters_full.use_distributed_sampler_test:
+                if self.data.test_data_set is not None:
+                    self.test_sampler = torch.utils.data.\
+                        distributed.DistributedSampler(self.data.test_data_set,
+                                                       num_replicas=dist.get_world_size(),
+                                                       rank=dist.get_rank(),
+                                                       shuffle=False)
 
         # Instantiate the learning rate scheduler, if necessary.
         if self.parameters.learning_rate_scheduler == "ReduceLROnPlateau":
@@ -581,7 +579,7 @@ class Trainer(Runner):
         # This shuffling is done in the dataset themselves.
         do_shuffle = self.parameters.use_shuffling_for_samplers
         if self.data.parameters.use_lazy_loading or self.parameters_full.\
-                use_horovod:
+                use_ddp:
             do_shuffle = False
 
         # Prepare data loaders.(look into mini-batch size)
@@ -645,7 +643,11 @@ class Trainer(Runner):
 
                         with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
                             prediction = network(input_data)
-                            loss = network.calculate_loss(prediction, target_data)
+                            if self.parameters_full.use_ddp:
+                                # JOSHR: We have to use "module" here to access custom method of DDP wrapped model
+                                loss = network.module.calcualte_loss(prediction, target_data)
+                            else:
+                                loss = network.calculate_loss(prediction, target_data)
 
                         if self.gradscaler:
                             self.gradscaler.scale(loss).backward()
@@ -659,12 +661,15 @@ class Trainer(Runner):
 
                 # Capture graph
                 self.train_graph = torch.cuda.CUDAGraph()
-                self.network.zero_grad(set_to_none=True)
+                network.zero_grad(set_to_none=True)
                 with torch.cuda.graph(self.train_graph):
                     with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
                         self.static_prediction = network(self.static_input_data)
 
-                        self.static_loss = network.calculate_loss(self.static_prediction, self.static_target_data)
+                        if self.parameters_full.use_ddp:
+                            self.static_loss = network.module.calculate_loss(self.static_prediction, self.static_target_data)
+                        else:
+                            self.static_loss = network.calculate_loss(self.static_prediction, self.static_target_data)
 
                     if self.gradscaler:
                         self.gradscaler.scale(self.static_loss).backward()
@@ -688,7 +693,10 @@ class Trainer(Runner):
                     torch.cuda.nvtx.range_pop()
 
                     torch.cuda.nvtx.range_push("loss")
-                    loss = network.calculate_loss(prediction, target_data)
+                    if self.parameters_full.use_ddp:
+                        loss = network.module.calculate_loss(prediction, target_data)
+                    else:
+                        loss = network.calculate_loss(prediction, target_data)
                     # loss
                     torch.cuda.nvtx.range_pop()
 
@@ -711,7 +719,10 @@ class Trainer(Runner):
                 return loss
         else:
             prediction = network(input_data)
-            loss = network.calculate_loss(prediction, target_data)
+            if self.parameters_full.use_ddp:
+                loss = network.module.calculate_loss(prediction, target_data)
+            else:
+                loss = network.calculate_loss(prediction, target_data)
             loss.backward()
             self.optimizer.step()
             self.optimizer.zero_grad()
@@ -761,7 +772,10 @@ class Trainer(Runner):
                                     for _ in range(20):
                                         with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
                                             prediction = network(x)
-                                            loss = network.calculate_loss(prediction, y)
+                                            if self.parameters_full.use_ddp:
+                                                loss = network.module.calculate_loss(prediction, y)
+                                            else:
+                                                loss = network.calculate_loss(prediction, y)
                                 torch.cuda.current_stream().wait_stream(s)
 
                                 # Create static entry point tensors to graph
@@ -773,7 +787,10 @@ class Trainer(Runner):
                                 with torch.cuda.graph(self.validation_graph):
                                     with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
                                         self.static_prediction_validation = network(self.static_input_validation)
-                                        self.static_loss_validation = network.calculate_loss(self.static_prediction_validation, self.static_target_validation)
+                                        if self.parameters_full.use_ddp:
+                                            self.static_loss_validation = network.module.calculate_loss(self.static_prediction_validation, self.static_target_validation)
+                                        else:
+                                            self.static_loss_validation = network.calculate_loss(self.static_prediction_validation, self.static_target_validation)
 
                             if self.validation_graph:
                                 self.static_input_validation.copy_(x)
@@ -783,7 +800,10 @@ class Trainer(Runner):
                             else:
                                 with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
                                     prediction = network(x)
-                                    loss = network.calculate_loss(prediction, y)
+                                    if self.parameters_full.use_ddp:
+                                        loss = network.module.calculate_loss(prediction, y)
+                                    else:
+                                        loss = network.calculate_loss(prediction, y)
                                     validation_loss_sum += loss
                             if batchid != 0 and (batchid + 1) % report_freq == 0:
                                 torch.cuda.synchronize()
@@ -804,8 +824,12 @@ class Trainer(Runner):
                             x = x.to(self.parameters._configuration["device"])
                             y = y.to(self.parameters._configuration["device"])
                             prediction = network(x)
-                            validation_loss_sum += \
-                                network.calculate_loss(prediction, y).item()
+                            if self.parameters_full.use_ddp:
+                                validation_loss_sum += \
+                                    network.module.calculate_loss(prediction, y).item()
+                            else:
+                                validation_loss_sum += \
+                                    network.calculate_loss(prediction, y).item()
                             batchid += 1
 
             validation_loss = validation_loss_sum.item() / batchid
@@ -939,8 +963,8 @@ class Trainer(Runner):
 
         # Next, we save all the other objects.
 
-        if self.parameters_full.use_horovod:
-            if hvd.rank() != 0:
+        if self.parameters_full.use_ddp:
+            if dist.get_rank() != 0:
                 return
         if self.scheduler is None:
             save_dict = {
@@ -963,8 +987,9 @@ class Trainer(Runner):
         self.save_run(self.parameters.checkpoint_name, save_runner=True)
 
     @staticmethod
-    def __average_validation(val, name):
+    def __average_validation(val, name, device="cpu"):
         """Average validation over multiple parallel processes."""
-        tensor = torch.tensor(val)
-        avg_loss = hvd.allreduce(tensor, name=name, op=hvd.Average)
+        tensor = torch.tensor(val, device=device)
+        dist.all_reduce(tensor)
+        avg_loss = tensor / dist.get_world_size()
         return avg_loss.item()

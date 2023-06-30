@@ -2,13 +2,9 @@
 import os
 from zipfile import ZipFile, ZIP_STORED
 
-try:
-    import horovod.torch as hvd
-except ModuleNotFoundError:
-    # Warning is thrown by Parameters class
-    pass
 import numpy as np
 import torch
+import torch.distributed as dist
 
 from mala.common.parameters import ParametersRunning
 from mala.network.network import Network
@@ -353,16 +349,19 @@ class Runner:
         """
         Prepare the Runner to run the Network.
 
-        This includes e.g. horovod setup.
+        This includes e.g. ddp setup.
         """
-        # See if we want to use horovod.
-        if self.parameters_full.use_horovod:
+        # See if we want to use ddp.
+        if self.parameters_full.use_ddp:
             if self.parameters_full.use_gpu:
                 # We cannot use "printout" here because this is supposed
                 # to happen on every rank.
+                size = dist.get_world_size()
+                rank = dist.get_rank()
+                local_rank = int(os.environ.get("LOCAL_RANK"))
                 if self.parameters_full.verbosity >= 2:
-                    print("size=", hvd.size(), "global_rank=", hvd.rank(),
-                          "local_rank=", hvd.local_rank(), "device=",
-                          torch.cuda.get_device_name(hvd.local_rank()))
+                    print("size=", size, "global_rank=", rank,
+                          "local_rank=", local_rank, "device=",
+                          torch.cuda.get_device_name(local_rank))
                 # pin GPU to local rank
-                torch.cuda.set_device(hvd.local_rank())
+                torch.cuda.set_device(local_rank)

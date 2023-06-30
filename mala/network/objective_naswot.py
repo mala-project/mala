@@ -69,7 +69,7 @@ class ObjectiveNASWOT(ObjectiveBase):
             # Load the batchesand get the jacobian.
             do_shuffle = self.params.running.use_shuffling_for_samplers
             if self.data_handler.parameters.use_lazy_loading or \
-                    self.params.use_horovod:
+                    self.params.use_ddp:
                 do_shuffle = False
             if self.params.running.use_shuffling_for_samplers:
                 self.data_handler.mix_datasets()

@@ -8,8 +8,6 @@ def check_modules():
     optional_libs = {
         "mpi4py": {"available": False, "description":
                    "Enables inference parallelization."},
-        "horovod": {"available": False, "description":
-                    "Enables training parallelization."},
         "lammps": {"available": False, "description":
                    "Enables descriptor calculation for data preprocessing "
                    "and inference."},

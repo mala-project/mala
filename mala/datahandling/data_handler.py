@@ -1,11 +1,5 @@
 """DataHandler class that loads and scales data."""
 import os
-
-try:
-    import horovod.torch as hvd
-except ModuleNotFoundError:
-    # Warning is thrown by Parameters class
-    pass
 import numpy as np
 import torch
 from torch.utils.data import TensorDataset
@@ -71,13 +65,13 @@ class DataHandler(DataHandlerBase):
         if self.input_data_scaler is None:
             self.input_data_scaler \
                 = DataScaler(self.parameters.input_rescaling_type,
-                             use_horovod=self.use_horovod)
+                             use_ddp=self.use_ddp)
 
         self.output_data_scaler = output_data_scaler
         if self.output_data_scaler is None:
             self.output_data_scaler \
                 = DataScaler(self.parameters.output_rescaling_type,
-                             use_horovod=self.use_horovod)
+                             use_ddp=self.use_ddp)
 
         # Actual data points in the different categories.
         self.nr_training_data = 0
@@ -576,14 +570,14 @@ class DataHandler(DataHandlerBase):
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
                     self.grid_dimension, self.grid_size,
-                    self.use_horovod, self.parameters.number_of_clusters,
+                    self.use_ddp, self.parameters.number_of_clusters,
                     self.parameters.train_ratio,
                     self.parameters.sample_ratio))
                 self.validation_data_sets.append(LazyLoadDataset(
                     self.input_dimension, self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
-                    self.use_horovod))
+                    self.use_ddp))
 
                 if self.nr_test_data != 0:
                     self.test_data_sets.append(LazyLoadDataset(
@@ -591,7 +585,7 @@ class DataHandler(DataHandlerBase):
                         self.output_dimension,
                         self.input_data_scaler, self.output_data_scaler,
                         self.descriptor_calculator, self.target_calculator,
-                        self.use_horovod,
+                        self.use_ddp,
                         input_requires_grad=True))
 
             else:
@@ -599,12 +593,12 @@ class DataHandler(DataHandlerBase):
                     self.input_dimension, self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
-                    self.use_horovod))
+                    self.use_ddp))
                 self.validation_data_sets.append(LazyLoadDataset(
                     self.input_dimension, self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
-                    self.use_horovod))
+                    self.use_ddp))
 
                 if self.nr_test_data != 0:
                     self.test_data_sets.append(LazyLoadDataset(
@@ -612,7 +606,7 @@ class DataHandler(DataHandlerBase):
                         self.output_dimension,
                         self.input_data_scaler, self.output_data_scaler,
                         self.descriptor_calculator, self.target_calculator,
-                        self.use_horovod,
+                        self.use_ddp,
                         input_requires_grad=True))
 
             # Add snapshots to the lazy loading data sets.
@@ -646,21 +640,21 @@ class DataHandler(DataHandlerBase):
                             self.input_dimension, self.output_dimension,
                             self.input_data_scaler, self.output_data_scaler,
                             self.descriptor_calculator, self.target_calculator,
-                            self.use_horovod))
+                            self.use_ddp))
                     if snapshot.snapshot_function == "va":
                         self.validation_data_sets.append(LazyLoadDatasetSingle(
                             self.mini_batch_size, snapshot,
                             self.input_dimension, self.output_dimension,
                             self.input_data_scaler, self.output_data_scaler,
                             self.descriptor_calculator, self.target_calculator,
-                            self.use_horovod))
+                            self.use_ddp))
                     if snapshot.snapshot_function == "te":
                         self.test_data_sets.append(LazyLoadDatasetSingle(
                             self.mini_batch_size, snapshot,
                             self.input_dimension, self.output_dimension,
                             self.input_data_scaler, self.output_data_scaler,
                             self.descriptor_calculator, self.target_calculator,
-                            self.use_horovod,
+                            self.use_ddp,
                             input_requires_grad=True))
 
         else:

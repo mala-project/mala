@@ -1,12 +1,5 @@
 """DataSet for lazy-loading."""
 import os
-
-try:
-    import horovod.torch as hvd
-except ModuleNotFoundError:
-    # Warning is thrown by Parameters class.
-    pass
-
 import numpy as np
 import torch
 from torch.utils.data import Dataset
@@ -47,8 +40,8 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
     target_calculator : mala.targets.target.Target or derivative
         Used to do unit conversion on output data.
 
-    use_horovod : bool
-        If true, it is assumed that horovod is used.
+    use_ddp : bool
+        If true, it is assumed that ddp is used.
 
     input_requires_grad : bool
         If True, then the gradient is stored for the inputs.
@@ -58,7 +51,7 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
 
     def __init__(self, input_dimension, output_dimension, input_data_scaler,
                  output_data_scaler, descriptor_calculator,
-                 target_calculator, use_horovod,
+                 target_calculator, use_ddp,
                  number_of_clusters, train_ratio, sample_ratio,
                  input_requires_grad=False):
         self.snapshot_list = []
@@ -75,7 +68,7 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
         self.currently_loaded_file = None
         self.input_data = np.empty(0)
         self.output_data = np.empty(0)
-        self.use_horovod = use_horovod
+        self.use_ddp = use_ddp
         self.return_outputs_directly = False
         self.input_requires_grad = input_requires_grad
 
@@ -231,8 +224,8 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
         if self.number_of_snapshots > 1:
             used_perm = torch.randperm(self.number_of_snapshots)
             barrier()
-            if self.use_horovod:
-                used_perm = hvd.broadcast(used_perm, 0)
+            if self.use_ddp:
+                used_perm = dist.broadcast(used_perm, 0)
 
             # Not only the snapshots, but also the clustered inputs and samples
             # per clusters have to be permutated.
