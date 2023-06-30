@@ -241,7 +241,7 @@ class Trainer(Runner):
             vloss = self.__average_validation(vloss, 'average_loss',
                                               self.parameters._configuration["device"])
             self.initial_validation_loss = vloss
-            if self.data.test_data_set is not None:
+            if self.data.test_data_sets is not None:
                 tloss = self.__average_validation(tloss, 'average_loss',
                                                   self.parameters._configuration["device"])
                 self.initial_test_loss = tloss
@@ -535,21 +535,21 @@ class Trainer(Runner):
 
             if self.parameters_full.use_distributed_sampler_train:
                 self.train_sampler = torch.utils.data.\
-                    distributed.DistributedSampler(self.data.training_data_set,
+                    distributed.DistributedSampler(self.data.training_data_sets,
                                                    num_replicas=dist.get_world_size(),
                                                    rank=dist.get_rank(),
                                                    shuffle=do_shuffle)
             if self.parameters_full.use_distributed_sampler_val:
                 self.validation_sampler = torch.utils.data.\
-                    distributed.DistributedSampler(self.data.validation_data_set,
+                    distributed.DistributedSampler(self.data.validation_data_sets,
                                                    num_replicas=dist.get_world_size(),
                                                    rank=dist.get_rank(),
                                                    shuffle=False)
 
             if self.parameters_full.use_distributed_sampler_test:
-                if self.data.test_data_set is not None:
+                if self.data.test_data_sets is not None:
                     self.test_sampler = torch.utils.data.\
-                        distributed.DistributedSampler(self.data.test_data_set,
+                        distributed.DistributedSampler(self.data.test_data_sets,
                                                        num_replicas=dist.get_world_size(),
                                                        rank=dist.get_rank(),
                                                        shuffle=False)
@@ -645,7 +645,7 @@ class Trainer(Runner):
                             prediction = network(input_data)
                             if self.parameters_full.use_ddp:
                                 # JOSHR: We have to use "module" here to access custom method of DDP wrapped model
-                                loss = network.module.calcualte_loss(prediction, target_data)
+                                loss = network.module.calculate_loss(prediction, target_data)
                             else:
                                 loss = network.calculate_loss(prediction, target_data)
 
