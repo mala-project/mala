@@ -77,8 +77,10 @@ class Runner:
             optimizer_file = run_name+".optimizer.pth"
 
         self.parameters_full.save(os.path.join(save_path, params_file))
-        self.network.module.save_network(os.path.join(save_path, model_file))
-        #self.network.save_network(os.path.join(save_path, model_file))
+        if self.parameters_full.use_ddp:
+            self.network.module.save_network(os.path.join(save_path, model_file))
+        else:
+            self.network.save_network(os.path.join(save_path, model_file))
         self.data.input_data_scaler.save(os.path.join(save_path, iscaler_file))
         self.data.output_data_scaler.save(os.path.join(save_path,
                                                        oscaler_file))
