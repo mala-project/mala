@@ -172,8 +172,8 @@ jobs:
         with:
           repository: mala-project/test-data
           path: mala_data
-          ref: v1.6.0
-          lfs: false
+          ref: v1.7.0
+          lfs: true
 
       - name: Test mala
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'

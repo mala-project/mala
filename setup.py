@@ -16,10 +16,10 @@ with open("LICENSE") as f:
 
 extras = {
     'dev': ['bump2version'],
-    'opt': ['oapackage', 'pqkmeans', 'openpmd-api'],
+    'opt': ['oapackage', 'pqkmeans'],
     'test': ['pytest'],
     'doc': open('docs/requirements.txt').read().splitlines(),
-    'experimental': ['asap3', 'dftpy']
+    'experimental': ['asap3', 'dftpy', 'minterpy']
 }
 
 setup(

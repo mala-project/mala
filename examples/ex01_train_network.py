@@ -51,6 +51,14 @@ data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
                           "Be_snapshot0.out.npy", data_path, "tr")
 data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
                           "Be_snapshot1.out.npy", data_path, "va")
+# New feature: You can switch the lines above for these to use the new,
+# more powerful OpenPMD interface for MALA!
+# data_handler.add_snapshot("Be_snapshot0.in.h5", data_path,
+#                           "Be_snapshot0.out.h5", data_path, "tr",
+#                           snapshot_type="openpmd")
+# data_handler.add_snapshot("Be_snapshot1.in.h5", data_path,
+#                           "Be_snapshot1.out.h5", data_path, "va",
+#                           snapshot_type="openpmd")
 data_handler.prepare_data()
 printout("Read data: DONE.")
 
