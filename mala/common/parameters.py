@@ -569,23 +569,6 @@ class ParametersData(ParametersBase):
         If True, will use alternative lazy loading path with prefetching
         for higher performance
 
-    use_clustering : bool
-        If True, and use_lazy_loading is True as well, the data is clustered,
-        i.e. not the entire training data is used by rather only a subset
-        which is determined by a clustering algorithm.
-
-    number_of_clusters : int
-        If use_clustering is True, this is the number of clusters used per
-        snapshot.
-
-    train_ratio : float
-        If use_clustering is True, this is the ratio of training data used
-        to train the encoder for the clustering.
-
-    sample_ratio : float
-        If use_clustering is True, this is the ratio of training data used
-        for sampling per snapshot (according to clustering then, of course).
-
     use_fast_tensor_data_set : bool
         If True, then the new, fast TensorDataSet implemented by Josh Romero
         will be used.
@@ -603,10 +586,6 @@ class ParametersData(ParametersBase):
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False
         self.use_lazy_loading_prefetch = False
-        self.use_clustering = False
-        self.number_of_clusters = 40
-        self.train_ratio = 0.1
-        self.sample_ratio = 0.5
         self.use_fast_tensor_data_set = False
         self.shuffling_seed = None
 

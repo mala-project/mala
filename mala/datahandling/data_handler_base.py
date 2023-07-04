@@ -47,11 +47,6 @@ class DataHandlerBase(ABC):
         self.output_dimension = 0
         self.nr_snapshots = 0
 
-        # Clustering still needs uniform grids
-        if self.parameters.use_clustering:
-            self.grid_dimension = [0, 0, 0]
-            self.grid_size = 0
-
     ##############################
     # Properties
     ##############################
@@ -182,9 +177,6 @@ class DataHandlerBase(ABC):
             snapshot.grid_size = int(np.prod(snapshot.grid_dimension))
             if firstsnapshot:
                 self.input_dimension = tmp_input_dimension
-                if self.parameters.use_clustering:
-                    self.grid_dimension[0:3] = tmp_grid_dim[0:3]
-                    self.grid_size = np.prod(self.grid_dimension)
             else:
                 if self.input_dimension != tmp_input_dimension:
                     raise Exception("Invalid snapshot entered at ", snapshot.
