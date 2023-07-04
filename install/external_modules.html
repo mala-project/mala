@@ -46,6 +46,7 @@
 <li class="toctree-l2"><a class="reference internal" href="README.html">Installation of MALA</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">External modules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#quantum-espresso-total-energy-module">Quantum ESPRESSO (total energy module)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#build-quantum-espresso">Build Quantum ESPRESSO</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#use-and-test-the-python-extension-module">Use and test the Python extension module</a></li>
 </ul>
@@ -96,41 +97,37 @@ bispectrum descriptors on the real space grid of a simulation cell, either for
 training or inference.</p>
 <div class="section" id="quantum-espresso-total-energy-module">
 <h2>Quantum ESPRESSO (total energy module)<a class="headerlink" href="#quantum-espresso-total-energy-module" title="Permalink to this headline"></a></h2>
-<p>To run the total energy module, you need a full Quantum ESPRESSO (version
-6.4.1.) and install the python bindings for it.</p>
-<div class="section" id="build-quantum-espresso">
-<h3>Build Quantum ESPRESSO<a class="headerlink" href="#build-quantum-espresso" title="Permalink to this headline"></a></h3>
+<p>To run the total energy module, you need a full Quantum ESPRESSO installation,
+for which to install the python bindings. This module has been tested with
+versionm <cite>7.2.</cite>, the most recent version upon this release of MALA. Newer
+versions may work (untested), but installation instructions may vary</p>
+<div class="section" id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline"></a></h3>
 <ul class="simple">
-<li><p>Clone QE source code: <code class="docutils literal notranslate"><span class="pre">git&#64;gitlab.com:QEF/q-e.git</span></code></p></li>
-<li><p>Chage into the <code class="docutils literal notranslate"><span class="pre">q-e</span></code> directory and check out the correct branch
-(the total energy module is based on version 6.4.1): <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">checkout</span> <span class="pre">qe-6.4.1</span></code></p></li>
 <li><p>Make sure you have an (MPI-aware) F90 compiler such as <code class="docutils literal notranslate"><span class="pre">mpif90</span></code> (e.g.
 Debian-ish machine: <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">install</span> <span class="pre">openmpi-bin</span></code>, on an HPC cluster something
 like <code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">openmpi</span> <span class="pre">gcc</span></code>). Make sure to use the same compiler
-for QE and the extension (<code class="docutils literal notranslate"><span class="pre">--f90exec=</span></code> in <code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module.sh</span></code>).</p></li>
+for QE and the extension. This should be the default case, but if problems
+arise you can manually select the compiler via
+<code class="docutils literal notranslate"><span class="pre">--f90exec=</span></code> in <code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module.sh</span></code></p></li>
 <li><p>We assume that QE’s <code class="docutils literal notranslate"><span class="pre">configure</span></code> script will find your system libs, e.g. use
 <code class="docutils literal notranslate"><span class="pre">-lblas</span></code>, <code class="docutils literal notranslate"><span class="pre">-llapack</span></code> and <code class="docutils literal notranslate"><span class="pre">-lfftw3</span></code>. We use those by default in
 <code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module.sh</span></code>. If you have, say, the MKL library,
 you may see <code class="docutils literal notranslate"><span class="pre">configure</span></code> use something like <code class="docutils literal notranslate"><span class="pre">-lmkl_intel_lp64</span> <span class="pre">-lmkl_sequential</span> <span class="pre">-lmkl_core</span></code>
 when building QE. In this case you have to modify
-<code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module.sh</span></code> to use the same libraries!</p>
-<ul>
-<li><p>GNU compiler specific: we use <code class="docutils literal notranslate"><span class="pre">-fallow-argument-mismatch</span></code></p></li>
+<code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module.sh</span></code> to use the same libraries!</p></li>
 </ul>
-</li>
-<li><p>Change to the <code class="docutils literal notranslate"><span class="pre">external_modules/total_energy_module</span></code> directory of the
-MALA repository</p></li>
-<li><p>Run the script <code class="docutils literal notranslate"><span class="pre">prepare_qe.sh</span> <span class="pre">/path/to/your/q-e</span></code> with <code class="docutils literal notranslate"><span class="pre">/path/to/your/qe</span></code>
-being the path to the <code class="docutils literal notranslate"><span class="pre">q-e</span></code> directory</p></li>
-<li><p>Change to the <code class="docutils literal notranslate"><span class="pre">q-e</span></code> directory</p>
-<ul>
-<li><p>If you already have a build of QE, go into the <code class="docutils literal notranslate"><span class="pre">q-e</span></code> folder and run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">veryclean</span></code>.</p></li>
-</ul>
-</li>
-<li><p>Run <code class="docutils literal notranslate"><span class="pre">./configure</span> <span class="pre">CFLAGS=&quot;-fPIC&quot;</span> <span class="pre">CPPFLAGS=&quot;-fPIC&quot;</span> <span class="pre">FFLAGS=&quot;-fPIC</span> <span class="pre">-fallow-argument-mismatch&quot;</span></code></p></li>
+</div>
+<div class="section" id="build-quantum-espresso">
+<h3>Build Quantum ESPRESSO<a class="headerlink" href="#build-quantum-espresso" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Download QE 7.2: <code class="docutils literal notranslate"><span class="pre">https://gitlab.com/QEF/q-e/-/releases/qe-7.2</span></code></p></li>
+<li><p>Change to the main QE directory (default: <code class="docutils literal notranslate"><span class="pre">q-e-qe-7.2</span></code>, you can rename this
+directory as you wish)</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">./configure</span> <span class="pre">CFLAGS=&quot;-fPIC&quot;</span> <span class="pre">CPPFLAGS=&quot;-fPIC&quot;</span> <span class="pre">FFLAGS=&quot;-fPIC&quot;</span></code></p></li>
 <li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">all</span></code> (use <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">-j&lt;your</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">cores&gt;</span> <span class="pre">all</span></code> for a faster
 compilation process).</p></li>
-<li><p>Change back to the  <code class="docutils literal notranslate"><span class="pre">external_modules/total_energy_module</span></code> directory of the
+<li><p>Change to the  <code class="docutils literal notranslate"><span class="pre">external_modules/total_energy_module</span></code> directory of the
 MALA repository</p></li>
 <li><p>Run <code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module.sh</span> <span class="pre">/path/to/your/q-e</span></code>.</p>
 <ul>
