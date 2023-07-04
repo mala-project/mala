@@ -24,7 +24,6 @@ datahandling
    mala.datahandling.data_shuffler
    mala.datahandling.fast_tensor_dataset
    mala.datahandling.lazy_load_dataset
-   mala.datahandling.lazy_load_dataset_clustered
    mala.datahandling.lazy_load_dataset_single
    mala.datahandling.multi_lazy_load_data_loader
    mala.datahandling.snapshot

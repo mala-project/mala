@@ -1,7 +1,0 @@
-lazy\_load\_dataset\_clustered
-==============================
-
-.. automodule:: mala.datahandling.lazy_load_dataset_clustered
-   :members:
-   :undoc-members:
-   :show-inheritance:
