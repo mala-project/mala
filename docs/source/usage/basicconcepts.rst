@@ -87,7 +87,6 @@ installed on your system. The output will look something like this:
             horovod: 	 not installed 	 Enables training parallelization.
             lammps: 	 installed 	 Enables descriptor calculation for data preprocessing and inference.
             oapackage: 	 installed 	 Enables usage of OAT method for hyperparameter optimization.
-            pqkmeans: 	 installed 	 Enables clustering of training data.
             total_energy: 	 not installed 	 Enables calculation of total energy.
 
 Attempting to use one of those functionalities without having the modules
