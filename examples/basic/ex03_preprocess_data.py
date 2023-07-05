@@ -70,9 +70,9 @@ data_converter.add_snapshot(descriptor_input_type="espresso-out",
 # One can just as easily save using OpenPMD (if installed on your machine),
 # in which case simply the correct file ending (e.g. ".h5" for HDF5) needs
 # to be used on the naming_scheme.
-data_converter.convert_snapshots(descriptor_save_path="./",
-                                 target_save_path="./",
-                                 additional_info_save_path="./",
+data_converter.convert_snapshots(descriptor_save_path="../",
+                                 target_save_path="../",
+                                 additional_info_save_path="../",
                                  naming_scheme="Be_snapshot*.npy")
 # New feature: You can switch the lines above for these to use the new,
 # more powerful OpenPMD interface for MALA!
@@ -88,7 +88,7 @@ data_converter.convert_snapshots(descriptor_save_path="./",
 data_converter = mala.DataConverter(test_parameters)
 data_converter.add_snapshot(descriptor_input_type="espresso-out",
                             descriptor_input_path=outfile,)
-data_converter.convert_snapshots(complete_save_path="./",
+data_converter.convert_snapshots(complete_save_path="../",
                                  naming_scheme="Be_snapshot_only_in*",
                                  descriptor_calculation_kwargs=
                                  {"working_directory": data_path})
@@ -97,7 +97,7 @@ data_converter = mala.DataConverter(test_parameters)
 data_converter.add_snapshot(target_input_type=".cube",
                             target_input_path=ldosfile,
                             target_units="1/(Ry*Bohr^3)")
-data_converter.convert_snapshots(target_save_path="./",
+data_converter.convert_snapshots(target_save_path="../",
                                  naming_scheme="Be_snapshot_only_out*")
 
 printout("Parameters used for this experiment:")

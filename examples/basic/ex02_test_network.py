@@ -15,7 +15,7 @@ or download the appropriate model from the provided test data repo.
 
 # Uses a trained network to make a prediction.
 # The Tester class is the testing analogon to the training class.
-assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
+assert os.path.exists("../be_model.zip"), "Be model missing, run ex01 first."
 parameters, network, data_handler, tester = mala.Tester.load_run("be_model")
 tester.observables_to_test = ["band_energy", "number_of_electrons"]
 

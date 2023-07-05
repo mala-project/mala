@@ -48,7 +48,7 @@ data_shuffler.add_snapshot("Be_snapshot1.in.npy", data_path,
 # After shuffling, these snapshots can be loaded as regular snapshots for
 # lazily loaded training. Both OpenPMD and numpy can be used as save format
 # for data.
-data_shuffler.shuffle_snapshots(complete_save_path="./",
+data_shuffler.shuffle_snapshots(complete_save_path="../",
                                 save_name="Be_shuffled*")
 # New feature: You can switch the lines above for these to use the new,
 # more powerful OpenPMD interface for MALA!

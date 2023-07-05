@@ -16,7 +16,7 @@ REQUIRES LAMMPS AND QUANTUM ESPRESSO (TOTAL ENERGY MODULE).
 
 
 # Load a model.
-assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
+assert os.path.exists("../be_model.zip"), "Be model missing, run ex01 first."
 
 # Set up the ASE objects.
 atoms = read(os.path.join(data_path, "Be_snapshot1.out"))

@@ -15,7 +15,7 @@ predictions can be made.
 
 
 # Uses a network to make a prediction.
-assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
+assert os.path.exists("../be_model.zip"), "Be model missing, run ex01 first."
 parameters, network, data_handler, predictor = mala.Predictor.\
     load_run("be_model")
 
