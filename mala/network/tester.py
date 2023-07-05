@@ -116,10 +116,15 @@ class Tester(Runner):
 
         results = {}
         for observable in self.observables_to_test:
-            results[observable] = self.\
-                __calculate_observable_error(snapshot_number,
-                                             observable, predicted_outputs,
-                                             actual_outputs)
+            try:
+                results[observable] = self.\
+                    __calculate_observable_error(snapshot_number,
+                                                observable, predicted_outputs,
+                                                actual_outputs)
+            except ValueError as e:
+                printout(f"Error calculating observable: {observable} for snapshot {snapshot_number}",  min_verbosity=0)
+                printout(e, min_verbosity=2)
+                results[observable] = np.inf
         return results
 
     def predict_targets(self, snapshot_number, data_type='te'):
