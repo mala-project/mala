@@ -25,7 +25,7 @@ This repository is structured as follows:
 
 > **WARNING**: Even if you install MALA via PyPI, please consult the full installation instructions afterwards. External modules (like the QuantumESPRESSO bindings) are not distributed via PyPI!
 
-Please refer to [Installation of MALA](docs/source/install/README.md).
+Please refer to [Installation of MALA](docs/source/install/installing_mala.rst).
 
 ## Running
 
