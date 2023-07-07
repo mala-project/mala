@@ -1,102 +1,91 @@
 import os
 
 import mala
-from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
-ex01_train_network.py: Shows how a neural network can be trained on material
+This example shows how a neural network can be trained on material
 data using this framework. It uses preprocessed data, that is read in
 from *.npy files.
 """
 
 
 ####################
-# PARAMETERS
-# All parameters are handled from a central parameters class that
-# contains subclasses.
+# 1. PARAMETERS
+# The first step of each MALA workflow is to define a parameters object and
+# select the necessary parameters for the application one wants to look into.
 ####################
 
-test_parameters = mala.Parameters()
-
-# Currently, the splitting in training, validation and test set are
-# done on a "by snapshot" basis.
-test_parameters.data.data_splitting_type = "by_snapshot"
-
-# Specify the data scaling.
-test_parameters.data.input_rescaling_type = "feature-wise-standard"
-test_parameters.data.output_rescaling_type = "normal"
-
+parameters = mala.Parameters()
+# Specify the data scaling. For regular bispectrum and LDOS data,
+# these have proven successful.
+parameters.data.input_rescaling_type = "feature-wise-standard"
+parameters.data.output_rescaling_type = "normal"
 # Specify the used activation function.
-test_parameters.network.layer_activations = ["ReLU"]
-
+parameters.network.layer_activations = ["ReLU"]
 # Specify the training parameters.
-test_parameters.running.max_number_epochs = 100
-test_parameters.running.mini_batch_size = 40
-test_parameters.running.learning_rate = 0.00001
-test_parameters.running.trainingtype = "Adam"
-test_parameters.verbosity = 1
+# These may be determined via hyperparameter tuning.
+parameters.running.max_number_epochs = 100
+parameters.running.mini_batch_size = 40
+parameters.running.learning_rate = 0.00001
+parameters.running.trainingtype = "Adam"
+# These parameters characterize how the LDOS and bispectrum descriptors
+# were calculated. They are _technically_ not needed to train a simple
+# network. However, it is useful to define them prior to training. Then,
+# when using the network later in production, all required parameters are
+# already set.
+parameters.targets.target_type = "LDOS"
+parameters.targets.ldos_gridsize = 11
+parameters.targets.ldos_gridspacing_ev = 2.5
+parameters.targets.ldos_gridoffset_ev = -5
+
+parameters.descriptors.descriptor_type = "Bispectrum"
+parameters.descriptors.bispectrum_twojmax = 10
+parameters.descriptors.bispectrum_cutoff = 4.67637
 
 ####################
-# DATA
-# Add and prepare snapshots for training.
+# 2. DATA
+# Data has to be added to the MALA workflow. The central object for this
+# is the DataHandler class, which takes care of all data needs. After data
+# has been added, it is loaded and scaled with the prepare_data function.
 ####################
 
-data_handler = mala.DataHandler(test_parameters)
-
+data_handler = mala.DataHandler(parameters)
 # Add a snapshot we want to use in to the list.
 data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
                           "Be_snapshot0.out.npy", data_path, "tr")
 data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
                           "Be_snapshot1.out.npy", data_path, "va")
-# New feature: You can switch the lines above for these to use the new,
-# more powerful OpenPMD interface for MALA!
-# data_handler.add_snapshot("Be_snapshot0.in.h5", data_path,
-#                           "Be_snapshot0.out.h5", data_path, "tr",
-#                           snapshot_type="openpmd")
-# data_handler.add_snapshot("Be_snapshot1.in.h5", data_path,
-#                           "Be_snapshot1.out.h5", data_path, "va",
-#                           snapshot_type="openpmd")
 data_handler.prepare_data()
-printout("Read data: DONE.")
 
 ####################
-# NETWORK SETUP
-# Set up the network and trainer we want to use.
-# The layer sizes can be specified before reading data,
-# but it is safer this way.
+# 3. NETWORK SETUP
+# Now we can set up the NN to be used in the ML-DFT model. The layer_sizes
+# list determines the number of neurons in the NN. It can be specified before
+# loading data, but it is recommended to do that afterwards, since then
+# the input_dimension and output_dimension properties of the data handling
+# class can be used to correctly define input and output layer of the NN.
 ####################
 
-test_parameters.network.layer_sizes = [data_handler.input_dimension,
-                                       100,
-                                       data_handler.output_dimension]
-
-# Setup network and trainer.
-test_network = mala.Network(test_parameters)
-test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
-printout("Network setup: DONE.")
+parameters.network.layer_sizes = [data_handler.input_dimension,
+                                  100,
+                                  data_handler.output_dimension]
+test_network = mala.Network(parameters)
 
 ####################
-# TRAINING
-# Train the network and save it afterwards.
+# 4. TRAINING THE NETWORK
+# Finally, the network can be trained. Afterwards, it can easily be saved
+# into a .zip archive for inference. It is recommended to load a file
+# containing additional calculation data (e.g., from the QE calculations
+# with which the LDOS data was created) so that things like simulated
+# temperature, information about the pseudopotential, etc. are stored along-
+# side the model. This makes inference easier.
 ####################
 
-printout("Starting training.")
+test_trainer = mala.Trainer(parameters, test_network, data_handler)
 test_trainer.train_network()
-
-# Additional calculation data, i.e., a simulation output, may be saved
-# along side the model. This makes future inference easier.
 additional_calculation_data = os.path.join(data_path, "Be_snapshot0.out")
 test_trainer.save_run("be_model",
                       additional_calculation_data=additional_calculation_data)
-printout("Training: DONE.")
-
-####################
-# RESULTS.
-# Print the used parameters and check whether the loss decreased enough.
-####################
-
-printout("Parameters used for this experiment:")
-test_parameters.show()

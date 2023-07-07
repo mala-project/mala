@@ -83,7 +83,8 @@ maxdepth: 2
 ---
 
 installation
-usage
+basic_usage
+advanced_usage
 api/modules
 CONTRIBUTE
 ```
