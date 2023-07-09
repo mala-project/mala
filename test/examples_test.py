@@ -20,7 +20,7 @@ class TestExamples:
         runpy.run_path("../examples/basic/ex04_postprocess_data.py")
 
     def test_ex05(self):
-        runpy.run_path("../examples/basic/ex05_hyperparameter_optimization.py")
+        runpy.run_path("../examples/basic/ex04_hyperparameter_optimization.py")
 
     def test_ex06(self):
         runpy.run_path(

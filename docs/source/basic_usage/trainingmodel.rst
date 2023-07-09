@@ -39,18 +39,32 @@ options to train a simple network with example data, namely
 
 Here, we can see that the ``Parameters`` object contains multiple
 sub-objects dealing with the individual aspects of the workflow. In the first
-two lines, we specify that MALA should standardize the input (=descriptors)
+two lines, which data scaling MALA should employ. Scaling data greatly
+improves the performance of NN based ML models. Options are
+
+* ``None``: No normalization is applied.
+
+* ``standard``: Standardization (Scale to mean 0, standard deviation 1)
+
+* ``normal``: Min-Max scaling (Scale to be in range 0...1)
+
+* ``feature-wise-standard``: Row Standardization (Scale to mean 0, standard deviation 1)
+
+* ``feature-wise-normal``: Row Min-Max scaling (Scale to be in range 0...1)
+
+Here, we specify that MALA should standardize the input (=descriptors)
 by feature (i.e., each entry of the vector separately on the grid) and
-normalize the entire LDOS. The third line tells MALA which activation
-function to use, and the last lines specify the training routine employed
-by MALA.
+normalize the entire LDOS.
+
+The third line tells MALA which activation function to use, and the last lines
+specify the training routine employed by MALA.
 
 For now, we will assume these values to be correct. Of course, for new
 data sets, optimal values have to be determined via :doc:`hyperparameter optimization <hyperparameters>`.
 Finally, it is useful to also save some information on how the LDOS and
 bispectrum descriptors were calculated into the parameters object - this helps
 at inference time, when this info is required. You will learn what these values
-mean :doc:`data acquisition part <more_data>` of this guide, for now we simply
+mean :doc:`data generation part <more_data>` of this guide, for now we simply
 use the values consistent with the example data.
 
       .. code-block:: python

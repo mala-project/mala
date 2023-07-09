@@ -1,5 +1,5 @@
-Data generation and preprocessing
-==================================
+Data generation and conversion
+===============================
 
 Data generation
 ###############
@@ -9,18 +9,17 @@ appropriate simulation software. The raw outputs of such calculations
 are atomic positions and the LDOS, the latter usually as multiple individual
 .cube files.
 
-Currently, only QuantumESPRESSO has been tested. Starting with version 7.2,
-any version of QuantumESPRESSO can be used to create data for MALA. In order
-to do so
+Currently, only Quantum ESPRESSO has been tested for preprocessing.
+Starting with version 7.2, any version of Quantum ESPRESSO can be used to
+create data for MALA. In order to do so
 
 1. Perform a regular DFT calculation using ``pw.x``
 2. Calculate the LDOS using ``pp.x``
 
 Make sure to use enough k-points in the DFT calculation (LDOS sampling
 requires denser k-grids then regular DFT calculations) and an appropriate
-energy grid when calculating the LDOS. See the
-:doc:`MALA publications <../about/publications>` for
-examples of such values for other materials. Lastly, when calculating
+energy grid when calculating the LDOS. See the `initial MALA publication <https://www.doi.org/10.1103/PhysRevB.104.035120>`_
+for more information on this topic. Lastly, when calculating
 the LDOS with ``pp.x``, make sure to set ``use_gauss_ldos=.true.`` in the
 ``inputpp`` section.
 
@@ -28,104 +27,100 @@ the LDOS with ``pp.x``, make sure to set ``use_gauss_ldos=.true.`` in the
 Data Conversion
 ###############
 
-MALA can be used to process raw data into ready-to-use data fro the surrogate models
-For this, the ``DataConverter`` class can be used; see example ``ex02_preprocess_data``.
-If you are not sure which descriptor hyperparameters to use (e.g.: "Which cutoff
-radius do I need?") MALA provides a fast analysis that does not involve
-model tuning. See ``ex13_acsd``.
+Once you have performed the necessary simulations, you will have to calculate
+the volumetric descriptor field from the atomic positions and transform
+the LDOS into a format useable by MALA.
 
-By default, MALA saves its data files to numpy ``.npy`` files. However, for
-storing large amounts of volumetric data (plus metadata), libraries such as
-`OpenPMD <https://github.com/openPMD/openPMD-api>`_ are more suitable.
-MALA provides a full OpenPMD interface that is currently tested in production.
-We recommend usage of the OpenPMD interface, which will become the new default
-in upcoming versions. Examples related to data processing and general workflow
-usage include lines that showcase the usage of OpenPMD within MALA.
-
-Using input and output data
-###########################
-
-MALA divides provided data into two categories: ``Descriptor`` objects
-and ``Target`` objects.
-
-Descriptors
-***********
-
-Descriptors give, per grid-point, information about the
-local environment around that grid-point. In most cases, users will not have
-to interact with a ``Descriptor`` object. Yet, these objects can be created
-by themselves if needed. The default option for descriptor calculation
-is ``Bispectrum``, i.e., the bispectrum descriptors used in all current MALA
-publications. Experimental options include ``AtomicDensity`` (i.e. the raw
-atomic density, e.g. for convolutional approaches) and ``MinterpyDescriptors``
-(currently experimental).
+MALA can be used to process raw data into ready-to-use data for ML-DFT model
+creation. For this, the ``DataConverter`` class can be used, as also shown
+in the example ``basic/ex03_preprocess_data``.
+The first thing when converting data is to select how the data should be
+processed. Up until now, MALA operates with bispectrum descriptors as
+input data (=descriptors) and LDOS as output data (=targets). Their
+calculation is calculated via
 
       .. code-block:: python
 
-            import mala
-
             parameters = mala.Parameters()
-            parameters.descriptors.descriptor_type = 'Bispectrum'
+            # Bispectrum parameters.
+            parameters.descriptors.descriptor_type = "Bispectrum"
+            parameters.descriptors.bispectrum_twojmax = 10
+            parameters.descriptors.bispectrum_cutoff = 4.67637
+            # LDOS parameters.
+            parameters.targets.target_type = "LDOS"
+            parameters.targets.ldos_gridsize = 11
+            parameters.targets.ldos_gridspacing_ev = 2.5
+            parameters.targets.ldos_gridoffset_ev = -5
 
-            # Creates a bispectrum object via interface
-            bispectrum = mala.Descriptor(parameters)
+For the LDOS, these parameters are determined by the electronic structure
+simulation. Namely, ``ldos_gridsize`` governs how many discretized energy
+values are included in the energy grid upon which the LDOS is sampled,
+``ldos_gridspacing_ev`` governs how far these values are apart and
+``ldos_gridoffset_ev`` determines the lowest energy value sampled. These values
+are chosen for the ``pp.x`` simulation and simply have to be given here.
 
-            # Creates a bispectrum object directly
-            bispectrum = mala.Bispectrum(parameters)
+For the bispectrum calculation, ``bispectrum_cutoff`` gives the radius of
+the cutoff sphere from which information on the atomic structure is incoporated
+into the bispectrum descriptor vector at each point in space, whereas
+``bispectrum_twojmax`` governs the dimensionality of the bispectrum
+representation at each point in space. If it is set to, e.g., 10, 91 components
+are used at each point in space to encode the atomic structure.
 
-            # Use the bispectrum object to calculate descriptors from QE calculation.
-            bispectrum_descriptors = bispectrum.calculate_from_qe_out(...)
+The values for the bispectrum descriptors have to be chosen such
+that the corresponding descriptors accurately represent atomic enviroment.
+:ref:`In the advanced example section <tuning descriptors>`, it is shown
+how these values can be determined by a newly developed method called
+`ACSD <https://doi.org/10.1088/2632-2153/ac9956>`_.
 
-Please note that bispectrum descriptors can be calculated on GPUs - for more
-information see :doc:`MALA publications <production>`.
-
-Targets
-*******
-
-``Target`` objects hold information about the electronic structure of a material.
-In comparison to the ``Descriptor`` objects these objects are more common
-in workflows, as they can be used for a variety of physical calculations.
-They can also be used to parse data from ab-initio simulations
-E.g. in a script like this:
+After selecting these options, we have to create a ``DataConverter`` object
+and fill it with data, e.g., by
 
       .. code-block:: python
 
-            import mala
+            data_converter = mala.DataConverter(parameters)
+            outfile = os.path.join(data_path, "Be_snapshot0.out")
+            ldosfile = os.path.join(data_path, "cubes/tmp.pp*Be_ldos.cube")
 
-            parameters = mala.Parameters()
-            parameters.targets.descriptor_type = 'LDOS'
+            data_converter.add_snapshot(descriptor_input_type="espresso-out",
+                                        descriptor_input_path=outfile,
+                                        target_input_type=".cube",
+                                        target_input_path=ldosfile,
+                                        additional_info_input_type="espresso-out",
+                                        additional_info_input_path=outfile,
+                                        target_units="1/(Ry*Bohr^3)")
 
-            # Creates a LDOS object via interface
-            ldos = mala.Target(parameters)
+The ``add_snapshot`` function can be called multiple times to add
+multiple snapshots to MALA.
+For regular Quantum ESPRESSO calculations, the ``descriptor_input_type``
+and ``target_input_type`` will always be ``"espresso-out"`` and ``".cube"``,
+respectively, and the ``target_units`` will always be ``"1/(Ry*Bohr^3)"``.
+The paths have to be modified accordingly. ``additional_info_input_*`` refers
+to the calculation output file - MALA provides an interface to condense
+the entire, verbose simulation output to ``.json`` files for further
+processing. In the preceding section, we had to specify calculation output
+files a number of times - instead, we can use the reduced ``.json`` files
+if we let them be created by the ``DataConverter`` class.
 
-            # Creates a LDOS object directly
-            ldos = mala.LDOS(parameters)
+Once data is provided, the conversion itself is simply.
 
-            # Use the LDOS object to calculate the band energy from LDOS data.
-            ldos_data = ldos.read_from_cube(...)
-            band_energy = ldos.get_band_energy(ldos_data)
+      .. code-block:: python
 
+            data_converter.convert_snapshots(descriptor_save_path="./",
+                                             target_save_path="./",
+                                             additional_info_save_path="./",
+                                             naming_scheme="Be_snapshot*.npy",
+                                             descriptor_calculation_kwargs=
+                                             {"working_directory": data_path})
+            # You can also provide only one path
+            # data_converter.convert_snapshots(complete_save_path="./",
+            #                                  naming_scheme="Be_snapshot*.npy",
+            #                                  descriptor_calculation_kwargs=
+            #                                  {"working_directory": data_path})
 
-Data Scaling
-############
-
-An additional step of preprocessing is scaling the data before a model is
-trained. This is done automatically in the ``DataHandler`` class, using the
-methods requested via the ``mala.parameters.data.input_rescaling_type`` and
-``mala.parameters.data.output_rescaling_type`` keywords. Currently supported here
-are:
-
-* ``None``: No normalization is applied.
-
-* ``standard``: Standardization (Scale to mean 0, standard deviation 1)
-
-* ``normal``: Min-Max scaling (Scale to be in range 0...1)
-
-* ``feature-wise-standard``: Row Standardization (Scale to mean 0, standard deviation 1)
-
-* ``feature-wise-normal``: Row Min-Max scaling (Scale to be in range 0...1)
-
-Internally, the ``DataScaler`` class is used. The objects of this class
-can be saved and loaded later for e.g. inference or to minimize calculation
-time for multiple ML experiments using the same set of data.
-Data scaling will always be done using the training data only.
+The ``convert_snapshots`` function will convert ALL snapshots added via
+``add_snapshot`` and save the resulting volumetric numpy files to the
+provided paths. You can either provide separate paths for the separate types
+of data or give one complete path, ``complete_save_path``, depending on your
+personal preference. Fine-granular access
+to the calculators is enabled via the descriptor_calculation_kwargs and
+target_calculation_kwargs arguments, but usually not needed.

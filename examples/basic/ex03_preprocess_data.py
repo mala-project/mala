@@ -1,59 +1,66 @@
 import os
 
 import mala
-from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
-ex03_preprocess_data.py: Shows how this framework can be used to preprocess
+Shows how this framework can be used to preprocess
 data. Preprocessing here means converting raw DFT calculation output into 
 numpy arrays of the correct size. For the input data, this means descriptor
 calculation.
-
-Further preprocessing steps (scaling, unit conversion) is done later. 
 
 REQUIRES LAMMPS.
 """
 
 
 ####################
-# PARAMETERS
-# All parameters are handled from a central parameters class that
-# contains subclasses.
+# 1. PARAMETERS
+# Select the correct parameters with which to preprocess the electronic
+# structure simulation data. For the LDOS, these parameters have to be chosen
+# consistent with the DFT calculation (i.e., if you specified an energy grid
+# with 250 values lying between -10 and 15 eV, and therefore 0.1 eV between
+# grid points, you will have to set ldos_gridsize to 250, gridspacing_ev to 0.1
+# and grid_offset_ev to -10). Of course, the values are dependent on the
+# physical system simulated.
+# Likewise, the values for the bispectrum descriptors have to be chosen such
+# that the corresponding descriptors accurately represent atomic enviroment.
+# In the advanced example section, it is shown how a newly developed analysis
+# called ACSD can be used to determine these values automatically.
+# For now, we will use standard values.
 ####################
 
-test_parameters = mala.Parameters()
-
-# Specify input data options, i.e. which descriptors are calculated
-# with which parameters. These parameters are slightly modified for better
-# performance.
-test_parameters.descriptors.descriptor_type = "Bispectrum"
-test_parameters.descriptors.bispectrum_twojmax = 10
-test_parameters.descriptors.bispectrum_cutoff = 4.67637
-test_parameters.descriptors.descriptors_contain_xyz = True
-
-# Specify output data options, i.e. how the LDOS is parsed.
-# The Be system used as an example here actually was calculated with
-# drastically reduced number of energy levels for better computability.
-test_parameters.targets.target_type = "LDOS"
-test_parameters.targets.ldos_gridsize = 11
-test_parameters.targets.ldos_gridspacing_ev = 2.5
-test_parameters.targets.ldos_gridoffset_ev = -5
+parameters = mala.Parameters()
+# Bispectrum parameters.
+parameters.descriptors.descriptor_type = "Bispectrum"
+parameters.descriptors.bispectrum_twojmax = 10
+parameters.descriptors.bispectrum_cutoff = 4.67637
+# LDOS parameters.
+parameters.targets.target_type = "LDOS"
+parameters.targets.ldos_gridsize = 11
+parameters.targets.ldos_gridspacing_ev = 2.5
+parameters.targets.ldos_gridoffset_ev = -5
 
 ####################
-# DATA
-# Create a DataConverter, and add snapshots to it.
+# 2. ADDING DATA FOR DATA CONVERSION
+# Data conversion itself is simple. We select input and output data
+# to be converted, add this data snapshot-wise and tell MALA to
+# convert snapshots. Inputs and outputs can be processed individually.
+# Further, via the additional_info_input_* keywords, calculation output
+# can be processed from the original simulation *.out output files into
+# more convenient *.json files that can be used in their stead. This saves
+# on disk space.
+# To only process parts of the data, omit/add descriptor_input*, target_input_*
+# and additional_info_input_* at your leisure.
+# Make sure to set the correct units - for QE, this should always be
+# 1/(Ry*Bohr^3).
 ####################
 
-data_converter = mala.DataConverter(test_parameters)
-
+data_converter = mala.DataConverter(parameters)
 outfile = os.path.join(data_path, "Be_snapshot0.out")
 ldosfile = os.path.join(data_path, "cubes/tmp.pp*Be_ldos.cube")
-# The add_snapshot function can be called with a lot of options to reflect
-# the data to be processed.
-# The standard way is this: specifying descriptor, target and additional info.
+
 data_converter.add_snapshot(descriptor_input_type="espresso-out",
                             descriptor_input_path=outfile,
                             target_input_type=".cube",
@@ -62,43 +69,24 @@ data_converter.add_snapshot(descriptor_input_type="espresso-out",
                             additional_info_input_path=outfile,
                             target_units="1/(Ry*Bohr^3)")
 
-# Likewise, there are multiple ways to save data. One way is to specify
-# separate paths for descriptors, target and info data.
-# A unified path can also be provided (see below).
-# Further, naming_scheme impacts how data is saved. Standard is
-# numpy, which can be indicated by ".npy".
-# One can just as easily save using OpenPMD (if installed on your machine),
-# in which case simply the correct file ending (e.g. ".h5" for HDF5) needs
-# to be used on the naming_scheme.
-data_converter.convert_snapshots(descriptor_save_path="../",
-                                 target_save_path="../",
-                                 additional_info_save_path="../",
-                                 naming_scheme="Be_snapshot*.npy")
-# New feature: You can switch the lines above for these to use the new,
-# more powerful OpenPMD interface for MALA!
-# data_converter.convert_snapshots(descriptor_save_path="./",
-#                                  target_save_path="./",
-#                                  additional_info_save_path="./",
-#                                  naming_scheme="Be_snapshot*.h5")
+####################
+# 3. Converting the data
+# To convert the data we now simply have to call the convert_snapshot function.
+# Input (descriptor) and output (target) data can be saved in individual
+# locations, as can the additional output data files. Fine-granular access
+# to the calculators is enabled via the descriptor_calculation_kwargs and
+# target_calculation_kwargs arguments, but usually not needed.
+# If all data files should be stored in the same location, the
+# complete_save_path keyword may be used.
+####################
 
-# If parts of the data have already been processed, the DataConverter class can
-# also be used to convert the rest.
-# No matter which way you access the DataConvert, you can always specify
-# keywords (check API) for the calculators.
-data_converter = mala.DataConverter(test_parameters)
-data_converter.add_snapshot(descriptor_input_type="espresso-out",
-                            descriptor_input_path=outfile,)
-data_converter.convert_snapshots(complete_save_path="../",
-                                 naming_scheme="Be_snapshot_only_in*",
+data_converter.convert_snapshots(descriptor_save_path="./",
+                                 target_save_path="./",
+                                 additional_info_save_path="./",
+                                 naming_scheme="Be_snapshot*.npy",
                                  descriptor_calculation_kwargs=
                                  {"working_directory": data_path})
-
-data_converter = mala.DataConverter(test_parameters)
-data_converter.add_snapshot(target_input_type=".cube",
-                            target_input_path=ldosfile,
-                            target_units="1/(Ry*Bohr^3)")
-data_converter.convert_snapshots(target_save_path="../",
-                                 naming_scheme="Be_snapshot_only_out*")
-
-printout("Parameters used for this experiment:")
-test_parameters.show()
+# data_converter.convert_snapshots(complete_save_path="./",
+#                                  naming_scheme="Be_snapshot*.npy",
+#                                  descriptor_calculation_kwargs=
+#                                  {"working_directory": data_path})
