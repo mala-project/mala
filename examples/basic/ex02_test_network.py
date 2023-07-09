@@ -17,7 +17,7 @@ assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
 ####################
 # 1. LOADING A NETWORK
 # To use the tester class to test an ML-DFT model, simply load it via the
-# Tester class interace. Afterwards, set the necessary parameters.
+# Tester class interface. Afterwards, set the necessary parameters.
 # It is recommended to enable the "lazy-loading" feature, so that
 # data is loaded into memory one snapshot at a time during testing - this
 # helps keep RAM requirement down. Furthermore, you have to decide which

@@ -6,3 +6,4 @@ Advanced options
 
    advanced_usage/trainingmodel
    advanced_usage/descriptors
+   advanced_usage/hyperparams

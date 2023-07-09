@@ -17,7 +17,7 @@ class TestExamples:
         runpy.run_path("../examples/basic/ex03_preprocess_data.py")
 
     def test_ex04(self):
-        runpy.run_path("../examples/basic/ex04_postprocess_data.py")
+        runpy.run_path("../examples/advanced/ex04_postprocess_data.py")
 
     def test_ex05(self):
         runpy.run_path("../examples/basic/ex04_hyperparameter_optimization.py")
@@ -43,7 +43,7 @@ class TestExamples:
         runpy.run_path("../examples/advanced/ex11_pass_single_feature.py")
 
     def test_ex12(self):
-        runpy.run_path("../examples/basic/ex12_run_predictions.py")
+        runpy.run_path("../examples/basic/ex05_run_predictions.py")
 
     def test_ex13(self):
         runpy.run_path("../examples/advanced/ex13_acsd.py")
@@ -52,10 +52,10 @@ class TestExamples:
         runpy.run_path("../examples/advanced/ex14_advanced_networks.py")
 
     def test_ex15(self):
-        runpy.run_path("../examples/basic/ex15_ase_calculator.py")
+        runpy.run_path("../examples/basic/ex06_ase_calculator.py")
 
     def test_ex16(self):
-        runpy.run_path("../examples/basic/ex16_observables.py")
+        runpy.run_path("../examples/advanced/ex16_observables.py")
 
     def test_ex17(self):
         runpy.run_path(

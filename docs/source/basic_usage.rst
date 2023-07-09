@@ -14,3 +14,4 @@ Advanced features and performance tweaks are ignored, and instead covered in
    basic_usage/trainingmodel
    basic_usage/more_data
    basic_usage/hyperparameters
+   basic_usage/predictions
