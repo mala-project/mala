@@ -100,9 +100,53 @@ properties of the ``Parameters`` class:
      - Learning rate of NN optimization (step size of gradient based optimizer)
      - ``running.learning_rate``
      - ``"float"``, ``"categorical"``
-   * - ``"ff_multiple_layers_neurons"``
-     - Has to be used in conjunction with ``"ff_multiple_layers_count"`` and is
-       mutually exclusive with ``"ff_neurons_layer"``. Opti
+   * - ``"ff_multiple_layers_neurons"`` /  ``"ff_multiple_layers_count"``
+     - Always have to be used together and are
+       mutually exclusive with ``"ff_neurons_layer"``. When using these options,
+       the hyperparameter search will add multiple layers of the same size.
+       ``"ff_multiple_layers_count"`` governs the number of layers added per
+       trial, ``"ff_multiple_layers_neurons"`` the number of neurons per
+       such layer.
      - ``network.layer_sizes``
+     - ``"int"``, ``"categorical"``
+   * - ``"ff_neurons_layer_XX"``
+     - Number of neurons per layer. This is the primary tuning parameter
+       to optimize the network architecture. One such parameter has to
+       be added per potential NN layer, which is done by setting, e.g.,
+       ``"ff_neurons_layer_00"``, ``"ff_neurons_layer_01"``, etc.;
+       By including 0 in the list of choices, layers can be deactivted
+       during the optimization.
+     - ``network.layer_sizes``
+     - ``"int"``, ``"categorical"``
+   * - ``"trainingtype"``
+     - Optimization algorithm used during the NN optimization.
+     - ``running.trainingtype``
+     - ``"categorical"``
+   * - ``"mini_batch_size"``
+     - Size of the mini batches used to calculate the gradient during
+       the gradient-based NN optimization.
+     - ``running.mini_batch_size``
+     - ``"int"``, ``"categorical"``
+   * - ``"early_stopping_epochs"``
+     - If the validation loss does not decrease for this number of epochs,
+       training is stopped.
+     - ``running.early_stopping_epochs``
+     - ``"int"``, ``"categorical"``
+   * - ``"learning_rate_patience"``
+     - If the validation loss does not decrease for this number of epochs,
+       the learning rate is adjusted according to ``running.learning_rate_patience``.
+     - ``running.learning_rate_patience``
+     - ``"int"``, ``"categorical"``
+   * - ``"learning_rate_decay"``
+     - If the validation loss plateaus, then the learning rate is scaled by
+       this factor. Should be smaller than zero.
+     - ``running.learning_rate_decay``
      - ``"float"``, ``"categorical"``
+   * - ``"layer_activation"``
+     - Describes the activation functions used in the NN. Can either be a list
+       used in the same fashion as ``"ff_neurons_layer_XX"``, i.e.,
+       one hyperparameter per layer, or by only giving one hyperparameter,
+       in which case all layers will use the same activation function.
+     - ``network.layer_activation``
+     - ``"categorical"``
 
