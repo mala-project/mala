@@ -86,18 +86,23 @@ means, among other things, that each hyperparameter can either be
 * ``"int"`` - a lower and upper bound will be given as the optimization space, and the hyperparameter can be any integer value in between
 
 The following hyperparameters can be optimized, all of which correspond to
-properties of the :
+properties of the ``Parameters`` class:
 
-.. list-table:: Title
-   :widths: 25 25 50
+.. list-table:: List of hyperparameters
+   :widths: 10 5 10 10
    :header-rows: 1
 
    * - Name of the hyperparameter
+     - Meaning
      - Linked parameter object
-     - Heading row 1, column 3
-   * - Row 1, column 1
-     -
-     - Row 1, column 3
-   * - Row 2, column 1
-     - Row 2, column 2
-     - Row 2, column 3
+     - Possible choices
+   * - ``"learning_rate"``
+     - Learning rate of NN optimization (step size of gradient based optimizer)
+     - ``running.learning_rate``
+     - ``"float"``, ``"categorical"``
+   * - ``"ff_multiple_layers_neurons"``
+     - Has to be used in conjunction with ``"ff_multiple_layers_count"`` and is
+       mutually exclusive with ``"ff_neurons_layer"``. Opti
+     - ``network.layer_sizes``
+     - ``"float"``, ``"categorical"``
+
