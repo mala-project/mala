@@ -1,4 +1,4 @@
-# Contributing to MALA
+# Contributions
 
 MALA is open source software and as such always welcomes additions and
 improvements. However, we kindly ask any contributor to adhere to the following

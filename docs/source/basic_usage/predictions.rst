@@ -3,7 +3,8 @@ Using ML-DFT models for predictions
 
 Having trained and saved a model, this model can now be used for predictions.
 This guide follows the examples ``ex05_run_predictions.py`` and
-``ex06_ase_calculator.py``.
+``ex06_ase_calculator.py``. In the :ref:`advanced section <production>` on
+this topic, performance tweaks and extended access to observables are covered.
 
 In order to get direct access to electronic structure via ML, MALA uses
 the ``Predictor`` class. Provided that the trained model was saved with

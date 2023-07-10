@@ -1,6 +1,11 @@
 Data generation and conversion
 ===============================
 
+MALA operates on volumetric data. Volumetric data is stored in binary files.
+By default - and discussed here, in the introductory guide - this simply
+means ``numpy`` files (``.npy`` files). Advanced data storing techniques
+are :ref:`also available <openpmd>`
+
 Data generation
 ###############
 
@@ -24,7 +29,7 @@ the LDOS with ``pp.x``, make sure to set ``use_gauss_ldos=.true.`` in the
 ``inputpp`` section.
 
 
-Data Conversion
+Data conversion
 ###############
 
 Once you have performed the necessary simulations, you will have to calculate

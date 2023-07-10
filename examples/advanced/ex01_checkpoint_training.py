@@ -7,8 +7,9 @@ from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
-ex07_checkpoint_training.py: Shows how a training run can be paused and 
-resumed. Delete all ex07_*.pkl and ex07_*pth prior to execution.
+Shows how a training run can be paused and 
+resumed. Delete the ex07.zip file prior to execution to see the effect
+of checkpointing.
 Afterwards, execute this script twice to see how MALA progresses from a 
 checkpoint. As the number of total epochs cannot be divided by the number
 of epochs after which a checkpoint is created without residual, this will 
@@ -17,45 +18,23 @@ lead to MALA performing the missing epochs again.
 
 
 def initial_setup():
-    ####################
-    # PARAMETERS
-    # All parameters are handled from a central parameters class that
-    # contains subclasses.
-    ####################
 
-    test_parameters = mala.Parameters()
-    # Currently, the splitting in training, validation and test set are
-    # done on a "by snapshot" basis.
-    test_parameters.data.data_splitting_type = "by_snapshot"
-
-    # Specify the data scaling.
-    test_parameters.data.input_rescaling_type = "feature-wise-standard"
-    test_parameters.data.output_rescaling_type = "normal"
-
-    # Specify the used activation function.
-    test_parameters.network.layer_activations = ["ReLU"]
-
-    # Specify the training parameters.
-    # We only train for an odd number of epochs here, and train for
-    # the rest after the checkpoint has been loaded.
-    test_parameters.running.max_number_epochs = 9
-    test_parameters.running.mini_batch_size = 8
-    test_parameters.running.learning_rate = 0.00001
-    test_parameters.running.trainingtype = "Adam"
+    parameters = mala.Parameters()
+    parameters.data.data_splitting_type = "by_snapshot"
+    parameters.data.input_rescaling_type = "feature-wise-standard"
+    parameters.data.output_rescaling_type = "normal"
+    parameters.network.layer_activations = ["ReLU"]
+    parameters.running.max_number_epochs = 9
+    parameters.running.mini_batch_size = 8
+    parameters.running.learning_rate = 0.00001
+    parameters.running.trainingtype = "Adam"
 
     # We checkpoint the training every 5 epochs and save the results
     # as "ex07".
-    test_parameters.running.checkpoints_each_epoch = 5
-    test_parameters.running.checkpoint_name = "ex07"
+    parameters.running.checkpoints_each_epoch = 5
+    parameters.running.checkpoint_name = "ex07"
 
-    ####################
-    # DATA
-    # Add and prepare snapshots for training.
-    ####################
-
-    data_handler = mala.DataHandler(test_parameters)
-
-    # Add a snapshot we want to use in to the list.
+    data_handler = mala.DataHandler(parameters)
     data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
                               "Be_snapshot0.out.npy", data_path, "tr")
     data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
@@ -72,17 +51,17 @@ def initial_setup():
     # but it is safer this way.
     ####################
 
-    test_parameters.network.layer_sizes = [data_handler.input_dimension,
+    parameters.network.layer_sizes = [data_handler.input_dimension,
                                            100,
                                            data_handler.output_dimension]
 
     # Setup network and trainer.
-    test_network = mala.Network(test_parameters)
-    test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
+    test_network = mala.Network(parameters)
+    test_trainer = mala.Trainer(parameters, test_network, data_handler)
 
     printout("Network setup: DONE.")
 
-    return test_parameters, test_network, data_handler, test_trainer
+    return parameters, test_network, data_handler, test_trainer
 
 
 def run_example07(desired_loss_improvement_factor=1):

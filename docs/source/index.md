@@ -85,8 +85,8 @@ maxdepth: 2
 installation
 basic_usage
 advanced_usage
-api/modules
 CONTRIBUTE
+api/modules
 ```
 
 # Indices and tables

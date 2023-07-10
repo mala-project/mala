@@ -28,7 +28,7 @@ class TestExamples:
         )
 
     def test_ex07(self):
-        runpy.run_path("../examples/advanced/ex07_checkpoint_training.py")
+        runpy.run_path("../examples/advanced/ex01_checkpoint_training.py")
 
     def test_ex08(self):
         runpy.run_path("../examples/advanced/ex08_checkpoint_hyperopt.py")
