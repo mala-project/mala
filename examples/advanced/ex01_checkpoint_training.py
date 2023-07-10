@@ -51,8 +51,6 @@ def initial_setup():
     return parameters, test_network, data_handler, test_trainer
 
 
-# This will either run a first training or re-run from the checkpoint,
-# depending on whether a checkpoint already exists.
 if mala.Trainer.run_exists("ex01_checkpoint"):
     parameters, network, datahandler, trainer = \
         mala.Trainer.load_run("ex01_checkpoint")

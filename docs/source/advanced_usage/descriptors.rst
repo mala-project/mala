@@ -1,7 +1,7 @@
 .. _tuning descriptors:
 
-Improved preprocessing
-======================
+Improved data conversion
+========================
 
 Tuning descriptors
 ******************

@@ -1,6 +1,6 @@
 .. _advanced training:
 
-Improving training performance
+Improved training performance
 ==============================
 
 MALA offers a options to make training available at large scales in reasonable
@@ -62,6 +62,39 @@ while maintaining the same prediction accuracy.
 
 Currently, these options are disabled by default as they are still being tested
 extensively by the MALA team in production. **Yet, activating them is highly recommended!**
+
+Advanced training metrics
+****************************
+
+When monitoring an NN training, one often checks the validation loss, which
+is directly outputted by MALA. By default, this validation loss gives the
+mean squared error between LDOS prediction and actual value. From a purely
+ML point of view, this is fine; however, the correctness of the LDOS itself
+does not hold much physical virtue. Thus, MALA implements physical validation
+metrics to be accessed before and after the training routine.
+
+Specifically, when setting
+
+      .. code-block:: python
+
+            parameters.running.after_before_training_metric = "band_energy"
+
+the error in the band energy between actual and predicted LDOS will be
+calculated and printed before and after network training (in meV/atom).
+This is a much more intuitive metric to judge network performance, since
+it is easily phyiscally interpretable. If the error is, e.g., 5 meV/atom, one
+can expect the network to be reasonably accurate; values of, e.g., 100 meV/atom
+hint at bad model performance. Of course, the final metric for the accuracy
+should always be the results of the ``Tester`` class.
+
+Please make sure to set the relevant LDOS parameters when using this property
+via
+
+      .. code-block:: python
+
+            parameters.targets.ldos_gridsize = 11
+            parameters.targets.ldos_gridspacing_ev = 2.5
+            parameters.targets.ldos_gridoffset_ev = -5
 
 Checkpointing a training run
 ****************************
