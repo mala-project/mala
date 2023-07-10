@@ -3,4 +3,160 @@
 Improving training performance
 ==============================
 
-MALA offers
+MALA offers a options to make training available at large scales in reasonable
+amounts of time. The general training workflow is the same as outlined in the
+basic section; the advanced features can simply be activated by setting
+the appropriate parameters in the ``Parameters`` object.
+
+Using a GPU
+***********
+
+The simplest way to accelerate any NN training is to use a GPU for training.
+Training NNs on GPUs is a well established industry practice and yields
+huge speedups. MALA supports GPU training. You simply have to activate
+GPU usage via
+
+      .. code-block:: python
+
+            parameters = mala.Parameters()
+            parameters.use_gpu = True
+
+Afterwards, the entire training will be performed on the GPU - given that
+a GPU is available.
+
+In cooperation with `Nvidia <https://www.nvidia.com/de-de/deep-learning-ai/solutions/machine-learning/>`_,
+advanced GPU performance optimizations have been implemented into MALA.
+Namely, you can enable the following options:
+
+      .. code-block:: python
+
+            parameters.use_gpu = False # True: Use GPU
+            """
+            Multiple workers allow for faster data processing, but require
+            additional CPU/RAM power. A good setup is e.g. using 4 CPUs attached
+            to one GPU and setting the num_workers to 4.
+            """
+            parameters.running.num_workers = 0 # set to e.g. 4
+            """
+            MALA supports a faster implementation of the TensorDataSet class
+            from the torch library. Turning it on will drastically improve
+            performance.
+            """
+            parameters.data.use_fast_tensor_data_set = False # True: Faster data loading
+            """
+            Likewise, using CUDA graphs improve performance by optimizing GPU
+            usage. Be careful, this option is only availabe from CUDA 11.0 onwards.
+            CUDA graphs will be most effective in cases that are latency-limited,
+            e.g. small models with shorter epoch times.
+            """
+            parameters.running.use_graphs = False # True: Better GPU utilization
+            """
+            Using mixed precision can also improve performance, but only if
+            the model is large enough.
+            """
+            parameters.running.use_mixed_precision = False # True: Improved performance for large models
+
+These options aim at different performance bottlenecks in the training and have
+been shown to speed-up training by up to a factor of 5 if used together,
+while maintaining the same prediction accuracy.
+
+Currently, these options are disabled by default as they are still being tested
+extensively by the MALA team in production. **Yet, activating them is highly recommended!**
+
+Checkpointing a training run
+****************************
+
+NN training can take a long time, and on HPC systems, where they are usually
+performed, there exist time limitations for calculations. Thus, it is often
+necessary to checkpoint a training run and resume it at a later point.
+MALA provides functionality for this, as shown in the example ``advanced/ex01_checkpoint_training.py``.
+To use checkpointing, simply enable the feature in the ``Parameters`` object:
+
+      .. code-block:: python
+
+            parameters.running.checkpoints_each_epoch = 5
+            parameters.running.checkpoint_name = "ex01_checkpoint"
+
+Simply set an interval for checkpointing and a name for the checkpoint and
+the training will automatically be checkpointed. Automatic resumption
+from a checkpoint can trivially be implemented via
+
+      .. code-block:: python
+
+            if mala.Trainer.run_exists("ex01_checkpoint"):
+                parameters, network, datahandler, trainer = \
+                    mala.Trainer.load_run("ex01_checkpoint")
+            else:
+                parameters, network, datahandler, trainer = initial_setup()
+
+Where ``initial_setup()`` encapsulates the training run setup.
+
+Using lazy loading
+******************
+
+Lazy loading was already briefly mentioned during the testing of a network.
+To recap, the idea of lazy loading is to incrementally load data into
+memory so as to save on RAM usage in cases where large amounts of data are
+involved. To use lazy loading, simply enable it by:
+
+      .. code-block:: python
+
+            parameters.data.use_lazy_loading = True
+
+
+MALA lazy loading operates snapshot wise - that means if lazy loading is
+enabled, one snapshot at a time is loaded into memory, processed, unloaded,
+and the next one is selected. Thus, lazy loading **will*** adversely
+affect performance. One way to mitigate this is to use multiple CPUs to
+load and prepare data, i.e., while one CPU is busy processing data/offloading
+it to GPU, another CPU can already load the next snapshot into memory.
+To use this so called "prefetching" feature, simply enable the corresponding
+parameter via
+
+      .. code-block:: python
+
+            parameters.data.use_lazy_loading_prefetch = True
+
+Please note that in order to use this feature, you have to assign enough
+CPUs and memory to your calculation.
+
+Apart from performance, there is an accuracy drawback when employing
+lazy loading. It is well known that ML algorithms perform optimal when
+individual training data points are accessed individually. This, however,
+is not naively possible when using lazy loading - since data is not loaded
+into memory completely at one point, data cannot be easily randomized.
+This can impact accuracy very negatively for complicated data sets,
+as briefly discussed in the MALA publication on
+`temperature transferability of ML-DFT models <https://arxiv.org/abs/2306.06032>`_.
+
+To circumvent this problem, MALA provides functionality to shuffle data from
+multiple atomic snapshots in snapshot-like files, which can then be used
+with lazy loading, guaranteeing randomized access to individual data points.
+Currently, this method requires additional disk space, since the randomized
+data sets have to be saved - in-memory implementations are currently developed.
+To use the data shuffling (also shown in example
+``advanced/ex02_shuffle_data.py``), you can use the ``DataShuffler`` class.
+
+The syntax is very easy, you simply create a ``DataShufller`` object,
+which provides the same ``add_snapshot`` functionalities as the ``DataHandler``
+object, and shuffle the data once you have added all snapshots in question,
+i.e.,
+      .. code-block:: python
+
+            parameters = mala.Parameters()
+            parameters.data.shuffling_seed = 1234
+
+            data_shuffler = mala.DataShuffler(parameters)
+            data_shuffler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                       "Be_snapshot0.out.npy", data_path)
+            data_shuffler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                       "Be_snapshot1.out.npy", data_path)
+            data_shuffler.shuffle_snapshots(complete_save_path="../",
+                                            save_name="Be_shuffled*")
+
+The seed ``parameters.data.shuffling_seed`` ensures reproducibility of data
+sets. The ``shuffle_snapshots`` function has a path handling ability akin to
+the ``DataConverter`` class. Further, via the ``number_of_shuffled_snapshots``
+keyword, you can fine-tune the number of new snapshots being created.
+By default, the same number of snapshots as had been provided will be created
+(if possible).

@@ -7,6 +7,11 @@ all necessary steps to build and use an ML-DFT model with MALA.
 Advanced features and performance tweaks are ignored, and instead covered in
 :doc:`the advanced section <advanced_usage>`.
 
+This also refers to hardware acceleration of computations. This guide
+will help you familiarize yourself with the MALA code, but always assume
+execution on a single CPU; GPU usage and CPU parallelization are covered
+in the advanced section as well.
+
 
 .. toctree::
    :maxdepth: 1

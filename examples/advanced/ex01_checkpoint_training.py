@@ -32,75 +32,34 @@ def initial_setup():
     # We checkpoint the training every 5 epochs and save the results
     # as "ex07".
     parameters.running.checkpoints_each_epoch = 5
-    parameters.running.checkpoint_name = "ex07"
+    parameters.running.checkpoint_name = "ex01_checkpoint"
 
     data_handler = mala.DataHandler(parameters)
     data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
                               "Be_snapshot0.out.npy", data_path, "tr")
     data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
                               "Be_snapshot1.out.npy", data_path, "va")
-    data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                              "Be_snapshot2.out.npy", data_path, "te")
     data_handler.prepare_data()
-    printout("Read data: DONE.")
-
-    ####################
-    # NETWORK SETUP
-    # Set up the network and trainer we want to use.
-    # The layer sizes can be specified before reading data,
-    # but it is safer this way.
-    ####################
 
     parameters.network.layer_sizes = [data_handler.input_dimension,
-                                           100,
-                                           data_handler.output_dimension]
+                                      100,
+                                      data_handler.output_dimension]
 
-    # Setup network and trainer.
     test_network = mala.Network(parameters)
     test_trainer = mala.Trainer(parameters, test_network, data_handler)
-
-    printout("Network setup: DONE.")
 
     return parameters, test_network, data_handler, test_trainer
 
 
-def run_example07(desired_loss_improvement_factor=1):
-    if mala.Trainer.run_exists("ex07"):
-        parameters, network, datahandler, trainer = \
-            mala.Trainer.load_run("ex07")
-        printout("Starting resumed training.")
-    else:
-        parameters, network, datahandler, trainer = initial_setup()
-        printout("Starting original training.")
+# This will either run a first training or re-run from the checkpoint,
+# depending on whether a checkpoint already exists.
+if mala.Trainer.run_exists("ex01_checkpoint"):
+    parameters, network, datahandler, trainer = \
+        mala.Trainer.load_run("ex01_checkpoint")
+    printout("Starting resumed training.")
+else:
+    parameters, network, datahandler, trainer = initial_setup()
+    printout("Starting original training.")
 
-    ####################
-    # TRAINING
-    # Train the network. After training, load from the last checkpoint
-    # and train for more epochs.
-    ####################
-    trainer.train_network()
-    printout("Training: DONE.")
+trainer.train_network()
 
-    ####################
-    # RESULTS.
-    # Print the used parameters and check whether the loss decreased enough.
-    ####################
-
-    printout("Parameters used for this experiment:")
-    parameters.show()
-
-    if desired_loss_improvement_factor*trainer.initial_test_loss\
-            < trainer.final_test_loss:
-        return False
-    else:
-        return True
-
-
-if __name__ == "__main__":
-    if run_example07():
-        printout("Successfully ran ex07_checkpoint_training.")
-    else:
-        raise Exception("Ran ex07_checkpoint_training but something was off."
-                        " If you haven't changed any parameters in "
-                        "the example, there might be a problem with your"
-                        " installation.")
