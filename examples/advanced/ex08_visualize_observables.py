@@ -6,9 +6,9 @@ import numpy as np
 
 from mala.datahandling.data_repo import data_repo_path
 atoms_path = os.path.join(os.path.join(data_repo_path, "Be2"),
-                          "Be_snapshot0.out")
+                          "Be_snapshot1.out")
 ldos_path = os.path.join(os.path.join(data_repo_path, "Be2"),
-                         "Be_snapshot0.out.npy")
+                         "Be_snapshot1.out.npy")
 """
 Shows how MALA can be used to visualize observables of interest. 
 """
