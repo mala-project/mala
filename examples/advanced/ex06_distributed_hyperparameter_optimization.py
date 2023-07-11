@@ -19,7 +19,7 @@ This example requires SQLite, which has to be installed manually.
 
 # Remove the previous data base.
 try:
-    os.remove("ex09.db")
+    os.remove("ex06.db")
 except FileNotFoundError:
     pass
 
@@ -33,10 +33,10 @@ parameters.running.learning_rate = 0.00001
 parameters.running.trainingtype = "Adam"
 parameters.hyperparameters.n_trials = 10
 parameters.hyperparameters.checkpoints_each_trial = -1
-parameters.hyperparameters.checkpoint_name = "ex09"
+parameters.hyperparameters.checkpoint_name = "ex06"
 parameters.hyperparameters.hyper_opt_method = "optuna"
-parameters.hyperparameters.study_name = "ex09"
-parameters.hyperparameters.rdb_storage = 'sqlite:///ex09.db'
+parameters.hyperparameters.study_name = "ex06"
+parameters.hyperparameters.rdb_storage = 'sqlite:///ex06.db'
 
 # Hyperparameter optimization can be further refined by using ensemble training
 # at each step and by using a different metric then the validation loss

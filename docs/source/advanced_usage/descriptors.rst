@@ -28,7 +28,7 @@ distinct points, optimal descriptor hyperparameters can be determined; for
 more detail, please refer to the publication.
 
 Within MALA, this analysis is available as a special hyperparameter
-optimization routine, as showcased in the example ``advanced/ex03_acsd.py``.
+optimization routine, as showcased in the example ``advanced/ex04_acsd.py``.
 The syntax for this analysis is similar to the regular hyperparameter
 optimization interface. First, set up an optimizer via
 

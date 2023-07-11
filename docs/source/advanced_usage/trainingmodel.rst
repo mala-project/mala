@@ -177,7 +177,6 @@ i.e.,
 
       .. code-block:: python
 
-            parameters = mala.Parameters()
             parameters.data.shuffling_seed = 1234
 
             data_shuffler = mala.DataShuffler(parameters)
@@ -194,3 +193,30 @@ the ``DataConverter`` class. Further, via the ``number_of_shuffled_snapshots``
 keyword, you can fine-tune the number of new snapshots being created.
 By default, the same number of snapshots as had been provided will be created
 (if possible).
+
+Using tensorboard
+******************
+
+Training routines in MALA can be visualized via tensorboard, as also shown
+in the file ``advanced/ex03_tensor_board``. Simply enable tensorboard
+visualization prior to training via
+
+      .. code-block:: python
+
+            # 0: No visualizatuon, 1: loss and learning rate, 2: like 1,
+            # but additionally weights and biases are saved
+            parameters.running.visualisation = 1
+            parameters.running.visualisation_dir = "mala_vis"
+
+where ``visualisation_dir`` specifies some directory in which to save the
+MALA visualization data. Afterwards, you can run the training without any
+other modifications. Once training is finished (or during training, in case
+you want to use tensorboard to monitor progress), you can launch tensorboard
+via
+
+      .. code-block:: bash
+
+            tensorboard --logdir path_to_visualization
+
+The full path for ``path_to_visualization``can be accessed via
+``trainer.full_visualization_path``.

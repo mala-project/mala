@@ -8,7 +8,7 @@ Checkpointing a hyperparameter search
 
 Just like a regular NN training, a hyperparameter search may be checkpointed
 and resumed at a later point. An example is shown in the file
-``advanced/ex04_checkpoint_hyperparameter_optimization.py``.
+``advanced/ex05_checkpoint_hyperparameter_optimization.py``.
 The syntax/interface is very similar as to the NN training checkpointing
 system, i.e.:
 
@@ -19,16 +19,16 @@ system, i.e.:
             parameters = mala.Parameters()
 
             parameters.hyperparameters.checkpoints_each_trial = 5
-            parameters.hyperparameters.checkpoint_name = "ex01_checkpoint"
+            parameters.hyperparameters.checkpoint_name = "ex05_checkpoint"
 
 will enable hyperparameter checkpointing after 5 hyperparameter trials.
 The checkpointing-restarting is then enabled via
 
       .. code-block:: python
 
-            if mala.Trainer.run_exists("ex01_checkpoint"):
+            if mala.Trainer.run_exists("ex05_checkpoint"):
                 parameters, network, datahandler, trainer = \
-                    mala.Trainer.load_run("ex01_checkpoint")
+                    mala.Trainer.load_run("ex05_checkpoint")
                 printout("Starting resumed training.")
             else:
                 parameters, network, datahandler, trainer = initial_setup()
@@ -51,14 +51,17 @@ Database handling is done via SQL. Several SQL frameworks exists, and
 optuna/MALA support PostgreSQL, MySQL and SQLite. The latter is good for local
 debugging, but should not be used at scale. An SQLite example for distributed
 hyperparameter optimization can be found in the file
-``advanced/ex05_distributed_hyperparameter_optimization.py``.
+``advanced/ex06_distributed_hyperparameter_optimization.py``.
 
 Distributed hyperparameter optimization works the same as regular
 hyperparameter optimization; parameter, data and optimizer setup do not have
-to be altered. You simply have to specify the data base to be used, e.g., via
+to be altered. You simply have to specify the data base (and a name for the
+study, since multiple studies may be saved in the same data base) to be used,
+e.g.,
 
       .. code-block:: python
 
+            parameters.hyperparameters.study_name = "my_study"
             # SQLite example
             parameters.hyperparameters.rdb_storage = 'sqlite:///DATABASENAME'
             # PostgreSQL example
@@ -133,7 +136,7 @@ ML-DFT models with MALA. Namely
 
 Both methods can easily be enabled without changing the familiar hyperparameter
 optimization workflow, as shown in the file
-``advanced/ex06_advanced_hyperparameter_optimization``.
+``advanced/ex07_advanced_hyperparameter_optimization``.
 
 These optimization algorithms are activated via the ``Parameters`` object:
 

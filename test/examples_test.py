@@ -24,7 +24,7 @@ class TestExamples:
 
     def test_ex06(self):
         runpy.run_path(
-            "../examples/advanced/ex06_advanced_hyperparameter_optimization.py"
+            "../examples/advanced/ex07_advanced_hyperparameter_optimization.py"
         )
 
     def test_ex07(self):
@@ -32,14 +32,14 @@ class TestExamples:
 
     def test_ex08(self):
         runpy.run_path(
-            "../examples/advanced/ex04_checkpoint_hyperparameter_optimization.py")
+            "../examples/advanced/ex05_checkpoint_hyperparameter_optimization.py")
 
     def test_ex09(self):
         runpy.run_path(
-            "../examples/advanced/ex05_distributed_hyperparameter_optimization.py")
+            "../examples/advanced/ex06_distributed_hyperparameter_optimization.py")
 
     def test_ex10(self):
-        runpy.run_path("../examples/advanced/ex10_tensor_board.py")
+        runpy.run_path("../examples/advanced/ex03_tensor_board.py")
 
     def test_ex11(self):
         runpy.run_path("../examples/advanced/ex11_pass_single_feature.py")
@@ -48,7 +48,7 @@ class TestExamples:
         runpy.run_path("../examples/basic/ex05_run_predictions.py")
 
     def test_ex13(self):
-        runpy.run_path("../examples/advanced/ex03_acsd.py")
+        runpy.run_path("../examples/advanced/ex04_acsd.py")
 
     def test_ex14(self):
         runpy.run_path("../examples/advanced/ex14_advanced_networks.py")

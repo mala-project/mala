@@ -26,7 +26,7 @@ def initial_setup():
     parameters.running.trainingtype = "Adam"
     parameters.hyperparameters.n_trials = 9
     parameters.hyperparameters.checkpoints_each_trial = 5
-    parameters.hyperparameters.checkpoint_name = "ex04_checkpoint"
+    parameters.hyperparameters.checkpoint_name = "ex05_checkpoint"
 
     data_handler = mala.DataHandler(parameters)
     data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
@@ -50,10 +50,10 @@ def initial_setup():
     return parameters, data_handler, hyperoptimizer
 
 
-if mala.HyperOptOptuna.checkpoint_exists("ex04_checkpoint"):
+if mala.HyperOptOptuna.checkpoint_exists("ex05_checkpoint"):
     parameters, datahandler, hyperoptimizer = \
         mala.HyperOptOptuna.resume_checkpoint(
-            "ex04_checkpoint")
+            "ex05_checkpoint")
 else:
     parameters, datahandler, hyperoptimizer = initial_setup()
 
