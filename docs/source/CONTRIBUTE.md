@@ -1,5 +1,38 @@
 # Contributions
 
+MALA is open source software and based on the work of many people. 
+The MALA team always welcomes contributions, but kindly asks potential 
+contributors to adhere to the following suggestions in order to keep the 
+overall quality and maintainability of the code high.
+
+## MALA contributors
+
+Many people have contributed to MALA, and we are deeply thankful for it. 
+If you make a contribution to MALA, please add your name to the following, 
+alphabetically ordered list of contributors and feel free to include a note 
+of your the nature of your contribution:
+
+- Attila Cangi (Scientific supervision)
+- Austin Ellis (General code infrastructure)
+- Omar Faruk (Training parallelization via horovod)
+- Lenz Fiedler (General code development and maintenance)
+- Nils Hoffmann (NASWOT method)
+- Daniel Kotik (Documentation and CI)
+- Somashekhar Kulkarni (Uncertainty quantification)
+- Normand Modine (Total energy module and parallelization)
+- Parvez Mohammed (OAT method)
+- Vladyslav Oles (Hyperparameter optimization)
+- Gabriel Popoola (Parallelization)
+- Siva Rajamanickam (Scientific supervision)
+- Josh Romero (GPU usage improvement for model tuning)
+- Steve Schmerler (Uncertainty quantification)
+- Adam Stephens (GNN exploratory work)
+- Aidan Thompson (Descriptor calculation)
+- Sneha Verma (Tensorboard interface)
+- Jon Vogel (Inference parallelization)
+
+## Contributing to MALA
+
 MALA is open source software and as such always welcomes additions and
 improvements. However, we kindly ask any contributor to adhere to the following
 suggestions in order to keep the overall quality and maintainability of the

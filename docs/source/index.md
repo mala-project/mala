@@ -50,7 +50,10 @@ and inference speed, scale to large systems or visualize results.
 ## Who is MALA?
 
 MALA is jointly developed by the [Sandia National Laboratories](https://www.sandia.gov/)
-and the [Center for Advanced Systems Understanding](https://www.casus.science/).
+(Scientific supervisor: Sivasankaran Rajamanickam, code maintenance: 
+Jon Vogel)
+and the [Center for Advanced Systems Understanding](https://www.casus.science/)
+(Scientific supervisor: Attila Cangi, code maintenance: Lenz Fiedler).
 
 ## Where is MALA? 
 
