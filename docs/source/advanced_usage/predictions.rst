@@ -94,3 +94,42 @@ If you, e.g., have an inference grid of ``[200,200,200]``, you could use
 400 CPUs and ``ysplit`` of 2. Then, the grid will be sliced into 200 z-planes,
 and each z-plane will be sliced twice, allowing even faster inference.
 
+Visualizinh observables
+************************
+
+MALA also provides useful functions to visualize observables, as shown in
+the file ``advanced/ex08_visualize_observables``. To calculate observables
+for analysis and visualization, you need an LDOS calculator object.
+If you perform ML-DFT inference, you will get this object from the
+``Predictor`` resp. ASE calculator object, but it can also be created by
+itself, as shown in the mentioned example file.
+
+Having obtained an LDOS calculator object, you can access several observables
+of interest for visualization via
+
+      .. code-block:: python
+
+            # The DOS can be visualized on the correct energy grid.
+            density_of_states = ldos_calculator.density_of_states
+            energy_grid = ldos_calculator.energy_grid
+
+            # The density can be saved into a .cube file for visualization with standard
+            # electronic structure visualization software.
+            density_calculator = mala.Density.from_ldos_calculator(ldos_calculator)
+            density_calculator.write_to_cube("Be_density.cube")
+
+            # The radial distribution function can be visualized on discretized radii.
+            rdf, radii = ldos_calculator.\
+                radial_distribution_function_from_atoms(ldos_calculator.atoms,
+                                                        number_of_bins=500)
+
+            # The static structure factor can be visualized on a discretized k-grid.
+            static_structure, kpoints = ldos_calculator.\
+                static_structure_factor_from_atoms(ldos_calculator.atoms,
+                                                   number_of_bins=500, kMax=12)
+
+With the exception of the electronic density, which is saved into the ``.cube``
+format for visualization with regular electronic structure visualization
+software, all of these observables can be plotted with python based
+visualization libraries such as ``matplotlib``.
+

@@ -57,7 +57,7 @@ class TestExamples:
         runpy.run_path("../examples/basic/ex06_ase_calculator.py")
 
     def test_ex16(self):
-        runpy.run_path("../examples/advanced/ex16_observables.py")
+        runpy.run_path("../examples/advanced/ex08_visualize_observables.py")
 
     def test_ex17(self):
         runpy.run_path(
