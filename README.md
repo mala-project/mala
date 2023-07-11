@@ -42,7 +42,7 @@ Jon Vogel
 - [Center for Advanced Systems Understanding](https://www.casus.science/) (CASUS), Germany.
     - Scientific supervisor: Attila Cangi, code maintenance: Lenz Fiedler
 
-A full list of contributors can be found [here](docs/source/CONTRIBUTE.md)
+A full list of contributors can be found [here](docs/source/CONTRIBUTE.md).
 
 ## Citing MALA
 
