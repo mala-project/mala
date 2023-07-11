@@ -218,5 +218,5 @@ via
 
             tensorboard --logdir path_to_visualization
 
-The full path for ``path_to_visualization``can be accessed via
+The full path for ``path_to_visualization`` can be accessed via
 ``trainer.full_visualization_path``.
