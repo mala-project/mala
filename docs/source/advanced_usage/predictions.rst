@@ -94,7 +94,7 @@ If you, e.g., have an inference grid of ``[200,200,200]``, you could use
 400 CPUs and ``ysplit`` of 2. Then, the grid will be sliced into 200 z-planes,
 and each z-plane will be sliced twice, allowing even faster inference.
 
-Visualizinh observables
+Visualizing observables
 ************************
 
 MALA also provides useful functions to visualize observables, as shown in

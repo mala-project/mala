@@ -48,7 +48,7 @@ Installing the python extension
 
 
 * After successfully having built LAMMPS, Change into the ``python`` folder of the LAMMPS code
-* ``python3 install.py -p lammps -l ../<build_folder>/liblammps.so``, where
+* ``python3 install.py -p lammps -l ../<build_folder>/liblammps.so -v ../src/version.h``, where
   ``<build_folder>`` is whatever folder you performed the ``cmake`` build in
 * Note: The python installation process may give an ``shutil.SameFileError``
   after successful installation; this is LAMMPS related and can be ignored
