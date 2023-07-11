@@ -70,6 +70,12 @@ ASE calculator and set a pseudopotential path
             calculator = mala.MALA.load_model("be_model")
             calculator.mala_parameters.targets.pseudopotential_path = ...
 
+Please note that the ``mala_parameters`` property is simply the ``Parameters``
+object with which the calculator was created/loaded and can be used
+just as a ``Parameters`` object to adjust inference settings
+. It is not called ``parameters`` since that keyword is already
+in use by ASE itself.
+
 Afterwards, simply define/load an ASE atoms object, set the ``MALA`` object
 as a calculator and use the ASE interface to perform the calculation.
 
