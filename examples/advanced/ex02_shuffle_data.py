@@ -23,5 +23,5 @@ data_shuffler.add_snapshot("Be_snapshot0.in.npy", data_path,
                            "Be_snapshot0.out.npy", data_path)
 data_shuffler.add_snapshot("Be_snapshot1.in.npy", data_path,
                            "Be_snapshot1.out.npy", data_path)
-data_shuffler.shuffle_snapshots(complete_save_path="../",
+data_shuffler.shuffle_snapshots(complete_save_path=".",
                                 save_name="Be_shuffled*")
