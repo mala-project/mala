@@ -31,10 +31,12 @@ class TestExamples:
         runpy.run_path("../examples/advanced/ex01_checkpoint_training.py")
 
     def test_ex08(self):
-        runpy.run_path("../examples/advanced/ex04_checkpoint_hyperopt.py")
+        runpy.run_path(
+            "../examples/advanced/ex04_checkpoint_hyperparameter_optimization.py")
 
     def test_ex09(self):
-        runpy.run_path("../examples/advanced/ex09_distributed_hyperopt.py")
+        runpy.run_path(
+            "../examples/advanced/ex05_distributed_hyperparameter_optimization.py")
 
     def test_ex10(self):
         runpy.run_path("../examples/advanced/ex10_tensor_board.py")

@@ -174,6 +174,7 @@ The syntax is very easy, you simply create a ``DataShufller`` object,
 which provides the same ``add_snapshot`` functionalities as the ``DataHandler``
 object, and shuffle the data once you have added all snapshots in question,
 i.e.,
+
       .. code-block:: python
 
             parameters = mala.Parameters()

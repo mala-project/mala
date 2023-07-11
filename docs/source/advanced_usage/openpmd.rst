@@ -1,4 +1,4 @@
-.. _openpmd:
+.. _openpmd data:
 
 Storing data with OpenPMD
 =========================
