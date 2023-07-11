@@ -31,13 +31,6 @@ of your the nature of your contribution:
 - Sneha Verma (Tensorboard interface)
 - Jon Vogel (Inference parallelization)
 
-## Contributing to MALA
-
-MALA is open source software and as such always welcomes additions and
-improvements. However, we kindly ask any contributor to adhere to the following
-suggestions in order to keep the overall quality and maintainability of the
-code high.
-
 ## Versioning and releases
 
 MALA has a versioning system. The version number is only updated when merging
