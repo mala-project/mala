@@ -96,30 +96,39 @@ def entropy_contribution():
     print(mala_forces[4000, :] / np.array(numerical_forces))
 
 
+def hartree_contribution():
+    ldos, ldos_calculator, parameters = run_prediction()
+    density_calculator = mala.Density.from_ldos_calculator(ldos_calculator)
+    density = ldos_calculator.density
+    mala_forces = density_calculator.force_contributions
+    ldos_calculator.debug_forces_flag = "hartree"
+
+    delta_numerical = 1e-6
+    points = [0, 2000, 4000]
+
+    for point in points:
+        numerical_forces = []
+
+        dens_plus = density.copy()
+        dens_plus[point] += delta_numerical * 0.5
+        density_calculator.read_from_array(dens_plus)
+        derivative_plus = density_calculator.total_energy_contributions[
+            "e_hartree"]
+
+        dens_plus = density.copy()
+        dens_plus[point] -= delta_numerical * 0.5
+        density_calculator.read_from_array(dens_plus)
+        derivative_minus = density_calculator.total_energy_contributions[
+            "e_hartree"]
+
+        numerical_forces.append((derivative_plus - derivative_minus) /
+                                delta_numerical)
+
+        print(mala_forces[0, :] / np.array(numerical_forces))
+        print(mala_forces[2000, :] / np.array(numerical_forces))
+        print(mala_forces[4000, :] / np.array(numerical_forces))
+
+
 # band_energy_contribution()
-entropy_contribution()
-
-
-    # mala_forces = ldos_calculator.atomic_forces.copy()
-    #
-    # delta_numerical = 1e-6
-    # points = [0, 2000, 4000]
-    #
-    # for point in points:
-    #     numerical_forces = []
-    #     for i in range(0, parameters.targets.ldos_gridsize):
-    #         ldos_plus = ldos.copy()
-    #         ldos_plus[point, i] += delta_numerical*0.5
-    #         ldos_calculator.read_from_array(ldos_plus)
-    #         density_calculator = ldos_calculator._density_calculator
-    #         derivative_plus = density_calculator.total_energy_contributions["e_hartree"]
-    #
-    #         ldos_minus = ldos.copy()
-    #         ldos_minus[point, i] -= delta_numerical*0.5
-    #         ldos_calculator.read_from_array(ldos_minus)
-    #         density_calculator = ldos_calculator._density_calculator
-    #         derivative_minus = density_calculator.total_energy_contributions["e_hartree"]
-    #
-    #         numerical_forces.append((derivative_plus-derivative_minus) /
-    #                                 delta_numerical)
-    #     print(mala_forces[point, :]/np.array(numerical_forces))
+# entropy_contribution()
+hartree_contribution()
