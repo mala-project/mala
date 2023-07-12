@@ -35,6 +35,7 @@ class LDOS(Target):
     def __init__(self, params):
         super(LDOS, self).__init__(params)
         self.local_density_of_states = None
+        self.debug_forces_flag = None
 
     @classmethod
     def from_numpy_file(cls, params, path, units="1/(eV*A^3)"):
@@ -1318,40 +1319,54 @@ class LDOS(Target):
                                 "total energy. Provide EITHER LDOS"
                                 " OR DOS and density.")
 
-            # DOS dependent energy terms.
-            d_E_d_D = (self._density_of_states_calculator.d_band_energy_d_dos
-                     + self._density_of_states_calculator.
-                     d_entropy_contribution_d_dos) * voxel.volume
-
             d_E_d_d = np.zeros_like(self.local_density_of_states)
-            if len(np.shape(self.local_density_of_states)) == 4:
-                d_E_d_d[:, :, :] = d_E_d_D
-            elif len(np.shape(self.local_density_of_states)) == 2:
-                d_E_d_d[:] = d_E_d_D
-            else:
-                raise Exception("Invalid LDOS shape provided.")
+
+            # DOS dependent energy terms.
+            if self.debug_forces_flag == "band_energy":
+                d_E_d_D = (self._density_of_states_calculator.d_band_energy_d_dos) \
+                           * voxel.volume
+            if self.debug_forces_flag == "entropy_contribution":
+                d_E_d_D = (self._density_of_states_calculator.
+                         d_entropy_contribution_d_dos) * voxel.volume
+            if self.debug_forces_flag is None:
+                d_E_d_D = (self._density_of_states_calculator.d_band_energy_d_dos
+                           + self._density_of_states_calculator.
+                           d_entropy_contribution_d_dos) \
+                           * voxel.volume
+            if self.debug_forces_flag == "band_energy" or \
+                self.debug_forces_flag == "entropy_contribution" or \
+                self.debug_forces_flag is None:
+                if len(np.shape(self.local_density_of_states)) == 4:
+                    d_E_d_d[:, :, :] = d_E_d_D
+                elif len(np.shape(self.local_density_of_states)) == 2:
+                    d_E_d_d[:] = d_E_d_D
+                else:
+                    raise Exception("Invalid LDOS shape provided.")
 
             # Density dependent energy terms.
-            print(self._density_calculator.force_contributions.shape)
-            d_n_d_d = analytical_integration_weights("F0", "F1", fermi_energy,
-                                                     energy_grid, temperature)
+            if self.debug_forces_flag is None or self.debug_forces_flag == \
+                "hartree":
+                print(self._density_calculator.force_contributions.shape)
+                d_n_d_d = analytical_integration_weights("F0", "F1", fermi_energy,
+                                                         energy_grid, temperature)
 
-            d_f01_d_mu = (analytical_integration_weights("F0", "F1", fermi_energy+delta,
-                                                     energy_grid, temperature)
-                        - analytical_integration_weights("F0", "F1", fermi_energy-delta,
-                                                             energy_grid, temperature)) / \
-                       (2.0*delta)
-            d_n_d_mu = np.dot(ldos_data, d_f01_d_mu)
-            d_E_h_d_mu = np.dot(self._density_calculator.force_contributions[:,0],
-                                d_n_d_mu)
-            d_mu_d_d = np.zeros_like(ldos_data)
-            d_mu_d_d[:] = -(-1.0) * (d_n_d_d*self.voxel.volume)
-            d_mu_d_d /= (self._density_of_states_calculator.
-                         d_number_of_electrons_d_mu)
-            d_E_d_n = self._density_calculator.force_contributions * \
-                      d_n_d_d + d_E_h_d_mu * d_mu_d_d
-            d_E_d_d += d_E_d_n
-            return d_E_d_n #d_E_d_d
+                d_f01_d_mu = (analytical_integration_weights("F0", "F1", fermi_energy+delta,
+                                                         energy_grid, temperature)
+                            - analytical_integration_weights("F0", "F1", fermi_energy-delta,
+                                                                 energy_grid, temperature)) / \
+                           (2.0*delta)
+                d_n_d_mu = np.dot(ldos_data, d_f01_d_mu)
+                d_E_h_d_mu = np.dot(self._density_calculator.force_contributions[:,0],
+                                    d_n_d_mu)
+                d_mu_d_d = np.zeros_like(ldos_data)
+                d_mu_d_d[:] = -(-1.0) * (d_n_d_d*self.voxel.volume)
+                d_mu_d_d /= (self._density_of_states_calculator.
+                             d_number_of_electrons_d_mu)
+                d_E_d_n = self._density_calculator.force_contributions * \
+                          d_n_d_d + d_E_h_d_mu * d_mu_d_d
+                d_E_d_d += d_E_d_n
+
+            return d_E_d_d
         # For now this only works with ML generated LDOS.
         # Gradient of the LDOS respect to the descriptors.
         # ldos_data.backward(dE_dd)
