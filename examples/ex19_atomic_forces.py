@@ -19,7 +19,7 @@ predictions can be made.
 assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
 
 
-def run_prediction():
+def run_prediction(backprop=False):
     parameters, network, data_handler, predictor = mala.Predictor. \
         load_run("be_model")
 
@@ -34,14 +34,14 @@ def run_prediction():
     parameters.targets.pseudopotential_path = data_path
 
     atoms = read(os.path.join(data_path, "Be_snapshot3.out"))
-    ldos = predictor.predict_for_atoms(atoms)
+    ldos = predictor.predict_for_atoms(atoms, save_grads=backprop)
     ldos_calculator: mala.LDOS = predictor.target_calculator
     ldos_calculator.read_from_array(ldos)
-    return ldos, ldos_calculator, parameters
+    return ldos, ldos_calculator, parameters, predictor
 
 
 def band_energy_contribution():
-    ldos, ldos_calculator, parameters = run_prediction()
+    ldos, ldos_calculator, parameters, predictor = run_prediction()
     ldos_calculator.debug_forces_flag = "band_energy"
     mala_forces = ldos_calculator.atomic_forces.copy()
 
@@ -69,7 +69,7 @@ def band_energy_contribution():
 
 
 def entropy_contribution():
-    ldos, ldos_calculator, parameters = run_prediction()
+    ldos, ldos_calculator, parameters, predictor = run_prediction()
     ldos_calculator.debug_forces_flag = "entropy_contribution"
     mala_forces = ldos_calculator.atomic_forces.copy()
 
@@ -97,7 +97,7 @@ def entropy_contribution():
 
 
 def hartree_contribution():
-    ldos, ldos_calculator, parameters = run_prediction()
+    ldos, ldos_calculator, parameters, predictor = run_prediction()
     density_calculator = mala.Density.from_ldos_calculator(ldos_calculator)
     density = ldos_calculator.density
     mala_forces = density_calculator.force_contributions
@@ -129,6 +129,15 @@ def hartree_contribution():
         print(mala_forces[4000, :] / np.array(numerical_forces))
 
 
+def backpropagation():
+    ldos, ldos_calculator, parameters, predictor = run_prediction(backprop=True)
+    ldos_calculator.input_data_derivative = predictor.input_data
+    ldos_calculator.output_data_torch = predictor.output_data
+    mala_forces = ldos_calculator.atomic_forces
+    print(mala_forces.size()) # Should be 8748, 91
+
+
 # band_energy_contribution()
 # entropy_contribution()
-hartree_contribution()
+# hartree_contribution()
+backpropagation()

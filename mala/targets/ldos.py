@@ -5,6 +5,7 @@ from ase.units import Rydberg, Bohr, J, m
 import math
 import numpy as np
 from scipy import integrate
+import torch
 
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
     barrier
@@ -36,6 +37,8 @@ class LDOS(Target):
         super(LDOS, self).__init__(params)
         self.local_density_of_states = None
         self.debug_forces_flag = None
+        self.input_data_derivative = None
+        self.output_data_torch = None
 
     @classmethod
     def from_numpy_file(cls, params, path, units="1/(eV*A^3)"):
@@ -1366,7 +1369,13 @@ class LDOS(Target):
                           d_n_d_d + d_E_h_d_mu * d_mu_d_d
                 d_E_d_d += d_E_d_n
 
-            return d_E_d_d
+            if self.input_data_derivative is not None:
+                self.output_data_torch.backward(torch.from_numpy(d_E_d_d))
+                d_d_d_B = self.input_data_derivative.grad
+                return d_d_d_B
+
+            else:
+                return d_E_d_d
         # For now this only works with ML generated LDOS.
         # Gradient of the LDOS respect to the descriptors.
         # ldos_data.backward(dE_dd)
