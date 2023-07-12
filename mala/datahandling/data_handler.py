@@ -16,8 +16,6 @@ from mala.datahandling.data_handler_base import DataHandlerBase
 from mala.datahandling.data_scaler import DataScaler
 from mala.datahandling.snapshot import Snapshot
 from mala.datahandling.lazy_load_dataset import LazyLoadDataset
-from mala.datahandling.lazy_load_dataset_clustered import \
-    LazyLoadDatasetClustered
 from mala.datahandling.lazy_load_dataset_single import LazyLoadDatasetSingle
 from mala.datahandling.fast_tensor_dataset import FastTensorDataset
 
@@ -570,50 +568,25 @@ class DataHandler(DataHandlerBase):
         if self.parameters.use_lazy_loading and not self.parameters.use_lazy_loading_prefetch:
 
             # Create the lazy loading data sets.
-            if self.parameters.use_clustering:
-                self.training_data_sets.append(LazyLoadDatasetClustered(
-                    self.input_dimension, self.output_dimension,
-                    self.input_data_scaler, self.output_data_scaler,
-                    self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
-                    self.use_horovod, self.parameters.number_of_clusters,
-                    self.parameters.train_ratio,
-                    self.parameters.sample_ratio))
-                self.validation_data_sets.append(LazyLoadDataset(
-                    self.input_dimension, self.output_dimension,
-                    self.input_data_scaler, self.output_data_scaler,
-                    self.descriptor_calculator, self.target_calculator,
-                    self.use_horovod))
+            self.training_data_sets.append(LazyLoadDataset(
+                self.input_dimension, self.output_dimension,
+                self.input_data_scaler, self.output_data_scaler,
+                self.descriptor_calculator, self.target_calculator,
+                self.use_horovod))
+            self.validation_data_sets.append(LazyLoadDataset(
+                self.input_dimension, self.output_dimension,
+                self.input_data_scaler, self.output_data_scaler,
+                self.descriptor_calculator, self.target_calculator,
+                self.use_horovod))
 
-                if self.nr_test_data != 0:
-                    self.test_data_sets.append(LazyLoadDataset(
-                        self.input_dimension,
-                        self.output_dimension,
-                        self.input_data_scaler, self.output_data_scaler,
-                        self.descriptor_calculator, self.target_calculator,
-                        self.use_horovod,
-                        input_requires_grad=True))
-
-            else:
-                self.training_data_sets.append(LazyLoadDataset(
-                    self.input_dimension, self.output_dimension,
+            if self.nr_test_data != 0:
+                self.test_data_sets.append(LazyLoadDataset(
+                    self.input_dimension,
+                    self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
-                    self.use_horovod))
-                self.validation_data_sets.append(LazyLoadDataset(
-                    self.input_dimension, self.output_dimension,
-                    self.input_data_scaler, self.output_data_scaler,
-                    self.descriptor_calculator, self.target_calculator,
-                    self.use_horovod))
-
-                if self.nr_test_data != 0:
-                    self.test_data_sets.append(LazyLoadDataset(
-                        self.input_dimension,
-                        self.output_dimension,
-                        self.input_data_scaler, self.output_data_scaler,
-                        self.descriptor_calculator, self.target_calculator,
-                        self.use_horovod,
-                        input_requires_grad=True))
+                    self.use_horovod,
+                    input_requires_grad=True))
 
             # Add snapshots to the lazy loading data sets.
             for snapshot in self.parameters.snapshot_directories_list:
@@ -624,8 +597,6 @@ class DataHandler(DataHandlerBase):
                 if snapshot.snapshot_function == "te":
                     self.test_data_sets[0].add_snapshot_to_dataset(snapshot)
 
-            if self.parameters.use_clustering:
-                self.training_data_sets[0].cluster_dataset()
             # I don't think we need to mix them here. We can use the standard
             # ordering for the first epoch
             # and mix it up after.
@@ -634,34 +605,31 @@ class DataHandler(DataHandlerBase):
             # self.test_data_set.mix_datasets()
         elif self.parameters.use_lazy_loading and self.parameters.use_lazy_loading_prefetch:
             printout("Using lazy loading pre-fetching.", min_verbosity=2)
-            # Create the lazy loading data sets.
-            if self.parameters.use_clustering:
-                raise Exception("clustering not supported in this mode")
-            else:
-                # Create LazyLoadDatasetSingle instances per snapshot and add to list
-                for snapshot in self.parameters.snapshot_directories_list:
-                    if snapshot.snapshot_function == "tr":
-                        self.training_data_sets.append(LazyLoadDatasetSingle(
-                            self.mini_batch_size, snapshot,
-                            self.input_dimension, self.output_dimension,
-                            self.input_data_scaler, self.output_data_scaler,
-                            self.descriptor_calculator, self.target_calculator,
-                            self.use_horovod))
-                    if snapshot.snapshot_function == "va":
-                        self.validation_data_sets.append(LazyLoadDatasetSingle(
-                            self.mini_batch_size, snapshot,
-                            self.input_dimension, self.output_dimension,
-                            self.input_data_scaler, self.output_data_scaler,
-                            self.descriptor_calculator, self.target_calculator,
-                            self.use_horovod))
-                    if snapshot.snapshot_function == "te":
-                        self.test_data_sets.append(LazyLoadDatasetSingle(
-                            self.mini_batch_size, snapshot,
-                            self.input_dimension, self.output_dimension,
-                            self.input_data_scaler, self.output_data_scaler,
-                            self.descriptor_calculator, self.target_calculator,
-                            self.use_horovod,
-                            input_requires_grad=True))
+            # Create LazyLoadDatasetSingle instances per snapshot and add to
+            # list.
+            for snapshot in self.parameters.snapshot_directories_list:
+                if snapshot.snapshot_function == "tr":
+                    self.training_data_sets.append(LazyLoadDatasetSingle(
+                        self.mini_batch_size, snapshot,
+                        self.input_dimension, self.output_dimension,
+                        self.input_data_scaler, self.output_data_scaler,
+                        self.descriptor_calculator, self.target_calculator,
+                        self.use_horovod))
+                if snapshot.snapshot_function == "va":
+                    self.validation_data_sets.append(LazyLoadDatasetSingle(
+                        self.mini_batch_size, snapshot,
+                        self.input_dimension, self.output_dimension,
+                        self.input_data_scaler, self.output_data_scaler,
+                        self.descriptor_calculator, self.target_calculator,
+                        self.use_horovod))
+                if snapshot.snapshot_function == "te":
+                    self.test_data_sets.append(LazyLoadDatasetSingle(
+                        self.mini_batch_size, snapshot,
+                        self.input_dimension, self.output_dimension,
+                        self.input_data_scaler, self.output_data_scaler,
+                        self.descriptor_calculator, self.target_calculator,
+                        self.use_horovod,
+                        input_requires_grad=True))
 
         else:
             if self.nr_training_data != 0:

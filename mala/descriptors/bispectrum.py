@@ -107,7 +107,8 @@ class Bispectrum(Descriptor):
         lammps_dict["twojmax"] = self.parameters.bispectrum_twojmax
         lammps_dict["rcutfac"] = self.parameters.bispectrum_cutoff
         lammps_dict["atom_config_fname"] = ase_out_path
-        lmp = self._setup_lammps(nx, ny, nz, outdir, lammps_dict)
+        lmp = self._setup_lammps(nx, ny, nz, outdir, lammps_dict,
+                                 log_file_name="lammps_bgrid_log.tmp")
 
         # An empty string means that the user wants to use the standard input.
         # What that is differs depending on serial/parallel execution.

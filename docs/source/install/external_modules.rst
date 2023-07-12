@@ -10,19 +10,20 @@ training or inference.
 Quantum ESPRESSO (total energy module)
 ***************************************
 
-To run the total energy module, you need a full Quantum ESPRESSO (version
-6.4.1.) and install the python bindings for it.
+To run the total energy module, you need a full Quantum ESPRESSO installation,
+for which to install the python bindings. This module has been tested with
+versionm `7.2.`, the most recent version upon this release of MALA. Newer
+versions may work (untested), but installation instructions may vary
 
-Build Quantum ESPRESSO
------------------------
+Prerequisites
+-------------
 
-* Clone QE source code: ``git@gitlab.com:QEF/q-e.git``
-* Chage into the ``q-e`` directory and check out the correct branch
-  (the total energy module is based on version 6.4.1): ``git checkout qe-6.4.1``
 * Make sure you have an (MPI-aware) F90 compiler such as ``mpif90`` (e.g.
   Debian-ish machine: ``apt install openmpi-bin``, on an HPC cluster something
   like ``module load openmpi gcc``). Make sure to use the same compiler
-  for QE and the extension (``--f90exec=`` in ``build_total_energy_energy_module.sh``).
+  for QE and the extension. This should be the default case, but if problems
+  arise you can manually select the compiler via
+  ``--f90exec=`` in ``build_total_energy_energy_module.sh``
 * We assume that QE's ``configure`` script will find your system libs, e.g. use
   ``-lblas``, ``-llapack`` and ``-lfftw3``. We use those by default in
   ``build_total_energy_energy_module.sh``. If you have, say, the MKL library,
@@ -30,18 +31,16 @@ Build Quantum ESPRESSO
   when building QE. In this case you have to modify
   ``build_total_energy_energy_module.sh`` to use the same libraries!
 
-  * GNU compiler specific: we use ``-fallow-argument-mismatch``
-* Change to the ``external_modules/total_energy_module`` directory of the
-  MALA repository
-* Run the script ``prepare_qe.sh /path/to/your/q-e`` with ``/path/to/your/qe``
-  being the path to the ``q-e`` directory
-* Change to the ``q-e`` directory
+Build Quantum ESPRESSO
+-----------------------
 
-  * If you already have a build of QE, go into the ``q-e`` folder and run ``make veryclean``.
-* Run ``./configure CFLAGS="-fPIC" CPPFLAGS="-fPIC" FFLAGS="-fPIC -fallow-argument-mismatch"``
+* Download QE 7.2: ``https://gitlab.com/QEF/q-e/-/releases/qe-7.2``
+* Change to the main QE directory (default: ``q-e-qe-7.2``, you can rename this
+  directory as you wish)
+* Run ``./configure CFLAGS="-fPIC" CPPFLAGS="-fPIC" FFLAGS="-fPIC"``
 * Run ``make all`` (use ``make -j<your number of cores> all`` for a faster
   compilation process).
-* Change back to the  ``external_modules/total_energy_module`` directory of the
+* Change to the  ``external_modules/total_energy_module`` directory of the
   MALA repository
 * Run ``build_total_energy_energy_module.sh /path/to/your/q-e``.
 

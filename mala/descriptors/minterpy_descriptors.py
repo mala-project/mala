@@ -167,7 +167,8 @@ class MinterpyDescriptors(Descriptor):
             lammps_dict["sigma"] = self.parameters.atomic_density_sigma
             lammps_dict["rcutfac"] = self.parameters.atomic_density_cutoff
             lammps_dict["atom_config_fname"] = ase_out_path
-            lmp = self._setup_lammps(nx, ny, nz, outdir, lammps_dict)
+            lmp = self._setup_lammps(nx, ny, nz, outdir, lammps_dict,
+                                     log_file_name="lammps_mgrid_log.tmp")
 
             # For now the file is chosen automatically, because this is used
             # mostly under the hood anyway.
