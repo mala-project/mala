@@ -20,7 +20,7 @@ users to build ML-DFT models that give **full access to the electronic structure
 observables such as the total free energy of the system **and** scale well with
 system size and temperature.
 
-## How is MALA? 
+## How does MALA work? 
 
 MALA operates by predicting the so called local density of states (LDOS). 
 The LDOS is an efficient and versatile representation of the electronic 
@@ -35,7 +35,7 @@ scalability and parallelization.
 
 Afterwards, a range of post-processing features are available within MALA to
 calculate obervables from interest. Just like a DFT calculation - just faster.
-For more detail on the workflow, check out the [first MALA publication](https://www.doi.org/10.1103/PhysRevB.104.035120)
+For more detail on the workflow, check out the [first MALA publication](https://www.doi.org/10.1103/PhysRevB.104.035120).
 
 
 ## Where to start?
@@ -47,20 +47,24 @@ MALA also provides ample options for [advanced use](./advanced_usage.rst), to, e
 and inference speed, scale to large systems or visualize results. 
 
 
-## Who is MALA?
+## Who is behind MALA?
 
 MALA is jointly developed by the [Sandia National Laboratories](https://www.sandia.gov/)
 (Scientific supervisor: Sivasankaran Rajamanickam, code maintenance: 
 Jon Vogel)
-and the [Center for Advanced Systems Understanding](https://www.casus.science/)
+and the [Center for Advanced Systems Understanding](https://www.casus.science/), 
+an institute of the [Helmholtz-Zentrum Dresden-Rossendorf](https://www.hzdr.de/) 
 (Scientific supervisor: Attila Cangi, code maintenance: Lenz Fiedler).
 
-## Where is MALA? 
+## MALA publications 
 
 MALA has been used in a range of publications:
 
 - [Accelerating finite-temperature Kohn-Sham density functional theory with deep neural networks](https://www.doi.org/10.1103/PhysRevB.104.035120) (Phys. Rev. B)
   by J. A. Ellis, L. Fiedler, G. A. Popoola, N. A. Modine, J. A. Stephens, A. P. Thompson, A. Cangi, and S. Rajamanickam
+
+  - First MALA paper, introduces the workflow and test it for Aluminium at room temperature and across
+    the melting point
 
 - [Predicting electronic structures at any length scale with machine learning](https://doi.org/10.1038/s41524-023-01070-z) (npj Comput. Mater.)
   by L. Fiedler, N. A. Modine, S. Schmerler, D. J. Vogel, G. A. Popoola, A. P. Thompson, S. Rajamanickam, A. Cangi
