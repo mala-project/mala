@@ -6,7 +6,7 @@
 # or
 #   $ F2PY=/usr/bin/f2py3 ./this.sh
 
-set -euo pipefail
+set -u
 
 err(){
     echo "error $@"
