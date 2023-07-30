@@ -43,6 +43,7 @@ version = tag.stdout.strip()
 extensions = [
     'myst_parser',
     'sphinx_markdown_tables',
+    'sphinx_copybutton',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.coverage',
