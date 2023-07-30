@@ -7,7 +7,7 @@ Prerequisites
 MALA does not depend on a specific Python version. The most recent Python
 version it has been tested with successfully is Python ``3.10.4``.
 
-MALA requires ``torch`` in order to function. This the installation of torch
+MALA requires ``torch`` in order to function. As the installation of torch
 depends highly on the architecture you are using, ``torch`` will not
 automatically be installed alongside MALA. Please obtain a suitable version
 of ``torch`` from the `official website <https://pytorch.org/>`_ before
@@ -47,7 +47,7 @@ binary files for example training data.
 
     git clone https://github.com/mala-project/test-data ~/path/to/data/repo
     cd ~/path/to/data/repo
-    git checkout v1.6.0
+    git checkout v1.7.0
 
 * Export the path to that repo by ``export MALA_DATA_REPO=~/path/to/data/repo``
 

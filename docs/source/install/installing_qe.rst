@@ -6,8 +6,8 @@ Prerequisites
 
 To run the total energy module, you need a full Quantum ESPRESSO installation,
 for which to install the Python bindings. This module has been tested with
-version ``7.2.``, the most recent version upon this release of MALA. Newer
-versions may work (untested), but installation instructions may vary.
+version ``7.2.``, the most recent version at the time of this release of MALA.
+Newer versions may work (untested), but installation instructions may vary.
 
 Make sure you have an (MPI-aware) F90 compiler such as ``mpif90`` (e.g.
 Debian-ish machine: ``apt install openmpi-bin``, on an HPC cluster something

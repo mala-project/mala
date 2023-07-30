@@ -127,5 +127,5 @@ The ``convert_snapshots`` function will convert ALL snapshots added via
 provided paths. You can either provide separate paths for the separate types
 of data or give one complete path, ``complete_save_path``, depending on your
 personal preference. Fine-granular access
-to the calculators is enabled via the descriptor_calculation_kwargs and
-target_calculation_kwargs arguments, but usually not needed.
+to the calculators is enabled via the ``descriptor_calculation_kwargs`` and
+``target_calculation_kwargs`` arguments, but usually not needed.

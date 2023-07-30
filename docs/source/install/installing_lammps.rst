@@ -32,7 +32,7 @@ The MALA team recommends to build LAMMPS with ``cmake``. To do so
   * ``PKG_KOKKOS=yes``: Enables the Kokkos package which is needed to calculate
     bispectrum descriptors on a GPU. Without this option, bispectrum descriptor
     calculation will solely be performed on CPU. If you want to use a GPU via
-    Kokkos (recommended for production settings!), further options you will have to set further options:
+    Kokkos (recommended for production settings!), you will have to set further options:
 
       * ``Kokkos_ENABLE_CUDA=yes``: Tells Kokkos to use CUDA
       * ``Kokkos_ARCH_HOSTARCH=???``: Your CPU architecture (see `Kokkos instructions <https://docs.lammps.org/Build_extras.html#kokkos-package>`_)

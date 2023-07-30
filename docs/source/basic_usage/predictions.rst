@@ -47,7 +47,7 @@ the predictor class to access various observables of interest, such as
             ldos_calculator.density_of_states
 
 Please note that in order to calculate the total energy, you have to
-provide to a pseudopotential (specifically the pseudopotential used during
+provide a pseudopotential (specifically the pseudopotential used during
 data generation) via ``parameters.targets.pseudopotential_path = ...``.
 
 Using the MALA ASE calculator

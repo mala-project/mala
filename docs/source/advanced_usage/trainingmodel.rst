@@ -139,7 +139,7 @@ involved. To use lazy loading, enable it by:
 
 MALA lazy loading operates snapshot wise - that means if lazy loading is
 enabled, one snapshot at a time is loaded into memory, processed, unloaded,
-and the next one is selected. Thus, lazy loading **will*** adversely
+and the next one is selected. Thus, lazy loading *will* adversely
 affect performance. One way to mitigate this is to use multiple CPUs to
 load and prepare data, i.e., while one CPU is busy processing data/offloading
 it to GPU, another CPU can already load the next snapshot into memory.

@@ -17,7 +17,7 @@ Setting parameters
 The central object of MALA workflows is the ``mala.Parameters()`` object.
 **All** options necessary to control a MALA workflow are accessible through
 this object. To do this, it has several subobjects for its various tasks,
-that we will get familiar with in the following.
+that we will get familiar with in this tutorial.
 
 MALA provides reasonable choices for a lot of parameters of interest.
 For a full list, please refer to the API reference - for now, we select a few
@@ -127,7 +127,7 @@ layers agree. To build a NN, we specify
             parameters.network.layer_sizes = [data_handler.input_dimension,
                                               100,
                                               data_handler.output_dimension]
-            test_network = mala.Network(parameters)
+            network = mala.Network(parameters)
 
 
 Now, we can easily train this network with the parameters specified above
@@ -135,8 +135,8 @@ by doing
 
       .. code-block:: python
 
-            test_trainer = mala.Trainer(parameters, test_network, data_handler)
-            test_trainer.train_network()
+            trainer = mala.Trainer(parameters, network, data_handler)
+            trainer.train_network()
 
 Afterwards, we want to save this model for future use. MALA saves models
 in a ``*.zip`` format. Within each model archive, information like scaling
@@ -149,8 +149,8 @@ coarseness, etc., are available at inference time. By
       .. code-block:: python
 
             additional_calculation_data = os.path.join(data_path, "Be_snapshot0.out")
-            test_trainer.save_run("be_model",
-                                  additional_calculation_data=additional_calculation_data)
+            trainer.save_run("be_model",
+                             additional_calculation_data=additional_calculation_data)
 
 This information is set and the resulting model is saved. It is now ready to
 be used.
