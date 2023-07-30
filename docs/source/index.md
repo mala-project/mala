@@ -46,6 +46,8 @@ supplemented by the example files in the repository.
 MALA also provides ample options for [advanced use](./advanced_usage.rst), to, e.g., improve training
 and inference speed, scale to large systems or visualize results. 
 
+If you use MALA in your research, please make sure to [cite accordingly](./citing.rst).
+
 
 ## Who is behind MALA?
 
@@ -63,21 +65,35 @@ MALA has been used in a range of publications:
 - [Accelerating finite-temperature Kohn-Sham density functional theory with deep neural networks](https://www.doi.org/10.1103/PhysRevB.104.035120) (Phys. Rev. B)
   by J. A. Ellis, L. Fiedler, G. A. Popoola, N. A. Modine, J. A. Stephens, A. P. Thompson, A. Cangi, and S. Rajamanickam
 
-  - First MALA paper, introduces the workflow and test it for Aluminium at room temperature and across
-    the melting point
-
-- [Predicting electronic structures at any length scale with machine learning](https://doi.org/10.1038/s41524-023-01070-z) (npj Comput. Mater.)
-  by L. Fiedler, N. A. Modine, S. Schmerler, D. J. Vogel, G. A. Popoola, A. P. Thompson, S. Rajamanickam, A. Cangi
+  - First MALA publication, introduces the workflow and shwos proof-of-concept 
+    resultsfor Aluminium at room temperature and across the melting point
 
 - [Training-free hyperparameter optimization of neural networks for electronic structures in matter](https://doi.org/10.1088/2632-2153/ac9956) (Mach. Learn.: Sci. Technol.)
   by L. Fiedler, N. Hoffmann, P. Mohammed, G. A. Popoola, T. Yovell, V. Oles, J. A. Ellis, S. Rajamanickam, A. Cangi
 
+  - This publication discusses hyperparameter optimization and shows how 
+    the training-free surrogate metrics implemented in MALA can be used for 
+    rapid identification of suitable hyperparameters.
+
 - [Accelerating Equilibration in First-Principles Molecular Dynamics with Orbital-Free Density Functional Theory](https://doi.org/10.1103/PhysRevResearch.4.043033) (Phys. Rev. Research)
   by L. Fiedler, Z. A. Moldabekov, X. Shao, K. Jiang, T. Dornheim, M. Pavanello, A. Cangi
 
+  - This publication shows how costly DFT-MD simulations can be accelerated 
+    by initializing a simulation with OF-DFT. These results extend to ML-DFT 
+    models, with MALA serving as an example.
+
+- [Predicting electronic structures at any length scale with machine learning](https://doi.org/10.1038/s41524-023-01070-z) (npj Comput. Mater.)
+  by L. Fiedler, N. A. Modine, S. Schmerler, D. J. Vogel, G. A. Popoola, A. P. Thompson, S. Rajamanickam, A. Cangi
+  
+  - This article asserts MALA's capability for size transfer; based on training
+    data calculated for hundreds of atoms, MALA can predict the electronic
+    structure of up to 100'000 atoms.
+
 - [Machine learning the electronic structure of matter across temperatures](https://doi.org/10.48550/arXiv.2306.06032) (arXiv preprint)
   by L. Fiedler, N. A. Modine, K. D. Miller, A. Cangi
-
+ 
+  - Currently in the preprint stage. Shown here is the temperature 
+    tranferability of MALA models.
 
 
 
@@ -86,18 +102,13 @@ MALA has been used in a range of publications:
 
 ```{toctree}
 ---
-maxdepth: 2
+maxdepth: 1
 ---
 
 installation
 basic_usage
 advanced_usage
+citing
 CONTRIBUTE
 api/modules
 ```
-
-# Indices and tables
-
-* {ref}`genindex`
-* {ref}`modindex`
-* {ref}`search`

@@ -10,23 +10,29 @@ overall quality and maintainability of the code high.
 Many people have contributed to MALA, and we are deeply thankful for it. 
 If you make a contribution to MALA, please add your name to the following, 
 alphabetically ordered list of contributors and feel free to include a note 
-of your the nature of your contribution:
+of the nature of your contribution:
 
+- Bartosz Brzoza (Bugfixes, GNN implementation)
+- Timothy Callow (Grid-size transferability)
 - Attila Cangi (Scientific supervision)
 - Austin Ellis (General code infrastructure)
 - Omar Faruk (Training parallelization via horovod)
 - Lenz Fiedler (General code development and maintenance)
+- James Fox (GNN implementation)
 - Nils Hoffmann (NASWOT method)
+- Kyle Miller (Data shuffling)
 - Daniel Kotik (Documentation and CI)
 - Somashekhar Kulkarni (Uncertainty quantification)
 - Normand Modine (Total energy module and parallelization)
 - Parvez Mohammed (OAT method)
 - Vladyslav Oles (Hyperparameter optimization)
 - Gabriel Popoola (Parallelization)
+- Franz Pöschel (OpenPMD interface)
 - Siva Rajamanickam (Scientific supervision)
 - Josh Romero (GPU usage improvement for model tuning)
 - Steve Schmerler (Uncertainty quantification)
-- Adam Stephens (GNN exploratory work)
+- Adam Stephens (Uncertainty quantification work)
+- Hossein Tahmasbi (Minterpy descriptors)
 - Aidan Thompson (Descriptor calculation)
 - Sneha Verma (Tensorboard interface)
 - Jon Vogel (Inference parallelization)
