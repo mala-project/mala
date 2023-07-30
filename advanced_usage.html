@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced options &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Improved training performance" href="advanced_usage/trainingmodel.html" />
+    <link rel="prev" title="Using ML-DFT models for predictions" href="basic_usage/predictions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html">
+            <img src="_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Advanced options</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced_usage/trainingmodel.html">Improved training performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced_usage/openpmd.html">Storing data with OpenPMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced_usage/descriptors.html">Improved data conversion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced_usage/hyperparameters.html">Improved hyperparameter optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced_usage/predictions.html">Using MALA in production</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Advanced options</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/advanced_usage.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="advanced-options">
+<h1>Advanced options<a class="headerlink" href="#advanced-options" title="Permalink to this headline"></a></h1>
+<p>The following guide gives an overview over advanced capabilities of MALA,
+such as performance improvements and more in-depth hyperparameter searches.
+Parallelization and hardware acceleration will also be discussed. When using
+the former, i.e., when computing across multiple CPUs, it is useful to
+employ the MALA parallel-safe printing function for all output.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mala</span>
+
+<span class="n">mala</span><span class="o">.</span><span class="n">printout</span><span class="p">(</span><span class="s2">&quot;This message will only be printed once, even &quot;</span>
+               <span class="s2">&quot;if multiple CPUS are used&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="advanced_usage/trainingmodel.html">Improved training performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_usage/openpmd.html">Storing data with OpenPMD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_usage/descriptors.html">Improved data conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_usage/hyperparameters.html">Improved hyperparameter optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_usage/predictions.html">Using MALA in production</a></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="basic_usage/predictions.html" class="btn btn-neutral float-left" title="Using ML-DFT models for predictions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="advanced_usage/trainingmodel.html" class="btn btn-neutral float-right" title="Improved training performance" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

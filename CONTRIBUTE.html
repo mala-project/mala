@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contributing to MALA &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>Contributions &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="shortcut icon" href="_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
@@ -16,11 +17,13 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
     <script src="_static/js/theme.js"></script>
-    <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="version" href="api/mala.version.html" /> 
+    <link rel="next" title="API reference" href="api/modules.html" />
+    <link rel="prev" title="Citing MALA" href="citing.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,11 +43,12 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API reference</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing to MALA</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing MALA</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#mala-contributors">MALA contributors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#versioning-and-releases">Versioning and releases</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#creating-a-release">Creating a release</a></li>
 </ul>
@@ -59,6 +63,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API reference</a></li>
 </ul>
 
         </div>
@@ -75,7 +80,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Contributing to MALA</li>
+      <li>Contributions</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/CONTRIBUTE.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -85,12 +90,46 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="contributing-to-mala">
-<h1>Contributing to MALA<a class="headerlink" href="#contributing-to-mala" title="Permalink to this headline"></a></h1>
-<p>MALA is open source software and as such always welcomes additions and
-improvements. However, we kindly ask any contributor to adhere to the following
-suggestions in order to keep the overall quality and maintainability of the
-code high.</p>
+  <div class="section" id="contributions">
+<h1>Contributions<a class="headerlink" href="#contributions" title="Permalink to this headline"></a></h1>
+<p>MALA is an open-source software and is built upon the collaborative efforts of
+many contributors. The MALA team warmly welcomes additional contributions and
+kindly requests potential contributors to follow the suggested guidelines below
+to ensure the code’s overall quality and maintainability.</p>
+<div class="section" id="mala-contributors">
+<h2>MALA contributors<a class="headerlink" href="#mala-contributors" title="Permalink to this headline"></a></h2>
+<p>Many people have made valuable contributions to MALA, and we are immensely
+grateful for their support.
+If you decide to contribute to MALA, please add your name to the following
+alphabetically ordered list of contributors and include a note of the
+nature of your contribution:</p>
+<ul class="simple">
+<li><p>Bartosz Brzoza (Bugfixes, GNN implementation)</p></li>
+<li><p>Timothy Callow (Grid-size transferability)</p></li>
+<li><p>Attila Cangi (Scientific supervision)</p></li>
+<li><p>Austin Ellis (General code infrastructure)</p></li>
+<li><p>Omar Faruk (Training parallelization via horovod)</p></li>
+<li><p>Lenz Fiedler (General code development and maintenance)</p></li>
+<li><p>James Fox (GNN implementation)</p></li>
+<li><p>Nils Hoffmann (NASWOT method)</p></li>
+<li><p>Kyle Miller (Data shuffling)</p></li>
+<li><p>Daniel Kotik (Documentation and CI)</p></li>
+<li><p>Somashekhar Kulkarni (Uncertainty quantification)</p></li>
+<li><p>Normand Modine (Total energy module and parallelization)</p></li>
+<li><p>Parvez Mohammed (OAT method)</p></li>
+<li><p>Vladyslav Oles (Hyperparameter optimization)</p></li>
+<li><p>Gabriel Popoola (Parallelization)</p></li>
+<li><p>Franz Pöschel (OpenPMD interface)</p></li>
+<li><p>Siva Rajamanickam (Scientific supervision)</p></li>
+<li><p>Josh Romero (GPU usage improvement for model tuning)</p></li>
+<li><p>Steve Schmerler (Uncertainty quantification)</p></li>
+<li><p>Adam Stephens (Uncertainty quantification work)</p></li>
+<li><p>Hossein Tahmasbi (Minterpy descriptors)</p></li>
+<li><p>Aidan Thompson (Descriptor calculation)</p></li>
+<li><p>Sneha Verma (Tensorboard interface)</p></li>
+<li><p>Jon Vogel (Inference parallelization)</p></li>
+</ul>
+</div>
 <div class="section" id="versioning-and-releases">
 <h2>Versioning and releases<a class="headerlink" href="#versioning-and-releases" title="Permalink to this headline"></a></h2>
 <p>MALA has a versioning system. The version number is only updated when merging
@@ -181,7 +220,8 @@ add <em>required</em> dependencies to the appropriate environment files in folde
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="api/mala.version.html" class="btn btn-neutral float-left" title="version" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="citing.html" class="btn btn-neutral float-left" title="Citing MALA" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api/modules.html" class="btn btn-neutral float-right" title="API reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

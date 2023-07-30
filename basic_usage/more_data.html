@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data generation and conversion &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Basic hyperparameter optimization" href="hyperparameters.html" />
+    <link rel="prev" title="Training an ML-DFT model" href="trainingmodel.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../basic_usage.html">Getting started with MALA</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="trainingmodel.html">Training an ML-DFT model</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Data generation and conversion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data-generation">Data generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-conversion">Data conversion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hyperparameters.html">Basic hyperparameter optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="predictions.html">Using ML-DFT models for predictions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../basic_usage.html">Getting started with MALA</a> &raquo;</li>
+      <li>Data generation and conversion</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/basic_usage/more_data.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="data-generation-and-conversion">
+<h1>Data generation and conversion<a class="headerlink" href="#data-generation-and-conversion" title="Permalink to this headline"></a></h1>
+<p>MALA operates on volumetric data. Volumetric data is stored in binary files.
+By default - and discussed here, in the introductory guide - this
+means <code class="docutils literal notranslate"><span class="pre">numpy</span></code> files (<code class="docutils literal notranslate"><span class="pre">.npy</span></code> files). Advanced data storing techniques
+are <a class="reference internal" href="../advanced_usage/openpmd.html#openpmd-data"><span class="std std-ref">also available</span></a></p>
+<div class="section" id="data-generation">
+<h2>Data generation<a class="headerlink" href="#data-generation" title="Permalink to this headline"></a></h2>
+<p>Data generation for MALA is done by electronic structure calculations using
+appropriate simulation software. The raw outputs of such calculations
+are atomic positions and the LDOS, the latter usually as multiple individual
+.cube files.</p>
+<p>Currently, only Quantum ESPRESSO has been tested for preprocessing.
+Starting with version 7.2, any version of Quantum ESPRESSO can be used to
+create data for MALA. In order to do so</p>
+<ol class="arabic simple">
+<li><p>Perform a regular DFT calculation using <code class="docutils literal notranslate"><span class="pre">pw.x</span></code></p></li>
+<li><p>Calculate the LDOS using <code class="docutils literal notranslate"><span class="pre">pp.x</span></code></p></li>
+</ol>
+<p>Make sure to use enough k-points in the DFT calculation (LDOS sampling
+requires denser k-grids then regular DFT calculations) and an appropriate
+energy grid when calculating the LDOS. See the <a class="reference external" href="https://www.doi.org/10.1103/PhysRevB.104.035120">initial MALA publication</a>
+for more information on this topic. Lastly, when calculating
+the LDOS with <code class="docutils literal notranslate"><span class="pre">pp.x</span></code>, make sure to set <code class="docutils literal notranslate"><span class="pre">use_gauss_ldos=.true.</span></code> in the
+<code class="docutils literal notranslate"><span class="pre">inputpp</span></code> section.</p>
+</div>
+<div class="section" id="data-conversion">
+<h2>Data conversion<a class="headerlink" href="#data-conversion" title="Permalink to this headline"></a></h2>
+<p>Once you have performed the necessary simulations, you will have to calculate
+the volumetric descriptor field from the atomic positions and transform
+the LDOS into a format useable by MALA.</p>
+<p>MALA can be used to process raw data into ready-to-use data for ML-DFT model
+creation. For this, the <code class="docutils literal notranslate"><span class="pre">DataConverter</span></code> class can be used, as also shown
+in the example <code class="docutils literal notranslate"><span class="pre">basic/ex03_preprocess_data</span></code>.
+The first thing when converting data is to select how the data should be
+processed. Up until now, MALA operates with bispectrum descriptors as
+input data (=descriptors) and LDOS as output data (=targets). Their
+calculation is calculated via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Parameters</span><span class="p">()</span>
+<span class="c1"># Bispectrum parameters.</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">=</span> <span class="s2">&quot;Bispectrum&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_cutoff</span> <span class="o">=</span> <span class="mf">4.67637</span>
+<span class="c1"># LDOS parameters.</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">target_type</span> <span class="o">=</span> <span class="s2">&quot;LDOS&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">=</span> <span class="mi">11</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span> <span class="o">=</span> <span class="mf">2.5</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span> <span class="o">=</span> <span class="o">-</span><span class="mi">5</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>For the LDOS, these parameters are determined by the electronic structure
+simulation. Namely, <code class="docutils literal notranslate"><span class="pre">ldos_gridsize</span></code> governs how many discretized energy
+values are included in the energy grid upon which the LDOS is sampled,
+<code class="docutils literal notranslate"><span class="pre">ldos_gridspacing_ev</span></code> governs how far these values are apart and
+<code class="docutils literal notranslate"><span class="pre">ldos_gridoffset_ev</span></code> determines the lowest energy value sampled. These values
+are chosen for the <code class="docutils literal notranslate"><span class="pre">pp.x</span></code> simulation and have to be given here.</p>
+<p>For the bispectrum calculation, <code class="docutils literal notranslate"><span class="pre">bispectrum_cutoff</span></code> gives the radius of
+the cutoff sphere from which information on the atomic structure is incoporated
+into the bispectrum descriptor vector at each point in space, whereas
+<code class="docutils literal notranslate"><span class="pre">bispectrum_twojmax</span></code> governs the dimensionality of the bispectrum
+representation at each point in space. If it is set to, e.g., 10, 91 components
+are used at each point in space to encode the atomic structure.</p>
+<p>The values for the bispectrum descriptors have to be chosen such
+that the corresponding descriptors accurately represent atomic enviroment.
+<a class="reference internal" href="../advanced_usage/descriptors.html#tuning-descriptors"><span class="std std-ref">In the advanced example section</span></a>, it is shown
+how these values can be determined by a newly developed method called
+<a class="reference external" href="https://doi.org/10.1088/2632-2153/ac9956">ACSD</a>.</p>
+<p>After selecting these options, we have to create a <code class="docutils literal notranslate"><span class="pre">DataConverter</span></code> object
+and fill it with data, e.g., by</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_converter</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">DataConverter</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+<span class="n">outfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot0.out&quot;</span><span class="p">)</span>
+<span class="n">ldosfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;cubes/tmp.pp*Be_ldos.cube&quot;</span><span class="p">)</span>
+
+<span class="n">data_converter</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="n">descriptor_input_type</span><span class="o">=</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">,</span>
+                            <span class="n">descriptor_input_path</span><span class="o">=</span><span class="n">outfile</span><span class="p">,</span>
+                            <span class="n">target_input_type</span><span class="o">=</span><span class="s2">&quot;.cube&quot;</span><span class="p">,</span>
+                            <span class="n">target_input_path</span><span class="o">=</span><span class="n">ldosfile</span><span class="p">,</span>
+                            <span class="n">additional_info_input_type</span><span class="o">=</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">,</span>
+                            <span class="n">additional_info_input_path</span><span class="o">=</span><span class="n">outfile</span><span class="p">,</span>
+                            <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;1/(Ry*Bohr^3)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The <code class="docutils literal notranslate"><span class="pre">add_snapshot</span></code> function can be called multiple times to add
+multiple snapshots to MALA.
+For regular Quantum ESPRESSO calculations, the <code class="docutils literal notranslate"><span class="pre">descriptor_input_type</span></code>
+and <code class="docutils literal notranslate"><span class="pre">target_input_type</span></code> will always be <code class="docutils literal notranslate"><span class="pre">&quot;espresso-out&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;.cube&quot;</span></code>,
+respectively, and the <code class="docutils literal notranslate"><span class="pre">target_units</span></code> will always be <code class="docutils literal notranslate"><span class="pre">&quot;1/(Ry*Bohr^3)&quot;</span></code>.
+The paths have to be modified accordingly. <code class="docutils literal notranslate"><span class="pre">additional_info_input_*</span></code> refers
+to the calculation output file - MALA provides an interface to condense
+the entire, verbose simulation output to <code class="docutils literal notranslate"><span class="pre">.json</span></code> files for further
+processing. In the preceding section, we had to specify calculation output
+files a number of times - instead, we can use the reduced <code class="docutils literal notranslate"><span class="pre">.json</span></code> files
+if we let them be created by the <code class="docutils literal notranslate"><span class="pre">DataConverter</span></code> class.</p>
+<p>Once data is provided, the conversion itself is simple.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_converter</span><span class="o">.</span><span class="n">convert_snapshots</span><span class="p">(</span><span class="n">descriptor_save_path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
+                                 <span class="n">target_save_path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
+                                 <span class="n">additional_info_save_path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
+                                 <span class="n">naming_scheme</span><span class="o">=</span><span class="s2">&quot;Be_snapshot*.npy&quot;</span><span class="p">,</span>
+                                 <span class="n">descriptor_calculation_kwargs</span><span class="o">=</span>
+                                 <span class="p">{</span><span class="s2">&quot;working_directory&quot;</span><span class="p">:</span> <span class="n">data_path</span><span class="p">})</span>
+<span class="c1"># You can also provide only one path</span>
+<span class="c1"># data_converter.convert_snapshots(complete_save_path=&quot;./&quot;,</span>
+<span class="c1">#                                  naming_scheme=&quot;Be_snapshot*.npy&quot;,</span>
+<span class="c1">#                                  descriptor_calculation_kwargs=</span>
+<span class="c1">#                                  {&quot;working_directory&quot;: data_path})</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The <code class="docutils literal notranslate"><span class="pre">convert_snapshots</span></code> function will convert ALL snapshots added via
+<code class="docutils literal notranslate"><span class="pre">add_snapshot</span></code> and save the resulting volumetric numpy files to the
+provided paths. You can either provide separate paths for the separate types
+of data or give one complete path, <code class="docutils literal notranslate"><span class="pre">complete_save_path</span></code>, depending on your
+personal preference. Fine-granular access
+to the calculators is enabled via the <code class="docutils literal notranslate"><span class="pre">descriptor_calculation_kwargs</span></code> and
+<code class="docutils literal notranslate"><span class="pre">target_calculation_kwargs</span></code> arguments, but usually not needed.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="trainingmodel.html" class="btn btn-neutral float-left" title="Training an ML-DFT model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hyperparameters.html" class="btn btn-neutral float-right" title="Basic hyperparameter optimization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

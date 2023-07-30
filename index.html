@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to MALA’s documentation! &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>Welcome to MALA! &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="shortcut icon" href="_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
@@ -16,11 +17,12 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
     <script src="_static/js/theme.js"></script>
-    <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="About" href="about.html" /> 
+    <link rel="next" title="Installation" href="installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,11 +42,12 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTE.html">Contributions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
         </div>
@@ -61,7 +64,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
-      <li>Welcome to MALA’s documentation!</li>
+      <li>Welcome to MALA!</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/index.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -71,155 +74,125 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="welcome-to-mala-s-documentation">
-<h1>Welcome to MALA’s documentation!<a class="headerlink" href="#welcome-to-mala-s-documentation" title="Permalink to this headline"></a></h1>
-<p><img alt="image" src="_images/mala_horizontal.png" /></p>
+  <p><img alt="image" src="_images/mala_horizontal.png" /></p>
+<div class="section" id="welcome-to-mala">
+<h1>Welcome to MALA!<a class="headerlink" href="#welcome-to-mala" title="Permalink to this headline"></a></h1>
+<div class="section" id="what-is-mala">
+<h2>What is MALA?<a class="headerlink" href="#what-is-mala" title="Permalink to this headline"></a></h2>
+<p>MALA is a software package for building ML models that replace
+density functional theory (DFT) calculations. DFT is one of the most widely
+used methods for simulating materials at a quantum level and predicting their
+properties, employed by researchers worldwide.</p>
+<p>Although DFT is more efficient compared to other quantum mechanical simulation
+techniques, it still exhibits cubic scaling with the number of atoms and
+temperature. This limitation poses significant computational challenges for
+conducting large-scale simulations.</p>
+<p>Recent research activities focus on harnessing the potential of
+<a class="reference external" href="https://journals.aps.org/prmaterials/abstract/10.1103/PhysRevMaterials.6.040301">ML and DFT</a>.
+MALA leads these efforts by facilitating the construction of ML-DFT models,
+offering comprehensive access to the electronic structure and observables,
+including the total free energy of the system. Moreover, MALA ensures
+scalability with system size and various parameters, such as temperature.</p>
 </div>
-<div class="section" id="mala">
-<h1>MALA<a class="headerlink" href="#mala" title="Permalink to this headline"></a></h1>
-<p><a class="reference external" href="https://github.com/mala-project/mala/actions/workflows/cpu-tests.yml"><img alt="CPU" src="https://github.com/mala-project/mala/actions/workflows/cpu-tests.yml/badge.svg" /></a>
-<a class="reference external" href="https://mala-project.github.io/mala/"><img alt="image" src="https://github.com/mala-project/mala/actions/workflows/gh-pages.yml/badge.svg" /></a>
-<a class="reference external" href="https://opensource.org/licenses/BSD-3-Clause"><img alt="image" src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" /></a>
-<a class="reference external" href="https://doi.org/10.5281/zenodo.5557255"><img alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.5557255.svg" /></a></p>
-<p>MALA (Materials Learning Algorithms) is a data-driven framework to generate surrogate models of density functional theory calculations based on machine learning. Its purpose is to enable multiscale modeling by bypassing computationally expensive steps in state-of-the-art density functional simulations.</p>
-<p>MALA is designed as a modular and open-source python package. It enables users to perform the entire modeling toolchain using only a few lines of code. MALA is jointly developed by the Sandia National Laboratories (SNL) and the Center for Advanced Systems Understanding (CASUS). See <a class="reference internal" href="CONTRIBUTE.html"><span class="doc std std-doc">Contributing</span></a> for contributing code to the repository.</p>
-<p>This repository is structured as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>├── examples : contains useful examples to get you started with the package
-├── install : contains scripts for setting up this package on your machine
-├── mala : the source code itself
-├── test : test scripts used during development, will hold tests for CI in the future
-└── docs : Sphinx documentation folder
-</pre></div>
+<div class="section" id="how-does-mala-work">
+<h2>How does MALA work?<a class="headerlink" href="#how-does-mala-work" title="Permalink to this headline"></a></h2>
+<p>MALA operates by predicting the so called local density of states (LDOS).
+The LDOS is an efficient and versatile representation of the electronic
+structure of a material. Based on the LDOS, a range of useful observables can
+be calculated.</p>
+<p>MALA calculates a grid-based representation for any given atomic structure
+(so called descriptors). These descriptors are subsequently fed into a neural
+network, an efficient ML algorithm, to predict the LDOS.
+The prediction is performed individually at each point of the real space grid,
+facilitating straightforward scalability and parallelization.</p>
+<p>Subsequently, MALA offers a variety of post-processing features to compute
+desired observables. Similar to a DFT calculation, but with enhanced speed.
+For further details on the workflow, refer to the
+<a class="reference external" href="https://www.doi.org/10.1103/PhysRevB.104.035120">first MALA publication</a>.</p>
 </div>
-<div class="section" id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h2>
-<blockquote>
-<div><p><strong>WARNING</strong>: Even if you install MALA via PyPI, please consult the full installation instructions afterwards. External modules (like the QuantumESPRESSO bindings) are not distributed via PyPI!</p>
-</div></blockquote>
-<p>Please refer to <a class="reference internal" href="install/README.html"><span class="doc std std-doc">Installation of MALA</span></a>.</p>
+<div class="section" id="where-to-start">
+<h2>Where to start?<a class="headerlink" href="#where-to-start" title="Permalink to this headline"></a></h2>
+<p>You can effortlessly set up MALA on your system by following the <a class="reference internal" href="installation.html"><span class="doc std std-doc">installation instructions.</span></a>
+To get acquainted with MALA, explore the <a class="reference internal" href="basic_usage.html"><span class="doc std std-doc">basic usage guide</span></a>,
+along with the example files in the repository.
+Additionally, MALA offers various options for <a class="reference internal" href="advanced_usage.html"><span class="doc std std-doc">advanced use</span></a>,
+allowing you to enhance training and inference speed, scale to large systems,
+and visualize results.</p>
+<p>If you use MALA in your research, please make sure to <a class="reference internal" href="citing.html"><span class="doc std std-doc">cite accordingly</span></a>.</p>
 </div>
-<div class="section" id="running">
-<h2>Running<a class="headerlink" href="#running" title="Permalink to this headline"></a></h2>
-<p>You can familiarize yourself with the usage of this package by running
-the examples in the <code class="docutils literal notranslate"><span class="pre">example/</span></code> folder.</p>
+<div class="section" id="who-is-behind-mala">
+<h2>Who is behind MALA?<a class="headerlink" href="#who-is-behind-mala" title="Permalink to this headline"></a></h2>
+<p>MALA is jointly developed by the <a class="reference external" href="https://www.sandia.gov/">Sandia National Laboratories</a>
+(Scientific supervisor: Sivasankaran Rajamanickam, code maintenance:
+Jon Vogel)
+and the <a class="reference external" href="https://www.casus.science/">Center for Advanced Systems Understanding</a>,
+an institute of the <a class="reference external" href="https://www.hzdr.de/">Helmholtz-Zentrum Dresden-Rossendorf</a>
+(Scientific supervisor: Attila Cangi, code maintenance: Lenz Fiedler).</p>
 </div>
-<div class="section" id="institutions">
-<h2>Institutions<a class="headerlink" href="#institutions" title="Permalink to this headline"></a></h2>
-<div class="section" id="founding-institutions">
-<h3>Founding Institutions<a class="headerlink" href="#founding-institutions" title="Permalink to this headline"></a></h3>
+<div class="section" id="mala-publications">
+<h2>MALA publications<a class="headerlink" href="#mala-publications" title="Permalink to this headline"></a></h2>
+<p>MALA has been employed in various publications, showcasing its versatility and effectiveness.</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://www.sandia.gov/">Sandia National Laboratories</a> (SNL), USA.</p></li>
-<li><p><a class="reference external" href="https://www.casus.science/">Center for Advanced Systems Understanding</a> (CASUS), Germany.</p></li>
+<li><p><a class="reference external" href="https://www.doi.org/10.1103/PhysRevB.104.035120">Accelerating finite-temperature Kohn-Sham density functional theory with deep neural networks</a> (Phys. Rev. B)
+by J. A. Ellis, L. Fiedler, G. A. Popoola, N. A. Modine, J. A. Stephens, A. P. Thompson, A. Cangi, and S. Rajamanickam</p>
+<ul>
+<li><p>First MALA publication, introduces the workflow and shows proof-of-concept
+resultsfor Aluminium at room temperature and across the melting point</p></li>
 </ul>
-</div>
-<div class="section" id="contributing-institutions">
-<h3>Contributing Institutions<a class="headerlink" href="#contributing-institutions" title="Permalink to this headline"></a></h3>
-<ul class="simple">
-<li><p><a class="reference external" href="https://www.ornl.gov/">Oak Ridge National Laboratory</a> (ORNL), USA</p></li>
+</li>
+<li><p><a class="reference external" href="https://doi.org/10.1088/2632-2153/ac9956">Training-free hyperparameter optimization of neural networks for electronic structures in matter</a> (Mach. Learn.: Sci. Technol.)
+by L. Fiedler, N. Hoffmann, P. Mohammed, G. A. Popoola, T. Yovell, V. Oles, J. A. Ellis, S. Rajamanickam, A. Cangi</p>
+<ul>
+<li><p>This publication discusses hyperparameter optimization and shows how
+the training-free surrogate metrics implemented in MALA can be used for
+rapid identification of suitable hyperparameters.</p></li>
 </ul>
-</div>
-</div>
-<div class="section" id="developers">
-<h2>Developers<a class="headerlink" href="#developers" title="Permalink to this headline"></a></h2>
-<div class="section" id="scientific-supervision">
-<h3>Scientific Supervision<a class="headerlink" href="#scientific-supervision" title="Permalink to this headline"></a></h3>
-<ul class="simple">
-<li><p>Attila Cangi (CASUS)</p></li>
-<li><p>Siva Rajamanickam (SNL)</p></li>
+</li>
+<li><p><a class="reference external" href="https://doi.org/10.1103/PhysRevResearch.4.043033">Accelerating Equilibration in First-Principles Molecular Dynamics with Orbital-Free Density Functional Theory</a> (Phys. Rev. Research)
+by L. Fiedler, Z. A. Moldabekov, X. Shao, K. Jiang, T. Dornheim, M. Pavanello, A. Cangi</p>
+<ul>
+<li><p>This publication shows how costly DFT-MD simulations can be accelerated
+by initializing a simulation with OF-DFT. These results extend to ML-DFT
+models, with MALA serving as an example.</p></li>
 </ul>
-</div>
-<div class="section" id="core-developers">
-<h3>Core Developers<a class="headerlink" href="#core-developers" title="Permalink to this headline"></a></h3>
-<ul class="simple">
-<li><p>Austin Ellis (ORNL)</p></li>
-<li><p>Lenz Fiedler (CASUS)</p></li>
-<li><p>Daniel Kotik (CASUS)</p></li>
-<li><p>Normand Modine (SNL)</p></li>
-<li><p>Vladyslav Oles (ORNL)</p></li>
-<li><p>Gabriel Popoola (SNL)</p></li>
-<li><p>Aidan Thompson (SNL)</p></li>
-<li><p>Steve Schmerler (HZDR)</p></li>
-<li><p>Adam Stephens (SNL)</p></li>
+</li>
+<li><p><a class="reference external" href="https://doi.org/10.1038/s41524-023-01070-z">Predicting electronic structures at any length scale with machine learning</a> (npj Comput. Mater.)
+by L. Fiedler, N. A. Modine, S. Schmerler, D. J. Vogel, G. A. Popoola, A. P. Thompson, S. Rajamanickam, A. Cangi</p>
+<ul>
+<li><p>This article asserts MALA’s capability for size transfer; based on training
+data calculated for hundreds of atoms, MALA can predict the electronic
+structure of up to 100’000 atoms.</p></li>
 </ul>
-</div>
-<div class="section" id="contributors">
-<h3>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline"></a></h3>
-<ul class="simple">
-<li><p>Sneha Verma (CASUS)</p></li>
-<li><p>Parvez Mohammed (CASUS)</p></li>
-<li><p>Nils Hoffmann (CASUS)</p></li>
-<li><p>Omar Faruk (CASUS)</p></li>
-<li><p>Somashekhar Kulkarni (CASUS)</p></li>
+</li>
+<li><p><a class="reference external" href="https://doi.org/10.48550/arXiv.2306.06032">Machine learning the electronic structure of matter across temperatures</a> (arXiv preprint)
+by L. Fiedler, N. A. Modine, K. D. Miller, A. Cangi</p>
+<ul>
+<li><p>Currently in the preprint stage. Shown here is the temperature
+tranferability of MALA models.</p></li>
 </ul>
-</div>
-</div>
-<div class="section" id="citing-mala">
-<h2>Citing MALA<a class="headerlink" href="#citing-mala" title="Permalink to this headline"></a></h2>
-<p>If you publish work which uses or mentions MALA, please cite the following paper:</p>
-<p>J. A. Ellis, L. Fiedler, G. A. Popoola, N. A. Modine, J. A. Stephens, A. P. Thompson,
-A. Cangi, S. Rajamanickam (2021). Accelerating Finite-temperature
-Kohn-Sham Density Functional Theory with Deep Neural Networks.
-<a class="reference external" href="https://doi.org/10.1103/PhysRevB.104.035120">Phys. Rev. B 104, 035120 (2021)</a></p>
-<p>alongside this repository.</p>
+</li>
+</ul>
 </div>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="about.html">About</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="about/overview.html">Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="about/background.html">Theoretical Background</a></li>
-<li class="toctree-l2"><a class="reference internal" href="about/publications.html">Publications</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="install/README.html">Installation of MALA</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install/external_modules.html">External modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install/on_cluster.html">Using MALA on HPC systems</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install/tested_systems.html">Successfully tested on</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="usage/basicconcepts.html">Basic concepts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/preprocessing.html">Data generation and preprocessing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/trainingmodel.html">Training a model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/postprocessing.html">Postprocessing the LDOS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/hyperparameters.html">Tuning the hyperparameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/predictions.html">Predict electronic structures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage/production.html">MALA production inference runs</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/mala.html">mala</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTE.html">Contributing to MALA</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTE.html#versioning-and-releases">Versioning and releases</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTE.html#branching-strategy">Branching strategy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTE.html#developing-code">Developing code</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTE.html#pull-requests">Pull Requests</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTE.html#issues">Issues</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTE.html#license">License</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API reference</a></li>
 </ul>
 </div>
 </div>
-</div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h1>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
-</ul>
 </div>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="about.html" class="btn btn-neutral float-right" title="About" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

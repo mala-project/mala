@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Using MALA in production &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Citing MALA" href="../citing.html" />
+    <link rel="prev" title="Improved hyperparameter optimization" href="hyperparameters.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../advanced_usage.html">Advanced options</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="trainingmodel.html">Improved training performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openpmd.html">Storing data with OpenPMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="descriptors.html">Improved data conversion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hyperparameters.html">Improved hyperparameter optimization</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Using MALA in production</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#predictions-on-gpu">Predictions on GPU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parallel-predictions-on-cpus">Parallel predictions on CPUs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#visualizing-observables">Visualizing observables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../advanced_usage.html">Advanced options</a> &raquo;</li>
+      <li>Using MALA in production</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/advanced_usage/predictions.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="using-mala-in-production">
+<span id="production"></span><h1>Using MALA in production<a class="headerlink" href="#using-mala-in-production" title="Permalink to this headline"></a></h1>
+<p>MALA is aimed at providing ML-DFT models for large scale investigations.
+Predictions at scale in principle work just like the predictions shown
+in the basic guide. One has to set a few additional parameters to make
+optimal use of the hardware at hand.</p>
+<p>MALA ML-DFT models can be used for predictions at system sizes and temperatures
+larger resp. different from the ones they were trained on. If you want to make
+a prediction at a larger length scale then the ML-DFT model was trained on,
+MALA will automatically determine a suitable realspace grid for the prediction.
+You can manually specify the inference grid if you wish via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Predictor class</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">inference_data_grid</span> <span class="o">=</span> <span class="o">...</span>
+<span class="c1"># ASE calculator</span>
+<span class="n">calculator</span><span class="o">.</span><span class="n">mala_parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">inference_data_grid</span> <span class="o">=</span> <span class="o">...</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Where you have to specify a list with three entries <code class="docutils literal notranslate"><span class="pre">[x,y,z]</span></code>. As matter
+of principle, stretching simulation cells in either direction should be
+reflected by the grid.</p>
+<p>Likewise, you can adjust the inference temperature via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Predictor class</span>
+<span class="n">predictor</span><span class="o">.</span><span class="n">predict_for_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=...</span><span class="p">)</span>
+<span class="c1"># ASE calculator</span>
+<span class="n">calculator</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="o">...</span>
+</pre></div>
+</div>
+</div></blockquote>
+<div class="section" id="predictions-on-gpu">
+<h2>Predictions on GPU<a class="headerlink" href="#predictions-on-gpu" title="Permalink to this headline"></a></h2>
+<p>MALA predictions can be run entirely on a GPU. For the NN part of the workflow,
+this seems like a trivial statement, but the GPU acceleration extends to
+descriptor calculation and total energy evaluation. By enabling GPU support
+with</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">use_gpu</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>prior to an ASE calculator calculation or usage of the <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> class,
+all computationally heavy parts of the MALA inference, will be offloaded
+to the GPU.</p>
+<p>Please note that this requires LAMMPS to be installed with GPU, i.e., Kokkos
+support. A current limitation of this implementation is that only a <em>single</em>
+GPU can be used for inference. This puts an upper limit on the number of atoms
+which can be simulated, depending on the hardware you have access to.
+Usual numbers observed by MALA team put this limit at a few thousand atoms, for
+which the electronic structure can be predicted in 1-2 minutes. Currently,
+multi-GPU inference is being implemented.</p>
+</div>
+<div class="section" id="parallel-predictions-on-cpus">
+<h2>Parallel predictions on CPUs<a class="headerlink" href="#parallel-predictions-on-cpus" title="Permalink to this headline"></a></h2>
+<p>Since GPU usage is currently limited to one GPU at a time, predictions
+for ten- to hundreds of thousands of atoms rely on the usage of a large number
+of CPUs. Just like with GPU acceleration, nothing about the general inference
+workflow has to be changed. Simply enable MPI usage in MALA</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Please be aware that GPU and MPI usage are mutually exclusive for inference
+at the moment. Once MPI is activated, you can start the MPI aware Python script
+with a large number of CPUs to simulate materials at large length scales.</p>
+<p>By default, MALA can only operate with a number of CPUs by which the
+z-dimension of the inference grid can be evenly divided, since the Quantum
+ESPRESSO backend of MALA by default only divides data along the z-dimension.
+If you, e.g., have an inference grid of <code class="docutils literal notranslate"><span class="pre">[200,200,200]</span></code> points, you can use
+a maximum of 200 CPUs. Using, e.g., 224 CPUs will lead to an error.</p>
+<p>Parallelization can further be made more efficient by also enabling splitting
+in the y-dimension. This is done by setting the parameter</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_y_splitting</span> <span class="o">=</span> <span class="n">ysplit</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>to an integer value <code class="docutils literal notranslate"><span class="pre">ysplit</span></code> (default: 0). If <code class="docutils literal notranslate"><span class="pre">ysplit</span></code> is not zero,
+each z-plane will be divided <code class="docutils literal notranslate"><span class="pre">ysplit</span></code> times for the parallelization.
+If you, e.g., have an inference grid of <code class="docutils literal notranslate"><span class="pre">[200,200,200]</span></code>, you could use
+400 CPUs and <code class="docutils literal notranslate"><span class="pre">ysplit</span></code> of 2. Then, the grid will be sliced into 200 z-planes,
+and each z-plane will be sliced twice, allowing even faster inference.</p>
+</div>
+<div class="section" id="visualizing-observables">
+<h2>Visualizing observables<a class="headerlink" href="#visualizing-observables" title="Permalink to this headline"></a></h2>
+<p>MALA also provides useful functions to visualize observables, as shown in
+the file <code class="docutils literal notranslate"><span class="pre">advanced/ex08_visualize_observables</span></code>. To calculate observables
+for analysis and visualization, you need an LDOS calculator object.
+If you perform ML-DFT inference, you will get this object from the
+<code class="docutils literal notranslate"><span class="pre">Predictor</span></code> resp. ASE calculator object, but it can also be created by
+itself, as shown in the mentioned example file.</p>
+<p>Having obtained an LDOS calculator object, you can access several observables
+of interest for visualization via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># The DOS can be visualized on the correct energy grid.</span>
+<span class="n">density_of_states</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">density_of_states</span>
+<span class="n">energy_grid</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">energy_grid</span>
+
+<span class="c1"># The density can be saved into a .cube file for visualization with standard</span>
+<span class="c1"># electronic structure visualization software.</span>
+<span class="n">density_calculator</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Density</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="n">ldos_calculator</span><span class="p">)</span>
+<span class="n">density_calculator</span><span class="o">.</span><span class="n">write_to_cube</span><span class="p">(</span><span class="s2">&quot;Be_density.cube&quot;</span><span class="p">)</span>
+
+<span class="c1"># The radial distribution function can be visualized on discretized radii.</span>
+<span class="n">rdf</span><span class="p">,</span> <span class="n">radii</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span>\
+    <span class="n">radial_distribution_function_from_atoms</span><span class="p">(</span><span class="n">ldos_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span>
+                                            <span class="n">number_of_bins</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+
+<span class="c1"># The static structure factor can be visualized on a discretized k-grid.</span>
+<span class="n">static_structure</span><span class="p">,</span> <span class="n">kpoints</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span>\
+    <span class="n">static_structure_factor_from_atoms</span><span class="p">(</span><span class="n">ldos_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span>
+                                       <span class="n">number_of_bins</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">kMax</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>With the exception of the electronic density, which is saved into the <code class="docutils literal notranslate"><span class="pre">.cube</span></code>
+format for visualization with regular electronic structure visualization
+software, all of these observables can be plotted with Python based
+visualization libraries such as <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="hyperparameters.html" class="btn btn-neutral float-left" title="Improved hyperparameter optimization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../citing.html" class="btn btn-neutral float-right" title="Citing MALA" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

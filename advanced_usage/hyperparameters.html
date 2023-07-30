@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Improved hyperparameter optimization &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Using MALA in production" href="predictions.html" />
+    <link rel="prev" title="Improved data conversion" href="descriptors.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../advanced_usage.html">Advanced options</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="trainingmodel.html">Improved training performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openpmd.html">Storing data with OpenPMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="descriptors.html">Improved data conversion</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Improved hyperparameter optimization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#checkpointing-a-hyperparameter-search">Checkpointing a hyperparameter search</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parallelizing-a-hyperparameter-search">Parallelizing a hyperparameter search</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-optimization-algorithms">Advanced optimization algorithms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="predictions.html">Using MALA in production</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../advanced_usage.html">Advanced options</a> &raquo;</li>
+      <li>Improved hyperparameter optimization</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/advanced_usage/hyperparameters.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="improved-hyperparameter-optimization">
+<span id="advanced-hyperparams"></span><h1>Improved hyperparameter optimization<a class="headerlink" href="#improved-hyperparameter-optimization" title="Permalink to this headline"></a></h1>
+<div class="section" id="checkpointing-a-hyperparameter-search">
+<h2>Checkpointing a hyperparameter search<a class="headerlink" href="#checkpointing-a-hyperparameter-search" title="Permalink to this headline"></a></h2>
+<p>Just like a regular NN training, a hyperparameter search may be checkpointed
+and resumed at a later point. An example is shown in the file
+<code class="docutils literal notranslate"><span class="pre">advanced/ex05_checkpoint_hyperparameter_optimization.py</span></code>.
+The syntax/interface is very similar as to the NN training checkpointing
+system, i.e.:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mala</span>
+
+<span class="n">parameters</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Parameters</span><span class="p">()</span>
+
+<span class="n">parameters</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoints_each_trial</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoint_name</span> <span class="o">=</span> <span class="s2">&quot;ex05_checkpoint&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>will enable hyperparameter checkpointing after 5 hyperparameter trials.
+The checkpointing-restarting is then enabled via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">mala</span><span class="o">.</span><span class="n">Trainer</span><span class="o">.</span><span class="n">run_exists</span><span class="p">(</span><span class="s2">&quot;ex05_checkpoint&quot;</span><span class="p">):</span>
+    <span class="n">parameters</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">datahandler</span><span class="p">,</span> <span class="n">trainer</span> <span class="o">=</span> \
+        <span class="n">mala</span><span class="o">.</span><span class="n">Trainer</span><span class="o">.</span><span class="n">load_run</span><span class="p">(</span><span class="s2">&quot;ex05_checkpoint&quot;</span><span class="p">)</span>
+    <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Starting resumed training.&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">parameters</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">datahandler</span><span class="p">,</span> <span class="n">trainer</span> <span class="o">=</span> <span class="n">initial_setup</span><span class="p">()</span>
+    <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Starting original training.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="parallelizing-a-hyperparameter-search">
+<h2>Parallelizing a hyperparameter search<a class="headerlink" href="#parallelizing-a-hyperparameter-search" title="Permalink to this headline"></a></h2>
+<p>Hyperparameter searches can be very computationally demanding, since many
+NN trainings have to be performed in order to determine the optimal set
+of parameters. One way to accelerate the process is through a
+<em>parallel</em>, distributed hyperparameter search. Here, we run the hyperparameter
+search on N CPUs/GPUs - each processing one specific trial. The results
+are collected in a central data base, which is accessed by each of the N
+ranks individually upon starting new trials. This is not a MALA feature itself,
+but rather a feature of the optuna library, that MALA implements and
+gives easy access to.</p>
+<p>Database handling is done via SQL. Several SQL frameworks exists, and
+optuna/MALA support PostgreSQL, MySQL and SQLite. The latter is good for local
+debugging, but should not be used at scale. An SQLite example for distributed
+hyperparameter optimization can be found in the file
+<code class="docutils literal notranslate"><span class="pre">advanced/ex06_distributed_hyperparameter_optimization.py</span></code>.</p>
+<p>Distributed hyperparameter optimization works the same as regular
+hyperparameter optimization; parameter, data and optimizer setup do not have
+to be altered. You have to specify the data base (and a name for the
+study, since multiple studies may be saved in the same data base) to be used,
+e.g.,</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">study_name</span> <span class="o">=</span> <span class="s2">&quot;my_study&quot;</span>
+<span class="c1"># SQLite example</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">rdb_storage</span> <span class="o">=</span> <span class="s1">&#39;sqlite:///DATABASENAME&#39;</span>
+<span class="c1"># PostgreSQL example</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">rdb_storage</span> <span class="o">=</span> <span class="s2">&quot;postgresql://SERVERNAME/DATABASENAME&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>For more information on <a class="reference external" href="https://www.postgresql.org/">PostgreSQL</a> and
+<a class="reference external" href="https://www.sqlite.org/index.html">SQLite</a>, please visit the respective
+websites.</p>
+<p>Once this parameter is set, the MALA-optuna interface will automatically use
+this database to store and initialize all trials. If you then execute the
+hyperparameter optimization Python script <em>multiple</em> times, the hyperparameter
+optimization will be parallel - no further changes to the code are necessary.</p>
+<p>On an HPC cluster, it may be prudent to launch the script multiple times
+with a single call, e.g.</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">12</span><span class="w"> </span>python3<span class="w"> </span>-u<span class="w"> </span>hyperopt.py
+</pre></div>
+</div>
+</div></blockquote>
+<p>since there a limitations on how many jobs can be launched individually.
+If you have to do this, MALA provides the helpful option of disentangling these
+instances via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">optuna_singlenode_setup</span><span class="p">(</span><span class="n">wait_time</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>This command makes sure that the individual instances of the optuna run
+are started with <code class="docutils literal notranslate"><span class="pre">wait_time</span></code> time interval in between (to avoid race
+conditions when accessing the same data base) and further only use the data
+base, not MPI, for communication.</p>
+<p>If you do distributed hyperparameter optimization, another useful option
+is</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">number_training_per_trial</span> <span class="o">=</span> <span class="mi">3</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>This option tells optuna to run each NN trial training
+<code class="docutils literal notranslate"><span class="pre">number_training_per_trial</span></code> times; instead of the accuracy of only one
+trial, the average accuracy (plus the standard deviation) are reported at the
+end of each trial. Doing so massively increases robustness of the
+hyperparameter optimization, since it eliminates models that perform well
+by chance (e.g., because they have been randomly initialized to be accurate
+by chance). This option is especially useful if used in conjunction with
+a physical validation metric such as</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">after_before_training_metric</span> <span class="o">=</span> <span class="s2">&quot;band_energy&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="advanced-optimization-algorithms">
+<h2>Advanced optimization algorithms<a class="headerlink" href="#advanced-optimization-algorithms" title="Permalink to this headline"></a></h2>
+<p>As discussed in the MALA publication on
+<a class="reference external" href="https://doi.org/10.1088/2632-2153/ac9956">hyperparameter optimization</a>,
+advanced hyperparameter optimization strategies have been evaluated for
+ML-DFT models with MALA. Namely</p>
+<ul class="simple">
+<li><p>NASWOT (Neural architecture search without training):
+A training-free hyperparameter optimization technique. It works by
+correlating the capability of a network to distinguish between data points
+at NN initialization with performance after training.</p></li>
+<li><p>OAT (Orthogonal array tuning):
+This technique requires network training, but constructs an optimal set
+of trials based on orthogonal arrays (a concept from optimal design theory)
+from which to extract a maximum of information with a limited number of
+training overhead.</p></li>
+</ul>
+<p>Both methods can easily be enabled without changing the familiar hyperparameter
+optimization workflow, as shown in the file
+<code class="docutils literal notranslate"><span class="pre">advanced/ex07_advanced_hyperparameter_optimization</span></code>.</p>
+<p>These optimization algorithms are activated via the <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> object:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use NASWOT</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span> <span class="o">=</span> <span class="s2">&quot;naswot&quot;</span>
+<span class="c1"># Use OAT</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span> <span class="o">=</span> <span class="s2">&quot;oat&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Both techniques are fully compatible with other MALA capabilities, with
+a few exceptions:</p>
+<ul class="simple">
+<li><p>NASWOT: Can only be used with hyperparameters related to network architecture
+(layer sizes, activation functions, etc.); training related hyperparameters
+will be ignored, and a warning to this effect will be printed. Only
+<code class="docutils literal notranslate"><span class="pre">&quot;categorical&quot;</span></code> hyperparameters are supported. Can be run in parallel by
+setting <code class="docutils literal notranslate"><span class="pre">parameters.use_mpi=True</span></code>.</p></li>
+<li><p>OAT: Can currently not be run in parallel. Only
+<code class="docutils literal notranslate"><span class="pre">&quot;categorical&quot;</span></code> hyperparameters are supported.</p></li>
+</ul>
+<p>For more details on the mathematical background of these methods, please refer
+to the aforementioned publication.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="descriptors.html" class="btn btn-neutral float-left" title="Improved data conversion" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="predictions.html" class="btn btn-neutral float-right" title="Using MALA in production" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

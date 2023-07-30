@@ -6,6 +6,7 @@
   <title>Installation &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="shortcut icon" href="_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
@@ -16,12 +17,13 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
     <script src="_static/js/theme.js"></script>
-    <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation of MALA" href="install/README.html" />
-    <link rel="prev" title="Publications" href="about/publications.html" /> 
+    <link rel="next" title="Installing MALA" href="install/installing_mala.html" />
+    <link rel="prev" title="Welcome to MALA!" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,17 +43,17 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="install/README.html">Installation of MALA</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install/external_modules.html">External modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install/on_cluster.html">Using MALA on HPC systems</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install/tested_systems.html">Successfully tested on</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/installing_mala.html">Installing MALA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/installing_lammps.html">Installing LAMMPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/installing_qe.html">Installing Quantum ESPRESSO (total energy module)</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTE.html">Contributions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
         </div>
@@ -80,12 +82,28 @@
              
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
+<p>As a software package, MALA consists of three parts:</p>
+<ol class="arabic simple">
+<li><p>The actual Python package <code class="docutils literal notranslate"><span class="pre">mala</span></code>, which this documentation accompanies</p></li>
+<li><p>The <a class="reference external" href="https://www.lammps.org/">LAMMPS</a> code, which is used by MALA to
+encode atomic structures on the real-space grid</p></li>
+<li><p>The <a class="reference external" href="https://www.quantum-espresso.org/">Quantum ESPRESSO</a> (QE) code, which
+is used by MALA to post-process the LDOS into total free energies (via the
+so called “total energy module”)</p></li>
+</ol>
+<p>All three parts require separate installations. The most important one is
+the first one, i.e., the Python library, and you can access a lot of MALA
+functionalities by just installing the MALA Python library, especially when
+working with precalculated input and output data (e.g. for model training).</p>
+<p>For access to all feature, you will have to furthermore install the LAMMPS
+and QE codes and associated Python bindings. The installation has been tested
+on Linux (Ubuntu/CentOS), Windows and macOS. The individual installation steps
+are given in:</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="install/README.html">Installation of MALA</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install/external_modules.html">External modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install/on_cluster.html">Using MALA on HPC systems</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install/tested_systems.html">Successfully tested on</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install/installing_mala.html">Installing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install/installing_lammps.html">Installing LAMMPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install/installing_qe.html">Installing Quantum ESPRESSO (total energy module)</a></li>
 </ul>
 </div>
 </div>
@@ -94,8 +112,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="about/publications.html" class="btn btn-neutral float-left" title="Publications" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="install/README.html" class="btn btn-neutral float-right" title="Installation of MALA" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to MALA!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="install/installing_mala.html" class="btn btn-neutral float-right" title="Installing MALA" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

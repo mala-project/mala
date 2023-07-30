@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Improved data conversion &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Improved hyperparameter optimization" href="hyperparameters.html" />
+    <link rel="prev" title="Storing data with OpenPMD" href="openpmd.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../advanced_usage.html">Advanced options</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="trainingmodel.html">Improved training performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openpmd.html">Storing data with OpenPMD</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Improved data conversion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Tuning descriptors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parallel-data-conversion">Parallel data conversion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hyperparameters.html">Improved hyperparameter optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="predictions.html">Using MALA in production</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../advanced_usage.html">Advanced options</a> &raquo;</li>
+      <li>Improved data conversion</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/advanced_usage/descriptors.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="improved-data-conversion">
+<span id="tuning-descriptors"></span><h1>Improved data conversion<a class="headerlink" href="#improved-data-conversion" title="Permalink to this headline"></a></h1>
+<div class="section" id="id1">
+<h2>Tuning descriptors<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
+<p>The data conversion shown in the basic MALA guide is straightforward from
+an interface point of view, however it is non-trivial to determine the
+correct hyperparameters for the bispectrum descriptors. Ideally, cutoff radius
+and dimensionality of the descriptors should be chosen such that atomic
+environments around each point in space are accurately represented.</p>
+<p>Some physical intuition factors into this process, as detailed in
+the MALA publication on <a class="reference external" href="https://doi.org/10.1088/2632-2153/ac9956">hyperparameter optimization</a>.
+There, it is discussed that too large cutoff radii lead to descriptors
+that are too similar for different points in space, complicating the
+ML training, while too small radii lead to descriptors not containing
+enough physical information, and do not yield physically accurate models.
+Likewise, the dimensionality of the expansion of the atomic density
+needs to match the amount of information one wants to encode.</p>
+<p>In the publication mentioned above, a method has been devised based on these
+principles, the so called average cosine similarity distance (ACSD) analysis.
+Based on cosine similarities between descriptor and target vectors for
+distinct points, optimal descriptor hyperparameters can be determined; for
+more detail, please refer to the publication.</p>
+<p>Within MALA, this analysis is available as a special hyperparameter
+optimization routine, as showcased in the example <code class="docutils literal notranslate"><span class="pre">advanced/ex04_acsd.py</span></code>.
+The syntax for this analysis is similar to the regular hyperparameter
+optimization interface. First, set up an optimizer via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mala</span>
+
+<span class="n">parameters</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Parameters</span><span class="p">()</span>
+
+<span class="c1"># Specify the details of the ACSD analysis.</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">acsd_points</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">hyperoptimizer</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">ACSDAnalyzer</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The <code class="docutils literal notranslate"><span class="pre">acsd_points</span></code> parameter determines how many points are compared during
+the ACSD analysis; the more points you select, the longer the analysis
+takes. If you set this value to 100, 100 points are compared with 100 different
+points each, yielding a point cloud of 10.000 points for analysis. For most
+purposes, this should be enough.</p>
+<p>Afterwards, specify ranges for the bispectrum hyperparameters over which
+to search for the optimal set of values via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">add_hyperparameter</span><span class="p">(</span><span class="s2">&quot;bispectrum_twojmax&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">add_hyperparameter</span><span class="p">(</span><span class="s2">&quot;bispectrum_cutoff&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>These two are the only hyperparameters needed for the bispectrum descriptors.
+Choose the lists according to the demands of your system; a good starting
+point is a coarse search over cutoff radii, and <code class="docutils literal notranslate"><span class="pre">bispectrum_twojmax</span></code>
+values of 2 to a maximum of 10.</p>
+<p>Afterwards, you have to add data to the hyperparameter optimization. This
+is similar to the regular hyperparameter optimization workflow, with two
+import distinctions. Firstly, only add preprocessed data for the LDOS; for
+the descriptors, add a raw calculation output, from which the descriptors
+can be computed. Secondly, the <code class="docutils literal notranslate"><span class="pre">add_snapshot</span></code> function is provided directly
+via the hyperparameter optimizer. No <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> instance is needed.
+An example would be this:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot1.out&quot;</span><span class="p">),</span>
+                            <span class="s2">&quot;numpy&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot1.out.npy&quot;</span><span class="p">),</span>
+                            <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;1/(Ry*Bohr^3)&quot;</span><span class="p">)</span>
+<span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot2.out&quot;</span><span class="p">),</span>
+                            <span class="s2">&quot;numpy&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot2.out.npy&quot;</span><span class="p">),</span>
+                            <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;1/(Ry*Bohr^3)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Once this is done, you can start the optimization via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">perform_study</span><span class="p">(</span><span class="n">return_plotting</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">set_optimal_parameters</span><span class="p">()</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>If <code class="docutils literal notranslate"><span class="pre">return_plotting</span></code> is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, relevant plotting data for the
+analysis are returned. This is useful for exploratory searches.</p>
+<p>Since the ACSD re-calculates the bispectrum descriptors for each combination
+of hyperparameters, it is useful to use parallel descriptor calculation.
+To do so, you can enable the <a class="reference external" href="https://www.mpi-forum.org/">MPI</a> capabilites
+of MALA/LAMMPS. Once enabled, multiple CPUs can be used in parallel to
+calculate descriptors. Enabling MPI in MALA can easily be done via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>If you use MPI, multiple CPUs need to be allocated to the MALA computation.</p>
+</div>
+<div class="section" id="parallel-data-conversion">
+<h2>Parallel data conversion<a class="headerlink" href="#parallel-data-conversion" title="Permalink to this headline"></a></h2>
+<p>Parallelization may also generally be used for data conversion via the
+<code class="docutils literal notranslate"><span class="pre">DataConverter</span></code> class. Just enable the MPI function in MALA via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>prior to using the <code class="docutils literal notranslate"><span class="pre">DataConverter</span></code> class. Then, all processing will
+be done in parallel - both the descriptor calculation as well as the LDOS
+parsing.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="openpmd.html" class="btn btn-neutral float-left" title="Storing data with OpenPMD" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hyperparameters.html" class="btn btn-neutral float-right" title="Improved hyperparameter optimization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

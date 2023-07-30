@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training an ML-DFT model &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Data generation and conversion" href="more_data.html" />
+    <link rel="prev" title="Getting started with MALA" href="../basic_usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../basic_usage.html">Getting started with MALA</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Training an ML-DFT model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setting-parameters">Setting parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#adding-training-data">Adding training data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-and-training-a-model">Building and training a model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-a-model">Testing a model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="more_data.html">Data generation and conversion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hyperparameters.html">Basic hyperparameter optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="predictions.html">Using ML-DFT models for predictions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../basic_usage.html">Getting started with MALA</a> &raquo;</li>
+      <li>Training an ML-DFT model</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/basic_usage/trainingmodel.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="training-an-ml-dft-model">
+<h1>Training an ML-DFT model<a class="headerlink" href="#training-an-ml-dft-model" title="Permalink to this headline"></a></h1>
+<p>For a first glimpse into MALA, let’s assume you already have input data
+(i.e., bispectrum descriptors encoding the atomic structure on a real space
+grid) and output data (the LDOS representing the electronic structure on the
+real space grid) for a system. For now, we will be using the example data
+provided in the <a class="reference external" href="https://github.com/mala-project/test-data">test data repository</a>.</p>
+<p>You will learn how to create your own data sets in <a class="reference internal" href="more_data.html"><span class="doc">the following section</span></a>.
+This guide follows the example file <code class="docutils literal notranslate"><span class="pre">basic/ex01_train_network.py</span></code> and
+<code class="docutils literal notranslate"><span class="pre">basic/ex02_test_network.py</span></code>.</p>
+<div class="section" id="setting-parameters">
+<h2>Setting parameters<a class="headerlink" href="#setting-parameters" title="Permalink to this headline"></a></h2>
+<p>The central object of MALA workflows is the <code class="docutils literal notranslate"><span class="pre">mala.Parameters()</span></code> object.
+<strong>All</strong> options necessary to control a MALA workflow are accessible through
+this object. To do this, it has several subobjects for its various tasks,
+that we will get familiar with in this tutorial.</p>
+<p>MALA provides reasonable choices for a lot of parameters of interest.
+For a full list, please refer to the API reference - for now, we select a few
+options to train a simple network with example data, namely</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Parameters</span><span class="p">()</span>
+
+<span class="n">parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">input_rescaling_type</span> <span class="o">=</span> <span class="s2">&quot;feature-wise-standard&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_rescaling_type</span> <span class="o">=</span> <span class="s2">&quot;normal&quot;</span>
+
+<span class="n">parameters</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_activations</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ReLU&quot;</span><span class="p">]</span>
+
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">max_number_epochs</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">0.00001</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">trainingtype</span> <span class="o">=</span> <span class="s2">&quot;Adam&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># level of output; 1 is standard, 0 is low, 2 is debug.</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Here, we can see that the <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> object contains multiple
+sub-objects dealing with the individual aspects of the workflow. In the first
+two lines, which data scaling MALA should employ. Scaling data greatly
+improves the performance of NN based ML models. Options are</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: No normalization is applied.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">standard</span></code>: Standardization (Scale to mean 0, standard deviation 1)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">normal</span></code>: Min-Max scaling (Scale to be in range 0…1)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">feature-wise-standard</span></code>: Row Standardization (Scale to mean 0, standard deviation 1)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">feature-wise-normal</span></code>: Row Min-Max scaling (Scale to be in range 0…1)</p></li>
+</ul>
+<p>Here, we specify that MALA should standardize the input (=descriptors)
+by feature (i.e., each entry of the vector separately on the grid) and
+normalize the entire LDOS.</p>
+<p>The third line tells MALA which activation function to use, and the last lines
+specify the training routine employed by MALA.</p>
+<p>For now, we will assume these values to be correct. Of course, for new
+data sets, optimal values have to be determined via <a class="reference internal" href="hyperparameters.html"><span class="doc">hyperparameter optimization</span></a>.
+Finally, it is useful to also save some information on how the LDOS and
+bispectrum descriptors were calculated into the parameters object - this helps
+at inference time, when this info is required. You will learn what these values
+mean <a class="reference internal" href="more_data.html"><span class="doc">data generation part</span></a> of this guide, for now we
+use the values consistent with the example data.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">target_type</span> <span class="o">=</span> <span class="s2">&quot;LDOS&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">=</span> <span class="mi">11</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span> <span class="o">=</span> <span class="mf">2.5</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span> <span class="o">=</span> <span class="o">-</span><span class="mi">5</span>
+
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">=</span> <span class="s2">&quot;Bispectrum&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_cutoff</span> <span class="o">=</span> <span class="mf">4.67637</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="adding-training-data">
+<h2>Adding training data<a class="headerlink" href="#adding-training-data" title="Permalink to this headline"></a></h2>
+<p>As with any ML library, MALA is a data-driven framework. So before we can
+train a model, we need to add data. The central object to manage data for any
+MALA workflow is the <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> class.</p>
+<p>MALA manages data “per snapshot”. One snapshot is one atomic configuration,
+for which volumetric input and output data has been calculated. Data has to
+be added to the <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> object per snapshot, pointing to the
+where the volumetric data files are saved on disk. This is done via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">DataHandler</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+<span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot0.in.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span>
+                          <span class="s2">&quot;Be_snapshot0.out.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;tr&quot;</span><span class="p">)</span>
+<span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot1.in.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span>
+                          <span class="s2">&quot;Be_snapshot1.out.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;va&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The <code class="docutils literal notranslate"><span class="pre">&quot;tr&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;va&quot;</span></code> flag signal that the respective snapshots are added as
+training and validation data, respectively. Training data is data the model
+is directly tuned on; validation data is data used to verify the model
+performance during the run time and make sure that no overfitting occurs.
+After data has been added to the <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code>, it has to be actually loaded
+and scaled via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_handler</span><span class="o">.</span><span class="n">prepare_data</span><span class="p">()</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> object can now be used for Machine learning.</p>
+</div>
+<div class="section" id="building-and-training-a-model">
+<h2>Building and training a model<a class="headerlink" href="#building-and-training-a-model" title="Permalink to this headline"></a></h2>
+<p>MALA uses neural networks (NNs) as a backbone for the ML-DFT models. To
+construct those, we have to specify the number of neurons. This is also done
+via the <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> object. In principle, we can specify the layer sizes
+whenever we want, however, it makes sense to do this <em>after</em> the data has been
+loaded, because then it is easier to make sure that the dimensions of the
+layers agree. To build a NN, we specify</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_handler</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">,</span>
+                                  <span class="mi">100</span><span class="p">,</span>
+                                  <span class="n">data_handler</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">]</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Network</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Now, we can easily train this network with the parameters specified above
+by doing</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trainer</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data_handler</span><span class="p">)</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train_network</span><span class="p">()</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Afterwards, we want to save this model for future use. MALA saves models
+in a <code class="docutils literal notranslate"><span class="pre">*.zip</span></code> format. Within each model archive, information like scaling
+coefficients, the model weights itself, etc. are stored in one place where MALA
+can easily access it. Additionally, it makes sense to provide MALA with a
+sample calculation output (from the simulations used to gather the training
+data), so that critical parameters like simulation temperature, grid
+coarseness, etc., are available at inference time. By</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">additional_calculation_data</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot0.out&quot;</span><span class="p">)</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">save_run</span><span class="p">(</span><span class="s2">&quot;be_model&quot;</span><span class="p">,</span>
+                 <span class="n">additional_calculation_data</span><span class="o">=</span><span class="n">additional_calculation_data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>This information is set and the resulting model is saved. It is now ready to
+be used.</p>
+</div>
+<div class="section" id="testing-a-model">
+<h2>Testing a model<a class="headerlink" href="#testing-a-model" title="Permalink to this headline"></a></h2>
+<p>Before using a model in production, it is wise to test its performance. To that
+end, MALA provides a <code class="docutils literal notranslate"><span class="pre">Tester</span></code> class, that allows users to load a model,
+give it some data unseen during training, and verify the models performance
+on that data.</p>
+<p>This verification is done by selecting observables of interest (e.g., the band
+energy, total energy or number of electrons) and comparing ML-DFT predictions
+with the ground truth. To instantiate a <code class="docutils literal notranslate"><span class="pre">Tester</span></code> object, call</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data_handler</span><span class="p">,</span> <span class="n">tester</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Tester</span><span class="o">.</span><span class="n">load_run</span><span class="p">(</span><span class="s2">&quot;be_model&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>There are a few useful options we should set when testing a network.
+Firstly, we need to specify which observables to test. Secondly, we have to
+decide if we want the resulting accuracy measures per each individual snapshot
+(<code class="docutils literal notranslate"><span class="pre">&quot;list&quot;</span></code>) or as an average across all snapshots (<code class="docutils literal notranslate"><span class="pre">&quot;mae&quot;</span></code>).
+Finally, it is useful to enable lazy-loading. Lazy-loading is a feature that
+incrementally loads data into memory. It is necessary when operating on large
+amounts of data; its usage in the training routine is further discussed in
+<a class="reference internal" href="../advanced_usage/trainingmodel.html#advanced-training"><span class="std std-ref">the advanced training section</span></a>.
+For testing a model, it is prudent to enable, since a lot of data may
+be involved. The accompanying syntax for these three options is</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tester</span><span class="o">.</span><span class="n">observables_to_test</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;band_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;number_of_electrons&quot;</span><span class="p">]</span>
+<span class="n">tester</span><span class="o">.</span><span class="n">output_format</span> <span class="o">=</span> <span class="s2">&quot;list&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">use_lazy_loading</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Afterwards, new data can be added just as shown above, now with the data
+function being <code class="docutils literal notranslate"><span class="pre">&quot;te&quot;</span></code> for testing data. Once this is done, testing can
+be done via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">tester</span><span class="o">.</span><span class="n">test_all_snapshots</span><span class="p">()</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Resulting in a dictionary, which can either be saved into a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file or
+directly processed.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../basic_usage.html" class="btn btn-neutral float-left" title="Getting started with MALA" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="more_data.html" class="btn btn-neutral float-right" title="Data generation and conversion" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

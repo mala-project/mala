@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installing MALA &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Installing LAMMPS" href="installing_lammps.html" />
+    <link rel="prev" title="Installation" href="../installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../installation.html">Installation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Installing MALA</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installing-the-python-library">Installing the Python library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#downloading-and-adding-example-data-recommended">Downloading and adding example data (Recommended)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-documentation-locally-optional">Build documentation locally (Optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installing_lammps.html">Installing LAMMPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installing_qe.html">Installing Quantum ESPRESSO (total energy module)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../installation.html">Installation</a> &raquo;</li>
+      <li>Installing MALA</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/install/installing_mala.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="installing-mala">
+<h1>Installing MALA<a class="headerlink" href="#installing-mala" title="Permalink to this headline"></a></h1>
+<div class="section" id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline"></a></h2>
+<p>MALA does not depend on a specific Python version. The most recent Python
+version it has been tested with successfully is Python <code class="docutils literal notranslate"><span class="pre">3.10.4</span></code>.</p>
+<p>MALA requires <code class="docutils literal notranslate"><span class="pre">torch</span></code> in order to function. As the installation of torch
+depends highly on the architecture you are using, <code class="docutils literal notranslate"><span class="pre">torch</span></code> will not
+automatically be installed alongside MALA. Please obtain a suitable version
+of <code class="docutils literal notranslate"><span class="pre">torch</span></code> from the <a class="reference external" href="https://pytorch.org/">official website</a> before
+continuing.</p>
+</div>
+<div class="section" id="installing-the-python-library">
+<h2>Installing the Python library<a class="headerlink" href="#installing-the-python-library" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>Download the MALA repository, e.g., with <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">git&#64;github.com:mala-project/mala.git</span></code></p></li>
+<li><p>Change into the directory you cloned the repository to</p></li>
+<li><p>Install MALA via <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.[options]</span></code></p></li>
+</ul>
+<p>The following options are available:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">dev</span></code>: Installs <code class="docutils literal notranslate"><span class="pre">bump2version</span></code> which is needed to correctly increment
+the version and thus needed for large code development (developers)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">opt</span></code>: Installs <code class="docutils literal notranslate"><span class="pre">oapackage</span></code>, so that the orthogonal array
+method may be used for large scale hyperparameter optimization (advanced users)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test</span></code>: Installs <code class="docutils literal notranslate"><span class="pre">pytest</span></code> which allows users to test the code (developers)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">doc</span></code>: Installs all dependencies for building the documentary locally (developers)</p></li>
+</ul>
+</div>
+<div class="section" id="downloading-and-adding-example-data-recommended">
+<h2>Downloading and adding example data (Recommended)<a class="headerlink" href="#downloading-and-adding-example-data-recommended" title="Permalink to this headline"></a></h2>
+<p>The examples and tests need additional data to run. The MALA team provides a
+<a class="reference external" href="https://github.com/mala-project/test-data">data repository</a>. Please be sure
+to check out the correct tag for the data repository, since the data repository
+itself is subject to ongoing development as well.</p>
+<p>Also make sure to have the <a class="reference external" href="https://git-lfs.com/">Git LFS</a> installed on your
+machine, since the data repository operates using Git LFS to handle large
+binary files for example training data.</p>
+<ul class="simple">
+<li><p>Download data repository and check out correct tag:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/mala-project/test-data<span class="w"> </span>~/path/to/data/repo
+<span class="nb">cd</span><span class="w"> </span>~/path/to/data/repo
+git<span class="w"> </span>checkout<span class="w"> </span>v1.7.0
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Export the path to that repo by <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">MALA_DATA_REPO=~/path/to/data/repo</span></code></p></li>
+</ul>
+<p>This will be used by tests and examples.</p>
+</div>
+<div class="section" id="build-documentation-locally-optional">
+<h2>Build documentation locally (Optional)<a class="headerlink" href="#build-documentation-locally-optional" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>Install the prerequisites (if you haven’t already during the MALA setup) via <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">docs/requirements.txt</span></code></p></li>
+<li><p>Change into <code class="docutils literal notranslate"><span class="pre">docs/</span></code> folder.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">apidocs</span></code> on Linux/macOS or <code class="docutils literal notranslate"><span class="pre">.\make.bat</span> <span class="pre">apidocs</span></code> on Windows.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span></code> on Linux/macOS or <code class="docutils literal notranslate"><span class="pre">.\make.bat</span> <span class="pre">html</span></code> on Windows. This creates a <code class="docutils literal notranslate"><span class="pre">_build</span></code> folder inside <code class="docutils literal notranslate"><span class="pre">docs</span></code>. You may also want to use <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span> <span class="pre">SPHINXOPTS=&quot;-W&quot;</span></code> sometimes. This treats warnings as errors and stops the output at first occurence of an error (useful for debugging rST syntax).</p></li>
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">docs/_build/html/index.html</span></code>.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code> on Linux/macOS or <code class="docutils literal notranslate"><span class="pre">.\make.bat</span> <span class="pre">clean</span></code> on Windows. if required (e.g. after fixing erros) and building again</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="installing_lammps.html" class="btn btn-neutral float-right" title="Installing LAMMPS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

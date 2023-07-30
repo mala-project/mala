@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basic hyperparameter optimization &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Using ML-DFT models for predictions" href="predictions.html" />
+    <link rel="prev" title="Data generation and conversion" href="more_data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../basic_usage.html">Getting started with MALA</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="trainingmodel.html">Training an ML-DFT model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="more_data.html">Data generation and conversion</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Basic hyperparameter optimization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#list-of-hyperparameters">List of hyperparameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="predictions.html">Using ML-DFT models for predictions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../basic_usage.html">Getting started with MALA</a> &raquo;</li>
+      <li>Basic hyperparameter optimization</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/basic_usage/hyperparameters.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="basic-hyperparameter-optimization">
+<h1>Basic hyperparameter optimization<a class="headerlink" href="#basic-hyperparameter-optimization" title="Permalink to this headline"></a></h1>
+<p>With new data, it may be necessary to determine the hyperparameters we
+assumed to be correct up until now manually. By default, MALA uses the
+<a class="reference external" href="https://optuna.org/">optuna library</a> to tune hyperparameters.
+<a class="reference internal" href="../advanced_usage/hyperparameters.html#advanced-hyperparams"><span class="std std-ref">Advanced/experimental hyperparameter optimization strategies</span></a> are available as
+well. This guide follows example <code class="docutils literal notranslate"><span class="pre">ex04_hyperparameter_optimization</span></code></p>
+<p>In order to tune hyperparameters,
+we first have to create a <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> object, specify parameters,
+create a <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> object and fill it with data. These steps are
+essentially the same as the ones in the <a class="reference internal" href="trainingmodel.html"><span class="doc">training example</span></a>.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Parameters</span><span class="p">()</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">input_rescaling_type</span> <span class="o">=</span> <span class="s2">&quot;feature-wise-standard&quot;</span>
+<span class="o">...</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">datahandler</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">DataHandler</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+<span class="n">datahandler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">datahandler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="n">data_handler</span><span class="o">.</span><span class="n">prepare_data</span><span class="p">()</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>There are two noteworthy differences: Firstly, we do not have to specify
+hyperparameters object when customizing the <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> object that we
+may want to tune later on; further, we have to specify the number of trials
+via <code class="docutils literal notranslate"><span class="pre">n_trials</span></code>. A <em>trial</em> is a candidate network/training strategy that is
+tested by the hyperparameter optimization algorithm. Each hyperparameter
+optimization <em>study</em> consists of multiple such trials, in which several
+combinations of hyperparameters of interest are investigated and the best
+one is identified.</p>
+<p>The interface for adding hyperparameters to a study in MALA is</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hyperoptimizer</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">HyperOpt</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">data_handler</span><span class="p">)</span>
+<span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">add_hyperparameter</span><span class="p">(</span><span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="s2">&quot;learning_rate&quot;</span><span class="p">,</span>
+                                  <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="mf">0.005</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.015</span><span class="p">])</span>
+<span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">add_hyperparameter</span><span class="p">(</span>
+    <span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="s2">&quot;ff_neurons_layer_00&quot;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">96</span><span class="p">])</span>
+<span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">add_hyperparameter</span><span class="p">(</span>
+    <span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="s2">&quot;ff_neurons_layer_01&quot;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">96</span><span class="p">])</span>
+<span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">add_hyperparameter</span><span class="p">(</span><span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="s2">&quot;layer_activation_00&quot;</span><span class="p">,</span>
+                                  <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;ReLU&quot;</span><span class="p">,</span> <span class="s2">&quot;Sigmoid&quot;</span><span class="p">,</span> <span class="s2">&quot;LeakyReLU&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Here, we have added the learning rate, number of neurons for two hidden NN
+layers and the activation function in between to the hyperparameter
+optimization. A reference list for potential hyperparameters and choices
+is explained at the end of this section.</p>
+<p>Once we have decided on hyperparameters, the actual hyperparameter optimization
+can easily be accessed with</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">perform_study</span><span class="p">()</span>
+<span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">set_optimal_parameters</span><span class="p">()</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The last command saves the determined, optimal hyperparameters to the
+<code class="docutils literal notranslate"><span class="pre">Parameters</span></code> object used in the script. The parameters can then easily
+be saved to a <code class="docutils literal notranslate"><span class="pre">.json</span></code> file and loaded later, e.g., for training a new model.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">perform_study</span><span class="p">()</span>
+<span class="n">params</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Parameters</span><span class="o">.</span><span class="n">load_from_file</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<div class="section" id="list-of-hyperparameters">
+<h2>List of hyperparameters<a class="headerlink" href="#list-of-hyperparameters" title="Permalink to this headline"></a></h2>
+<p>For in-depth description of how hyperparameter optimization works and an
+extended explanation of parameters, please refer to the MALA publication
+on <a class="reference external" href="https://doi.org/10.1088/2632-2153/ac9956">hyperparameter optimization</a>.</p>
+<p>MALA follows the optuna library in its nomenclature of hyperparameters. That
+means, among other things, that each hyperparameter can either be</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;categorical&quot;</span></code> - a list of float values will be given as optimization space</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;float&quot;</span></code> - a lower and upper bound will be given as the optimization space, and the hyperparameter can be any real number in between</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;int&quot;</span></code> - a lower and upper bound will be given as the optimization space, and the hyperparameter can be any integer value in between</p></li>
+</ul>
+<p>The following hyperparameters can be optimized, all of which correspond to
+properties of the <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> class:</p>
+<table class="colwidths-given docutils align-default" id="id1">
+<caption><span class="caption-text">List of hyperparameters</span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 14%" />
+<col style="width: 29%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name of the hyperparameter</p></th>
+<th class="head"><p>Meaning</p></th>
+<th class="head"><p>Linked parameter object</p></th>
+<th class="head"><p>Possible choices</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;learning_rate&quot;</span></code></p></td>
+<td><p>Learning rate of NN optimization (step size of gradient based optimizer)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">running.learning_rate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;float&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;categorical&quot;</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;ff_multiple_layers_neurons&quot;</span></code> /  <code class="docutils literal notranslate"><span class="pre">&quot;ff_multiple_layers_count&quot;</span></code></p></td>
+<td><p>Always have to be used together and are
+mutually exclusive with <code class="docutils literal notranslate"><span class="pre">&quot;ff_neurons_layer&quot;</span></code>. When using these options,
+the hyperparameter search will add multiple layers of the same size.
+<code class="docutils literal notranslate"><span class="pre">&quot;ff_multiple_layers_count&quot;</span></code> governs the number of layers added per
+trial, <code class="docutils literal notranslate"><span class="pre">&quot;ff_multiple_layers_neurons&quot;</span></code> the number of neurons per
+such layer.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">network.layer_sizes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;int&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;categorical&quot;</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;ff_neurons_layer_XX&quot;</span></code></p></td>
+<td><p>Number of neurons per layer. This is the primary tuning parameter
+to optimize the network architecture. One such parameter has to
+be added per potential NN layer, which is done by setting, e.g.,
+<code class="docutils literal notranslate"><span class="pre">&quot;ff_neurons_layer_00&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;ff_neurons_layer_01&quot;</span></code>, etc.;
+By including 0 in the list of choices, layers can be deactivted
+during the optimization.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">network.layer_sizes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;int&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;categorical&quot;</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;trainingtype&quot;</span></code></p></td>
+<td><p>Optimization algorithm used during the NN optimization.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">running.trainingtype</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;categorical&quot;</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;mini_batch_size&quot;</span></code></p></td>
+<td><p>Size of the mini batches used to calculate the gradient during
+the gradient-based NN optimization.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">running.mini_batch_size</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;int&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;categorical&quot;</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;early_stopping_epochs&quot;</span></code></p></td>
+<td><p>If the validation loss does not decrease for this number of epochs,
+training is stopped.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">running.early_stopping_epochs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;int&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;categorical&quot;</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;learning_rate_patience&quot;</span></code></p></td>
+<td><p>If the validation loss does not decrease for this number of epochs,
+the learning rate is adjusted according to <code class="docutils literal notranslate"><span class="pre">running.learning_rate_patience</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">running.learning_rate_patience</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;int&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;categorical&quot;</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;learning_rate_decay&quot;</span></code></p></td>
+<td><p>If the validation loss plateaus, then the learning rate is scaled by
+this factor. Should be smaller than zero.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">running.learning_rate_decay</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;float&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;categorical&quot;</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;layer_activation&quot;</span></code></p></td>
+<td><p>Describes the activation functions used in the NN. Can either be a list
+used in the same fashion as <code class="docutils literal notranslate"><span class="pre">&quot;ff_neurons_layer_XX&quot;</span></code>, i.e.,
+one hyperparameter per layer, or by only giving one hyperparameter,
+in which case all layers will use the same activation function.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">network.layer_activation</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;categorical&quot;</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="more_data.html" class="btn btn-neutral float-left" title="Data generation and conversion" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="predictions.html" class="btn btn-neutral float-right" title="Using ML-DFT models for predictions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

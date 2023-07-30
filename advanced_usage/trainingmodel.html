@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Improved training performance &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Storing data with OpenPMD" href="openpmd.html" />
+    <link rel="prev" title="Advanced options" href="../advanced_usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../advanced_usage.html">Advanced options</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Improved training performance</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-a-gpu">Using a GPU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-training-metrics">Advanced training metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#checkpointing-a-training-run">Checkpointing a training run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-lazy-loading">Using lazy loading</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-tensorboard">Using tensorboard</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="openpmd.html">Storing data with OpenPMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="descriptors.html">Improved data conversion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hyperparameters.html">Improved hyperparameter optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="predictions.html">Using MALA in production</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../advanced_usage.html">Advanced options</a> &raquo;</li>
+      <li>Improved training performance</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/advanced_usage/trainingmodel.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="improved-training-performance">
+<span id="advanced-training"></span><h1>Improved training performance<a class="headerlink" href="#improved-training-performance" title="Permalink to this headline"></a></h1>
+<p>MALA offers a options to make training available at large scales in reasonable
+amounts of time. The general training workflow is the same as outlined in the
+basic section; the advanced features can be activated by setting
+the appropriate parameters in the <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> object.</p>
+<div class="section" id="using-a-gpu">
+<h2>Using a GPU<a class="headerlink" href="#using-a-gpu" title="Permalink to this headline"></a></h2>
+<p>The simplest way to accelerate any NN training is to use a GPU for training.
+Training NNs on GPUs is a well established industry practice and yields
+huge speedups. MALA supports GPU training. You have to activate
+GPU usage via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Parameters</span><span class="p">()</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">use_gpu</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Afterwards, the entire training will be performed on the GPU - given that
+a GPU is available.</p>
+<p>In cooperation with <a class="reference external" href="https://www.nvidia.com/de-de/deep-learning-ai/solutions/machine-learning/">Nvidia</a>,
+advanced GPU performance optimizations have been implemented into MALA.
+Namely, you can enable the following options:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">use_gpu</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># True: Use GPU</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Multiple workers allow for faster data processing, but require</span>
+<span class="sd">additional CPU/RAM power. A good setup is e.g. using 4 CPUs attached</span>
+<span class="sd">to one GPU and setting the num_workers to 4.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># set to e.g. 4</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">MALA supports a faster implementation of the TensorDataSet class</span>
+<span class="sd">from the torch library. Turning it on will drastically improve</span>
+<span class="sd">performance.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">use_fast_tensor_data_set</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># True: Faster data loading</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Likewise, using CUDA graphs improve performance by optimizing GPU</span>
+<span class="sd">usage. Be careful, this option is only availabe from CUDA 11.0 onwards.</span>
+<span class="sd">CUDA graphs will be most effective in cases that are latency-limited,</span>
+<span class="sd">e.g. small models with shorter epoch times.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">use_graphs</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># True: Better GPU utilization</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Using mixed precision can also improve performance, but only if</span>
+<span class="sd">the model is large enough.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">use_mixed_precision</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># True: Improved performance for large models</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>These options aim at different performance bottlenecks in the training and have
+been shown to speed-up training by up to a factor of 5 if used together,
+while maintaining the same prediction accuracy.</p>
+<p>Currently, these options are disabled by default as they are still being tested
+extensively by the MALA team in production. <strong>Yet, activating them is highly recommended!</strong></p>
+</div>
+<div class="section" id="advanced-training-metrics">
+<h2>Advanced training metrics<a class="headerlink" href="#advanced-training-metrics" title="Permalink to this headline"></a></h2>
+<p>When monitoring an NN training, one often checks the validation loss, which
+is directly outputted by MALA. By default, this validation loss gives the
+mean squared error between LDOS prediction and actual value. From a purely
+ML point of view, this is fine; however, the correctness of the LDOS itself
+does not hold much physical virtue. Thus, MALA implements physical validation
+metrics to be accessed before and after the training routine.</p>
+<p>Specifically, when setting</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">after_before_training_metric</span> <span class="o">=</span> <span class="s2">&quot;band_energy&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>the error in the band energy between actual and predicted LDOS will be
+calculated and printed before and after network training (in meV/atom).
+This is a much more intuitive metric to judge network performance, since
+it is easily phyiscally interpretable. If the error is, e.g., 5 meV/atom, one
+can expect the network to be reasonably accurate; values of, e.g., 100 meV/atom
+hint at bad model performance. Of course, the final metric for the accuracy
+should always be the results of the <code class="docutils literal notranslate"><span class="pre">Tester</span></code> class.</p>
+<p>Please make sure to set the relevant LDOS parameters when using this property
+via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">=</span> <span class="mi">11</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span> <span class="o">=</span> <span class="mf">2.5</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span> <span class="o">=</span> <span class="o">-</span><span class="mi">5</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="checkpointing-a-training-run">
+<h2>Checkpointing a training run<a class="headerlink" href="#checkpointing-a-training-run" title="Permalink to this headline"></a></h2>
+<p>NN training can take a long time, and on HPC systems, where they are usually
+performed, there exist time limitations for calculations. Thus, it is often
+necessary to checkpoint a training run and resume it at a later point.
+MALA provides functionality for this, as shown in the example <code class="docutils literal notranslate"><span class="pre">advanced/ex01_checkpoint_training.py</span></code>.
+To use checkpointing, enable the feature in the <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> object:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">checkpoints_each_epoch</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">checkpoint_name</span> <span class="o">=</span> <span class="s2">&quot;ex01_checkpoint&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Simply set an interval for checkpointing and a name for the checkpoint and
+the training will automatically be checkpointed. Automatic resumption
+from a checkpoint can trivially be implemented via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">mala</span><span class="o">.</span><span class="n">Trainer</span><span class="o">.</span><span class="n">run_exists</span><span class="p">(</span><span class="s2">&quot;ex01_checkpoint&quot;</span><span class="p">):</span>
+    <span class="n">parameters</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">datahandler</span><span class="p">,</span> <span class="n">trainer</span> <span class="o">=</span> \
+        <span class="n">mala</span><span class="o">.</span><span class="n">Trainer</span><span class="o">.</span><span class="n">load_run</span><span class="p">(</span><span class="s2">&quot;ex01_checkpoint&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">parameters</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">datahandler</span><span class="p">,</span> <span class="n">trainer</span> <span class="o">=</span> <span class="n">initial_setup</span><span class="p">()</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Where <code class="docutils literal notranslate"><span class="pre">initial_setup()</span></code> encapsulates the training run setup.</p>
+</div>
+<div class="section" id="using-lazy-loading">
+<h2>Using lazy loading<a class="headerlink" href="#using-lazy-loading" title="Permalink to this headline"></a></h2>
+<p>Lazy loading was already briefly mentioned during the testing of a network.
+To recap, the idea of lazy loading is to incrementally load data into
+memory so as to save on RAM usage in cases where large amounts of data are
+involved. To use lazy loading, enable it by:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">use_lazy_loading</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>MALA lazy loading operates snapshot wise - that means if lazy loading is
+enabled, one snapshot at a time is loaded into memory, processed, unloaded,
+and the next one is selected. Thus, lazy loading <em>will</em> adversely
+affect performance. One way to mitigate this is to use multiple CPUs to
+load and prepare data, i.e., while one CPU is busy processing data/offloading
+it to GPU, another CPU can already load the next snapshot into memory.
+To use this so called “prefetching” feature, enable the corresponding
+parameter via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">use_lazy_loading_prefetch</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Please note that in order to use this feature, you have to assign enough
+CPUs and memory to your calculation.</p>
+<p>Apart from performance, there is an accuracy drawback when employing
+lazy loading. It is well known that ML algorithms perform optimal when
+individual training data points are accessed individually. This, however,
+is not naively possible when using lazy loading - since data is not loaded
+into memory completely at one point, data cannot be easily randomized.
+This can impact accuracy very negatively for complicated data sets,
+as briefly discussed in the MALA publication on
+<a class="reference external" href="https://arxiv.org/abs/2306.06032">temperature transferability of ML-DFT models</a>.</p>
+<p>To circumvent this problem, MALA provides functionality to shuffle data from
+multiple atomic snapshots in snapshot-like files, which can then be used
+with lazy loading, guaranteeing randomized access to individual data points.
+Currently, this method requires additional disk space, since the randomized
+data sets have to be saved - in-memory implementations are currently developed.
+To use the data shuffling (also shown in example
+<code class="docutils literal notranslate"><span class="pre">advanced/ex02_shuffle_data.py</span></code>), you can use the <code class="docutils literal notranslate"><span class="pre">DataShuffler</span></code> class.</p>
+<p>The syntax is very easy, you create a <code class="docutils literal notranslate"><span class="pre">DataShufller</span></code> object,
+which provides the same <code class="docutils literal notranslate"><span class="pre">add_snapshot</span></code> functionalities as the <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code>
+object, and shuffle the data once you have added all snapshots in question,
+i.e.,</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shuffling_seed</span> <span class="o">=</span> <span class="mi">1234</span>
+
+<span class="n">data_shuffler</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">DataShuffler</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+<span class="n">data_shuffler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot0.in.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span>
+                           <span class="s2">&quot;Be_snapshot0.out.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">)</span>
+<span class="n">data_shuffler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot1.in.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span>
+                           <span class="s2">&quot;Be_snapshot1.out.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">)</span>
+<span class="n">data_shuffler</span><span class="o">.</span><span class="n">shuffle_snapshots</span><span class="p">(</span><span class="n">complete_save_path</span><span class="o">=</span><span class="s2">&quot;../&quot;</span><span class="p">,</span>
+                                <span class="n">save_name</span><span class="o">=</span><span class="s2">&quot;Be_shuffled*&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The seed <code class="docutils literal notranslate"><span class="pre">parameters.data.shuffling_seed</span></code> ensures reproducibility of data
+sets. The <code class="docutils literal notranslate"><span class="pre">shuffle_snapshots</span></code> function has a path handling ability akin to
+the <code class="docutils literal notranslate"><span class="pre">DataConverter</span></code> class. Further, via the <code class="docutils literal notranslate"><span class="pre">number_of_shuffled_snapshots</span></code>
+keyword, you can fine-tune the number of new snapshots being created.
+By default, the same number of snapshots as had been provided will be created
+(if possible).</p>
+</div>
+<div class="section" id="using-tensorboard">
+<h2>Using tensorboard<a class="headerlink" href="#using-tensorboard" title="Permalink to this headline"></a></h2>
+<p>Training routines in MALA can be visualized via tensorboard, as also shown
+in the file <code class="docutils literal notranslate"><span class="pre">advanced/ex03_tensor_board</span></code>. Simply enable tensorboard
+visualization prior to training via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 0: No visualizatuon, 1: loss and learning rate, 2: like 1,</span>
+<span class="c1"># but additionally weights and biases are saved</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">visualisation</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">visualisation_dir</span> <span class="o">=</span> <span class="s2">&quot;mala_vis&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>where <code class="docutils literal notranslate"><span class="pre">visualisation_dir</span></code> specifies some directory in which to save the
+MALA visualization data. Afterwards, you can run the training without any
+other modifications. Once training is finished (or during training, in case
+you want to use tensorboard to monitor progress), you can launch tensorboard
+via</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tensorboard<span class="w"> </span>--logdir<span class="w"> </span>path_to_visualization
+</pre></div>
+</div>
+</div></blockquote>
+<p>The full path for <code class="docutils literal notranslate"><span class="pre">path_to_visualization</span></code> can be accessed via
+<code class="docutils literal notranslate"><span class="pre">trainer.full_visualization_path</span></code>.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../advanced_usage.html" class="btn btn-neutral float-left" title="Advanced options" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="openpmd.html" class="btn btn-neutral float-right" title="Storing data with OpenPMD" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
