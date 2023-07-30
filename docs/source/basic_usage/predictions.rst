@@ -9,7 +9,7 @@ this topic, performance tweaks and extended access to observables are covered.
 In order to get direct access to electronic structure via ML, MALA uses
 the ``Predictor`` class. Provided that the trained model was saved with
 all the necessary information on the bispectrum descriptors and the LDOS,
-no further parameters have to be set here. You simply have to load the
+no further parameters have to be set here. You have to load the
 model and acquire atomic positions (e.g., from a previous molecular dynamics
 simulation or other source) via
 
@@ -22,7 +22,7 @@ simulation or other source) via
             atoms = ase.io.read(...)
 
 Please note that MALA interfaces are `ASE <https://wiki.fysik.dtu.dk/ase/>`_
-compatible. ASE is a powerful library for atomistic modeling in python,
+compatible. ASE is a powerful library for atomistic modeling in Python,
 providing functionalities such as a format for atomic structures and
 interfaces to simulation software. Having such an atomic configuration
 in the form of a ``ase.Atoms`` object, a prediction can
@@ -61,7 +61,7 @@ calculators exist for many simulation codes, such as Quantum ESPRESSO,
 GPAW, etc.
 
 The merit of using the MALA ASE calculator is that existing workflows
-do not have to be altered - they can simply be performed faster with
+do not have to be altered - they can be performed faster with
 the power of ML. Usage is fairly simple, first, a model is loaded as an
 ASE calculator and set a pseudopotential path
 
@@ -70,13 +70,13 @@ ASE calculator and set a pseudopotential path
             calculator = mala.MALA.load_model("be_model")
             calculator.mala_parameters.targets.pseudopotential_path = ...
 
-Please note that the ``mala_parameters`` property is simply the ``Parameters``
+Please note that the ``mala_parameters`` property is the ``Parameters``
 object with which the calculator was created/loaded and can be used
 just as a ``Parameters`` object to adjust inference settings
 . It is not called ``parameters`` since that keyword is already
 in use by ASE itself.
 
-Afterwards, simply define/load an ASE atoms object, set the ``MALA`` object
+Afterwards, define/load an ASE atoms object, set the ``MALA`` object
 as a calculator and use the ASE interface to perform the calculation.
 
       .. code-block:: python

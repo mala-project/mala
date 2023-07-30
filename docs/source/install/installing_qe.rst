@@ -5,7 +5,7 @@ Prerequisites
 *************
 
 To run the total energy module, you need a full Quantum ESPRESSO installation,
-for which to install the python bindings. This module has been tested with
+for which to install the Python bindings. This module has been tested with
 version ``7.2.``, the most recent version upon this release of MALA. Newer
 versions may work (untested), but installation instructions may vary.
 
@@ -35,7 +35,7 @@ Build Quantum ESPRESSO
 * Change to the  ``external_modules/total_energy_module`` directory of the
   MALA repository
 
-Installing the python extension
+Installing the Python extension
 ********************************
 
 * Run ``build_total_energy_energy_module.sh /path/to/your/q-e``.
@@ -43,7 +43,7 @@ Installing the python extension
   * If the build is successful, a file named something like
     ``total_energy.cpython-39m-x86_64-linux-gnu.so`` will be generated. This is
     the Python extension module.
-* Add the ``external_modules/total_energy_module`` directory to your python
+* Add the ``external_modules/total_energy_module`` directory to your Python
   path, e.g. via ``export PYTHONPATH=/path/to/mala/external_modules/total_energy_module:$PYTHONPATH``
 * Now you can use ``import total_energy`` to access the total energy module
 * The MALA test suite will test the total energy module

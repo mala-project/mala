@@ -44,7 +44,7 @@ of parameters. One way to accelerate the process is through a
 search on N CPUs/GPUs - each processing one specific trial. The results
 are collected in a central data base, which is accessed by each of the N
 ranks individually upon starting new trials. This is not a MALA feature itself,
-but rather a feature of the optuna library, that MALA simply implements and
+but rather a feature of the optuna library, that MALA implements and
 gives easy access to.
 
 Database handling is done via SQL. Several SQL frameworks exists, and
@@ -55,7 +55,7 @@ hyperparameter optimization can be found in the file
 
 Distributed hyperparameter optimization works the same as regular
 hyperparameter optimization; parameter, data and optimizer setup do not have
-to be altered. You simply have to specify the data base (and a name for the
+to be altered. You have to specify the data base (and a name for the
 study, since multiple studies may be saved in the same data base) to be used,
 e.g.,
 
@@ -73,7 +73,7 @@ websites.
 
 Once this parameter is set, the MALA-optuna interface will automatically use
 this database to store and initialize all trials. If you then execute the
-hyperparameter optimization python script *multiple* times, the hyperparameter
+hyperparameter optimization Python script *multiple* times, the hyperparameter
 optimization will be parallel - no further changes to the code are necessary.
 
 On an HPC cluster, it may be prudent to launch the script multiple times

@@ -2,7 +2,7 @@ Data generation and conversion
 ===============================
 
 MALA operates on volumetric data. Volumetric data is stored in binary files.
-By default - and discussed here, in the introductory guide - this simply
+By default - and discussed here, in the introductory guide - this
 means ``numpy`` files (``.npy`` files). Advanced data storing techniques
 are :ref:`also available <openpmd data>`
 
@@ -62,7 +62,7 @@ simulation. Namely, ``ldos_gridsize`` governs how many discretized energy
 values are included in the energy grid upon which the LDOS is sampled,
 ``ldos_gridspacing_ev`` governs how far these values are apart and
 ``ldos_gridoffset_ev`` determines the lowest energy value sampled. These values
-are chosen for the ``pp.x`` simulation and simply have to be given here.
+are chosen for the ``pp.x`` simulation and have to be given here.
 
 For the bispectrum calculation, ``bispectrum_cutoff`` gives the radius of
 the cutoff sphere from which information on the atomic structure is incoporated
@@ -106,7 +106,7 @@ processing. In the preceding section, we had to specify calculation output
 files a number of times - instead, we can use the reduced ``.json`` files
 if we let them be created by the ``DataConverter`` class.
 
-Once data is provided, the conversion itself is simply.
+Once data is provided, the conversion itself is simple.
 
       .. code-block:: python
 

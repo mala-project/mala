@@ -5,7 +5,7 @@ Improved training performance
 
 MALA offers a options to make training available at large scales in reasonable
 amounts of time. The general training workflow is the same as outlined in the
-basic section; the advanced features can simply be activated by setting
+basic section; the advanced features can be activated by setting
 the appropriate parameters in the ``Parameters`` object.
 
 Using a GPU
@@ -13,7 +13,7 @@ Using a GPU
 
 The simplest way to accelerate any NN training is to use a GPU for training.
 Training NNs on GPUs is a well established industry practice and yields
-huge speedups. MALA supports GPU training. You simply have to activate
+huge speedups. MALA supports GPU training. You have to activate
 GPU usage via
 
       .. code-block:: python
@@ -103,7 +103,7 @@ NN training can take a long time, and on HPC systems, where they are usually
 performed, there exist time limitations for calculations. Thus, it is often
 necessary to checkpoint a training run and resume it at a later point.
 MALA provides functionality for this, as shown in the example ``advanced/ex01_checkpoint_training.py``.
-To use checkpointing, simply enable the feature in the ``Parameters`` object:
+To use checkpointing, enable the feature in the ``Parameters`` object:
 
       .. code-block:: python
 
@@ -130,7 +130,7 @@ Using lazy loading
 Lazy loading was already briefly mentioned during the testing of a network.
 To recap, the idea of lazy loading is to incrementally load data into
 memory so as to save on RAM usage in cases where large amounts of data are
-involved. To use lazy loading, simply enable it by:
+involved. To use lazy loading, enable it by:
 
       .. code-block:: python
 
@@ -143,7 +143,7 @@ and the next one is selected. Thus, lazy loading **will*** adversely
 affect performance. One way to mitigate this is to use multiple CPUs to
 load and prepare data, i.e., while one CPU is busy processing data/offloading
 it to GPU, another CPU can already load the next snapshot into memory.
-To use this so called "prefetching" feature, simply enable the corresponding
+To use this so called "prefetching" feature, enable the corresponding
 parameter via
 
       .. code-block:: python
@@ -170,7 +170,7 @@ data sets have to be saved - in-memory implementations are currently developed.
 To use the data shuffling (also shown in example
 ``advanced/ex02_shuffle_data.py``), you can use the ``DataShuffler`` class.
 
-The syntax is very easy, you simply create a ``DataShufller`` object,
+The syntax is very easy, you create a ``DataShufller`` object,
 which provides the same ``add_snapshot`` functionalities as the ``DataHandler``
 object, and shuffle the data once you have added all snapshots in question,
 i.e.,

@@ -25,7 +25,7 @@ The MALA team recommends to build LAMMPS with ``cmake``. To do so
   ``cmake ../cmake -D OPTION1 -D OPTION2 ...``; Options for a typical LAMMPS
   build for usage with MALA:
 
-  * ``BUILD_SHARED_LIBS=yes``: Necessary to link the LAMMPS library to python
+  * ``BUILD_SHARED_LIBS=yes``: Necessary to link the LAMMPS library to Python
   * ``PKG_ML-SNAP=yes``: Enables the calculation of SNAP descriptors with LAMMPS
   * ``BUILD_MPI=yes``: Enables MPI aware calculations; set this option if
     plan to use MPI and have an MPI aware compiler loaded
@@ -43,13 +43,13 @@ The MALA team recommends to build LAMMPS with ``cmake``. To do so
 * Build the library and executable with ``cmake --build .``
   (Add ``--parallel=8`` for a faster build)
 
-Installing the python extension
+Installing the Python extension
 ********************************
 
 
 * After successfully having built LAMMPS, Change into the ``python`` folder of the LAMMPS code
 * ``python3 install.py -p lammps -l ../<build_folder>/liblammps.so -v ../src/version.h``, where
   ``<build_folder>`` is whatever folder you performed the ``cmake`` build in
-* Note: The python installation process may give an ``shutil.SameFileError``
+* Note: The Python installation process may give an ``shutil.SameFileError``
   after successful installation; this is LAMMPS related and can be ignored
   here.

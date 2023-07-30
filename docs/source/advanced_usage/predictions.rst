@@ -5,7 +5,7 @@ Using MALA in production
 
 MALA is aimed at providing ML-DFT models for large scale investigations.
 Predictions at scale in principle work just like the predictions shown
-in the basic guide. One simply has to set a few additional parameters to make
+in the basic guide. One has to set a few additional parameters to make
 optimal use of the hardware at hand.
 
 MALA ML-DFT models can be used for predictions at system sizes and temperatures
@@ -72,7 +72,7 @@ workflow has to be changed. Simply enable MPI usage in MALA
             parameters.use_mpi = True
 
 Please be aware that GPU and MPI usage are mutually exclusive for inference
-at the moment. Once MPI is activated, you can start the MPI aware python script
+at the moment. Once MPI is activated, you can start the MPI aware Python script
 with a large number of CPUs to simulate materials at large length scales.
 
 By default, MALA can only operate with a number of CPUs by which the
@@ -130,6 +130,6 @@ of interest for visualization via
 
 With the exception of the electronic density, which is saved into the ``.cube``
 format for visualization with regular electronic structure visualization
-software, all of these observables can be plotted with python based
+software, all of these observables can be plotted with Python based
 visualization libraries such as ``matplotlib``.
 

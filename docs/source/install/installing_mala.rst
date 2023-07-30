@@ -4,8 +4,8 @@ Installing MALA
 Prerequisites
 **************
 
-MALA does not depend on a specific python version. The most recent python
-version it has been tested with successfully is python ``3.10.4``.
+MALA does not depend on a specific Python version. The most recent Python
+version it has been tested with successfully is Python ``3.10.4``.
 
 MALA requires ``torch`` in order to function. This the installation of torch
 depends highly on the architecture you are using, ``torch`` will not
@@ -13,7 +13,7 @@ automatically be installed alongside MALA. Please obtain a suitable version
 of ``torch`` from the `official website <https://pytorch.org/>`_ before
 continuing.
 
-Installing the python library
+Installing the Python library
 *****************************
 
 * Download the MALA repository, e.g., with ``git clone git@github.com:mala-project/mala.git``

@@ -65,7 +65,7 @@ data sets, optimal values have to be determined via :doc:`hyperparameter optimiz
 Finally, it is useful to also save some information on how the LDOS and
 bispectrum descriptors were calculated into the parameters object - this helps
 at inference time, when this info is required. You will learn what these values
-mean :doc:`data generation part <more_data>` of this guide, for now we simply
+mean :doc:`data generation part <more_data>` of this guide, for now we
 use the values consistent with the example data.
 
       .. code-block:: python
@@ -120,7 +120,7 @@ construct those, we have to specify the number of neurons. This is also done
 via the ``Parameters`` object. In principle, we can specify the layer sizes
 whenever we want, however, it makes sense to do this *after* the data has been
 loaded, because then it is easier to make sure that the dimensions of the
-layers agree. To build a NN, we simply specify
+layers agree. To build a NN, we specify
 
       .. code-block:: python
 
@@ -165,7 +165,7 @@ on that data.
 
 This verification is done by selecting observables of interest (e.g., the band
 energy, total energy or number of electrons) and comparing ML-DFT predictions
-with the ground truth. To instantiate a ``Tester`` object, simply call
+with the ground truth. To instantiate a ``Tester`` object, call
 
       .. code-block:: python
 
@@ -179,7 +179,7 @@ Finally, it is useful to enable lazy-loading. Lazy-loading is a feature that
 incrementally loads data into memory. It is necessary when operating on large
 amounts of data; its usage in the training routine is further discussed in
 :ref:`the advanced training section <advanced training>`.
-For testing a model, it is simply prudent to enable, since a lot of data may
+For testing a model, it is prudent to enable, since a lot of data may
 be involved. The accompanying syntax for these three options is
 
       .. code-block:: python
@@ -189,7 +189,7 @@ be involved. The accompanying syntax for these three options is
             parameters.data.use_lazy_loading = True
 
 Afterwards, new data can be added just as shown above, now with the data
-function being ``"te"`` for testing data. Once this is done, testing can simply
+function being ``"te"`` for testing data. Once this is done, testing can
 be done via
 
       .. code-block:: python
