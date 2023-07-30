@@ -5,20 +5,21 @@
 ## What is MALA?
 
 MALA is a software package for building ML models that replace
-density functional theory (DFT) calculations. DFT is **the** most
-popular method for simulating materials on a quantum level and predicting 
-materials properties, and employed by researcher throughout the world. 
+density functional theory (DFT) calculations. DFT is one of the most widely 
+used methods for simulating materials at a quantum level and predicting their 
+properties, employed by researchers worldwide.
 
-While DFT is very efficient compared to other quantum mechanical simulation
-techniques, it still scales cubically with number of atoms and temperature 
-simulated, making large scale simulation at arbitrary temperatures very 
-computationally challenging. 
+Although DFT is more efficient compared to other quantum mechanical simulation 
+techniques, it still exhibits cubic scaling with the number of atoms and 
+temperature. This limitation poses significant computational challenges for 
+conducting large-scale simulations.
 
-Therefore, a new direction of research tries to [combine the power of ML with DFT](https://journals.aps.org/prmaterials/abstract/10.1103/PhysRevMaterials.6.040301).
-MALA is at the forefront of these efforts, being the first library to allow 
-users to build ML-DFT models that give **full access to the electronic structure**,
-observables such as the total free energy of the system **and** scale well with
-system size and temperature.
+Recent research activities focus on harnessing the potential of 
+[ML and DFT](https://journals.aps.org/prmaterials/abstract/10.1103/PhysRevMaterials.6.040301).
+MALA leads these efforts by facilitating the construction of ML-DFT models, 
+offering comprehensive access to the electronic structure and observables, 
+including the total free energy of the system. Moreover, MALA ensures 
+scalability with system size and various parameters, such as temperature.
 
 ## How does MALA work? 
 
@@ -27,24 +28,27 @@ The LDOS is an efficient and versatile representation of the electronic
 structure of a material. Based on the LDOS, a range of useful observables can
 be calculated. 
 
-MALA calculates a grid-based representation of any atomic structure presented 
-to it (so called descriptors). These descriptors are then passed through a 
-neural network, a very efficient ML algorithm, to predict the LDOS. This is 
-done individually at each point of the real space grid, allowing for easy 
-scalability and parallelization. 
+MALA calculates a grid-based representation for any given atomic structure 
+(so called descriptors). These descriptors are subsequently fed into a neural 
+network, an efficient ML algorithm, to predict the LDOS.
+The prediction is performed individually at each point of the real space grid, 
+facilitating straightforward scalability and parallelization.
+ 
 
-Afterwards, a range of post-processing features are available within MALA to
-calculate obervables from interest. Just like a DFT calculation - just faster.
-For more detail on the workflow, check out the [first MALA publication](https://www.doi.org/10.1103/PhysRevB.104.035120).
+Subsequently, MALA offers a variety of post-processing features to compute 
+desired observables. Similar to a DFT calculation, but with enhanced speed. 
+For further details on the workflow, refer to the 
+[first MALA publication](https://www.doi.org/10.1103/PhysRevB.104.035120).
 
 
 ## Where to start?
 
-MALA can easily be set up on your system by following the [provided installation instructions.](./installation.rst)
-To familiarize yourself with MALA, check out the [basic usage guide](./basic_usage.rst),
-supplemented by the example files in the repository. 
-MALA also provides ample options for [advanced use](./advanced_usage.rst), to, e.g., improve training
-and inference speed, scale to large systems or visualize results. 
+You can effortlessly set up MALA on your system by following the [installation instructions.](./installation.rst)
+To get acquainted with MALA, explore the [basic usage guide](./basic_usage.rst),
+along with the example files in the repository. 
+Additionally, MALA offers various options for [advanced use](./advanced_usage.rst), 
+allowing you to enhance training and inference speed, scale to large systems, 
+and visualize results. 
 
 If you use MALA in your research, please make sure to [cite accordingly](./citing.rst).
 
@@ -60,12 +64,12 @@ an institute of the [Helmholtz-Zentrum Dresden-Rossendorf](https://www.hzdr.de/)
 
 ## MALA publications 
 
-MALA has been used in a range of publications:
+MALA has been employed in various publications, showcasing its versatility and effectiveness.
 
 - [Accelerating finite-temperature Kohn-Sham density functional theory with deep neural networks](https://www.doi.org/10.1103/PhysRevB.104.035120) (Phys. Rev. B)
   by J. A. Ellis, L. Fiedler, G. A. Popoola, N. A. Modine, J. A. Stephens, A. P. Thompson, A. Cangi, and S. Rajamanickam
 
-  - First MALA publication, introduces the workflow and shwos proof-of-concept 
+  - First MALA publication, introduces the workflow and shows proof-of-concept 
     resultsfor Aluminium at room temperature and across the melting point
 
 - [Training-free hyperparameter optimization of neural networks for electronic structures in matter](https://doi.org/10.1088/2632-2153/ac9956) (Mach. Learn.: Sci. Technol.)

@@ -1,16 +1,18 @@
 # Contributions
 
-MALA is open source software and based on the work of many people. 
-The MALA team always welcomes contributions, but kindly asks potential 
-contributors to adhere to the following suggestions in order to keep the 
-overall quality and maintainability of the code high.
+MALA is an open-source software and is built upon the collaborative efforts of 
+many contributors. The MALA team warmly welcomes additional contributions and 
+kindly requests potential contributors to follow the suggested guidelines below
+to ensure the code's overall quality and maintainability.
 
 ## MALA contributors
 
-Many people have contributed to MALA, and we are deeply thankful for it. 
-If you make a contribution to MALA, please add your name to the following, 
-alphabetically ordered list of contributors and feel free to include a note 
-of the nature of your contribution:
+Many people have made valuable contributions to MALA, and we are immensely 
+grateful for their support.
+If you decide to contribute to MALA, please add your name to the following 
+alphabetically ordered list of contributors and include a note of the
+nature of your contribution:
+
 
 - Bartosz Brzoza (Bugfixes, GNN implementation)
 - Timothy Callow (Grid-size transferability)
