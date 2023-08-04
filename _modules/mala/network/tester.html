@@ -192,10 +192,15 @@
 
         <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">observable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observables_to_test</span><span class="p">:</span>
-            <span class="n">results</span><span class="p">[</span><span class="n">observable</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
-                <span class="n">__calculate_observable_error</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">,</span>
-                                             <span class="n">observable</span><span class="p">,</span> <span class="n">predicted_outputs</span><span class="p">,</span>
-                                             <span class="n">actual_outputs</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">observable</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
+                    <span class="n">__calculate_observable_error</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">,</span>
+                                                <span class="n">observable</span><span class="p">,</span> <span class="n">predicted_outputs</span><span class="p">,</span>
+                                                <span class="n">actual_outputs</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">printout</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error calculating observable: </span><span class="si">{</span><span class="n">observable</span><span class="si">}</span><span class="s2"> for snapshot </span><span class="si">{</span><span class="n">snapshot_number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>  <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">printout</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">observable</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
         <span class="k">return</span> <span class="n">results</span></div>
 
 <div class="viewcode-block" id="Tester.predict_targets"><a class="viewcode-back" href="../../../api/mala.network.tester.html#mala.network.tester.Tester.predict_targets">[docs]</a>    <span class="k">def</span> <span class="nf">predict_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;te&#39;</span><span class="p">):</span>
