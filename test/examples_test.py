@@ -1,5 +1,5 @@
 """Test whether the examples are still working."""
-
+import importlib
 import runpy
 
 import pytest
@@ -43,6 +43,9 @@ class TestExamples:
     def test_advanced_ex06(self):
         runpy.run_path("../examples/advanced/ex06_distributed_hyperparameter_optimization.py")
 
+    @pytest.mark.skipif(importlib.util.find_spec("oapackage") is None,
+                        reason="No OAT found on this machine, skipping this "
+                               "test.")
     def test_advanced_ex07(self):
         runpy.run_path("../examples/advanced/ex07_advanced_hyperparameter_optimization.py")
 

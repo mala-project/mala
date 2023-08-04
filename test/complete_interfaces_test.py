@@ -52,6 +52,37 @@ class TestInterfaces:
             else:
                 assert (getattr(new_params, v) == getattr(params, v))
 
+    @pytest.mark.skipif(importlib.util.find_spec("openpmd_api") is None,
+                        reason="No OpenPMD found on this machine, skipping "
+                               "test.")
+    def test_openpmd_io(self):
+        params = mala.Parameters()
+
+        # Read an LDOS and some additional data for it.
+        ldos_calculator = mala.LDOS.\
+            from_numpy_file(params,
+                            os.path.join(data_path,
+                                         "Be_snapshot1.out.npy"))
+        ldos_calculator.\
+            read_additional_calculation_data(os.path.join(data_path,
+                                                          "Be_snapshot1.out"),
+                                             "espresso-out")
+
+        # Write and then read in via OpenPMD and make sure all the info is
+        # retained.
+        ldos_calculator.write_to_openpmd_file("test_openpmd.h5",
+                                              ldos_calculator.
+                                              local_density_of_states)
+        ldos_calculator2 = mala.LDOS.from_openpmd_file(params,
+                                                       "test_openpmd.h5")
+
+        assert np.isclose(np.sum(ldos_calculator.local_density_of_states -
+                                 ldos_calculator.local_density_of_states),
+                          0.0, rtol=accuracy_fine)
+        assert np.isclose(ldos_calculator.fermi_energy_dft,
+                          ldos_calculator2.fermi_energy_dft,
+                          rtol=accuracy_fine)
+
     @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
                         reason="LAMMPS is currently not part of the pipeline.")
     def test_ase_calculator(self):
@@ -193,34 +224,3 @@ class TestInterfaces:
                 assert np.isclose(ldos_calculator.atoms.get_positions()[i, j],
                                   new_ldos_calculator.atoms.get_positions()[i, j],
                                   rtol=accuracy_fine)
-
-    @pytest.mark.skipif(importlib.util.find_spec("openpmd_api") is None,
-                        reason="No OpenPMD found on this machine, skipping "
-                               "test.")
-    def test_openpmd_io(self):
-        params = mala.Parameters()
-
-        # Read an LDOS and some additional data for it.
-        ldos_calculator = mala.LDOS.\
-            from_numpy_file(params,
-                            os.path.join(data_path,
-                                         "Be_snapshot1.out.npy"))
-        ldos_calculator.\
-            read_additional_calculation_data(os.path.join(data_path,
-                                                          "Be_snapshot1.out"),
-                                             "espresso-out")
-
-        # Write and then read in via OpenPMD and make sure all the info is
-        # retained.
-        ldos_calculator.write_to_openpmd_file("test_openpmd.h5",
-                                              ldos_calculator.
-                                              local_density_of_states)
-        ldos_calculator2 = mala.LDOS.from_openpmd_file(params,
-                                                       "test_openpmd.h5")
-
-        assert np.isclose(np.sum(ldos_calculator.local_density_of_states -
-                                 ldos_calculator.local_density_of_states),
-                          0.0, rtol=accuracy_fine)
-        assert np.isclose(ldos_calculator.fermi_energy_dft,
-                          ldos_calculator2.fermi_energy_dft,
-                          rtol=accuracy_fine)
