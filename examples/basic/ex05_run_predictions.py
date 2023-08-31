@@ -1,4 +1,5 @@
 import os
+from importlib.util import find_spec
 
 from ase.io import read
 import mala
@@ -13,7 +14,7 @@ assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
 Show how a prediction can be made using MALA, based on only a
 trained network and atomic configurations.
 
-REQUIRES LAMMPS (and potentiall the total energy module).
+REQUIRES LAMMPS (and potentially the total energy module).
 """
 
 
@@ -37,7 +38,11 @@ ldos = predictor.predict_for_atoms(atoms)
 ldos_calculator: mala.LDOS = predictor.target_calculator
 ldos_calculator.read_from_array(ldos)
 printout("Predicted band energy: ", ldos_calculator.band_energy)
+
 # If the total energy module is installed, the total energy can also be
 # calculated.
-# parameters.targets.pseudopotential_path = data_path
-# printout("Predicted total energy", ldos_calculator.total_energy)
+if find_spec("total_energy"):
+    parameters.targets.pseudopotential_path = data_path
+    printout("Predicted total energy", ldos_calculator.total_energy)
+else:
+    print("total_energy module not found, skipping total energy calculation")
