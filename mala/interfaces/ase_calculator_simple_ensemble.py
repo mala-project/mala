@@ -1,4 +1,4 @@
-"""ASE calculator for MALA predictions."""
+"""ASE SimpleEnsemble calculator for MALA predictions."""
 
 from ase.calculators.calculator import Calculator, all_changes
 import numpy as np
@@ -10,9 +10,7 @@ from mala.interfaces.ase_calculator import MALA
 
 class MALASimpleEnsemble(MALA):
     """
-    Implements an ASE calculator based on MALA predictions.
-
-    With this, MD simulations can be performed.
+    Implements an ASE calculator based on  SimpleEnsemble MALA predictions.
 
     Parameters
     ----------
@@ -153,4 +151,3 @@ class MALASimpleEnsemble(MALA):
 
         """
         raise Exception("Saving currently not implemented for this class.")
-

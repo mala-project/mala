@@ -1,4 +1,3 @@
-"""Tester class for testing a network."""
 import glob
 import os
 from zipfile import ZipFile, ZIP_STORED
@@ -22,7 +21,7 @@ from mala import Parameters
 
 class SimpleEnsemblePredictor(Predictor):
     """
-    A class for running predictions using a neural network.
+    A class for running predictions using a Simple Ensemble of neural networks.
 
     It enables production-level inference.
 
