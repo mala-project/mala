@@ -50,9 +50,9 @@ def train_network_ensemble():
                               additional_calculation_data=additional_calculation_data)
 
 
-# train_network_ensemble()
 # Load a model.
-assert os.path.exists("be_model_test0.zip")
+if not os.path.exists("be_model_test0.zip"):
+    train_network_ensemble()
 
 # Set up the ASE objects.
 atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
