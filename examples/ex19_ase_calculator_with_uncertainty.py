@@ -15,8 +15,44 @@ REQUIRES LAMMPS AND QUANTUM ESPRESSO (TOTAL ENERGY MODULE).
 """
 
 
+def train_network_ensemble():
+    for i in range(0, 5):
+        test_parameters = mala.Parameters()
+        test_parameters.data.data_splitting_type = "by_snapshot"
+        test_parameters.data.input_rescaling_type = "feature-wise-standard"
+        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.running.max_number_epochs = 100
+        test_parameters.running.mini_batch_size = 40
+        test_parameters.running.learning_rate = 0.00001
+        test_parameters.running.trainingtype = "Adam"
+
+        data_handler = mala.DataHandler(test_parameters)
+        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                  "Be_snapshot0.out.npy", data_path, "tr")
+        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                  "Be_snapshot1.out.npy", data_path, "va")
+        data_handler.prepare_data()
+        printout("Read data: DONE.")
+
+        test_parameters.network.layer_sizes = [
+              data_handler.input_dimension,
+              100,
+              data_handler.output_dimension]
+
+        test_network = mala.Network(test_parameters)
+        test_trainer = mala.Trainer(test_parameters, test_network,
+                                    data_handler)
+        test_trainer.train_network()
+        additional_calculation_data = os.path.join(data_path,
+                                                   "Be_snapshot0.out")
+        test_trainer.save_run("be_model_test"+str(i),
+                              additional_calculation_data=additional_calculation_data)
+
+
+# train_network_ensemble()
 # Load a model.
-assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
+assert os.path.exists("be_model_test0.zip")
 
 # Set up the ASE objects.
 atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
