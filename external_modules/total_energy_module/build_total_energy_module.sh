@@ -6,7 +6,7 @@
 # or
 #   $ F2PY=/usr/bin/f2py3 ./this.sh
 
-set -euo pipefail
+set -u
 
 err(){
     echo "error $@"
@@ -15,10 +15,7 @@ err(){
 
 [ $# -eq 1 ] || err "Please provide exactly one argument (the path to the QE directory)" && root_dir=$1
 
-echo $root_dir
-
-# base dir of QE distribution
-#root_dir=$(readlink -f ../)
+echo "Using QE root dir: $root_dir"
 
 pw_src_path=$root_dir/PW/src
 
@@ -39,7 +36,7 @@ project_lib_folders=" -L$root_dir/Modules -L$root_dir/KS_Solvers -L$root_dir/FFT
 project_libs="-lqemod -lks_solvers -lqefft -lqela -lutil -ldftd3qe -lupf -ldevXlib -lmbd"
 project_inc_folders="-I$root_dir/Modules -I$root_dir/FFTXlib/src -I$root_dir/LAXlib -I$root_dir/KS_Solvers -I$root_dir/UtilXlib -I$root_dir/upflib -I$root_dir/XClib -I$root_dir/external/devxlib/src -I$root_dir/external/mbd/src"
 
-# default: systen blas,lapack and fftw, adapt as needed
+# default: system blas,lapack and fftw, adapt as needed
 linalg="-lblas -llapack"
 fftw="-lfftw3"
 
