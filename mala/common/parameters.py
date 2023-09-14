@@ -712,6 +712,7 @@ class ParametersRunning(ParametersBase):
         self.max_number_epochs = 100
         self.verbosity = True
         self.mini_batch_size = 10
+        self.num_gpus = 1
         self.weight_decay = 0
         self.early_stopping_epochs = 0
         self.early_stopping_threshold = 0
