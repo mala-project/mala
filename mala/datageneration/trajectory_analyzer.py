@@ -40,6 +40,7 @@ class TrajectoryAnalyzer:
         self.params: ParametersDataGeneration = parameters.datageneration
 
         # If needed, read the trajectory
+        self.trajectory = None
         if isinstance(trajectory, TrajectoryReader):
             self.trajectory = trajectory
         elif isinstance(trajectory, str):
@@ -80,6 +81,15 @@ class TrajectoryAnalyzer:
         if malada_compatability:
             self.target_calculator.parameters.rdf_parameters["rMax"] = "2mic"
 
+    @property
+    def trajectory(self):
+        """Trajectory to be analyzed."""
+        return self._trajectory
+
+    @trajectory.setter
+    def trajectory(self, new_trajectory):
+        self._trajectory = new_trajectory
+        self.uncache_properties()
 
     def _is_property_cached(self, property_name):
         return property_name in self.__dict__.keys()
@@ -93,12 +103,12 @@ class TrajectoryAnalyzer:
 
     @cached_property
     def first_snapshot(self):
-        """Energy grid on which the LDOS is expressed."""
+        """First equilibrated snapshot."""
         return self.get_first_snapshot()
 
     @cached_property
     def snapshot_correlation_cutoff(self):
-        """Energy grid on which the LDOS is expressed."""
+        """Cutoff for the snapshot correlation analysis."""
         return self.get_snapshot_correlation_cutoff()
 
     def get_first_snapshot(self, equilibrated_snapshot=None,
@@ -257,7 +267,7 @@ class TrajectoryAnalyzer:
         # of the snapshot), we first find the center of the equilibrated part
         # of the trajectory and calculate the differences w.r.t to to it.
         center = int((np.shape(self.distance_metrics_denoised)[
-                          0] - self.first_snapshot) / 2)
+                          0] - self.first_snapshot) / 2) + self.first_snapshot
         width = int(
             self.params.trajectory_analysis_estimated_equilibrium *
             np.shape(self.distance_metrics_denoised)[0])
