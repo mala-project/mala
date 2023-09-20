@@ -1144,6 +1144,17 @@
 <span class="sd">        from the end). Usually, 10% is a fine assumption. This value usually</span>
 <span class="sd">        does not need to be changed.</span>
 
+<span class="sd">    trajectory_analysis_correlation_metric_cutoff : float</span>
+<span class="sd">        Cutoff value to be used when sampling uncorrelated snapshots</span>
+<span class="sd">        during trajectory analysis. If negative, a value will be determined</span>
+<span class="sd">        numerically. This value is a cutoff for the minimum euclidean distance</span>
+<span class="sd">        between any two ions in two subsequent ionic configurations.</span>
+
+<span class="sd">    trajectory_analysis_temperature_tolerance_percent : float</span>
+<span class="sd">        Maximum deviation of temperature between snapshot and desired</span>
+<span class="sd">        temperature for snapshot to be considered for DFT calculation</span>
+<span class="sd">        (in percent)</span>
+
 <span class="sd">    local_psp_path : string</span>
 <span class="sd">        Path to where the local pseudopotential is stored (for OF-DFT-MD).</span>
 
@@ -1171,6 +1182,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span> <span class="o">=</span> <span class="mi">100</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_analysis_below_average_counter</span> <span class="o">=</span> <span class="mi">50</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_analysis_estimated_equilibrium</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_analysis_correlation_metric_cutoff</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_analysis_temperature_tolerance_percent</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">local_psp_path</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">local_psp_name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ofdft_timestep</span> <span class="o">=</span> <span class="mi">0</span>

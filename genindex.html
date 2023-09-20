@@ -400,6 +400,8 @@
 </li>
       <li><a href="api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting">finish_incremental_fitting() (DataScaler method)</a>
 </li>
+      <li><a href="api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.first_snapshot">first_snapshot (TrajectoryAnalyzer property)</a>
+</li>
       <li><a href="api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.fit">fit() (DataScaler method)</a>
 </li>
       <li><a href="api/mala.network.network.html#mala.network.network.FeedForwardNet.forward">forward() (FeedForwardNet method)</a>
@@ -554,10 +556,10 @@
 </li>
       <li><a href="api/mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_float">get_float() (HyperparameterOptuna method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_int">get_int() (HyperparameterOptuna method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.parallelizer.html#mala.common.parallelizer.get_local_rank">get_local_rank() (in module mala.common.parallelizer)</a>
 </li>
       <li><a href="api/mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data">get_new_data() (LazyLoadDataset method)</a>
@@ -604,6 +606,8 @@
 </li>
       <li><a href="api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output">get_snapshot_calculation_output() (DataHandler method)</a>
 </li>
+      <li><a href="api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_snapshot_correlation_cutoff">get_snapshot_correlation_cutoff() (TrajectoryAnalyzer method)</a>
+</li>
       <li><a href="api/mala.targets.target.html#mala.targets.target.Target.get_static_structure_factor">get_static_structure_factor() (Target method)</a>
 </li>
       <li><a href="api/mala.targets.density.html#mala.targets.density.Density.get_target">get_target() (Density method)</a>
@@ -623,6 +627,8 @@
       <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_total_energy">get_total_energy() (LDOS method)</a>
 </li>
       <li><a href="api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study">get_trials_from_study() (HyperOptOptuna method)</a>
+</li>
+      <li><a href="api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_uncorrelated_snapshots">get_uncorrelated_snapshots() (TrajectoryAnalyzer method)</a>
 </li>
       <li><a href="api/mala.network.network.html#mala.network.network.GRU">GRU (class in mala.network.network)</a>
 </li>
@@ -1673,6 +1679,8 @@
       </ul></li>
       <li><a href="api/mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot">Snapshot (class in mala.datahandling.snapshot)</a>
 </li>
+      <li><a href="api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.snapshot_correlation_cutoff">snapshot_correlation_cutoff (TrajectoryAnalyzer property)</a>
+</li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersData.snapshot_directories_list">snapshot_directories_list (ParametersData attribute)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersTargets.ssf_parameters">ssf_parameters (ParametersTargets attribute)</a>
@@ -1713,12 +1721,12 @@
       </ul></li>
       <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.total_energy">total_energy (LDOS property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.targets.density.html#mala.targets.density.Density.total_energy_contributions">total_energy_contributions (Density property)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersTargets.tpcf_parameters">tpcf_parameters (ParametersTargets attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.network.trainer.html#mala.network.trainer.Trainer.train_network">train_network() (Trainer method)</a>
 </li>
       <li><a href="api/mala.network.trainer.html#mala.network.trainer.Trainer">Trainer (class in mala.network.trainer)</a>
@@ -1727,11 +1735,17 @@
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.trainingtype">trainingtype (ParametersRunning attribute)</a>
 </li>
+      <li><a href="api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.trajectory">trajectory (TrajectoryAnalyzer property)</a>
+</li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_below_average_counter">trajectory_analysis_below_average_counter (ParametersDataGeneration attribute)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_correlation_metric_cutoff">trajectory_analysis_correlation_metric_cutoff (ParametersDataGeneration attribute)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_denoising_width">trajectory_analysis_denoising_width (ParametersDataGeneration attribute)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_estimated_equilibrium">trajectory_analysis_estimated_equilibrium (ParametersDataGeneration attribute)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_temperature_tolerance_percent">trajectory_analysis_temperature_tolerance_percent (ParametersDataGeneration attribute)</a>
 </li>
       <li><a href="api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer">TrajectoryAnalyzer (class in mala.datageneration.trajectory_analyzer)</a>
 </li>
@@ -1753,6 +1767,8 @@
         <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.uncache_properties">(DOS method)</a>
 </li>
         <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.uncache_properties">(LDOS method)</a>
+</li>
+        <li><a href="api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.uncache_properties">(TrajectoryAnalyzer method)</a>
 </li>
       </ul></li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.use_compression">use_compression (ParametersRunning attribute)</a>

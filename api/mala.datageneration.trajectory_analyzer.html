@@ -100,7 +100,7 @@
 <p>Tools for analyzing a trajectory.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TrajectoryAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TrajectoryAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperatures</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">malada_compatability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Provides useful functions to analyze a trajectory.</p>
 <dl class="field-list simple">
@@ -138,6 +138,68 @@ e.g. multiple trajectories are to be compared.</p></li>
 <dd class="field-odd"><p>int</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_snapshot_correlation_cutoff">
+<span class="sig-name descname"><span class="pre">get_snapshot_correlation_cutoff</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer.get_snapshot_correlation_cutoff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_snapshot_correlation_cutoff" title="Permalink to this definition"></a></dt>
+<dd><p>Determine the cutoff for the distance metric.</p>
+<p>If a cutoff is set by the user via the Parameters object, this
+function simply returns this value. Elsewise, the value
+is determined numerically. The distance metric used here is realspace
+(i.e. the smallest displacement of an atom between two snapshots). The
+cutoff gives a lower estimate for the oscillations of the trajectory.
+Any distance above this cutoff can be attributed to the oscillations
+in the trajectory. Any cutoff below is the consquence of temporal
+neighborhood of these snapshots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>cutoff</strong> – Cutoff below which two snapshots can be assumed to be similar
+to each other to a degree that suggests temporal neighborhood.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_uncorrelated_snapshots">
+<span class="sig-name descname"><span class="pre">get_uncorrelated_snapshots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_uncorrelated_snapshots</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer.get_uncorrelated_snapshots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_uncorrelated_snapshots" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate a set of uncorrelated configurations from a trajectory.</p>
+<p>If not priorly determined with the object calling this function, the
+first equilibrated configuration will be determined automatically.
+This function will create two files, one archiving the MD step number
+of all snapshots sampled, and one with the actual snapshots themselves.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename_uncorrelated_snapshots</strong> (<em>string</em>) – Name of the file in which to save the uncorrelated snapshots.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.uncache_properties">
+<span class="sig-name descname"><span class="pre">uncache_properties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer.uncache_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.uncache_properties" title="Permalink to this definition"></a></dt>
+<dd><p>Uncache all cached properties of this calculator.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.first_snapshot">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">first_snapshot</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.first_snapshot" title="Permalink to this definition"></a></dt>
+<dd><p>First equilibrated snapshot.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.snapshot_correlation_cutoff">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">snapshot_correlation_cutoff</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.snapshot_correlation_cutoff" title="Permalink to this definition"></a></dt>
+<dd><p>Cutoff for the snapshot correlation analysis.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.trajectory">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trajectory</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.trajectory" title="Permalink to this definition"></a></dt>
+<dd><p>Trajectory to be analyzed.</p>
 </dd></dl>
 
 </dd></dl>

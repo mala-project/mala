@@ -637,6 +637,33 @@ does not need to be changed.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDataGeneration.trajectory_analysis_correlation_metric_cutoff">
+<span class="sig-name descname"><span class="pre">trajectory_analysis_correlation_metric_cutoff</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_correlation_metric_cutoff" title="Permalink to this definition"></a></dt>
+<dd><p>Cutoff value to be used when sampling uncorrelated snapshots
+during trajectory analysis. If negative, a value will be determined
+numerically. This value is a cutoff for the minimum euclidean distance
+between any two ions in two subsequent ionic configurations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDataGeneration.trajectory_analysis_temperature_tolerance_percent">
+<span class="sig-name descname"><span class="pre">trajectory_analysis_temperature_tolerance_percent</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_temperature_tolerance_percent" title="Permalink to this definition"></a></dt>
+<dd><p>Maximum deviation of temperature between snapshot and desired
+temperature for snapshot to be considered for DFT calculation
+(in percent)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersDataGeneration.local_psp_path">
 <span class="sig-name descname"><span class="pre">local_psp_path</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDataGeneration.local_psp_path" title="Permalink to this definition"></a></dt>
 <dd><p>Path to where the local pseudopotential is stored (for OF-DFT-MD).</p>
