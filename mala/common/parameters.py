@@ -1068,6 +1068,17 @@ class ParametersDataGeneration(ParametersBase):
         from the end). Usually, 10% is a fine assumption. This value usually
         does not need to be changed.
 
+    trajectory_analysis_correlation_metric_cutoff : float
+        Cutoff value to be used when sampling uncorrelated snapshots
+        during trajectory analysis. If negative, a value will be determined
+        numerically. This value is a cutoff for the minimum euclidean distance
+        between any two ions in two subsequent ionic configurations.
+
+    trajectory_analysis_temperature_tolerance_percent : float
+        Maximum deviation of temperature between snapshot and desired
+        temperature for snapshot to be considered for DFT calculation
+        (in percent)
+
     local_psp_path : string
         Path to where the local pseudopotential is stored (for OF-DFT-MD).
 
@@ -1095,6 +1106,8 @@ class ParametersDataGeneration(ParametersBase):
         self.trajectory_analysis_denoising_width = 100
         self.trajectory_analysis_below_average_counter = 50
         self.trajectory_analysis_estimated_equilibrium = 0.1
+        self.trajectory_analysis_correlation_metric_cutoff = -0.1
+        self.trajectory_analysis_temperature_tolerance_percent = 1
         self.local_psp_path = None
         self.local_psp_name = None
         self.ofdft_timestep = 0
