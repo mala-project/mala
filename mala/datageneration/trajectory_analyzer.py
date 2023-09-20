@@ -31,7 +31,8 @@ class TrajectoryAnalyzer:
     """
 
     def __init__(self, parameters, trajectory, temperatures=None,
-                 target_calculator=None, target_temperature=None):
+                 target_calculator=None, target_temperature=None,
+                 malada_compatability=False):
         warn("The class TrajectoryAnalyzer is experimental. The algorithms "
              "within have been tested, but the API may still be subject to "
              "large changes.")
@@ -71,6 +72,14 @@ class TrajectoryAnalyzer:
         self.__saved_rdf = None
         self.first_considered_snapshot = None
         self.last_considered_snapshot = None
+
+        # MALADA used two times the minimum imaging convention (MIC) to
+        # determine the cutoff radius for the RDF.
+        # In the future, only the MIC radius should be used, but to
+        # recreate old plots, one may need to use two times the MIC.
+        if malada_compatability:
+            self.target_calculator.parameters.rdf_parameters["rMax"] = "2mic"
+
 
     def _is_property_cached(self, property_name):
         return property_name in self.__dict__.keys()
