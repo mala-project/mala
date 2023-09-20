@@ -31,7 +31,7 @@ class TrajectoryAnalyzer:
     """
 
     def __init__(self, parameters, trajectory, temperatures=None,
-                 target_calculator=None):
+                 target_calculator=None, target_temperature=None):
         warn("The class TrajectoryAnalyzer is experimental. The algorithms "
              "within have been tested, but the API may still be subject to "
              "large changes.")
@@ -60,6 +60,9 @@ class TrajectoryAnalyzer:
         self.target_calculator = target_calculator
         if target_calculator is None:
             self.target_calculator = Target(parameters)
+
+        if target_temperature is not None:
+            self.target_calculator.temperature = target_temperature
 
         # Initialize variables.
         self.distance_metrics = []
