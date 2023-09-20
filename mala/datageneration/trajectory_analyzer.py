@@ -193,7 +193,6 @@ class TrajectoryAnalyzer:
             to each other to a degree that suggests temporal neighborhood.
 
         """
-
         if self.params.trajectory_analysis_correlation_metric_cutoff < 0:
             return self._analyze_distance_metric(self.trajectory)
         else:
