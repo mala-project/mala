@@ -173,3 +173,9 @@ cython_debug/
 
 # Git files
 .gitconfig
+
+# HDF5 files
+*.h5
+
+*.zip
+*~

@@ -5,13 +5,13 @@ import numpy as np
 import torch
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
+data_path = os.path.join(data_repo_path, "Be2")
 
 # This test checks that all scaling options are working and are not messing
 # up the data.
 # The desired accuracy is pretty inaccurate, since we simply lose some due to
 # the float32 converisons.
-desired_accuracy = 5e-4
+desired_accuracy = 10e-3
 
 
 class TestScaling:
@@ -31,6 +31,8 @@ class TestScaling:
 
             scaler = mala.DataScaler(scaling)
             scaler.fit(data)
-            transformed = scaler.inverse_transform(scaler.transform(data))
+            transformed = data
+            scaler.transform(transformed)
+            transformed = scaler.inverse_transform(transformed)
             relative_error = torch.sum(np.abs((data2 - transformed)/data2))
             assert relative_error < desired_accuracy

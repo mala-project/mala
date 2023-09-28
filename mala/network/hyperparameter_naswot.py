@@ -36,7 +36,7 @@ class HyperparameterNASWOT(HyperparameterOptuna):
         List of possible choices (for categorical parameter).
     """
 
-    def __init__(self, opttype="categorical", name="", low=0, high=0,
+    def __init__(self, hotype=None, opttype="categorical", name="", low=0, high=0,
                  choices=None):
         super(HyperparameterNASWOT, self).__init__(opttype=opttype,
                                                    name=name,

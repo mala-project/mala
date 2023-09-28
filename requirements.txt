@@ -8,3 +8,4 @@ optuna
 scipy
 pandas
 tensorboard
+openpmd-api>=0.15

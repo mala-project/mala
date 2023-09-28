@@ -10,13 +10,15 @@ try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     pass
-
+import numpy as np
 import torch
 
 from mala.common.parallelizer import printout, set_horovod_status, \
     set_mpi_status, get_rank, get_local_rank, set_current_verbosity, \
     parallel_warn
 from mala.common.json_serializable import JSONSerializable
+
+DEFAULT_NP_DATA_DTYPE = np.float32
 
 
 class ParametersBase(JSONSerializable):
@@ -25,7 +27,8 @@ class ParametersBase(JSONSerializable):
     def __init__(self,):
         super(ParametersBase, self).__init__()
         self._configuration = {"gpu": False, "horovod": False, "mpi": False,
-                               "device": "cpu"}
+                               "device": "cpu", "openpmd_configuration": {},
+                               "openpmd_granularity": 1}
         pass
 
     def show(self, indent=""):
@@ -59,6 +62,12 @@ class ParametersBase(JSONSerializable):
 
     def _update_device(self, new_device):
         self._configuration["device"] = new_device
+
+    def _update_openpmd_configuration(self, new_openpmd):
+        self._configuration["openpmd_configuration"] = new_openpmd
+
+    def _update_openpmd_granularity(self, new_granularity):
+        self._configuration["openpmd_granularity"] = new_granularity
 
     @staticmethod
     def _member_to_json(member):
@@ -268,44 +277,40 @@ class ParametersDescriptors(ParametersBase):
     ----------
     descriptor_type : string
         Type of descriptors that is used to represent the atomic fingerprint.
-        Currently only "SNAP" is supported.
+        Supported:
 
-    twojmax : int
-        SNAP calculation: 2*jmax-parameter used for calculation of SNAP
+            - 'Bispectrum': Bispectrum descriptors (formerly called 'SNAP').
+            - 'Atomic Density': Atomic density, calculated via Gaussian
+                                descriptors.
+
+    bispectrum_twojmax : int
+        Bispectrum calculation: 2*jmax-parameter used for calculation of SNAP
         descriptors. Default value for jmax is 5, so default value for
         twojmax is 10.
 
     lammps_compute_file: string
-        SNAP calculation: LAMMPS input file that is used to calculate the
-        SNAP descriptors. If this string is empty, the standard LAMMPS input
+        Bispectrum calculation: LAMMPS input file that is used to calculate the
+        Bispectrum descriptors. If this string is empty, the standard LAMMPS input
         file found in this repository will be used (recommended).
-
-    acsd_points : int
-        Number of points used to calculate the ACSD.
-        The actual number of distances will be acsd_points x acsd_points,
-        since the cosine similarity is only defined for pairs.
 
     descriptors_contain_xyz : bool
         Legacy option. If True, it is assumed that the first three entries of
         the descriptor vector are the xyz coordinates and they are cut from the
         descriptor vector. If False, no such cutting is peformed.
 
-    gaussian_descriptors_sigma : float
+    atomic_density_sigma : float
         Sigma used for the calculation of the Gaussian descriptors.
     """
 
     def __init__(self):
         super(ParametersDescriptors, self).__init__()
-        self.descriptor_type = "SNAP"
-        self.twojmax = 10
-        self.use_gaussian_descriptors_energy_formula = False
-        self.gaussian_descriptors_sigma = None
-        self.gaussian_descriptors_cutoff = None
-        self.rcutfac = 4.67637
+        self.descriptor_type = "Bispectrum"
+
+        # These affect all descriptors, at least as long all descriptors
+        # use LAMMPS (which they currently do).
         self.lammps_compute_file = ""
-        self.snap_switchflag = 1
-        self.acsd_points = 100
         self.descriptors_contain_xyz = True
+
         # TODO: I would rather handle the parallelization info automatically
         # and more under the hood. At this stage of the project this would
         # probably be overkill and hard to do, since there are many moving
@@ -313,6 +318,26 @@ class ParametersDescriptors(ParametersBase):
         # this should be adressed.
         self.use_z_splitting = True
         self.use_y_splitting = 0
+
+        # Everything pertaining to the bispectrum descriptors.
+        self.bispectrum_twojmax = 10
+        self.bispectrum_cutoff = 4.67637
+        self.bispectrum_switchflag = 1
+
+        # Everything pertaining to the atomic density.
+        # Seperate cutoff given here because bispectrum descriptors and
+        # atomic density may be used at the same time, if e.g. bispectrum
+        # descriptors are used for a full inference, which then uses the atomic
+        # density for the calculation of the Ewald sum.
+        self.use_atomic_density_energy_formula = False
+        self.atomic_density_sigma = None
+        self.atomic_density_cutoff = None
+
+        # Everything concerning the minterpy descriptors.
+        self.minterpy_point_list = []
+        self.minterpy_cutoff_cube_size = 0.0
+        self.minterpy_polynomial_degree = 4
+        self.minterpy_lp_norm = 2
 
     @property
     def use_z_splitting(self):
@@ -354,19 +379,19 @@ class ParametersDescriptors(ParametersBase):
                 self._number_y_planes = value
 
     @property
-    def rcutfac(self):
-        """Cut off radius for SNAP calculation."""
+    def bispectrum_cutoff(self):
+        """Cut off radius for bispectrum calculation."""
         return self._rcutfac
 
-    @rcutfac.setter
-    def rcutfac(self, value):
+    @bispectrum_cutoff.setter
+    def bispectrum_cutoff(self, value):
         self._rcutfac = value
-        self.gaussian_descriptors_cutoff = value
+        self.atomic_density_cutoff = value
 
     @property
-    def snap_switchflag(self):
+    def bispectrum_switchflag(self):
         """
-        Switchflag for the SNAP calculation.
+        Switchflag for the bispectrum calculation.
 
         Can only be 1 or 0. If 1 (default), a switching function will be used
         to ensure that atomic contributions smoothly go to zero after a
@@ -375,13 +400,20 @@ class ParametersDescriptors(ParametersBase):
         """
         return self._snap_switchflag
 
-    @snap_switchflag.setter
-    def snap_switchflag(self, value):
+    @bispectrum_switchflag.setter
+    def bispectrum_switchflag(self, value):
         _int_value = int(value)
         if _int_value == 0:
             self._snap_switchflag = value
         if _int_value > 0:
             self._snap_switchflag = 1
+
+    def _update_mpi(self, new_mpi):
+        self._configuration["mpi"] = new_mpi
+
+        # There may have been a serial or parallel run before that is now
+        # no longer valid.
+        self.lammps_compute_file = ""
 
 
 class ParametersTargets(ParametersBase):
@@ -395,11 +427,10 @@ class ParametersTargets(ParametersBase):
         (L)DOS.
 
     ldos_gridsize : float
-        Gridspacing of the energy grid the (L)DOS is evaluated on [eV].
+        Gridsize of the LDOS.
 
     ldos_gridspacing_ev: float
-        SNAP calculation: radius cutoff factor for the fingerprint sphere in
-        Angstroms. Default value is 4.67637.
+        Gridspacing of the energy grid the (L)DOS is evaluated on [eV].
 
     ldos_gridoffset_ev: float
         Lowest energy value on the (L)DOS energy grid [eV].
@@ -534,37 +565,29 @@ class ParametersData(ParametersBase):
         currently needed will be kept in memory. This greatly reduces memory
         demands, but adds additional computational time.
 
-    use_clustering : bool
-        If True, and use_lazy_loading is True as well, the data is clustered,
-        i.e. not the entire training data is used by rather only a subset
-        which is determined by a clustering algorithm.
+    use_lazy_loading_prefetch : bool
+        If True, will use alternative lazy loading path with prefetching
+        for higher performance
 
-    number_of_clusters : int
-        If use_clustering is True, this is the number of clusters used per
-        snapshot.
+    use_fast_tensor_data_set : bool
+        If True, then the new, fast TensorDataSet implemented by Josh Romero
+        will be used.
 
-    train_ratio : float
-        If use_clustering is True, this is the ratio of training data used
-        to train the encoder for the clustering.
-
-
-    sample_ratio : float
-        If use_clustering is True, this is the ratio of training data used
-        for sampling per snapshot (according to clustering then, of course).
+    shuffling_seed : int
+        If not None, a seed that will be used to make the shuffling of the data
+        in the DataShuffler class deterministic.
     """
 
     def __init__(self):
         super(ParametersData, self).__init__()
-        self.descriptors_contain_xyz = True
         self.snapshot_directories_list = []
         self.data_splitting_type = "by_snapshot"
         self.input_rescaling_type = "None"
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False
-        self.use_clustering = False
-        self.number_of_clusters = 40
-        self.train_ratio = 0.1
-        self.sample_ratio = 0.5
+        self.use_lazy_loading_prefetch = False
+        self.use_fast_tensor_data_set = False
+        self.shuffling_seed = None
 
 
 class ParametersRunning(ParametersBase):
@@ -601,12 +624,15 @@ class ParametersRunning(ParametersBase):
         early stopping is performed. Default: 0.
 
     early_stopping_threshold : float
-        If the validation accuracy does not improve by at least threshold for
-        early_stopping_epochs epochs, training is terminated:
-        validation_loss < validation_loss_old * (1+early_stopping_threshold),
-        or patience counter will go up.
+        Minimum fractional reduction in validation loss required to avoid
+        early stopping, e.g. a value of 0.05 means that validation loss must
+        decrease by 5% within early_stopping_epochs epochs or the training
+        will be stopped early. More explicitly,
+        validation_loss < validation_loss_old * (1-early_stopping_threshold)
+        or the patience counter goes up.
         Default: 0. Numbers bigger than 0 can make early stopping very
-        aggresive.
+        aggresive, while numbers less than 0 make the trainer very forgiving
+        of loss increase.
 
     learning_rate_scheduler : string
         Learning rate scheduler to be used. If not None, an instance of the
@@ -665,6 +691,18 @@ class ParametersRunning(ParametersBase):
     inference_data_grid : list
         List holding the grid to be used for inference in the form of
         [x,y,z].
+
+    use_mixed_precision : bool
+        If True, mixed precision computation (via AMP) will be used.
+
+    training_report_frequency : int
+        Determines how often detailed performance info is printed during
+        training (only has an effect if the verbosity is high enough).
+
+    profiler_range : list
+        List with two entries determining with which batch/iteration number
+         the CUDA profiler will start and stop profiling. Please note that
+         this option only holds significance if the nsys profiler is used.
     """
 
     def __init__(self):
@@ -691,6 +729,10 @@ class ParametersRunning(ParametersBase):
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
         self.inference_data_grid = [0, 0, 0]
+        self.use_mixed_precision = False
+        self.use_graphs = False
+        self.training_report_frequency = 1000
+        self.profiler_range = [1000, 2000]
 
     def _update_horovod(self, new_horovod):
         super(ParametersRunning, self)._update_horovod(new_horovod)
@@ -742,6 +784,37 @@ class ParametersRunning(ParametersBase):
                 raise Exception("Currently, MALA can only operate with the "
                                 "\"ldos\" metric for horovod runs.")
         self._after_before_training_metric = value
+
+    @during_training_metric.setter
+    def during_training_metric(self, value):
+        if value != "ldos":
+            if self._configuration["horovod"]:
+                raise Exception("Currently, MALA can only operate with the "
+                                "\"ldos\" metric for horovod runs.")
+        self._during_training_metric = value
+
+    @property
+    def use_graphs(self):
+        """
+        Decide whether CUDA graphs are used during training.
+
+        Doing so will improve performance, but CUDA graphs are only available
+        from CUDA 11.0 upwards.
+        """
+        return self._use_graphs
+
+    @use_graphs.setter
+    def use_graphs(self, value):
+        if value is True:
+            if self._configuration["gpu"] is False or \
+                    torch.version.cuda is None:
+                parallel_warn("No CUDA or GPU found, cannot use CUDA graphs.")
+                value = False
+            else:
+                if float(torch.version.cuda) < 11.0:
+                    raise Exception("Cannot use CUDA graphs with a CUDA"
+                                    " version below 11.0")
+        self._use_graphs = value
 
 
 class ParametersHyperparameterOptimization(ParametersBase):
@@ -894,6 +967,9 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.number_bad_trials_before_stopping = None
         self.sqlite_timeout = 600
 
+        # For accelerated hyperparameter optimization.
+        self.acsd_points = 100
+
     @property
     def rdb_storage_heartbeat(self):
         """Control whether a heartbeat is used for distributed optuna runs."""
@@ -992,6 +1068,17 @@ class ParametersDataGeneration(ParametersBase):
         from the end). Usually, 10% is a fine assumption. This value usually
         does not need to be changed.
 
+    trajectory_analysis_correlation_metric_cutoff : float
+        Cutoff value to be used when sampling uncorrelated snapshots
+        during trajectory analysis. If negative, a value will be determined
+        numerically. This value is a cutoff for the minimum euclidean distance
+        between any two ions in two subsequent ionic configurations.
+
+    trajectory_analysis_temperature_tolerance_percent : float
+        Maximum deviation of temperature between snapshot and desired
+        temperature for snapshot to be considered for DFT calculation
+        (in percent)
+
     local_psp_path : string
         Path to where the local pseudopotential is stored (for OF-DFT-MD).
 
@@ -1019,6 +1106,8 @@ class ParametersDataGeneration(ParametersBase):
         self.trajectory_analysis_denoising_width = 100
         self.trajectory_analysis_below_average_counter = 50
         self.trajectory_analysis_estimated_equilibrium = 0.1
+        self.trajectory_analysis_correlation_metric_cutoff = -0.1
+        self.trajectory_analysis_temperature_tolerance_percent = 1
         self.local_psp_path = None
         self.local_psp_name = None
         self.ofdft_timestep = 0
@@ -1026,23 +1115,6 @@ class ParametersDataGeneration(ParametersBase):
         self.ofdft_temperature = 0
         self.ofdft_kedf = "WT"
         self.ofdft_friction = 0.1
-
-
-class ParametersDebug(ParametersBase):
-    """
-    All debugging parameters.
-
-    Attributes
-    ----------
-    grid_dimensions : list
-        A list containing three elements. It enforces a smaller grid size
-        globally when it is not empty.. Default : []
-
-    """
-
-    def __init__(self):
-        super(ParametersDebug, self).__init__()
-        self.grid_dimensions = []
 
 
 class Parameters:
@@ -1092,7 +1164,6 @@ class Parameters:
         self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptimization()
         self.datageneration = ParametersDataGeneration()
-        self.debug = ParametersDebug()
 
         # Attributes.
         self.manual_seed = None
@@ -1103,6 +1174,36 @@ class Parameters:
         self.use_mpi = False
         self.verbosity = 1
         self.device = "cpu"
+        self.openpmd_configuration = {}
+        # TODO: Maybe as a percentage? Feature dimensions can be quite
+        # different.
+        self.openpmd_granularity = 1
+
+    @property
+    def openpmd_granularity(self):
+        """
+        Adjust the memory overhead of the OpenPMD interface.
+
+        Smallest possible value is 1, meaning smallest memory footprint
+        and slowest I/O. Higher values will introduce some memory penalty,
+        but offer greater speed.
+        The maximum level is the feature dimension of your data set, if
+        you choose a value larger than this feature dimension, it will
+        automatically be set to the feature dimension upon loading.
+        """
+        return self._openpmd_granularity
+
+    @openpmd_granularity.setter
+    def openpmd_granularity(self, value):
+        if value < 1:
+            value = 1
+        self._openpmd_granularity = value
+        self.network._update_openpmd_granularity(self._openpmd_granularity)
+        self.descriptors._update_openpmd_granularity(self._openpmd_granularity)
+        self.targets._update_openpmd_granularity(self._openpmd_granularity)
+        self.data._update_openpmd_granularity(self._openpmd_granularity)
+        self.running._update_openpmd_granularity(self._openpmd_granularity)
+        self.hyperparameters._update_openpmd_granularity(self._openpmd_granularity)
 
     @property
     def verbosity(self):
@@ -1148,7 +1249,6 @@ class Parameters:
         self.data._update_gpu(self.use_gpu)
         self.running._update_gpu(self.use_gpu)
         self.hyperparameters._update_gpu(self.use_gpu)
-        self.debug._update_gpu(self.use_gpu)
 
     @property
     def use_horovod(self):
@@ -1170,7 +1270,6 @@ class Parameters:
         self.data._update_horovod(self.use_horovod)
         self.running._update_horovod(self.use_horovod)
         self.hyperparameters._update_horovod(self.use_horovod)
-        self.debug._update_horovod(self.use_horovod)
 
     @property
     def device(self):
@@ -1191,7 +1290,6 @@ class Parameters:
         self.data._update_device(self._device)
         self.running._update_device(self._device)
         self.hyperparameters._update_device(self._device)
-        self.debug._update_device(self._device)
 
     @property
     def use_mpi(self):
@@ -1210,7 +1308,29 @@ class Parameters:
         self.data._update_mpi(self.use_mpi)
         self.running._update_mpi(self.use_mpi)
         self.hyperparameters._update_mpi(self.use_mpi)
-        self.debug._update_mpi(self.use_mpi)
+
+    @property
+    def openpmd_configuration(self):
+        """
+        Provide a .toml or .json formatted string to configure OpenPMD.
+
+        To load a configuration from a file, add an "@" in front of the file
+        name and put the resulting string here. OpenPMD will then load
+        the file. For further details, see the OpenPMD documentation.
+        """
+        return self._openpmd_configuration
+
+    @openpmd_configuration.setter
+    def openpmd_configuration(self, value):
+        self._openpmd_configuration = value
+
+        # Invalidate, will be updated in setter.
+        self.network._update_openpmd_configuration(self.openpmd_configuration)
+        self.descriptors._update_openpmd_configuration(self.openpmd_configuration)
+        self.targets._update_openpmd_configuration(self.openpmd_configuration)
+        self.data._update_openpmd_configuration(self.openpmd_configuration)
+        self.running._update_openpmd_configuration(self.openpmd_configuration)
+        self.hyperparameters._update_openpmd_configuration(self.openpmd_configuration)
 
     def show(self):
         """Print name and values of all attributes of this object."""
@@ -1345,17 +1465,16 @@ class Parameters:
         self.data._update_device(device_temp)
         self.running._update_device(device_temp)
         self.hyperparameters._update_device(device_temp)
-        self.debug._update_device(device_temp)
 
     @classmethod
-    def load_from_file(cls, filename, save_format="json",
+    def load_from_file(cls, file, save_format="json",
                        no_snapshots=False):
         """
         Load a Parameters object from a file.
 
         Parameters
         ----------
-        filename : string
+        file : string or ZipExtFile
             File to which the parameters will be saved to.
 
         save_format : string
@@ -1373,16 +1492,22 @@ class Parameters:
 
         """
         if save_format == "pickle":
-            with open(filename, 'rb') as handle:
-                loaded_parameters = pickle.load(handle)
-                if no_snapshots is True:
-                    loaded_parameters.data.snapshot_directories_list = []
+            if isinstance(file, str):
+                loaded_parameters = pickle.load(open(file, 'rb'))
+            else:
+                loaded_parameters = pickle.load(file)
+            if no_snapshots is True:
+                loaded_parameters.data.snapshot_directories_list = []
         elif save_format == "json":
-            with open(filename, encoding="utf-8") as json_file:
-                json_dict = json.load(json_file)
+            if isinstance(file, str):
+                json_dict = json.load(open(file, encoding="utf-8"))
+            else:
+                json_dict = json.load(file)
+
             loaded_parameters = cls()
             for key in json_dict:
-                if isinstance(json_dict[key], dict):
+                if isinstance(json_dict[key], dict) and key \
+                        != "openpmd_configuration":
                     # These are the other parameter classes.
                     sub_parameters =\
                         globals()[json_dict[key]["_parameters_type"]].\
@@ -1392,7 +1517,8 @@ class Parameters:
             # We iterate a second time, to set global values, so that they
             # are properly forwarded.
             for key in json_dict:
-                if not isinstance(json_dict[key], dict):
+                if not isinstance(json_dict[key], dict) or key == \
+                        "openpmd_configuration":
                     setattr(loaded_parameters, key, json_dict[key])
             if no_snapshots is True:
                 loaded_parameters.data.snapshot_directories_list = []
@@ -1402,13 +1528,13 @@ class Parameters:
         return loaded_parameters
 
     @classmethod
-    def load_from_pickle(cls, filename, no_snapshots=False):
+    def load_from_pickle(cls, file, no_snapshots=False):
         """
         Load a Parameters object from a pickle file.
 
         Parameters
         ----------
-        filename : string
+        file : string or ZipExtFile
             File to which the parameters will be saved to.
 
         no_snapshots : bool
@@ -1421,17 +1547,17 @@ class Parameters:
             The loaded Parameters object.
 
         """
-        return Parameters.load_from_file(filename, save_format="pickle",
+        return Parameters.load_from_file(file, save_format="pickle",
                                          no_snapshots=no_snapshots)
 
     @classmethod
-    def load_from_json(cls, filename, no_snapshots=False):
+    def load_from_json(cls, file, no_snapshots=False):
         """
         Load a Parameters object from a json file.
 
         Parameters
         ----------
-        filename : string
+        file : string or ZipExtFile
             File to which the parameters will be saved to.
 
         no_snapshots : bool
@@ -1444,5 +1570,5 @@ class Parameters:
             The loaded Parameters object.
 
         """
-        return Parameters.load_from_file(filename, save_format="json",
+        return Parameters.load_from_file(file, save_format="json",
                                          no_snapshots=no_snapshots)

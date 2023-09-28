@@ -10,6 +10,9 @@ units		metal
 read_data ${atom_config_fname}
 mass * 1.0
 
+# Needs to be defined for Kokkos
+run_style verlet
+
 # define grid compute and atom compute
 
 group 		snapgroup type 1

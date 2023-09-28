@@ -11,13 +11,13 @@ on:
 
 jobs:
   test-docstrings:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 
@@ -29,19 +29,19 @@ jobs:
 
       - name: Check docstrings
          # Ignoring the cached_properties because pydocstyle (sometimes?) treats them as functions.
-        run: pydocstyle --convention=numpy --ignore-decorators=cached_property mala
+        run: pydocstyle --convention=numpy --ignore-decorators=[cached_property,property] mala
 
   build-and-deploy-pages:
     needs: test-docstrings
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0  # 0 fetches complete history and tags
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 

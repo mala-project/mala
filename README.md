@@ -25,47 +25,24 @@ This repository is structured as follows:
 
 > **WARNING**: Even if you install MALA via PyPI, please consult the full installation instructions afterwards. External modules (like the QuantumESPRESSO bindings) are not distributed via PyPI!
 
-Please refer to [Installation of MALA](docs/source/install/README.md).
+Please refer to [Installation of MALA](docs/source/install/installing_mala.rst).
 
 ## Running
 
 You can familiarize yourself with the usage of this package by running
 the examples in the `example/` folder.
 
-## Institutions
-### Founding Institutions
+## Contributors
+
+MALA is jointly maintained by 
 
 - [Sandia National Laboratories](https://www.sandia.gov/) (SNL), USA.
+    - Scientific supervisor: Sivasankaran Rajamanickam, code maintenance: 
+Jon Vogel
 - [Center for Advanced Systems Understanding](https://www.casus.science/) (CASUS), Germany.
+    - Scientific supervisor: Attila Cangi, code maintenance: Lenz Fiedler
 
-### Contributing Institutions
-
-- [Oak Ridge National Laboratory](https://www.ornl.gov/) (ORNL), USA
-
-## Developers
-### Scientific Supervision
-- Attila Cangi (CASUS)
-- Siva Rajamanickam (SNL)
-
-### Core Developers
-
-- Austin Ellis (ORNL)
-- Lenz Fiedler (CASUS)
-- Daniel Kotik (CASUS)
-- Normand Modine (SNL)
-- Vladyslav Oles (ORNL)
-- Gabriel Popoola (SNL)
-- Aidan Thompson (SNL)
-- Steve Schmerler (HZDR)
-- Adam Stephens (SNL)
-
-### Contributors
-
-- Sneha Verma (CASUS)
-- Parvez Mohammed (CASUS)
-- Nils Hoffmann (CASUS)
-- Omar Faruk (CASUS)
-- Somashekhar Kulkarni (CASUS)
+A full list of contributors can be found [here](docs/source/CONTRIBUTE.md).
 
 ## Citing MALA
 

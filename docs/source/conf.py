@@ -43,6 +43,7 @@ version = tag.stdout.strip()
 extensions = [
     'myst_parser',
     'sphinx_markdown_tables',
+    'sphinx_copybutton',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.coverage',
@@ -70,7 +71,8 @@ autodoc_mock_imports = [
     'total_energy',
     'pqkmeans',
     'dftpy',
-    'asap3'
+    'asap3',
+    'openpmd_io'
 ]
 
 myst_heading_anchors = 3

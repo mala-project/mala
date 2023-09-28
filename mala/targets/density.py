@@ -3,20 +3,22 @@ import os
 import time
 
 import ase.io
-from ase.units import Rydberg, Bohr
+from ase.units import Rydberg, Bohr, m
 from functools import cached_property
+import numpy as np
 try:
     import total_energy as te
 except ModuleNotFoundError:
     pass
-import numpy as np
 
-from mala.common.parallelizer import printout, parallel_warn, barrier
+from mala.common.parallelizer import printout, parallel_warn, barrier, get_size
 from mala.targets.target import Target
-from mala.targets.calculation_helpers import *
+from mala.targets.calculation_helpers import integrate_values_on_spacing
 from mala.targets.cube_parser import read_cube, write_cube
+from mala.targets.calculation_helpers import integrate_values_on_spacing
+from mala.targets.xsf_parser import read_xsf
 from mala.targets.atomic_force import AtomicForce
-from mala.descriptors.gaussian import GaussianDescriptors
+from mala.descriptors.atomic_density import AtomicDensity
 
 
 class Density(Target):
@@ -64,7 +66,7 @@ class Density(Target):
             Density calculator object.
         """
         return_density_object = Density(params)
-        return_density_object.read_from_numpy(path, units=units)
+        return_density_object.read_from_numpy_file(path, units=units)
         return return_density_object
 
     @classmethod
@@ -121,6 +123,55 @@ class Density(Target):
         return return_density_object
 
     @classmethod
+    def from_xsf_file(cls, params, path, units="1/A^3"):
+        """
+        Create a Density calculator from a xsf file.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this DOS object.
+
+        path : string
+            Name of the xsf file.
+
+        units : string
+            Units the density is saved in.
+
+        Returns
+        -------
+        dens_object : mala.targets.density.Density
+            Density object created from LDOS object.
+        """
+        return_density_object = Density(params)
+        return_density_object.read_from_xsf(path, units=units)
+        return return_density_object
+
+    @classmethod
+    def from_openpmd_file(cls, params, path):
+        """
+        Create an Density calculator from an OpenPMD file.
+
+        Supports all OpenPMD supported file endings.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this LDOS object.
+
+        path : string
+            Path to OpenPMD file.
+
+        Returns
+        -------
+        density_calculator : mala.targets.density.Density
+            Density calculator object.
+        """
+        return_density_object = Density(params)
+        return_density_object.read_from_openpmd_file(path)
+        return return_density_object
+
+    @classmethod
     def from_ldos_calculator(cls, ldos_object):
         """
         Create a Density calculator from an LDOS object.
@@ -158,6 +209,7 @@ class Density(Target):
             ldos_object.number_of_electrons_from_eigenvals
         return_density_object.local_grid = ldos_object.local_grid
         return_density_object._parameters_full = ldos_object._parameters_full
+        return_density_object.y_planes = ldos_object.y_planes
 
         # If the source calculator has LDOS data, then this new object
         # can have DOS data.
@@ -169,6 +221,32 @@ class Density(Target):
     ##############################
     # Properties
     ##############################
+
+    @property
+    def feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        return 1
+
+    @property
+    def data_name(self):
+        """Get a string that describes the target (for e.g. metadata)."""
+        return "Density"
+
+    @property
+    def si_unit_conversion(self):
+        """
+        Numeric value of the conversion from MALA (ASE) units to SI.
+
+        Needed for OpenPMD interface.
+        """
+        return m**3
+
+    @property
+    def si_dimension(self):
+        """Dictionary containing the SI unit dimensions in OpenPMD format."""
+        import openpmd_api as io
+
+        return {io.Unit_Dimension.L: -3}
 
     @property
     def density(self):
@@ -199,11 +277,6 @@ class Density(Target):
         It should work for all implemented targets.
         """
         self.density = None
-
-    @property
-    def feature_size(self):
-        """Get dimension of this target if used as feature in ML."""
-        return 1
 
     @cached_property
     def number_of_electrons(self):
@@ -270,7 +343,7 @@ class Density(Target):
         converted_array : numpy.array
             Data in 1/A^3.
         """
-        if in_units == "1/A^3":
+        if in_units == "1/A^3" or in_units is None:
             return array
         elif in_units == "1/Bohr^3":
             return array * (1/Bohr) * (1/Bohr) * (1/Bohr)
@@ -320,22 +393,28 @@ class Density(Target):
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file ", path, min_verbosity=0)
-        data, meta = read_cube(path)*self.convert_units(1, in_units=units)
+        data, meta = read_cube(path)
+        data *= self.convert_units(1, in_units=units)
         self.density = data
+        self.grid_dimensions = list(np.shape(data)[0:3])
+        return data
 
-    def read_from_numpy(self, path, units="1/A^3"):
+    def read_from_xsf(self, path, units="1/A^3", **kwargs):
         """
-        Read the density data from a numpy file.
+        Read the density data from an xsf file.
 
         Parameters
         ----------
-        path :
-            Name of the numpy file.
+        path : string
+            Name of the xsf file.
 
         units : string
             Units the density is saved in. Usually none.
         """
-        self.density = np.load(path)*self.convert_units(1, in_units=units)
+        printout("Reading density from .cube file ", path, min_verbosity=0)
+        data, meta = read_xsf(path)*self.convert_units(1, in_units=units)
+        self.density = data
+        return data
 
     def read_from_array(self, array, units="1/A^3"):
         """
@@ -349,9 +428,53 @@ class Density(Target):
         units : string
             Units the density is saved in. Usually none.
         """
-        self.density = array*self.convert_units(1, in_units=units)
+        array *= self.convert_units(1, in_units=units)
+        self.density = array
+        return array
 
-    def write_as_cube(self, file_name, density_data, atoms=None,
+    def write_to_openpmd_file(self, path, array=None,
+                              additional_attributes={},
+                              internal_iteration_number=0):
+        """
+        Write data to a numpy file.
+
+        Parameters
+        ----------
+        path : string
+            File to save into. If no file ending is given, .h5 is assumed.
+
+        array : numpy.ndarray
+            Target data to save. If None, the data stored in the calculator
+            will be used.
+
+        additional_attributes : dict
+            Dict containing additional attributes to be saved.
+
+        internal_iteration_number : int
+            Internal OpenPMD iteration number. Ideally, this number should
+            match any number present in the file name, if this data is part
+            of a larger data set.
+        """
+        if array is None:
+            if len(self.density.shape) == 2:
+                super(Target, self).\
+                    write_to_openpmd_file(path, np.reshape(self.density,
+                                                           self.grid_dimensions
+                                                           + [1]),
+                                          internal_iteration_number=
+                                          internal_iteration_number)
+            elif len(self.density.shape) == 4:
+                super(Target, self).\
+                    write_to_openpmd_file(path, self.density,
+                                          internal_iteration_number=
+                                          internal_iteration_number)
+        else:
+            super(Target, self).\
+                write_to_openpmd_file(path, array,
+                                      internal_iteration_number=
+                                      internal_iteration_number)
+
+    def write_to_cube(self, file_name, density_data=None, atoms=None,
                       grid_dimensions=None):
         """
         Write the density data in a cube file.
@@ -367,20 +490,26 @@ class Density(Target):
         atoms : ase.Atoms
             Atoms to be written to the file alongside the density data.
             If None, and the target object has an atoms object, this will
-            be used.
+            be used. Ignored, unless density_data is provided.
 
         grid_dimensions : list
-            Grid dimensions. Only necessary if a 1D density is provided.
+            Grid dimensions. Ignored, unless density_data is provided.
         """
-        if grid_dimensions is None:
+        if density_data is not None:
+            if grid_dimensions is None or atoms is None:
+                raise Exception("No grid or atom data provided. "
+                                "Please note that these are only optional "
+                                "if the density saved in the calculator is "
+                                "used and have to be provided otherwise.")
+        else:
+            density_data = self.density
             grid_dimensions = self.grid_dimensions
-        if atoms is None:
             atoms = self.atoms
-        if len(density_data.shape) != 3:
-            if len(density_data.shape) == 1:
-                density_data = np.reshape(density_data, grid_dimensions)
-            else:
-                raise Exception("Unknown density shape provided.")
+
+        if len(density_data.shape) == 4 or len(density_data.shape) == 2:
+            density_data = np.reshape(density_data, grid_dimensions)
+        else:
+            raise Exception("Unknown density shape provided.")
         # %%
         meta = {}
         atom_list = []
@@ -390,9 +519,9 @@ class Density(Target):
 
         meta["atoms"] = atom_list
         meta["org"] = [0.0, 0.0, 0.0]
-        meta["xvec"] = self.voxel[0]
-        meta["yvec"] = self.voxel[1]
-        meta["zvec"] = self.voxel[2]
+        meta["xvec"] = self.voxel[0] / Bohr
+        meta["yvec"] = self.voxel[1] / Bohr
+        meta["zvec"] = self.voxel[2] / Bohr
         write_cube(density_data, meta, file_name)
 
     # Calculations
@@ -433,9 +562,9 @@ class Density(Target):
             voxel = self.voxel
 
         # Check input data for correctness.
-        data_shape = np.shape(np.squeeze(density_data))
-        if len(data_shape) != 3:
-            if len(data_shape) != 1:
+        data_shape = np.shape(density_data)
+        if len(data_shape) != 4:
+            if len(data_shape) != 2:
                 raise Exception("Unknown Density shape, cannot calculate "
                                 "number of electrons.")
             elif integration_method != "summation":
@@ -487,14 +616,14 @@ class Density(Target):
             else:
                 number_of_electrons *= grid_spacing_bohr_z
         else:
-            if len(data_shape) == 3:
+            if len(data_shape) == 4:
                 number_of_electrons = np.sum(density_data, axis=(0, 1, 2)) \
                                       * voxel.volume
-            if len(data_shape) == 1:
+            if len(data_shape) == 2:
                 number_of_electrons = np.sum(density_data, axis=0) * \
                                       voxel.volume
 
-        return number_of_electrons
+        return np.squeeze(number_of_electrons)
 
     def get_density(self, density_data=None, convert_to_threedimensional=False,
                     grid_dimensions=None):
@@ -525,9 +654,9 @@ class Density(Target):
         density_data : numpy.array
             Electronic density data in the desired shape.
         """
-        if len(density_data.shape) == 3:
+        if len(density_data.shape) == 4:
             return density_data
-        elif len(density_data.shape) == 1:
+        elif len(density_data.shape) == 2:
             if convert_to_threedimensional:
                 if self.parameters._configuration["mpi"]:
                     # In the MPI case we have to use the local grid to
@@ -546,12 +675,12 @@ class Density(Target):
                     density_data = \
                         np.reshape(density_data,
                                    [last_z - first_z, last_y - first_y,
-                                    last_x - first_x]).transpose([2, 1, 0])
+                                    last_x - first_x, 1]).transpose([2, 1, 0, 3])
                     return density_data
                 else:
                     if grid_dimensions is None:
                         grid_dimensions = self.grid_dimensions
-                    return density_data.reshape(grid_dimensions)
+                    return density_data.reshape(grid_dimensions+[1])
             else:
                 return density_data
         else:
@@ -714,6 +843,15 @@ class Density(Target):
     # Private methods
     #################
 
+    def _process_loaded_array(self, array, units=None):
+        array *= self.convert_units(1, in_units=units)
+        if self.save_target_data:
+            self.density = array
+
+    def _set_feature_size_from_array(self, array):
+        # Feature size is always 1 in this case, no need to do anything.
+        pass
+
     def __setup_total_energy_module(self, density_data, atoms_Angstrom,
                                     create_file=True, qe_input_data=None,
                                     qe_pseudopotentials=None):
@@ -770,24 +908,43 @@ class Density(Target):
         # We need to find out if the grid dimensions are consistent.
         # That depends on the form of the density data we received.
         number_of_gridpoints = te.get_nnr()
-        if len(density_data.shape) == 3:
+        if len(density_data.shape) == 4:
             number_of_gridpoints_mala = density_data.shape[0] * \
                                         density_data.shape[1] * \
                                         density_data.shape[2]
-        elif len(density_data.shape) == 1:
+        elif len(density_data.shape) == 2:
             number_of_gridpoints_mala = density_data.shape[0]
         else:
             raise Exception("Density data has wrong dimensions. ")
-        if number_of_gridpoints_mala != number_of_gridpoints:
-            raise Exception("Grid is inconsistent between MALA and"
-                            " Quantum Espresso")
+
+        # If MPI is enabled, we NEED z-splitting for this to work.
+        if self._parameters_full.use_mpi and \
+                not self._parameters_full.descriptors.use_z_splitting:
+            raise Exception("Cannot calculate the total energy if "
+                            "the real space grid was not split in "
+                            "z-direction.")
+
+        # Check if we need to test the grid points.
+        # We skip the check only if z-splitting is enabled and unequal
+        # z-splits are to be expected, and no
+        # y-splitting is enabled (since y-splitting currently works
+        # for equal z-splitting anyway).
+        if self._parameters_full.use_mpi and \
+           self._parameters_full.descriptors.use_y_splitting == 0 \
+           and int(self.grid_dimensions[2] / get_size()) != \
+                  (self.grid_dimensions[2] / get_size()):
+            pass
+        else:
+            if number_of_gridpoints_mala != number_of_gridpoints:
+                raise Exception("Grid is inconsistent between MALA and"
+                                " Quantum Espresso")
 
         # Now we need to reshape the density.
         density_for_qe = None
-        if len(density_data.shape) == 3:
+        if len(density_data.shape) == 4:
             density_for_qe = np.reshape(density_data, [number_of_gridpoints,
                                                        1], order='F')
-        elif len(density_data.shape) == 1:
+        elif len(density_data.shape) == 2:
             parallel_warn("Using 1D density to calculate the total energy"
                           " requires reshaping of this data. "
                           "This is unproblematic, as long as you provided t"
@@ -795,8 +952,17 @@ class Density(Target):
             density_for_qe = self.get_density(density_data,
                                               convert_to_threedimensional=True)
 
-            density_for_qe = np.reshape(density_for_qe, [number_of_gridpoints,
-                                                         1], order='F')
+            density_for_qe = np.reshape(density_for_qe,
+                                        [number_of_gridpoints_mala, 1],
+                                        order='F')
+
+            # If there is an inconsistency between MALA and QE (which
+            # can only happen in the uneven z-splitting case at the moment)
+            # we need to pad the density array.
+            if density_for_qe.shape[0] < number_of_gridpoints:
+                grid_diff = number_of_gridpoints - number_of_gridpoints_mala
+                density_for_qe = np.pad(density_for_qe,
+                                        pad_width=((0, grid_diff), (0, 0)))
 
         # QE has the density in 1/Bohr^3
         density_for_qe *= self.backconvert_units(1, "1/Bohr^3")
@@ -807,7 +973,7 @@ class Density(Target):
         positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
 
         if self._parameters_full.descriptors.\
-                use_gaussian_descriptors_energy_formula:
+                use_atomic_density_energy_formula:
             # Calculate the Gaussian descriptors for the calculation of the
             # structure factors.
             barrier()
@@ -865,9 +1031,9 @@ class Density(Target):
         # Ewald energy and the structure factor can be skipped.
         te.set_positions(np.transpose(positions_for_qe), number_of_atoms,
                          self._parameters_full.descriptors. \
-                         use_gaussian_descriptors_energy_formula,
+                         use_atomic_density_energy_formula,
                          self._parameters_full.descriptors. \
-                         use_gaussian_descriptors_energy_formula)
+                         use_atomic_density_energy_formula)
         barrier()
         t1 = time.perf_counter()
         printout("time used by set_positions: ", t1 - t0,
@@ -876,7 +1042,7 @@ class Density(Target):
         barrier()
 
         if self._parameters_full.descriptors.\
-                use_gaussian_descriptors_energy_formula:
+                use_atomic_density_energy_formula:
             t0 = time.perf_counter()
             gaussian_descriptors = \
                 np.reshape(gaussian_descriptors,
@@ -885,7 +1051,7 @@ class Density(Target):
                 np.reshape(reference_gaussian_descriptors,
                            [number_of_gridpoints, 1], order='F')
             sigma = self._parameters_full.descriptors.\
-                gaussian_descriptors_sigma
+                atomic_density_sigma
             sigma = sigma / Bohr
             te.set_positions_gauss(self._parameters_full.verbosity,
                                    gaussian_descriptors,
@@ -909,6 +1075,7 @@ class Density(Target):
         return atoms_Angstrom
 
     def _get_gaussian_descriptors_for_structure_factors(self, atoms, grid):
-        descriptor_calculator = GaussianDescriptors(self._parameters_full)
+        descriptor_calculator = AtomicDensity(self._parameters_full)
+        kwargs = {"return_directly": True, "use_fp64": True}
         return descriptor_calculator.\
-            calculate_from_atoms(atoms, grid)[0][:, 6:]
+            calculate_from_atoms(atoms, grid, **kwargs)[:, 6:]

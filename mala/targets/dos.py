@@ -2,7 +2,7 @@
 from functools import cached_property
 
 import ase.io
-from ase.units import Rydberg
+from ase.units import Rydberg, J
 import numpy as np
 from scipy import interpolate, integrate
 from scipy.optimize import toms748
@@ -98,7 +98,7 @@ class DOS(Target):
             DOS calculator object.
         """
         return_dos = DOS(params)
-        return_dos.read_from_numpy(path, units=units)
+        return_dos.read_from_numpy_file(path, units=units)
         return return_dos
 
     @classmethod
@@ -180,7 +180,7 @@ class DOS(Target):
         return_dos = DOS(params)
 
         # In this case, we may just read the entire qe.out file.
-        return_dos.read_additional_calculation_data("qe.out", path)
+        return_dos.read_additional_calculation_data(path, "espresso-out")
 
         # This method will use the ASE atoms object read above automatically.
         return_dos.read_from_qe_out()
@@ -194,6 +194,28 @@ class DOS(Target):
     def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
         return self.parameters.ldos_gridsize
+
+    @property
+    def data_name(self):
+        """Get a string that describes the target (for e.g. metadata)."""
+        return "DOS"
+
+    @property
+    def si_unit_conversion(self):
+        """
+        Numeric value of the conversion from MALA (ASE) units to SI.
+
+        Needed for OpenPMD interface.
+        """
+        return J
+
+    @property
+    def si_dimension(self):
+        """Dictionary containing the SI unit dimensions in OpenPMD format."""
+        import openpmd_api as io
+
+        return {io.Unit_Dimension.M: -1, io.Unit_Dimension.L: -2,
+                io.Unit_Dimension.T: 2}
 
     @property
     def density_of_states(self):
@@ -330,7 +352,7 @@ class DOS(Target):
         converted_array : numpy.array
             Data in 1/eV.
         """
-        if in_units == "1/eV":
+        if in_units == "1/eV" or in_units is None:
             return array
         elif in_units == "1/Ry":
             return array * (1/Rydberg)
@@ -402,7 +424,9 @@ class DOS(Target):
                         return_dos_values.append(dosval)
                         i += 1
 
-        self.density_of_states = np.array(return_dos_values)
+        array = np.array(return_dos_values)
+        self.density_of_states = array
+        return array
 
     def read_from_qe_out(self, path=None, smearing_factor=2):
         r"""
@@ -448,21 +472,7 @@ class DOS(Target):
         # QE gives the band energies in eV, so no conversion necessary here.
         dos_data = np.sum(dos_per_band, axis=(0, 1))
         self.density_of_states = dos_data
-
-    def read_from_numpy(self, path, units="1/eV"):
-        """
-        Read the density data from a numpy file.
-
-        Parameters
-        ----------
-        path : string
-            Name of the numpy file.
-
-        units : string
-            Units the density is saved in. Usually none.
-        """
-        self.density_of_states = np.load(path) * \
-            self.convert_units(1, in_units=units)
+        return dos_data
 
     def read_from_array(self, array, units="1/eV"):
         """
@@ -471,14 +481,14 @@ class DOS(Target):
         Parameters
         ----------
         array : numpy.ndarray
-            Numpy array containing the DOS..
+            Numpy array containing the DOS.
 
         units : string
             Units the density is saved in. Usually none.
         """
+        array *= self.convert_units(1, in_units=units)
         self.density_of_states = array
-        self.density_of_states *= \
-            self.convert_units(1, in_units=units)
+        return array
 
     # Calculations
     ##############
@@ -803,13 +813,22 @@ class DOS(Target):
     # Private methods
     #################
 
+    def _process_loaded_array(self, array, units=None):
+        array *= self.convert_units(1, in_units=units)
+        if self.save_target_data:
+            self.density_of_states = array
+
+    def _set_feature_size_from_array(self, array):
+        self.parameters.ldos_gridsize = np.shape(array)[-1]
+
     @staticmethod
     def __number_of_electrons_from_dos(dos_data, energy_grid, fermi_energy,
                                        temperature, integration_method):
         """Calculate the number of electrons from DOS data."""
         # Calculate the energy levels and the Fermi function.
 
-        fermi_vals = fermi_function(energy_grid, fermi_energy, temperature)
+        fermi_vals = fermi_function(energy_grid, fermi_energy, temperature,
+                                    suppress_overflow=True)
         # Calculate the number of electrons.
         if integration_method == "trapz":
             number_of_electrons = integrate.trapz(dos_data * fermi_vals,
@@ -821,7 +840,8 @@ class DOS(Target):
             dos_pointer = interpolate.interp1d(energy_grid, dos_data)
             number_of_electrons, abserr = integrate.quad(
                 lambda e: dos_pointer(e) * fermi_function(e, fermi_energy,
-                                                          temperature),
+                                                          temperature,
+                                                          suppress_overflow=True),
                 energy_grid[0], energy_grid[-1], limit=500,
                 points=fermi_energy)
         elif integration_method == "analytical":
@@ -839,7 +859,8 @@ class DOS(Target):
                                temperature, integration_method):
         """Calculate the band energy from DOS data."""
         # Calculate the energy levels and the Fermi function.
-        fermi_vals = fermi_function(energy_grid, fermi_energy, temperature)
+        fermi_vals = fermi_function(energy_grid, fermi_energy, temperature,
+                                    suppress_overflow=True)
 
         # Calculate the band energy.
         if integration_method == "trapz":
@@ -854,7 +875,8 @@ class DOS(Target):
             dos_pointer = interpolate.interp1d(energy_grid, dos_data)
             band_energy, abserr = integrate.quad(
                 lambda e: dos_pointer(e) * e * fermi_function(e, fermi_energy,
-                                                              temperature),
+                                                              temperature,
+                                                              suppress_overflow=True),
                 energy_grid[0], energy_grid[-1], limit=500,
                 points=fermi_energy)
         elif integration_method == "analytical":

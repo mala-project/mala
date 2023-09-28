@@ -14,6 +14,7 @@ use_mpi = False
 comm = None
 local_mpi_rank = None
 current_verbosity = 0
+lammps_instance = None
 
 
 def set_current_verbosity(new_value):
@@ -78,6 +79,26 @@ def set_mpi_status(new_value):
     # else:
     #     global comm
     #     comm = MockCommunicator()
+
+
+def set_lammps_instance(new_instance):
+    """
+    Set a new LAMMPS instance to be targeted during the finalize call.
+
+    This currently has to be done in order for Kokkos to not through an
+    error when operating in GPU descriptor calculation mode.
+
+    Parameters
+    ----------
+    new_instance : lammps.LAMMPS
+        A LAMMPS instance currently in memory to be properly finalized at the
+        end of the script.
+
+    """
+    import lammps
+    global lammps_instance
+    if isinstance(new_instance, lammps.core.lammps):
+        lammps_instance = new_instance
 
 
 def get_rank():
@@ -213,7 +234,7 @@ def printout(*values, sep=' ', min_verbosity=0):
             print(outstring)
 
 
-def parallel_warn(warning, min_verbosity=0):
+def parallel_warn(warning, min_verbosity=0, category=UserWarning):
     """
     Interface for warnings in parallel runs. Can be used like warnings.warn.
 
@@ -224,10 +245,18 @@ def parallel_warn(warning, min_verbosity=0):
     ----------
     warning
         Warning to be printed.
-
     min_verbosity : int
         Minimum number of verbosity for this output to still be printed.
+
+    category : class
+        Category of the warning to be thrown.
     """
     if current_verbosity >= min_verbosity:
         if get_rank() == 0:
-            warnings.warn(warning)
+            warnings.warn(warning, category=category)
+
+
+def finalize():
+    """Properly shut down lingering Kokkos/GPU instances."""
+    if lammps_instance is not None:
+        lammps_instance.finalize()

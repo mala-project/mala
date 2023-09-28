@@ -7,7 +7,7 @@ from ase.io import read
 import pytest
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
+data_path = os.path.join(data_repo_path, "Be2")
 
 # Control the various accuracies..
 accuracy_snaps = 1e-4
@@ -23,31 +23,31 @@ class TestParallel:
         Test whether MALA can preprocess data.
 
         This means reading the LDOS from cube files and calculating
-        SNAP descriptors.
+        bispectrum descriptors.
         The data necessary for this is currently not in the data repo!
         """
 
         # Set up parameters.
         test_parameters = mala.Parameters()
-        test_parameters.descriptors.descriptor_type = "SNAP"
-        test_parameters.descriptors.twojmax = 6
-        test_parameters.descriptors.rcutfac = 4.67637
+        test_parameters.descriptors.descriptor_type = "Bispectrum"
+        test_parameters.descriptors.bispectrum_twojmax = 6
+        test_parameters.descriptors.bispectrum_cutoff = 4.67637
         test_parameters.descriptors.descriptors_contain_xyz = True
 
         atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
 
-        snap_calculator = mala.SNAP(test_parameters)
+        snap_calculator = mala.Bispectrum(test_parameters)
         snaps_serial, snapsize = snap_calculator.calculate_from_atoms(atoms,
                                                             [18, 18, 27])
 
         test_parameters = mala.Parameters()
-        test_parameters.descriptors.descriptor_type = "SNAP"
-        test_parameters.descriptors.twojmax = 6
-        test_parameters.descriptors.rcutfac = 4.67637
+        test_parameters.descriptors.descriptor_type = "Bispectrum"
+        test_parameters.descriptors.bispectrum_twojmax = 6
+        test_parameters.descriptors.bispectrum_cutoff = 4.67637
         test_parameters.descriptors.descriptors_contain_xyz = True
         test_parameters.descriptors.use_z_splitting = False
         test_parameters.use_mpi = True
-        snap_calculator = mala.SNAP(test_parameters)
+        snap_calculator = mala.Bispectrum(test_parameters)
         snaps_parallel, snapsize = snap_calculator.calculate_from_atoms(atoms,
                                                               [18, 18, 27])
         snaps_parallel = snap_calculator.gather_descriptors(snaps_parallel)

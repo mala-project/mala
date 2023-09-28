@@ -6,7 +6,7 @@ from mala.common.parallelizer import printout
 from mala.common.parameters import Parameters
 from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
-from mala.network.hyperparameter_interface import HyperparameterInterface
+from mala.network.hyperparameter import Hyperparameter
 from mala.network.objective_base import ObjectiveBase
 
 
@@ -25,7 +25,7 @@ class HyperOpt(ABC):
         If true, .pkl checkpoints will be created.
     """
 
-    def __new__(cls, params: Parameters, data, use_pkl_checkpoints=False):
+    def __new__(cls, params: Parameters, data=None, use_pkl_checkpoints=False):
         """
         Create a HyperOpt instance.
 
@@ -64,7 +64,8 @@ class HyperOpt(ABC):
 
         return hoptimizer
 
-    def __init__(self, params: Parameters, data, use_pkl_checkpoints=False):
+    def __init__(self, params: Parameters, data=None,
+                 use_pkl_checkpoints=False):
         self.params: Parameters = params
         self.data_handler = data
         self.objective = ObjectiveBase(self.params, self.data_handler)
@@ -106,13 +107,13 @@ class HyperOpt(ABC):
         """
         self.params.\
             hyperparameters.hlist.append(
-                HyperparameterInterface(self.params.hyperparameters.
-                                        hyper_opt_method,
-                                        opttype=opttype,
-                                        name=name,
-                                        low=low,
-                                        high=high,
-                                        choices=choices))
+                Hyperparameter(self.params.hyperparameters.
+                               hyper_opt_method,
+                               opttype=opttype,
+                               name=name,
+                               low=low,
+                               high=high,
+                               choices=choices))
 
     def clear_hyperparameters(self):
         """Clear the list of hyperparameters that are to be investigated."""
@@ -250,7 +251,8 @@ class HyperOpt(ABC):
             loaded_params.data.use_lazy_loading = True
         new_datahandler = DataHandler(loaded_params,
                                       input_data_scaler=loaded_iscaler,
-                                      output_data_scaler=loaded_oscaler)
+                                      output_data_scaler=loaded_oscaler,
+                                      clear_data=False)
         new_datahandler.prepare_data(reparametrize_scaler=False)
 
         return loaded_params, new_datahandler, optimizer_name

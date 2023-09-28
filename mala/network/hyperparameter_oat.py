@@ -1,9 +1,9 @@
 """Hyperparameter to use with OAT."""
 
-from mala.common.json_serializable import JSONSerializable
+from mala.network.hyperparameter import Hyperparameter
 
 
-class HyperparameterOAT(JSONSerializable):
+class HyperparameterOAT(Hyperparameter):
     """Represents a hyperparameter for OAT.
 
     Parameters
@@ -29,11 +29,11 @@ class HyperparameterOAT(JSONSerializable):
         List of possible choices (for categorical parameter).
     """
 
-    def __init__(self, opttype="categorical", name="", choices=[]):
-        super(HyperparameterOAT, self).__init__()
-        self.name = name
-        self.opttype = opttype
-        self.choices = choices
+    def __init__(self, hotype=None, opttype="categorical", name="", choices=[],
+                 low=0, high=0):
+        super(HyperparameterOAT, self).__init__(opttype=opttype,
+                                                name=name,
+                                                choices=choices)
 
         if self.opttype != "categorical":
             raise Exception("Unsupported Hyperparameter type.")

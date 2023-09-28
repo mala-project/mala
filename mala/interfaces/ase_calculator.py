@@ -41,12 +41,13 @@ class MALA(Calculator):
     implemented_properties = ['energy', 'forces']
 
     def __init__(self, params: Parameters, network: Network,
-                 data: DataHandler, reference_data):
+                 data: DataHandler, reference_data=None,
+                 predictor=None):
         super(MALA, self).__init__()
 
         # Copy the MALA relevant objects.
-        self.params: Parameters = params
-        if self.params.targets.target_type != "LDOS":
+        self.mala_parameters: Parameters = params
+        if self.mala_parameters.targets.target_type != "LDOS":
             raise Exception("The MALA calculator currently only works with the"
                             "LDOS.")
 
@@ -54,16 +55,43 @@ class MALA(Calculator):
         self.data_handler: DataHandler = data
 
         # Prepare for prediction.
-        self.predictor = Predictor(self.params, self.network,
-                                   self.data_handler)
+        if predictor is None:
+            self.predictor = Predictor(self.mala_parameters, self.network,
+                                       self.data_handler)
+        else:
+            self.predictor = predictor
 
-        # Get critical values from a reference file (cutoff, temperature, etc.)
-        self.data_handler.target_calculator.\
-            read_additional_calculation_data(reference_data[0],
-                                             reference_data[1])
+        if reference_data is not None:
+            # Get critical values from a reference file (cutoff,
+            # temperature, etc.)
+            self.data_handler.target_calculator.\
+                read_additional_calculation_data(reference_data)
 
         # Needed for e.g. Monte Carlo.
         self.last_energy_contributions = {}
+
+    @classmethod
+    def load_model(cls, run_name, path="./"):
+        """
+        Load a model to use for the calculator.
+
+        Only supports zipped models with .json parameters. No legacy
+        models supported.
+
+        Parameters
+        ----------
+        run_name : str
+            Name under which the model is saved.
+
+        path : str
+            Path where the model is saved.
+        """
+        loaded_params, loaded_network, \
+            new_datahandler, loaded_runner = Predictor.\
+            load_run(run_name, path=path)
+        calculator = cls(loaded_params, loaded_network, new_datahandler,
+                         predictor=loaded_runner)
+        return calculator
 
     def calculate(self, atoms=None, properties=['energy'],
                   system_changes=all_changes):
@@ -154,7 +182,7 @@ class MALA(Calculator):
             self.results["ion_ion_energy"] = self.\
                 last_energy_contributions["e_ewald"]
 
-    def save_calculator(self, filename):
+    def save_calculator(self, filename, save_path="./"):
         """
         Save parameters used for this calculator.
 
@@ -163,8 +191,12 @@ class MALA(Calculator):
         Parameters
         ----------
         filename : string
-            Path to file in which to store the Calculator.
+            Name of the file in which to store the calculator.
+
+        save_path : string
+            Path where the calculator should be saved.
 
         """
-        self.params.save(filename)
+        self.predictor.save_run(filename, save_path=save_path,
+                                additional_calculation_data=True)
 

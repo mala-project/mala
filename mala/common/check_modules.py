@@ -16,14 +16,14 @@ def check_modules():
         "oapackage": {"available": False, "description":
                       "Enables usage of OAT method for hyperparameter "
                       "optimization."},
-        "pqkmeans": {"available": False, "description":
-                     "Enables clustering of training data."},
         "total_energy": {"available": False, "description":
                          "Enables calculation of total energy."},
         "asap3": {"available": False, "description":
                   "Enables trajectory analysis."},
         "dftpy": {"available": False, "description":
-                  "Enables OF-DFT-MD initialization."}
+                  "Enables OF-DFT-MD initialization."},
+        "minterpy": {"available": False, "description":
+            "Enables minterpy descriptor calculation for data preprocessing."}
     }
 
     # Find out if libs are available.
