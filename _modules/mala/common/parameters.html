@@ -82,8 +82,10 @@
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
 
+<span class="n">horovod_available</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
+    <span class="n">horovod_available</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="k">pass</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -1333,19 +1335,25 @@
 
     <span class="nd">@use_horovod</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">use_horovod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
-            <span class="n">hvd</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_use_horovod</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">horovod_available</span><span class="p">:</span>
+                <span class="n">hvd</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+                <span class="c1"># Invalidate, will be updated in setter.</span>
+                <span class="n">set_horovod_status</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_use_horovod</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parallel_warn</span><span class="p">(</span><span class="s2">&quot;Horovod requested, but not installed found. &quot;</span>
+                              <span class="s2">&quot;MALA will operate without horovod only.&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Invalidate, will be updated in setter.</span>
-        <span class="n">set_horovod_status</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_use_horovod</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
