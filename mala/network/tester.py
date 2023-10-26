@@ -210,7 +210,7 @@ class Tester(Runner):
             target_calculator.read_from_array(predicted_target)
             predicted = target_calculator.band_energy
             return [actual, predicted,
-                    target_calculator.total_energy_dft_calculation]
+                    target_calculator.band_energy_dft_calculation]
 
         elif observable == "number_of_electrons":
             target_calculator = self.data.target_calculator
