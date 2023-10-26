@@ -286,7 +286,7 @@
             <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_target</span><span class="p">)</span>
             <span class="n">predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">band_energy</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">actual</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span>
-                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span><span class="p">]</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span><span class="p">]</span>
 
         <span class="k">elif</span> <span class="n">observable</span> <span class="o">==</span> <span class="s2">&quot;number_of_electrons&quot;</span><span class="p">:</span>
             <span class="n">target_calculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
