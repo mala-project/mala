@@ -630,6 +630,15 @@ class Trainer(Runner):
                                                          mini_batch_size * 1,
                                                          sampler=self.test_sampler,
                                                          **kwargs))
+        
+
+
+        if self.parameters_full.use_gpu and self.parameters_full.running.num_gpus > 1:
+            if self.parameters_full.network.nn_type != "feed-forward":
+                raise Exception("Only feed-forward networks are supported "
+                                "with multiple GPUs.")
+            self.network = torch.nn.DataParallel(self.network,
+                device_ids=list(range(self.parameters_full.running.num_gpus)))
 
     def __process_mini_batch(self, network, input_data, target_data):
         """Process a mini batch."""
@@ -645,7 +654,10 @@ class Trainer(Runner):
 
                         with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
                             prediction = network(input_data)
-                            loss = network.calculate_loss(prediction, target_data)
+                            if hasattr(network, "calculate_loss"):
+                                loss = network.calculate_loss(prediction, target_data)
+                            else:
+                                loss = network.module.calculate_loss(prediction, target_data)
 
                         if self.gradscaler:
                             self.gradscaler.scale(loss).backward()
@@ -665,6 +677,11 @@ class Trainer(Runner):
                         self.static_prediction = network(self.static_input_data)
 
                         self.static_loss = network.calculate_loss(self.static_prediction, self.static_target_data)
+
+                        if hasattr(network, "calculate_loss"):
+                            self.static_loss = network.calculate_loss(self.static_prediction, self.static_target_data)
+                        else:
+                            self.static_loss = network.module.calculate_loss(self.static_prediction, self.static_target_data)
 
                     if self.gradscaler:
                         self.gradscaler.scale(self.static_loss).backward()
@@ -688,7 +705,10 @@ class Trainer(Runner):
                     torch.cuda.nvtx.range_pop()
 
                     torch.cuda.nvtx.range_push("loss")
-                    loss = network.calculate_loss(prediction, target_data)
+                    if hasattr(network, "calculate_loss"):
+                        loss = network.calculate_loss(prediction, target_data)
+                    else:
+                        loss = network.module.calculate_loss(prediction, target_data)
                     # loss
                     torch.cuda.nvtx.range_pop()
 
@@ -711,7 +731,10 @@ class Trainer(Runner):
                 return loss
         else:
             prediction = network(input_data)
-            loss = network.calculate_loss(prediction, target_data)
+            if hasattr(network, "calculate_loss"):
+                loss = network.calculate_loss(prediction, target_data)
+            else:
+                loss = network.module.calculate_loss(prediction, target_data)
             loss.backward()
             self.optimizer.step()
             self.optimizer.zero_grad()
@@ -761,7 +784,10 @@ class Trainer(Runner):
                                     for _ in range(20):
                                         with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
                                             prediction = network(x)
-                                            loss = network.calculate_loss(prediction, y)
+                                            if hasattr(network, "calculate_loss"):
+                                                loss = network.calculate_loss(prediction, y)
+                                            else:
+                                                loss = network.module.calculate_loss(prediction, y)
                                 torch.cuda.current_stream().wait_stream(s)
 
                                 # Create static entry point tensors to graph
@@ -774,6 +800,10 @@ class Trainer(Runner):
                                     with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
                                         self.static_prediction_validation = network(self.static_input_validation)
                                         self.static_loss_validation = network.calculate_loss(self.static_prediction_validation, self.static_target_validation)
+                                        if hasattr(network, "calculate_loss"):
+                                            self.static_loss_validation = network.calculate_loss(self.static_prediction_validation, self.static_target_validation)
+                                        else:
+                                            self.static_loss_validation = network.module.calculate_loss(self.static_prediction_validation, self.static_target_validation)
 
                             if self.validation_graph:
                                 self.static_input_validation.copy_(x)
@@ -783,7 +813,10 @@ class Trainer(Runner):
                             else:
                                 with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
                                     prediction = network(x)
-                                    loss = network.calculate_loss(prediction, y)
+                                    if hasattr(network, "calculate_loss"):
+                                        loss = network.calculate_loss(prediction, y)
+                                    else:
+                                        loss = network.module.calculate_loss(prediction, y)
                                     validation_loss_sum += loss
                             if batchid != 0 and (batchid + 1) % report_freq == 0:
                                 torch.cuda.synchronize()
@@ -804,8 +837,13 @@ class Trainer(Runner):
                             x = x.to(self.parameters._configuration["device"])
                             y = y.to(self.parameters._configuration["device"])
                             prediction = network(x)
-                            validation_loss_sum += \
-                                network.calculate_loss(prediction, y).item()
+
+                            if hasattr(network, "calculate_loss"):
+                                loss = network.calculate_loss(prediction, y)
+                            else:
+                                loss = network.module.calculate_loss(prediction, y)
+                            
+                            validation_loss_sum += loss.item()
                             batchid += 1
 
             validation_loss = validation_loss_sum.item() / batchid

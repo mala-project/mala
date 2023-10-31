@@ -28,7 +28,7 @@ class Network(nn.Module):
         Parameters used to create this neural network.
     """
 
-    def __new__(cls, params: Parameters):
+    def __new__(cls, params: Parameters=None):
         """
         Create a neural network instance.
 
@@ -38,7 +38,7 @@ class Network(nn.Module):
 
         Parameters
         ----------
-        params : mala.common.parametes.Parameters
+        params : mala.common.parameters.Parameters
             Parameters used to create this neural network.
         """
         model = None
