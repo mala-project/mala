@@ -293,10 +293,16 @@ class Tester(Runner):
 
             target_calculator.read_from_array(predicted_target)
             predicted = target_calculator.density_of_states
-            return np.mean(np.abs((actual - predicted) / actual)) * 100
 
+            percentage_error = 0
+            values_counted = 0
+            for i in range(0, self.parameters_full.targets.ldos_gridsize):
+                if actual[i] > 0:
+                    percentage_error += np.abs((actual[i] - predicted[i]) / actual[i]) \
+                                        * 100
+                    values_counted += 1
 
-
+            return np.ma.masked_invalid(np.abs((actual - predicted) / actual)).mean() * 100
 
     def __prepare_to_test(self, snapshot_number):
         """Prepare the tester class to for test run."""
