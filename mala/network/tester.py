@@ -288,13 +288,15 @@ class Tester(Runner):
                 read_additional_calculation_data(
                 self.data.get_snapshot_calculation_output(snapshot_number))
 
+            # We shift both the actual and predicted DOS by 1.0 to overcome
+            # numerical issues with the DOS having values equal to zero.
             target_calculator.read_from_array(actual_target)
-            actual = target_calculator.density_of_states
+            actual = target_calculator.density_of_states + 1.0
 
             target_calculator.read_from_array(predicted_target)
-            predicted = target_calculator.density_of_states
+            predicted = target_calculator.density_of_states + 1.0
 
-            return np.ma.masked_invalid(np.abs((actual - predicted) / (actual+predicted))).mean() * 100
+            return np.ma.masked_invalid(np.abs((actual - predicted) / (actual))).mean() * 100
 
     def __prepare_to_test(self, snapshot_number):
         """Prepare the tester class to for test run."""
