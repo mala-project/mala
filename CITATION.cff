@@ -2,16 +2,20 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it using these metadata."
 authors:
-  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+ - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Cangi
+    given-names: Attila
+    orcid: https://orcid.org/0000-0001-9162-262X
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Rajamanickam
+    given-names: Sivasankaran
+    orcid: https://orcid.org/0000-0002-5854-409X
+- affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Brzoza
     given-names: Bartosz
   - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Callow
     given-names: Timothy J.
-  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
-    family-names: Cangi
-    given-names: Attila
-    orcid: https://orcid.org/0000-0001-9162-262X
   - affiliation: "Oak Ridge National Laboratory (ORNL)"
     family-names: Ellis
     given-names: J. Austin
@@ -54,10 +58,6 @@ authors:
   - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Pöschel
     given-names: Franz
-  - affiliation: "Sandia National Laboratories (SNL)"
-    family-names: Rajamanickam
-    given-names: Sivasankaran
-    orcid: https://orcid.org/0000-0002-5854-409X
   - affiliation: "Nvidia Corporation"
     family-names: Romero
     given-names: Josh
