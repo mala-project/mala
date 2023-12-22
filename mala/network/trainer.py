@@ -279,7 +279,7 @@ class Trainer(Runner):
                 self.data.training_data_sets[0].shuffle()
 
             if self.parameters._configuration["gpu"]:
-                torch.cuda.synchronize()
+                torch.cuda.synchronize(self.parameters._configuration["device"])
                 tsample = time.time()
                 t0 = time.time()
                 batchid = 0
@@ -309,7 +309,7 @@ class Trainer(Runner):
                         training_loss_sum += loss
 
                         if batchid != 0 and (batchid + 1) % self.parameters.training_report_frequency == 0:
-                            torch.cuda.synchronize()
+                            torch.cuda.synchronize(self.parameters._configuration["device"])
                             sample_time = time.time() - tsample
                             avg_sample_time = sample_time / self.parameters.training_report_frequency
                             avg_sample_tput = self.parameters.training_report_frequency * inputs.shape[0] / sample_time
@@ -319,14 +319,14 @@ class Trainer(Runner):
                                      min_verbosity=2)
                             tsample = time.time()
                         batchid += 1
-                torch.cuda.synchronize()
+                torch.cuda.synchronize(self.parameters._configuration["device"])
                 t1 = time.time()
                 printout(f"training time: {t1 - t0}", min_verbosity=2)
 
                 training_loss = training_loss_sum.item() / batchid
 
                 # Calculate the validation loss. and output it.
-                torch.cuda.synchronize()
+                torch.cuda.synchronize(self.parameters._configuration["device"])
             else:
                 batchid = 0
                 for loader in self.training_data_loaders:
@@ -375,14 +375,14 @@ class Trainer(Runner):
                 self.tensor_board.close()
 
             if self.parameters._configuration["gpu"]:
-                torch.cuda.synchronize()
+                torch.cuda.synchronize(self.parameters._configuration["device"])
 
             # Mix the DataSets up (this function only does something
             # in the lazy loading case).
             if self.parameters.use_shuffling_for_samplers:
                 self.data.mix_datasets()
             if self.parameters._configuration["gpu"]:
-                torch.cuda.synchronize()
+                torch.cuda.synchronize(self.parameters._configuration["device"])
 
             # If a scheduler is used, update it.
             if self.scheduler is not None:
@@ -742,7 +742,7 @@ class Trainer(Runner):
             with torch.no_grad():
                 if self.parameters._configuration["gpu"]:
                     report_freq = self.parameters.training_report_frequency
-                    torch.cuda.synchronize()
+                    torch.cuda.synchronize(self.parameters._configuration["device"])
                     tsample = time.time()
                     batchid = 0
                     for loader in data_loaders:
@@ -786,7 +786,7 @@ class Trainer(Runner):
                                     loss = network.calculate_loss(prediction, y)
                                     validation_loss_sum += loss
                             if batchid != 0 and (batchid + 1) % report_freq == 0:
-                                torch.cuda.synchronize()
+                                torch.cuda.synchronize(self.parameters._configuration["device"])
                                 sample_time = time.time() - tsample
                                 avg_sample_time = sample_time / report_freq
                                 avg_sample_tput = report_freq * x.shape[0] / sample_time
@@ -796,7 +796,7 @@ class Trainer(Runner):
                                          min_verbosity=2)
                                 tsample = time.time()
                             batchid += 1
-                    torch.cuda.synchronize()
+                    torch.cuda.synchronize(self.parameters._configuration["device"])
                 else:
                     batchid = 0
                     for loader in data_loaders:
