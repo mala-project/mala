@@ -636,8 +636,8 @@ class Trainer(Runner):
         if self.parameters._configuration["gpu"]:
             if self.parameters.use_graphs and self.train_graph is None:
                 printout("Capturing CUDA graph for training.", min_verbosity=2)
-                s = torch.cuda.Stream()
-                s.wait_stream(torch.cuda.current_stream())
+                s = torch.cuda.Stream(self.parameters._configuration["device"])
+                s.wait_stream(torch.cuda.current_stream(self.parameters._configuration["device"]))
                 # Warmup for graphs
                 with torch.cuda.stream(s):
                     for _ in range(20):
@@ -651,7 +651,7 @@ class Trainer(Runner):
                             self.gradscaler.scale(loss).backward()
                         else:
                             loss.backward()
-                torch.cuda.current_stream().wait_stream(s)
+                torch.cuda.current_stream(self.parameters._configuration["device"]).wait_stream(s)
 
                 # Create static entry point tensors to graph
                 self.static_input_data = torch.empty_like(input_data)
@@ -754,15 +754,15 @@ class Trainer(Runner):
 
                             if self.parameters.use_graphs and self.validation_graph is None:
                                 printout("Capturing CUDA graph for validation.", min_verbosity=2)
-                                s = torch.cuda.Stream()
-                                s.wait_stream(torch.cuda.current_stream())
+                                s = torch.cuda.Stream(self.parameters._configuration["device"])
+                                s.wait_stream(torch.cuda.current_stream(self.parameters._configuration["device"]))
                                 # Warmup for graphs
                                 with torch.cuda.stream(s):
                                     for _ in range(20):
                                         with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
                                             prediction = network(x)
                                             loss = network.calculate_loss(prediction, y)
-                                torch.cuda.current_stream().wait_stream(s)
+                                torch.cuda.current_stream(self.parameters._configuration["device"]).wait_stream(s)
 
                                 # Create static entry point tensors to graph
                                 self.static_input_validation = torch.empty_like(x)
