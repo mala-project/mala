@@ -734,7 +734,7 @@ class ParametersRunning(ParametersBase):
         self.use_mixed_precision = False
         self.use_graphs = False
         self.training_report_frequency = 1000
-        self.profiler_range = [1000, 2000]
+        self.profiler_range = None #[1000, 2000]
 
     def _update_horovod(self, new_horovod):
         super(ParametersRunning, self)._update_horovod(new_horovod)

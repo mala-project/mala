@@ -286,10 +286,11 @@ class Trainer(Runner):
                 for loader in self.training_data_loaders:
                     for (inputs, outputs) in loader:
 
-                        if batchid == self.parameters.profiler_range[0]:
-                            torch.cuda.profiler.start()
-                        if batchid == self.parameters.profiler_range[1]:
-                            torch.cuda.profiler.stop()
+                        if self.parameters.profiler_range is not None:
+                            if batchid == self.parameters.profiler_range[0]:
+                                torch.cuda.profiler.start()
+                            if batchid == self.parameters.profiler_range[1]:
+                                torch.cuda.profiler.stop()
 
                         torch.cuda.nvtx.range_push(f"step {batchid}")
 
