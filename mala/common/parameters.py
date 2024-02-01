@@ -6,8 +6,10 @@ import os
 import pickle
 from time import sleep
 
+horovod_available = False
 try:
     import horovod.torch as hvd
+    horovod_available = True
 except ModuleNotFoundError:
     pass
 import numpy as np
@@ -732,7 +734,7 @@ class ParametersRunning(ParametersBase):
         self.use_mixed_precision = False
         self.use_graphs = False
         self.training_report_frequency = 1000
-        self.profiler_range = [1000, 2000]
+        self.profiler_range = None #[1000, 2000]
 
     def _update_horovod(self, new_horovod):
         super(ParametersRunning, self)._update_horovod(new_horovod)
@@ -1257,19 +1259,25 @@ class Parameters:
 
     @use_horovod.setter
     def use_horovod(self, value):
-        if value:
-            hvd.init()
+        if value is False:
+            self._use_horovod = False
+        else:
+            if horovod_available:
+                hvd.init()
+                # Invalidate, will be updated in setter.
+                set_horovod_status(value)
+                self.device = None
+                self._use_horovod = value
+                self.network._update_horovod(self.use_horovod)
+                self.descriptors._update_horovod(self.use_horovod)
+                self.targets._update_horovod(self.use_horovod)
+                self.data._update_horovod(self.use_horovod)
+                self.running._update_horovod(self.use_horovod)
+                self.hyperparameters._update_horovod(self.use_horovod)
+            else:
+                parallel_warn("Horovod requested, but not installed found. "
+                              "MALA will operate without horovod only.")
 
-        # Invalidate, will be updated in setter.
-        set_horovod_status(value)
-        self.device = None
-        self._use_horovod = value
-        self.network._update_horovod(self.use_horovod)
-        self.descriptors._update_horovod(self.use_horovod)
-        self.targets._update_horovod(self.use_horovod)
-        self.data._update_horovod(self.use_horovod)
-        self.running._update_horovod(self.use_horovod)
-        self.hyperparameters._update_horovod(self.use_horovod)
 
     @property
     def device(self):
