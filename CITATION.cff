@@ -1,5 +1,5 @@
 # YAML 1.2
-cff-version: 1.2.0
+cff-version: 1.2.1
 message: "If you use this software, please cite it using these metadata."
 authors:
   - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
@@ -91,4 +91,4 @@ license: "BSD-3-Clause"
 repository-code: "https://github.com/mala-project/mala"
 title: MALA
 doi: 10.5281/zenodo.5557254 # This DOI represents all versions, and will always resolve to the latest one.
-version: 1.2.0
+version: 1.2.1
