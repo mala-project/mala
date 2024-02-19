@@ -526,12 +526,6 @@ class Descriptor(PhysicalData):
         """
         from lammps import lammps
 
-        if self.parameters._configuration["mpi"] and \
-           self.parameters._configuration["gpu"]:
-            raise Exception("LAMMPS can currently only work with multiple "
-                            "ranks or GPU on one rank - but not multiple GPUs "
-                            "across ranks.")
-
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = ["-screen", "none", "-log",
                        os.path.join(outdir, log_file_name)]
