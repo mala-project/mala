@@ -114,7 +114,7 @@ class Runner:
     @classmethod
     def load_run(cls, run_name, path="./", zip_run=True,
                  params_format="json", load_runner=True,
-                 prepare_data=False):
+                 prepare_data=False, use_mpi=None):
         """
         Load a run.
 
@@ -183,6 +183,8 @@ class Runner:
                                          ".params."+params_format)
 
         loaded_params = Parameters.load_from_json(loaded_params)
+        if use_mpi is not None:
+            loaded_params.use_mpi = use_mpi
         loaded_network = Network.load_from_file(loaded_params,
                                                 loaded_network)
         loaded_iscaler = DataScaler.load_from_file(loaded_iscaler)
