@@ -192,7 +192,7 @@ class Network(nn.Module):
         loaded_network = Network(params)
         if params.use_gpu:
             loaded_network.load_state_dict(torch.load(file,
-                                                      map_location="cuda"))
+                                                      map_location=params.device))
         else:
             loaded_network.load_state_dict(torch.load(file,
                                                       map_location="cpu"))
