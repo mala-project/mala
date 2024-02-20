@@ -114,7 +114,7 @@ class Runner:
     @classmethod
     def load_run(cls, run_name, path="./", zip_run=True,
                  params_format="json", load_runner=True,
-                 prepare_data=False, use_mpi=None):
+                 prepare_data=False, load_with_mpi=False):
         """
         Load a run.
 
@@ -140,6 +140,14 @@ class Runner:
         prepare_data : bool
             If True, the data will be loaded into memory. This is needed when
             continuing a model training.
+
+        load_with_mpi : bool
+            If False (default) no additional MPI will be activated during
+            loading. If True, MPI will be activated during loading.
+            MPI usage has to be enabled upon loading, since neural network
+            parameters have to be loaded onto the correct GPU.
+            If MPI was already enabled at the end of the training loop,
+            this parameter will have no effect.
 
         Return
         ------
@@ -183,8 +191,10 @@ class Runner:
                                          ".params."+params_format)
 
         loaded_params = Parameters.load_from_json(loaded_params)
-        if use_mpi is not None:
-            loaded_params.use_mpi = use_mpi
+
+        # MPI has to be specified upon loading, in contrast to GPU.
+        if load_with_mpi is True:
+            loaded_params.use_mpi = load_with_mpi
         loaded_network = Network.load_from_file(loaded_params,
                                                 loaded_network)
         loaded_iscaler = DataScaler.load_from_file(loaded_iscaler)

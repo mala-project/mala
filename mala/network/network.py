@@ -190,12 +190,8 @@ class Network(nn.Module):
             The network that was loaded from the file.
         """
         loaded_network = Network(params)
-        if params.use_gpu:
-            loaded_network.load_state_dict(torch.load(file,
-                                                      map_location=params.device))
-        else:
-            loaded_network.load_state_dict(torch.load(file,
-                                                      map_location="cpu"))
+        loaded_network.\
+            load_state_dict(torch.load(file, map_location=params.device))
         loaded_network.eval()
         return loaded_network
 
