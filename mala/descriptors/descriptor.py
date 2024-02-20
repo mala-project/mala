@@ -526,7 +526,7 @@ class Descriptor(PhysicalData):
         """
         from lammps import lammps
 
-        printout("Warning: do not initialize more than one pre-processing calculation\
+        parallel_warn("Do not initialize more than one pre-processing calculation\
 in the same directory at the same time. Data may be over-written.")
 
         if self.parameters._configuration["mpi"] and \
