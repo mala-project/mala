@@ -1046,10 +1046,21 @@ class Density(Target):
             t0 = time.perf_counter()
             gaussian_descriptors = \
                 np.reshape(gaussian_descriptors,
-                           [number_of_gridpoints, 1], order='F')
+                           [number_of_gridpoints_mala, 1], order='F')
             reference_gaussian_descriptors = \
                 np.reshape(reference_gaussian_descriptors,
-                           [number_of_gridpoints, 1], order='F')
+                           [number_of_gridpoints_mala, 1], order='F')
+
+            # If there is an inconsistency between MALA and QE (which
+            # can only happen in the uneven z-splitting case at the moment)
+            # we need to pad the gaussian descriptor arrays.
+            if number_of_gridpoints_mala < number_of_gridpoints:
+                grid_diff = number_of_gridpoints - number_of_gridpoints_mala
+                gaussian_descriptors = np.pad(gaussian_descriptors,
+                                            pad_width=((0, grid_diff), (0, 0)))
+                reference_gaussian_descriptors = np.pad(reference_gaussian_descriptors,
+                                            pad_width=((0, grid_diff), (0, 0)))
+
             sigma = self._parameters_full.descriptors.\
                 atomic_density_sigma
             sigma = sigma / Bohr
