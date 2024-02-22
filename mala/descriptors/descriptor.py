@@ -526,6 +526,9 @@ class Descriptor(PhysicalData):
         """
         from lammps import lammps
 
+        parallel_warn("Do not initialize more than one pre-processing calculation\
+        in the same directory at the same time. Data may be over-written.")
+
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = ["-screen", "none", "-log",
                        os.path.join(outdir, log_file_name)]
@@ -699,24 +702,23 @@ class Descriptor(PhysicalData):
                         "switch"] = self.parameters.bispectrum_switchflag
 
         else:
-            size = 1
             lammps_dict["ngridx"] = nx
             lammps_dict["ngridy"] = ny
             lammps_dict["ngridz"] = nz
             lammps_dict[
                 "switch"] = self.parameters.bispectrum_switchflag
-        if self.parameters._configuration["gpu"]:
-            # Tell Kokkos to use one GPU.
-            lmp_cmdargs.append("-k")
-            lmp_cmdargs.append("on")
-            lmp_cmdargs.append("g")
-            lmp_cmdargs.append(str(size))
+            if self.parameters._configuration["gpu"]:
+                # Tell Kokkos to use one GPU.
+                lmp_cmdargs.append("-k")
+                lmp_cmdargs.append("on")
+                lmp_cmdargs.append("g")
+                lmp_cmdargs.append("1")
 
-            # Tell LAMMPS to use Kokkos versions of those commands for
-            # which a Kokkos version exists.
-            lmp_cmdargs.append("-sf")
-            lmp_cmdargs.append("kk")
-            pass
+                # Tell LAMMPS to use Kokkos versions of those commands for
+                # which a Kokkos version exists.
+                lmp_cmdargs.append("-sf")
+                lmp_cmdargs.append("kk")
+                pass
 
         lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
 
