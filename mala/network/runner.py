@@ -295,6 +295,11 @@ class Runner:
         predicted_outputs : numpy.ndarray
             Precicted outputs for snapshot.
         """
+        # Ensure the Network is on the correct device.
+        # This line is necessary because GPU acceleration may have been
+        # activated AFTER loading a model.
+        self.network.to(self.network.params._configuration["device"])
+
         # Determine where the snapshot begins and ends.
         from_index = 0
         to_index = None
