@@ -1122,10 +1122,21 @@
             <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
             <span class="n">gaussian_descriptors</span> <span class="o">=</span> \
                 <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">gaussian_descriptors</span><span class="p">,</span>
-                           <span class="p">[</span><span class="n">number_of_gridpoints</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+                           <span class="p">[</span><span class="n">number_of_gridpoints_mala</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
             <span class="n">reference_gaussian_descriptors</span> <span class="o">=</span> \
                 <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">reference_gaussian_descriptors</span><span class="p">,</span>
-                           <span class="p">[</span><span class="n">number_of_gridpoints</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+                           <span class="p">[</span><span class="n">number_of_gridpoints_mala</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+
+            <span class="c1"># If there is an inconsistency between MALA and QE (which</span>
+            <span class="c1"># can only happen in the uneven z-splitting case at the moment)</span>
+            <span class="c1"># we need to pad the gaussian descriptor arrays.</span>
+            <span class="k">if</span> <span class="n">number_of_gridpoints_mala</span> <span class="o">&lt;</span> <span class="n">number_of_gridpoints</span><span class="p">:</span>
+                <span class="n">grid_diff</span> <span class="o">=</span> <span class="n">number_of_gridpoints</span> <span class="o">-</span> <span class="n">number_of_gridpoints_mala</span>
+                <span class="n">gaussian_descriptors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">gaussian_descriptors</span><span class="p">,</span>
+                                            <span class="n">pad_width</span><span class="o">=</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">grid_diff</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
+                <span class="n">reference_gaussian_descriptors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">reference_gaussian_descriptors</span><span class="p">,</span>
+                                            <span class="n">pad_width</span><span class="o">=</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">grid_diff</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
+
             <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span>\
                 <span class="n">atomic_density_sigma</span>
             <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">/</span> <span class="n">Bohr</span>

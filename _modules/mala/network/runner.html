@@ -190,7 +190,8 @@
 <div class="viewcode-block" id="Runner.load_run"><a class="viewcode-back" href="../../../api/mala.network.runner.html#mala.network.runner.Runner.load_run">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">run_name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span> <span class="n">zip_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">params_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">load_runner</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                 <span class="n">prepare_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                 <span class="n">prepare_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">load_with_mpi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">load_with_gpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a run.</span>
 
@@ -216,6 +217,23 @@
 <span class="sd">        prepare_data : bool</span>
 <span class="sd">            If True, the data will be loaded into memory. This is needed when</span>
 <span class="sd">            continuing a model training.</span>
+
+<span class="sd">        load_with_mpi : bool</span>
+<span class="sd">            Can be used to actively enable/disable MPI during loading.</span>
+<span class="sd">            Default is None, so that the MPI parameters set during</span>
+<span class="sd">            training/saving of the model are not overwritten.</span>
+<span class="sd">            If MPI is to be used in concert with GPU during training,</span>
+<span class="sd">            MPI already has to be activated here, if it was not activated</span>
+<span class="sd">            during training!</span>
+
+<span class="sd">        load_with_gpu : bool</span>
+<span class="sd">            Can be used to actively enable/disable GPU during loading.</span>
+<span class="sd">            Default is None, so that the GPU parameters set during</span>
+<span class="sd">            training/saving of the model are not overwritten.</span>
+<span class="sd">            If MPI is to be used in concert with GPU during training,</span>
+<span class="sd">            it is advised that GPU usage is activated here, if it was not</span>
+<span class="sd">            activated during training. Can also be used to activate a CPU</span>
+<span class="sd">            based inference, by setting it to False.</span>
 
 <span class="sd">        Return</span>
 <span class="sd">        ------</span>
@@ -259,6 +277,13 @@
                                          <span class="s2">&quot;.params.&quot;</span><span class="o">+</span><span class="n">params_format</span><span class="p">)</span>
 
         <span class="n">loaded_params</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">load_from_json</span><span class="p">(</span><span class="n">loaded_params</span><span class="p">)</span>
+
+        <span class="c1"># MPI has to be specified upon loading, in contrast to GPU.</span>
+        <span class="k">if</span> <span class="n">load_with_mpi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">loaded_params</span><span class="o">.</span><span class="n">use_mpi</span> <span class="o">=</span> <span class="n">load_with_mpi</span>
+        <span class="k">if</span> <span class="n">load_with_gpu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">loaded_params</span><span class="o">.</span><span class="n">use_gpu</span> <span class="o">=</span> <span class="n">load_with_gpu</span>
+
         <span class="n">loaded_network</span> <span class="o">=</span> <span class="n">Network</span><span class="o">.</span><span class="n">load_from_file</span><span class="p">(</span><span class="n">loaded_params</span><span class="p">,</span>
                                                 <span class="n">loaded_network</span><span class="p">)</span>
         <span class="n">loaded_iscaler</span> <span class="o">=</span> <span class="n">DataScaler</span><span class="o">.</span><span class="n">load_from_file</span><span class="p">(</span><span class="n">loaded_iscaler</span><span class="p">)</span>
@@ -359,6 +384,11 @@
 <span class="sd">        predicted_outputs : numpy.ndarray</span>
 <span class="sd">            Precicted outputs for snapshot.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Ensure the Network is on the correct device.</span>
+        <span class="c1"># This line is necessary because GPU acceleration may have been</span>
+        <span class="c1"># activated AFTER loading a model.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
+
         <span class="c1"># Determine where the snapshot begins and ends.</span>
         <span class="n">from_index</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">to_index</span> <span class="o">=</span> <span class="kc">None</span>

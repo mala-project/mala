@@ -266,12 +266,8 @@
 <span class="sd">            The network that was loaded from the file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">loaded_network</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">use_gpu</span><span class="p">:</span>
-            <span class="n">loaded_network</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">,</span>
-                                                      <span class="n">map_location</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">loaded_network</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">,</span>
-                                                      <span class="n">map_location</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">))</span>
+        <span class="n">loaded_network</span><span class="o">.</span>\
+            <span class="n">load_state_dict</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
         <span class="n">loaded_network</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">loaded_network</span></div></div>
 
