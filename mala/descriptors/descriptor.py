@@ -527,13 +527,7 @@ class Descriptor(PhysicalData):
         from lammps import lammps
 
         parallel_warn("Do not initialize more than one pre-processing calculation\
-in the same directory at the same time. Data may be over-written.")
-
-        if self.parameters._configuration["mpi"] and \
-           self.parameters._configuration["gpu"]:
-            raise Exception("LAMMPS can currently only work with multiple "
-                            "ranks or GPU on one rank - but not multiple GPUs "
-                            "across ranks.")
+        in the same directory at the same time. Data may be over-written.")
 
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = ["-screen", "none", "-log",
