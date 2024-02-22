@@ -114,7 +114,8 @@ class Runner:
     @classmethod
     def load_run(cls, run_name, path="./", zip_run=True,
                  params_format="json", load_runner=True,
-                 prepare_data=False, load_with_mpi=False):
+                 prepare_data=False, load_with_mpi=None,
+                 load_with_gpu=None):
         """
         Load a run.
 
@@ -142,12 +143,21 @@ class Runner:
             continuing a model training.
 
         load_with_mpi : bool
-            If False (default) no additional MPI will be activated during
-            loading. If True, MPI will be activated during loading.
-            MPI usage has to be enabled upon loading, since neural network
-            parameters have to be loaded onto the correct GPU.
-            If MPI was already enabled at the end of the training loop,
-            this parameter will have no effect.
+            Can be used to actively enable/disable MPI during loading.
+            Default is None, so that the MPI parameters set during
+            training/saving of the model are not overwritten.
+            If MPI is to be used in concert with GPU during training,
+            MPI already has to be activated here, if it was not activated
+            during training!
+
+        load_with_gpu : bool
+            Can be used to actively enable/disable GPU during loading.
+            Default is None, so that the GPU parameters set during
+            training/saving of the model are not overwritten.
+            If MPI is to be used in concert with GPU during training,
+            it is advised that GPU usage is activated here, if it was not
+            activated during training. Can also be used to activate a CPU
+            based inference, by setting it to False.
 
         Return
         ------
@@ -193,8 +203,11 @@ class Runner:
         loaded_params = Parameters.load_from_json(loaded_params)
 
         # MPI has to be specified upon loading, in contrast to GPU.
-        if load_with_mpi is True:
+        if load_with_mpi is not None:
             loaded_params.use_mpi = load_with_mpi
+        if load_with_gpu is not None:
+            loaded_params.use_gpu = load_with_gpu
+
         loaded_network = Network.load_from_file(loaded_params,
                                                 loaded_network)
         loaded_iscaler = DataScaler.load_from_file(loaded_iscaler)
