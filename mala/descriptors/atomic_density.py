@@ -222,18 +222,45 @@ class AtomicDensity(Descriptor):
 
     def __calculate_python(self, atoms, outdir, grid_dimensions, **kwargs):
         voxel = atoms.cell.copy()
-        voxel[0] = voxel[0] / (self.grid_dimensions[0])
-        voxel[1] = voxel[1] / (self.grid_dimensions[1])
-        voxel[2] = voxel[2] / (self.grid_dimensions[2])
-        gaussian_descriptors_np = np.zeros([self.grid_dimensions[0],
-                                            self.grid_dimensions[1],
-                                            self.grid_dimensions[2],
-                                            4])
-        for z in range(0, grid_dimensions[2]):
-            for y in range(0, grid_dimensions[1]):
-                for x in range(0, grid_dimensions[0]):
-                    gaussian_descriptors_np[x, y, z, 0] = voxel[0] * x
-                    gaussian_descriptors_np[x, y, z, 1] = voxel[1] * y
-                    gaussian_descriptors_np[x, y, z, 2] = voxel[2] * z
+        print(atoms.cell[1, 0], atoms.cell[2, 0])
+        voxel[0] = voxel[0] / (grid_dimensions[0])
+        voxel[1] = voxel[1] / (grid_dimensions[1])
+        voxel[2] = voxel[2] / (grid_dimensions[2])
+        # gaussian_descriptors_np = np.zeros([np.product(grid_dimensions), 4])
+        gaussian_descriptors_np = np.zeros((grid_dimensions[0],
+                                             grid_dimensions[1],
+                                             grid_dimensions[2], 4),
+                                           dtype=np.float64)
+
+        # This should be what is happening in compute_grid_local.cpp grid2x
+        # in general
+        for k in range(0, grid_dimensions[2]):
+            for j in range(0, grid_dimensions[1]):
+                for i in range(0, grid_dimensions[0]):
+                    if atoms.cell.orthorhombic:
+                        gaussian_descriptors_np[i, j, k, 0:3] = \
+                            np.diag(voxel) * [i, j, k]
+                    else:
+                        # This is only for triclinic cells, see domain.cpp
+                        gaussian_descriptors_np[i, j, k, 0] = \
+                            i/grid_dimensions[0]*atoms.cell[0, 0] + \
+                            j/grid_dimensions[1]*atoms.cell[1, 0] + \
+                            k/grid_dimensions[2]*atoms.cell[2, 0]
+
+                        gaussian_descriptors_np[i, j, k, 1] = \
+                            j/grid_dimensions[1] * atoms.cell[1, 1] + \
+                            k/grid_dimensions[2] * atoms.cell[1, 2]
+
+                        gaussian_descriptors_np[i, j, k, 2] = \
+                            k/grid_dimensions[2] * atoms.cell[2, 2]
+                        # gaussian_descriptors_np[i, j, k, 0] =
+                        # print("TRICLINIC")
+
+        # gaussian_descriptors_np = np.reshape(gaussian_descriptors_np,
+        #                                      (grid_dimensions[0],
+        #                                       grid_dimensions[1],
+        #                                       grid_dimensions[2], 4),
+        #                                      order="F")
+
         return gaussian_descriptors_np
 
