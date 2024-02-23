@@ -222,7 +222,6 @@ class AtomicDensity(Descriptor):
 
     def __calculate_python(self, atoms, outdir, grid_dimensions, **kwargs):
         voxel = atoms.cell.copy()
-        print(atoms.cell[1, 0], atoms.cell[2, 0])
         voxel[0] = voxel[0] / (grid_dimensions[0])
         voxel[1] = voxel[1] / (grid_dimensions[1])
         voxel[2] = voxel[2] / (grid_dimensions[2])
@@ -232,16 +231,27 @@ class AtomicDensity(Descriptor):
                                              grid_dimensions[2], 4),
                                            dtype=np.float64)
 
-        # This should be what is happening in compute_grid_local.cpp grid2x
-        # in general
+        # Hyperparameters
+        if self.parameters.atomic_density_sigma is None:
+            self.parameters.atomic_density_sigma = self.\
+                get_optimal_sigma(voxel)
+        cutoff_squared = self.parameters.atomic_density_cutoff*\
+                         self.parameters.atomic_density_cutoff
+        prefactor = 1.0 /(np.power(self.parameters.atomic_density_sigma*np.sqrt(2*np.pi),3))
+        argumentfactor = 1.0 / (2.0 * self.parameters.atomic_density_sigma*
+                                self.parameters.atomic_density_sigma)
+
         for k in range(0, grid_dimensions[2]):
             for j in range(0, grid_dimensions[1]):
                 for i in range(0, grid_dimensions[0]):
+                    # Compute the grid.
+                    # Orthorhombic cells and triclinic ones have
+                    # to be treated differently, see domain.cpp
+
                     if atoms.cell.orthorhombic:
                         gaussian_descriptors_np[i, j, k, 0:3] = \
                             np.diag(voxel) * [i, j, k]
                     else:
-                        # This is only for triclinic cells, see domain.cpp
                         gaussian_descriptors_np[i, j, k, 0] = \
                             i/grid_dimensions[0]*atoms.cell[0, 0] + \
                             j/grid_dimensions[1]*atoms.cell[1, 0] + \
@@ -253,14 +263,16 @@ class AtomicDensity(Descriptor):
 
                         gaussian_descriptors_np[i, j, k, 2] = \
                             k/grid_dimensions[2] * atoms.cell[2, 2]
-                        # gaussian_descriptors_np[i, j, k, 0] =
-                        # print("TRICLINIC")
 
-        # gaussian_descriptors_np = np.reshape(gaussian_descriptors_np,
-        #                                      (grid_dimensions[0],
-        #                                       grid_dimensions[1],
-        #                                       grid_dimensions[2], 4),
-        #                                      order="F")
+                    # Compute the Gaussians.
+                    positions = atoms.get_positions()
+                    for a in range(0, len(atoms)):
+                        distance_squared = \
+                            np.sum(positions[a] -
+                                   gaussian_descriptors_np[i, j, k, 0:3])
+                        if distance_squared < cutoff_squared:
+                            gaussian_descriptors_np[i, j, k, 3] += \
+                                prefactor*np.exp(-distance_squared*argumentfactor)
 
         return gaussian_descriptors_np
 
