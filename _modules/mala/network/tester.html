@@ -364,15 +364,17 @@
                 <span class="n">read_additional_calculation_data</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">))</span>
 
+            <span class="c1"># We shift both the actual and predicted DOS by 1.0 to overcome</span>
+            <span class="c1"># numerical issues with the DOS having values equal to zero.</span>
             <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">actual_target</span><span class="p">)</span>
-            <span class="n">actual</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density_of_states</span>
+            <span class="n">actual</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">+</span> <span class="mf">1.0</span>
 
             <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_target</span><span class="p">)</span>
-            <span class="n">predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density_of_states</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">actual</span> <span class="o">-</span> <span class="n">predicted</span><span class="p">)</span> <span class="o">/</span> <span class="n">actual</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span>
+            <span class="n">predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">+</span> <span class="mf">1.0</span>
 
-
-
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_invalid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">actual</span> <span class="o">-</span> <span class="n">predicted</span><span class="p">)</span> <span class="o">/</span>
+                                               <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">+</span>
+                                                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">predicted</span><span class="p">))))</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="mi">100</span>
 
     <span class="k">def</span> <span class="nf">__prepare_to_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the tester class to for test run.&quot;&quot;&quot;</span>
