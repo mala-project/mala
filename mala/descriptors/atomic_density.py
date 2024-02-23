@@ -118,6 +118,14 @@ class AtomicDensity(Descriptor):
                optimal_sigma_aluminium
 
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
+        if self.parameters._configuration["lammps"]:
+            return self.__calculate_lammps(atoms, outdir, grid_dimensions,
+                                           **kwargs)
+        else:
+            return self.__calculate_python(atoms, outdir, grid_dimensions,
+                                           **kwargs)
+
+    def __calculate_lammps(self, atoms, outdir, grid_dimensions, **kwargs):
         """Perform actual Gaussian descriptor calculation."""
         use_fp64 = kwargs.get("use_fp64", False)
         return_directly = kwargs.get("return_directly", False)
@@ -211,4 +219,21 @@ class AtomicDensity(Descriptor):
                     self.fingerprint_length = 1
                     return gaussian_descriptors_np[:, :, :, 6:], \
                            nx*ny*nz
+
+    def __calculate_python(self, atoms, outdir, grid_dimensions, **kwargs):
+        voxel = atoms.cell.copy()
+        voxel[0] = voxel[0] / (self.grid_dimensions[0])
+        voxel[1] = voxel[1] / (self.grid_dimensions[1])
+        voxel[2] = voxel[2] / (self.grid_dimensions[2])
+        gaussian_descriptors_np = np.zeros([self.grid_dimensions[0],
+                                            self.grid_dimensions[1],
+                                            self.grid_dimensions[2],
+                                            4])
+        for z in range(0, grid_dimensions[2]):
+            for y in range(0, grid_dimensions[1]):
+                for x in range(0, grid_dimensions[0]):
+                    gaussian_descriptors_np[x, y, z, 0] = voxel[0] * x
+                    gaussian_descriptors_np[x, y, z, 1] = voxel[1] * y
+                    gaussian_descriptors_np[x, y, z, 2] = voxel[2] * z
+        return gaussian_descriptors_np
 
