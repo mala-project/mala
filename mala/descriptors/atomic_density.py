@@ -15,6 +15,7 @@ try:
 except ModuleNotFoundError:
     pass
 import numpy as np
+from scipy.spatial import distance
 
 from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
 from mala.descriptors.descriptor import Descriptor
@@ -242,9 +243,9 @@ class AtomicDensity(Descriptor):
         argumentfactor = 1.0 / (2.0 * self.parameters.atomic_density_sigma*
                                 self.parameters.atomic_density_sigma)
         print(prefactor,argumentfactor)
-        for k in range(0, grid_dimensions[2]):
+        for i in range(0, grid_dimensions[0]):
             for j in range(0, grid_dimensions[1]):
-                for i in range(0, grid_dimensions[0]):
+                for k in range(0, grid_dimensions[2]):
                     # Compute the grid.
                     # Orthorhombic cells and triclinic ones have
                     # to be treated differently, see domain.cpp
@@ -279,15 +280,21 @@ class AtomicDensity(Descriptor):
                     neighborlist.update(atoms_with_grid_point)
                     indices, offsets = neighborlist.get_neighbors(len(atoms))
                     nogrid = np.argwhere(indices<len(atoms))
-                    indices_nogrid = indices()
-                    positions = atoms.get_positions()
-                    for a in range(0, len(atoms)):
-                        distance_squared = \
-                            np.sum(positions[a] -
-                                   gaussian_descriptors_np[i, j, k, 0:3])
-                        if distance_squared < cutoff_squared:
-                            gaussian_descriptors_np[i, j, k, 3] += \
-                                prefactor*np.exp(-distance_squared*argumentfactor)
+                    indices_nogrid = indices[nogrid].flatten()
+                    offsets_nogrid = np.squeeze(offsets[nogrid])
+                    dm = np.squeeze(distance.cdist([atoms_with_grid_point.get_positions()[len(atoms)]],
+                                        atoms.positions[indices_nogrid] + offsets_nogrid @
+                                        atoms.get_cell()))
+                    dm = dm*dm
+                    dm_cutoff = dm[np.argwhere(dm<cutoff_squared)]
+                    gaussian_descriptors_np[i, j, k, 3] = \
+                        np.sum(prefactor*np.exp(-dm_cutoff*argumentfactor))
+                    # number_distances = np.shape(dm)[0]
+                    #
+                    # for a in range(0, number_distances):
+                    #     if dm[a] < cutoff_squared:
+                    #         gaussian_descriptors_np[i, j, k, 3] += \
+                    #             prefactor*np.exp(-dm[a]*argumentfactor)
 
         return gaussian_descriptors_np
 
