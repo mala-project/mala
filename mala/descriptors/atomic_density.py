@@ -3,6 +3,7 @@ import os
 
 import ase
 import ase.io
+from ase.neighborlist import NeighborList
 try:
     from lammps import lammps
     # For version compatibility; older lammps versions (the serial version
@@ -240,7 +241,7 @@ class AtomicDensity(Descriptor):
         prefactor = 1.0 /(np.power(self.parameters.atomic_density_sigma*np.sqrt(2*np.pi),3))
         argumentfactor = 1.0 / (2.0 * self.parameters.atomic_density_sigma*
                                 self.parameters.atomic_density_sigma)
-
+        print(prefactor,argumentfactor)
         for k in range(0, grid_dimensions[2]):
             for j in range(0, grid_dimensions[1]):
                 for i in range(0, grid_dimensions[0]):
@@ -265,6 +266,20 @@ class AtomicDensity(Descriptor):
                             k/grid_dimensions[2] * atoms.cell[2, 2]
 
                     # Compute the Gaussians.
+                    # Construct a neighborlist for each grid point.
+                    neighborlist = ase.neighborlist.NeighborList(
+                        np.zeros(len(atoms)+1) +
+                        [self.parameters.atomic_density_cutoff],
+                        bothways=True,
+                    self_interaction=False)
+
+                    atoms_with_grid_point = atoms.copy()
+                    atoms_with_grid_point.append(ase.Atom("H",
+                                                          gaussian_descriptors_np[i, j, k, 0:3]))
+                    neighborlist.update(atoms_with_grid_point)
+                    indices, offsets = neighborlist.get_neighbors(len(atoms))
+                    nogrid = np.argwhere(indices<len(atoms))
+                    indices_nogrid = indices()
                     positions = atoms.get_positions()
                     for a in range(0, len(atoms)):
                         distance_squared = \
