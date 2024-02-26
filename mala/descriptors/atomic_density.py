@@ -222,6 +222,25 @@ class AtomicDensity(Descriptor):
                     return gaussian_descriptors_np[:, :, :, 6:], \
                            nx*ny*nz
 
+    def __grid_to_coord(self, gridpoint, atoms, voxel, grid_dimensions):
+        i = gridpoint[0]
+        j = gridpoint[1]
+        k = gridpoint[2]
+        # Orthorhombic cells and triclinic ones have
+        # to be treated differently, see domain.cpp
+
+        if atoms.cell.orthorhombic:
+            return np.diag(voxel) * [i, j, k]
+        else:
+            ret = [0, 0, 0]
+            ret[0] = i / grid_dimensions[0] * atoms.cell[0, 0] + \
+                j / grid_dimensions[1] * atoms.cell[1, 0] + \
+                k / grid_dimensions[2] * atoms.cell[2, 0]
+            ret[1] = j / grid_dimensions[1] * atoms.cell[1, 1] + \
+                k / grid_dimensions[2] * atoms.cell[1, 2]
+            ret[2] = k / grid_dimensions[2] * atoms.cell[2, 2]
+            return np.array(ret)
+
     def __calculate_python(self, atoms, outdir, grid_dimensions, **kwargs):
         voxel = atoms.cell.copy()
         voxel[0] = voxel[0] / (grid_dimensions[0])
@@ -242,59 +261,66 @@ class AtomicDensity(Descriptor):
         prefactor = 1.0 /(np.power(self.parameters.atomic_density_sigma*np.sqrt(2*np.pi),3))
         argumentfactor = 1.0 / (2.0 * self.parameters.atomic_density_sigma*
                                 self.parameters.atomic_density_sigma)
-        print(prefactor,argumentfactor)
+
+        edges = [
+            [0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1],
+            [1, 1, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0]]
+        all_cells_list = None
+        for edge in edges:
+            edge_point = self.__grid_to_coord(edge, atoms, voxel,
+                                              grid_dimensions)
+            neighborlist = ase.neighborlist.NeighborList(
+                np.zeros(len(atoms)+1) +
+                [self.parameters.atomic_density_cutoff],
+                bothways=True,
+            self_interaction=False, primitive=ase.neighborlist.NewPrimitiveNeighborList)
+
+            atoms_with_grid_point = atoms.copy()
+            atoms_with_grid_point.append(ase.Atom("H", edge_point))
+            neighborlist.update(atoms_with_grid_point)
+            indices, offsets = neighborlist.get_neighbors(len(atoms))
+            if all_cells_list is None:
+                all_cells_list = np.unique(offsets, axis=0)
+            else:
+                all_cells_list = np.concatenate((all_cells_list, np.unique(offsets, axis=0)))
+        all_cells = np.unique(all_cells_list, axis=0)
+        big_atoms = atoms.copy
+        for cell in all_cells:
+            shifted_atoms = atoms.get_positions()
+            big_atoms.append(Atom())
+
         for i in range(0, grid_dimensions[0]):
             for j in range(0, grid_dimensions[1]):
                 for k in range(0, grid_dimensions[2]):
                     # Compute the grid.
-                    # Orthorhombic cells and triclinic ones have
-                    # to be treated differently, see domain.cpp
+                    gaussian_descriptors_np[i, j, k, 0:3] = \
+                        self.__grid_to_coord([i, j, k], atoms, voxel, grid_dimensions)
 
-                    if atoms.cell.orthorhombic:
-                        gaussian_descriptors_np[i, j, k, 0:3] = \
-                            np.diag(voxel) * [i, j, k]
-                    else:
-                        gaussian_descriptors_np[i, j, k, 0] = \
-                            i/grid_dimensions[0]*atoms.cell[0, 0] + \
-                            j/grid_dimensions[1]*atoms.cell[1, 0] + \
-                            k/grid_dimensions[2]*atoms.cell[2, 0]
-
-                        gaussian_descriptors_np[i, j, k, 1] = \
-                            j/grid_dimensions[1] * atoms.cell[1, 1] + \
-                            k/grid_dimensions[2] * atoms.cell[1, 2]
-
-                        gaussian_descriptors_np[i, j, k, 2] = \
-                            k/grid_dimensions[2] * atoms.cell[2, 2]
 
                     # Compute the Gaussians.
                     # Construct a neighborlist for each grid point.
-                    neighborlist = ase.neighborlist.NeighborList(
-                        np.zeros(len(atoms)+1) +
-                        [self.parameters.atomic_density_cutoff],
-                        bothways=True,
-                    self_interaction=False)
-
-                    atoms_with_grid_point = atoms.copy()
-                    atoms_with_grid_point.append(ase.Atom("H",
-                                                          gaussian_descriptors_np[i, j, k, 0:3]))
-                    neighborlist.update(atoms_with_grid_point)
-                    indices, offsets = neighborlist.get_neighbors(len(atoms))
-                    nogrid = np.argwhere(indices<len(atoms))
-                    indices_nogrid = indices[nogrid].flatten()
-                    offsets_nogrid = np.squeeze(offsets[nogrid])
-                    dm = np.squeeze(distance.cdist([atoms_with_grid_point.get_positions()[len(atoms)]],
-                                        atoms.positions[indices_nogrid] + offsets_nogrid @
-                                        atoms.get_cell()))
-                    dm = dm*dm
-                    dm_cutoff = dm[np.argwhere(dm<cutoff_squared)]
-                    gaussian_descriptors_np[i, j, k, 3] = \
-                        np.sum(prefactor*np.exp(-dm_cutoff*argumentfactor))
-                    # number_distances = np.shape(dm)[0]
+                    # This works! It's just very very slow!
+                    # neighborlist = ase.neighborlist.NeighborList(
+                    #     np.zeros(len(atoms)+1) +
+                    #     [self.parameters.atomic_density_cutoff],
+                    #     bothways=True,
+                    # self_interaction=False, primitive=ase.neighborlist.NewPrimitiveNeighborList)
                     #
-                    # for a in range(0, number_distances):
-                    #     if dm[a] < cutoff_squared:
-                    #         gaussian_descriptors_np[i, j, k, 3] += \
-                    #             prefactor*np.exp(-dm[a]*argumentfactor)
+                    # atoms_with_grid_point = atoms.copy()
+                    # atoms_with_grid_point.append(ase.Atom("H",
+                    #                                       gaussian_descriptors_np[i, j, k, 0:3]))
+                    # neighborlist.update(atoms_with_grid_point)
+                    # indices, offsets = neighborlist.get_neighbors(len(atoms))
+                    # nogrid = np.argwhere(indices<len(atoms))
+                    # indices_nogrid = indices[nogrid].flatten()
+                    # offsets_nogrid = np.squeeze(offsets[nogrid])
+                    # dm = np.squeeze(distance.cdist([atoms_with_grid_point.get_positions()[len(atoms)]],
+                    #                     atoms.positions[indices_nogrid] + offsets_nogrid @
+                    #                     atoms.get_cell()))
+                    # dm = dm*dm
+                    # dm_cutoff = dm[np.argwhere(dm<cutoff_squared)]
+                    # gaussian_descriptors_np[i, j, k, 3] = \
+                    #     np.sum(prefactor*np.exp(-dm_cutoff*argumentfactor))
 
         return gaussian_descriptors_np
 
