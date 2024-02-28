@@ -281,6 +281,10 @@ class AtomicDensity(Descriptor):
             # If no PBC are used, only consider a single cell.
             all_cells = [[0, 0, 0]]
 
+        all_atoms = []
+        for a in range(0, len(self.atoms)):
+            all_atoms.append(self.atoms.positions[a] + all_cells @ self.atoms.get_cell())
+
         for i in range(0, self.grid_dimensions[0]):
             for j in range(0, self.grid_dimensions[1]):
                 for k in range(0, self.grid_dimensions[2]):
@@ -292,7 +296,7 @@ class AtomicDensity(Descriptor):
                     for a in range(0, len(self.atoms)):
                         dm = np.squeeze(distance.cdist(
                             [gaussian_descriptors_np[i, j, k, 0:3]],
-                            self.atoms.positions[a] + all_cells @ self.atoms.get_cell()))
+                            all_atoms[a]))
                         dm = dm*dm
                         dm_cutoff = dm[np.argwhere(dm < cutoff_squared)]
                         gaussian_descriptors_np[i, j, k, 3] += \
