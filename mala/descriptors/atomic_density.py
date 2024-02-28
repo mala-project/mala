@@ -281,9 +281,13 @@ class AtomicDensity(Descriptor):
             # If no PBC are used, only consider a single cell.
             all_cells = [[0, 0, 0]]
 
-        all_atoms = []
+        all_atoms = None
         for a in range(0, len(self.atoms)):
-            all_atoms.append(self.atoms.positions[a] + all_cells @ self.atoms.get_cell())
+            if all_atoms is None:
+                all_atoms = self.atoms.positions[a] + all_cells @ self.atoms.get_cell()
+            else:
+                all_atoms = np.concatenate((all_atoms,
+                                           self.atoms.positions[a] + all_cells @ self.atoms.get_cell()))
 
         for i in range(0, self.grid_dimensions[0]):
             for j in range(0, self.grid_dimensions[1]):
@@ -293,14 +297,13 @@ class AtomicDensity(Descriptor):
                         self.__grid_to_coord([i, j, k])
 
                     # Compute the Gaussian descriptors.
-                    for a in range(0, len(self.atoms)):
-                        dm = np.squeeze(distance.cdist(
-                            [gaussian_descriptors_np[i, j, k, 0:3]],
-                            all_atoms[a]))
-                        dm = dm*dm
-                        dm_cutoff = dm[np.argwhere(dm < cutoff_squared)]
-                        gaussian_descriptors_np[i, j, k, 3] += \
-                            np.sum(prefactor*np.exp(-dm_cutoff*argumentfactor))
+                    dm = np.squeeze(distance.cdist(
+                        [gaussian_descriptors_np[i, j, k, 0:3]],
+                        all_atoms))
+                    dm = dm*dm
+                    dm_cutoff = dm[np.argwhere(dm < cutoff_squared)]
+                    gaussian_descriptors_np[i, j, k, 3] += \
+                        np.sum(prefactor*np.exp(-dm_cutoff*argumentfactor))
 
         return gaussian_descriptors_np, np.prod(self.grid_dimensions)
 
