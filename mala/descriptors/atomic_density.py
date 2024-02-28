@@ -247,11 +247,11 @@ class AtomicDensity(Descriptor):
         # This approach may become inefficient for larger cells, in which
         # case this python based implementation should not be used
         # at any rate.
-        all_index_offset_pairs = None
         if np.any(self.atoms.pbc):
             edges = [
                 [0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1],
                 [1, 1, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0]]
+            all_cells_list = None
             for edge in edges:
                 edge_point = self.__grid_to_coord(edge)
                 neighborlist = ase.neighborlist.NeighborList(
@@ -268,19 +268,26 @@ class AtomicDensity(Descriptor):
                 neighborlist.update(atoms_with_grid_point)
                 indices, offsets = neighborlist.get_neighbors(len(self.atoms))
 
-                offsets_without_grid = np.squeeze(offsets[np.argwhere(indices < len(self.atoms))])
-                indices_without_grid = indices[np.argwhere(indices < len(self.atoms))]
-                if all_index_offset_pairs is None:
-                    all_index_offset_pairs = np.concatenate((indices_without_grid, offsets_without_grid), axis=1)
+                # Incrementally fill the list containing all cells to be
+                # considered.
+                if all_cells_list is None:
+                    all_cells_list = np.unique(offsets, axis=0)
                 else:
-                    all_index_offset_pairs = np.concatenate((all_index_offset_pairs, np.concatenate((indices_without_grid, offsets_without_grid), axis=1)))
-            all_index_offset_pairs_unique = np.unique(all_index_offset_pairs, axis=0)
-            all_atoms = np.zeros((np.shape(all_index_offset_pairs_unique)[0], 3))
-            for a in range(np.shape(all_index_offset_pairs_unique)[0]):
-                all_atoms[a] = self.atoms.positions[all_index_offset_pairs_unique[a,0]] + all_index_offset_pairs_unique[a,1:] @ self.atoms.get_cell()
+                    all_cells_list = \
+                        np.concatenate((all_cells_list,
+                                        np.unique(offsets, axis=0)))
+            all_cells = np.unique(all_cells_list, axis=0)
         else:
             # If no PBC are used, only consider a single cell.
-            all_atoms = self.atoms.positions
+            all_cells = [[0, 0, 0]]
+
+        all_atoms = None
+        for a in range(0, len(self.atoms)):
+            if all_atoms is None:
+                all_atoms = self.atoms.positions[a] + all_cells @ self.atoms.get_cell()
+            else:
+                all_atoms = np.concatenate((all_atoms,
+                                           self.atoms.positions[a] + all_cells @ self.atoms.get_cell()))
 
         for i in range(0, self.grid_dimensions[0]):
             for j in range(0, self.grid_dimensions[1]):
