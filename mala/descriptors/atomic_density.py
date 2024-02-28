@@ -119,36 +119,30 @@ class AtomicDensity(Descriptor):
         return (np.max(voxel) / reference_grid_spacing_aluminium) * \
                optimal_sigma_aluminium
 
-    def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
+    def _calculate(self, outdir, **kwargs):
         if self.parameters._configuration["lammps"]:
-            return self.__calculate_lammps(atoms, outdir, grid_dimensions,
-                                           **kwargs)
+            return self.__calculate_lammps(outdir, **kwargs)
         else:
-            return self.__calculate_python(atoms, outdir, grid_dimensions,
-                                           **kwargs)
+            return self.__calculate_python(**kwargs)
 
-    def __calculate_lammps(self, atoms, outdir, grid_dimensions, **kwargs):
+    def __calculate_lammps(self, outdir, **kwargs):
         """Perform actual Gaussian descriptor calculation."""
         use_fp64 = kwargs.get("use_fp64", False)
         return_directly = kwargs.get("return_directly", False)
 
         lammps_format = "lammps-data"
         ase_out_path = os.path.join(outdir, "lammps_input.tmp")
-        ase.io.write(ase_out_path, atoms, format=lammps_format)
+        ase.io.write(ase_out_path, self.atoms, format=lammps_format)
 
-        nx = grid_dimensions[0]
-        ny = grid_dimensions[1]
-        nz = grid_dimensions[2]
+        nx = self.grid_dimensions[0]
+        ny = self.grid_dimensions[1]
+        nz = self.grid_dimensions[2]
 
         # Check if we have to determine the optimal sigma value.
         if self.parameters.atomic_density_sigma is None:
             self.grid_dimensions = [nx, ny, nz]
-            voxel = atoms.cell.copy()
-            voxel[0] = voxel[0] / (self.grid_dimensions[0])
-            voxel[1] = voxel[1] / (self.grid_dimensions[1])
-            voxel[2] = voxel[2] / (self.grid_dimensions[2])
             self.parameters.atomic_density_sigma = self.\
-                get_optimal_sigma(voxel)
+                get_optimal_sigma(self.voxel)
 
         # Create LAMMPS instance.
         lammps_dict = {}
@@ -207,9 +201,9 @@ class AtomicDensity(Descriptor):
                 # and thus have to properly reorder it.
                 # We have to switch from x fastest to z fastest reordering.
                 gaussian_descriptors_np = \
-                    gaussian_descriptors_np.reshape((grid_dimensions[2],
-                                                     grid_dimensions[1],
-                                                     grid_dimensions[0],
+                    gaussian_descriptors_np.reshape((self.grid_dimensions[2],
+                                                     self.grid_dimensions[1],
+                                                     self.grid_dimensions[0],
                                                      7))
                 gaussian_descriptors_np = \
                     gaussian_descriptors_np.transpose([2, 1, 0, 3])
@@ -222,21 +216,17 @@ class AtomicDensity(Descriptor):
                     return gaussian_descriptors_np[:, :, :, 6:], \
                            nx*ny*nz
 
-    def __calculate_python(self, atoms, outdir, grid_dimensions, **kwargs):
-        voxel = atoms.cell.copy()
-        voxel[0] = voxel[0] / (grid_dimensions[0])
-        voxel[1] = voxel[1] / (grid_dimensions[1])
-        voxel[2] = voxel[2] / (grid_dimensions[2])
-        gaussian_descriptors_np = np.zeros((grid_dimensions[0],
-                                             grid_dimensions[1],
-                                             grid_dimensions[2], 4),
+    def __calculate_python(self, **kwargs):
+        gaussian_descriptors_np = np.zeros((self.grid_dimensions[0],
+                                            self.grid_dimensions[1],
+                                            self.grid_dimensions[2], 4),
                                            dtype=np.float64)
 
         # Construct the hyperparameters to calculate the Gaussians.
         # This follows the implementation in the LAMMPS code.
         if self.parameters.atomic_density_sigma is None:
             self.parameters.atomic_density_sigma = self.\
-                get_optimal_sigma(voxel)
+                get_optimal_sigma(self.voxel)
         cutoff_squared = self.parameters.atomic_density_cutoff * \
             self.parameters.atomic_density_cutoff
         prefactor = 1.0 / (np.power(self.parameters.atomic_density_sigma *
@@ -257,27 +247,26 @@ class AtomicDensity(Descriptor):
         # This approach may become inefficient for larger cells, in which
         # case this python based implementation should not be used
         # at any rate.
-        if np.any(atoms.pbc):
+        if np.any(self.atoms.pbc):
             edges = [
                 [0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1],
                 [1, 1, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0]]
             all_cells_list = None
             for edge in edges:
-                edge_point = self.__grid_to_coord(edge, atoms, voxel,
-                                                  grid_dimensions)
+                edge_point = self.__grid_to_coord(edge)
                 neighborlist = ase.neighborlist.NeighborList(
-                    np.zeros(len(atoms)+1) +
+                    np.zeros(len(self.atoms)+1) +
                     [self.parameters.atomic_density_cutoff],
                     bothways=True,
                     self_interaction=False,
                     primitive=ase.neighborlist.NewPrimitiveNeighborList)
 
-                atoms_with_grid_point = atoms.copy()
+                atoms_with_grid_point = self.atoms.copy()
 
                 # Construct a ghost atom representing the grid point.
                 atoms_with_grid_point.append(ase.Atom("H", edge_point))
                 neighborlist.update(atoms_with_grid_point)
-                indices, offsets = neighborlist.get_neighbors(len(atoms))
+                indices, offsets = neighborlist.get_neighbors(len(self.atoms))
 
                 # Incrementally fill the list containing all cells to be
                 # considered.
@@ -292,18 +281,18 @@ class AtomicDensity(Descriptor):
             # If no PBC are used, only consider a single cell.
             all_cells = [[0, 0, 0]]
 
-        for i in range(0, grid_dimensions[0]):
-            for j in range(0, grid_dimensions[1]):
-                for k in range(0, grid_dimensions[2]):
+        for i in range(0, self.grid_dimensions[0]):
+            for j in range(0, self.grid_dimensions[1]):
+                for k in range(0, self.grid_dimensions[2]):
                     # Compute the grid.
                     gaussian_descriptors_np[i, j, k, 0:3] = \
-                        self.__grid_to_coord([i, j, k], atoms, voxel, grid_dimensions)
+                        self.__grid_to_coord([i, j, k])
 
                     # Compute the Gaussian descriptors.
-                    for a in range(0, len(atoms)):
+                    for a in range(0, len(self.atoms)):
                         dm = np.squeeze(distance.cdist(
                             [gaussian_descriptors_np[i, j, k, 0:3]],
-                            atoms.positions[a] + all_cells @ atoms.get_cell()))
+                            self.atoms.positions[a] + all_cells @ self.atoms.get_cell()))
                         dm = dm*dm
                         dm_cutoff = dm[np.argwhere(dm < cutoff_squared)]
                         gaussian_descriptors_np[i, j, k, 3] += \
@@ -311,7 +300,7 @@ class AtomicDensity(Descriptor):
 
         return gaussian_descriptors_np
 
-    def __grid_to_coord(self, gridpoint, atoms, voxel, grid_dimensions):
+    def __grid_to_coord(self, gridpoint):
         # Convert grid indices to real space grid point.
         i = gridpoint[0]
         j = gridpoint[1]
@@ -319,14 +308,14 @@ class AtomicDensity(Descriptor):
         # Orthorhombic cells and triclinic ones have
         # to be treated differently, see domain.cpp
 
-        if atoms.cell.orthorhombic:
-            return np.diag(voxel) * [i, j, k]
+        if self.atoms.cell.orthorhombic:
+            return np.diag(self.voxel) * [i, j, k]
         else:
             ret = [0, 0, 0]
-            ret[0] = i / grid_dimensions[0] * atoms.cell[0, 0] + \
-                j / grid_dimensions[1] * atoms.cell[1, 0] + \
-                k / grid_dimensions[2] * atoms.cell[2, 0]
-            ret[1] = j / grid_dimensions[1] * atoms.cell[1, 1] + \
-                k / grid_dimensions[2] * atoms.cell[1, 2]
-            ret[2] = k / grid_dimensions[2] * atoms.cell[2, 2]
+            ret[0] = i / self.grid_dimensions[0] * self.atoms.cell[0, 0] + \
+                j / self.grid_dimensions[1] * self.atoms.cell[1, 0] + \
+                k / self.grid_dimensions[2] * self.atoms.cell[2, 0]
+            ret[1] = j / self.grid_dimensions[1] * self.atoms.cell[1, 1] + \
+                k / self.grid_dimensions[2] * self.atoms.cell[1, 2]
+            ret[2] = k / self.grid_dimensions[2] * self.atoms.cell[2, 2]
             return np.array(ret)

@@ -90,17 +90,17 @@ class Bispectrum(Descriptor):
         else:
             raise Exception("Unsupported unit for bispectrum descriptors.")
 
-    def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
+    def _calculate(self, outdir, **kwargs):
         """Perform actual bispectrum calculation."""
         use_fp64 = kwargs.get("use_fp64", False)
 
         lammps_format = "lammps-data"
         ase_out_path = os.path.join(outdir, "lammps_input.tmp")
-        ase.io.write(ase_out_path, atoms, format=lammps_format)
+        ase.io.write(ase_out_path, self.atoms, format=lammps_format)
 
-        nx = grid_dimensions[0]
-        ny = grid_dimensions[1]
-        nz = grid_dimensions[2]
+        nx = self.grid_dimensions[0]
+        ny = self.grid_dimensions[1]
+        nz = self.grid_dimensions[2]
 
         # Create LAMMPS instance.
         lammps_dict = {}

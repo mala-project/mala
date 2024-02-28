@@ -100,6 +100,7 @@ class Descriptor(PhysicalData):
         self.verbosity = parameters.verbosity
         self.in_format_ase = ""
         self.atoms = None
+        self.voxel = None
 
     ##############################
     # Properties
@@ -251,14 +252,14 @@ class Descriptor(PhysicalData):
         printout("Calculating descriptors from", qe_out_file,
                  min_verbosity=0)
         # We get the atomic information by using ASE.
-        atoms = ase.io.read(qe_out_file, format=self.in_format_ase)
+        self.atoms = ase.io.read(qe_out_file, format=self.in_format_ase)
 
         # Enforcing / Checking PBC on the read atoms.
-        atoms = self.enforce_pbc(atoms)
+        self.atoms = self.enforce_pbc(self.atoms)
 
         # Get the grid dimensions.
         if "grid_dimensions" in kwargs.keys():
-            grid_dimensions = kwargs["grid_dimensions"]
+            self.grid_dimensions = kwargs["grid_dimensions"]
 
             # Deleting this keyword from the list to avoid conflict with
             # dict below.
@@ -266,18 +267,22 @@ class Descriptor(PhysicalData):
         else:
             qe_outfile = open(qe_out_file, "r")
             lines = qe_outfile.readlines()
-            grid_dimensions = [0, 0, 0]
+            self.grid_dimensions = [0, 0, 0]
 
             for line in lines:
                 if "FFT dimensions" in line:
                     tmp = line.split("(")[1].split(")")[0]
-                    grid_dimensions[0] = int(tmp.split(",")[0])
-                    grid_dimensions[1] = int(tmp.split(",")[1])
-                    grid_dimensions[2] = int(tmp.split(",")[2])
+                    self.grid_dimensions[0] = int(tmp.split(",")[0])
+                    self.grid_dimensions[1] = int(tmp.split(",")[1])
+                    self.grid_dimensions[2] = int(tmp.split(",")[2])
                     break
 
-        return self._calculate(atoms,
-                               working_directory, grid_dimensions, **kwargs)
+        self.voxel = self.atoms.cell.copy()
+        self.voxel[0] = self.voxel[0] / (self.grid_dimensions[0])
+        self.voxel[1] = self.voxel[1] / (self.grid_dimensions[1])
+        self.voxel[2] = self.voxel[2] / (self.grid_dimensions[2])
+
+        return self._calculate(working_directory, **kwargs)
 
     def calculate_from_atoms(self, atoms, grid_dimensions,
                              working_directory=".", **kwargs):
@@ -304,9 +309,13 @@ class Descriptor(PhysicalData):
             (x,y,z,descriptor_dimension)
         """
         # Enforcing / Checking PBC on the input atoms.
-        atoms = self.enforce_pbc(atoms)
-        return self._calculate(atoms, working_directory,
-                               grid_dimensions, **kwargs)
+        self.atoms = self.enforce_pbc(atoms)
+        self.grid_dimensions = grid_dimensions
+        self.voxel = self.atoms.cell.copy()
+        self.voxel[0] = self.voxel[0] / (self.grid_dimensions[0])
+        self.voxel[1] = self.voxel[1] / (self.grid_dimensions[1])
+        self.voxel[2] = self.voxel[2] / (self.grid_dimensions[2])
+        return self._calculate(working_directory, **kwargs)
 
     def gather_descriptors(self, descriptors_np, use_pickled_comm=False):
         """
@@ -499,14 +508,14 @@ class Descriptor(PhysicalData):
         if self.atoms is not None:
             import openpmd_api as io
 
-            voxel = self.atoms.cell.copy()
-            voxel[0] = voxel[0] / (self.grid_dimensions[0])
-            voxel[1] = voxel[1] / (self.grid_dimensions[1])
-            voxel[2] = voxel[2] / (self.grid_dimensions[2])
+            self.voxel = self.atoms.cell.copy()
+            self.voxel[0] = self.voxel[0] / (self.grid_dimensions[0])
+            self.voxel[1] = self.voxel[1] / (self.grid_dimensions[1])
+            self.voxel[2] = self.voxel[2] / (self.grid_dimensions[2])
 
             mesh.geometry = io.Geometry.cartesian
-            mesh.grid_spacing = voxel.cellpar()[0:3]
-            mesh.set_attribute("angles", voxel.cellpar()[3:])
+            mesh.grid_spacing = self.voxel.cellpar()[0:3]
+            mesh.set_attribute("angles", self.voxel.cellpar()[3:])
 
     def _get_atoms(self):
         return self.atoms
@@ -728,7 +737,7 @@ class Descriptor(PhysicalData):
         return lmp
 
     @abstractmethod
-    def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
+    def _calculate(self, outdir, **kwargs):
         pass
 
     def _set_feature_size_from_array(self, array):
