@@ -298,7 +298,7 @@ class AtomicDensity(Descriptor):
                         gaussian_descriptors_np[i, j, k, 3] += \
                             np.sum(prefactor*np.exp(-dm_cutoff*argumentfactor))
 
-        return gaussian_descriptors_np
+        return gaussian_descriptors_np, np.prod(self.grid_dimensions)
 
     def __grid_to_coord(self, gridpoint):
         # Convert grid indices to real space grid point.
