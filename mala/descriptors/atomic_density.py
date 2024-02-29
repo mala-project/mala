@@ -281,6 +281,13 @@ class AtomicDensity(Descriptor):
             # If no PBC are used, only consider a single cell.
             all_cells = [[0, 0, 0]]
 
+        idx = 0
+        for a in range(0, len(all_cells)):
+            if (all_cells[a, :] == np.array([0,0,0])).all():
+                break
+            idx += 1
+        all_cells = np.delete(all_cells, idx, axis=0)
+
         all_atoms = None
         for a in range(0, len(self.atoms)):
             if all_atoms is None:
@@ -309,6 +316,7 @@ class AtomicDensity(Descriptor):
         all_distances = np.min(all_distances, axis=0)
         all_atoms = np.squeeze(all_atoms[np.argwhere(all_distances <
                                                      self.parameters.atomic_density_cutoff), :])
+        all_atoms = np.concatenate((all_atoms,  self.atoms.positions))
 
         for i in range(0, self.grid_dimensions[0]):
             for j in range(0, self.grid_dimensions[1]):
