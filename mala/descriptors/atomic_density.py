@@ -288,6 +288,27 @@ class AtomicDensity(Descriptor):
             else:
                 all_atoms = np.concatenate((all_atoms,
                                            self.atoms.positions[a] + all_cells @ self.atoms.get_cell()))
+        from skspatial.objects import Plane
+
+        planes = [[[0, 1, 0], [0,0,1], [0,0,0]],
+                  [[self.grid_dimensions[0], 1, 0], [self.grid_dimensions[0],0,1], self.grid_dimensions],
+                  [[1, 0, 0], [0,0,1], [0,0,0]],
+                  [[1, self.grid_dimensions[1], 0], [0,self.grid_dimensions[1],1], self.grid_dimensions],
+                  [[1, 0, 0], [0,1,0], [0,0,0]],
+                  [[1, 0, self.grid_dimensions[2]], [0,1,self.grid_dimensions[2]], self.grid_dimensions]]
+        all_distances = []
+        for plane in planes:
+            curplane = Plane.from_points(self.__grid_to_coord(plane[0]),
+                                         self.__grid_to_coord(plane[1]),
+                                         self.__grid_to_coord(plane[2]))
+            distances = []
+            for a in range(np.shape(all_atoms)[0]):
+                distances.append(curplane.distance_point(all_atoms[a]))
+            all_distances.append(distances)
+        all_distances = np.array(all_distances)
+        all_distances = np.min(all_distances, axis=0)
+        all_atoms = np.squeeze(all_atoms[np.argwhere(all_distances <
+                                                     self.parameters.atomic_density_cutoff), :])
 
         for i in range(0, self.grid_dimensions[0]):
             for j in range(0, self.grid_dimensions[1]):
