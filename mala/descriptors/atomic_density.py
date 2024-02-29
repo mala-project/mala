@@ -248,9 +248,9 @@ class AtomicDensity(Descriptor):
         # case this python based implementation should not be used
         # at any rate.
         if np.any(self.atoms.pbc):
-            edges = [
+            edges = list(np.array([
                 [0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1],
-                [1, 1, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0]]
+                [1, 1, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0]])*np.array(self.grid_dimensions))
             all_cells_list = None
             for edge in edges:
                 edge_point = self.__grid_to_coord(edge)
