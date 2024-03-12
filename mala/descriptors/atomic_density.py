@@ -3,7 +3,6 @@ import os
 
 import ase
 import ase.io
-from ase.neighborlist import NeighborList
 try:
     from lammps import lammps
     # For version compatibility; older lammps versions (the serial version
@@ -17,7 +16,7 @@ except ModuleNotFoundError:
 import numpy as np
 from scipy.spatial import distance
 
-from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
+from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
 
 # Empirical value for the Gaussian descriptor width, determined for an
@@ -234,96 +233,14 @@ class AtomicDensity(Descriptor):
         argumentfactor = 1.0 / (2.0 * self.parameters.atomic_density_sigma *
                                 self.parameters.atomic_density_sigma)
 
-        # If periodic boundary conditions are used, which is usually the case
-        # for MALA simulation, one has to compute the atomic density by also
-        # incorporating atoms from neighboring cells.
-        # To do this efficiently, here we first check which cells have to be
-        # included in the calculation.
-        # For this we simply take the edges of the simulation cell and
-        # construct neighor lists with the selected cutoff radius.
-        # Each neighboring cell which is included in the neighbor list for
-        # one of the edges will be considered for the calculation of the
-        # Gaussians.
-        # This approach may become inefficient for larger cells, in which
-        # case this python based implementation should not be used
-        # at any rate.
-        if np.any(self.atoms.pbc):
-            edges = list(np.array([
-                [0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1],
-                [1, 1, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0]])*np.array(self.grid_dimensions))
-            all_cells_list = None
-            for edge in edges:
-                edge_point = self.__grid_to_coord(edge)
-                neighborlist = ase.neighborlist.NeighborList(
-                    np.zeros(len(self.atoms)+1) +
-                    [self.parameters.atomic_density_cutoff],
-                    bothways=True,
-                    self_interaction=False,
-                    primitive=ase.neighborlist.NewPrimitiveNeighborList)
-
-                atoms_with_grid_point = self.atoms.copy()
-
-                # Construct a ghost atom representing the grid point.
-                atoms_with_grid_point.append(ase.Atom("H", edge_point))
-                neighborlist.update(atoms_with_grid_point)
-                indices, offsets = neighborlist.get_neighbors(len(self.atoms))
-
-                # Incrementally fill the list containing all cells to be
-                # considered.
-                if all_cells_list is None:
-                    all_cells_list = np.unique(offsets, axis=0)
-                else:
-                    all_cells_list = \
-                        np.concatenate((all_cells_list,
-                                        np.unique(offsets, axis=0)))
-            all_cells = np.unique(all_cells_list, axis=0)
-        else:
-            # If no PBC are used, only consider a single cell.
-            all_cells = [[0, 0, 0]]
-
-        idx = 0
-        for a in range(0, len(all_cells)):
-            if (all_cells[a, :] == np.array([0,0,0])).all():
-                break
-            idx += 1
-        all_cells = np.delete(all_cells, idx, axis=0)
-
-        all_atoms = None
-        for a in range(0, len(self.atoms)):
-            if all_atoms is None:
-                all_atoms = self.atoms.positions[a] + all_cells @ self.atoms.get_cell()
-            else:
-                all_atoms = np.concatenate((all_atoms,
-                                           self.atoms.positions[a] + all_cells @ self.atoms.get_cell()))
-        from skspatial.objects import Plane
-
-        planes = [[[0, 1, 0], [0,0,1], [0,0,0]],
-                  [[self.grid_dimensions[0], 1, 0], [self.grid_dimensions[0],0,1], self.grid_dimensions],
-                  [[1, 0, 0], [0,0,1], [0,0,0]],
-                  [[1, self.grid_dimensions[1], 0], [0,self.grid_dimensions[1],1], self.grid_dimensions],
-                  [[1, 0, 0], [0,1,0], [0,0,0]],
-                  [[1, 0, self.grid_dimensions[2]], [0,1,self.grid_dimensions[2]], self.grid_dimensions]]
-        all_distances = []
-        for plane in planes:
-            curplane = Plane.from_points(self.__grid_to_coord(plane[0]),
-                                         self.__grid_to_coord(plane[1]),
-                                         self.__grid_to_coord(plane[2]))
-            distances = []
-            for a in range(np.shape(all_atoms)[0]):
-                distances.append(curplane.distance_point(all_atoms[a]))
-            all_distances.append(distances)
-        all_distances = np.array(all_distances)
-        all_distances = np.min(all_distances, axis=0)
-        all_atoms = np.squeeze(all_atoms[np.argwhere(all_distances <
-                                                     self.parameters.atomic_density_cutoff), :])
-        all_atoms = np.concatenate((all_atoms,  self.atoms.positions))
+        all_atoms = self._setup_atom_list()
 
         for i in range(0, self.grid_dimensions[0]):
             for j in range(0, self.grid_dimensions[1]):
                 for k in range(0, self.grid_dimensions[2]):
                     # Compute the grid.
                     gaussian_descriptors_np[i, j, k, 0:3] = \
-                        self.__grid_to_coord([i, j, k])
+                        self._grid_to_coord([i, j, k])
 
                     # Compute the Gaussian descriptors.
                     dm = np.squeeze(distance.cdist(
@@ -336,22 +253,3 @@ class AtomicDensity(Descriptor):
 
         return gaussian_descriptors_np, np.prod(self.grid_dimensions)
 
-    def __grid_to_coord(self, gridpoint):
-        # Convert grid indices to real space grid point.
-        i = gridpoint[0]
-        j = gridpoint[1]
-        k = gridpoint[2]
-        # Orthorhombic cells and triclinic ones have
-        # to be treated differently, see domain.cpp
-
-        if self.atoms.cell.orthorhombic:
-            return np.diag(self.voxel) * [i, j, k]
-        else:
-            ret = [0, 0, 0]
-            ret[0] = i / self.grid_dimensions[0] * self.atoms.cell[0, 0] + \
-                j / self.grid_dimensions[1] * self.atoms.cell[1, 0] + \
-                k / self.grid_dimensions[2] * self.atoms.cell[2, 0]
-            ret[1] = j / self.grid_dimensions[1] * self.atoms.cell[1, 1] + \
-                k / self.grid_dimensions[2] * self.atoms.cell[1, 2]
-            ret[2] = k / self.grid_dimensions[2] * self.atoms.cell[2, 2]
-            return np.array(ret)
