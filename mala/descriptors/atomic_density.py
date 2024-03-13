@@ -251,5 +251,10 @@ class AtomicDensity(Descriptor):
                     gaussian_descriptors_np[i, j, k, 3] += \
                         np.sum(prefactor*np.exp(-dm_cutoff*argumentfactor))
 
-        return gaussian_descriptors_np, np.prod(self.grid_dimensions)
-
+        if self.parameters.descriptors_contain_xyz:
+            self.fingerprint_length = 4
+            return gaussian_descriptors_np, np.prod(self.grid_dimensions)
+        else:
+            self.fingerprint_length = 1
+            return gaussian_descriptors_np[:, :, :, 3:], \
+                   np.prod(self.grid_dimensions)

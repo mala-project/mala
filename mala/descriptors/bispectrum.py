@@ -13,6 +13,8 @@ try:
         pass
 except ModuleNotFoundError:
     pass
+import numpy as np
+from scipy.spatial import distance
 
 from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
 from mala.descriptors.descriptor import Descriptor
@@ -91,6 +93,12 @@ class Bispectrum(Descriptor):
             raise Exception("Unsupported unit for bispectrum descriptors.")
 
     def _calculate(self, outdir, **kwargs):
+        if self.parameters._configuration["lammps"]:
+            return self.__calculate_lammps(outdir, **kwargs)
+        else:
+            return self.__calculate_python(**kwargs)
+
+    def __calculate_lammps(self, outdir, **kwargs):
         """Perform actual bispectrum calculation."""
         use_fp64 = kwargs.get("use_fp64", False)
 
@@ -182,3 +190,49 @@ class Bispectrum(Descriptor):
                 return snap_descriptors_np, nx*ny*nz
             else:
                 return snap_descriptors_np[:, :, :, 3:], nx*ny*nz
+
+    def __calculate_python(self, **kwargs):
+        ncoeff = (self.parameters.bispectrum_twojmax + 2) * \
+                 (self.parameters.bispectrum_twojmax + 3) * (self.parameters.bispectrum_twojmax + 4)
+        ncoeff = ncoeff // 24   # integer division
+        self.fingerprint_length = ncoeff + 3
+        bispectrum_np = np.zeros((self.grid_dimensions[0],
+                                  self.grid_dimensions[1],
+                                  self.grid_dimensions[2],
+                                  self.fingerprint_length),
+                                 dtype=np.float64)
+        cutoff_squared = self.parameters.bispectrum_cutoff * \
+            self.parameters.bispectrum_cutoff
+
+        all_atoms = self._setup_atom_list()
+
+        # These are technically hyperparameters. We currently simply set them
+        # to set values for everything.
+        rmin0 = 0.0
+        rfac0 = 0.99363
+
+        for i in range(0, self.grid_dimensions[0]):
+            for j in range(0, self.grid_dimensions[1]):
+                for k in range(0, self.grid_dimensions[2]):
+                    # Compute the grid.
+                    bispectrum_np[i, j, k, 0:3] = \
+                        self._grid_to_coord([i, j, k])
+
+                    # Compute the Gaussian descriptors.
+                    dm = np.squeeze(distance.cdist(
+                        [bispectrum_np[i, j, k, 0:3]],
+                        all_atoms))
+                    dmsquared = dm*dm
+                    dmsquared_cutoff = dmsquared[np.argwhere(dmsquared < cutoff_squared)]
+                    dm_cutoff = np.abs(dm[np.argwhere(dm < self.parameters.bispectrum_cutoff)])
+
+                    # Compute ui
+                    theta0 = (dm_cutoff-rmin0) * rfac0 * np.pi / (self.parameters.bispectrum_cutoff-rmin0)
+                    z0 = dm_cutoff / np.tan(theta0)
+                    compute_uarray(x, y, z, z0, r, j);
+                    add_uarraytot(r, j);
+
+                    gaussian_descriptors_np[i, j, k, 3] += \
+                        np.sum(prefactor*np.exp(-dm_cutoff*argumentfactor))
+
+        return gaussian_descriptors_np, np.prod(self.grid_dimensions)
