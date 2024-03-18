@@ -114,7 +114,8 @@ class Runner:
     @classmethod
     def load_run(cls, run_name, path="./", zip_run=True,
                  params_format="json", load_runner=True,
-                 prepare_data=False):
+                 prepare_data=False, load_with_mpi=None,
+                 load_with_gpu=None):
         """
         Load a run.
 
@@ -140,6 +141,23 @@ class Runner:
         prepare_data : bool
             If True, the data will be loaded into memory. This is needed when
             continuing a model training.
+
+        load_with_mpi : bool
+            Can be used to actively enable/disable MPI during loading.
+            Default is None, so that the MPI parameters set during
+            training/saving of the model are not overwritten.
+            If MPI is to be used in concert with GPU during training,
+            MPI already has to be activated here, if it was not activated
+            during training!
+
+        load_with_gpu : bool
+            Can be used to actively enable/disable GPU during loading.
+            Default is None, so that the GPU parameters set during
+            training/saving of the model are not overwritten.
+            If MPI is to be used in concert with GPU during training,
+            it is advised that GPU usage is activated here, if it was not
+            activated during training. Can also be used to activate a CPU
+            based inference, by setting it to False.
 
         Return
         ------
@@ -183,6 +201,13 @@ class Runner:
                                          ".params."+params_format)
 
         loaded_params = Parameters.load_from_json(loaded_params)
+
+        # MPI has to be specified upon loading, in contrast to GPU.
+        if load_with_mpi is not None:
+            loaded_params.use_mpi = load_with_mpi
+        if load_with_gpu is not None:
+            loaded_params.use_gpu = load_with_gpu
+
         loaded_network = Network.load_from_file(loaded_params,
                                                 loaded_network)
         loaded_iscaler = DataScaler.load_from_file(loaded_iscaler)
@@ -283,6 +308,11 @@ class Runner:
         predicted_outputs : numpy.ndarray
             Precicted outputs for snapshot.
         """
+        # Ensure the Network is on the correct device.
+        # This line is necessary because GPU acceleration may have been
+        # activated AFTER loading a model.
+        self.network.to(self.network.params._configuration["device"])
+
         # Determine where the snapshot begins and ends.
         from_index = 0
         to_index = None
