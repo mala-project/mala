@@ -1,3 +1,9 @@
+"""Example of the MALASimpleEnsemble API to calculate basic (uncalibrated)
+energy uncertainties.
+
+Requires LAMMPS and Quantum Espresso (total energy module).
+"""
+
 import os
 
 import mala
@@ -6,13 +12,6 @@ from ase.io import read
 
 from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Be2")
-
-"""
-ex19_ase_calculator_with_uncertainty.py: Shows how MALA can be used as an ASE
-calculator. Currently, calculation of forces is not supported.
-
-REQUIRES LAMMPS AND QUANTUM ESPRESSO (TOTAL ENERGY MODULE).
-"""
 
 def message(txt, bar="="*79):
     print(f"\n{bar}\n{txt}\n{bar}\n")
@@ -26,6 +25,7 @@ def train_network_ensemble(n_models=5):
         parameters.data.input_rescaling_type = "feature-wise-standard"
         parameters.data.output_rescaling_type = "normal"
         parameters.network.layer_activations = ["ReLU"]
+        # Small number of epochs, only to make example run fast.
         parameters.running.max_number_epochs = 10
         parameters.running.mini_batch_size = 40
         parameters.running.learning_rate = 0.00001
