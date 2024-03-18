@@ -96,7 +96,7 @@ message("Calculate total energy for ensemble")
 atoms.set_calculator(calculator)
 atoms.get_potential_energy()
 print(
-    calculator.results["energy"],
-    calculator.results["energy_std"],
-    calculator.results["energy_samples"],
+    f"{calculator.results['energy']=}\n"
+    f"{calculator.results['energy_std']=}\n"
+    f"{calculator.results['energy_samples']=}"
 )
