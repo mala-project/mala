@@ -211,28 +211,156 @@ class Bispectrum(Descriptor):
         rmin0 = 0.0
         rfac0 = 0.99363
 
-        for i in range(0, self.grid_dimensions[0]):
-            for j in range(0, self.grid_dimensions[1]):
-                for k in range(0, self.grid_dimensions[2]):
+        self.__init_index_arrays()
+
+        for x in range(0, self.grid_dimensions[0]):
+            for y in range(0, self.grid_dimensions[1]):
+                for z in range(0, self.grid_dimensions[2]):
                     # Compute the grid.
-                    bispectrum_np[i, j, k, 0:3] = \
-                        self._grid_to_coord([i, j, k])
+                    bispectrum_np[x, y, z, 0:3] = \
+                        self._grid_to_coord([x, y, z])
 
-                    # Compute the Gaussian descriptors.
-                    dm = np.squeeze(distance.cdist(
-                        [bispectrum_np[i, j, k, 0:3]],
+                    # Compute the bispectrum descriptors.
+                    distances = np.squeeze(distance.cdist(
+                        [bispectrum_np[x, y, z, 0:3]],
                         all_atoms))
-                    dmsquared = dm*dm
-                    dmsquared_cutoff = dmsquared[np.argwhere(dmsquared < cutoff_squared)]
-                    dm_cutoff = np.abs(dm[np.argwhere(dm < self.parameters.bispectrum_cutoff)])
+                    distances_squared = distances*distances
+                    distances_squared_cutoff = distances_squared[np.argwhere(distances_squared < cutoff_squared)]
+                    distances_cutoff = np.abs(distances[np.argwhere(distances < self.parameters.bispectrum_cutoff)])
+                    atoms_cutoff = np.squeeze(all_atoms[np.argwhere(distances < self.parameters.bispectrum_cutoff), :])
+                    nr_atoms = np.shape(atoms_cutoff)[0]
 
-                    # Compute ui
-                    theta0 = (dm_cutoff-rmin0) * rfac0 * np.pi / (self.parameters.bispectrum_cutoff-rmin0)
-                    z0 = dm_cutoff / np.tan(theta0)
-                    compute_uarray(x, y, z, z0, r, j);
-                    add_uarraytot(r, j);
+                    ulisttot_r, ulisttot_i = \
+                        self.__compute_ui(nr_atoms, atoms_cutoff,
+                                          distances_cutoff,
+                                          distances_squared_cutoff, rmin0,
+                                          rfac0)
+                    print("Got Ui")
 
-                    gaussian_descriptors_np[i, j, k, 3] += \
-                        np.sum(prefactor*np.exp(-dm_cutoff*argumentfactor))
+                    #
+                    # gaussian_descriptors_np[i, j, k, 3] += \
+                    #     np.sum(prefactor*np.exp(-dm_cutoff*argumentfactor))
 
-        return gaussian_descriptors_np, np.prod(self.grid_dimensions)
+        return bispectrum_np, np.prod(self.grid_dimensions)
+
+    def __init_index_arrays(self):
+        # TODO: Declare these in constructor!
+        idxu_count = 0
+        self.idxu_block = np.zeros(self.parameters.bispectrum_twojmax + 1)
+        for j in range(0, self.parameters.bispectrum_twojmax + 1):
+            self.idxu_block[j] = idxu_count
+            for mb in range(j + 1):
+                for ma in range(j + 1):
+                    idxu_count += 1
+        self.idxu_max = idxu_count
+
+        self.rootpqarray = np.zeros((self.parameters.bispectrum_twojmax + 2,
+                                    self.parameters.bispectrum_twojmax + 2))
+        for p in range(1, self.parameters.bispectrum_twojmax + 1):
+            for q in range(1,
+                           self.parameters.bispectrum_twojmax + 1):
+                self.rootpqarray[p, q] = np.sqrt(p / q)
+
+    def __compute_ui(self, nr_atoms, atoms_cutoff, distances_cutoff,
+                     distances_squared_cutoff, rmin0, rfac0):
+        # Precompute and prepare ui stuff
+        theta0 = (distances_cutoff - rmin0) * rfac0 * np.pi / (
+                    self.parameters.bispectrum_cutoff - rmin0)
+        z0 = distances_cutoff / np.tan(theta0)
+
+        ulist_r_ij = np.zeros((nr_atoms, self.idxu_max)) + 1.0
+        ulist_i_ij = np.zeros((nr_atoms, self.idxu_max))
+        ulisttot_r = np.zeros(self.idxu_max)
+        ulisttot_i = np.zeros(self.idxu_max)
+        r0inv = 1.0 / np.sqrt(distances_cutoff)
+
+        for a in range(nr_atoms):
+            # This encapsulates the compute_uarray function
+
+            # Cayley-Klein parameters for unit quaternion.
+            a_r = r0inv[a] * z0[a]
+            a_i = -r0inv[a] * atoms_cutoff[a, 2]
+            b_r = r0inv[a] * atoms_cutoff[a, 1]
+            b_i = -r0inv[a] * atoms_cutoff[a, 0]
+
+            for j in range(1, self.parameters.bispectrum_twojmax + 1):
+                jju = int(self.idxu_block[j])
+                jjup = int(self.idxu_block[j - 1])
+
+                for mb in range(0, j // 2 + 1):
+                    ulist_r_ij[a, jju] = 0.0
+                    ulist_i_ij[a, jju] = 0.0
+                    for ma in range(0, j):
+                        rootpq = self.rootpqarray[j - ma][j - mb]
+                        ulist_r_ij[a, jju] += rootpq * (
+                                a_r * ulist_r_ij[a, jjup] + a_i *
+                                ulist_i_ij[a, jjup])
+                        ulist_i_ij[a, jju] += rootpq * (
+                                a_r * ulist_i_ij[a, jjup] - a_i *
+                                ulist_r_ij[a, jjup])
+                        rootpq = self.rootpqarray[ma + 1][j - mb]
+                        ulist_r_ij[a, jju + 1] = -rootpq * (
+                                b_r * ulist_r_ij[a, jjup] + b_i *
+                                ulist_i_ij[a, jjup])
+                        ulist_i_ij[a, jju + 1] = -rootpq * (
+                                b_r * ulist_i_ij[a, jjup] - b_i *
+                                ulist_r_ij[a, jjup])
+                        jju += 1
+                        jjup += 1
+                    jju += 1
+
+                jju = int(self.idxu_block[j])
+                jjup = int(jju + (j + 1) * (j + 1) - 1)
+                mbpar = 1
+                for mb in range(0, j // 2 + 1):
+                    mapar = mbpar
+                    for ma in range(0, j + 1):
+                        if mapar == 1:
+                            ulist_r_ij[a, jjup] = ulist_r_ij[a, jju]
+                            ulist_i_ij[a, jjup] = -ulist_i_ij[a, jju]
+                        else:
+                            ulist_r_ij[a, jjup] = -ulist_r_ij[a, jju]
+                            ulist_i_ij[a, jjup] = ulist_i_ij[a, jju]
+                        mapar = -mapar
+                        jju += 1
+                        jjup -= 1
+                    mbpar = -mbpar
+
+            # This emulates add_uarraytot.
+            # First, we compute sfac.
+            if self.parameters.bispectrum_switchflag == 0:
+                sfac = 1.0
+            elif distances_cutoff[a] <= rmin0:
+                sfac = 1.0
+            elif distances_cutoff[a] > self.parameters.bispectrum_cutoff:
+                sfac = 0.0
+            else:
+                rcutfac = np.pi / (self.parameters.bispectrum_cutoff - rmin0)
+                sfac = 0.5 * (np.cos((distances_cutoff[a] - rmin0) * rcutfac)
+                              + 1.0)
+
+            # sfac technically has to be weighted according to the chemical
+            # species. But this is a minimal implementation only for a single
+            # chemical species, so I am ommitting this for now. It would
+            # look something like
+            # sfac *= weights[a]
+            # Further, some things have to be calculated if
+            # switch_inner_flag is true. If I understand correctly, it
+            # essentially never is in our case. So I am ommitting this
+            # (along with some other similar lines) here for now.
+            # If this becomes relevant later, we of course have to
+            # add it.
+
+            # Now use sfac for computations.
+            for j in range(self.parameters.bispectrum_twojmax + 1):
+                jju = int(self.idxu_block[j])
+                for mb in range(j + 1):
+                    for ma in range(j + 1):
+                        ulisttot_r[jju] += sfac * ulist_r_ij[a,
+                            jju]
+                        ulisttot_i[jju] += sfac * ulist_i_ij[a,
+                            jju]
+                        jju += 1
+
+        return ulisttot_r, ulisttot_i
+
