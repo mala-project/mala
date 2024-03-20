@@ -208,8 +208,11 @@ class Bispectrum(Descriptor):
 
         # These are technically hyperparameters. We currently simply set them
         # to set values for everything.
-        rmin0 = 0.0
-        rfac0 = 0.99363
+        self.rmin0 = 0.0
+        self.rfac0 = 0.99363
+        self.bzero_flag = False
+        self.wselfall_flag = False
+        self.bnorm_flag = False
 
         self.__init_index_arrays()
 
@@ -233,15 +236,10 @@ class Bispectrum(Descriptor):
                     ulisttot_r, ulisttot_i = \
                         self.__compute_ui(nr_atoms, atoms_cutoff,
                                           distances_cutoff,
-                                          distances_squared_cutoff, rmin0,
-                                          rfac0)
-                    print("Got ui")
+                                          distances_squared_cutoff)
                     zlist_r, zlist_i = \
                         self.__compute_zi(ulisttot_r, ulisttot_i)
-                    print("Got zi")
                     self.__compute_bi(ulisttot_r, ulisttot_i, zlist_r, zlist_i)
-
-                    print("Got bi")
 
                     #
                     # gaussian_descriptors_np[i, j, k, 3] += \
@@ -262,6 +260,13 @@ class Bispectrum(Descriptor):
             self.na = 0
             self.nb = 0
             self.jju = 0
+
+    class BIndices:
+
+        def __init__(self):
+            self.j1 = 0
+            self.j2 = 0
+            self.j = 0
 
     def __init_index_arrays(self):
         # TODO: Declare these in constructor!
@@ -341,11 +346,42 @@ class Bispectrum(Descriptor):
         self.idxcg_max = idxcg_count
         self.cglist = np.zeros(self.idxcg_max)
 
+        idxb_count = 0
+        for j1 in range(self.parameters.bispectrum_twojmax + 1):
+            for j2 in range(j1 + 1):
+                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
+                                            j1 + j2) + 1, 2):
+                    if j >= j1:
+                        idxb_count += 1
+        self.idxb_max = idxb_count
+        self.idxb = [self.BIndices()]*self.idxb_max
+        idxb_count = 0
+        for j1 in range(self.parameters.bispectrum_twojmax + 1):
+            for j2 in range(j1 + 1):
+                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax, j1 + j2) + 1, 2):
+                    if j >= j1:
+                        self.idxb[idxb_count].j1 = j1
+                        self.idxb[idxb_count].j2 = j2
+                        self.idxb[idxb_count].j = j
+                        idxb_count += 1
+        self.idxb_block = np.zeros((self.parameters.bispectrum_twojmax + 1,
+                                    self.parameters.bispectrum_twojmax + 1,
+                                    self.parameters.bispectrum_twojmax + 1))
+
+        idxb_count = 0
+        for j1 in range(self.parameters.bispectrum_twojmax + 1):
+            for j2 in range(j1 + 1):
+                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
+                                            j1 + j2) + 1, 2):
+                    if j >= j1:
+                        self.idxb_block[j1][j2][j] = idxb_count
+                        idxb_count += 1
+
     def __compute_ui(self, nr_atoms, atoms_cutoff, distances_cutoff,
-                     distances_squared_cutoff, rmin0, rfac0):
+                     distances_squared_cutoff):
         # Precompute and prepare ui stuff
-        theta0 = (distances_cutoff - rmin0) * rfac0 * np.pi / (
-                    self.parameters.bispectrum_cutoff - rmin0)
+        theta0 = (distances_cutoff - self.rmin0) * self.rfac0 * np.pi / (
+                    self.parameters.bispectrum_cutoff - self.rmin0)
         z0 = distances_cutoff / np.tan(theta0)
 
         ulist_r_ij = np.zeros((nr_atoms, self.idxu_max)) + 1.0
@@ -410,13 +446,14 @@ class Bispectrum(Descriptor):
             # First, we compute sfac.
             if self.parameters.bispectrum_switchflag == 0:
                 sfac = 1.0
-            elif distances_cutoff[a] <= rmin0:
+            elif distances_cutoff[a] <= self.rmin0:
                 sfac = 1.0
             elif distances_cutoff[a] > self.parameters.bispectrum_cutoff:
                 sfac = 0.0
             else:
-                rcutfac = np.pi / (self.parameters.bispectrum_cutoff - rmin0)
-                sfac = 0.5 * (np.cos((distances_cutoff[a] - rmin0) * rcutfac)
+                rcutfac = np.pi / (self.parameters.bispectrum_cutoff -
+                                   self.rmin0)
+                sfac = 0.5 * (np.cos((distances_cutoff[a] - self.rmin0) * rcutfac)
                               + 1.0)
 
             # sfac technically has to be weighted according to the chemical
@@ -453,10 +490,6 @@ class Bispectrum(Descriptor):
         zlist_r = np.zeros((number_element_pairs*self.idxz_max))
         zlist_i = np.zeros((number_element_pairs*self.idxz_max))
         idouble = 0
-
-        # This seems to be hardcoded for the bispectrum descriptors in
-        # LAMMPS as well
-        bnorm_flag = False
         for elem1 in range(0, number_elements):
             for elem2 in range(0, number_elements):
                 for jjz in range(self.idxz_max):
@@ -501,7 +534,7 @@ class Bispectrum(Descriptor):
                         jju2 -= j2 + 1
                         icgb += j2
 
-                    if bnorm_flag:
+                    if self.bnorm_flag:
                         zlist_r[jjz] /= (j + 1)
                         zlist_i[jjz] /= (j + 1)
                 idouble += 1
@@ -513,3 +546,71 @@ class Bispectrum(Descriptor):
         # This currently really only works for one element.
         number_elements = 1
         number_element_pairs = number_elements*number_elements
+        number_element_triples = number_element_pairs*number_elements
+        ielem = 0
+        blist = np.zeros(self.idxb_max*number_element_triples)
+        itriple = 0
+        idouble = 0
+
+        if self.bzero_flag:
+            wself = 1.0
+            bzero = np.zeros(self.parameters.bispectrum_twojmax+1)
+            www = wself * wself * wself
+            for j in range(self.parameters.bispectrum_twojmax + 1):
+                if self.bnorm_flag:
+                    bzero[j] = www
+                else:
+                    bzero[j] = www * (j + 1)
+
+        for elem1 in range(number_elements):
+            for elem2 in range(number_elements):
+                for elem3 in range(number_elements):
+                    for jjb in range(self.idxb_max):
+                        j1 = int(self.idxb[jjb].j1)
+                        j2 = int(self.idxb[jjb].j2)
+                        j = int(self.idxb[jjb].j)
+                        jjz = int(self.idxz_block[j1][j2][j])
+                        jju = int(self.idxu_block[j])
+                        sumzu = 0.0
+                        for mb in range(j // 2):
+                            for ma in range(j + 1):
+                                sumzu += ulisttot_r[elem3 * self.idxu_max + jju] * \
+                                         zlist_r[jjz] + ulisttot_i[
+                                             elem3 * self.idxu_max + jju] * zlist_i[
+                                             jjz]
+                                jjz += 1
+                                jju += 1
+                        if j % 2 == 0:
+                            mb = j // 2
+                            for ma in range(mb):
+                                sumzu += ulisttot_r[elem3 * self.idxu_max + jju] * \
+                                         zlist_r[jjz] + ulisttot_i[
+                                             elem3 * self.idxu_max + jju] * zlist_i[
+                                             jjz]
+                                jjz += 1
+                                jju += 1
+                            sumzu += 0.5 * (
+                                        ulisttot_r[elem3 * self.idxu_max + jju] *
+                                        zlist_r[jjz] + ulisttot_i[
+                                            elem3 * self.idxu_max + jju] * zlist_i[
+                                            jjz])
+                        blist[itriple * self.idxb_max + jjb] = 2.0 * sumzu
+                    itriple += 1
+                idouble += 1
+
+        if self.bzero_flag:
+            if not self.wselfall_flag:
+                itriple = (ielem * number_elements + ielem) * number_elements + ielem
+                for jjb in range(self.idxb_max):
+                    j = self.idxb[jjb].j
+                    blist[itriple * self.idxb_max + jjb] -= bzero[j]
+            else:
+                itriple = 0
+                for elem1 in range(number_elements):
+                    for elem2 in range(number_elements):
+                        for elem3 in range(number_elements):
+                            for jjb in range(self.idxb_max):
+                                j = self.idxb[jjb].j
+                                blist[itriple * self.idxb_max + jjb] -= bzero[j]
+                            itriple += 1
+
