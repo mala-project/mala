@@ -235,13 +235,33 @@ class Bispectrum(Descriptor):
                                           distances_cutoff,
                                           distances_squared_cutoff, rmin0,
                                           rfac0)
-                    print("Got Ui")
+                    print("Got ui")
+                    zlist_r, zlist_i = \
+                        self.__compute_zi(ulisttot_r, ulisttot_i)
+                    print("Got zi")
+                    self.__compute_bi(ulisttot_r, ulisttot_i, zlist_r, zlist_i)
+
+                    print("Got bi")
 
                     #
                     # gaussian_descriptors_np[i, j, k, 3] += \
                     #     np.sum(prefactor*np.exp(-dm_cutoff*argumentfactor))
 
         return bispectrum_np, np.prod(self.grid_dimensions)
+
+    class ZIndices:
+
+        def __init__(self):
+            self.j1 = 0
+            self.j2 = 0
+            self.j = 0
+            self.ma1min = 0
+            self.ma2max = 0
+            self.mb1min = 0
+            self.mb2max = 0
+            self.na = 0
+            self.nb = 0
+            self.jju = 0
 
     def __init_index_arrays(self):
         # TODO: Declare these in constructor!
@@ -260,6 +280,66 @@ class Bispectrum(Descriptor):
             for q in range(1,
                            self.parameters.bispectrum_twojmax + 1):
                 self.rootpqarray[p, q] = np.sqrt(p / q)
+
+        idxz_count = 0
+        for j1 in range(self.parameters.bispectrum_twojmax + 1):
+            for j2 in range(j1 + 1):
+                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
+                                            j1 + j2) + 1, 2):
+                    for mb in range(j // 2 + 1):
+                        for ma in range(j + 1):
+                            idxz_count += 1
+        self.idxz_max = idxz_count
+        self.idxz = [self.ZIndices()]*self.idxz_max
+        self.idxz_block = np.zeros((self.parameters.bispectrum_twojmax + 1,
+                                    self.parameters.bispectrum_twojmax + 1,
+                                    self.parameters.bispectrum_twojmax + 1))
+
+        idxz_count = 0
+        for j1 in range(self.parameters.bispectrum_twojmax + 1):
+            for j2 in range(j1 + 1):
+                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
+                                            j1 + j2) + 1, 2):
+                    self.idxz_block[j1][j2][j] = idxz_count
+
+                    for mb in range(j // 2 + 1):
+                        for ma in range(j + 1):
+                            self.idxz[idxz_count].j1 = j1
+                            self.idxz[idxz_count].j2 = j2
+                            self.idxz[idxz_count].j = j
+                            self.idxz[idxz_count].ma1min = max(0, (
+                                        2 * ma - j - j2 + j1) // 2)
+                            self.idxz[idxz_count].ma2max = (2 * ma - j - (2 * self.idxz[
+                                idxz_count].ma1min - j1) + j2) // 2
+                            self.idxz[idxz_count].na = min(j1, (
+                                        2 * ma - j + j2 + j1) // 2) - self.idxz[
+                                                      idxz_count].ma1min + 1
+                            self.idxz[idxz_count].mb1min = max(0, (
+                                        2 * mb - j - j2 + j1) // 2)
+                            self.idxz[idxz_count].mb2max = (2 * mb - j - (2 * self.idxz[
+                                idxz_count].mb1min - j1) + j2) // 2
+                            self.idxz[idxz_count].nb = min(j1, (
+                                        2 * mb - j + j2 + j1) // 2) - self.idxz[
+                                                      idxz_count].mb1min + 1
+
+                            jju = self.idxu_block[j] + (j + 1) * mb + ma
+                            self.idxz[idxz_count].jju = jju
+                            idxz_count += 1
+
+        self.idxcg_block = np.zeros((self.parameters.bispectrum_twojmax + 1,
+                                     self.parameters.bispectrum_twojmax + 1,
+                                     self.parameters.bispectrum_twojmax + 1))
+        idxcg_count = 0
+        for j1 in range(self.parameters.bispectrum_twojmax + 1):
+            for j2 in range(j1 + 1):
+                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
+                                            j1 + j2) + 1, 2):
+                    self.idxcg_block[j1][j2][j] = idxcg_count
+                    for m1 in range(j1 + 1):
+                        for m2 in range(j2 + 1):
+                            idxcg_count += 1
+        self.idxcg_max = idxcg_count
+        self.cglist = np.zeros(self.idxcg_max)
 
     def __compute_ui(self, nr_atoms, atoms_cutoff, distances_cutoff,
                      distances_squared_cutoff, rmin0, rfac0):
@@ -364,3 +444,72 @@ class Bispectrum(Descriptor):
 
         return ulisttot_r, ulisttot_i
 
+    def __compute_zi(self, ulisttot_r, ulisttot_i):
+        # For now set the number of elements to 1.
+        # This also has some implications for the rest of the function.
+        # This currently really only works for one element.
+        number_elements = 1
+        number_element_pairs = number_elements*number_elements
+        zlist_r = np.zeros((number_element_pairs*self.idxz_max))
+        zlist_i = np.zeros((number_element_pairs*self.idxz_max))
+        idouble = 0
+
+        # This seems to be hardcoded for the bispectrum descriptors in
+        # LAMMPS as well
+        bnorm_flag = False
+        for elem1 in range(0, number_elements):
+            for elem2 in range(0, number_elements):
+                for jjz in range(self.idxz_max):
+                    j1 = self.idxz[jjz].j1
+                    j2 = self.idxz[jjz].j2
+                    j = self.idxz[jjz].j
+                    ma1min = self.idxz[jjz].ma1min
+                    ma2max = self.idxz[jjz].ma2max
+                    na = self.idxz[jjz].na
+                    mb1min = self.idxz[jjz].mb1min
+                    mb2max = self.idxz[jjz].mb2max
+                    nb = self.idxz[jjz].nb
+                    cgblock = self.cglist + self.idxcg_block[j1][j2][j]
+                    zlist_r[jjz] = 0.0
+                    zlist_i[jjz] = 0.0
+                    jju1 = int(self.idxu_block[j1] + (j1 + 1) * mb1min)
+                    jju2 = int(self.idxu_block[j2] + (j2 + 1) * mb2max)
+                    icgb = mb1min * (j2 + 1) + mb2max
+                    for ib in range(nb):
+                        suma1_r = 0.0
+                        suma1_i = 0.0
+                        u1_r = ulisttot_r[elem1 * self.idxu_max + jju1:]
+                        u1_i = ulisttot_i[elem1 * self.idxu_max + jju1:]
+                        u2_r = ulisttot_r[elem2 * self.idxu_max + jju2:]
+                        u2_i = ulisttot_i[elem2 * self.idxu_max + jju2:]
+                        ma1 = ma1min
+                        ma2 = ma2max
+                        icga = ma1min * (j2 + 1) + ma2max
+                        for ia in range(na):
+                            suma1_r += cgblock[icga] * (
+                                        u1_r[ma1] * u2_r[ma2] - u1_i[ma1] *
+                                        u2_i[ma2])
+                            suma1_i += cgblock[icga] * (
+                                        u1_r[ma1] * u2_i[ma2] + u1_i[ma1] *
+                                        u2_r[ma2])
+                            ma1 += 1
+                            ma2 -= 1
+                            icga += j2
+                        zlist_r[jjz] += cgblock[icgb] * suma1_r
+                        zlist_i[jjz] += cgblock[icgb] * suma1_i
+                        jju1 += j1 + 1
+                        jju2 -= j2 + 1
+                        icgb += j2
+
+                    if bnorm_flag:
+                        zlist_r[jjz] /= (j + 1)
+                        zlist_i[jjz] /= (j + 1)
+                idouble += 1
+        return zlist_r, zlist_i
+
+    def __compute_bi(self, ulisttot_r, ulisttot_i, zlist_r, zlist_i):
+        # For now set the number of elements to 1.
+        # This also has some implications for the rest of the function.
+        # This currently really only works for one element.
+        number_elements = 1
+        number_element_pairs = number_elements*number_elements
