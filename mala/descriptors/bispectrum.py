@@ -234,16 +234,29 @@ class Bispectrum(Descriptor):
                     atoms_cutoff = np.squeeze(all_atoms[np.argwhere(distances < self.parameters.bispectrum_cutoff), :])
                     nr_atoms = np.shape(atoms_cutoff)[0]
 
+                    printer = False
+                    if x == 0 and y == 0 and z == 1:
+                        printer = True
+
                     ulisttot_r, ulisttot_i = \
                         self.__compute_ui(nr_atoms, atoms_cutoff,
                                           distances_cutoff,
-                                          distances_squared_cutoff)
+                                          distances_squared_cutoff, bispectrum_np[x,y,z,0:3],
+                                          printer)
+                    if x == 0 and y == 0 and z == 1:
+                        print("ulisttot_r i", ulisttot_r[0], ulisttot_i[0])
+                        print("ulisttot_r i", ulisttot_r[1], ulisttot_i[1])
+                        print("idxu_block", self.idxu_block[5])
+
                     zlist_r, zlist_i = \
                         self.__compute_zi(ulisttot_r, ulisttot_i)
                     blist = \
                         self.__compute_bi(ulisttot_r, ulisttot_i, zlist_r, zlist_i)
 
                     bispectrum_np[x, y, z, 3:] = blist
+                    if x == 0 and y == 0 and z == 1:
+                        print("BISPECTRUM", bispectrum_np[x, y, z, :])
+                        exit()
 
                     # This will basically never be used. We don't really
                     # need to optimize it for now.
@@ -396,7 +409,7 @@ class Bispectrum(Descriptor):
                         idxb_count += 1
 
     def __compute_ui(self, nr_atoms, atoms_cutoff, distances_cutoff,
-                     distances_squared_cutoff):
+                     distances_squared_cutoff, grid, printer=False):
         # Precompute and prepare ui stuff
         theta0 = (distances_cutoff - self.rmin0) * self.rfac0 * np.pi / (
                     self.parameters.bispectrum_cutoff - self.rmin0)
@@ -404,18 +417,21 @@ class Bispectrum(Descriptor):
 
         ulist_r_ij = np.zeros((nr_atoms, self.idxu_max)) + 1.0
         ulist_i_ij = np.zeros((nr_atoms, self.idxu_max))
-        ulisttot_r = np.zeros(self.idxu_max)
+        ulisttot_r = np.zeros(self.idxu_max) + 1.0 # Actually probably wself
         ulisttot_i = np.zeros(self.idxu_max)
-        r0inv = 1.0 / np.sqrt(distances_cutoff)
+        r0inv = 1.0 / np.sqrt(distances_cutoff + z0*z0)
 
         for a in range(nr_atoms):
             # This encapsulates the compute_uarray function
 
             # Cayley-Klein parameters for unit quaternion.
             a_r = r0inv[a] * z0[a]
-            a_i = -r0inv[a] * atoms_cutoff[a, 2]
-            b_r = r0inv[a] * atoms_cutoff[a, 1]
-            b_i = -r0inv[a] * atoms_cutoff[a, 0]
+            a_i = -r0inv[a] * (grid[2]-atoms_cutoff[a, 2])
+            b_r = r0inv[a] * (grid[1]-atoms_cutoff[a, 1])
+            b_i = -r0inv[a] * (grid[0]-atoms_cutoff[a, 0])
+            if printer:
+                print(distances_cutoff[a][0], atoms_cutoff[a,0], atoms_cutoff[a,1], atoms_cutoff[a,2],
+                      a_r[0], a_i[0], b_r[0], b_i[0])
 
             for j in range(1, self.parameters.bispectrum_twojmax + 1):
                 jju = int(self.idxu_block[j])
