@@ -213,6 +213,7 @@ class Bispectrum(Descriptor):
         self.bzero_flag = False
         self.wselfall_flag = False
         self.bnorm_flag = False
+        self.quadraticflag = False
 
         self.__init_index_arrays()
 
@@ -239,7 +240,24 @@ class Bispectrum(Descriptor):
                                           distances_squared_cutoff)
                     zlist_r, zlist_i = \
                         self.__compute_zi(ulisttot_r, ulisttot_i)
-                    self.__compute_bi(ulisttot_r, ulisttot_i, zlist_r, zlist_i)
+                    blist = \
+                        self.__compute_bi(ulisttot_r, ulisttot_i, zlist_r, zlist_i)
+
+                    bispectrum_np[x, y, z, 3:] = blist
+
+                    # This will basically never be used. We don't really
+                    # need to optimize it for now.
+                    if self.quadraticflag:
+                        ncount = ncoeff
+                        for icoeff in range(ncoeff):
+                            bveci = blist[icoeff]
+                            bispectrum_np[x, y, z, 3 + ncount] = 0.5 * bveci * bveci
+                            ncount += 1
+                            for jcoeff in range(icoeff + 1, ncoeff):
+                                bispectrum_np[x, y, z, 3 + ncount] = bveci * \
+                                                                     blist[
+                                                                         jcoeff]
+                                ncount += 1
 
                     #
                     # gaussian_descriptors_np[i, j, k, 3] += \
@@ -614,3 +632,4 @@ class Bispectrum(Descriptor):
                                 blist[itriple * self.idxb_max + jjb] -= bzero[j]
                             itriple += 1
 
+        return blist
