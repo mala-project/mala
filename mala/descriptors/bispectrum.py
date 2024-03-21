@@ -419,7 +419,7 @@ class Bispectrum(Descriptor):
         ulist_i_ij = np.zeros((nr_atoms, self.idxu_max))
         ulisttot_r = np.zeros(self.idxu_max) + 1.0 # Actually probably wself
         ulisttot_i = np.zeros(self.idxu_max)
-        r0inv = 1.0 / np.sqrt(distances_cutoff + z0*z0)
+        r0inv = 1.0 / np.sqrt(distances_cutoff*distances_cutoff + z0*z0)
 
         for a in range(nr_atoms):
             # This encapsulates the compute_uarray function
@@ -430,8 +430,8 @@ class Bispectrum(Descriptor):
             b_r = r0inv[a] * (grid[1]-atoms_cutoff[a, 1])
             b_i = -r0inv[a] * (grid[0]-atoms_cutoff[a, 0])
             if printer:
-                print(distances_cutoff[a][0], atoms_cutoff[a,0], atoms_cutoff[a,1], atoms_cutoff[a,2],
-                      a_r[0], a_i[0], b_r[0], b_i[0])
+                print(distances_cutoff[a][0], grid[0]-atoms_cutoff[a, 0], grid[1]-atoms_cutoff[a, 1], grid[2]-atoms_cutoff[a, 2],
+                      a_r[0], a_i[0], b_r[0], b_i[0], r0inv[a][0], z0[a][0])
 
             for j in range(1, self.parameters.bispectrum_twojmax + 1):
                 jju = int(self.idxu_block[j])
