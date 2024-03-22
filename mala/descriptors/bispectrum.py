@@ -249,7 +249,13 @@ class Bispectrum(Descriptor):
                         print("idxu_block", self.idxu_block[5])
 
                     zlist_r, zlist_i = \
-                        self.__compute_zi(ulisttot_r, ulisttot_i)
+                        self.__compute_zi(ulisttot_r, ulisttot_i, printer)
+                    if x == 0 and y == 0 and z == 1:
+                        print("zlist_r i", zlist_r[0], zlist_i[0])
+                        print("zlist_r i", zlist_r[1], zlist_i[1])
+                        print("zlist_r i", zlist_r[2], zlist_i[2])
+                        print("zlist_r i", zlist_r[3], zlist_i[3])
+
                     blist = \
                         self.__compute_bi(ulisttot_r, ulisttot_i, zlist_r, zlist_i)
 
@@ -300,6 +306,12 @@ class Bispectrum(Descriptor):
             self.j = 0
 
     def __init_index_arrays(self):
+        def deltacg(j1, j2, j):
+            sfaccg = np.math.factorial((j1 + j2 + j) // 2 + 1)
+            return np.sqrt(np.math.factorial((j1 + j2 - j) // 2) *
+                           np.math.factorial((j1 - j2 + j) // 2) *
+                           np.math.factorial((-j1 + j2 + j) // 2) / sfaccg)
+
         # TODO: Declare these in constructor!
         idxu_count = 0
         self.idxu_block = np.zeros(self.parameters.bispectrum_twojmax + 1)
@@ -326,7 +338,9 @@ class Bispectrum(Descriptor):
                         for ma in range(j + 1):
                             idxz_count += 1
         self.idxz_max = idxz_count
-        self.idxz = [self.ZIndices()]*self.idxz_max
+        self.idxz = []
+        for z in range(self.idxz_max):
+            self.idxz.append(self.ZIndices())
         self.idxz_block = np.zeros((self.parameters.bispectrum_twojmax + 1,
                                     self.parameters.bispectrum_twojmax + 1,
                                     self.parameters.bispectrum_twojmax + 1))
@@ -377,6 +391,45 @@ class Bispectrum(Descriptor):
         self.idxcg_max = idxcg_count
         self.cglist = np.zeros(self.idxcg_max)
 
+        idxcg_count = 0
+        for j1 in range(self.parameters.bispectrum_twojmax + 1):
+            for j2 in range(j1 + 1):
+                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
+                                            j1 + j2) + 1, 2):
+                    for m1 in range(j1 + 1):
+                        aa2 = 2 * m1 - j1
+                        for m2 in range(j2 + 1):
+                            bb2 = 2 * m2 - j2
+                            m = (aa2 + bb2 + j) // 2
+                            if m < 0 or m > j:
+                                self.cglist[idxcg_count] = 0.0
+                                idxcg_count += 1
+                                continue
+                            cgsum = 0.0
+                            for z in range(max(0, max(-(j - j2 + aa2) // 2,
+                                                      -(j - j1 - bb2) // 2)),
+                                           min((j1 + j2 - j) // 2,
+                                               min((j1 - aa2) // 2,
+                                                   (j2 + bb2) // 2)) + 1):
+                                ifac = -1 if z % 2 else 1
+                                cgsum += ifac / (np.math.factorial(z) * np.math.factorial(
+                                    (j1 + j2 - j) // 2 - z) * np.math.factorial(
+                                    (j1 - aa2) // 2 - z) * np.math.factorial(
+                                    (j2 + bb2) // 2 - z) * np.math.factorial(
+                                    (j - j2 + aa2) // 2 + z) * np.math.factorial(
+                                    (j - j1 - bb2) // 2 + z))
+                            cc2 = 2 * m - j
+                            dcg = deltacg(j1, j2, j)
+                            sfaccg = np.sqrt(
+                                np.math.factorial((j1 + aa2) // 2) * np.math.factorial(
+                                    (j1 - aa2) // 2) * np.math.factorial(
+                                    (j2 + bb2) // 2) * np.math.factorial(
+                                    (j2 - bb2) // 2) * np.math.factorial(
+                                    (j + cc2) // 2) * np.math.factorial(
+                                    (j - cc2) // 2) * (j + 1))
+                            self.cglist[idxcg_count] = cgsum * dcg * sfaccg
+                            idxcg_count += 1
+
         idxb_count = 0
         for j1 in range(self.parameters.bispectrum_twojmax + 1):
             for j2 in range(j1 + 1):
@@ -385,7 +438,10 @@ class Bispectrum(Descriptor):
                     if j >= j1:
                         idxb_count += 1
         self.idxb_max = idxb_count
-        self.idxb = [self.BIndices()]*self.idxb_max
+        self.idxb = []
+        for b in range(self.idxb_max):
+            self.idxb.append(self.BIndices())
+
         idxb_count = 0
         for j1 in range(self.parameters.bispectrum_twojmax + 1):
             for j2 in range(j1 + 1):
@@ -415,9 +471,10 @@ class Bispectrum(Descriptor):
                     self.parameters.bispectrum_cutoff - self.rmin0)
         z0 = distances_cutoff / np.tan(theta0)
 
-        ulist_r_ij = np.zeros((nr_atoms, self.idxu_max)) + 1.0
+        ulist_r_ij = np.zeros((nr_atoms, self.idxu_max))
+        ulist_r_ij[:, 0] = 1.0
         ulist_i_ij = np.zeros((nr_atoms, self.idxu_max))
-        ulisttot_r = np.zeros(self.idxu_max) + 1.0 # Actually probably wself
+        ulisttot_r = np.zeros(self.idxu_max)
         ulisttot_i = np.zeros(self.idxu_max)
         r0inv = 1.0 / np.sqrt(distances_cutoff*distances_cutoff + z0*z0)
 
@@ -515,7 +572,7 @@ class Bispectrum(Descriptor):
 
         return ulisttot_r, ulisttot_i
 
-    def __compute_zi(self, ulisttot_r, ulisttot_i):
+    def __compute_zi(self, ulisttot_r, ulisttot_i, printer):
         # For now set the number of elements to 1.
         # This also has some implications for the rest of the function.
         # This currently really only works for one element.
@@ -530,13 +587,15 @@ class Bispectrum(Descriptor):
                     j1 = self.idxz[jjz].j1
                     j2 = self.idxz[jjz].j2
                     j = self.idxz[jjz].j
+                    # if printer:
+                    #     print(jjz, j1, j2, j)
                     ma1min = self.idxz[jjz].ma1min
                     ma2max = self.idxz[jjz].ma2max
                     na = self.idxz[jjz].na
                     mb1min = self.idxz[jjz].mb1min
                     mb2max = self.idxz[jjz].mb2max
                     nb = self.idxz[jjz].nb
-                    cgblock = self.cglist + self.idxcg_block[j1][j2][j]
+                    cgblock = self.cglist[int(self.idxcg_block[j1][j2][j]):]
                     zlist_r[jjz] = 0.0
                     zlist_i[jjz] = 0.0
                     jju1 = int(self.idxu_block[j1] + (j1 + 1) * mb1min)
@@ -553,6 +612,9 @@ class Bispectrum(Descriptor):
                         ma2 = ma2max
                         icga = ma1min * (j2 + 1) + ma2max
                         for ia in range(na):
+                            if printer and (jjz == 2 or jjz == 3):
+                                # print(jjz, self.cglist[icgb], self.idxcg_block[j1][j2][j], icgb, cgblock[icgb], suma1_r, suma1_i)
+                                print(jjz, u1_r[ma1], u2_r[ma2], u1_i[ma1], u2_i[ma2])
                             suma1_r += cgblock[icga] * (
                                         u1_r[ma1] * u2_r[ma2] - u1_i[ma1] *
                                         u2_i[ma2])
