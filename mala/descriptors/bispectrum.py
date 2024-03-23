@@ -257,6 +257,12 @@ class Bispectrum(Descriptor):
                         print("zlist_r i", zlist_r[1], zlist_i[1])
                         print("zlist_r i", zlist_r[2], zlist_i[2])
                         print("zlist_r i", zlist_r[3], zlist_i[3])
+                        print("zlist_r i", zlist_r[4], zlist_i[4])
+                        print("zlist_r i", zlist_r[5], zlist_i[5])
+                        print("zlist_r i", zlist_r[6], zlist_i[6])
+                        print("zlist_r i", zlist_r[7], zlist_i[7])
+                        print("zlist_r i", zlist_r[8], zlist_i[8])
+                        print("zlist_r i", zlist_r[9], zlist_i[9])
 
                     blist = \
                         self.__compute_bi(ulisttot_r, ulisttot_i, zlist_r, zlist_i)
