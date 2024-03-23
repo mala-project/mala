@@ -214,6 +214,8 @@ class Bispectrum(Descriptor):
         self.wselfall_flag = False
         self.bnorm_flag = False
         self.quadraticflag = False
+        self.number_elements = 1
+        self.wself = 1.0
 
         self.__init_index_arrays()
 
@@ -474,9 +476,20 @@ class Bispectrum(Descriptor):
         ulist_r_ij = np.zeros((nr_atoms, self.idxu_max))
         ulist_r_ij[:, 0] = 1.0
         ulist_i_ij = np.zeros((nr_atoms, self.idxu_max))
-        ulisttot_r = np.zeros(self.idxu_max)
+        ulisttot_r = np.zeros(self.idxu_max)+1.0
         ulisttot_i = np.zeros(self.idxu_max)
         r0inv = 1.0 / np.sqrt(distances_cutoff*distances_cutoff + z0*z0)
+        for jelem in range(self.number_elements):
+            for j in range(self.parameters.bispectrum_twojmax + 1):
+                jju = int(self.idxu_block[j])
+                for mb in range(j + 1):
+                    for ma in range(j + 1):
+                        ulisttot_r[jelem * self.idxu_max + jju] = 0.0
+                        ulisttot_i[jelem * self.idxu_max + jju] = 0.0
+
+                        if ma == mb:
+                            ulisttot_r[jelem * self.idxu_max + jju] = self.wself
+                        jju += 1
 
         for a in range(nr_atoms):
             # This encapsulates the compute_uarray function
@@ -486,9 +499,6 @@ class Bispectrum(Descriptor):
             a_i = -r0inv[a] * (grid[2]-atoms_cutoff[a, 2])
             b_r = r0inv[a] * (grid[1]-atoms_cutoff[a, 1])
             b_i = -r0inv[a] * (grid[0]-atoms_cutoff[a, 0])
-            if printer:
-                print(distances_cutoff[a][0], grid[0]-atoms_cutoff[a, 0], grid[1]-atoms_cutoff[a, 1], grid[2]-atoms_cutoff[a, 2],
-                      a_r[0], a_i[0], b_r[0], b_i[0], r0inv[a][0], z0[a][0])
 
             for j in range(1, self.parameters.bispectrum_twojmax + 1):
                 jju = int(self.idxu_block[j])
@@ -564,10 +574,13 @@ class Bispectrum(Descriptor):
                 jju = int(self.idxu_block[j])
                 for mb in range(j + 1):
                     for ma in range(j + 1):
+                        if printer and j == 0:
+                            print(distances_cutoff[a], jju, mb, ma, ulisttot_r[jju])
                         ulisttot_r[jju] += sfac * ulist_r_ij[a,
                             jju]
                         ulisttot_i[jju] += sfac * ulist_i_ij[a,
                             jju]
+
                         jju += 1
 
         return ulisttot_r, ulisttot_i
@@ -576,13 +589,14 @@ class Bispectrum(Descriptor):
         # For now set the number of elements to 1.
         # This also has some implications for the rest of the function.
         # This currently really only works for one element.
-        number_elements = 1
-        number_element_pairs = number_elements*number_elements
+        number_element_pairs = self.number_elements*self.number_elements
         zlist_r = np.zeros((number_element_pairs*self.idxz_max))
         zlist_i = np.zeros((number_element_pairs*self.idxz_max))
+        for test in range(20):
+            print(test, ulisttot_r[test])
         idouble = 0
-        for elem1 in range(0, number_elements):
-            for elem2 in range(0, number_elements):
+        for elem1 in range(0, self.number_elements):
+            for elem2 in range(0, self.number_elements):
                 for jjz in range(self.idxz_max):
                     j1 = self.idxz[jjz].j1
                     j2 = self.idxz[jjz].j2
