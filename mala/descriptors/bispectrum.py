@@ -245,32 +245,13 @@ class Bispectrum(Descriptor):
                                           distances_cutoff,
                                           distances_squared_cutoff, bispectrum_np[x,y,z,0:3],
                                           printer)
-                    if x == 0 and y == 0 and z == 1:
-                        print("ulisttot_r i", ulisttot_r[0], ulisttot_i[0])
-                        print("ulisttot_r i", ulisttot_r[1], ulisttot_i[1])
-                        print("idxu_block", self.idxu_block[5])
 
                     zlist_r, zlist_i = \
                         self.__compute_zi(ulisttot_r, ulisttot_i, printer)
-                    if x == 0 and y == 0 and z == 1:
-                        print("zlist_r i", zlist_r[0], zlist_i[0])
-                        print("zlist_r i", zlist_r[1], zlist_i[1])
-                        print("zlist_r i", zlist_r[2], zlist_i[2])
-                        print("zlist_r i", zlist_r[3], zlist_i[3])
-                        print("zlist_r i", zlist_r[4], zlist_i[4])
-                        print("zlist_r i", zlist_r[5], zlist_i[5])
-                        print("zlist_r i", zlist_r[6], zlist_i[6])
-                        print("zlist_r i", zlist_r[7], zlist_i[7])
-                        print("zlist_r i", zlist_r[8], zlist_i[8])
-                        print("zlist_r i", zlist_r[9], zlist_i[9])
 
                     blist = \
-                        self.__compute_bi(ulisttot_r, ulisttot_i, zlist_r, zlist_i)
+                        self.__compute_bi(ulisttot_r, ulisttot_i, zlist_r, zlist_i, printer)
 
-                    bispectrum_np[x, y, z, 3:] = blist
-                    if x == 0 and y == 0 and z == 1:
-                        print("BISPECTRUM", bispectrum_np[x, y, z, :])
-                        exit()
 
                     # This will basically never be used. We don't really
                     # need to optimize it for now.
@@ -285,6 +266,14 @@ class Bispectrum(Descriptor):
                                                                      blist[
                                                                          jcoeff]
                                 ncount += 1
+                    bispectrum_np[x, y, z, 3:] = blist
+                    # if x == 0 and y == 0 and z == 1:
+                    #     for i in range(0, 94):
+                    #         print(bispectrum_np[x, y, z, i])
+                    # if x == 0 and y == 0 and z == 2:
+                    #     for i in range(0, 94):
+                    #         print(bispectrum_np[x, y, z, i])
+                    #     exit()
 
                     #
                     # gaussian_descriptors_np[i, j, k, 3] += \
@@ -580,8 +569,6 @@ class Bispectrum(Descriptor):
                 jju = int(self.idxu_block[j])
                 for mb in range(j + 1):
                     for ma in range(j + 1):
-                        if printer and j == 0:
-                            print(distances_cutoff[a], jju, mb, ma, ulisttot_r[jju])
                         ulisttot_r[jju] += sfac * ulist_r_ij[a,
                             jju]
                         ulisttot_i[jju] += sfac * ulist_i_ij[a,
@@ -598,8 +585,6 @@ class Bispectrum(Descriptor):
         number_element_pairs = self.number_elements*self.number_elements
         zlist_r = np.zeros((number_element_pairs*self.idxz_max))
         zlist_i = np.zeros((number_element_pairs*self.idxz_max))
-        for test in range(20):
-            print(test, ulisttot_r[test])
         idouble = 0
         for elem1 in range(0, self.number_elements):
             for elem2 in range(0, self.number_elements):
@@ -607,8 +592,6 @@ class Bispectrum(Descriptor):
                     j1 = self.idxz[jjz].j1
                     j2 = self.idxz[jjz].j2
                     j = self.idxz[jjz].j
-                    # if printer:
-                    #     print(jjz, j1, j2, j)
                     ma1min = self.idxz[jjz].ma1min
                     ma2max = self.idxz[jjz].ma2max
                     na = self.idxz[jjz].na
@@ -632,9 +615,6 @@ class Bispectrum(Descriptor):
                         ma2 = ma2max
                         icga = ma1min * (j2 + 1) + ma2max
                         for ia in range(na):
-                            if printer and (jjz == 2 or jjz == 3):
-                                # print(jjz, self.cglist[icgb], self.idxcg_block[j1][j2][j], icgb, cgblock[icgb], suma1_r, suma1_i)
-                                print(jjz, u1_r[ma1], u2_r[ma2], u1_i[ma1], u2_i[ma2])
                             suma1_r += cgblock[icga] * (
                                         u1_r[ma1] * u2_r[ma2] - u1_i[ma1] *
                                         u2_i[ma2])
@@ -656,7 +636,7 @@ class Bispectrum(Descriptor):
                 idouble += 1
         return zlist_r, zlist_i
 
-    def __compute_bi(self, ulisttot_r, ulisttot_i, zlist_r, zlist_i):
+    def __compute_bi(self, ulisttot_r, ulisttot_i, zlist_r, zlist_i, printer):
         # For now set the number of elements to 1.
         # This also has some implications for the rest of the function.
         # This currently really only works for one element.
@@ -688,7 +668,7 @@ class Bispectrum(Descriptor):
                         jjz = int(self.idxz_block[j1][j2][j])
                         jju = int(self.idxu_block[j])
                         sumzu = 0.0
-                        for mb in range(j // 2):
+                        for mb in range(int(np.ceil(j/2))):
                             for ma in range(j + 1):
                                 sumzu += ulisttot_r[elem3 * self.idxu_max + jju] * \
                                          zlist_r[jjz] + ulisttot_i[
