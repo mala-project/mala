@@ -258,8 +258,10 @@ class Bispectrum(Descriptor):
                     print("Compute ui", time.time() - t0)
 
                     t0 = time.time()
+                    # zlist_r, zlist_i = \
+                    #     self.__compute_zi(ulisttot_r, ulisttot_i, printer)
                     zlist_r, zlist_i = \
-                        self.__compute_zi(ulisttot_r, ulisttot_i, printer)
+                        self.__compute_zi_fast(ulisttot_r, ulisttot_i, printer)
                     print("Compute zi", time.time() - t0)
 
                     t0 = time.time()
@@ -338,6 +340,20 @@ class Bispectrum(Descriptor):
                 for ma in range(j + 1):
                     idxu_count += 1
         self.idxu_max = idxu_count
+
+        self.rootpqarray = np.zeros((self.parameters.bispectrum_twojmax + 2,
+                                    self.parameters.bispectrum_twojmax + 2))
+        for p in range(1, self.parameters.bispectrum_twojmax + 1):
+            for q in range(1,
+                           self.parameters.bispectrum_twojmax + 1):
+                self.rootpqarray[p, q] = np.sqrt(p / q)
+
+        # Everthing in this block is EXCLUSIVELY for the
+        # optimization of compute_ui!
+        # Declaring indices over which to perform vector operations speeds
+        # things up significantly - it is not memory-sparse, but this is
+        # not a big concern for the python implementation which is only
+        # used for small systems anyway.
         self.idxu_init_pairs = None
         for j in range(0, self.parameters.bispectrum_twojmax + 1):
             stop = self.idxu_block[j+1] if j < self.parameters.bispectrum_twojmax else self.idxu_max
@@ -347,13 +363,60 @@ class Bispectrum(Descriptor):
                 self.idxu_init_pairs = np.concatenate((self.idxu_init_pairs,
                                          np.arange(self.idxu_block[j], stop=stop, step=j + 2)))
         self.idxu_init_pairs = self.idxu_init_pairs.astype(np.int32)
+        self.all_mas = []
+        self.all_mbs = []
+        self.all_jju = []
+        self.all_pos_jju = []
+        self.all_neg_jju = []
+        self.all_jjup = []
+        self.all_pos_jjup = []
+        self.all_neg_jjup = []
+        self.all_rootpq_1 = []
+        self.all_rootpq_2 = []
+        self.all_mbpar = []
+        self.all_mapar = []
 
-        self.rootpqarray = np.zeros((self.parameters.bispectrum_twojmax + 2,
-                                    self.parameters.bispectrum_twojmax + 2))
-        for p in range(1, self.parameters.bispectrum_twojmax + 1):
-            for q in range(1,
-                           self.parameters.bispectrum_twojmax + 1):
-                self.rootpqarray[p, q] = np.sqrt(p / q)
+        for j in range(1, self.parameters.bispectrum_twojmax + 1):
+            jju = int(self.idxu_block[j])
+            jjup = int(self.idxu_block[j - 1])
+
+            for mb in range(0, j // 2 + 1):
+                for ma in range(0, j):
+                    self.all_rootpq_1.append(self.rootpqarray[j - ma][j - mb])
+                    self.all_rootpq_2.append(self.rootpqarray[ma + 1][j - mb])
+                    self.all_mas.append(ma)
+                    self.all_mbs.append(mb)
+                    self.all_jju.append(jju)
+                    self.all_jjup.append(jjup)
+                    jju += 1
+                    jjup += 1
+                jju += 1
+
+            mbpar = 1
+            jju = int(self.idxu_block[j])
+            jjup = int(jju + (j + 1) * (j + 1) - 1)
+
+            for mb in range(0, j // 2 + 1):
+                mapar = mbpar
+                for ma in range(0, j + 1):
+                    if mapar == 1:
+                        self.all_pos_jju.append(jju)
+                        self.all_pos_jjup.append(jjup)
+                    else:
+                        self.all_neg_jju.append(jju)
+                        self.all_neg_jjup.append(jjup)
+                    mapar = -mapar
+                    jju += 1
+                    jjup -= 1
+                mbpar = -mbpar
+
+        self.all_mas = np.array(self.all_mas)
+        self.all_mbs = np.array(self.all_mbs)
+        self.all_jjup = np.array(self.all_jjup)
+        self.all_rootpq_1 = np.array(self.all_rootpq_1)
+        self.all_rootpq_2 = np.array(self.all_rootpq_2)
+        # END OF UI OPTIMIZATION BLOCK!
+
 
         idxz_count = 0
         for j1 in range(self.parameters.bispectrum_twojmax + 1):
@@ -500,62 +563,59 @@ class Bispectrum(Descriptor):
         ulist_r_ij = np.zeros((nr_atoms, self.idxu_max))
         ulist_r_ij[:, 0] = 1.0
         ulist_i_ij = np.zeros((nr_atoms, self.idxu_max))
+        test_ulist_r_ij = np.zeros((nr_atoms, self.idxu_max))
+        test_ulist_r_ij[:, 0] = 1.0
+        test_ulist_i_ij = np.zeros((nr_atoms, self.idxu_max))
         ulisttot_r = np.zeros(self.idxu_max)
         ulisttot_i = np.zeros(self.idxu_max)
         r0inv = np.squeeze(1.0 / np.sqrt(distances_cutoff*distances_cutoff + z0*z0))
         ulisttot_r[self.idxu_init_pairs] = 1.0
         distance_vector = -1.0 * (atoms_cutoff - grid)
+        # Cayley-Klein parameters for unit quaternion.
         a_r = r0inv * z0
         a_i = -r0inv * distance_vector[:,2]
         b_r = r0inv * distance_vector[:,1]
         b_i = -r0inv * distance_vector[:,0]
 
         # This encapsulates the compute_uarray function
-        # Cayley-Klein parameters for unit quaternion.
+        jju1 = 0
+        jju2 = 0
+        jju3 = 0
+        for jju_outer in range(self.idxu_max):
+            if jju_outer in self.all_jju:
+                rootpq = self.all_rootpq_1[jju1]
+                ulist_r_ij[:, self.all_jju[jju1]] += rootpq * (
+                        a_r * ulist_r_ij[:, self.all_jjup[jju1]] +
+                        a_i *
+                        ulist_i_ij[:, self.all_jjup[jju1]])
+                ulist_i_ij[:, self.all_jju[jju1]] += rootpq * (
+                        a_r * ulist_i_ij[:, self.all_jjup[jju1]] -
+                        a_i *
+                        ulist_r_ij[:, self.all_jjup[jju1]])
 
-        for j in range(1, self.parameters.bispectrum_twojmax + 1):
-            jju = int(self.idxu_block[j])
-            jjup = int(self.idxu_block[j - 1])
+                rootpq = self.all_rootpq_2[jju1]
+                ulist_r_ij[:, self.all_jju[jju1] + 1] = -1.0 * rootpq * (
+                        b_r * ulist_r_ij[:, self.all_jjup[jju1]] +
+                        b_i *
+                        ulist_i_ij[:, self.all_jjup[jju1]])
+                ulist_i_ij[:, self.all_jju[jju1] + 1] = -1.0 * rootpq * (
+                        b_r * ulist_i_ij[:, self.all_jjup[jju1]] -
+                        b_i *
+                        ulist_r_ij[:, self.all_jjup[jju1]])
+                jju1 += 1
+            if jju_outer in self.all_pos_jjup:
+                ulist_r_ij[:, self.all_pos_jjup[jju2]] = ulist_r_ij[:,
+                                                        self.all_pos_jju[jju2]]
+                ulist_i_ij[:, self.all_pos_jjup[jju2]] = -ulist_i_ij[:,
+                                                         self.all_pos_jju[jju2]]
+                jju2 += 1
 
-            for mb in range(0, j // 2 + 1):
-                ulist_r_ij[:, jju] = 0.0
-                ulist_i_ij[:, jju] = 0.0
-                for ma in range(0, j):
-                    print(j, mb, ma, jju, jjup)
-                    rootpq = self.rootpqarray[j - ma][j - mb]
-                    ulist_r_ij[:, jju] += rootpq * (
-                            a_r * ulist_r_ij[:, jjup] + a_i *
-                            ulist_i_ij[:, jjup])
-                    ulist_i_ij[:, jju] += rootpq * (
-                            a_r * ulist_i_ij[:, jjup] - a_i *
-                            ulist_r_ij[:, jjup])
-                    rootpq = self.rootpqarray[ma + 1][j - mb]
-                    ulist_r_ij[:, jju + 1] = -rootpq * (
-                            b_r * ulist_r_ij[:, jjup] + b_i *
-                            ulist_i_ij[:, jjup])
-                    ulist_i_ij[:, jju + 1] = -rootpq * (
-                            b_r * ulist_i_ij[:, jjup] - b_i *
-                            ulist_r_ij[:, jjup])
-                    jju += 1
-                    jjup += 1
-                jju += 1
-
-            jju = int(self.idxu_block[j])
-            jjup = int(jju + (j + 1) * (j + 1) - 1)
-            mbpar = 1
-            for mb in range(0, j // 2 + 1):
-                mapar = mbpar
-                for ma in range(0, j + 1):
-                    if mapar == 1:
-                        ulist_r_ij[:, jjup] = ulist_r_ij[:, jju]
-                        ulist_i_ij[:, jjup] = -ulist_i_ij[:, jju]
-                    else:
-                        ulist_r_ij[:, jjup] = -ulist_r_ij[:, jju]
-                        ulist_i_ij[:, jjup] = ulist_i_ij[:, jju]
-                    mapar = -mapar
-                    jju += 1
-                    jjup -= 1
-                mbpar = -mbpar
+            if jju_outer in self.all_neg_jjup:
+                ulist_r_ij[:, self.all_neg_jjup[jju3]] = -ulist_r_ij[:,
+                                                         self.all_neg_jju[jju3]]
+                ulist_i_ij[:, self.all_neg_jjup[jju3]] = ulist_i_ij[:,
+                                                        self.all_neg_jju[jju3]]
+                jju3 += 1
 
         # This emulates add_uarraytot.
         # First, we compute sfac.
@@ -584,16 +644,9 @@ class Bispectrum(Descriptor):
         # add it.
 
         # Now use sfac for computations.
-        for j in range(self.parameters.bispectrum_twojmax + 1):
-            jju = int(self.idxu_block[j])
-            for mb in range(j + 1):
-                for ma in range(j + 1):
-                    ulisttot_r[jju] += np.sum(sfac * ulist_r_ij[:,
-                        jju])
-                    ulisttot_i[jju] += np.sum(sfac * ulist_i_ij[:,
-                        jju])
-
-                    jju += 1
+        for jju in range(self.idxu_max):
+            ulisttot_r[jju] += np.sum(sfac * ulist_r_ij[:, jju])
+            ulisttot_i[jju] += np.sum(sfac * ulist_i_ij[:, jju])
 
         return ulisttot_r, ulisttot_i
 
