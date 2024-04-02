@@ -14,6 +14,7 @@ try:
 except ModuleNotFoundError:
     pass
 import numpy as np
+from numba import njit
 from scipy.spatial import distance
 
 from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
@@ -261,7 +262,28 @@ class Bispectrum(Descriptor):
                     # zlist_r, zlist_i = \
                     #     self.__compute_zi(ulisttot_r, ulisttot_i, printer)
                     zlist_r, zlist_i = \
-                        self.__compute_zi_fast(ulisttot_r, ulisttot_i, printer)
+                        self.__compute_zi_fast(ulisttot_r, ulisttot_i,
+                                               self.number_elements,
+                                               self.idxz_max,
+                                               self.cglist,
+                                               self.idxcg_block,
+                                               self.idxu_block,
+                                               self.idxu_max,
+                                               self.bnorm_flag,
+                                               self.zindices_j1,
+                                               self.zindices_j2,
+                                               self.zindices_j,
+                                               self.zindices_ma1min,
+                                               self.zindices_ma2max,
+                                               self.zindices_mb1min,
+                                               self.zindices_mb2max,
+                                               self.zindices_na,
+                                               self.zindices_nb,
+                                               self.zindices_jju,
+                                               self.zsum_ma1,
+                                               self.zsum_ma2,
+                                               self.zsum_icga
+                                               )
                     print("Compute zi", time.time() - t0)
 
                     t0 = time.time()
@@ -363,8 +385,6 @@ class Bispectrum(Descriptor):
                 self.idxu_init_pairs = np.concatenate((self.idxu_init_pairs,
                                          np.arange(self.idxu_block[j], stop=stop, step=j + 2)))
         self.idxu_init_pairs = self.idxu_init_pairs.astype(np.int32)
-        self.all_mas = []
-        self.all_mbs = []
         self.all_jju = []
         self.all_pos_jju = []
         self.all_neg_jju = []
@@ -373,8 +393,6 @@ class Bispectrum(Descriptor):
         self.all_neg_jjup = []
         self.all_rootpq_1 = []
         self.all_rootpq_2 = []
-        self.all_mbpar = []
-        self.all_mapar = []
 
         for j in range(1, self.parameters.bispectrum_twojmax + 1):
             jju = int(self.idxu_block[j])
@@ -384,8 +402,6 @@ class Bispectrum(Descriptor):
                 for ma in range(0, j):
                     self.all_rootpq_1.append(self.rootpqarray[j - ma][j - mb])
                     self.all_rootpq_2.append(self.rootpqarray[ma + 1][j - mb])
-                    self.all_mas.append(ma)
-                    self.all_mbs.append(mb)
                     self.all_jju.append(jju)
                     self.all_jjup.append(jjup)
                     jju += 1
@@ -410,8 +426,6 @@ class Bispectrum(Descriptor):
                     jjup -= 1
                 mbpar = -mbpar
 
-        self.all_mas = np.array(self.all_mas)
-        self.all_mbs = np.array(self.all_mbs)
         self.all_jjup = np.array(self.all_jjup)
         self.all_rootpq_1 = np.array(self.all_rootpq_1)
         self.all_rootpq_2 = np.array(self.all_rootpq_2)
@@ -435,6 +449,16 @@ class Bispectrum(Descriptor):
                                     self.parameters.bispectrum_twojmax + 1))
 
         idxz_count = 0
+        self.zindices_j1 = []
+        self.zindices_j2 = []
+        self.zindices_j = []
+        self.zindices_ma1min = []
+        self.zindices_ma2max = []
+        self.zindices_mb1min = []
+        self.zindices_mb2max = []
+        self.zindices_na = []
+        self.zindices_nb = []
+        self.zindices_jju = []
         for j1 in range(self.parameters.bispectrum_twojmax + 1):
             for j2 in range(j1 + 1):
                 for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
@@ -463,7 +487,83 @@ class Bispectrum(Descriptor):
 
                             jju = self.idxu_block[j] + (j + 1) * mb + ma
                             self.idxz[idxz_count].jju = jju
+                            self.zindices_j1.append(self.idxz[idxz_count].j1)
+                            self.zindices_j2.append(self.idxz[idxz_count].j2)
+                            self.zindices_j.append(self.idxz[idxz_count].j)
+                            self.zindices_ma1min.append(self.idxz[idxz_count].ma1min)
+                            self.zindices_ma2max.append(self.idxz[idxz_count].ma2max)
+                            self.zindices_mb1min.append(self.idxz[idxz_count].mb1min)
+                            self.zindices_mb2max.append(self.idxz[idxz_count].mb2max)
+                            self.zindices_na.append(self.idxz[idxz_count].na)
+                            self.zindices_nb.append(self.idxz[idxz_count].nb)
+                            self.zindices_jju.append(self.idxz[idxz_count].jju)
+
                             idxz_count += 1
+
+        self.zsum_ma1 = []
+        self.zsum_ma2 = []
+        self.zsum_icga = []
+        for jjz in range(self.idxz_max):
+            tmp_z_rsum_indices = []
+            tmp_z_isum_indices = []
+            tmp_icga_sum_indices = []
+            for ib in range(self.idxz[jjz].nb):
+                ma1 = self.idxz[jjz].ma1min
+                ma2 = self.idxz[jjz].ma2max
+                icga = self.idxz[jjz].ma1min * (self.idxz[jjz].j2 + 1) + \
+                       self.idxz[jjz].ma2max
+                tmp2_z_rsum_indices = []
+                tmp2_z_isum_indices = []
+                tmp2_icga_sum_indices = []
+                for ia in range(self.idxz[jjz].na):
+                    tmp2_z_rsum_indices.append(ma1)
+                    tmp2_z_isum_indices.append(ma2)
+                    tmp2_icga_sum_indices.append(icga)
+                    ma1 += 1
+                    ma2 -= 1
+                    icga += self.idxz[jjz].j2
+                tmp_z_rsum_indices.append(tmp2_z_rsum_indices)
+                tmp_z_isum_indices.append(tmp2_z_isum_indices)
+                tmp_icga_sum_indices.append(tmp2_icga_sum_indices)
+            self.zsum_ma1.append(np.array(tmp_z_rsum_indices))
+            self.zsum_ma2.append(np.array(tmp_z_isum_indices))
+            self.zsum_icga.append(np.array(tmp_icga_sum_indices))
+        self.zsum_ma1 = self.zsum_ma1
+        self.zsum_ma2 = self.zsum_ma2
+        self.zsum_icga = self.zsum_icga
+
+
+        self.zsum_u1r = []
+        self.zsum_u1i = []
+        self.zsum_u2r = []
+        self.zsum_u2i = []
+        self.zsum_icga = []
+        self.zsum_icgb = []
+        for jjz in range(self.idxz_max):
+            j1 =
+            j2 =
+            j =
+            jju1 = int(self.idxu_block[self.idxz[jjz].j1] + (self.idxz[jjz].j1 + 1) * self.idxz[jjz].mb1min)
+            jju2 = int(self.idxu_block[self.idxz[jjz].j2] + (self.idxz[jjz].j2 + 1) * self.idxz[jjz].mb2max)
+            icgb = self.idxz[jjz].mb1min * (self.idxz[jjz].j2 + 1) + self.idxz[jjz].mb2max
+            for ib in range(self.idxz[jjz].nb):
+                ma1 = self.idxz[jjz].ma1min
+                ma2 = self.idxz[jjz].ma2max
+                icga = self.idxz[jjz].ma1min * (self.idxz[jjz].j2 + 1) + \
+                       self.idxz[jjz].ma2max
+                for ia in range(self.idxz[jjz].na):
+                    self.zsum_u1r.append(jju1+ma1)
+                    self.zsum_u1i.append(jju1+ma1)
+                    self.zsum_u2r.append(jju2+ma2)
+                    self.zsum_u2i.append(jju2+ma2)
+                    self.zsum_icga.append(icga)
+                    self.zsum_icgb.append(icgb)
+                    ma1 += 1
+                    ma2 -= 1
+                    icga += self.idxz[jjz].j2
+            jju1 += j1 + 1
+            jju2 -= j2 + 1
+            icgb += j2
 
         self.idxcg_block = np.zeros((self.parameters.bispectrum_twojmax + 1,
                                      self.parameters.bispectrum_twojmax + 1,
@@ -560,14 +660,11 @@ class Bispectrum(Descriptor):
                     self.parameters.bispectrum_cutoff - self.rmin0)
         z0 = np.squeeze(distances_cutoff / np.tan(theta0))
 
-        ulist_r_ij = np.zeros((nr_atoms, self.idxu_max))
+        ulist_r_ij = np.zeros((nr_atoms, self.idxu_max), dtype=np.float64)
         ulist_r_ij[:, 0] = 1.0
-        ulist_i_ij = np.zeros((nr_atoms, self.idxu_max))
-        test_ulist_r_ij = np.zeros((nr_atoms, self.idxu_max))
-        test_ulist_r_ij[:, 0] = 1.0
-        test_ulist_i_ij = np.zeros((nr_atoms, self.idxu_max))
-        ulisttot_r = np.zeros(self.idxu_max)
-        ulisttot_i = np.zeros(self.idxu_max)
+        ulist_i_ij = np.zeros((nr_atoms, self.idxu_max), dtype=np.float64)
+        ulisttot_r = np.zeros(self.idxu_max, dtype=np.float64)
+        ulisttot_i = np.zeros(self.idxu_max, dtype=np.float64)
         r0inv = np.squeeze(1.0 / np.sqrt(distances_cutoff*distances_cutoff + z0*z0))
         ulisttot_r[self.idxu_init_pairs] = 1.0
         distance_vector = -1.0 * (atoms_cutoff - grid)
@@ -767,6 +864,84 @@ class Bispectrum(Descriptor):
                         jju += 1
 
         return ulisttot_r, ulisttot_i
+
+    @staticmethod
+    # @njit(nopython=True)
+    def __compute_zi_fast(ulisttot_r, ulisttot_i,
+                          number_elements, idxz_max,
+                          cglist, idxcg_block, idxu_block,
+                          idxu_max, bnorm_flag,
+                          zindices_j1, zindices_j2, zindices_j,
+                          zindices_ma1min, zindices_ma2max, zindices_mb1min,
+                          zindices_mb2max, zindices_na, zindices_nb,
+                          zindices_jju, zsum_ma1, zsum_ma2, zsum_icga):
+        # For now set the number of elements to 1.
+        # This also has some implications for the rest of the function.
+        # This currently really only works for one element.
+        number_element_pairs = number_elements*number_elements
+        zlist_r = np.zeros((number_element_pairs*idxz_max))
+        zlist_i = np.zeros((number_element_pairs*idxz_max))
+        for jjz in range(idxz_max):
+            j1 = zindices_j1[jjz]
+            j2 = zindices_j2[jjz]
+            j = zindices_j[jjz]
+            ma1min = zindices_ma1min[jjz]
+            ma2max = zindices_ma2max[jjz]
+            na = zindices_na[jjz]
+            mb1min = zindices_mb1min[jjz]
+            mb2max = zindices_mb2max[jjz]
+            nb = zindices_nb[jjz]
+            cgblock = cglist[int(idxcg_block[j1][j2][j]):]
+            zlist_r[jjz] = 0.0
+            zlist_i[jjz] = 0.0
+            jju1 = int(idxu_block[j1] + (j1 + 1) * mb1min)
+            jju2 = int(idxu_block[j2] + (j2 + 1) * mb2max)
+
+
+            icgb = mb1min * (j2 + 1) + mb2max
+            for ib in range(nb):
+                test1 = cgblock[zsum_icga[jjz][ib]]
+                test2 = ulisttot_r[jju1+zsum_ma1[jjz][ib]]
+                test3 = ulisttot_r[jju2+zsum_ma2[jjz][ib]]
+                test3 = ulisttot_i[jju1+zsum_ma1[jjz][ib]]
+                test5 = ulisttot_i[jju2+zsum_ma2[jjz][ib]]
+                suma1_r = np.sum(cgblock[zsum_icga[jjz] * (
+                       ulisttot_r[jju1+zsum_ma1[jjz][ib]]*ulisttot_r[jju2+zsum_ma2[jjz][ib]] -
+                       ulisttot_i[jju1+zsum_ma1[jjz][ib]]*ulisttot_i[jju2+zsum_ma2[jjz][ib]]))
+                suma1_i = np.sum(cgblock[zsum_icga[jjz][ib]] *
+                                     (ulisttot_r[jju1+zsum_ma1[jjz][ib]]*ulisttot_i[jju2+zsum_ma2[jjz][ib]] +
+                                        ulisttot_i[jju1+zsum_ma1[jjz][ib]]*ulisttot_r[jju2+zsum_ma2[jjz][ib]]))
+                # suma1_r = 0.0
+                # suma1_i = 0.0
+                # u1_r = ulisttot_r[jju1:]
+                # u1_i = ulisttot_i[jju1:]
+                # u2_r = ulisttot_r[jju2:]
+                # u2_i = ulisttot_i[jju2:]
+                # ma1 = ma1min
+                # ma2 = ma2max
+                # icga = ma1min * (j2 + 1) + ma2max
+                # for ia in range(na):
+                #     suma1_r += cgblock[icga] * (
+                #                 u1_r[ma1] * u2_r[ma2] - u1_i[ma1] *
+                #                 u2_i[ma2])
+                #     suma1_i += cgblock[icga] * (
+                #                 u1_r[ma1] * u2_i[ma2] + u1_i[ma1] *
+                #                 u2_r[ma2])
+                #     ma1 += 1
+                #     ma2 -= 1
+                #     icga += j2
+                # print(tmp_suma1_r,suma1_r)
+                # print(tmp_suma1_i,suma1_i)
+                zlist_r[jjz] += cgblock[icgb] * suma1_r
+                zlist_i[jjz] += cgblock[icgb] * suma1_i
+                jju1 += j1 + 1
+                jju2 -= j2 + 1
+                icgb += j2
+
+            if bnorm_flag:
+                zlist_r[jjz] /= (j + 1)
+                zlist_i[jjz] /= (j + 1)
+        return zlist_r, zlist_i
 
     def __compute_zi(self, ulisttot_r, ulisttot_i, printer):
         # For now set the number of elements to 1.
