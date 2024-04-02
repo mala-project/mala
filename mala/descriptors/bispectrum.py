@@ -511,7 +511,6 @@ class Bispectrum(Descriptor):
         b_i = -r0inv * distance_vector[:,0]
 
         # This encapsulates the compute_uarray function
-
         # Cayley-Klein parameters for unit quaternion.
 
         for j in range(1, self.parameters.bispectrum_twojmax + 1):
@@ -522,6 +521,7 @@ class Bispectrum(Descriptor):
                 ulist_r_ij[:, jju] = 0.0
                 ulist_i_ij[:, jju] = 0.0
                 for ma in range(0, j):
+                    print(j, mb, ma, jju, jjup)
                     rootpq = self.rootpqarray[j - ma][j - mb]
                     ulist_r_ij[:, jju] += rootpq * (
                             a_r * ulist_r_ij[:, jjup] + a_i *
@@ -556,44 +556,44 @@ class Bispectrum(Descriptor):
                     jju += 1
                     jjup -= 1
                 mbpar = -mbpar
-        for a in range(0, nr_atoms):
-            # This emulates add_uarraytot.
-            # First, we compute sfac.
-            if self.parameters.bispectrum_switchflag == 0:
-                sfac = 1.0
-            elif distances_cutoff[a] <= self.rmin0:
-                sfac = 1.0
-            elif distances_cutoff[a] > self.parameters.bispectrum_cutoff:
-                sfac = 0.0
-            else:
-                rcutfac = np.pi / (self.parameters.bispectrum_cutoff -
-                                   self.rmin0)
-                sfac = 0.5 * (np.cos((distances_cutoff[a] - self.rmin0) * rcutfac)
-                              + 1.0)
 
-            # sfac technically has to be weighted according to the chemical
-            # species. But this is a minimal implementation only for a single
-            # chemical species, so I am ommitting this for now. It would
-            # look something like
-            # sfac *= weights[a]
-            # Further, some things have to be calculated if
-            # switch_inner_flag is true. If I understand correctly, it
-            # essentially never is in our case. So I am ommitting this
-            # (along with some other similar lines) here for now.
-            # If this becomes relevant later, we of course have to
-            # add it.
+        # This emulates add_uarraytot.
+        # First, we compute sfac.
+        sfac = np.zeros(nr_atoms)
+        if self.parameters.bispectrum_switchflag == 0:
+            sfac += 1.0
+        else:
+            rcutfac = np.pi / (self.parameters.bispectrum_cutoff -
+                               self.rmin0)
+            sfac = 0.5 * (np.cos((distances_cutoff - self.rmin0) * rcutfac)
+                          + 1.0)
+            sfac[np.where(distances_cutoff <= self.rmin0)] = 1.0
+            sfac[np.where(distances_cutoff >
+                          self.parameters.bispectrum_cutoff)] = 0.0
 
-            # Now use sfac for computations.
-            for j in range(self.parameters.bispectrum_twojmax + 1):
-                jju = int(self.idxu_block[j])
-                for mb in range(j + 1):
-                    for ma in range(j + 1):
-                        ulisttot_r[jju] += sfac * ulist_r_ij[a,
-                            jju]
-                        ulisttot_i[jju] += sfac * ulist_i_ij[a,
-                            jju]
+        # sfac technically has to be weighted according to the chemical
+        # species. But this is a minimal implementation only for a single
+        # chemical species, so I am ommitting this for now. It would
+        # look something like
+        # sfac *= weights[a]
+        # Further, some things have to be calculated if
+        # switch_inner_flag is true. If I understand correctly, it
+        # essentially never is in our case. So I am ommitting this
+        # (along with some other similar lines) here for now.
+        # If this becomes relevant later, we of course have to
+        # add it.
 
-                        jju += 1
+        # Now use sfac for computations.
+        for j in range(self.parameters.bispectrum_twojmax + 1):
+            jju = int(self.idxu_block[j])
+            for mb in range(j + 1):
+                for ma in range(j + 1):
+                    ulisttot_r[jju] += np.sum(sfac * ulist_r_ij[:,
+                        jju])
+                    ulisttot_i[jju] += np.sum(sfac * ulist_i_ij[:,
+                        jju])
+
+                    jju += 1
 
         return ulisttot_r, ulisttot_i
 
