@@ -14,7 +14,7 @@ try:
 except ModuleNotFoundError:
     pass
 import numpy as np
-from numba import njit
+from numba import jit
 from scipy.spatial import distance
 
 from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
@@ -214,7 +214,7 @@ class Bispectrum(Descriptor):
         self.rfac0 = 0.99363
         self.bzero_flag = False
         self.wselfall_flag = False
-        self.bnorm_flag = False
+        self.bnorm_flag = False # Currently not working if True
         self.quadraticflag = False
         self.number_elements = 1
         self.wself = 1.0
@@ -263,38 +263,13 @@ class Bispectrum(Descriptor):
                     # zlist_r, zlist_i = \
                     #     self.__compute_zi(ulisttot_r, ulisttot_i, printer)
                     zlist_r, zlist_i = \
-                        self.__compute_zi_fast(ulisttot_r, ulisttot_i,
-                                               self.number_elements,
-                                               self.idxz_max,
-                                               self.cglist,
-                                               self.idxcg_block,
-                                               self.idxu_block,
-                                               self.idxu_max,
-                                               self.bnorm_flag,
-                                               self.zindices_j1,
-                                               self.zindices_j2,
-                                               self.zindices_j,
-                                               self.zindices_ma1min,
-                                               self.zindices_ma2max,
-                                               self.zindices_mb1min,
-                                               self.zindices_mb2max,
-                                               self.zindices_na,
-                                               self.zindices_nb,
-                                               self.zindices_jju,
-                                               self.zsum_u1r,
-                                               self.zsum_u1i,
-                                               self.zsum_u2r,
-                                               self.zsum_u2i,
-                                               self.zsum_icga,
-                                               self.zsum_icgb,
-                                               self.zsum_jjz)
+                        self.__compute_zi_fast(ulisttot_r, ulisttot_i)
                     print("Compute zi", time.time() - t0)
 
                     t0 = time.time()
                     blist = \
                         self.__compute_bi(ulisttot_r, ulisttot_i, zlist_r, zlist_i, printer)
                     print("Compute bi", time.time() - t0)
-
 
                     # This will basically never be used. We don't really
                     # need to optimize it for now.
@@ -888,156 +863,32 @@ class Bispectrum(Descriptor):
 
         return ulisttot_r, ulisttot_i
 
-    @staticmethod
-    # @njit
-    def __compute_zi_fast(ulisttot_r, ulisttot_i,
-                          number_elements, idxz_max,
-                          cglist, idxcg_block, idxu_block,
-                          idxu_max, bnorm_flag,
-                          zindices_j1, zindices_j2, zindices_j,
-                          zindices_ma1min, zindices_ma2max, zindices_mb1min,
-                          zindices_mb2max, zindices_na, zindices_nb,
-                          zindices_jju, zsum_u1r, zsum_u1i, zsum_u2r,
-                          zsum_u2i, zsum_icga, zsum_icgb, zsum_jjz):
-        # For now set the number of elements to 1.
-        # This also has some implications for the rest of the function.
-        # This currently really only works for one element.
-        number_element_pairs = number_elements*number_elements
-        zlist_r = np.zeros((number_element_pairs*idxz_max))
-        zlist_i = np.zeros((number_element_pairs*idxz_max))
-        # test_zlist_r = np.zeros((number_element_pairs*idxz_max))
-        # test_zlist_i = np.zeros((number_element_pairs*idxz_max))
-        #
-        # critical_jjz = 3
-        #
-        # for jjz_counting in range(np.shape(zsum_jjz)[0]):
-        #
-        #     zlist_r[zsum_jjz[jjz_counting]] += \
-        #         cglist[zsum_icgb[jjz_counting]] * \
-        #         cglist[zsum_icga[jjz_counting]] * \
-        #         (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_r[zsum_u2r[jjz_counting]]
-        #          - ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_i[zsum_u2i[jjz_counting]])
-        #
-        #     zlist_i[zsum_jjz[jjz_counting]] += \
-        #         cglist[zsum_icgb[jjz_counting]] * \
-        #         cglist[zsum_icga[jjz_counting]] * \
-        #           (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_i[zsum_u2i[jjz_counting]]
-        #          + ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_r[zsum_u2r[jjz_counting]])
-        #
-        #     if jjz_counting == critical_jjz:
-        #         print("NEW", cglist[zsum_icgb[jjz_counting]],
-        #               cglist[zsum_icga[jjz_counting]] * \
-        #               (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_r[
-        #                   zsum_u2r[jjz_counting]]
-        #                - ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_i[
-        #                    zsum_u2i[jjz_counting]]),
-        #               cglist[zsum_icga[jjz_counting]] * \
-        #               (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_i[
-        #                   zsum_u2i[jjz_counting]]
-        #                + ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_r[
-        #                    zsum_u2r[jjz_counting]])
-        #
-        #               )
-        # print(cglist[zsum_icgb[critical_jjz]] * cglist[zsum_icga[critical_jjz]] * \
-        #     (ulisttot_r[zsum_u1r[critical_jjz]] * ulisttot_r[zsum_u2r[critical_jjz]]
-        #      - ulisttot_i[zsum_u1i[critical_jjz]] * ulisttot_i[zsum_u2i[critical_jjz]]))
-        #
-        test =  cglist[zsum_icgb] *   cglist[zsum_icga] * \
-            (ulisttot_r[zsum_u1r] * ulisttot_r[zsum_u2r]
-             - ulisttot_i[zsum_u1i] * ulisttot_i[zsum_u2i])
+    def __compute_zi_fast(self, ulisttot_r, ulisttot_i):
+        tmp_real = self.cglist[self.zsum_icgb] * \
+            self.cglist[self.zsum_icga] * \
+            (ulisttot_r[self.zsum_u1r] * ulisttot_r[self.zsum_u2r]
+             - ulisttot_i[self.zsum_u1i] * ulisttot_i[self.zsum_u2i])
+        tmp_imag = self.cglist[self.zsum_icgb] * \
+                    self.cglist[self.zsum_icga] * \
+                      (ulisttot_r[self.zsum_u1r] * ulisttot_i[self.zsum_u2i]
+                     + ulisttot_i[self.zsum_u1i] * ulisttot_r[self.zsum_u2r])
 
-        tmp_real = cglist[zsum_icgb] * \
-            cglist[zsum_icga] * \
-            (ulisttot_r[zsum_u1r] * ulisttot_r[zsum_u2r]
-             - ulisttot_i[zsum_u1i] * ulisttot_i[zsum_u2i])
-        tmp_imag = cglist[zsum_icgb] * \
-                    cglist[zsum_icga] * \
-                      (ulisttot_r[zsum_u1r] * ulisttot_i[zsum_u2i]
-                     + ulisttot_i[zsum_u1i] * ulisttot_r[zsum_u2r])
-
-        _, idx, _ = np.unique(zsum_jjz, return_counts=True,
+        # Summation over an array based on indices stored in a different
+        # array.
+        # Taken from: https://stackoverflow.com/questions/67108215/how-to-get-sum-of-values-in-a-numpy-array-based-on-another-array-with-repetitive
+        # Under "much better version".
+        _, idx, _ = np.unique(self.zsum_jjz, return_counts=True,
                               return_inverse=True)
-        zlist_r = np.bincount(idx,
-                                   tmp_real)  # Same shape and type as your version
-        _, idx, _ = np.unique(zsum_jjz, return_counts=True,
+        zlist_r = np.bincount(idx, tmp_real)
+        _, idx, _ = np.unique(self.zsum_jjz, return_counts=True,
                               return_inverse=True)
-        zlist_i = np.bincount(idx,
-                                   tmp_imag)  # Same shape and type as your version
+        zlist_i = np.bincount(idx, tmp_imag)
 
-        # for jjz in range(idxz_max):
-        #     zlist_r[jjz] = np.sum(tmp_real[zsum_jjz == jjz])
-        #     zlist_i[jjz] = np.sum(tmp_imag[zsum_jjz == jjz])
-
-        # print("ZERO?", np.mean(temp_zlist_r-zlist_r))
-        # print("ZERO?", np.mean(temp_zlist_i-zlist_i))
-        # print("test")
-
-
-
-        # test_zlist_r[zsum_jjz] += \
-        #     cglist[zsum_icgb] * \
-        #     cglist[zsum_icga] * \
-        #     (ulisttot_r[zsum_u1r] * ulisttot_r[zsum_u2r]
-        #      - ulisttot_i[zsum_u1i] * ulisttot_i[zsum_u2i])
-        #
-        # test_zlist_i[zsum_jjz] += \
-        #     cglist[zsum_icgb] * \
-        #     cglist[zsum_icga] * \
-        #       (ulisttot_r[zsum_u1r] * ulisttot_i[zsum_u2i]
-        #      + ulisttot_i[zsum_u1i] * ulisttot_r[zsum_u2r])
-
-        # print("REAL ZERO",np.mean(test_zlist_r-zlist_r))
-        # print("IMAGINARY ZERO",np.mean(test_zlist_i-zlist_i))
-
-        # for jjz in range(idxz_max):
-        #     j1 = zindices_j1[jjz]
-        #     j2 = zindices_j2[jjz]
-        #     j = zindices_j[jjz]
-        #     ma1min = zindices_ma1min[jjz]
-        #     ma2max = zindices_ma2max[jjz]
-        #     na = zindices_na[jjz]
-        #     mb1min = zindices_mb1min[jjz]
-        #     mb2max = zindices_mb2max[jjz]
-        #     nb = zindices_nb[jjz]
-        #     cgblock = cglist[int(idxcg_block[j1][j2][j]):]
-        #     zlist_r[jjz] = 0.0
-        #     zlist_i[jjz] = 0.0
-        #     jju1 = int(idxu_block[j1] + (j1 + 1) * mb1min)
-        #     jju2 = int(idxu_block[j2] + (j2 + 1) * mb2max)
-        #
-        #
-        #     icgb = mb1min * (j2 + 1) + mb2max
-        #     for ib in range(nb):
-        #         suma1_r = 0.0
-        #         suma1_i = 0.0
-        #         u1_r = ulisttot_r[jju1:]
-        #         u1_i = ulisttot_i[jju1:]
-        #         u2_r = ulisttot_r[jju2:]
-        #         u2_i = ulisttot_i[jju2:]
-        #         ma1 = ma1min
-        #         ma2 = ma2max
-        #         icga = ma1min * (j2 + 1) + ma2max
-        #         for ia in range(na):
-        #             suma1_r += cgblock[icga] * (
-        #                         u1_r[ma1] * u2_r[ma2] - u1_i[ma1] *
-        #                         u2_i[ma2])
-        #             suma1_i += cgblock[icga] * (
-        #                         u1_r[ma1] * u2_i[ma2] + u1_i[ma1] *
-        #                         u2_r[ma2])
-        #             ma1 += 1
-        #             ma2 -= 1
-        #             icga += j2
-        #
-        #         zlist_r[jjz] += cgblock[icgb] * suma1_r
-        #         zlist_i[jjz] += cgblock[icgb] * suma1_i
-        #         if jjz == critical_jjz:
-        #             print("OLD", cgblock[icgb], suma1_r, suma1_i)
-        #         jju1 += j1 + 1
-        #         jju2 -= j2 + 1
-        #         icgb += j2
-            # if bnorm_flag:
-            #     zlist_r[jjz] /= (j + 1)
-            #     zlist_i[jjz] /= (j + 1)
+        # Commented out for efficiency reasons. May be commented in at a later
+        # point if needed.
+        # if bnorm_flag:
+        #     zlist_r[jjz] /= (j + 1)
+        #     zlist_i[jjz] /= (j + 1)
         return zlist_r, zlist_i
 
     def __compute_zi(self, ulisttot_r, ulisttot_i, printer):
