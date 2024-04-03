@@ -908,32 +908,48 @@ class Bispectrum(Descriptor):
         test_zlist_r = np.zeros((number_element_pairs*idxz_max))
         test_zlist_i = np.zeros((number_element_pairs*idxz_max))
 
-        # for jjz_counting in range(np.shape(zsum_jjz)[0]):
+        critical_jjz = 1
+
+        for jjz_counting in range(np.shape(zsum_jjz)[0]):
+
+            zlist_r[zsum_jjz[jjz_counting]] += \
+                cglist[zsum_icgb[jjz_counting]] * \
+                cglist[zsum_icga[jjz_counting]] * \
+                (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_r[zsum_u2r[jjz_counting]]
+                 - ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_i[zsum_u2i[jjz_counting]])
+
+            zlist_i[zsum_jjz[jjz_counting]] += \
+                cglist[zsum_icgb[jjz_counting]] * \
+                cglist[zsum_icga[jjz_counting]] * \
+                  (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_i[zsum_u2i[jjz_counting]]
+                 + ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_r[zsum_u2r[jjz_counting]])
+
+            if zsum_jjz[jjz_counting] == critical_jjz:
+                print("NEW", cglist[zsum_icgb[jjz_counting]],
+                      cglist[zsum_icga[jjz_counting]] * \
+                      (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_r[
+                          zsum_u2r[jjz_counting]]
+                       - ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_i[
+                           zsum_u2i[jjz_counting]]),
+                      cglist[zsum_icga[jjz_counting]] * \
+                      (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_i[
+                          zsum_u2i[jjz_counting]]
+                       + ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_r[
+                           zsum_u2r[jjz_counting]])
+
+                      )
+
+        # zlist_r[zsum_jjz] += \
+        #     cglist[zsum_icgb] * \
+        #     cglist[zsum_icga] * \
+        #     (ulisttot_r[zsum_u1r] * ulisttot_r[zsum_u2r]
+        #      - ulisttot_i[zsum_u1i] * ulisttot_i[zsum_u2i])
         #
-        #     zlist_r[zsum_jjz[jjz_counting]] += \
-        #         cglist[zsum_icgb[jjz_counting]] * \
-        #         cglist[zsum_icga[jjz_counting]] * \
-        #         (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_r[zsum_u2r[jjz_counting]]
-        #          - ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_i[zsum_u2i[jjz_counting]])
-        #
-        #     zlist_i[zsum_jjz[jjz_counting]] += \
-        #         cglist[zsum_icgb[jjz_counting]] * \
-        #         cglist[zsum_icga[jjz_counting]] * \
-        #           (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_i[zsum_u2i[jjz_counting]]
-        #          - ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_r[zsum_u2r[jjz_counting]])
-
-        zlist_r[zsum_jjz] += \
-            cglist[zsum_icgb] * \
-            cglist[zsum_icga] * \
-            (ulisttot_r[zsum_u1r] * ulisttot_r[zsum_u2r]
-             - ulisttot_i[zsum_u1i] * ulisttot_i[zsum_u2i])
-
-        zlist_i[zsum_jjz] += \
-            cglist[zsum_icgb] * \
-            cglist[zsum_icga] * \
-              (ulisttot_r[zsum_u1r] * ulisttot_i[zsum_u2i]
-             - ulisttot_i[zsum_u1i] * ulisttot_r[zsum_u2r])
-
+        # zlist_i[zsum_jjz] += \
+        #     cglist[zsum_icgb] * \
+        #     cglist[zsum_icga] * \
+        #       (ulisttot_r[zsum_u1r] * ulisttot_i[zsum_u2i]
+        #      - ulisttot_i[zsum_u1i] * ulisttot_r[zsum_u2r])
 
         # for jjz in range(idxz_max):
         #     j1 = zindices_j1[jjz]
@@ -973,12 +989,14 @@ class Bispectrum(Descriptor):
         #             ma1 += 1
         #             ma2 -= 1
         #             icga += j2
+        #
         #         zlist_r[jjz] += cgblock[icgb] * suma1_r
         #         zlist_i[jjz] += cgblock[icgb] * suma1_i
+        #         if jjz == critical_jjz:
+        #             print("OLD", cgblock[icgb], suma1_r, suma1_i)
         #         jju1 += j1 + 1
         #         jju2 -= j2 + 1
         #         icgb += j2
-
             # if bnorm_flag:
             #     zlist_r[jjz] /= (j + 1)
             #     zlist_i[jjz] /= (j + 1)
