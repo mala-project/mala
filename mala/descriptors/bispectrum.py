@@ -910,46 +910,64 @@ class Bispectrum(Descriptor):
 
         critical_jjz = 1
 
-        for jjz_counting in range(np.shape(zsum_jjz)[0]):
-
-            zlist_r[zsum_jjz[jjz_counting]] += \
-                cglist[zsum_icgb[jjz_counting]] * \
-                cglist[zsum_icga[jjz_counting]] * \
-                (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_r[zsum_u2r[jjz_counting]]
-                 - ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_i[zsum_u2i[jjz_counting]])
-
-            zlist_i[zsum_jjz[jjz_counting]] += \
-                cglist[zsum_icgb[jjz_counting]] * \
-                cglist[zsum_icga[jjz_counting]] * \
-                  (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_i[zsum_u2i[jjz_counting]]
-                 + ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_r[zsum_u2r[jjz_counting]])
-
-            if zsum_jjz[jjz_counting] == critical_jjz:
-                print("NEW", cglist[zsum_icgb[jjz_counting]],
-                      cglist[zsum_icga[jjz_counting]] * \
-                      (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_r[
-                          zsum_u2r[jjz_counting]]
-                       - ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_i[
-                           zsum_u2i[jjz_counting]]),
-                      cglist[zsum_icga[jjz_counting]] * \
-                      (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_i[
-                          zsum_u2i[jjz_counting]]
-                       + ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_r[
-                           zsum_u2r[jjz_counting]])
-
-                      )
-
-        # zlist_r[zsum_jjz] += \
+        # for jjz_counting in range(np.shape(zsum_jjz)[0]):
+        #
+        #     zlist_r[zsum_jjz[jjz_counting]] += \
+        #         cglist[zsum_icgb[jjz_counting]] * \
+        #         cglist[zsum_icga[jjz_counting]] * \
+        #         (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_r[zsum_u2r[jjz_counting]]
+        #          - ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_i[zsum_u2i[jjz_counting]])
+        #
+        #     zlist_i[zsum_jjz[jjz_counting]] += \
+        #         cglist[zsum_icgb[jjz_counting]] * \
+        #         cglist[zsum_icga[jjz_counting]] * \
+        #           (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_i[zsum_u2i[jjz_counting]]
+        #          + ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_r[zsum_u2r[jjz_counting]])
+        #
+        #     if zsum_jjz[jjz_counting] == critical_jjz:
+        #         print("NEW", cglist[zsum_icgb[jjz_counting]],
+        #               cglist[zsum_icga[jjz_counting]] * \
+        #               (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_r[
+        #                   zsum_u2r[jjz_counting]]
+        #                - ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_i[
+        #                    zsum_u2i[jjz_counting]]),
+        #               cglist[zsum_icga[jjz_counting]] * \
+        #               (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_i[
+        #                   zsum_u2i[jjz_counting]]
+        #                + ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_r[
+        #                    zsum_u2r[jjz_counting]])
+        #
+        #               )
+        # print(cglist[zsum_icgb[critical_jjz]] * cglist[zsum_icga[critical_jjz]] * \
+        #     (ulisttot_r[zsum_u1r[critical_jjz]] * ulisttot_r[zsum_u2i[critical_jjz]]
+        #      - ulisttot_i[zsum_u1i[critical_jjz]] * ulisttot_i[zsum_u2r[critical_jjz]]))
+        #
+        # test =  cglist[zsum_icgb] *   cglist[zsum_icga] * \
+        #     (ulisttot_r[zsum_u1r] * ulisttot_r[zsum_u2r]
+        #      - ulisttot_i[zsum_u1i] * ulisttot_i[zsum_u2i])
+        #
+        # test_zlist_r[zsum_jjz] += \
         #     cglist[zsum_icgb] * \
         #     cglist[zsum_icga] * \
         #     (ulisttot_r[zsum_u1r] * ulisttot_r[zsum_u2r]
         #      - ulisttot_i[zsum_u1i] * ulisttot_i[zsum_u2i])
-        #
-        # zlist_i[zsum_jjz] += \
-        #     cglist[zsum_icgb] * \
-        #     cglist[zsum_icga] * \
-        #       (ulisttot_r[zsum_u1r] * ulisttot_i[zsum_u2i]
-        #      - ulisttot_i[zsum_u1i] * ulisttot_r[zsum_u2r])
+
+
+        print("test")
+
+
+
+        zlist_r[zsum_jjz] += \
+            cglist[zsum_icgb] * \
+            cglist[zsum_icga] * \
+            (ulisttot_r[zsum_u1r] * ulisttot_r[zsum_u2r]
+             - ulisttot_i[zsum_u1i] * ulisttot_i[zsum_u2i])
+
+        zlist_i[zsum_jjz] += \
+            cglist[zsum_icgb] * \
+            cglist[zsum_icga] * \
+              (ulisttot_r[zsum_u1r] * ulisttot_i[zsum_u2i]
+             + ulisttot_i[zsum_u1i] * ulisttot_r[zsum_u2r])
 
         # for jjz in range(idxz_max):
         #     j1 = zindices_j1[jjz]
