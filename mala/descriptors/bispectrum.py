@@ -14,7 +14,6 @@ try:
 except ModuleNotFoundError:
     pass
 import numpy as np
-from numba import jit
 from scipy.spatial import distance
 
 from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
@@ -221,7 +220,7 @@ class Bispectrum(Descriptor):
 
         t0 = time.time()
         self.__init_index_arrays()
-        print("Init index arrays", time.time()-t0)
+        # print("Init index arrays", time.time()-t0)
         for x in range(0, self.grid_dimensions[0]):
             for y in range(0, self.grid_dimensions[1]):
                 for z in range(0, self.grid_dimensions[2]):
@@ -240,7 +239,7 @@ class Bispectrum(Descriptor):
                     distances_cutoff = np.squeeze(np.abs(distances[np.argwhere(distances < self.parameters.bispectrum_cutoff)]))
                     atoms_cutoff = np.squeeze(all_atoms[np.argwhere(distances < self.parameters.bispectrum_cutoff), :])
                     nr_atoms = np.shape(atoms_cutoff)[0]
-                    print("Distances", time.time() - t0)
+                    # print("Distances", time.time() - t0)
 
                     printer = False
                     if x == 0 and y == 0 and z == 1:
@@ -257,19 +256,19 @@ class Bispectrum(Descriptor):
                                           distances_cutoff,
                                           distances_squared_cutoff, bispectrum_np[x,y,z,0:3],
                                           printer)
-                    print("Compute ui", time.time() - t0)
+                    # print("Compute ui", time.time() - t0)
 
                     t0 = time.time()
                     # zlist_r, zlist_i = \
                     #     self.__compute_zi(ulisttot_r, ulisttot_i, printer)
                     zlist_r, zlist_i = \
                         self.__compute_zi_fast(ulisttot_r, ulisttot_i)
-                    print("Compute zi", time.time() - t0)
+                    # print("Compute zi", time.time() - t0)
 
                     t0 = time.time()
                     blist = \
                         self.__compute_bi(ulisttot_r, ulisttot_i, zlist_r, zlist_i, printer)
-                    print("Compute bi", time.time() - t0)
+                    # print("Compute bi", time.time() - t0)
 
                     # This will basically never be used. We don't really
                     # need to optimize it for now.
@@ -284,13 +283,13 @@ class Bispectrum(Descriptor):
                                                                      blist[
                                                                          jcoeff]
                                 ncount += 1
-                    print("Per grid point", time.time()-t00)
+                    # print("Per grid point", time.time()-t00)
                     bispectrum_np[x, y, z, 3:] = blist
-                    if x == 0 and y == 0 and z == 1:
-                        print(bispectrum_np[x, y, z, :])
-                    if x == 0 and y == 0 and z == 2:
-                        print(bispectrum_np[x, y, z, :])
-                        exit()
+                    # if x == 0 and y == 0 and z == 1:
+                    #     print(bispectrum_np[x, y, z, :])
+                    # if x == 0 and y == 0 and z == 2:
+                    #     print(bispectrum_np[x, y, z, :])
+                    #     exit()
                     # if x == 0 and y == 0 and z == 1:
                     #     for i in range(0, 94):
                     #         print(bispectrum_np[x, y, z, i])
@@ -350,8 +349,121 @@ class Bispectrum(Descriptor):
                            self.parameters.bispectrum_twojmax + 1):
                 self.rootpqarray[p, q] = np.sqrt(p / q)
 
+        idxz_count = 0
+        for j1 in range(self.parameters.bispectrum_twojmax + 1):
+            for j2 in range(j1 + 1):
+                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
+                                            j1 + j2) + 1, 2):
+                    for mb in range(j // 2 + 1):
+                        for ma in range(j + 1):
+                            idxz_count += 1
+        self.idxz_max = idxz_count
+        self.idxz = []
+        for z in range(self.idxz_max):
+            self.idxz.append(self.ZIndices())
+        self.idxz_block = np.zeros((self.parameters.bispectrum_twojmax + 1,
+                                    self.parameters.bispectrum_twojmax + 1,
+                                    self.parameters.bispectrum_twojmax + 1))
+
+        idxz_count = 0
+        self.zindices_j1 = []
+        self.zindices_j2 = []
+        self.zindices_j = []
+        self.zindices_ma1min = []
+        self.zindices_ma2max = []
+        self.zindices_mb1min = []
+        self.zindices_mb2max = []
+        self.zindices_na = []
+        self.zindices_nb = []
+        self.zindices_jju = []
+        for j1 in range(self.parameters.bispectrum_twojmax + 1):
+            for j2 in range(j1 + 1):
+                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
+                                            j1 + j2) + 1, 2):
+                    self.idxz_block[j1][j2][j] = idxz_count
+
+                    for mb in range(j // 2 + 1):
+                        for ma in range(j + 1):
+                            self.idxz[idxz_count].j1 = j1
+                            self.idxz[idxz_count].j2 = j2
+                            self.idxz[idxz_count].j = j
+                            self.idxz[idxz_count].ma1min = max(0, (
+                                        2 * ma - j - j2 + j1) // 2)
+                            self.idxz[idxz_count].ma2max = (2 * ma - j - (2 * self.idxz[
+                                idxz_count].ma1min - j1) + j2) // 2
+                            self.idxz[idxz_count].na = min(j1, (
+                                        2 * ma - j + j2 + j1) // 2) - self.idxz[
+                                                      idxz_count].ma1min + 1
+                            self.idxz[idxz_count].mb1min = max(0, (
+                                        2 * mb - j - j2 + j1) // 2)
+                            self.idxz[idxz_count].mb2max = (2 * mb - j - (2 * self.idxz[
+                                idxz_count].mb1min - j1) + j2) // 2
+                            self.idxz[idxz_count].nb = min(j1, (
+                                        2 * mb - j + j2 + j1) // 2) - self.idxz[
+                                                      idxz_count].mb1min + 1
+
+                            jju = self.idxu_block[j] + (j + 1) * mb + ma
+                            self.idxz[idxz_count].jju = jju
+
+                            idxz_count += 1
+
+        self.idxcg_block = np.zeros((self.parameters.bispectrum_twojmax + 1,
+                                     self.parameters.bispectrum_twojmax + 1,
+                                     self.parameters.bispectrum_twojmax + 1))
+        idxcg_count = 0
+        for j1 in range(self.parameters.bispectrum_twojmax + 1):
+            for j2 in range(j1 + 1):
+                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
+                                            j1 + j2) + 1, 2):
+                    self.idxcg_block[j1][j2][j] = idxcg_count
+                    for m1 in range(j1 + 1):
+                        for m2 in range(j2 + 1):
+                            idxcg_count += 1
+        self.idxcg_max = idxcg_count
+        self.cglist = np.zeros(self.idxcg_max)
+
+        idxcg_count = 0
+        for j1 in range(self.parameters.bispectrum_twojmax + 1):
+            for j2 in range(j1 + 1):
+                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
+                                            j1 + j2) + 1, 2):
+                    for m1 in range(j1 + 1):
+                        aa2 = 2 * m1 - j1
+                        for m2 in range(j2 + 1):
+                            bb2 = 2 * m2 - j2
+                            m = (aa2 + bb2 + j) // 2
+                            if m < 0 or m > j:
+                                self.cglist[idxcg_count] = 0.0
+                                idxcg_count += 1
+                                continue
+                            cgsum = 0.0
+                            for z in range(max(0, max(-(j - j2 + aa2) // 2,
+                                                      -(j - j1 - bb2) // 2)),
+                                           min((j1 + j2 - j) // 2,
+                                               min((j1 - aa2) // 2,
+                                                   (j2 + bb2) // 2)) + 1):
+                                ifac = -1 if z % 2 else 1
+                                cgsum += ifac / (np.math.factorial(z) * np.math.factorial(
+                                    (j1 + j2 - j) // 2 - z) * np.math.factorial(
+                                    (j1 - aa2) // 2 - z) * np.math.factorial(
+                                    (j2 + bb2) // 2 - z) * np.math.factorial(
+                                    (j - j2 + aa2) // 2 + z) * np.math.factorial(
+                                    (j - j1 - bb2) // 2 + z))
+                            cc2 = 2 * m - j
+                            dcg = deltacg(j1, j2, j)
+                            sfaccg = np.sqrt(
+                                np.math.factorial((j1 + aa2) // 2) * np.math.factorial(
+                                    (j1 - aa2) // 2) * np.math.factorial(
+                                    (j2 + bb2) // 2) * np.math.factorial(
+                                    (j2 - bb2) // 2) * np.math.factorial(
+                                    (j + cc2) // 2) * np.math.factorial(
+                                    (j - cc2) // 2) * (j + 1))
+                            self.cglist[idxcg_count] = cgsum * dcg * sfaccg
+                            idxcg_count += 1
+
+        # BEGINNING OF UI/ZI OPTIMIZATION BLOCK!
         # Everthing in this block is EXCLUSIVELY for the
-        # optimization of compute_ui!
+        # optimization of compute_ui and compute_zi!
         # Declaring indices over which to perform vector operations speeds
         # things up significantly - it is not memory-sparse, but this is
         # not a big concern for the python implementation which is only
@@ -409,163 +521,6 @@ class Bispectrum(Descriptor):
         self.all_jjup = np.array(self.all_jjup)
         self.all_rootpq_1 = np.array(self.all_rootpq_1)
         self.all_rootpq_2 = np.array(self.all_rootpq_2)
-        # END OF UI OPTIMIZATION BLOCK!
-
-
-        idxz_count = 0
-        for j1 in range(self.parameters.bispectrum_twojmax + 1):
-            for j2 in range(j1 + 1):
-                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
-                                            j1 + j2) + 1, 2):
-                    for mb in range(j // 2 + 1):
-                        for ma in range(j + 1):
-                            idxz_count += 1
-        self.idxz_max = idxz_count
-        self.idxz = []
-        for z in range(self.idxz_max):
-            self.idxz.append(self.ZIndices())
-        self.idxz_block = np.zeros((self.parameters.bispectrum_twojmax + 1,
-                                    self.parameters.bispectrum_twojmax + 1,
-                                    self.parameters.bispectrum_twojmax + 1))
-
-        idxz_count = 0
-        self.zindices_j1 = []
-        self.zindices_j2 = []
-        self.zindices_j = []
-        self.zindices_ma1min = []
-        self.zindices_ma2max = []
-        self.zindices_mb1min = []
-        self.zindices_mb2max = []
-        self.zindices_na = []
-        self.zindices_nb = []
-        self.zindices_jju = []
-        for j1 in range(self.parameters.bispectrum_twojmax + 1):
-            for j2 in range(j1 + 1):
-                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
-                                            j1 + j2) + 1, 2):
-                    self.idxz_block[j1][j2][j] = idxz_count
-
-                    for mb in range(j // 2 + 1):
-                        for ma in range(j + 1):
-                            self.idxz[idxz_count].j1 = j1
-                            self.idxz[idxz_count].j2 = j2
-                            self.idxz[idxz_count].j = j
-                            self.idxz[idxz_count].ma1min = max(0, (
-                                        2 * ma - j - j2 + j1) // 2)
-                            self.idxz[idxz_count].ma2max = (2 * ma - j - (2 * self.idxz[
-                                idxz_count].ma1min - j1) + j2) // 2
-                            self.idxz[idxz_count].na = min(j1, (
-                                        2 * ma - j + j2 + j1) // 2) - self.idxz[
-                                                      idxz_count].ma1min + 1
-                            self.idxz[idxz_count].mb1min = max(0, (
-                                        2 * mb - j - j2 + j1) // 2)
-                            self.idxz[idxz_count].mb2max = (2 * mb - j - (2 * self.idxz[
-                                idxz_count].mb1min - j1) + j2) // 2
-                            self.idxz[idxz_count].nb = min(j1, (
-                                        2 * mb - j + j2 + j1) // 2) - self.idxz[
-                                                      idxz_count].mb1min + 1
-
-                            jju = self.idxu_block[j] + (j + 1) * mb + ma
-                            self.idxz[idxz_count].jju = jju
-                            self.zindices_j1.append(self.idxz[idxz_count].j1)
-                            self.zindices_j2.append(self.idxz[idxz_count].j2)
-                            self.zindices_j.append(self.idxz[idxz_count].j)
-                            self.zindices_ma1min.append(self.idxz[idxz_count].ma1min)
-                            self.zindices_ma2max.append(self.idxz[idxz_count].ma2max)
-                            self.zindices_mb1min.append(self.idxz[idxz_count].mb1min)
-                            self.zindices_mb2max.append(self.idxz[idxz_count].mb2max)
-                            self.zindices_na.append(self.idxz[idxz_count].na)
-                            self.zindices_nb.append(self.idxz[idxz_count].nb)
-                            self.zindices_jju.append(self.idxz[idxz_count].jju)
-
-                            idxz_count += 1
-
-        # self.zsum_ma1 = []
-        # self.zsum_ma2 = []
-        # self.zsum_icga = []
-        # for jjz in range(self.idxz_max):
-        #     tmp_z_rsum_indices = []
-        #     tmp_z_isum_indices = []
-        #     tmp_icga_sum_indices = []
-        #     for ib in range(self.idxz[jjz].nb):
-        #         ma1 = self.idxz[jjz].ma1min
-        #         ma2 = self.idxz[jjz].ma2max
-        #         icga = self.idxz[jjz].ma1min * (self.idxz[jjz].j2 + 1) + \
-        #                self.idxz[jjz].ma2max
-        #         tmp2_z_rsum_indices = []
-        #         tmp2_z_isum_indices = []
-        #         tmp2_icga_sum_indices = []
-        #         for ia in range(self.idxz[jjz].na):
-        #             tmp2_z_rsum_indices.append(ma1)
-        #             tmp2_z_isum_indices.append(ma2)
-        #             tmp2_icga_sum_indices.append(icga)
-        #             ma1 += 1
-        #             ma2 -= 1
-        #             icga += self.idxz[jjz].j2
-        #         tmp_z_rsum_indices.append(tmp2_z_rsum_indices)
-        #         tmp_z_isum_indices.append(tmp2_z_isum_indices)
-        #         tmp_icga_sum_indices.append(tmp2_icga_sum_indices)
-        #     self.zsum_ma1.append(np.array(tmp_z_rsum_indices))
-        #     self.zsum_ma2.append(np.array(tmp_z_isum_indices))
-        #     self.zsum_icga.append(np.array(tmp_icga_sum_indices))
-        # self.zsum_ma1 = self.zsum_ma1
-        # self.zsum_ma2 = self.zsum_ma2
-        # self.zsum_icga = self.zsum_icga
-
-        self.idxcg_block = np.zeros((self.parameters.bispectrum_twojmax + 1,
-                                     self.parameters.bispectrum_twojmax + 1,
-                                     self.parameters.bispectrum_twojmax + 1))
-        idxcg_count = 0
-        for j1 in range(self.parameters.bispectrum_twojmax + 1):
-            for j2 in range(j1 + 1):
-                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
-                                            j1 + j2) + 1, 2):
-                    self.idxcg_block[j1][j2][j] = idxcg_count
-                    for m1 in range(j1 + 1):
-                        for m2 in range(j2 + 1):
-                            idxcg_count += 1
-        self.idxcg_max = idxcg_count
-        self.cglist = np.zeros(self.idxcg_max)
-
-        idxcg_count = 0
-        for j1 in range(self.parameters.bispectrum_twojmax + 1):
-            for j2 in range(j1 + 1):
-                for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
-                                            j1 + j2) + 1, 2):
-                    for m1 in range(j1 + 1):
-                        aa2 = 2 * m1 - j1
-                        for m2 in range(j2 + 1):
-                            bb2 = 2 * m2 - j2
-                            m = (aa2 + bb2 + j) // 2
-                            if m < 0 or m > j:
-                                self.cglist[idxcg_count] = 0.0
-                                idxcg_count += 1
-                                continue
-                            cgsum = 0.0
-                            for z in range(max(0, max(-(j - j2 + aa2) // 2,
-                                                      -(j - j1 - bb2) // 2)),
-                                           min((j1 + j2 - j) // 2,
-                                               min((j1 - aa2) // 2,
-                                                   (j2 + bb2) // 2)) + 1):
-                                ifac = -1 if z % 2 else 1
-                                cgsum += ifac / (np.math.factorial(z) * np.math.factorial(
-                                    (j1 + j2 - j) // 2 - z) * np.math.factorial(
-                                    (j1 - aa2) // 2 - z) * np.math.factorial(
-                                    (j2 + bb2) // 2 - z) * np.math.factorial(
-                                    (j - j2 + aa2) // 2 + z) * np.math.factorial(
-                                    (j - j1 - bb2) // 2 + z))
-                            cc2 = 2 * m - j
-                            dcg = deltacg(j1, j2, j)
-                            sfaccg = np.sqrt(
-                                np.math.factorial((j1 + aa2) // 2) * np.math.factorial(
-                                    (j1 - aa2) // 2) * np.math.factorial(
-                                    (j2 + bb2) // 2) * np.math.factorial(
-                                    (j2 - bb2) // 2) * np.math.factorial(
-                                    (j + cc2) // 2) * np.math.factorial(
-                                    (j - cc2) // 2) * (j + 1))
-                            self.cglist[idxcg_count] = cgsum * dcg * sfaccg
-                            idxcg_count += 1
-
 
         self.zsum_u1r = []
         self.zsum_u1i = []
@@ -615,6 +570,8 @@ class Bispectrum(Descriptor):
         self.zsum_icga = np.array(self.zsum_icga)
         self.zsum_icgb = np.array(self.zsum_icgb)
         self.zsum_jjz = np.array(self.zsum_jjz)
+
+        # END OF UI/ZI OPTIMIZATION BLOCK!
 
 
         idxb_count = 0
@@ -744,7 +701,6 @@ class Bispectrum(Descriptor):
             ulisttot_i[jju] += np.sum(sfac * ulist_i_ij[:, jju])
 
         return ulisttot_r, ulisttot_i
-
 
     def __compute_ui(self, nr_atoms, atoms_cutoff, distances_cutoff,
                      distances_squared_cutoff, grid, printer=False):
