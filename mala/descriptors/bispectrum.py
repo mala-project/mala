@@ -905,11 +905,11 @@ class Bispectrum(Descriptor):
         number_element_pairs = number_elements*number_elements
         zlist_r = np.zeros((number_element_pairs*idxz_max))
         zlist_i = np.zeros((number_element_pairs*idxz_max))
-        test_zlist_r = np.zeros((number_element_pairs*idxz_max))
-        test_zlist_i = np.zeros((number_element_pairs*idxz_max))
-
-        critical_jjz = 1
-
+        # test_zlist_r = np.zeros((number_element_pairs*idxz_max))
+        # test_zlist_i = np.zeros((number_element_pairs*idxz_max))
+        #
+        # critical_jjz = 3
+        #
         # for jjz_counting in range(np.shape(zsum_jjz)[0]):
         #
         #     zlist_r[zsum_jjz[jjz_counting]] += \
@@ -924,7 +924,7 @@ class Bispectrum(Descriptor):
         #           (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_i[zsum_u2i[jjz_counting]]
         #          + ulisttot_i[zsum_u1i[jjz_counting]] * ulisttot_r[zsum_u2r[jjz_counting]])
         #
-        #     if zsum_jjz[jjz_counting] == critical_jjz:
+        #     if jjz_counting == critical_jjz:
         #         print("NEW", cglist[zsum_icgb[jjz_counting]],
         #               cglist[zsum_icga[jjz_counting]] * \
         #               (ulisttot_r[zsum_u1r[jjz_counting]] * ulisttot_r[
@@ -939,35 +939,55 @@ class Bispectrum(Descriptor):
         #
         #               )
         # print(cglist[zsum_icgb[critical_jjz]] * cglist[zsum_icga[critical_jjz]] * \
-        #     (ulisttot_r[zsum_u1r[critical_jjz]] * ulisttot_r[zsum_u2i[critical_jjz]]
-        #      - ulisttot_i[zsum_u1i[critical_jjz]] * ulisttot_i[zsum_u2r[critical_jjz]]))
+        #     (ulisttot_r[zsum_u1r[critical_jjz]] * ulisttot_r[zsum_u2r[critical_jjz]]
+        #      - ulisttot_i[zsum_u1i[critical_jjz]] * ulisttot_i[zsum_u2i[critical_jjz]]))
         #
-        # test =  cglist[zsum_icgb] *   cglist[zsum_icga] * \
-        #     (ulisttot_r[zsum_u1r] * ulisttot_r[zsum_u2r]
-        #      - ulisttot_i[zsum_u1i] * ulisttot_i[zsum_u2i])
-        #
+        test =  cglist[zsum_icgb] *   cglist[zsum_icga] * \
+            (ulisttot_r[zsum_u1r] * ulisttot_r[zsum_u2r]
+             - ulisttot_i[zsum_u1i] * ulisttot_i[zsum_u2i])
+
+        tmp_real = cglist[zsum_icgb] * \
+            cglist[zsum_icga] * \
+            (ulisttot_r[zsum_u1r] * ulisttot_r[zsum_u2r]
+             - ulisttot_i[zsum_u1i] * ulisttot_i[zsum_u2i])
+        tmp_imag = cglist[zsum_icgb] * \
+                    cglist[zsum_icga] * \
+                      (ulisttot_r[zsum_u1r] * ulisttot_i[zsum_u2i]
+                     + ulisttot_i[zsum_u1i] * ulisttot_r[zsum_u2r])
+
+        _, idx, _ = np.unique(zsum_jjz, return_counts=True,
+                              return_inverse=True)
+        zlist_r = np.bincount(idx,
+                                   tmp_real)  # Same shape and type as your version
+        _, idx, _ = np.unique(zsum_jjz, return_counts=True,
+                              return_inverse=True)
+        zlist_i = np.bincount(idx,
+                                   tmp_imag)  # Same shape and type as your version
+
+        # for jjz in range(idxz_max):
+        #     zlist_r[jjz] = np.sum(tmp_real[zsum_jjz == jjz])
+        #     zlist_i[jjz] = np.sum(tmp_imag[zsum_jjz == jjz])
+
+        # print("ZERO?", np.mean(temp_zlist_r-zlist_r))
+        # print("ZERO?", np.mean(temp_zlist_i-zlist_i))
+        # print("test")
+
+
+
         # test_zlist_r[zsum_jjz] += \
         #     cglist[zsum_icgb] * \
         #     cglist[zsum_icga] * \
         #     (ulisttot_r[zsum_u1r] * ulisttot_r[zsum_u2r]
         #      - ulisttot_i[zsum_u1i] * ulisttot_i[zsum_u2i])
+        #
+        # test_zlist_i[zsum_jjz] += \
+        #     cglist[zsum_icgb] * \
+        #     cglist[zsum_icga] * \
+        #       (ulisttot_r[zsum_u1r] * ulisttot_i[zsum_u2i]
+        #      + ulisttot_i[zsum_u1i] * ulisttot_r[zsum_u2r])
 
-
-        print("test")
-
-
-
-        zlist_r[zsum_jjz] += \
-            cglist[zsum_icgb] * \
-            cglist[zsum_icga] * \
-            (ulisttot_r[zsum_u1r] * ulisttot_r[zsum_u2r]
-             - ulisttot_i[zsum_u1i] * ulisttot_i[zsum_u2i])
-
-        zlist_i[zsum_jjz] += \
-            cglist[zsum_icgb] * \
-            cglist[zsum_icga] * \
-              (ulisttot_r[zsum_u1r] * ulisttot_i[zsum_u2i]
-             + ulisttot_i[zsum_u1i] * ulisttot_r[zsum_u2r])
+        # print("REAL ZERO",np.mean(test_zlist_r-zlist_r))
+        # print("IMAGINARY ZERO",np.mean(test_zlist_i-zlist_i))
 
         # for jjz in range(idxz_max):
         #     j1 = zindices_j1[jjz]
