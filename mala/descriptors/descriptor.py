@@ -739,11 +739,13 @@ class Descriptor(PhysicalData):
         return lmp
 
     def _setup_atom_list(self):
-        # Set up a list of all atoms that may be relevant for descriptor
-        # calculation.
-        # If periodic boundary conditions are used, which is usually the case
-        # for MALA simulation, one has to compute descriptors by also
-        # incorporating atoms from neighboring cells.
+        """
+        Set up a list of atoms potentially relevant for descriptor calculation.
+
+        If periodic boundary conditions are used, which is usually the case
+        for MALA simulation, one has to compute descriptors by also
+        incorporating atoms from neighboring cells.
+        """
         if np.any(self.atoms.pbc):
 
             # To determine the list of relevant atoms we first take the edges

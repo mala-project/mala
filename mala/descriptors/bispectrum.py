@@ -35,18 +35,18 @@ class Bispectrum(Descriptor):
         # Index arrays needed only when computing the bispectrum descriptors
         # via python.
         # They are later filled in the __init_index_arrays() function.
-        self.__idxu_block = None
-        self.__idxu_max = None
+        self.__index_u_block = None
+        self.__index_u_max = None
         self.__cglist = None
-        self.__idxu_init_pairs = None
-        self.__all_jju = None
-        self.__all_pos_jju = None
-        self.__all_neg_jju = None
-        self.__all_jjup = None
-        self.__all_pos_jjup = None
-        self.__all_neg_jjup = None
-        self.__all_rootpq_1 = None
-        self.__all_rootpq_2 = None
+        self.__index_u_one_initialized = None
+        self.__index_u_full = None
+        self.__index_u_symmetry_pos = None
+        self.__index_u_symmetry_neg = None
+        self.__index_u1_full = None
+        self.__index_u1_symmetry_pos = None
+        self.__index_u1_symmetry_neg = None
+        self.__rootpq_full_1 = None
+        self.__rootpq_full_2 = None
         self.__zsum_u1r = None
         self.__zsum_u1i = None
         self.__zsum_u2r = None
@@ -125,7 +125,12 @@ class Bispectrum(Descriptor):
             return self.__calculate_python(**kwargs)
 
     def __calculate_lammps(self, outdir, **kwargs):
-        """Perform actual bispectrum calculation."""
+        """
+        Perform bispectrum calculation using LAMMPS.
+
+        Creates a LAMMPS instance with appropriate call parameters and uses
+        it for the calculation.
+        """
         use_fp64 = kwargs.get("use_fp64", False)
 
         lammps_format = "lammps-data"
@@ -218,7 +223,37 @@ class Bispectrum(Descriptor):
                 return snap_descriptors_np[:, :, :, 3:], nx*ny*nz
 
     def __calculate_python(self, **kwargs):
-        import time
+        """
+        Perform bispectrum calculation using python.
+
+        The code used to this end was adapted from the LAMMPS implementation.
+        It serves as a fallback option whereever LAMMPS is not available.
+        This may be useful, e.g., to students or people getting started with
+        MALA who just want to look around. It is not intended for production
+        calculations.
+        Compared to the LAMMPS implementation, this implementation has quite a
+        few limitations. Namely
+
+            - it only runs in serial
+            - it is roughly an order of magnitude slower for small systems
+              and doesn't scale too great (more information on the optimization
+              below)
+
+        Some option are hardcoded in the same manner the LAMMPS implementation
+        hard codes them. Compared to the LAMMPS implementation, some
+        essentially never used options are not maintained/optimized.
+        """
+        # The entire bispectrum calculation may be extensively profiled.
+        profile_calculation = kwargs.get("profile_calculation", False)
+        if profile_calculation:
+            import time
+            timing_distances = 0
+            timing_ui = 0
+            timing_zi = 0
+            timing_bi = 0
+            timing_gridpoints = 0
+
+        # Set up the array holding the bispectrum descriptors.
         ncoeff = (self.parameters.bispectrum_twojmax + 2) * \
                  (self.parameters.bispectrum_twojmax + 3) * \
                  (self.parameters.bispectrum_twojmax + 4)
@@ -229,9 +264,8 @@ class Bispectrum(Descriptor):
                                   self.grid_dimensions[2],
                                   self.fingerprint_length),
                                  dtype=np.float64)
-        cutoff_squared = self.parameters.bispectrum_cutoff * \
-            self.parameters.bispectrum_cutoff
 
+        # Create a list of all potentially relevant atoms.
         all_atoms = self._setup_atom_list()
 
         # These are technically hyperparameters. We currently simply set them
@@ -240,25 +274,80 @@ class Bispectrum(Descriptor):
         self.rfac0 = 0.99363
         self.bzero_flag = False
         self.wselfall_flag = False
-        # Currently not working if True
+        # Currently not supported
         self.bnorm_flag = False
+        # Currently not supported
         self.quadraticflag = False
         self.number_elements = 1
         self.wself = 1.0
 
-        t0 = time.time()
+        # What follows is the python implementation of the
+        # bispectrum descriptor calculation.
+        #
+        # It was developed by first copying the code directly and
+        # then optimizing it just enough to be usable. LAMMPS is
+        # written in C++, and as such, many for-loops which are
+        # optimized by the compiler can be employed. This is
+        # drastically inefficient in python, so functions were
+        # rewritten to use optimized vector-operations
+        # (e.g. via numpy) where possible. This requires the
+        # precomputation of quite a few index arrays. Thus,
+        # this implementation is memory-intensive, which should
+        # not be a problem given the intended use.
+        #
+        # There is still quite some optimization potential here.
+        # I have decided to not optimized this code further just
+        # now, since we do not know yet whether the bispectrum
+        # descriptors will be used indefinitely, or if, e.g.
+        # other types of neural networks will be used.
+        # The implementation here is fast enough to be used for
+        # tests of small test systems during development,
+        # which is the sole purpose. If we eventually decide to
+        # stick with bispectrum descriptors and feed-forward
+        # neural networks, this code can be further optimized and
+        # refined. I will leave some guidance below on what to
+        # try/what has already been done, should someone else
+        # want to give it a try.
+        #
+        # Final note: if we want to ship MALA with its own
+        # bispectrum descriptor calculation to be used at scale,
+        # the best way would potentially be via self-maintained
+        # C++-functions.
+
+        ########
+        # Initialize index arrays.
+        #
+        # This function initializes a couple of lists of indices for
+        # matrix multiplication/summation. By doing so, nested for-loops
+        # can be avoided.
+        ########
+
+        if profile_calculation:
+            t_begin = time.time()
         self.__init_index_arrays()
-        # print("Init index arrays", time.time()-t0)
+        if profile_calculation:
+            timing_index_init = time.time() - t_begin
+
         for x in range(0, self.grid_dimensions[0]):
             for y in range(0, self.grid_dimensions[1]):
                 for z in range(0, self.grid_dimensions[2]):
-                    # Compute the grid.
+                    # Compute the grid point.
+                    if profile_calculation:
+                        t_grid = time.time()
                     bispectrum_np[x, y, z, 0:3] = \
                         self._grid_to_coord([x, y, z])
 
-                    # Compute the bispectrum descriptors.
-                    t0 = time.time()
-                    t00 = time.time()
+                    ########
+                    # DISTANCE MATRIX CALCULATION
+                    # Here, the distances to all atoms within our
+                    # targeted cutoff are calculated.
+                    #
+                    # FURTHER OPTIMIZATION: probably not that much, this mostly
+                    # already uses optimized python functions.
+                    ########
+
+                    if profile_calculation:
+                        t0 = time.time()
                     distances = np.squeeze(distance.cdist(
                         [bispectrum_np[x, y, z, 0:3]],
                         all_atoms))
@@ -269,36 +358,67 @@ class Bispectrum(Descriptor):
                         all_atoms[np.argwhere(
                             distances < self.parameters.bispectrum_cutoff), :])
                     nr_atoms = np.shape(atoms_cutoff)[0]
-                    # print("Distances", time.time() - t0)
+                    if profile_calculation:
+                        timing_distances += time.time() - t0
 
-                    printer = False
-                    if x == 0 and y == 0 and z == 1:
-                        printer = True
+                    ########
+                    # COMPUTE UI
+                    # This calculates the
+                    #
+                    # FURTHER OPTIMIZATION: probably not that much, this mostly
+                    # already uses optimized python functions.
+                    ########
 
-                    t0 = time.time()
+
+                    if profile_calculation:
+                        t0 = time.time()
                     ulisttot_r, ulisttot_i = \
                         self.__compute_ui(nr_atoms, atoms_cutoff,
                                           distances_cutoff,
                                           bispectrum_np[x, y, z, 0:3])
-                    # print("Compute ui", time.time() - t0)
+                    if profile_calculation:
+                        timing_ui += time.time() - t0
 
-                    t0 = time.time()
-                    # zlist_r, zlist_i = \
-                    #     self.__compute_zi(ulisttot_r, ulisttot_i, printer)
+                    if profile_calculation:
+                        t0 = time.time()
                     zlist_r, zlist_i = \
                         self.__compute_zi(ulisttot_r, ulisttot_i)
-                    # print("Compute zi", time.time() - t0)
+                    if profile_calculation:
+                        timing_zi += time.time() - t0
 
-                    t0 = time.time()
+                    if profile_calculation:
+                        t0 = time.time()
                     bispectrum_np[x, y, z, 3:] = \
                         self.__compute_bi(ulisttot_r, ulisttot_i, zlist_r,
                                           zlist_i, printer)
+                    if profile_calculation:
+                        timing_gridpoints += time.time() - t_grid
+                        timing_bi += time.time() - t0
+
                     # print("Compute bi", time.time() - t0)
                     # print("Per grid point", time.time()-t00)
 
-        return bispectrum_np, np.prod(self.grid_dimensions)
+        if profile_calculation:
+            timing_total = time.time() - t_begin
+            print("Python-based bispectrum descriptor calculation timing: ")
+            print("Index matrix initialization [s]", timing_index_init)
+            print("Overall calculation time [s]", timing_total)
+            print("Calculation time per gridpoint [s/gridpoint]",
+                  timing_gridpoints / np.prod(self.grid_dimensions))
+            print("Timing contributions per gridpoint: ")
+            print("Distance matrix [s/gridpoint]", timing_distances/np.prod(self.grid_dimensions))
+            print("Compute ui [s/gridpoint]", timing_ui/np.prod(self.grid_dimensions))
+            print("Compute zi [s/gridpoint]", timing_zi/np.prod(self.grid_dimensions))
+            print("Compute bi [s/gridpoint]", timing_bi/np.prod(self.grid_dimensions))
 
-    class ZIndices:
+
+        if self.parameters.descriptors_contain_xyz:
+            return bispectrum_np, np.prod(self.grid_dimensions)
+        else:
+            self.fingerprint_length -= 3
+            return bispectrum_np[:, :, :, 3:], np.prod(self.grid_dimensions)
+
+    class _ZIndices:
 
         def __init__(self):
             self.j1 = 0
@@ -312,7 +432,7 @@ class Bispectrum(Descriptor):
             self.nb = 0
             self.jju = 0
 
-    class BIndices:
+    class _BIndices:
 
         def __init__(self):
             self.j1 = 0
@@ -320,20 +440,40 @@ class Bispectrum(Descriptor):
             self.j = 0
 
     def __init_index_arrays(self):
+        """
+        Initialize index arrays.
+
+        This function initializes a couple of lists of indices for
+        matrix multiplication/summation. By doing so, nested for-loops
+        can be avoided.
+
+        FURTHER OPTIMIZATION: This function relies on nested for-loops.
+        They may be optimized. I have not done so, because it is non-trivial
+        in some cases and not really needed. These arrays are the same
+        for each grid point, so the overall overhead is rather small.
+        """
+
+        # Needed for the Clebsch-Gordan product matrices (below)
+
         def deltacg(j1, j2, j):
             sfaccg = np.math.factorial((j1 + j2 + j) // 2 + 1)
             return np.sqrt(np.math.factorial((j1 + j2 - j) // 2) *
                            np.math.factorial((j1 - j2 + j) // 2) *
                            np.math.factorial((-j1 + j2 + j) // 2) / sfaccg)
 
+        ########
+        # Indices for compute_ui.
+        ########
+
+        # First, the ones also used in LAMMPS.
         idxu_count = 0
-        self.__idxu_block = np.zeros(self.parameters.bispectrum_twojmax + 1)
+        self.__index_u_block = np.zeros(self.parameters.bispectrum_twojmax + 1)
         for j in range(0, self.parameters.bispectrum_twojmax + 1):
-            self.__idxu_block[j] = idxu_count
+            self.__index_u_block[j] = idxu_count
             for mb in range(j + 1):
                 for ma in range(j + 1):
                     idxu_count += 1
-        self.__idxu_max = idxu_count
+        self.__index_u_max = idxu_count
 
         rootpqarray = np.zeros((self.parameters.bispectrum_twojmax + 2,
                                 self.parameters.bispectrum_twojmax + 2))
@@ -342,6 +482,66 @@ class Bispectrum(Descriptor):
                            self.parameters.bispectrum_twojmax + 1):
                 rootpqarray[p, q] = np.sqrt(p / q)
 
+        # These are only for optimization purposes.
+        self.__index_u_one_initialized = None
+        for j in range(0, self.parameters.bispectrum_twojmax + 1):
+            stop = self.__index_u_block[j + 1] if j < self.parameters.bispectrum_twojmax else self.__index_u_max
+            if self.__index_u_one_initialized is None:
+                self.__index_u_one_initialized = np.arange(self.__index_u_block[j], stop=stop, step=j + 2)
+            else:
+                self.__index_u_one_initialized = np.concatenate((self.__index_u_one_initialized,
+                                                                 np.arange(self.__index_u_block[j], stop=stop, step=j + 2)))
+        self.__index_u_one_initialized = self.__index_u_one_initialized.astype(np.int32)
+        self.__index_u_full = []
+        self.__index_u_symmetry_pos = []
+        self.__index_u_symmetry_neg = []
+        self.__index_u1_full = []
+        self.__index_u1_symmetry_pos = []
+        self.__index_u1_symmetry_neg = []
+        self.__rootpq_full_1 = []
+        self.__rootpq_full_2 = []
+
+        for j in range(1, self.parameters.bispectrum_twojmax + 1):
+            jju = int(self.__index_u_block[j])
+            jjup = int(self.__index_u_block[j - 1])
+
+            for mb in range(0, j // 2 + 1):
+                for ma in range(0, j):
+                    self.__rootpq_full_1.append(rootpqarray[j - ma][j - mb])
+                    self.__rootpq_full_2.append(rootpqarray[ma + 1][j - mb])
+                    self.__index_u_full.append(jju)
+                    self.__index_u1_full.append(jjup)
+                    jju += 1
+                    jjup += 1
+                jju += 1
+
+            mbpar = 1
+            jju = int(self.__index_u_block[j])
+            jjup = int(jju + (j + 1) * (j + 1) - 1)
+
+            for mb in range(0, j // 2 + 1):
+                mapar = mbpar
+                for ma in range(0, j + 1):
+                    if mapar == 1:
+                        self.__index_u_symmetry_pos.append(jju)
+                        self.__index_u1_symmetry_pos.append(jjup)
+                    else:
+                        self.__index_u_symmetry_neg.append(jju)
+                        self.__index_u1_symmetry_neg.append(jjup)
+                    mapar = -mapar
+                    jju += 1
+                    jjup -= 1
+                mbpar = -mbpar
+
+        self.__index_u1_full = np.array(self.__index_u1_full)
+        self.__rootpq_full_1 = np.array(self.__rootpq_full_1)
+        self.__rootpq_full_2 = np.array(self.__rootpq_full_2)
+
+        ########
+        # Indices for compute_zi.
+        ########
+
+        # First, the ones also used in LAMMPS.
         idxz_count = 0
         for j1 in range(self.parameters.bispectrum_twojmax + 1):
             for j2 in range(j1 + 1):
@@ -353,7 +553,7 @@ class Bispectrum(Descriptor):
         idxz_max = idxz_count
         idxz = []
         for z in range(idxz_max):
-            idxz.append(self.ZIndices())
+            idxz.append(self._ZIndices())
         self.__idxz_block = np.zeros((self.parameters.bispectrum_twojmax + 1,
                                       self.parameters.bispectrum_twojmax + 1,
                                       self.parameters.bispectrum_twojmax + 1))
@@ -385,7 +585,7 @@ class Bispectrum(Descriptor):
                                         2 * mb - j + j2 + j1) // 2) - idxz[
                                                       idxz_count].mb1min + 1
 
-                            jju = self.__idxu_block[j] + (j + 1) * mb + ma
+                            jju = self.__index_u_block[j] + (j + 1) * mb + ma
                             idxz[idxz_count].jju = jju
 
                             idxz_count += 1
@@ -443,67 +643,7 @@ class Bispectrum(Descriptor):
                             self.__cglist[idxcg_count] = cgsum * dcg * sfaccg
                             idxcg_count += 1
 
-        # BEGINNING OF UI/ZI OPTIMIZATION BLOCK!
-        # Everthing in this block is EXCLUSIVELY for the
-        # optimization of compute_ui and compute_zi!
-        # Declaring indices over which to perform vector operations speeds
-        # things up significantly - it is not memory-sparse, but this is
-        # not a big concern for the python implementation which is only
-        # used for small systems anyway.
-        self.__idxu_init_pairs = None
-        for j in range(0, self.parameters.bispectrum_twojmax + 1):
-            stop = self.__idxu_block[j + 1] if j < self.parameters.bispectrum_twojmax else self.__idxu_max
-            if self.__idxu_init_pairs is None:
-                self.__idxu_init_pairs = np.arange(self.__idxu_block[j], stop=stop, step=j + 2)
-            else:
-                self.__idxu_init_pairs = np.concatenate((self.__idxu_init_pairs,
-                                                         np.arange(self.__idxu_block[j], stop=stop, step=j + 2)))
-        self.__idxu_init_pairs = self.__idxu_init_pairs.astype(np.int32)
-        self.__all_jju = []
-        self.__all_pos_jju = []
-        self.__all_neg_jju = []
-        self.__all_jjup = []
-        self.__all_pos_jjup = []
-        self.__all_neg_jjup = []
-        self.__all_rootpq_1 = []
-        self.__all_rootpq_2 = []
-
-        for j in range(1, self.parameters.bispectrum_twojmax + 1):
-            jju = int(self.__idxu_block[j])
-            jjup = int(self.__idxu_block[j - 1])
-
-            for mb in range(0, j // 2 + 1):
-                for ma in range(0, j):
-                    self.__all_rootpq_1.append(rootpqarray[j - ma][j - mb])
-                    self.__all_rootpq_2.append(rootpqarray[ma + 1][j - mb])
-                    self.__all_jju.append(jju)
-                    self.__all_jjup.append(jjup)
-                    jju += 1
-                    jjup += 1
-                jju += 1
-
-            mbpar = 1
-            jju = int(self.__idxu_block[j])
-            jjup = int(jju + (j + 1) * (j + 1) - 1)
-
-            for mb in range(0, j // 2 + 1):
-                mapar = mbpar
-                for ma in range(0, j + 1):
-                    if mapar == 1:
-                        self.__all_pos_jju.append(jju)
-                        self.__all_pos_jjup.append(jjup)
-                    else:
-                        self.__all_neg_jju.append(jju)
-                        self.__all_neg_jjup.append(jjup)
-                    mapar = -mapar
-                    jju += 1
-                    jjup -= 1
-                mbpar = -mbpar
-
-        self.__all_jjup = np.array(self.__all_jjup)
-        self.__all_rootpq_1 = np.array(self.__all_rootpq_1)
-        self.__all_rootpq_2 = np.array(self.__all_rootpq_2)
-
+        # These are only for optimization purposes.
         self.__zsum_u1r = []
         self.__zsum_u1i = []
         self.__zsum_u2r = []
@@ -521,8 +661,8 @@ class Bispectrum(Descriptor):
             mb1min = idxz[jjz].mb1min
             mb2max = idxz[jjz].mb2max
             nb = idxz[jjz].nb
-            jju1 = int(self.__idxu_block[j1] + (j1 + 1) * mb1min)
-            jju2 = int(self.__idxu_block[j2] + (j2 + 1) * mb2max)
+            jju1 = int(self.__index_u_block[j1] + (j1 + 1) * mb1min)
+            jju2 = int(self.__index_u_block[j2] + (j2 + 1) * mb2max)
 
             icgb = mb1min * (j2 + 1) + mb2max
             for ib in range(nb):
@@ -552,9 +692,11 @@ class Bispectrum(Descriptor):
         self.__zsum_icgb = np.array(self.__zsum_icgb)
         self.__zsum_jjz = np.array(self.__zsum_jjz)
 
-        # END OF UI/ZI OPTIMIZATION BLOCK!
+        ########
+        # Indices for compute_bi.
+        ########
 
-
+        # These are identical to LAMMPS, because we do not optimize compute_bi.
         idxb_count = 0
         for j1 in range(self.parameters.bispectrum_twojmax + 1):
             for j2 in range(j1 + 1):
@@ -565,7 +707,7 @@ class Bispectrum(Descriptor):
         self.__idxb_max = idxb_count
         self.__idxb = []
         for b in range(self.__idxb_max):
-            self.__idxb.append(self.BIndices())
+            self.__idxb.append(self._BIndices())
 
         idxb_count = 0
         for j1 in range(self.parameters.bispectrum_twojmax + 1):
@@ -583,13 +725,13 @@ class Bispectrum(Descriptor):
                     self.parameters.bispectrum_cutoff - self.rmin0)
         z0 = np.squeeze(distances_cutoff / np.tan(theta0))
 
-        ulist_r_ij = np.zeros((nr_atoms, self.__idxu_max), dtype=np.float64)
+        ulist_r_ij = np.zeros((nr_atoms, self.__index_u_max), dtype=np.float64)
         ulist_r_ij[:, 0] = 1.0
-        ulist_i_ij = np.zeros((nr_atoms, self.__idxu_max), dtype=np.float64)
-        ulisttot_r = np.zeros(self.__idxu_max, dtype=np.float64)
-        ulisttot_i = np.zeros(self.__idxu_max, dtype=np.float64)
+        ulist_i_ij = np.zeros((nr_atoms, self.__index_u_max), dtype=np.float64)
+        ulisttot_r = np.zeros(self.__index_u_max, dtype=np.float64)
+        ulisttot_i = np.zeros(self.__index_u_max, dtype=np.float64)
         r0inv = np.squeeze(1.0 / np.sqrt(distances_cutoff*distances_cutoff + z0*z0))
-        ulisttot_r[self.__idxu_init_pairs] = 1.0
+        ulisttot_r[self.__index_u_one_initialized] = 1.0
         distance_vector = -1.0 * (atoms_cutoff - grid)
         # Cayley-Klein parameters for unit quaternion.
         a_r = r0inv * z0
@@ -601,40 +743,40 @@ class Bispectrum(Descriptor):
         jju1 = 0
         jju2 = 0
         jju3 = 0
-        for jju_outer in range(self.__idxu_max):
-            if jju_outer in self.__all_jju:
-                rootpq = self.__all_rootpq_1[jju1]
-                ulist_r_ij[:, self.__all_jju[jju1]] += rootpq * (
-                        a_r * ulist_r_ij[:, self.__all_jjup[jju1]] +
+        for jju_outer in range(self.__index_u_max):
+            if jju_outer in self.__index_u_full:
+                rootpq = self.__rootpq_full_1[jju1]
+                ulist_r_ij[:, self.__index_u_full[jju1]] += rootpq * (
+                        a_r * ulist_r_ij[:, self.__index_u1_full[jju1]] +
                         a_i *
-                        ulist_i_ij[:, self.__all_jjup[jju1]])
-                ulist_i_ij[:, self.__all_jju[jju1]] += rootpq * (
-                        a_r * ulist_i_ij[:, self.__all_jjup[jju1]] -
+                        ulist_i_ij[:, self.__index_u1_full[jju1]])
+                ulist_i_ij[:, self.__index_u_full[jju1]] += rootpq * (
+                        a_r * ulist_i_ij[:, self.__index_u1_full[jju1]] -
                         a_i *
-                        ulist_r_ij[:, self.__all_jjup[jju1]])
+                        ulist_r_ij[:, self.__index_u1_full[jju1]])
 
-                rootpq = self.__all_rootpq_2[jju1]
-                ulist_r_ij[:, self.__all_jju[jju1] + 1] = -1.0 * rootpq * (
-                        b_r * ulist_r_ij[:, self.__all_jjup[jju1]] +
+                rootpq = self.__rootpq_full_2[jju1]
+                ulist_r_ij[:, self.__index_u_full[jju1] + 1] = -1.0 * rootpq * (
+                        b_r * ulist_r_ij[:, self.__index_u1_full[jju1]] +
                         b_i *
-                        ulist_i_ij[:, self.__all_jjup[jju1]])
-                ulist_i_ij[:, self.__all_jju[jju1] + 1] = -1.0 * rootpq * (
-                        b_r * ulist_i_ij[:, self.__all_jjup[jju1]] -
+                        ulist_i_ij[:, self.__index_u1_full[jju1]])
+                ulist_i_ij[:, self.__index_u_full[jju1] + 1] = -1.0 * rootpq * (
+                        b_r * ulist_i_ij[:, self.__index_u1_full[jju1]] -
                         b_i *
-                        ulist_r_ij[:, self.__all_jjup[jju1]])
+                        ulist_r_ij[:, self.__index_u1_full[jju1]])
                 jju1 += 1
-            if jju_outer in self.__all_pos_jjup:
-                ulist_r_ij[:, self.__all_pos_jjup[jju2]] = ulist_r_ij[:,
-                                                        self.__all_pos_jju[jju2]]
-                ulist_i_ij[:, self.__all_pos_jjup[jju2]] = -ulist_i_ij[:,
-                                                         self.__all_pos_jju[jju2]]
+            if jju_outer in self.__index_u1_symmetry_pos:
+                ulist_r_ij[:, self.__index_u1_symmetry_pos[jju2]] = ulist_r_ij[:,
+                                                        self.__index_u_symmetry_pos[jju2]]
+                ulist_i_ij[:, self.__index_u1_symmetry_pos[jju2]] = -ulist_i_ij[:,
+                                                         self.__index_u_symmetry_pos[jju2]]
                 jju2 += 1
 
-            if jju_outer in self.__all_neg_jjup:
-                ulist_r_ij[:, self.__all_neg_jjup[jju3]] = -ulist_r_ij[:,
-                                                         self.__all_neg_jju[jju3]]
-                ulist_i_ij[:, self.__all_neg_jjup[jju3]] = ulist_i_ij[:,
-                                                        self.__all_neg_jju[jju3]]
+            if jju_outer in self.__index_u1_symmetry_neg:
+                ulist_r_ij[:, self.__index_u1_symmetry_neg[jju3]] = -ulist_r_ij[:,
+                                                         self.__index_u_symmetry_neg[jju3]]
+                ulist_i_ij[:, self.__index_u1_symmetry_neg[jju3]] = ulist_i_ij[:,
+                                                        self.__index_u_symmetry_neg[jju3]]
                 jju3 += 1
 
         # This emulates add_uarraytot.
@@ -664,7 +806,7 @@ class Bispectrum(Descriptor):
         # add it.
 
         # Now use sfac for computations.
-        for jju in range(self.__idxu_max):
+        for jju in range(self.__index_u_max):
             ulisttot_r[jju] += np.sum(sfac * ulist_r_ij[:, jju])
             ulisttot_i[jju] += np.sum(sfac * ulist_i_ij[:, jju])
 
@@ -728,29 +870,29 @@ class Bispectrum(Descriptor):
                         j2 = int(self.__idxb[jjb].j2)
                         j = int(self.__idxb[jjb].j)
                         jjz = int(self.__idxz_block[j1][j2][j])
-                        jju = int(self.__idxu_block[j])
+                        jju = int(self.__index_u_block[j])
                         sumzu = 0.0
                         for mb in range(int(np.ceil(j/2))):
                             for ma in range(j + 1):
-                                sumzu += ulisttot_r[elem3 * self.__idxu_max + jju] * \
+                                sumzu += ulisttot_r[elem3 * self.__index_u_max + jju] * \
                                          zlist_r[jjz] + ulisttot_i[
-                                             elem3 * self.__idxu_max + jju] * zlist_i[
+                                             elem3 * self.__index_u_max + jju] * zlist_i[
                                              jjz]
                                 jjz += 1
                                 jju += 1
                         if j % 2 == 0:
                             mb = j // 2
                             for ma in range(mb):
-                                sumzu += ulisttot_r[elem3 * self.__idxu_max + jju] * \
+                                sumzu += ulisttot_r[elem3 * self.__index_u_max + jju] * \
                                          zlist_r[jjz] + ulisttot_i[
-                                             elem3 * self.__idxu_max + jju] * zlist_i[
+                                             elem3 * self.__index_u_max + jju] * zlist_i[
                                              jjz]
                                 jjz += 1
                                 jju += 1
                             sumzu += 0.5 * (
-                                    ulisttot_r[elem3 * self.__idxu_max + jju] *
+                                    ulisttot_r[elem3 * self.__index_u_max + jju] *
                                     zlist_r[jjz] + ulisttot_i[
-                                        elem3 * self.__idxu_max + jju] * zlist_i[
+                                        elem3 * self.__index_u_max + jju] * zlist_i[
                                             jjz])
                         blist[itriple * self.__idxb_max + jjb] = 2.0 * sumzu
                     itriple += 1
