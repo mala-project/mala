@@ -478,7 +478,6 @@ class Bispectrum(Descriptor):
         in some cases and not really needed. These arrays are the same
         for each grid point, so the overall overhead is rather small.
         """
-
         # Needed for the Clebsch-Gordan product matrices (below)
 
         def deltacg(j1, j2, j):
@@ -906,7 +905,6 @@ class Bispectrum(Descriptor):
         compared to the other parts of the bispectrum descriptor calculation.
         It contains multiple for-loops, that may be optimized out.
         """
-
         # For now set the number of elements to 1.
         # This also has some implications for the rest of the function.
         # This currently really only works for one element.
