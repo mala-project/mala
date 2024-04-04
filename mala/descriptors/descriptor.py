@@ -465,33 +465,6 @@ class Descriptor(PhysicalData):
                 transpose([2, 1, 0, 3])
         return descriptors_full, local_offset, local_reach
 
-    def get_acsd(self, descriptor_data, ldos_data):
-        """
-        Calculate the ACSD for given descriptors and LDOS data.
-
-        ACSD stands for average cosine similarity distance and is a metric
-        of how well the descriptors capture the local environment to a
-        degree where similar vectors result in simlar LDOS vectors.
-
-        Parameters
-        ----------
-        descriptor_data : numpy.ndarray
-            Array containing the descriptors.
-
-        ldos_data : numpy.ndarray
-            Array containing the LDOS.
-
-        Returns
-        -------
-        acsd : float
-            The average cosine similarity distance.
-
-        """
-        return self._calculate_acsd(descriptor_data, ldos_data,
-                                    self.parameters.acsd_points,
-                                    descriptor_vectors_contain_xyz=
-                                    self.descriptors_contain_xyz)
-
     # Private methods
     #################
 
@@ -745,6 +718,9 @@ class Descriptor(PhysicalData):
         If periodic boundary conditions are used, which is usually the case
         for MALA simulation, one has to compute descriptors by also
         incorporating atoms from neighboring cells.
+
+        FURTHER OPTIMIZATION: Probably not that much, this mostly already uses
+        optimized python functions.
         """
         if np.any(self.atoms.pbc):
 

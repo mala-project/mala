@@ -47,16 +47,16 @@ class Bispectrum(Descriptor):
         self.__index_u1_symmetry_neg = None
         self.__rootpq_full_1 = None
         self.__rootpq_full_2 = None
-        self.__zsum_u1r = None
-        self.__zsum_u1i = None
-        self.__zsum_u2r = None
-        self.__zsum_u2i = None
-        self.__zsum_icga = None
-        self.__zsum_icgb = None
-        self.__zsum_jjz = None
-        self.__idxz_block = None
-        self.__idxb_max = None
-        self.__idxb = None
+        self.__index_z_u1r = None
+        self.__index_z_u1i = None
+        self.__index_z_u2r = None
+        self.__index_z_u2i = None
+        self.__index_z_icga = None
+        self.__index_z_icgb = None
+        self.__index_z_jjz = None
+        self.__index_z_block = None
+        self.__index_b_max = None
+        self.__index_b = None
 
     @property
     def data_name(self):
@@ -238,6 +238,7 @@ class Bispectrum(Descriptor):
             - it is roughly an order of magnitude slower for small systems
               and doesn't scale too great (more information on the optimization
               below)
+            - it only works for ONE chemical element
 
         Some option are hardcoded in the same manner the LAMMPS implementation
         hard codes them. Compared to the LAMMPS implementation, some
@@ -338,12 +339,10 @@ class Bispectrum(Descriptor):
                         self._grid_to_coord([x, y, z])
 
                     ########
-                    # DISTANCE MATRIX CALCULATION
+                    # Distance matrix calculation.
+                    #
                     # Here, the distances to all atoms within our
                     # targeted cutoff are calculated.
-                    #
-                    # FURTHER OPTIMIZATION: probably not that much, this mostly
-                    # already uses optimized python functions.
                     ########
 
                     if profile_calculation:
@@ -362,13 +361,11 @@ class Bispectrum(Descriptor):
                         timing_distances += time.time() - t0
 
                     ########
-                    # COMPUTE UI
-                    # This calculates the
+                    # Compute ui.
                     #
-                    # FURTHER OPTIMIZATION: probably not that much, this mostly
-                    # already uses optimized python functions.
+                    # This calculates the expansion coefficients of the
+                    # hyperspherical harmonics (usually referred to as ui).
                     ########
-
 
                     if profile_calculation:
                         t0 = time.time()
@@ -379,6 +376,13 @@ class Bispectrum(Descriptor):
                     if profile_calculation:
                         timing_ui += time.time() - t0
 
+                    ########
+                    # Compute zi.
+                    #
+                    # This calculates the bispectrum components through
+                    # triple scalar products/Clebsch-Gordan products.
+                    ########
+
                     if profile_calculation:
                         t0 = time.time()
                     zlist_r, zlist_i = \
@@ -386,17 +390,20 @@ class Bispectrum(Descriptor):
                     if profile_calculation:
                         timing_zi += time.time() - t0
 
+                    ########
+                    # Compute the bispectrum descriptors itself.
+                    #
+                    # This essentially just extracts the descriptors from
+                    # the expansion coeffcients.
+                    ########
                     if profile_calculation:
                         t0 = time.time()
                     bispectrum_np[x, y, z, 3:] = \
                         self.__compute_bi(ulisttot_r, ulisttot_i, zlist_r,
-                                          zlist_i, printer)
+                                          zlist_i)
                     if profile_calculation:
                         timing_gridpoints += time.time() - t_grid
                         timing_bi += time.time() - t0
-
-                    # print("Compute bi", time.time() - t0)
-                    # print("Per grid point", time.time()-t00)
 
         if profile_calculation:
             timing_total = time.time() - t_begin
@@ -411,12 +418,18 @@ class Bispectrum(Descriptor):
             print("Compute zi [s/gridpoint]", timing_zi/np.prod(self.grid_dimensions))
             print("Compute bi [s/gridpoint]", timing_bi/np.prod(self.grid_dimensions))
 
-
         if self.parameters.descriptors_contain_xyz:
             return bispectrum_np, np.prod(self.grid_dimensions)
         else:
             self.fingerprint_length -= 3
             return bispectrum_np[:, :, :, 3:], np.prod(self.grid_dimensions)
+
+    ########
+    # Functions and helper classes for calculating the bispectrum descriptors.
+    #
+    # The ZIndices and BIndices classes are useful stand-ins for structs used
+    # in the original C++ code.
+    ########
 
     class _ZIndices:
 
@@ -554,16 +567,16 @@ class Bispectrum(Descriptor):
         idxz = []
         for z in range(idxz_max):
             idxz.append(self._ZIndices())
-        self.__idxz_block = np.zeros((self.parameters.bispectrum_twojmax + 1,
-                                      self.parameters.bispectrum_twojmax + 1,
-                                      self.parameters.bispectrum_twojmax + 1))
+        self.__index_z_block = np.zeros((self.parameters.bispectrum_twojmax + 1,
+                                         self.parameters.bispectrum_twojmax + 1,
+                                         self.parameters.bispectrum_twojmax + 1))
 
         idxz_count = 0
         for j1 in range(self.parameters.bispectrum_twojmax + 1):
             for j2 in range(j1 + 1):
                 for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax,
                                             j1 + j2) + 1, 2):
-                    self.__idxz_block[j1][j2][j] = idxz_count
+                    self.__index_z_block[j1][j2][j] = idxz_count
 
                     for mb in range(j // 2 + 1):
                         for ma in range(j + 1):
@@ -644,13 +657,13 @@ class Bispectrum(Descriptor):
                             idxcg_count += 1
 
         # These are only for optimization purposes.
-        self.__zsum_u1r = []
-        self.__zsum_u1i = []
-        self.__zsum_u2r = []
-        self.__zsum_u2i = []
-        self.__zsum_icga = []
-        self.__zsum_icgb = []
-        self.__zsum_jjz = []
+        self.__index_z_u1r = []
+        self.__index_z_u1i = []
+        self.__index_z_u2r = []
+        self.__index_z_u2i = []
+        self.__index_z_icga = []
+        self.__index_z_icgb = []
+        self.__index_z_jjz = []
         for jjz in range(idxz_max):
             j1 = idxz[jjz].j1
             j2 = idxz[jjz].j2
@@ -670,13 +683,13 @@ class Bispectrum(Descriptor):
                 ma2 = ma2max
                 icga = ma1min * (j2 + 1) + ma2max
                 for ia in range(na):
-                    self.__zsum_jjz.append(jjz)
-                    self.__zsum_icgb.append(int(idxcg_block[j1][j2][j]) + icgb)
-                    self.__zsum_icga.append(int(idxcg_block[j1][j2][j]) + icga)
-                    self.__zsum_u1r.append(jju1 + ma1)
-                    self.__zsum_u1i.append(jju1 + ma1)
-                    self.__zsum_u2r.append(jju2 + ma2)
-                    self.__zsum_u2i.append(jju2 + ma2)
+                    self.__index_z_jjz.append(jjz)
+                    self.__index_z_icgb.append(int(idxcg_block[j1][j2][j]) + icgb)
+                    self.__index_z_icga.append(int(idxcg_block[j1][j2][j]) + icga)
+                    self.__index_z_u1r.append(jju1 + ma1)
+                    self.__index_z_u1i.append(jju1 + ma1)
+                    self.__index_z_u2r.append(jju2 + ma2)
+                    self.__index_z_u2i.append(jju2 + ma2)
                     ma1 += 1
                     ma2 -= 1
                     icga += j2
@@ -684,13 +697,13 @@ class Bispectrum(Descriptor):
                 jju2 -= j2 + 1
                 icgb += j2
 
-        self.__zsum_u1r = np.array(self.__zsum_u1r)
-        self.__zsum_u1i = np.array(self.__zsum_u1i)
-        self.__zsum_u2r = np.array(self.__zsum_u2r)
-        self.__zsum_u2i = np.array(self.__zsum_u2i)
-        self.__zsum_icga = np.array(self.__zsum_icga)
-        self.__zsum_icgb = np.array(self.__zsum_icgb)
-        self.__zsum_jjz = np.array(self.__zsum_jjz)
+        self.__index_z_u1r = np.array(self.__index_z_u1r)
+        self.__index_z_u1i = np.array(self.__index_z_u1i)
+        self.__index_z_u2r = np.array(self.__index_z_u2r)
+        self.__index_z_u2i = np.array(self.__index_z_u2i)
+        self.__index_z_icga = np.array(self.__index_z_icga)
+        self.__index_z_icgb = np.array(self.__index_z_icgb)
+        self.__index_z_jjz = np.array(self.__index_z_jjz)
 
         ########
         # Indices for compute_bi.
@@ -704,22 +717,35 @@ class Bispectrum(Descriptor):
                                             j1 + j2) + 1, 2):
                     if j >= j1:
                         idxb_count += 1
-        self.__idxb_max = idxb_count
-        self.__idxb = []
-        for b in range(self.__idxb_max):
-            self.__idxb.append(self._BIndices())
+        self.__index_b_max = idxb_count
+        self.__index_b = []
+        for b in range(self.__index_b_max):
+            self.__index_b.append(self._BIndices())
 
         idxb_count = 0
         for j1 in range(self.parameters.bispectrum_twojmax + 1):
             for j2 in range(j1 + 1):
                 for j in range(j1 - j2, min(self.parameters.bispectrum_twojmax, j1 + j2) + 1, 2):
                     if j >= j1:
-                        self.__idxb[idxb_count].j1 = j1
-                        self.__idxb[idxb_count].j2 = j2
-                        self.__idxb[idxb_count].j = j
+                        self.__index_b[idxb_count].j1 = j1
+                        self.__index_b[idxb_count].j2 = j2
+                        self.__index_b[idxb_count].j = j
                         idxb_count += 1
 
     def __compute_ui(self, nr_atoms, atoms_cutoff, distances_cutoff, grid):
+        """
+        Compute ui.
+
+        This calculates the expansion coefficients of the
+        hyperspherical harmonics (usually referred to as ui).
+
+        FURTHER OPTIMIZATION: This originally was a huge nested for-loop.
+        By vectorizing over the atoms and pre-initializing a bunch of arrays,
+        a  massive amount of time could be saved. There is one principal
+        for-loop remaining - I have not found an easy way to optimize it out.
+        Also, I have not tried numba or some other just-in-time compilation,
+        may help.
+        """
         # Precompute and prepare ui stuff
         theta0 = (distances_cutoff - self.rmin0) * self.rfac0 * np.pi / (
                     self.parameters.bispectrum_cutoff - self.rmin0)
@@ -733,6 +759,7 @@ class Bispectrum(Descriptor):
         r0inv = np.squeeze(1.0 / np.sqrt(distances_cutoff*distances_cutoff + z0*z0))
         ulisttot_r[self.__index_u_one_initialized] = 1.0
         distance_vector = -1.0 * (atoms_cutoff - grid)
+
         # Cayley-Klein parameters for unit quaternion.
         a_r = r0inv * z0
         a_i = -r0inv * distance_vector[:,2]
@@ -813,23 +840,37 @@ class Bispectrum(Descriptor):
         return ulisttot_r, ulisttot_i
 
     def __compute_zi(self, ulisttot_r, ulisttot_i):
-        tmp_real = self.__cglist[self.__zsum_icgb] * \
-                   self.__cglist[self.__zsum_icga] * \
-                   (ulisttot_r[self.__zsum_u1r] * ulisttot_r[self.__zsum_u2r]
-                    - ulisttot_i[self.__zsum_u1i] * ulisttot_i[self.__zsum_u2i])
-        tmp_imag = self.__cglist[self.__zsum_icgb] * \
-                   self.__cglist[self.__zsum_icga] * \
-                   (ulisttot_r[self.__zsum_u1r] * ulisttot_i[self.__zsum_u2i]
-                    + ulisttot_i[self.__zsum_u1i] * ulisttot_r[self.__zsum_u2r])
+        """
+        Compute zi.
+
+        This calculates the bispectrum components through
+        triple scalar products/Clebsch-Gordan products.
+
+        FURTHER OPTIMIZATION: In the original code, this is a huge nested
+        for-loop. Even after optimization, this is the principal
+        computational cost. I have found this implementation to be the
+        most efficient without any major refactoring.
+        However, due to the usage of np.unique, numba cannot trivially be used.
+        A different route that then may employ just-in-time compilation
+        could be fruitful.
+        """
+        tmp_real = self.__cglist[self.__index_z_icgb] * \
+                   self.__cglist[self.__index_z_icga] * \
+                   (ulisttot_r[self.__index_z_u1r] * ulisttot_r[self.__index_z_u2r]
+                    - ulisttot_i[self.__index_z_u1i] * ulisttot_i[self.__index_z_u2i])
+        tmp_imag = self.__cglist[self.__index_z_icgb] * \
+                   self.__cglist[self.__index_z_icga] * \
+                   (ulisttot_r[self.__index_z_u1r] * ulisttot_i[self.__index_z_u2i]
+                    + ulisttot_i[self.__index_z_u1i] * ulisttot_r[self.__index_z_u2r])
 
         # Summation over an array based on indices stored in a different
         # array.
         # Taken from: https://stackoverflow.com/questions/67108215/how-to-get-sum-of-values-in-a-numpy-array-based-on-another-array-with-repetitive
         # Under "much better version".
-        _, idx, _ = np.unique(self.__zsum_jjz, return_counts=True,
+        _, idx, _ = np.unique(self.__index_z_jjz, return_counts=True,
                               return_inverse=True)
         zlist_r = np.bincount(idx, tmp_real)
-        _, idx, _ = np.unique(self.__zsum_jjz, return_counts=True,
+        _, idx, _ = np.unique(self.__index_z_jjz, return_counts=True,
                               return_inverse=True)
         zlist_i = np.bincount(idx, tmp_imag)
 
@@ -840,7 +881,19 @@ class Bispectrum(Descriptor):
         #     zlist_i[jjz] /= (j + 1)
         return zlist_r, zlist_i
 
-    def __compute_bi(self, ulisttot_r, ulisttot_i, zlist_r, zlist_i, printer):
+    def __compute_bi(self, ulisttot_r, ulisttot_i, zlist_r, zlist_i):
+        """
+        Compute the bispectrum descriptors itself.
+
+        This essentially just extracts the descriptors from
+        the expansion coeffcients.
+
+        FURTHER OPTIMIZATION: I have not optimized this function AT ALL.
+        This is due to the fact that its computational footprint is miniscule
+        compared to the other parts of the bispectrum descriptor calculation.
+        It contains multiple for-loops, that may be optimized out.
+        """
+
         # For now set the number of elements to 1.
         # This also has some implications for the rest of the function.
         # This currently really only works for one element.
@@ -848,7 +901,7 @@ class Bispectrum(Descriptor):
         number_element_pairs = number_elements*number_elements
         number_element_triples = number_element_pairs*number_elements
         ielem = 0
-        blist = np.zeros(self.__idxb_max * number_element_triples)
+        blist = np.zeros(self.__index_b_max * number_element_triples)
         itriple = 0
         idouble = 0
 
@@ -865,11 +918,11 @@ class Bispectrum(Descriptor):
         for elem1 in range(number_elements):
             for elem2 in range(number_elements):
                 for elem3 in range(number_elements):
-                    for jjb in range(self.__idxb_max):
-                        j1 = int(self.__idxb[jjb].j1)
-                        j2 = int(self.__idxb[jjb].j2)
-                        j = int(self.__idxb[jjb].j)
-                        jjz = int(self.__idxz_block[j1][j2][j])
+                    for jjb in range(self.__index_b_max):
+                        j1 = int(self.__index_b[jjb].j1)
+                        j2 = int(self.__index_b[jjb].j2)
+                        j = int(self.__index_b[jjb].j)
+                        jjz = int(self.__index_z_block[j1][j2][j])
                         jju = int(self.__index_u_block[j])
                         sumzu = 0.0
                         for mb in range(int(np.ceil(j/2))):
@@ -894,24 +947,24 @@ class Bispectrum(Descriptor):
                                     zlist_r[jjz] + ulisttot_i[
                                         elem3 * self.__index_u_max + jju] * zlist_i[
                                             jjz])
-                        blist[itriple * self.__idxb_max + jjb] = 2.0 * sumzu
+                        blist[itriple * self.__index_b_max + jjb] = 2.0 * sumzu
                     itriple += 1
                 idouble += 1
 
         if self.bzero_flag:
             if not self.wselfall_flag:
                 itriple = (ielem * number_elements + ielem) * number_elements + ielem
-                for jjb in range(self.__idxb_max):
-                    j = self.__idxb[jjb].j
-                    blist[itriple * self.__idxb_max + jjb] -= bzero[j]
+                for jjb in range(self.__index_b_max):
+                    j = self.__index_b[jjb].j
+                    blist[itriple * self.__index_b_max + jjb] -= bzero[j]
             else:
                 itriple = 0
                 for elem1 in range(number_elements):
                     for elem2 in range(number_elements):
                         for elem3 in range(number_elements):
-                            for jjb in range(self.__idxb_max):
-                                j = self.__idxb[jjb].j
-                                blist[itriple * self.__idxb_max + jjb] -= bzero[j]
+                            for jjb in range(self.__index_b_max):
+                                j = self.__index_b[jjb].j
+                                blist[itriple * self.__index_b_max + jjb] -= bzero[j]
                             itriple += 1
 
         # Untested  & Unoptimized
