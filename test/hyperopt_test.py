@@ -157,8 +157,6 @@ class TestHyperparameterOptimization:
                min(performed_trials_values) < \
                max(performed_trials_values)
 
-    @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
-                        reason="LAMMPS is currently not part of the pipeline.")
     def test_acsd(self):
         """Test that the ACSD routine is still working."""
         test_parameters = mala.Parameters()

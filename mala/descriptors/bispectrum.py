@@ -366,9 +366,9 @@ class Bispectrum(Descriptor):
                     distances_cutoff = np.squeeze(np.abs(
                         distances[np.argwhere(
                             distances < self.parameters.bispectrum_cutoff)]))
-                    atoms_cutoff = np.squeeze(
-                        all_atoms[np.argwhere(
-                            distances < self.parameters.bispectrum_cutoff), :])
+                    atoms_cutoff = np.squeeze(all_atoms[np.argwhere(
+                            distances < self.parameters.bispectrum_cutoff), :],
+                                              axis=1)
                     nr_atoms = np.shape(atoms_cutoff)[0]
                     if profile_calculation:
                         timing_distances += time.time() - t0
@@ -773,81 +773,87 @@ class Bispectrum(Descriptor):
         distance_vector = -1.0 * (atoms_cutoff - grid)
 
         # Cayley-Klein parameters for unit quaternion.
-        a_r = r0inv * z0
-        a_i = -r0inv * distance_vector[:,2]
-        b_r = r0inv * distance_vector[:,1]
-        b_i = -r0inv * distance_vector[:,0]
+        if nr_atoms > 0:
+            a_r = r0inv * z0
+            a_i = -r0inv * distance_vector[:, 2]
+            b_r = r0inv * distance_vector[:, 1]
+            b_i = -r0inv * distance_vector[:, 0]
 
-        # This encapsulates the compute_uarray function
-        jju1 = 0
-        jju2 = 0
-        jju3 = 0
-        for jju_outer in range(self.__index_u_max):
-            if jju_outer in self.__index_u_full:
-                rootpq = self.__rootpq_full_1[jju1]
-                ulist_r_ij[:, self.__index_u_full[jju1]] += rootpq * (
-                        a_r * ulist_r_ij[:, self.__index_u1_full[jju1]] +
-                        a_i *
-                        ulist_i_ij[:, self.__index_u1_full[jju1]])
-                ulist_i_ij[:, self.__index_u_full[jju1]] += rootpq * (
-                        a_r * ulist_i_ij[:, self.__index_u1_full[jju1]] -
-                        a_i *
-                        ulist_r_ij[:, self.__index_u1_full[jju1]])
+            # This encapsulates the compute_uarray function
+            jju1 = 0
+            jju2 = 0
+            jju3 = 0
+            for jju_outer in range(self.__index_u_max):
+                if jju_outer in self.__index_u_full:
+                    rootpq = self.__rootpq_full_1[jju1]
+                    ulist_r_ij[:, self.__index_u_full[jju1]] += rootpq * (
+                            a_r * ulist_r_ij[:, self.__index_u1_full[jju1]] +
+                            a_i *
+                            ulist_i_ij[:, self.__index_u1_full[jju1]])
+                    ulist_i_ij[:, self.__index_u_full[jju1]] += rootpq * (
+                            a_r * ulist_i_ij[:, self.__index_u1_full[jju1]] -
+                            a_i *
+                            ulist_r_ij[:, self.__index_u1_full[jju1]])
 
-                rootpq = self.__rootpq_full_2[jju1]
-                ulist_r_ij[:, self.__index_u_full[jju1] + 1] = -1.0 * rootpq * (
-                        b_r * ulist_r_ij[:, self.__index_u1_full[jju1]] +
-                        b_i *
-                        ulist_i_ij[:, self.__index_u1_full[jju1]])
-                ulist_i_ij[:, self.__index_u_full[jju1] + 1] = -1.0 * rootpq * (
-                        b_r * ulist_i_ij[:, self.__index_u1_full[jju1]] -
-                        b_i *
-                        ulist_r_ij[:, self.__index_u1_full[jju1]])
-                jju1 += 1
-            if jju_outer in self.__index_u1_symmetry_pos:
-                ulist_r_ij[:, self.__index_u1_symmetry_pos[jju2]] = ulist_r_ij[:,
-                                                        self.__index_u_symmetry_pos[jju2]]
-                ulist_i_ij[:, self.__index_u1_symmetry_pos[jju2]] = -ulist_i_ij[:,
-                                                         self.__index_u_symmetry_pos[jju2]]
-                jju2 += 1
+                    rootpq = self.__rootpq_full_2[jju1]
+                    ulist_r_ij[:, self.__index_u_full[jju1] + 1] = -1.0 * rootpq * (
+                            b_r * ulist_r_ij[:, self.__index_u1_full[jju1]] +
+                            b_i *
+                            ulist_i_ij[:, self.__index_u1_full[jju1]])
+                    ulist_i_ij[:, self.__index_u_full[jju1] + 1] = -1.0 * rootpq * (
+                            b_r * ulist_i_ij[:, self.__index_u1_full[jju1]] -
+                            b_i *
+                            ulist_r_ij[:, self.__index_u1_full[jju1]])
+                    jju1 += 1
+                if jju_outer in self.__index_u1_symmetry_pos:
+                    ulist_r_ij[:, self.__index_u1_symmetry_pos[jju2]] = ulist_r_ij[:,
+                                                            self.__index_u_symmetry_pos[jju2]]
+                    ulist_i_ij[:, self.__index_u1_symmetry_pos[jju2]] = -ulist_i_ij[:,
+                                                             self.__index_u_symmetry_pos[jju2]]
+                    jju2 += 1
 
-            if jju_outer in self.__index_u1_symmetry_neg:
-                ulist_r_ij[:, self.__index_u1_symmetry_neg[jju3]] = -ulist_r_ij[:,
-                                                         self.__index_u_symmetry_neg[jju3]]
-                ulist_i_ij[:, self.__index_u1_symmetry_neg[jju3]] = ulist_i_ij[:,
-                                                        self.__index_u_symmetry_neg[jju3]]
-                jju3 += 1
+                if jju_outer in self.__index_u1_symmetry_neg:
+                    ulist_r_ij[:, self.__index_u1_symmetry_neg[jju3]] = -ulist_r_ij[:,
+                                                             self.__index_u_symmetry_neg[jju3]]
+                    ulist_i_ij[:, self.__index_u1_symmetry_neg[jju3]] = ulist_i_ij[:,
+                                                            self.__index_u_symmetry_neg[jju3]]
+                    jju3 += 1
 
-        # This emulates add_uarraytot.
-        # First, we compute sfac.
-        sfac = np.zeros(nr_atoms)
-        if self.parameters.bispectrum_switchflag == 0:
-            sfac += 1.0
-        else:
-            rcutfac = np.pi / (self.parameters.bispectrum_cutoff -
-                               self.rmin0)
-            sfac = 0.5 * (np.cos((distances_cutoff - self.rmin0) * rcutfac)
-                          + 1.0)
-            sfac[np.where(distances_cutoff <= self.rmin0)] = 1.0
-            sfac[np.where(distances_cutoff >
-                          self.parameters.bispectrum_cutoff)] = 0.0
+            # This emulates add_uarraytot.
+            # First, we compute sfac.
+            sfac = np.zeros(nr_atoms)
+            if self.parameters.bispectrum_switchflag == 0:
+                sfac += 1.0
+            else:
+                rcutfac = np.pi / (self.parameters.bispectrum_cutoff -
+                                   self.rmin0)
+                if nr_atoms > 1:
+                    sfac = 0.5 * (np.cos(
+                        (distances_cutoff - self.rmin0) * rcutfac)
+                                  + 1.0)
+                    sfac[np.where(distances_cutoff <= self.rmin0)] = 1.0
+                    sfac[np.where(distances_cutoff >
+                                  self.parameters.bispectrum_cutoff)] = 0.0
+                else:
+                    sfac = 1.0 if distances_cutoff <= self.rmin0 else sfac
+                    sfac = 0.0 if distances_cutoff <= self.rmin0 else sfac
 
-        # sfac technically has to be weighted according to the chemical
-        # species. But this is a minimal implementation only for a single
-        # chemical species, so I am ommitting this for now. It would
-        # look something like
-        # sfac *= weights[a]
-        # Further, some things have to be calculated if
-        # switch_inner_flag is true. If I understand correctly, it
-        # essentially never is in our case. So I am ommitting this
-        # (along with some other similar lines) here for now.
-        # If this becomes relevant later, we of course have to
-        # add it.
+            # sfac technically has to be weighted according to the chemical
+            # species. But this is a minimal implementation only for a single
+            # chemical species, so I am ommitting this for now. It would
+            # look something like
+            # sfac *= weights[a]
+            # Further, some things have to be calculated if
+            # switch_inner_flag is true. If I understand correctly, it
+            # essentially never is in our case. So I am ommitting this
+            # (along with some other similar lines) here for now.
+            # If this becomes relevant later, we of course have to
+            # add it.
 
-        # Now use sfac for computations.
-        for jju in range(self.__index_u_max):
-            ulisttot_r[jju] += np.sum(sfac * ulist_r_ij[:, jju])
-            ulisttot_i[jju] += np.sum(sfac * ulist_i_ij[:, jju])
+            # Now use sfac for computations.
+            for jju in range(self.__index_u_max):
+                ulisttot_r[jju] += np.sum(sfac * ulist_r_ij[:, jju])
+                ulisttot_i[jju] += np.sum(sfac * ulist_i_ij[:, jju])
 
         return ulisttot_r, ulisttot_i
 
@@ -860,8 +866,8 @@ class Bispectrum(Descriptor):
 
         FURTHER OPTIMIZATION: In the original code, this is a huge nested
         for-loop. Even after optimization, this is the principal
-        computational cost. I have found this implementation to be the
-        most efficient without any major refactoring.
+        computational cost (for realistic systems). I have found this
+        implementation to be the most efficient without any major refactoring.
         However, due to the usage of np.unique, numba cannot trivially be used.
         A different route that then may employ just-in-time compilation
         could be fruitful.
