@@ -120,12 +120,17 @@ class Bispectrum(Descriptor):
             raise Exception("Unsupported unit for bispectrum descriptors.")
 
     def _calculate(self, outdir, **kwargs):
+
         if self.parameters._configuration["lammps"]:
+            try:
+                from lammps import lammps
+            except ModuleNotFoundError:
+                printout("No LAMMPS found for descriptor calculation, "
+                         "falling back to python.")
+                return self.__calculate_python(**kwargs)
+
             return self.__calculate_lammps(outdir, **kwargs)
         else:
-            printout("Using python for descriptor calculation. "
-                     "The resulting calculation will be slow for "
-                     "large systems.")
             return self.__calculate_python(**kwargs)
 
     def __calculate_lammps(self, outdir, **kwargs):
@@ -248,6 +253,10 @@ class Bispectrum(Descriptor):
         hard codes them. Compared to the LAMMPS implementation, some
         essentially never used options are not maintained/optimized.
         """
+        printout("Using python for descriptor calculation. "
+                 "The resulting calculation will be slow for "
+                 "large systems.")
+
         # The entire bispectrum calculation may be extensively profiled.
         profile_calculation = kwargs.get("profile_calculation", False)
         if profile_calculation:

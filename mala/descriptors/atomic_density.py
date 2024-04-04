@@ -121,11 +121,15 @@ class AtomicDensity(Descriptor):
 
     def _calculate(self, outdir, **kwargs):
         if self.parameters._configuration["lammps"]:
+            try:
+                from lammps import lammps
+            except ModuleNotFoundError:
+                printout("No LAMMPS found for descriptor calculation, "
+                         "falling back to python.")
+                return self.__calculate_python(**kwargs)
+
             return self.__calculate_lammps(outdir, **kwargs)
         else:
-            printout("Using python for descriptor calculation. "
-                     "The resulting calculation will be slow for "
-                     "large systems.")
             return self.__calculate_python(**kwargs)
 
     def __calculate_lammps(self, outdir, **kwargs):
@@ -236,6 +240,9 @@ class AtomicDensity(Descriptor):
             - It only works for ONE chemical element
             - It has now MPI or GPU support
         """
+        printout("Using python for descriptor calculation. "
+                 "The resulting calculation will be slow for "
+                 "large systems.")
 
         gaussian_descriptors_np = np.zeros((self.grid_dimensions[0],
                                             self.grid_dimensions[1],
