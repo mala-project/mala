@@ -72,7 +72,8 @@ autodoc_mock_imports = [
     'pqkmeans',
     'dftpy',
     'asap3',
-    'openpmd_io'
+    'openpmd_io',
+    'skspatial'
 ]
 
 myst_heading_anchors = 3
