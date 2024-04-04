@@ -93,11 +93,12 @@ MALA has been employed in various publications, showcasing its versatility and e
     data calculated for hundreds of atoms, MALA can predict the electronic
     structure of up to 100'000 atoms.
 
-- [Machine learning the electronic structure of matter across temperatures](https://doi.org/10.48550/arXiv.2306.06032) (arXiv preprint)
+- [Machine learning the electronic structure of matter across temperatures](https://doi.org/10.1103/PhysRevB.108.125146) (Phys. Rev. B)
   by L. Fiedler, N. A. Modine, K. D. Miller, A. Cangi
  
-  - Currently in the preprint stage. Shown here is the temperature 
-    tranferability of MALA models.
+  - This publication shows how MALA models can be employed across temperature 
+    ranges. It is demonstrated how such models account for both ionic and
+    electronic temperature effects of materials.
 
 
 
