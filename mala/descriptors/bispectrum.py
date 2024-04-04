@@ -16,7 +16,8 @@ except ModuleNotFoundError:
 import numpy as np
 from scipy.spatial import distance
 
-from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
+from mala.common.parallelizer import printout
+from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
 
 
@@ -122,6 +123,9 @@ class Bispectrum(Descriptor):
         if self.parameters._configuration["lammps"]:
             return self.__calculate_lammps(outdir, **kwargs)
         else:
+            printout("Using python for descriptor calculation. "
+                     "The resulting calculation will be slow for "
+                     "large systems.")
             return self.__calculate_python(**kwargs)
 
     def __calculate_lammps(self, outdir, **kwargs):
@@ -234,13 +238,13 @@ class Bispectrum(Descriptor):
         Compared to the LAMMPS implementation, this implementation has quite a
         few limitations. Namely
 
-            - it only runs in serial
-            - it is roughly an order of magnitude slower for small systems
+            - It is roughly an order of magnitude slower for small systems
               and doesn't scale too great (more information on the optimization
               below)
-            - it only works for ONE chemical element
+            - It only works for ONE chemical element
+            - It has now MPI or GPU support
 
-        Some option are hardcoded in the same manner the LAMMPS implementation
+        Some options are hardcoded in the same manner the LAMMPS implementation
         hard codes them. Compared to the LAMMPS implementation, some
         essentially never used options are not maintained/optimized.
         """

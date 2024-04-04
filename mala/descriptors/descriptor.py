@@ -510,8 +510,10 @@ class Descriptor(PhysicalData):
         """
         from lammps import lammps
 
-        parallel_warn("Do not initialize more than one pre-processing calculation\
-        in the same directory at the same time. Data may be over-written.")
+        parallel_warn("Using LAMMPS for descriptor calculation. "
+                      "Do not initialize more than one pre-processing "
+                      "calculation in the same directory at the same time. "
+                      "Data may be over-written.")
 
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = ["-screen", "none", "-log",

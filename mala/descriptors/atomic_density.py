@@ -16,6 +16,7 @@ except ModuleNotFoundError:
 import numpy as np
 from scipy.spatial import distance
 
+from mala.common.parallelizer import printout
 from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
 
@@ -122,6 +123,9 @@ class AtomicDensity(Descriptor):
         if self.parameters._configuration["lammps"]:
             return self.__calculate_lammps(outdir, **kwargs)
         else:
+            printout("Using python for descriptor calculation. "
+                     "The resulting calculation will be slow for "
+                     "large systems.")
             return self.__calculate_python(**kwargs)
 
     def __calculate_lammps(self, outdir, **kwargs):
@@ -216,6 +220,23 @@ class AtomicDensity(Descriptor):
                            nx*ny*nz
 
     def __calculate_python(self, **kwargs):
+        """
+        Perform Gaussian descriptor calculation using python.
+
+        The code used to this end was adapted from the LAMMPS implementation.
+        It serves as a fallback option whereever LAMMPS is not available.
+        This may be useful, e.g., to students or people getting started with
+        MALA who just want to look around. It is not intended for production
+        calculations.
+        Compared to the LAMMPS implementation, this implementation has quite a
+        few limitations. Namely
+
+            - It is roughly an order of magnitude slower for small systems
+              and doesn't scale too great
+            - It only works for ONE chemical element
+            - It has now MPI or GPU support
+        """
+
         gaussian_descriptors_np = np.zeros((self.grid_dimensions[0],
                                             self.grid_dimensions[1],
                                             self.grid_dimensions[2], 4),
@@ -233,8 +254,16 @@ class AtomicDensity(Descriptor):
         argumentfactor = 1.0 / (2.0 * self.parameters.atomic_density_sigma *
                                 self.parameters.atomic_density_sigma)
 
+        # Create a list of all potentially relevant atoms.
         all_atoms = self._setup_atom_list()
 
+        # I think this nested for-loop could probably be optimized if instead
+        # the density matrix is used on the entire grid. That would be VERY
+        # memory-intensive. Since the goal of such an optimization would be
+        # to use this implementation at potentially larger length-scales,
+        # one would have to investigate that this is OK memory-wise.
+        # I haven't optimized it yet for the smaller scales since there
+        # the performance was already good enough.
         for i in range(0, self.grid_dimensions[0]):
             for j in range(0, self.grid_dimensions[1]):
                 for k in range(0, self.grid_dimensions[2]):
