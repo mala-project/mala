@@ -247,7 +247,7 @@ class Bispectrum(Descriptor):
               and doesn't scale too great (more information on the optimization
               below)
             - It only works for ONE chemical element
-            - It has now MPI or GPU support
+            - It has no MPI or GPU support
 
         Some options are hardcoded in the same manner the LAMMPS implementation
         hard codes them. Compared to the LAMMPS implementation, some

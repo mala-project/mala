@@ -238,7 +238,7 @@ class AtomicDensity(Descriptor):
             - It is roughly an order of magnitude slower for small systems
               and doesn't scale too great
             - It only works for ONE chemical element
-            - It has now MPI or GPU support
+            - It has no MPI or GPU support
         """
         printout("Using python for descriptor calculation. "
                  "The resulting calculation will be slow for "
