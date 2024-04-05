@@ -266,29 +266,6 @@ the Recv/Sendv route as default.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.descriptors.descriptor.Descriptor.get_acsd">
-<span class="sig-name descname"><span class="pre">get_acsd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descriptor_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor.html#Descriptor.get_acsd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor.Descriptor.get_acsd" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate the ACSD for given descriptors and LDOS data.</p>
-<p>ACSD stands for average cosine similarity distance and is a metric
-of how well the descriptors capture the local environment to a
-degree where similar vectors result in simlar LDOS vectors.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>descriptor_data</strong> (<em>numpy.ndarray</em>) – Array containing the descriptors.</p></li>
-<li><p><strong>ldos_data</strong> (<em>numpy.ndarray</em>) – Array containing the LDOS.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>acsd</strong> – The average cosine similarity distance.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.descriptors.descriptor.Descriptor.descriptors_contain_xyz">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">descriptors_contain_xyz</span></span><a class="headerlink" href="#mala.descriptors.descriptor.Descriptor.descriptors_contain_xyz" title="Permalink to this definition"></a></dt>

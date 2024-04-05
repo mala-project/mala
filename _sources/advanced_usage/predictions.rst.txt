@@ -8,6 +8,11 @@ Predictions at scale in principle work just like the predictions shown
 in the basic guide. One has to set a few additional parameters to make
 optimal use of the hardware at hand.
 
+As a general remark please be reminded that if you have not used LAMMPS
+for your first steps in MALA, and instead used the python-based descriptor
+calculation methods, we highly advise switching to LAMMPS for advanced/more
+involved examples (see  :ref:`installation instructions for LAMMPS <lammpsinstallation>`).
+
 MALA ML-DFT models can be used for predictions at system sizes and temperatures
 larger resp. different from the ones they were trained on. If you want to make
 a prediction at a larger length scale then the ML-DFT model was trained on,

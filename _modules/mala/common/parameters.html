@@ -106,7 +106,7 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;gpu&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;horovod&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;mpi&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
                                <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">:</span> <span class="p">{},</span>
-                               <span class="s2">&quot;openpmd_granularity&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+                               <span class="s2">&quot;openpmd_granularity&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;lammps&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
         <span class="k">pass</span>
 
 <div class="viewcode-block" id="ParametersBase.show"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersBase.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
@@ -146,6 +146,9 @@
 
     <span class="k">def</span> <span class="nf">_update_openpmd_granularity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_granularity</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_granularity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_granularity</span>
+
+    <span class="k">def</span> <span class="nf">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_lammps</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;lammps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_lammps</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_member_to_json</span><span class="p">(</span><span class="n">member</span><span class="p">):</span>
@@ -1256,6 +1259,7 @@
         <span class="c1"># TODO: Maybe as a percentage? Feature dimensions can be quite</span>
         <span class="c1"># different.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">openpmd_granularity</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">openpmd_granularity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1383,6 +1387,7 @@
     <span class="nd">@use_mpi</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">use_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="n">set_mpi_status</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
         <span class="c1"># Invalidate, will be updated in setter.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_use_mpi</span> <span class="o">=</span> <span class="n">value</span>
@@ -1407,14 +1412,27 @@
     <span class="nd">@openpmd_configuration</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_openpmd_configuration</span> <span class="o">=</span> <span class="n">value</span>
-
-        <span class="c1"># Invalidate, will be updated in setter.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">_update_openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openpmd_configuration</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_update_openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openpmd_configuration</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">_update_openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openpmd_configuration</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_update_openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openpmd_configuration</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">_update_openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openpmd_configuration</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openpmd_configuration</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">use_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether or not to use LAMMPS for descriptor calculation.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_lammps</span>
+
+    <span class="nd">@use_lammps</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">use_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_lammps</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Parameters.show"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Print name and values of all attributes of this object.&quot;&quot;&quot;</span>
