@@ -83,8 +83,10 @@ class TestInterfaces:
                           ldos_calculator2.fermi_energy_dft,
                           rtol=accuracy_fine)
 
-    @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
-                        reason="LAMMPS is currently not part of the pipeline.")
+    @pytest.mark.skipif(importlib.util.find_spec("total_energy") is None
+                        or importlib.util.find_spec("lammps") is None,
+                        reason="QE and LAMMPS are currently not part of the "
+                               "pipeline.")
     def test_ase_calculator(self):
         """
         Test whether the ASE calculator class can still be used.
