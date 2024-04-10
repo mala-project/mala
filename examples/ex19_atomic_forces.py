@@ -137,7 +137,7 @@ def backpropagation():
     print(mala_forces.size()) # Should be 8748, 91
 
 
-# band_energy_contribution()
-# entropy_contribution()
-# hartree_contribution()
-backpropagation()
+band_energy_contribution()
+entropy_contribution()
+hartree_contribution()
+# backpropagation()

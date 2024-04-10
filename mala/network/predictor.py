@@ -243,9 +243,7 @@ class Predictor(Runner):
                                       (
                                                   i + 1) * self.parameters.mini_batch_size] \
                         = self.data.output_data_scaler. \
-                        inverse_transform(self.output_data[i * self.parameters.mini_batch_size:
-                                      (
-                                                  i + 1) * self.parameters.mini_batch_size].
+                        inverse_transform(self.network(inputs).
                                           to('cpu'), as_numpy=True)
 
             # Restricting the actual quantities to physical meaningful values,

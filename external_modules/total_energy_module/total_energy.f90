@@ -187,9 +187,6 @@ SUBROUTINE init_run_setup(calculate_eigts)
   USE dynamics_module,    ONLY : allocate_dyn_vars
   USE paw_variables,      ONLY : okpaw
   USE paw_init,           ONLY : paw_init_onecenter, allocate_paw_internals
-#if defined(__MPI)
-  USE paw_init,           ONLY : paw_post_init
-#endif
   USE bp,                 ONLY : allocate_bp_efield, bp_global_map
   USE fft_base,           ONLY : dfftp, dffts
   USE xc_lib,             ONLY : xclib_dft_is_libxc, xclib_init_libxc, xclib_dft_is
@@ -926,6 +923,7 @@ SUBROUTINE v_h_wrapper(v, nnr_in, nspin_in)
   ! of the input arrays using module variables (e.g. dfftp%nnr). Other arguments
   ! are passed through unaltered to v_h().
 
+  USE gvect,       ONLY : ngm
   USE lsda_mod,    ONLY : nspin
   USE kinds,       ONLY : DP
   USE fft_base,    ONLY : dfftp
