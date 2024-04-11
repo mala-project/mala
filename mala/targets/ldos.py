@@ -1362,13 +1362,10 @@ class LDOS(Target):
                 d_n_d_mu = np.dot(ldos_data, d_f01_d_mu)
                 d_E_h_d_mu = np.dot(d_E_h_d_n[:,0], d_n_d_mu)
                 d_mu_d_d = np.zeros_like(ldos_data)
-                d_mu_d_d[:] = -(-1.0) * (d_n_d_d*self.voxel.volume)
+                d_mu_d_d[:] = (-1.0) * (d_n_d_d*self.voxel.volume)
                 d_mu_d_d /= (self._density_of_states_calculator.
                              d_number_of_electrons_d_mu)
-                d_E_d_n = d_E_h_d_n * d_n_d_d - d_E_h_d_mu * d_mu_d_d
-                # d_E_d_n = d_E_h_d_mu
-
-
+                d_E_d_n = d_E_h_d_n * d_n_d_d + d_E_h_d_mu * d_mu_d_d
                 d_E_d_d += d_E_d_n
 
             if self.input_data_derivative is not None:
