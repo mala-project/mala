@@ -146,7 +146,27 @@ def hartree_contribution():
     for point in points:
         numerical_forces = []
         for i in range(0, parameters.targets.ldos_gridsize):
-            # Chemical potential constant
+            pass
+            # Derivative of Hartree energy w.r.t LDOS,
+            # chemical potential NOT constant
+            # This is what the forces SHOULD be checked against
+            ldos_plus = ldos.copy()
+            ldos_plus[point, i] += delta_numerical * 0.5
+            ldos_calculator.read_from_array(ldos_plus)
+            _, derivative_plus = ldos_calculator.get_total_energy(return_energy_contributions=True)
+            derivative_plus = derivative_plus["e_hartree"]
+
+            ldos_minus = ldos.copy()
+            ldos_minus[point, i] -= delta_numerical * 0.5
+            ldos_calculator.read_from_array(ldos_minus)
+            _, derivative_minus = ldos_calculator.get_total_energy(return_energy_contributions=True)
+            derivative_minus = derivative_minus["e_hartree"]
+            numerical_forces.append((derivative_plus - derivative_minus) /
+                                    delta_numerical)
+
+
+            # Derivative of Hartree energy w.r.t LDOS,
+            # chemical potential constant
             # ldos_plus = ldos.copy()
             # ldos_plus[point, i] += delta_numerical * 0.5
             # ldos_calculator.read_from_array(ldos_plus)
@@ -163,24 +183,43 @@ def hartree_contribution():
             #                                                       return_energy_contributions=True)
             # derivative_minus = derivative_minus["e_hartree"]
 
-            # Chemical potential NOT constant
-            ldos_plus = ldos.copy()
-            ldos_plus[point, i] += delta_numerical * 0.5
-            ldos_calculator.read_from_array(ldos_plus)
-            _, derivative_plus = ldos_calculator.get_total_energy(return_energy_contributions=True)
-            derivative_plus = derivative_plus["e_hartree"]
 
-            ldos_minus = ldos.copy()
-            ldos_minus[point, i] -= delta_numerical * 0.5
-            ldos_calculator.read_from_array(ldos_minus)
-            _, derivative_minus = ldos_calculator.get_total_energy(return_energy_contributions=True)
-            derivative_minus = derivative_minus["e_hartree"]
+            # Derivative of the Fermi energy
+            # ldos_plus = ldos.copy()
+            # ldos_plus[point, i] += delta_numerical * 0.5
+            # ldos_calculator.read_from_array(ldos_plus)
+            # derivative_plus = ldos_calculator.fermi_energy
+            #
+            # ldos_minus = ldos.copy()
+            # ldos_minus[point, i] -= delta_numerical * 0.5
+            # ldos_calculator.read_from_array(ldos_minus)
+            # derivative_minus = ldos_calculator.fermi_energy
+            #
+            #
+            # numerical_forces.append((derivative_plus - derivative_minus) /
+            #                         delta_numerical)
 
-            numerical_forces.append((derivative_plus - derivative_minus) /
-                                    delta_numerical)
 
-        # numerical_forces.append((derivative_plus - derivative_minus) /
-        #                         delta_numerical)
+        # Derivative of Hartree Energy w.r.t Fermi Energy
+        # ldos_plus = ldos.copy()
+        # fermi_energy_plus = fermi_energy + delta_numerical * 0.5
+        # ldos_calculator.read_from_array(ldos_plus)
+        # _, derivative_plus = ldos_calculator.get_total_energy(ldos_plus,
+        #                                                       fermi_energy=fermi_energy_plus,
+        #                                                       return_energy_contributions=True)
+        # derivative_plus = derivative_plus["e_hartree"]
+        #
+        # ldos_minus = ldos.copy()
+        # fermi_energy_minus = fermi_energy - delta_numerical * 0.5
+        # ldos_calculator.read_from_array(ldos_minus)
+        # _, derivative_minus = ldos_calculator.get_total_energy(ldos_minus,
+        #                                                       fermi_energy=fermi_energy_minus,
+        #                                                       return_energy_contributions=True)
+        # derivative_minus = derivative_minus["e_hartree"]
+        #
+        #
+        # numerical_forces = (derivative_plus - derivative_minus) / \
+        #                         delta_numerical
 
         print(mala_forces[point, :] / np.array(numerical_forces))
 
