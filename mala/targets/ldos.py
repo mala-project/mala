@@ -1350,6 +1350,7 @@ class LDOS(Target):
             if self.debug_forces_flag is None or self.debug_forces_flag == \
                 "hartree":
                 print(self._density_calculator.force_contributions.shape)
+                d_E_h_d_n = self._density_calculator.force_contributions
                 d_n_d_d = analytical_integration_weights("F0", "F1", fermi_energy,
                                                          energy_grid, temperature)
 
@@ -1359,14 +1360,14 @@ class LDOS(Target):
                                                                  energy_grid, temperature)) / \
                            (2.0*delta)
                 d_n_d_mu = np.dot(ldos_data, d_f01_d_mu)
-                d_E_h_d_mu = np.dot(self._density_calculator.force_contributions[:,0],
-                                    d_n_d_mu)
+                d_E_h_d_mu = np.dot(d_E_h_d_n[:,0], d_n_d_mu)
                 d_mu_d_d = np.zeros_like(ldos_data)
                 d_mu_d_d[:] = -(-1.0) * (d_n_d_d*self.voxel.volume)
                 d_mu_d_d /= (self._density_of_states_calculator.
                              d_number_of_electrons_d_mu)
-                d_E_d_n = self._density_calculator.force_contributions * \
-                          d_n_d_d + d_E_h_d_mu * d_mu_d_d
+                d_E_d_n = d_E_h_d_n * d_n_d_d + d_E_h_d_mu * d_mu_d_d
+
+
                 d_E_d_d += d_E_d_n
 
             if self.input_data_derivative is not None:

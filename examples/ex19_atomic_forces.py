@@ -136,7 +136,9 @@ def hartree_contribution():
     density = ldos_calculator.density
     # mala_forces = density_calculator.force_contributions
     ldos_calculator.debug_forces_flag = "hartree"
+
     mala_forces = ldos_calculator.atomic_forces.copy()
+    fermi_energy = ldos_calculator.fermi_energy.copy()
 
     delta_numerical = 1e-6
     points = [0, 2000, 4000]
@@ -144,14 +146,32 @@ def hartree_contribution():
     for point in points:
         numerical_forces = []
         for i in range(0, parameters.targets.ldos_gridsize):
+            # Chemical potential constant
+            # ldos_plus = ldos.copy()
+            # ldos_plus[point, i] += delta_numerical * 0.5
+            # ldos_calculator.read_from_array(ldos_plus)
+            # _, derivative_plus = ldos_calculator.get_total_energy(ldos_plus,
+            #                                                       fermi_energy=fermi_energy,
+            #                                                       return_energy_contributions=True)
+            # derivative_plus = derivative_plus["e_hartree"]
+            #
+            # ldos_minus = ldos.copy()
+            # ldos_minus[point, i] -= delta_numerical * 0.5
+            # ldos_calculator.read_from_array(ldos_minus)
+            # _, derivative_minus = ldos_calculator.get_total_energy(ldos_minus,
+            #                                                       fermi_energy=fermi_energy,
+            #                                                       return_energy_contributions=True)
+            # derivative_minus = derivative_minus["e_hartree"]
+
+            # Chemical potential NOT constant
             ldos_plus = ldos.copy()
-            ldos_plus[0, i] += delta_numerical * 0.5
+            ldos_plus[point, i] += delta_numerical * 0.5
             ldos_calculator.read_from_array(ldos_plus)
             _, derivative_plus = ldos_calculator.get_total_energy(return_energy_contributions=True)
             derivative_plus = derivative_plus["e_hartree"]
 
             ldos_minus = ldos.copy()
-            ldos_minus[0, i] -= delta_numerical * 0.5
+            ldos_minus[point, i] -= delta_numerical * 0.5
             ldos_calculator.read_from_array(ldos_minus)
             _, derivative_minus = ldos_calculator.get_total_energy(return_energy_contributions=True)
             derivative_minus = derivative_minus["e_hartree"]
