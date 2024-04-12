@@ -9,7 +9,7 @@ from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
-ex12_run_predictions.py: Show how a prediction can be made using MALA.
+ex19_at.py: Show how a prediction can be made using MALA.
 Using nothing more then the trained network and atomic configurations, 
 predictions can be made. 
 """
@@ -20,6 +20,9 @@ assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
 
 
 def run_prediction(backprop=False):
+    """
+    This just runs a regular MALA prediction for a two-atom Beryllium model.
+    """
     parameters, network, data_handler, predictor = mala.Predictor. \
         load_run("be_model")
 
@@ -41,7 +44,16 @@ def run_prediction(backprop=False):
 
 
 def band_energy_contribution():
+    """
+    Test the band energy contribution to the forces by calculating it
+    via finite differences and analytically. This should return arrays of 1s.
+    Note that the LDOS is only shifted at one point in space, but since the
+    band energy is a not a spatially resolved quantity, the forces should
+    be the same for all grid points.
+    """
     ldos, ldos_calculator, parameters, predictor = run_prediction()
+
+    # Only compute a specific part of the forces.
     ldos_calculator.debug_forces_flag = "band_energy"
     mala_forces = ldos_calculator.atomic_forces.copy()
 
@@ -62,14 +74,25 @@ def band_energy_contribution():
         numerical_forces.append((derivative_plus - derivative_minus) /
                                 delta_numerical)
 
-    print("TEST BAND ENERGY FORCE CONTRIBUTIONS")
+    print("FORCE TEST: Band energy contribution.")
     print(mala_forces[0, :] / np.array(numerical_forces))
     print(mala_forces[2000, :] / np.array(numerical_forces))
     print(mala_forces[4000, :] / np.array(numerical_forces))
 
 
 def entropy_contribution():
+    """
+    Test the entropy contribution to the forces by calculating it
+    via finite differences and analytically. This should return arrays of 1s,
+    it will most likely not for many test settings due to the fact that the
+    entropy contribution is VERY small.
+    Note that the LDOS is only shifted at one point in space, but since the
+    entropy is a not a spatially resolved quantity, the forces should
+    be the same for all grid points.
+    """
     ldos, ldos_calculator, parameters, predictor = run_prediction()
+
+    # Only compute a specific part of the forces.
     ldos_calculator.debug_forces_flag = "entropy_contribution"
     mala_forces = ldos_calculator.atomic_forces.copy()
 
@@ -90,55 +113,30 @@ def entropy_contribution():
         numerical_forces.append((derivative_plus - derivative_minus) /
                                 delta_numerical)
 
-    print("TEST ENTROPY FORCE CONTRIBUTIONS")
+    print("FORCE TEST: Entropy contribution.")
     print(mala_forces[0, :] / np.array(numerical_forces))
     print(mala_forces[2000, :] / np.array(numerical_forces))
     print(mala_forces[4000, :] / np.array(numerical_forces))
 
 
-def hartree_contribution_density_derivative():
-    # This only tests dEh/dn
-    ldos, ldos_calculator, parameters, predictor = run_prediction()
-    density_calculator = mala.Density.from_ldos_calculator(ldos_calculator)
-    density = ldos_calculator.density
-    mala_forces = density_calculator.force_contributions
-    ldos_calculator.debug_forces_flag = "hartree"
-
-    delta_numerical = 1e-6
-    points = [0, 1000, 2000, 3000, 4000, 5000]
-
-    # numerical_forces = []
-    for point in points:
-
-        dens_plus = density.copy()
-        dens_plus[point] += delta_numerical * 0.5
-        density_calculator.read_from_array(dens_plus)
-        derivative_plus = density_calculator.total_energy_contributions[
-            "e_hartree"]
-
-        dens_plus = density.copy()
-        dens_plus[point] -= delta_numerical * 0.5
-        density_calculator.read_from_array(dens_plus)
-        derivative_minus = density_calculator.total_energy_contributions[
-            "e_hartree"]
-
-        # numerical_forces.append((derivative_plus - derivative_minus) /
-        #                         delta_numerical)
-        numerical_forces = (derivative_plus - derivative_minus) / \
-                                delta_numerical
-
-        print(mala_forces[point, :] / np.array(numerical_forces))
-
-
 def hartree_contribution():
+    """
+    Test the Hartree contribution to the forces by calculating it
+    via finite differences and analytically. This should return arrays of 1s.
+    Since the Hartree energy is dependent on the electronic density, the
+    derivative will vary across space, and we have to compute the forces
+    at multiple points.
+    """
     ldos, ldos_calculator, parameters, predictor = run_prediction()
-    ldos_calculator.debug_forces_flag = "hartree"
 
+    # Only compute a specific part of the forces.
+    ldos_calculator.debug_forces_flag = "hartree"
     mala_forces = ldos_calculator.atomic_forces.copy()
 
     delta_numerical = 1e-6
     points = [0, 2000, 4000]
 
+    print("FORCE TEST: Hartree contribution.")
     for point in points:
         numerical_forces = []
         for i in range(0, parameters.targets.ldos_gridsize):
@@ -160,15 +158,21 @@ def hartree_contribution():
 
 
 def backpropagation():
+    """
+    Test whether backpropagation works. To this end, the entire forces are
+    computed, and then backpropagated through the network.
+    """
+    # Only compute a specific part of the forces.
     ldos, ldos_calculator, parameters, predictor = run_prediction(backprop=True)
     ldos_calculator.input_data_derivative = predictor.input_data
     ldos_calculator.output_data_torch = predictor.output_data
     mala_forces = ldos_calculator.atomic_forces
-    print(mala_forces.size()) # Should be 8748, 91
+    # Should be 8748, 91
+    print("FORCE TEST: Backpropagation machinery.")
+    print(mala_forces.size())
 
 
-# band_energy_contribution()
-# entropy_contribution()
-# hartree_contribution_density_derivative()
+band_energy_contribution()
+entropy_contribution()
 hartree_contribution()
-# backpropagation()
+backpropagation()
