@@ -1313,7 +1313,10 @@ class LDOS(Target):
         # LDOS, or calculate everything from scratch.
         if ldos_data is not None or (dos_data is not None
                                      and density_data is not None):
-            pass
+            # Not using cached properties is currently not implemented.
+            # We can implement this later as needed.
+            raise Exception("Forces can currently only be calculated using "
+                            "cached properties!")
         else:
             # In this case, we use cached propeties wherever possible.
             ldos_data = self.local_density_of_states
@@ -1324,18 +1327,29 @@ class LDOS(Target):
 
             d_E_d_d = np.zeros_like(self.local_density_of_states)
 
+            #############################
             # DOS dependent energy terms.
+            #############################
+
+            # Band energy and entropy contribution can be calculated separately
+            # (if the debug flag asks for it) or as a singular DOS
+            # contribution.
             if self.debug_forces_flag == "band_energy":
                 d_E_d_D = (self._density_of_states_calculator.d_band_energy_d_dos) \
                            * voxel.volume
+
             if self.debug_forces_flag == "entropy_contribution":
                 d_E_d_D = (self._density_of_states_calculator.
                          d_entropy_contribution_d_dos) * voxel.volume
+
+            # This is the entire DOS contribution.
             if self.debug_forces_flag is None:
                 d_E_d_D = (self._density_of_states_calculator.d_band_energy_d_dos
                            + self._density_of_states_calculator.
                            d_entropy_contribution_d_dos) \
                            * voxel.volume
+
+            # The DOS contribution may need reshaping.
             if self.debug_forces_flag == "band_energy" or \
                 self.debug_forces_flag == "entropy_contribution" or \
                 self.debug_forces_flag is None:
@@ -1346,14 +1360,25 @@ class LDOS(Target):
                 else:
                     raise Exception("Invalid LDOS shape provided.")
 
+            #################################
             # Density dependent energy terms.
+            #################################
+
+            # Currently only the Hartree energy is computded.
             if self.debug_forces_flag is None or self.debug_forces_flag == \
                 "hartree":
-                print(self._density_calculator.force_contributions.shape)
-                d_E_h_d_n = self._density_calculator.force_contributions
+
+                # The derivative of the Hartree energy w.r.t the density
+                # is simply the Hartree potential.
+                # Then we have to apply the chain rule.
+                d_E_h_d_n = self._density_calculator.force_contributions["hartree"]
                 d_n_d_d = analytical_integration_weights("F0", "F1", fermi_energy,
                                                          energy_grid, temperature)
 
+
+                # The second portion of the derivative is the derivative of the
+                # Hartree energy w.r.t. the chemical potential.
+                # That's what happens here.
                 d_f01_d_mu = (analytical_integration_weights("F0", "F1", fermi_energy+delta,
                                                          energy_grid, temperature)
                             - analytical_integration_weights("F0", "F1", fermi_energy-delta,
@@ -1365,8 +1390,14 @@ class LDOS(Target):
                 d_mu_d_d[:] = (d_n_d_d*self.voxel.volume)
                 d_mu_d_d /= (-1.0) * (self._density_of_states_calculator.
                                       d_number_of_electrons_d_mu)
+
+                # Add both portions together.
                 d_E_d_n = d_E_h_d_n * d_n_d_d + d_E_h_d_mu * d_mu_d_d
                 d_E_d_d += d_E_d_n
+
+            #################################
+            # Backpropagation of LDOS terms.
+            #################################
 
             if self.input_data_derivative is not None:
                 self.output_data_torch.backward(torch.from_numpy(d_E_d_d))

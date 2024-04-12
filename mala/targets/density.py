@@ -801,16 +801,19 @@ class Density(Target):
 
         spin = te.get_nspin()
 
-
+        # Putting the force contributions together.
+        # @Normand: If you add more things to be extracted from QE,
+        # I would suggest you do it here.
         # Hartree potential
         hartree_potential = np.zeros([number_of_gridpoints, 1])
         te.v_h_wrapper(hartree_potential, number_of_gridpoints, spin)
         hartree_potential = np.reshape(hartree_potential,
                                        self.grid_dimensions+[1], order="F")
-        force_contribution = np.reshape(hartree_potential,
-                                        [number_of_gridpoints_mala, 1],
-                                        order="C") * Rydberg * \
-                                        self.voxel.volume
+        force_contribution = {"hartree": np.reshape(hartree_potential,
+                                                    [number_of_gridpoints_mala,
+                                                     1],
+                                                    order="C") * Rydberg * \
+                                         self.voxel.volume}
 
         return force_contribution
 

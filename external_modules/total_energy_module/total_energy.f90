@@ -937,7 +937,6 @@ SUBROUTINE v_h_wrapper(v, nnr_in, nspin_in)
 
   DOUBLE PRECISION :: ehart, charge
 
-  print *, "I AM HERE"
     ! Check consistency of dimensions
   IF (nnr_in /= dfftp%nnr) STOP "*** nnr provided to v_h_wrapper() does not match dfftp%nnr"
   IF (nspin_in /= nspin) STOP "*** nspin provided to v_h_wrapper() does not mach lsda_mod%nspin"
