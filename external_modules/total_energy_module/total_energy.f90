@@ -908,7 +908,8 @@ SUBROUTINE v_xc_wrapper(rho_of_r, rho_of_g, rho_core, rhog_core,&
 
 END SUBROUTINE v_xc_wrapper
 
-SUBROUTINE v_h_wrapper(rhog, ehart, charge, v,  nnr_in, nspin_in, ngm_in)
+
+SUBROUTINE v_h_wrapper(v, nnr_in, nspin_in)
   !----------------------------------------------------------------------------
   !  Derived from Quantum Espresso code
   !! author: Paolo Giannozzi
@@ -926,20 +927,22 @@ SUBROUTINE v_h_wrapper(rhog, ehart, charge, v,  nnr_in, nspin_in, ngm_in)
   USE lsda_mod,    ONLY : nspin
   USE kinds,       ONLY : DP
   USE fft_base,    ONLY : dfftp
+!  USE fft_rho,       ONLY : rho_r2g
+  USE scf,           ONLY : rho
 
   IMPLICIT NONE
 
-  INTEGER,     INTENT(IN)  :: ngm_in, nnr_in, nspin_in
-  DOUBLE COMPLEX, INTENT(IN)  :: rhog(ngm_in)
+  INTEGER,     INTENT(IN)  :: nnr_in, nspin_in
   DOUBLE PRECISION,  INTENT(INOUT) :: v(nnr_in,nspin_in)
-  DOUBLE PRECISION,    INTENT(OUT) :: ehart, charge
 
-  ! Check consistency of dimensions
+  DOUBLE PRECISION :: ehart, charge
+
+    ! Check consistency of dimensions
   IF (nnr_in /= dfftp%nnr) STOP "*** nnr provided to v_h_wrapper() does not match dfftp%nnr"
   IF (nspin_in /= nspin) STOP "*** nspin provided to v_h_wrapper() does not mach lsda_mod%nspin"
-  IF (ngm_in /= ngm) STOP "*** ngm provided to v_h_wrapper() does not match gvect%ngm"
 
-  CALL v_h(rhog, ehart, charge, v)
+!  CALL rho_r2g(dfftp, rho_of_r, rho%of_g)
+  CALL v_h(rho%of_g(:,1), ehart, charge, v)
 
 END SUBROUTINE v_h_wrapper
 
