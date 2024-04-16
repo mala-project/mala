@@ -4,7 +4,9 @@ import os
 
 import ase
 from ase.units import m
+from ase.neighborlist import NeighborList
 import numpy as np
+from skspatial.objects import Plane
 
 from mala.common.parameters import ParametersDescriptors, Parameters
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
@@ -100,6 +102,7 @@ class Descriptor(PhysicalData):
         self.verbosity = parameters.verbosity
         self.in_format_ase = ""
         self.atoms = None
+        self.voxel = None
 
     ##############################
     # Properties
@@ -251,14 +254,14 @@ class Descriptor(PhysicalData):
         printout("Calculating descriptors from", qe_out_file,
                  min_verbosity=0)
         # We get the atomic information by using ASE.
-        atoms = ase.io.read(qe_out_file, format=self.in_format_ase)
+        self.atoms = ase.io.read(qe_out_file, format=self.in_format_ase)
 
         # Enforcing / Checking PBC on the read atoms.
-        atoms = self.enforce_pbc(atoms)
+        self.atoms = self.enforce_pbc(self.atoms)
 
         # Get the grid dimensions.
         if "grid_dimensions" in kwargs.keys():
-            grid_dimensions = kwargs["grid_dimensions"]
+            self.grid_dimensions = kwargs["grid_dimensions"]
 
             # Deleting this keyword from the list to avoid conflict with
             # dict below.
@@ -266,18 +269,22 @@ class Descriptor(PhysicalData):
         else:
             qe_outfile = open(qe_out_file, "r")
             lines = qe_outfile.readlines()
-            grid_dimensions = [0, 0, 0]
+            self.grid_dimensions = [0, 0, 0]
 
             for line in lines:
                 if "FFT dimensions" in line:
                     tmp = line.split("(")[1].split(")")[0]
-                    grid_dimensions[0] = int(tmp.split(",")[0])
-                    grid_dimensions[1] = int(tmp.split(",")[1])
-                    grid_dimensions[2] = int(tmp.split(",")[2])
+                    self.grid_dimensions[0] = int(tmp.split(",")[0])
+                    self.grid_dimensions[1] = int(tmp.split(",")[1])
+                    self.grid_dimensions[2] = int(tmp.split(",")[2])
                     break
 
-        return self._calculate(atoms,
-                               working_directory, grid_dimensions, **kwargs)
+        self.voxel = self.atoms.cell.copy()
+        self.voxel[0] = self.voxel[0] / (self.grid_dimensions[0])
+        self.voxel[1] = self.voxel[1] / (self.grid_dimensions[1])
+        self.voxel[2] = self.voxel[2] / (self.grid_dimensions[2])
+
+        return self._calculate(working_directory, **kwargs)
 
     def calculate_from_atoms(self, atoms, grid_dimensions,
                              working_directory=".", **kwargs):
@@ -304,9 +311,13 @@ class Descriptor(PhysicalData):
             (x,y,z,descriptor_dimension)
         """
         # Enforcing / Checking PBC on the input atoms.
-        atoms = self.enforce_pbc(atoms)
-        return self._calculate(atoms, working_directory,
-                               grid_dimensions, **kwargs)
+        self.atoms = self.enforce_pbc(atoms)
+        self.grid_dimensions = grid_dimensions
+        self.voxel = self.atoms.cell.copy()
+        self.voxel[0] = self.voxel[0] / (self.grid_dimensions[0])
+        self.voxel[1] = self.voxel[1] / (self.grid_dimensions[1])
+        self.voxel[2] = self.voxel[2] / (self.grid_dimensions[2])
+        return self._calculate(working_directory, **kwargs)
 
     def gather_descriptors(self, descriptors_np, use_pickled_comm=False):
         """
@@ -454,33 +465,6 @@ class Descriptor(PhysicalData):
                 transpose([2, 1, 0, 3])
         return descriptors_full, local_offset, local_reach
 
-    def get_acsd(self, descriptor_data, ldos_data):
-        """
-        Calculate the ACSD for given descriptors and LDOS data.
-
-        ACSD stands for average cosine similarity distance and is a metric
-        of how well the descriptors capture the local environment to a
-        degree where similar vectors result in simlar LDOS vectors.
-
-        Parameters
-        ----------
-        descriptor_data : numpy.ndarray
-            Array containing the descriptors.
-
-        ldos_data : numpy.ndarray
-            Array containing the LDOS.
-
-        Returns
-        -------
-        acsd : float
-            The average cosine similarity distance.
-
-        """
-        return self._calculate_acsd(descriptor_data, ldos_data,
-                                    self.parameters.acsd_points,
-                                    descriptor_vectors_contain_xyz=
-                                    self.descriptors_contain_xyz)
-
     # Private methods
     #################
 
@@ -499,14 +483,14 @@ class Descriptor(PhysicalData):
         if self.atoms is not None:
             import openpmd_api as io
 
-            voxel = self.atoms.cell.copy()
-            voxel[0] = voxel[0] / (self.grid_dimensions[0])
-            voxel[1] = voxel[1] / (self.grid_dimensions[1])
-            voxel[2] = voxel[2] / (self.grid_dimensions[2])
+            self.voxel = self.atoms.cell.copy()
+            self.voxel[0] = self.voxel[0] / (self.grid_dimensions[0])
+            self.voxel[1] = self.voxel[1] / (self.grid_dimensions[1])
+            self.voxel[2] = self.voxel[2] / (self.grid_dimensions[2])
 
             mesh.geometry = io.Geometry.cartesian
-            mesh.grid_spacing = voxel.cellpar()[0:3]
-            mesh.set_attribute("angles", voxel.cellpar()[3:])
+            mesh.grid_spacing = self.voxel.cellpar()[0:3]
+            mesh.set_attribute("angles", self.voxel.cellpar()[3:])
 
     def _get_atoms(self):
         return self.atoms
@@ -526,8 +510,10 @@ class Descriptor(PhysicalData):
         """
         from lammps import lammps
 
-        parallel_warn("Do not initialize more than one pre-processing calculation\
-        in the same directory at the same time. Data may be over-written.")
+        parallel_warn("Using LAMMPS for descriptor calculation. "
+                      "Do not initialize more than one pre-processing "
+                      "calculation in the same directory at the same time. "
+                      "Data may be over-written.")
 
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = ["-screen", "none", "-log",
@@ -727,8 +713,136 @@ class Descriptor(PhysicalData):
 
         return lmp
 
+    def _setup_atom_list(self):
+        """
+        Set up a list of atoms potentially relevant for descriptor calculation.
+
+        If periodic boundary conditions are used, which is usually the case
+        for MALA simulation, one has to compute descriptors by also
+        incorporating atoms from neighboring cells.
+
+        FURTHER OPTIMIZATION: Probably not that much, this mostly already uses
+        optimized python functions.
+        """
+        if np.any(self.atoms.pbc):
+
+            # To determine the list of relevant atoms we first take the edges
+            # of the simulation cell and use them to determine all cells
+            # which hold atoms that _may_ be relevant for the calculation.
+            edges = list(np.array([
+                [0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1],
+                [1, 1, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0]])*np.array(self.grid_dimensions))
+            all_cells_list = None
+
+            # For each edge point create a neighborhoodlist to all cells
+            # given by the cutoff radius.
+            for edge in edges:
+                edge_point = self._grid_to_coord(edge)
+                neighborlist = ase.neighborlist.NeighborList(
+                    np.zeros(len(self.atoms)+1) +
+                    [self.parameters.atomic_density_cutoff],
+                    bothways=True,
+                    self_interaction=False,
+                    primitive=ase.neighborlist.NewPrimitiveNeighborList)
+
+                atoms_with_grid_point = self.atoms.copy()
+
+                # Construct a ghost atom representing the grid point.
+                atoms_with_grid_point.append(ase.Atom("H", edge_point))
+                neighborlist.update(atoms_with_grid_point)
+                indices, offsets = neighborlist.get_neighbors(len(self.atoms))
+
+                # Incrementally fill the list containing all cells to be
+                # considered.
+                if all_cells_list is None:
+                    all_cells_list = np.unique(offsets, axis=0)
+                else:
+                    all_cells_list = \
+                        np.concatenate((all_cells_list,
+                                        np.unique(offsets, axis=0)))
+
+            # Delete the original cell from the list of all cells.
+            # This is to avoid double checking of atoms below.
+            all_cells = np.unique(all_cells_list, axis=0)
+            idx = 0
+            for a in range(0, len(all_cells)):
+                if (all_cells[a, :] == np.array([0, 0, 0])).all():
+                    break
+                idx += 1
+            all_cells = np.delete(all_cells, idx, axis=0)
+
+            # Create an object to hold all relevant atoms.
+            # First, instantiate it by filling it will all atoms from all
+            # potentiall relevant cells, as identified above.
+            all_atoms = None
+            for a in range(0, len(self.atoms)):
+                if all_atoms is None:
+                    all_atoms = self.atoms.positions[
+                                    a] + all_cells @ self.atoms.get_cell()
+                else:
+                    all_atoms = np.concatenate((all_atoms,
+                                                self.atoms.positions[
+                                                    a] + all_cells @ self.atoms.get_cell()))
+
+            # Next, construct the planes forming the unit cell.
+            # Atoms from neighboring cells are only included in the list of
+            # all relevant atoms, if they have a distance to any of these
+            # planes smaller than the cutoff radius. Elsewise, they would
+            # not be included in the eventual calculation anyhow.
+            planes = [[[0, 1, 0], [0, 0, 1], [0, 0, 0]],
+                      [[self.grid_dimensions[0], 1, 0],
+                       [self.grid_dimensions[0], 0, 1], self.grid_dimensions],
+                      [[1, 0, 0], [0, 0, 1], [0, 0, 0]],
+                      [[1, self.grid_dimensions[1], 0],
+                       [0, self.grid_dimensions[1], 1], self.grid_dimensions],
+                      [[1, 0, 0], [0, 1, 0], [0, 0, 0]],
+                      [[1, 0, self.grid_dimensions[2]],
+                       [0, 1, self.grid_dimensions[2]], self.grid_dimensions]]
+            all_distances = []
+            for plane in planes:
+                curplane = Plane.from_points(self._grid_to_coord(plane[0]),
+                                             self._grid_to_coord(plane[1]),
+                                             self._grid_to_coord(plane[2]))
+                distances = []
+
+                # TODO: This may be optimized, and formulated in an array
+                # operation.
+                for a in range(np.shape(all_atoms)[0]):
+                    distances.append(curplane.distance_point(all_atoms[a]))
+                all_distances.append(distances)
+            all_distances = np.array(all_distances)
+            all_distances = np.min(all_distances, axis=0)
+            all_atoms = np.squeeze(all_atoms[np.argwhere(all_distances <
+                                                         self.parameters.atomic_density_cutoff),
+                                   :])
+            return np.concatenate((all_atoms, self.atoms.positions))
+
+        else:
+            # If no PBC are used, only consider a single cell.
+            return self.atoms.positions
+
+    def _grid_to_coord(self, gridpoint):
+        # Convert grid indices to real space grid point.
+        i = gridpoint[0]
+        j = gridpoint[1]
+        k = gridpoint[2]
+        # Orthorhombic cells and triclinic ones have
+        # to be treated differently, see domain.cpp
+
+        if self.atoms.cell.orthorhombic:
+            return np.diag(self.voxel) * [i, j, k]
+        else:
+            ret = [0, 0, 0]
+            ret[0] = i / self.grid_dimensions[0] * self.atoms.cell[0, 0] + \
+                j / self.grid_dimensions[1] * self.atoms.cell[1, 0] + \
+                k / self.grid_dimensions[2] * self.atoms.cell[2, 0]
+            ret[1] = j / self.grid_dimensions[1] * self.atoms.cell[1, 1] + \
+                k / self.grid_dimensions[2] * self.atoms.cell[1, 2]
+            ret[2] = k / self.grid_dimensions[2] * self.atoms.cell[2, 2]
+            return np.array(ret)
+
     @abstractmethod
-    def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
+    def _calculate(self, outdir, **kwargs):
         pass
 
     def _set_feature_size_from_array(self, array):

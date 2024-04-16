@@ -238,8 +238,8 @@ class ACSDAnalyzer(HyperOpt):
                     outstring += "]"
                     best_trial_string = ". No suitable trial found yet."
                     if best_acsd is not None:
-                        best_trial_string = ". Best trial is"+str(best_trial) \
-                                            + "with"+str(best_acsd)
+                        best_trial_string = ". Best trial is "+str(best_trial) \
+                                            + " with "+str(best_acsd)
 
                     printout("Trial", idx, "finished with ACSD="+str(acsd),
                              "and parameters:", outstring+best_trial_string,

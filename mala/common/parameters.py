@@ -30,7 +30,7 @@ class ParametersBase(JSONSerializable):
         super(ParametersBase, self).__init__()
         self._configuration = {"gpu": False, "horovod": False, "mpi": False,
                                "device": "cpu", "openpmd_configuration": {},
-                               "openpmd_granularity": 1}
+                               "openpmd_granularity": 1, "lammps": True}
         pass
 
     def show(self, indent=""):
@@ -70,6 +70,9 @@ class ParametersBase(JSONSerializable):
 
     def _update_openpmd_granularity(self, new_granularity):
         self._configuration["openpmd_granularity"] = new_granularity
+
+    def _update_lammps(self, new_lammps):
+        self._configuration["lammps"] = new_lammps
 
     @staticmethod
     def _member_to_json(member):
@@ -1180,6 +1183,7 @@ class Parameters:
         # TODO: Maybe as a percentage? Feature dimensions can be quite
         # different.
         self.openpmd_granularity = 1
+        self.use_lammps = True
 
     @property
     def openpmd_granularity(self):
@@ -1307,6 +1311,7 @@ class Parameters:
     @use_mpi.setter
     def use_mpi(self, value):
         set_mpi_status(value)
+
         # Invalidate, will be updated in setter.
         self.device = None
         self._use_mpi = value
@@ -1331,14 +1336,27 @@ class Parameters:
     @openpmd_configuration.setter
     def openpmd_configuration(self, value):
         self._openpmd_configuration = value
-
-        # Invalidate, will be updated in setter.
         self.network._update_openpmd_configuration(self.openpmd_configuration)
         self.descriptors._update_openpmd_configuration(self.openpmd_configuration)
         self.targets._update_openpmd_configuration(self.openpmd_configuration)
         self.data._update_openpmd_configuration(self.openpmd_configuration)
         self.running._update_openpmd_configuration(self.openpmd_configuration)
         self.hyperparameters._update_openpmd_configuration(self.openpmd_configuration)
+
+    @property
+    def use_lammps(self):
+        """Control whether or not to use LAMMPS for descriptor calculation."""
+        return self._use_lammps
+
+    @use_lammps.setter
+    def use_lammps(self, value):
+        self._use_lammps = value
+        self.network._update_lammps(self.use_lammps)
+        self.descriptors._update_lammps(self.use_lammps)
+        self.targets._update_lammps(self.use_lammps)
+        self.data._update_lammps(self.use_lammps)
+        self.running._update_lammps(self.use_lammps)
+        self.hyperparameters._update_lammps(self.use_lammps)
 
     def show(self):
         """Print name and values of all attributes of this object."""

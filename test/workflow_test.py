@@ -46,8 +46,6 @@ class TestFullWorkflow:
         assert desired_loss_improvement_factor * \
                test_trainer.initial_test_loss > test_trainer.final_test_loss
 
-    @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
-                        reason="LAMMPS is currently not part of the pipeline.")
     def test_preprocessing(self):
         """
         Test whether MALA can preprocess data.
@@ -60,7 +58,7 @@ class TestFullWorkflow:
         # Set up parameters.
         test_parameters = mala.Parameters()
         test_parameters.descriptors.descriptor_type = "Bispectrum"
-        test_parameters.descriptors.bispectrum_twojmax = 6
+        test_parameters.descriptors.bispectrum_twojmax = 4
         test_parameters.descriptors.bispectrum_cutoff = 4.67637
         test_parameters.descriptors.descriptors_contain_xyz = True
         test_parameters.targets.target_type = "LDOS"
@@ -86,15 +84,13 @@ class TestFullWorkflow:
         input_data = np.load("Be_snapshot0.in.npy")
         input_data_shape = np.shape(input_data)
         assert input_data_shape[0] == 18 and input_data_shape[1] == 18 and \
-               input_data_shape[2] == 27 and input_data_shape[3] == 33
+               input_data_shape[2] == 27 and input_data_shape[3] == 17
 
         output_data = np.load("Be_snapshot0.out.npy")
         output_data_shape = np.shape(output_data)
         assert output_data_shape[0] == 18 and output_data_shape[1] == 18 and\
                output_data_shape[2] == 27 and output_data_shape[3] == 11
 
-    @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
-                        reason="LAMMPS is currently not part of the pipeline.")
     def test_preprocessing_openpmd(self):
         """
         Test whether MALA can preprocess data.
@@ -107,7 +103,7 @@ class TestFullWorkflow:
         # Set up parameters.
         test_parameters = mala.Parameters()
         test_parameters.descriptors.descriptor_type = "Bispectrum"
-        test_parameters.descriptors.bispectrum_twojmax = 6
+        test_parameters.descriptors.bispectrum_twojmax = 4
         test_parameters.descriptors.bispectrum_cutoff = 4.67637
         test_parameters.descriptors.descriptors_contain_xyz = True
         test_parameters.targets.target_type = "LDOS"
@@ -134,7 +130,7 @@ class TestFullWorkflow:
             read_from_openpmd_file("Be_snapshot0.in.h5")
         input_data_shape = np.shape(input_data)
         assert input_data_shape[0] == 18 and input_data_shape[1] == 18 and \
-               input_data_shape[2] == 27 and input_data_shape[3] == 30
+               input_data_shape[2] == 27 and input_data_shape[3] == 14
 
         output_data = data_converter.target_calculator.\
             read_from_openpmd_file("Be_snapshot0.out.h5")
