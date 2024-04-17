@@ -155,7 +155,7 @@ jobs:
           conda env export -n mala-cpu > env_1.yml
 
           # install mala package
-          pip --no-cache-dir install -e .[opt,test]
+          pip --no-cache-dir install -e .[opt,test] --no-build-isolation
 
       - name: Check if Conda environment meets the specified requirements
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
