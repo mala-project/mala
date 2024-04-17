@@ -1,4 +1,5 @@
 """Collection of all parameter related classes and functions."""
+
 import importlib
 import inspect
 import json
@@ -9,15 +10,22 @@ from time import sleep
 horovod_available = False
 try:
     import horovod.torch as hvd
+
     horovod_available = True
 except ModuleNotFoundError:
     pass
 import numpy as np
 import torch
 
-from mala.common.parallelizer import printout, set_horovod_status, \
-    set_mpi_status, get_rank, get_local_rank, set_current_verbosity, \
-    parallel_warn
+from mala.common.parallelizer import (
+    printout,
+    set_horovod_status,
+    set_mpi_status,
+    get_rank,
+    get_local_rank,
+    set_current_verbosity,
+    parallel_warn,
+)
 from mala.common.json_serializable import JSONSerializable
 
 DEFAULT_NP_DATA_DTYPE = np.float32
@@ -26,11 +34,19 @@ DEFAULT_NP_DATA_DTYPE = np.float32
 class ParametersBase(JSONSerializable):
     """Base parameter class for MALA."""
 
-    def __init__(self,):
+    def __init__(
+        self,
+    ):
         super(ParametersBase, self).__init__()
-        self._configuration = {"gpu": False, "horovod": False, "mpi": False,
-                               "device": "cpu", "openpmd_configuration": {},
-                               "openpmd_granularity": 1, "lammps": True}
+        self._configuration = {
+            "gpu": False,
+            "horovod": False,
+            "mpi": False,
+            "device": "cpu",
+            "openpmd_configuration": {},
+            "openpmd_granularity": 1,
+            "lammps": True,
+        }
         pass
 
     def show(self, indent=""):
@@ -47,11 +63,15 @@ class ParametersBase(JSONSerializable):
         for v in vars(self):
             if v != "_configuration":
                 if v[0] == "_":
-                    printout(indent + '%-15s: %s' % (v[1:], getattr(self, v)),
-                             min_verbosity=0)
+                    printout(
+                        indent + "%-15s: %s" % (v[1:], getattr(self, v)),
+                        min_verbosity=0,
+                    )
                 else:
-                    printout(indent + '%-15s: %s' % (v, getattr(self, v)),
-                             min_verbosity=0)
+                    printout(
+                        indent + "%-15s: %s" % (v, getattr(self, v)),
+                        min_verbosity=0,
+                    )
 
     def _update_gpu(self, new_gpu):
         self._configuration["gpu"] = new_gpu
@@ -92,8 +112,9 @@ class ParametersBase(JSONSerializable):
 
         """
         json_dict = {}
-        members = inspect.getmembers(self,
-                                     lambda a: not (inspect.isroutine(a)))
+        members = inspect.getmembers(
+            self, lambda a: not (inspect.isroutine(a))
+        )
         for member in members:
             # Filter out all private members, builtins, etc.
             if member[0][0] != "_":
@@ -141,8 +162,9 @@ class ParametersBase(JSONSerializable):
             else:
                 # If it is not an elementary builtin type AND not an object
                 # dictionary, something is definitely off.
-                raise Exception("Could not decode JSON file, error in",
-                                json_value)
+                raise Exception(
+                    "Could not decode JSON file, error in", json_value
+                )
 
     @classmethod
     def from_json(cls, json_dict):
@@ -173,8 +195,9 @@ class ParametersBase(JSONSerializable):
                     if len(json_dict[key]) > 0:
                         _member = []
                         for m in json_dict[key]:
-                            _member.append(deserialized_object.
-                                           _json_to_member(m))
+                            _member.append(
+                                deserialized_object._json_to_member(m)
+                            )
                         setattr(deserialized_object, key, _member)
                     else:
                         setattr(deserialized_object, key, json_dict[key])
@@ -183,16 +206,20 @@ class ParametersBase(JSONSerializable):
                     if len(json_dict[key]) > 0:
                         _member = {}
                         for m in json_dict[key].keys():
-                            _member[m] = deserialized_object.\
-                                _json_to_member(json_dict[key][m])
+                            _member[m] = deserialized_object._json_to_member(
+                                json_dict[key][m]
+                            )
                         setattr(deserialized_object, key, _member)
 
                     else:
                         setattr(deserialized_object, key, json_dict[key])
 
                 else:
-                    setattr(deserialized_object, key, deserialized_object.
-                            _json_to_member(json_dict[key]))
+                    setattr(
+                        deserialized_object,
+                        key,
+                        deserialized_object._json_to_member(json_dict[key]),
+                    )
         return deserialized_object
 
 
@@ -737,7 +764,7 @@ class ParametersRunning(ParametersBase):
         self.use_mixed_precision = False
         self.use_graphs = False
         self.training_report_frequency = 1000
-        self.profiler_range = None #[1000, 2000]
+        self.profiler_range = None  # [1000, 2000]
 
     def _update_horovod(self, new_horovod):
         super(ParametersRunning, self)._update_horovod(new_horovod)
@@ -763,8 +790,10 @@ class ParametersRunning(ParametersBase):
     def during_training_metric(self, value):
         if value != "ldos":
             if self._configuration["horovod"]:
-                raise Exception("Currently, MALA can only operate with the "
-                                "\"ldos\" metric for horovod runs.")
+                raise Exception(
+                    "Currently, MALA can only operate with the "
+                    '"ldos" metric for horovod runs.'
+                )
         self._during_training_metric = value
 
     @property
@@ -786,16 +815,20 @@ class ParametersRunning(ParametersBase):
     def after_before_training_metric(self, value):
         if value != "ldos":
             if self._configuration["horovod"]:
-                raise Exception("Currently, MALA can only operate with the "
-                                "\"ldos\" metric for horovod runs.")
+                raise Exception(
+                    "Currently, MALA can only operate with the "
+                    '"ldos" metric for horovod runs.'
+                )
         self._after_before_training_metric = value
 
     @during_training_metric.setter
     def during_training_metric(self, value):
         if value != "ldos":
             if self._configuration["horovod"]:
-                raise Exception("Currently, MALA can only operate with the "
-                                "\"ldos\" metric for horovod runs.")
+                raise Exception(
+                    "Currently, MALA can only operate with the "
+                    '"ldos" metric for horovod runs.'
+                )
         self._during_training_metric = value
 
     @property
@@ -811,14 +844,18 @@ class ParametersRunning(ParametersBase):
     @use_graphs.setter
     def use_graphs(self, value):
         if value is True:
-            if self._configuration["gpu"] is False or \
-                    torch.version.cuda is None:
+            if (
+                self._configuration["gpu"] is False
+                or torch.version.cuda is None
+            ):
                 parallel_warn("No CUDA or GPU found, cannot use CUDA graphs.")
                 value = False
             else:
                 if float(torch.version.cuda) < 11.0:
-                    raise Exception("Cannot use CUDA graphs with a CUDA"
-                                    " version below 11.0")
+                    raise Exception(
+                        "Cannot use CUDA graphs with a CUDA"
+                        " version below 11.0"
+                    )
         self._use_graphs = value
 
 
@@ -954,7 +991,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
 
     def __init__(self):
         super(ParametersHyperparameterOptimization, self).__init__()
-        self.direction = 'minimize'
+        self.direction = "minimize"
         self.n_trials = 100
         self.hlist = []
         self.hyper_opt_method = "optuna"
@@ -1034,18 +1071,24 @@ class ParametersHyperparameterOptimization(ParametersBase):
             if v != "_configuration":
                 if v != "hlist":
                     if v[0] == "_":
-                        printout(indent + '%-15s: %s' %
-                                 (v[1:], getattr(self, v)), min_verbosity=0)
+                        printout(
+                            indent + "%-15s: %s" % (v[1:], getattr(self, v)),
+                            min_verbosity=0,
+                        )
                     else:
                         printout(
-                            indent + '%-15s: %s' % (v, getattr(self, v)),
-                            min_verbosity=0)
+                            indent + "%-15s: %s" % (v, getattr(self, v)),
+                            min_verbosity=0,
+                        )
                 if v == "hlist":
                     i = 0
                     for hyp in self.hlist:
-                        printout(indent + '%-15s: %s' %
-                                 ("hyperparameter #"+str(i), hyp.name),
-                                 min_verbosity=0)
+                        printout(
+                            indent
+                            + "%-15s: %s"
+                            % ("hyperparameter #" + str(i), hyp.name),
+                            min_verbosity=0,
+                        )
                         i += 1
 
 
@@ -1209,7 +1252,9 @@ class Parameters:
         self.targets._update_openpmd_granularity(self._openpmd_granularity)
         self.data._update_openpmd_granularity(self._openpmd_granularity)
         self.running._update_openpmd_granularity(self._openpmd_granularity)
-        self.hyperparameters._update_openpmd_granularity(self._openpmd_granularity)
+        self.hyperparameters._update_openpmd_granularity(
+            self._openpmd_granularity
+        )
 
     @property
     def verbosity(self):
@@ -1244,8 +1289,10 @@ class Parameters:
             if torch.cuda.is_available():
                 self._use_gpu = True
             else:
-                parallel_warn("GPU requested, but no GPU found. MALA will "
-                              "operate with CPU only.")
+                parallel_warn(
+                    "GPU requested, but no GPU found. MALA will "
+                    "operate with CPU only."
+                )
 
         # Invalidate, will be updated in setter.
         self.device = None
@@ -1279,9 +1326,10 @@ class Parameters:
                 self.running._update_horovod(self.use_horovod)
                 self.hyperparameters._update_horovod(self.use_horovod)
             else:
-                parallel_warn("Horovod requested, but not installed found. "
-                              "MALA will operate without horovod only.")
-
+                parallel_warn(
+                    "Horovod requested, but not installed found. "
+                    "MALA will operate without horovod only."
+                )
 
     @property
     def device(self):
@@ -1292,8 +1340,7 @@ class Parameters:
     def device(self, value):
         device_id = get_local_rank()
         if self.use_gpu:
-            self._device = "cuda:"\
-                           f"{device_id}"
+            self._device = "cuda:" f"{device_id}"
         else:
             self._device = "cpu"
         self.network._update_device(self._device)
@@ -1337,11 +1384,15 @@ class Parameters:
     def openpmd_configuration(self, value):
         self._openpmd_configuration = value
         self.network._update_openpmd_configuration(self.openpmd_configuration)
-        self.descriptors._update_openpmd_configuration(self.openpmd_configuration)
+        self.descriptors._update_openpmd_configuration(
+            self.openpmd_configuration
+        )
         self.targets._update_openpmd_configuration(self.openpmd_configuration)
         self.data._update_openpmd_configuration(self.openpmd_configuration)
         self.running._update_openpmd_configuration(self.openpmd_configuration)
-        self.hyperparameters._update_openpmd_configuration(self.openpmd_configuration)
+        self.hyperparameters._update_openpmd_configuration(
+            self.openpmd_configuration
+        )
 
     @property
     def use_lammps(self):
@@ -1360,8 +1411,9 @@ class Parameters:
 
     def show(self):
         """Print name and values of all attributes of this object."""
-        printout("--- " + self.__doc__.split("\n")[1] + " ---",
-                 min_verbosity=0)
+        printout(
+            "--- " + self.__doc__.split("\n")[1] + " ---", min_verbosity=0
+        )
 
         # Two for-statements so that global parameters are shown on top.
         for v in vars(self):
@@ -1369,16 +1421,21 @@ class Parameters:
                 pass
             else:
                 if v[0] == "_":
-                    printout('%-15s: %s' % (v[1:], getattr(self, v)),
-                             min_verbosity=0)
+                    printout(
+                        "%-15s: %s" % (v[1:], getattr(self, v)),
+                        min_verbosity=0,
+                    )
                 else:
-                    printout('%-15s: %s' % (v, getattr(self, v)),
-                             min_verbosity=0)
+                    printout(
+                        "%-15s: %s" % (v, getattr(self, v)), min_verbosity=0
+                    )
         for v in vars(self):
             if isinstance(getattr(self, v), ParametersBase):
                 parobject = getattr(self, v)
-                printout("--- " + parobject.__doc__.split("\n")[1] + " ---",
-                         min_verbosity=0)
+                printout(
+                    "--- " + parobject.__doc__.split("\n")[1] + " ---",
+                    min_verbosity=0,
+                )
                 parobject.show("\t")
 
     def save(self, filename, save_format="json"):
@@ -1401,14 +1458,15 @@ class Parameters:
         if save_format == "pickle":
             if filename[-3:] != "pkl":
                 filename += ".pkl"
-            with open(filename, 'wb') as handle:
+            with open(filename, "wb") as handle:
                 pickle.dump(self, handle, protocol=4)
         elif save_format == "json":
             if filename[-4:] != "json":
                 filename += ".json"
             json_dict = {}
-            members = inspect.getmembers(self,
-                                         lambda a: not (inspect.isroutine(a)))
+            members = inspect.getmembers(
+                self, lambda a: not (inspect.isroutine(a))
+            )
 
             # Two for loops so global properties enter the dict first.
             for member in members:
@@ -1480,7 +1538,7 @@ class Parameters:
         self.use_gpu = True
         self.use_mpi = True
         device_temp = self.device
-        sleep(get_rank()*wait_time)
+        sleep(get_rank() * wait_time)
 
         # Now we can turn of MPI and set the device manually.
         self.use_mpi = False
@@ -1493,8 +1551,7 @@ class Parameters:
         self.hyperparameters._update_device(device_temp)
 
     @classmethod
-    def load_from_file(cls, file, save_format="json",
-                       no_snapshots=False):
+    def load_from_file(cls, file, save_format="json", no_snapshots=False):
         """
         Load a Parameters object from a file.
 
@@ -1519,7 +1576,7 @@ class Parameters:
         """
         if save_format == "pickle":
             if isinstance(file, str):
-                loaded_parameters = pickle.load(open(file, 'rb'))
+                loaded_parameters = pickle.load(open(file, "rb"))
             else:
                 loaded_parameters = pickle.load(file)
             if no_snapshots is True:
@@ -1532,19 +1589,23 @@ class Parameters:
 
             loaded_parameters = cls()
             for key in json_dict:
-                if isinstance(json_dict[key], dict) and key \
-                        != "openpmd_configuration":
+                if (
+                    isinstance(json_dict[key], dict)
+                    and key != "openpmd_configuration"
+                ):
                     # These are the other parameter classes.
-                    sub_parameters =\
-                        globals()[json_dict[key]["_parameters_type"]].\
-                        from_json(json_dict[key])
+                    sub_parameters = globals()[
+                        json_dict[key]["_parameters_type"]
+                    ].from_json(json_dict[key])
                     setattr(loaded_parameters, key, sub_parameters)
 
             # We iterate a second time, to set global values, so that they
             # are properly forwarded.
             for key in json_dict:
-                if not isinstance(json_dict[key], dict) or key == \
-                        "openpmd_configuration":
+                if (
+                    not isinstance(json_dict[key], dict)
+                    or key == "openpmd_configuration"
+                ):
                     setattr(loaded_parameters, key, json_dict[key])
             if no_snapshots is True:
                 loaded_parameters.data.snapshot_directories_list = []
@@ -1573,8 +1634,9 @@ class Parameters:
             The loaded Parameters object.
 
         """
-        return Parameters.load_from_file(file, save_format="pickle",
-                                         no_snapshots=no_snapshots)
+        return Parameters.load_from_file(
+            file, save_format="pickle", no_snapshots=no_snapshots
+        )
 
     @classmethod
     def load_from_json(cls, file, no_snapshots=False):
@@ -1596,5 +1658,6 @@ class Parameters:
             The loaded Parameters object.
 
         """
-        return Parameters.load_from_file(file, save_format="json",
-                                         no_snapshots=no_snapshots)
+        return Parameters.load_from_file(
+            file, save_format="json", no_snapshots=no_snapshots
+        )

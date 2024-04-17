@@ -1,10 +1,9 @@
 """ASE calculator for MALA predictions."""
 
 from ase.calculators.calculator import Calculator, all_changes
-import numpy as np
 
-from mala import Parameters, Network, DataHandler, Predictor, LDOS, Density, DOS
-from mala.common.parallelizer import get_rank, get_comm, barrier
+from mala import Parameters, Network, DataHandler, Predictor, LDOS
+from mala.common.parallelizer import barrier
 
 
 class MALA(Calculator):
@@ -52,7 +51,9 @@ class MALA(Calculator):
         # Copy the MALA relevant objects.
         self.mala_parameters: Parameters = params
         if self.mala_parameters.targets.target_type != "LDOS":
-            raise Exception("The MALA calculator currently only works with the" "LDOS.")
+            raise Exception(
+                "The MALA calculator currently only works with the LDOS."
+            )
 
         self.network: Network = network
         self.data_handler: DataHandler = data
@@ -95,11 +96,16 @@ class MALA(Calculator):
             Predictor.load_run(run_name, path=path)
         )
         calculator = cls(
-            loaded_params, loaded_network, new_datahandler, predictor=loaded_runner
+            loaded_params,
+            loaded_network,
+            new_datahandler,
+            predictor=loaded_runner,
         )
         return calculator
 
-    def calculate(self, atoms=None, properties=["energy"], system_changes=all_changes):
+    def calculate(
+        self, atoms=None, properties=["energy"], system_changes=all_changes
+    ):
         """
         Perform the calculations.
 
@@ -139,8 +145,8 @@ class MALA(Calculator):
         ldos_calculator: LDOS = self.data_handler.target_calculator
 
         ldos_calculator.read_from_array(ldos)
-        energy, self.last_energy_contributions = ldos_calculator.get_total_energy(
-            return_energy_contributions=True
+        energy, self.last_energy_contributions = (
+            ldos_calculator.get_total_energy(return_energy_contributions=True)
         )
         barrier()
 
@@ -184,10 +190,14 @@ class MALA(Calculator):
             )
         if "static_structure_factor" in properties:
             self.results["static_structure_factor"] = (
-                self.data_handler.target_calculator.get_static_structure_factor(atoms)
+                self.data_handler.target_calculator.get_static_structure_factor(
+                    atoms
+                )
             )
         if "ion_ion_energy" in properties:
-            self.results["ion_ion_energy"] = self.last_energy_contributions["e_ewald"]
+            self.results["ion_ion_energy"] = self.last_energy_contributions[
+                "e_ewald"
+            ]
 
     def save_calculator(self, filename, save_path="./"):
         """

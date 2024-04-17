@@ -1,4 +1,5 @@
 """DataSet for lazy-loading."""
+
 import os
 from multiprocessing import shared_memory
 
@@ -45,10 +46,19 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         If True, then the gradient is stored for the inputs.
     """
 
-    def __init__(self, batch_size, snapshot, input_dimension, output_dimension,
-                 input_data_scaler, output_data_scaler, descriptor_calculator,
-                 target_calculator, use_horovod,
-                 input_requires_grad=False):
+    def __init__(
+        self,
+        batch_size,
+        snapshot,
+        input_dimension,
+        output_dimension,
+        input_data_scaler,
+        output_data_scaler,
+        descriptor_calculator,
+        target_calculator,
+        use_horovod,
+        input_requires_grad=False,
+    ):
         self.snapshot = snapshot
         self.input_dimension = input_dimension
         self.output_dimension = output_dimension
@@ -58,8 +68,9 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         self.target_calculator = target_calculator
         self.number_of_snapshots = 0
         self.total_size = 0
-        self.descriptors_contain_xyz = self.descriptor_calculator.\
-            descriptors_contain_xyz
+        self.descriptors_contain_xyz = (
+            self.descriptor_calculator.descriptors_contain_xyz
+        )
         self.currently_loaded_file = None
         self.input_data = np.empty(0)
         self.output_data = np.empty(0)
@@ -83,25 +94,45 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         """
         # Get array shape and data types
         if self.snapshot.snapshot_type == "numpy":
-            self.input_shape, self.input_dtype = self.descriptor_calculator. \
-                read_dimensions_from_numpy_file(
-                os.path.join(self.snapshot.input_npy_directory,
-                             self.snapshot.input_npy_file), read_dtype=True)
+            self.input_shape, self.input_dtype = (
+                self.descriptor_calculator.read_dimensions_from_numpy_file(
+                    os.path.join(
+                        self.snapshot.input_npy_directory,
+                        self.snapshot.input_npy_file,
+                    ),
+                    read_dtype=True,
+                )
+            )
 
-            self.output_shape, self.output_dtype = self.target_calculator. \
-                read_dimensions_from_numpy_file(
-                os.path.join(self.snapshot.output_npy_directory,
-                             self.snapshot.output_npy_file), read_dtype=True)
+            self.output_shape, self.output_dtype = (
+                self.target_calculator.read_dimensions_from_numpy_file(
+                    os.path.join(
+                        self.snapshot.output_npy_directory,
+                        self.snapshot.output_npy_file,
+                    ),
+                    read_dtype=True,
+                )
+            )
         elif self.snapshot.snapshot_type == "openpmd":
-            self.input_shape, self.input_dtype = self.descriptor_calculator. \
-                read_dimensions_from_openpmd_file(
-                os.path.join(self.snapshot.input_npy_directory,
-                             self.snapshot.input_npy_file), read_dtype=True)
+            self.input_shape, self.input_dtype = (
+                self.descriptor_calculator.read_dimensions_from_openpmd_file(
+                    os.path.join(
+                        self.snapshot.input_npy_directory,
+                        self.snapshot.input_npy_file,
+                    ),
+                    read_dtype=True,
+                )
+            )
 
-            self.output_shape, self.output_dtype = self.target_calculator. \
-                read_dimensions_from_openpmd_file(
-                os.path.join(self.snapshot.output_npy_directory,
-                             self.snapshot.output_npy_file), read_dtype=True)
+            self.output_shape, self.output_dtype = (
+                self.target_calculator.read_dimensions_from_openpmd_file(
+                    os.path.join(
+                        self.snapshot.output_npy_directory,
+                        self.snapshot.output_npy_file,
+                    ),
+                    read_dtype=True,
+                )
+            )
         else:
             raise Exception("Invalid snapshot type selected.")
 
@@ -109,8 +140,9 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         # usage to data in FP32 type (which is a good idea anyway to save
         # memory)
         if self.input_dtype != np.float32 or self.output_dtype != np.float32:
-            raise Exception("LazyLoadDatasetSingle requires numpy data in "
-                            "FP32.")
+            raise Exception(
+                "LazyLoadDatasetSingle requires numpy data in FP32."
+            )
 
         # Allocate shared memory buffer
         input_bytes = self.input_dtype.itemsize * np.prod(self.input_shape)
@@ -164,16 +196,22 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         input_shm = shared_memory.SharedMemory(name=self.input_shm_name)
         output_shm = shared_memory.SharedMemory(name=self.output_shm_name)
 
-        input_data = np.ndarray(shape=[self.snapshot.grid_size,
-                                       self.input_dimension],
-                                dtype=np.float32, buffer=input_shm.buf)
-        output_data = np.ndarray(shape=[self.snapshot.grid_size,
-                                        self.output_dimension],
-                                 dtype=np.float32, buffer=output_shm.buf)
-        if idx == self.len-1:
-            batch = self.indices[idx * self.batch_size:]
+        input_data = np.ndarray(
+            shape=[self.snapshot.grid_size, self.input_dimension],
+            dtype=np.float32,
+            buffer=input_shm.buf,
+        )
+        output_data = np.ndarray(
+            shape=[self.snapshot.grid_size, self.output_dimension],
+            dtype=np.float32,
+            buffer=output_shm.buf,
+        )
+        if idx == self.len - 1:
+            batch = self.indices[idx * self.batch_size :]
         else:
-            batch = self.indices[idx*self.batch_size:(idx+1)*self.batch_size]
+            batch = self.indices[
+                idx * self.batch_size : (idx + 1) * self.batch_size
+            ]
         # print(batch.shape)
 
         input_batch = input_data[batch, ...]
@@ -220,4 +258,3 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         single dataset object is used back to back.
         """
         np.random.shuffle(self.indices)
-

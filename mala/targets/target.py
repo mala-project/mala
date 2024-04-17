@@ -1,4 +1,5 @@
 """Base class for all target calculators."""
+
 from abc import ABC, abstractmethod
 import itertools
 import json
@@ -63,14 +64,17 @@ class Target(PhysicalData):
             else:
                 raise Exception("Wrong type of parameters for Targets class.")
 
-            if targettype == 'LDOS':
+            if targettype == "LDOS":
                 from mala.targets.ldos import LDOS
+
                 target = super(Target, LDOS).__new__(LDOS)
-            if targettype == 'DOS':
+            if targettype == "DOS":
                 from mala.targets.dos import DOS
+
                 target = super(Target, DOS).__new__(DOS)
-            if targettype == 'Density':
+            if targettype == "Density":
                 from mala.targets.density import Density
+
                 target = super(Target, Density).__new__(Density)
 
             if target is None:
@@ -95,7 +99,7 @@ class Target(PhysicalData):
         params : mala.Parameters
             The parameters object with which this object was created.
         """
-        return self.params_arg,
+        return (self.params_arg,)
 
     def __init__(self, params):
         super(Target, self).__init__(params)
@@ -118,19 +122,19 @@ class Target(PhysicalData):
         self.atoms = None
         self.electrons_per_atom = None
         self.qe_input_data = {
-                "occupations": 'smearing',
-                "calculation": 'scf',
-                "restart_mode": 'from_scratch',
-                "prefix": 'MALA',
-                "pseudo_dir": self.parameters.pseudopotential_path,
-                "outdir": './',
-                "ibrav": None,
-                "smearing": 'fermi-dirac',
-                "degauss": None,
-                "ecutrho": None,
-                "ecutwfc": None,
-                "nosym": True,
-                "noinv": True,
+            "occupations": "smearing",
+            "calculation": "scf",
+            "restart_mode": "from_scratch",
+            "prefix": "MALA",
+            "pseudo_dir": self.parameters.pseudopotential_path,
+            "outdir": "./",
+            "ibrav": None,
+            "smearing": "fermi-dirac",
+            "degauss": None,
+            "ecutrho": None,
+            "ecutwfc": None,
+            "nosym": True,
+            "noinv": True,
         }
 
         # It has been shown that the number of k-points
@@ -187,8 +191,9 @@ class Target(PhysicalData):
     def qe_input_data(self):
         """Input data for QE TEM calls."""
         # Update the pseudopotential path from Parameters.
-        self._qe_input_data["pseudo_dir"] = \
+        self._qe_input_data["pseudo_dir"] = (
             self.parameters.pseudopotential_path
+        )
         return self._qe_input_data
 
     @qe_input_data.setter
@@ -225,8 +230,9 @@ class Target(PhysicalData):
             Data in MALA units.
 
         """
-        raise Exception("No unit conversion method implemented for"
-                        " this target type.")
+        raise Exception(
+            "No unit conversion method implemented for this target type."
+        )
 
     @staticmethod
     @abstractmethod
@@ -248,8 +254,10 @@ class Target(PhysicalData):
             Data in out_units.
 
         """
-        raise Exception("No unit back conversion method implemented "
-                        "for this target type.")
+        raise Exception(
+            "No unit back conversion method implemented "
+            "for this target type."
+        )
 
     def read_additional_calculation_data(self, data, data_type=None):
         """
@@ -292,11 +300,15 @@ class Target(PhysicalData):
                 elif file_ending == "json":
                     data_type = "json"
                 else:
-                    raise Exception("Could not guess type of additional "
-                                    "calculation data provided to MALA.")
+                    raise Exception(
+                        "Could not guess type of additional "
+                        "calculation data provided to MALA."
+                    )
             else:
-                raise Exception("Could not guess type of additional "
-                                "calculation data provided to MALA.")
+                raise Exception(
+                    "Could not guess type of additional "
+                    "calculation data provided to MALA."
+                )
 
         if data_type == "espresso-out":
             # Reset everything.
@@ -313,8 +325,9 @@ class Target(PhysicalData):
             # Read the file.
             self.atoms = ase.io.read(data, format="espresso-out")
             vol = self.atoms.get_volume()
-            self.fermi_energy_dft = self.atoms.get_calculator().\
-                get_fermi_level()
+            self.fermi_energy_dft = (
+                self.atoms.get_calculator().get_fermi_level()
+            )
 
             # Parse the file for energy values.
             total_energy = None
@@ -328,33 +341,40 @@ class Target(PhysicalData):
                     if "End of self-consistent calculation" in line:
                         past_calculation_part = True
                     if "number of electrons       =" in line:
-                        self.number_of_electrons_exact = \
-                            np.float64(line.split('=')[1])
+                        self.number_of_electrons_exact = np.float64(
+                            line.split("=")[1]
+                        )
                     if "Fermi-Dirac smearing, width (Ry)=" in line:
-                        self.temperature = np.float64(line.split('=')[2]) * \
-                                           Rydberg / kB
+                        self.temperature = (
+                            np.float64(line.split("=")[2]) * Rydberg / kB
+                        )
                     if "convergence has been achieved" in line:
                         break
                     if "FFT dimensions" in line:
                         dims = line.split("(")[1]
                         self.grid_dimensions[0] = int(dims.split(",")[0])
                         self.grid_dimensions[1] = int(dims.split(",")[1])
-                        self.grid_dimensions[2] = int((dims.split(",")[2]).
-                                                      split(")")[0])
+                        self.grid_dimensions[2] = int(
+                            (dims.split(",")[2]).split(")")[0]
+                        )
                     if "bravais-lattice index" in line:
                         self.qe_input_data["ibrav"] = int(line.split("=")[1])
                     if "kinetic-energy cutoff" in line:
-                        self.qe_input_data["ecutwfc"] \
-                            = float((line.split("=")[1]).split("Ry")[0])
+                        self.qe_input_data["ecutwfc"] = float(
+                            (line.split("=")[1]).split("Ry")[0]
+                        )
                     if "charge density cutoff" in line:
-                        self.qe_input_data["ecutrho"] \
-                            = float((line.split("=")[1]).split("Ry")[0])
+                        self.qe_input_data["ecutrho"] = float(
+                            (line.split("=")[1]).split("Ry")[0]
+                        )
                     if "smearing, width" in line:
-                        self.qe_input_data["degauss"] \
-                            = float(line.split("=")[-1])
+                        self.qe_input_data["degauss"] = float(
+                            line.split("=")[-1]
+                        )
                     if pseudolinefound:
-                        self.qe_pseudopotentials[lastpseudo.strip()] \
-                            = line.split("/")[-1].strip()
+                        self.qe_pseudopotentials[lastpseudo.strip()] = (
+                            line.split("/")[-1].strip()
+                        )
                         pseudolinefound = False
                         lastpseudo = None
                     if "PseudoPot." in line:
@@ -362,51 +382,61 @@ class Target(PhysicalData):
                         lastpseudo = (line.split("for")[1]).split("read")[0]
                     if "total energy" in line and past_calculation_part:
                         if total_energy is None:
-                            total_energy \
-                                = float((line.split('=')[1]).split('Ry')[0])
+                            total_energy = float(
+                                (line.split("=")[1]).split("Ry")[0]
+                            )
                     if "smearing contrib." in line and past_calculation_part:
                         if entropy_contribution is None:
-                            entropy_contribution \
-                                = float((line.split('=')[1]).split('Ry')[0])
+                            entropy_contribution = float(
+                                (line.split("=")[1]).split("Ry")[0]
+                            )
                     if "set verbosity='high' to print them." in line:
                         bands_included = False
 
             # The voxel is needed for e.g. LDOS integration.
             self.voxel = self.atoms.cell.copy()
-            self.voxel[0] = self.voxel[0] / (
-                        self.grid_dimensions[0])
-            self.voxel[1] = self.voxel[1] / (
-                        self.grid_dimensions[1])
-            self.voxel[2] = self.voxel[2] / (
-                        self.grid_dimensions[2])
-            self._parameters_full.descriptors.atomic_density_sigma = \
+            self.voxel[0] = self.voxel[0] / (self.grid_dimensions[0])
+            self.voxel[1] = self.voxel[1] / (self.grid_dimensions[1])
+            self.voxel[2] = self.voxel[2] / (self.grid_dimensions[2])
+            self._parameters_full.descriptors.atomic_density_sigma = (
                 AtomicDensity.get_optimal_sigma(self.voxel)
+            )
 
             # This is especially important for size extrapolation.
-            self.electrons_per_atom = self.number_of_electrons_exact / \
-                len(self.atoms)
+            self.electrons_per_atom = self.number_of_electrons_exact / len(
+                self.atoms
+            )
 
             # Unit conversion
-            self.total_energy_dft_calculation = total_energy*Rydberg
+            self.total_energy_dft_calculation = total_energy * Rydberg
             if entropy_contribution is not None:
-                self.entropy_contribution_dft_calculation = entropy_contribution * Rydberg
+                self.entropy_contribution_dft_calculation = (
+                    entropy_contribution * Rydberg
+                )
 
             # Calculate band energy, if the necessary data is included in
             # the output file.
             if bands_included:
                 eigs = np.transpose(
-                    self.atoms.get_calculator().band_structure().
-                    energies[0, :, :])
+                    self.atoms.get_calculator()
+                    .band_structure()
+                    .energies[0, :, :]
+                )
                 kweights = self.atoms.get_calculator().get_k_point_weights()
-                eband_per_band = eigs * fermi_function(eigs,
-                                                       self.fermi_energy_dft,
-                                                       self.temperature,
-                                                       suppress_overflow=True)
+                eband_per_band = eigs * fermi_function(
+                    eigs,
+                    self.fermi_energy_dft,
+                    self.temperature,
+                    suppress_overflow=True,
+                )
                 eband_per_band = kweights[np.newaxis, :] * eband_per_band
                 self.band_energy_dft_calculation = np.sum(eband_per_band)
-                enum_per_band = fermi_function(eigs, self.fermi_energy_dft,
-                                               self.temperature,
-                                               suppress_overflow=True)
+                enum_per_band = fermi_function(
+                    eigs,
+                    self.fermi_energy_dft,
+                    self.temperature,
+                    suppress_overflow=True,
+                )
                 enum_per_band = kweights[np.newaxis, :] * enum_per_band
                 self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)
 
@@ -429,24 +459,25 @@ class Target(PhysicalData):
 
             # The voxel is needed for e.g. LDOS integration.
             self.voxel = self.atoms.cell.copy()
-            self.voxel[0] = self.voxel[0] / (
-                        self.grid_dimensions[0])
-            self.voxel[1] = self.voxel[1] / (
-                        self.grid_dimensions[1])
-            self.voxel[2] = self.voxel[2] / (
-                        self.grid_dimensions[2])
-            self._parameters_full.descriptors.atomic_density_sigma = \
+            self.voxel[0] = self.voxel[0] / (self.grid_dimensions[0])
+            self.voxel[1] = self.voxel[1] / (self.grid_dimensions[1])
+            self.voxel[2] = self.voxel[2] / (self.grid_dimensions[2])
+            self._parameters_full.descriptors.atomic_density_sigma = (
                 AtomicDensity.get_optimal_sigma(self.voxel)
+            )
 
             if self.electrons_per_atom is None:
-                printout("No number of electrons per atom provided, "
-                         "MALA cannot guess the number of electrons "
-                         "in the cell with this. Energy calculations may be"
-                         "wrong.")
+                printout(
+                    "No number of electrons per atom provided, "
+                    "MALA cannot guess the number of electrons "
+                    "in the cell with this. Energy calculations may be"
+                    "wrong."
+                )
 
             else:
-                self.number_of_electrons_exact = self.electrons_per_atom * \
-                                                 len(self.atoms)
+                self.number_of_electrons_exact = self.electrons_per_atom * len(
+                    self.atoms
+                )
         elif data_type == "json":
             if isinstance(data, str):
                 json_dict = json.load(open(data, encoding="utf-8"))
@@ -501,34 +532,42 @@ class Target(PhysicalData):
             "total_energy_dft_calculation": self.total_energy_dft_calculation,
             "grid_dimensions": list(self.grid_dimensions),
             "electrons_per_atom": self.electrons_per_atom,
-            "number_of_electrons_from_eigenvals":
-                self.number_of_electrons_from_eigenvals,
+            "number_of_electrons_from_eigenvals": self.number_of_electrons_from_eigenvals,
             "ibrav": self.qe_input_data["ibrav"],
             "ecutwfc": self.qe_input_data["ecutwfc"],
             "ecutrho": self.qe_input_data["ecutrho"],
             "degauss": self.qe_input_data["degauss"],
             "pseudopotentials": self.qe_pseudopotentials,
-            "entropy_contribution_dft_calculation": self.entropy_contribution_dft_calculation
+            "entropy_contribution_dft_calculation": self.entropy_contribution_dft_calculation,
         }
         if self.voxel is not None:
             additional_calculation_data["voxel"] = self.voxel.todict()
-            additional_calculation_data["voxel"]["array"] = \
+            additional_calculation_data["voxel"]["array"] = (
                 additional_calculation_data["voxel"]["array"].tolist()
+            )
             additional_calculation_data["voxel"].pop("pbc", None)
         if self.atoms is not None:
             additional_calculation_data["atoms"] = self.atoms.todict()
-            additional_calculation_data["atoms"]["numbers"] = \
+            additional_calculation_data["atoms"]["numbers"] = (
                 additional_calculation_data["atoms"]["numbers"].tolist()
-            additional_calculation_data["atoms"]["positions"] = \
+            )
+            additional_calculation_data["atoms"]["positions"] = (
                 additional_calculation_data["atoms"]["positions"].tolist()
-            additional_calculation_data["atoms"]["cell"] = \
+            )
+            additional_calculation_data["atoms"]["cell"] = (
                 additional_calculation_data["atoms"]["cell"].tolist()
-            additional_calculation_data["atoms"]["pbc"] = \
+            )
+            additional_calculation_data["atoms"]["pbc"] = (
                 additional_calculation_data["atoms"]["pbc"].tolist()
+            )
         if return_string is False:
             with open(filepath, "w", encoding="utf-8") as f:
-                json.dump(additional_calculation_data, f,
-                          ensure_ascii=False, indent=4)
+                json.dump(
+                    additional_calculation_data,
+                    f,
+                    ensure_ascii=False,
+                    indent=4,
+                )
         else:
             return additional_calculation_data
 
@@ -550,8 +589,13 @@ class Target(PhysicalData):
         else:
             super(Target, self).write_to_numpy_file(path, target_data)
 
-    def write_to_openpmd_file(self, path, array=None, additional_attributes={},
-                              internal_iteration_number=0):
+    def write_to_openpmd_file(
+        self,
+        path,
+        array=None,
+        additional_attributes={},
+        internal_iteration_number=0,
+    ):
         """
         Write data to a numpy file.
 
@@ -578,14 +622,16 @@ class Target(PhysicalData):
                 path,
                 self.get_target(),
                 additional_attributes=additional_attributes,
-                internal_iteration_number=internal_iteration_number)
+                internal_iteration_number=internal_iteration_number,
+            )
         else:
             # The feature dimension may be undefined.
             return super(Target, self).write_to_openpmd_file(
                 path,
                 array,
                 additional_attributes=additional_attributes,
-                internal_iteration_number=internal_iteration_number)
+                internal_iteration_number=internal_iteration_number,
+            )
 
     # Accessing target data
     ########################
@@ -619,8 +665,15 @@ class Target(PhysicalData):
 
     def get_real_space_grid(self):
         """Get the real space grid."""
-        grid3D = np.zeros((self.grid_dimensions[0], self.grid_dimensions[1],
-                           self.grid_dimensions[2], 3), dtype=np.float64)
+        grid3D = np.zeros(
+            (
+                self.grid_dimensions[0],
+                self.grid_dimensions[1],
+                self.grid_dimensions[2],
+                3,
+            ),
+            dtype=np.float64,
+        )
         for i in range(0, self.grid_dimensions[0]):
             for j in range(0, self.grid_dimensions[1]):
                 for k in range(0, self.grid_dimensions[2]):
@@ -628,10 +681,9 @@ class Target(PhysicalData):
         return grid3D
 
     @staticmethod
-    def radial_distribution_function_from_atoms(atoms: ase.Atoms,
-                                                number_of_bins,
-                                                rMax="mic",
-                                                method="mala"):
+    def radial_distribution_function_from_atoms(
+        atoms: ase.Atoms, number_of_bins, rMax="mic", method="mala"
+    ):
         """
         Calculate the radial distribution function (RDF).
 
@@ -689,12 +741,15 @@ class Target(PhysicalData):
             _rMax = Target._get_ideal_rmax_for_rdf(atoms, method="2mic")
         else:
             if method == "asap3":
-                _rMax_possible = Target._get_ideal_rmax_for_rdf(atoms,
-                                                                method="2mic")
+                _rMax_possible = Target._get_ideal_rmax_for_rdf(
+                    atoms, method="2mic"
+                )
                 if rMax > _rMax_possible:
-                    raise Exception("ASAP3 calculation fo RDF cannot work "
-                                    "with radii that are bigger then the "
-                                    "cell.")
+                    raise Exception(
+                        "ASAP3 calculation fo RDF cannot work "
+                        "with radii that are bigger then the "
+                        "cell."
+                    )
             _rMax = rMax
 
         atoms = atoms
@@ -711,21 +766,23 @@ class Target(PhysicalData):
                         parallel_warn(
                             "Calculating RDF with a radius larger then the "
                             "unit cell. While this will work numerically, be "
-                            "cautious about the physicality of its results")
+                            "cautious about the physicality of its results"
+                        )
 
             # Calculate all the distances.
             # rMax/2 because this is the radius around one atom, so half the
             # distance to the next one.
             # Using neighborlists grants us access to the PBC.
-            neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms)) +
-                                                         [_rMax/2.0],
-                                                         bothways=True)
+            neighborlist = ase.neighborlist.NeighborList(
+                np.zeros(len(atoms)) + [_rMax / 2.0], bothways=True
+            )
             neighborlist.update(atoms)
             for i in range(0, len(atoms)):
                 indices, offsets = neighborlist.get_neighbors(i)
-                dm = distance.cdist([atoms.get_positions()[i]],
-                                    atoms.positions[indices] + offsets @
-                                    atoms.get_cell())
+                dm = distance.cdist(
+                    [atoms.get_positions()[i]],
+                    atoms.positions[indices] + offsets @ atoms.get_cell(),
+                )
                 index = (np.ceil(dm / dr)).astype(int)
                 index = index.flatten()
                 out_of_scope = index > number_of_bins
@@ -739,13 +796,15 @@ class Target(PhysicalData):
             norm = 4.0 * np.pi * dr * phi * len(atoms)
             for i in range(1, number_of_bins + 1):
                 rr.append((i - 0.5) * dr)
-                rdf[i] /= (norm * ((rr[-1] ** 2) + (dr ** 2) / 12.))
+                rdf[i] /= norm * ((rr[-1] ** 2) + (dr**2) / 12.0)
         elif method == "asap3":
             # ASAP3 loads MPI which takes a long time to import, so
             # we'll only do that when absolutely needed.
             from asap3.analysis.rdf import RadialDistributionFunction
-            rdf = RadialDistributionFunction(atoms, _rMax,
-                                             number_of_bins).get_rdf()
+
+            rdf = RadialDistributionFunction(
+                atoms, _rMax, number_of_bins
+            ).get_rdf()
             rr = []
             for i in range(1, number_of_bins + 1):
                 rr.append((i - 0.5) * dr)
@@ -755,9 +814,9 @@ class Target(PhysicalData):
         return rdf[1:], rr
 
     @staticmethod
-    def three_particle_correlation_function_from_atoms(atoms: ase.Atoms,
-                                                       number_of_bins,
-                                                       rMax="mic"):
+    def three_particle_correlation_function_from_atoms(
+        atoms: ase.Atoms, number_of_bins, rMax="mic"
+    ):
         """
         Calculate the three particle correlation function (TPCF).
 
@@ -805,22 +864,25 @@ class Target(PhysicalData):
 
         # TPCF is a function of three radii.
         atoms = atoms
-        dr = float(_rMax/number_of_bins)
-        tpcf = np.zeros([number_of_bins + 1, number_of_bins + 1,
-                        number_of_bins + 1])
+        dr = float(_rMax / number_of_bins)
+        tpcf = np.zeros(
+            [number_of_bins + 1, number_of_bins + 1, number_of_bins + 1]
+        )
         cell = atoms.get_cell()
         pbc = atoms.get_pbc()
         for i in range(0, 3):
             if pbc[i]:
                 if _rMax > cell[i, i]:
-                    raise Exception("Cannot calculate RDF with this radius. "
-                                    "Please choose a smaller value.")
+                    raise Exception(
+                        "Cannot calculate RDF with this radius. "
+                        "Please choose a smaller value."
+                    )
 
         # Construct a neighbor list for calculation of distances.
         # With this, the PBC are satisfied.
-        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms)) +
-                                                     [_rMax/2.0],
-                                                     bothways=True)
+        neighborlist = ase.neighborlist.NeighborList(
+            np.zeros(len(atoms)) + [_rMax / 2.0], bothways=True
+        )
         neighborlist.update(atoms)
 
         # To calculate the TPCF we calculate the three distances between
@@ -835,31 +897,42 @@ class Target(PhysicalData):
             # Generate all pairs of atoms, and calculate distances of
             # reference atom to them.
             indices, offsets = neighborlist.get_neighbors(i)
-            neighbor_pairs = itertools.\
-                combinations(list(zip(indices, offsets)), r=2)
+            neighbor_pairs = itertools.combinations(
+                list(zip(indices, offsets)), r=2
+            )
             neighbor_list = list(neighbor_pairs)
-            pair_positions = np.array([np.concatenate((atoms.positions[pair1[0]] + \
-                                                       pair1[1] @ atoms.get_cell(),
-                                                       atoms.positions[pair2[0]] + \
-                                                       pair2[1] @ atoms.get_cell()))
-                                       for pair1, pair2 in neighbor_list])
+            pair_positions = np.array(
+                [
+                    np.concatenate(
+                        (
+                            atoms.positions[pair1[0]]
+                            + pair1[1] @ atoms.get_cell(),
+                            atoms.positions[pair2[0]]
+                            + pair2[1] @ atoms.get_cell(),
+                        )
+                    )
+                    for pair1, pair2 in neighbor_list
+                ]
+            )
             dists_between_atoms = np.sqrt(
-                np.square(pair_positions[:, 0] - pair_positions[:, 3]) +
-                np.square(pair_positions[:, 1] - pair_positions[:, 4]) +
-                np.square(pair_positions[:, 2] - pair_positions[:, 5]))
-            pair_positions = np.reshape(pair_positions, (len(neighbor_list)*2,
-                                                         3), order="C")
+                np.square(pair_positions[:, 0] - pair_positions[:, 3])
+                + np.square(pair_positions[:, 1] - pair_positions[:, 4])
+                + np.square(pair_positions[:, 2] - pair_positions[:, 5])
+            )
+            pair_positions = np.reshape(
+                pair_positions, (len(neighbor_list) * 2, 3), order="C"
+            )
             all_dists = distance.cdist([pos1], pair_positions)[0]
 
             for idx, neighbor_pair in enumerate(neighbor_list):
-                r1 = all_dists[2*idx]
-                r2 = all_dists[2*idx+1]
+                r1 = all_dists[2 * idx]
+                r2 = all_dists[2 * idx + 1]
 
                 # We don't need to do any calculation if either of the
                 # atoms are already out of range.
                 if r1 < _rMax and r2 < _rMax:
                     r3 = dists_between_atoms[idx]
-                    if r3 < _rMax and np.abs(r1-r2) < r3 < (r1+r2):
+                    if r3 < _rMax and np.abs(r1 - r2) < r3 < (r1 + r2):
                         # print(r1, r2, r3)
                         id1 = (np.ceil(r1 / dr)).astype(int)
                         id2 = (np.ceil(r2 / dr)).astype(int)
@@ -868,8 +941,9 @@ class Target(PhysicalData):
 
         # Normalize the TPCF and calculate the distances.
         # This loop takes almost no time compared to the one above.
-        rr = np.zeros([3, number_of_bins+1, number_of_bins+1,
-                       number_of_bins+1])
+        rr = np.zeros(
+            [3, number_of_bins + 1, number_of_bins + 1, number_of_bins + 1]
+        )
         phi = len(atoms) / atoms.get_volume()
         norm = 8.0 * np.pi * np.pi * dr * phi * phi * len(atoms)
         for i in range(1, number_of_bins + 1):
@@ -878,18 +952,20 @@ class Target(PhysicalData):
                     r1 = (i - 0.5) * dr
                     r2 = (j - 0.5) * dr
                     r3 = (k - 0.5) * dr
-                    tpcf[i, j, k] /= (norm * r1 * r2 * r3
-                                      * dr * dr * dr)
+                    tpcf[i, j, k] /= norm * r1 * r2 * r3 * dr * dr * dr
                     rr[0, i, j, k] = r1
                     rr[1, i, j, k] = r2
                     rr[2, i, j, k] = r3
         return tpcf[1:, 1:, 1:], rr[:, 1:, 1:, 1:]
 
     @staticmethod
-    def static_structure_factor_from_atoms(atoms: ase.Atoms, number_of_bins,
-                                           kMax,
-                                           radial_distribution_function=None,
-                                           calculation_type="direct"):
+    def static_structure_factor_from_atoms(
+        atoms: ase.Atoms,
+        number_of_bins,
+        kMax,
+        radial_distribution_function=None,
+        calculation_type="direct",
+    ):
         """
         Calculate the static structure factor (SSF).
 
@@ -934,11 +1010,12 @@ class Target(PhysicalData):
         """
         if calculation_type == "fourier_transform":
             if radial_distribution_function is None:
-                rMax = Target._get_ideal_rmax_for_rdf(atoms)*6
-                radial_distribution_function = Target.\
-                    radial_distribution_function_from_atoms(atoms, rMax=rMax,
-                                                            number_of_bins=
-                                                            1500)
+                rMax = Target._get_ideal_rmax_for_rdf(atoms) * 6
+                radial_distribution_function = (
+                    Target.radial_distribution_function_from_atoms(
+                        atoms, rMax=rMax, number_of_bins=1500
+                    )
+                )
             rdf = radial_distribution_function[0]
             radii = radial_distribution_function[1]
 
@@ -948,14 +1025,15 @@ class Target(PhysicalData):
 
             # Fourier transform the RDF by calculating the integral at each
             # k-point we investigate.
-            rho = len(atoms)/atoms.get_volume()
+            rho = len(atoms) / atoms.get_volume()
             for i in range(0, number_of_bins + 1):
                 # Construct integrand.
-                kpoints.append(dk*i)
-                kr = np.array(radii)*kpoints[-1]
-                integrand = (rdf-1)*radii*np.sin(kr)/kpoints[-1]
-                structure_factor[i] = 1 + (4*np.pi*rho * simps(integrand,
-                                                               radii))
+                kpoints.append(dk * i)
+                kr = np.array(radii) * kpoints[-1]
+                integrand = (rdf - 1) * radii * np.sin(kr) / kpoints[-1]
+                structure_factor[i] = 1 + (
+                    4 * np.pi * rho * simps(integrand, radii)
+                )
 
             return structure_factor[1:], np.array(kpoints)[1:]
 
@@ -968,12 +1046,15 @@ class Target(PhysicalData):
             # The structure factor is undefined for wave vectors smaller
             # then this number.
             dk = float(kMax / number_of_bins)
-            dk_threedimensional = atoms.get_cell().reciprocal()*2*np.pi
+            dk_threedimensional = atoms.get_cell().reciprocal() * 2 * np.pi
 
             # From this, the necessary dimensions of the k-grid for this
             # particular k-max can be determined as
-            kgrid_size = np.ceil(np.matmul(np.linalg.inv(dk_threedimensional),
-                                           [kMax, kMax, kMax])).astype(int)
+            kgrid_size = np.ceil(
+                np.matmul(
+                    np.linalg.inv(dk_threedimensional), [kMax, kMax, kMax]
+                )
+            ).astype(int)
             print("Calculating SSF on k-grid of size", kgrid_size)
 
             # k-grids:
@@ -988,7 +1069,7 @@ class Target(PhysicalData):
                             kgrid.append(k_point)
             kpoints = []
             for i in range(0, number_of_bins + 1):
-                kpoints.append(dk*i)
+                kpoints.append(dk * i)
 
             # The first will hold S(|k|) (i.e., what we are actually interested
             # in, the second will hold lists of all S(k) corresponding to the
@@ -1005,7 +1086,9 @@ class Target(PhysicalData):
             cosine_sum = np.sum(np.cos(dot_product), axis=1)
             sine_sum = np.sum(np.sin(dot_product), axis=1)
             del dot_product
-            s_values = (np.square(cosine_sum)+np.square(sine_sum)) / len(atoms)
+            s_values = (np.square(cosine_sum) + np.square(sine_sum)) / len(
+                atoms
+            )
             del cosine_sum
             del sine_sum
 
@@ -1024,11 +1107,13 @@ class Target(PhysicalData):
             return structure_factor[1:], np.array(kpoints)[1:]
 
         else:
-            raise Exception("Static structure factor calculation method "
-                            "unsupported.")
+            raise Exception(
+                "Static structure factor calculation method unsupported."
+            )
 
-    def get_radial_distribution_function(self, atoms: ase.Atoms,
-                                         method="mala"):
+    def get_radial_distribution_function(
+        self, atoms: ase.Atoms, method="mala"
+    ):
         """
         Calculate the radial distribution function (RDF).
 
@@ -1060,15 +1145,12 @@ class Target(PhysicalData):
             automatically calculated.
 
         """
-        return Target.\
-            radial_distribution_function_from_atoms(atoms,
-                                                    number_of_bins=self.
-                                                    parameters.
-                                                    rdf_parameters
-                                                    ["number_of_bins"],
-                                                    rMax=self.parameters.
-                                                    rdf_parameters["rMax"],
-                                                    method=method)
+        return Target.radial_distribution_function_from_atoms(
+            atoms,
+            number_of_bins=self.parameters.rdf_parameters["number_of_bins"],
+            rMax=self.parameters.rdf_parameters["rMax"],
+            method=method,
+        )
 
     def get_three_particle_correlation_function(self, atoms: ase.Atoms):
         """
@@ -1090,14 +1172,11 @@ class Target(PhysicalData):
             The radii at which the TPCF was calculated (for plotting),
             [rMax, rMax, rMax].
         """
-        return Target.\
-            three_particle_correlation_function_from_atoms(atoms,
-                                                           number_of_bins=self.
-                                                           parameters.
-                                                           tpcf_parameters
-                                                           ["number_of_bins"],
-                                                           rMax=self.parameters.
-                                                           tpcf_parameters["rMax"])
+        return Target.three_particle_correlation_function_from_atoms(
+            atoms,
+            number_of_bins=self.parameters.tpcf_parameters["number_of_bins"],
+            rMax=self.parameters.tpcf_parameters["rMax"],
+        )
 
     def get_static_structure_factor(self, atoms: ase.Atoms):
         """
@@ -1119,16 +1198,20 @@ class Target(PhysicalData):
             The k-points  at which the SSF was calculated (for plotting),
             as [kMax] array.
         """
-        return Target.static_structure_factor_from_atoms(atoms,
-                                                         self.parameters.
-                                                         ssf_parameters["number_of_bins"],
-                                                         self.parameters.
-                                                         ssf_parameters["number_of_bins"])
+        return Target.static_structure_factor_from_atoms(
+            atoms,
+            self.parameters.ssf_parameters["number_of_bins"],
+            self.parameters.ssf_parameters["number_of_bins"],
+        )
 
     @staticmethod
-    def write_tem_input_file(atoms_Angstrom, qe_input_data,
-                             qe_pseudopotentials,
-                             grid_dimensions, kpoints):
+    def write_tem_input_file(
+        atoms_Angstrom,
+        qe_input_data,
+        qe_pseudopotentials,
+        grid_dimensions,
+        kpoints,
+    ):
         """
         Write a QE-style input file for the total energy module.
 
@@ -1157,9 +1240,11 @@ class Target(PhysicalData):
             k-grid used, usually None or (1,1,1) for TEM calculations.
         """
         # Specify grid dimensions, if any are given.
-        if grid_dimensions[0] != 0 and \
-                grid_dimensions[1] != 0 and \
-                grid_dimensions[2] != 0:
+        if (
+            grid_dimensions[0] != 0
+            and grid_dimensions[1] != 0
+            and grid_dimensions[2] != 0
+        ):
             qe_input_data["nr1"] = grid_dimensions[0]
             qe_input_data["nr2"] = grid_dimensions[1]
             qe_input_data["nr3"] = grid_dimensions[2]
@@ -1172,10 +1257,14 @@ class Target(PhysicalData):
         # the DFT calculation. If symmetry is then on in here, that
         # leads to errors.
         # qe_input_data["nosym"] = False
-        ase.io.write("mala.pw.scf.in", atoms_Angstrom, "espresso-in",
-                     input_data=qe_input_data,
-                     pseudopotentials=qe_pseudopotentials,
-                     kpts=kpoints)
+        ase.io.write(
+            "mala.pw.scf.in",
+            atoms_Angstrom,
+            "espresso-in",
+            input_data=qe_input_data,
+            pseudopotentials=qe_pseudopotentials,
+            kpts=kpoints,
+        )
 
     def restrict_data(self, array):
         """
@@ -1212,30 +1301,43 @@ class Target(PhysicalData):
         return array_dimensions
 
     def _process_additional_metadata(self, additional_metadata):
-        self.read_additional_calculation_data(additional_metadata[0],
-                                              additional_metadata[1])
+        self.read_additional_calculation_data(
+            additional_metadata[0], additional_metadata[1]
+        )
 
     def _set_openpmd_attribtues(self, iteration, mesh):
         super(Target, self)._set_openpmd_attribtues(iteration, mesh)
 
         # If no atoms have been read, neither have any of the other
         # properties.
-        additional_calculation_data = \
-            self.write_additional_calculation_data("", return_string=True)
+        additional_calculation_data = self.write_additional_calculation_data(
+            "", return_string=True
+        )
         for key in additional_calculation_data:
-            if key != "atoms" and key != "voxel" and key != "grid_dimensions" \
-                    and key is not None and key != "pseudopotentials" and \
-                    additional_calculation_data[key] is not None:
+            if (
+                key != "atoms"
+                and key != "voxel"
+                and key != "grid_dimensions"
+                and key is not None
+                and key != "pseudopotentials"
+                and additional_calculation_data[key] is not None
+            ):
                 iteration.set_attribute(key, additional_calculation_data[key])
             if key == "pseudopotentials":
-                for pseudokey in \
-                        additional_calculation_data["pseudopotentials"].keys():
-                    iteration.set_attribute("psp_" + pseudokey,
-                                            additional_calculation_data[
-                                                "pseudopotentials"][pseudokey])
+                for pseudokey in additional_calculation_data[
+                    "pseudopotentials"
+                ].keys():
+                    iteration.set_attribute(
+                        "psp_" + pseudokey,
+                        additional_calculation_data["pseudopotentials"][
+                            pseudokey
+                        ],
+                    )
 
     def _process_openpmd_attributes(self, series, iteration, mesh):
-        super(Target, self)._process_openpmd_attributes(series, iteration, mesh)
+        super(Target, self)._process_openpmd_attributes(
+            series, iteration, mesh
+        )
 
         # Process the atoms, which can only be done if we have voxel info.
         self.grid_dimensions[0] = mesh["0"].shape[0]
@@ -1259,55 +1361,91 @@ class Target(PhysicalData):
             cell[0] = self.voxel[0] * self.grid_dimensions[0]
             cell[1] = self.voxel[1] * self.grid_dimensions[1]
             cell[2] = self.voxel[2] * self.grid_dimensions[2]
-            self.atoms = ase.Atoms(positions=positions, cell=cell, numbers=numbers)
-            self.atoms.pbc[0] = iteration.\
-                get_attribute("periodic_boundary_conditions_x")
-            self.atoms.pbc[1] = iteration.\
-                get_attribute("periodic_boundary_conditions_y")
-            self.atoms.pbc[2] = iteration.\
-                get_attribute("periodic_boundary_conditions_z")
+            self.atoms = ase.Atoms(
+                positions=positions, cell=cell, numbers=numbers
+            )
+            self.atoms.pbc[0] = iteration.get_attribute(
+                "periodic_boundary_conditions_x"
+            )
+            self.atoms.pbc[1] = iteration.get_attribute(
+                "periodic_boundary_conditions_y"
+            )
+            self.atoms.pbc[2] = iteration.get_attribute(
+                "periodic_boundary_conditions_z"
+            )
 
         # Process all the regular meta info.
-        self.fermi_energy_dft = \
-            self._get_attribute_if_attribute_exists(iteration, "fermi_energy_dft",
-                                                    default_value=self.fermi_energy_dft)
-        self.temperature = \
-            self._get_attribute_if_attribute_exists(iteration, "temperature",
-                                                    default_value=self.temperature)
-        self.number_of_electrons_exact = \
-            self._get_attribute_if_attribute_exists(iteration, "number_of_electrons_exact",
-                                                    default_value=self.number_of_electrons_exact)
-        self.band_energy_dft_calculation = \
-            self._get_attribute_if_attribute_exists(iteration, "band_energy_dft_calculation",
-                                                    default_value=self.band_energy_dft_calculation)
-        self.total_energy_dft_calculation = \
-            self._get_attribute_if_attribute_exists(iteration, "total_energy_dft_calculation",
-                                                    default_value=self.total_energy_dft_calculation)
-        self.electrons_per_atom = \
-            self._get_attribute_if_attribute_exists(iteration, "electrons_per_atom",
-                                                    default_value=self.electrons_per_atom)
-        self.number_of_electrons_from_eigenval = \
-            self._get_attribute_if_attribute_exists(iteration, "number_of_electrons_from_eigenvals",
-                                                    default_value=self.number_of_electrons_from_eigenvals)
-        self.qe_input_data["ibrav"] = \
-            self._get_attribute_if_attribute_exists(iteration, "ibrav",
-                                                    default_value=self.qe_input_data["ibrav"])
-        self.qe_input_data["ecutwfc"] = \
-            self._get_attribute_if_attribute_exists(iteration, "ecutwfc",
-                                                    default_value=self.qe_input_data["ecutwfc"])
-        self.qe_input_data["ecutrho"] = \
-            self._get_attribute_if_attribute_exists(iteration, "ecutrho",
-                                                    default_value=self.qe_input_data["ecutrho"])
-        self.qe_input_data["degauss"] = \
-            self._get_attribute_if_attribute_exists(iteration, "degauss",
-                                                    default_value=self.qe_input_data["degauss"])
+        self.fermi_energy_dft = self._get_attribute_if_attribute_exists(
+            iteration, "fermi_energy_dft", default_value=self.fermi_energy_dft
+        )
+        self.temperature = self._get_attribute_if_attribute_exists(
+            iteration, "temperature", default_value=self.temperature
+        )
+        self.number_of_electrons_exact = (
+            self._get_attribute_if_attribute_exists(
+                iteration,
+                "number_of_electrons_exact",
+                default_value=self.number_of_electrons_exact,
+            )
+        )
+        self.band_energy_dft_calculation = (
+            self._get_attribute_if_attribute_exists(
+                iteration,
+                "band_energy_dft_calculation",
+                default_value=self.band_energy_dft_calculation,
+            )
+        )
+        self.total_energy_dft_calculation = (
+            self._get_attribute_if_attribute_exists(
+                iteration,
+                "total_energy_dft_calculation",
+                default_value=self.total_energy_dft_calculation,
+            )
+        )
+        self.electrons_per_atom = self._get_attribute_if_attribute_exists(
+            iteration,
+            "electrons_per_atom",
+            default_value=self.electrons_per_atom,
+        )
+        self.number_of_electrons_from_eigenval = (
+            self._get_attribute_if_attribute_exists(
+                iteration,
+                "number_of_electrons_from_eigenvals",
+                default_value=self.number_of_electrons_from_eigenvals,
+            )
+        )
+        self.qe_input_data["ibrav"] = self._get_attribute_if_attribute_exists(
+            iteration, "ibrav", default_value=self.qe_input_data["ibrav"]
+        )
+        self.qe_input_data["ecutwfc"] = (
+            self._get_attribute_if_attribute_exists(
+                iteration,
+                "ecutwfc",
+                default_value=self.qe_input_data["ecutwfc"],
+            )
+        )
+        self.qe_input_data["ecutrho"] = (
+            self._get_attribute_if_attribute_exists(
+                iteration,
+                "ecutrho",
+                default_value=self.qe_input_data["ecutrho"],
+            )
+        )
+        self.qe_input_data["degauss"] = (
+            self._get_attribute_if_attribute_exists(
+                iteration,
+                "degauss",
+                default_value=self.qe_input_data["degauss"],
+            )
+        )
 
         # Take care of the pseudopotentials.
         self.qe_input_data["pseudopotentials"] = {}
         for attribute in iteration.attributes:
             if "psp" in attribute:
-                self.qe_pseudopotentials[attribute.split("psp_")[1]] = \
+                self.qe_pseudopotentials[attribute.split("psp_")[1]] = (
                     iteration.get_attribute(attribute)
+                )
 
     def _set_geometry_info(self, mesh):
         # Geometry: Save the cell parameters and angles of the grid.
@@ -1322,7 +1460,7 @@ class Target(PhysicalData):
         spacing = mesh.grid_spacing
         if "angles" in mesh.attributes:
             angles = mesh.get_attribute("angles")
-            self.voxel = ase.cell.Cell.new(cell=spacing+angles)
+            self.voxel = ase.cell.Cell.new(cell=spacing + angles)
 
     def _get_atoms(self):
         return self.atoms
@@ -1330,7 +1468,7 @@ class Target(PhysicalData):
     @staticmethod
     def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):
         if method == "mic":
-            return np.min(np.linalg.norm(atoms.get_cell(), axis=0))/2
+            return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) / 2
         elif method == "2mic":
             return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
         else:

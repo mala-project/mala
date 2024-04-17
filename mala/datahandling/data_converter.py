@@ -1,4 +1,5 @@
 """DataConverter class for converting snapshots into numpy arrays."""
+
 import os
 
 import json
@@ -9,15 +10,9 @@ from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
 from mala.version import __version__ as mala_version
 
-descriptor_input_types = [
-    "espresso-out"
-]
-target_input_types = [
-    ".cube", ".xsf"
-]
-additional_info_input_types = [
-    "espresso-out"
-]
+descriptor_input_types = ["espresso-out"]
+target_input_types = [".cube", ".xsf"]
+additional_info_input_types = ["espresso-out"]
 
 
 class DataConverter:
@@ -50,8 +45,9 @@ class DataConverter:
         Target calculator used for parsing/converting target data.
     """
 
-    def __init__(self, parameters, descriptor_calculator=None,
-                 target_calculator=None):
+    def __init__(
+        self, parameters, descriptor_calculator=None, target_calculator=None
+    ):
         self.parameters: ParametersData = parameters.data
         self.parameters_full = parameters
         self.target_calculator = target_calculator
@@ -64,8 +60,9 @@ class DataConverter:
 
         if parameters.descriptors.use_z_splitting:
             parameters.descriptors.use_z_splitting = False
-            printout("Disabling z-splitting for preprocessing.",
-                     min_verbosity=0)
+            printout(
+                "Disabling z-splitting for preprocessing.", min_verbosity=0
+            )
 
         self.__snapshots_to_convert = []
         self.__snapshot_description = []
@@ -76,16 +73,19 @@ class DataConverter:
         self.process_targets = False
         self.process_additional_info = False
 
-    def add_snapshot(self, descriptor_input_type=None,
-                     descriptor_input_path=None,
-                     target_input_type=None,
-                     target_input_path=None,
-                     additional_info_input_type=None,
-                     additional_info_input_path=None,
-                     descriptor_units=None,
-                     metadata_input_type=None,
-                     metadata_input_path=None,
-                     target_units=None):
+    def add_snapshot(
+        self,
+        descriptor_input_type=None,
+        descriptor_input_path=None,
+        target_input_type=None,
+        target_input_path=None,
+        additional_info_input_type=None,
+        additional_info_input_path=None,
+        descriptor_units=None,
+        metadata_input_type=None,
+        metadata_input_path=None,
+        target_units=None,
+    ):
         """
         Add a snapshot to be processed.
 
@@ -139,17 +139,17 @@ class DataConverter:
         if descriptor_input_type is not None:
             if descriptor_input_path is None:
                 raise Exception(
-                    "Cannot process descriptor data with no path "
-                    "given.")
+                    "Cannot process descriptor data with no path given."
+                )
             if descriptor_input_type not in descriptor_input_types:
-                raise Exception(
-                    "Cannot process this type of descriptor data.")
+                raise Exception("Cannot process this type of descriptor data.")
             self.process_descriptors = True
 
         if target_input_type is not None:
             if target_input_path is None:
-                raise Exception("Cannot process target data with no path "
-                                "given.")
+                raise Exception(
+                    "Cannot process target data with no path given."
+                )
             if target_input_type not in target_input_types:
                 raise Exception("Cannot process this type of target data.")
             self.process_targets = True
@@ -157,48 +157,63 @@ class DataConverter:
         if additional_info_input_type is not None:
             metadata_input_type = additional_info_input_type
             if additional_info_input_path is None:
-                raise Exception("Cannot process additional info data with "
-                                "no path given.")
+                raise Exception(
+                    "Cannot process additional info data with "
+                    "no path given."
+                )
             if additional_info_input_type not in additional_info_input_types:
                 raise Exception(
-                    "Cannot process this type of additional info "
-                    "data.")
+                    "Cannot process this type of additional info data."
+                )
             self.process_additional_info = True
 
             metadata_input_path = additional_info_input_path
 
         if metadata_input_type is not None:
             if metadata_input_path is None:
-                raise Exception("Cannot process additional info data with "
-                                "no path given.")
+                raise Exception(
+                    "Cannot process additional info data with "
+                    "no path given."
+                )
             if metadata_input_type not in additional_info_input_types:
                 raise Exception(
-                    "Cannot process this type of additional info "
-                    "data.")
+                    "Cannot process this type of additional info data."
+                )
 
         # Assign info.
-        self.__snapshots_to_convert.append({"input": descriptor_input_path,
-                                            "output": target_input_path,
-                                            "additional_info":
-                                                additional_info_input_path,
-                                            "metadata": metadata_input_path})
-        self.__snapshot_description.append({"input": descriptor_input_type,
-                                            "output": target_input_type,
-                                            "additional_info":
-                                                additional_info_input_type,
-                                            "metadata": metadata_input_type})
-        self.__snapshot_units.append({"input": descriptor_units,
-                                      "output": target_units})
+        self.__snapshots_to_convert.append(
+            {
+                "input": descriptor_input_path,
+                "output": target_input_path,
+                "additional_info": additional_info_input_path,
+                "metadata": metadata_input_path,
+            }
+        )
+        self.__snapshot_description.append(
+            {
+                "input": descriptor_input_type,
+                "output": target_input_type,
+                "additional_info": additional_info_input_type,
+                "metadata": metadata_input_type,
+            }
+        )
+        self.__snapshot_units.append(
+            {"input": descriptor_units, "output": target_units}
+        )
 
-    def convert_snapshots(self, complete_save_path=None,
-                          descriptor_save_path=None,
-                          target_save_path=None,
-                          additional_info_save_path=None,
-                          naming_scheme="ELEM_snapshot*.npy", starts_at=0,
-                          file_based_communication=False,
-                          descriptor_calculation_kwargs=None,
-                          target_calculator_kwargs=None,
-                          use_fp64=False):
+    def convert_snapshots(
+        self,
+        complete_save_path=None,
+        descriptor_save_path=None,
+        target_save_path=None,
+        additional_info_save_path=None,
+        naming_scheme="ELEM_snapshot*.npy",
+        starts_at=0,
+        file_based_communication=False,
+        descriptor_calculation_kwargs=None,
+        target_calculator_kwargs=None,
+        use_fp64=False,
+    ):
         """
         Convert the snapshots in the list to numpy arrays.
 
@@ -257,8 +272,9 @@ class DataConverter:
                 import openpmd_api as io
 
                 if file_ending not in io.file_extensions:
-                    raise Exception("Invalid file ending selected: " +
-                                    file_ending)
+                    raise Exception(
+                        "Invalid file ending selected: " + file_ending
+                    )
         else:
             file_ending = "npy"
 
@@ -284,14 +300,24 @@ class DataConverter:
             additional_info_save_path = complete_save_path
         else:
             if self.process_targets is True and target_save_path is None:
-                raise Exception("No target path specified, cannot process "
-                                "data.")
-            if self.process_descriptors is True and descriptor_save_path is None:
-                raise Exception("No descriptor path specified, cannot "
-                                "process data.")
-            if self.process_additional_info is True and additional_info_save_path is None:
-                raise Exception("No additional info path specified, cannot "
-                                "process data.")
+                raise Exception(
+                    "No target path specified, cannot process data."
+                )
+            if (
+                self.process_descriptors is True
+                and descriptor_save_path is None
+            ):
+                raise Exception(
+                    "No descriptor path specified, cannot process data."
+                )
+            if (
+                self.process_additional_info is True
+                and additional_info_save_path is None
+            ):
+                raise Exception(
+                    "No additional info path specified, cannot "
+                    "process data."
+                )
 
         if file_ending != "npy":
             snapshot_name = naming_scheme
@@ -300,19 +326,27 @@ class DataConverter:
             if self.process_descriptors:
                 if self.parameters._configuration["mpi"]:
                     input_series = io.Series(
-                        os.path.join(descriptor_save_path,
-                                     series_name + ".in." + file_ending),
+                        os.path.join(
+                            descriptor_save_path,
+                            series_name + ".in." + file_ending,
+                        ),
                         io.Access.create,
                         get_comm(),
                         options=json.dumps(
-                            self.parameters_full.openpmd_configuration))
+                            self.parameters_full.openpmd_configuration
+                        ),
+                    )
                 else:
                     input_series = io.Series(
-                        os.path.join(descriptor_save_path,
-                                     series_name + ".in." + file_ending),
+                        os.path.join(
+                            descriptor_save_path,
+                            series_name + ".in." + file_ending,
+                        ),
                         io.Access.create,
                         options=json.dumps(
-                            self.parameters_full.openpmd_configuration))
+                            self.parameters_full.openpmd_configuration
+                        ),
+                    )
                 input_series.set_attribute("is_mala_data", 1)
                 input_series.set_software(name="MALA", version="x.x.x")
                 input_series.author = "..."
@@ -320,19 +354,27 @@ class DataConverter:
             if self.process_targets:
                 if self.parameters._configuration["mpi"]:
                     output_series = io.Series(
-                        os.path.join(target_save_path,
-                                     series_name + ".out." + file_ending),
+                        os.path.join(
+                            target_save_path,
+                            series_name + ".out." + file_ending,
+                        ),
                         io.Access.create,
                         get_comm(),
                         options=json.dumps(
-                            self.parameters_full.openpmd_configuration))
+                            self.parameters_full.openpmd_configuration
+                        ),
+                    )
                 else:
                     output_series = io.Series(
-                        os.path.join(target_save_path,
-                                     series_name + ".out." + file_ending),
+                        os.path.join(
+                            target_save_path,
+                            series_name + ".out." + file_ending,
+                        ),
                         io.Access.create,
                         options=json.dumps(
-                            self.parameters_full.openpmd_configuration))
+                            self.parameters_full.openpmd_configuration
+                        ),
+                    )
 
                 output_series.set_attribute("is_mala_data", 1)
                 output_series.set_software(name="MALA", version=mala_version)
@@ -345,8 +387,9 @@ class DataConverter:
 
             # Create the paths as needed.
             if self.process_additional_info:
-                info_path = os.path.join(additional_info_save_path,
-                                         snapshot_name + ".info.json")
+                info_path = os.path.join(
+                    additional_info_save_path, snapshot_name + ".info.json"
+                )
             else:
                 info_path = None
             input_iteration = None
@@ -355,22 +398,27 @@ class DataConverter:
             if file_ending == "npy":
                 # Create the actual paths, if needed.
                 if self.process_descriptors:
-                    descriptor_path = os.path.join(descriptor_save_path,
-                                                   snapshot_name + ".in." +
-                                                   file_ending)
+                    descriptor_path = os.path.join(
+                        descriptor_save_path,
+                        snapshot_name + ".in." + file_ending,
+                    )
                 else:
                     descriptor_path = None
 
                 memmap = None
                 if self.process_targets:
-                    target_path = os.path.join(target_save_path,
-                                               snapshot_name + ".out."+
-                                               file_ending)
+                    target_path = os.path.join(
+                        target_save_path,
+                        snapshot_name + ".out." + file_ending,
+                    )
                     # A memory mapped file is used as buffer for distributed cases.
-                    if self.parameters._configuration["mpi"] and \
-                            file_based_communication:
-                        memmap = os.path.join(target_save_path, snapshot_name +
-                                              ".out.npy_temp")
+                    if (
+                        self.parameters._configuration["mpi"]
+                        and file_based_communication
+                    ):
+                        memmap = os.path.join(
+                            target_save_path, snapshot_name + ".out.npy_temp"
+                        )
                 else:
                     target_path = None
             else:
@@ -378,27 +426,36 @@ class DataConverter:
                 target_path = None
                 memmap = None
                 if self.process_descriptors:
-                    input_iteration = input_series.write_iterations()[i + starts_at]
+                    input_iteration = input_series.write_iterations()[
+                        i + starts_at
+                    ]
                     input_iteration.dt = i + starts_at
                     input_iteration.time = 0
                 if self.process_targets:
-                    output_iteration = output_series.write_iterations()[i + starts_at]
+                    output_iteration = output_series.write_iterations()[
+                        i + starts_at
+                    ]
                     output_iteration.dt = i + starts_at
                     output_iteration.time = 0
 
-            self.__convert_single_snapshot(i, descriptor_calculation_kwargs,
-                                           target_calculator_kwargs,
-                                           input_path=descriptor_path,
-                                           output_path=target_path,
-                                           use_memmap=memmap,
-                                           input_iteration=input_iteration,
-                                           output_iteration=output_iteration,
-                                           additional_info_path=info_path,
-                                           use_fp64=use_fp64)
+            self.__convert_single_snapshot(
+                i,
+                descriptor_calculation_kwargs,
+                target_calculator_kwargs,
+                input_path=descriptor_path,
+                output_path=target_path,
+                use_memmap=memmap,
+                input_iteration=input_iteration,
+                output_iteration=output_iteration,
+                additional_info_path=info_path,
+                use_fp64=use_fp64,
+            )
 
             if get_rank() == 0:
-                if self.parameters._configuration["mpi"] \
-                        and file_based_communication:
+                if (
+                    self.parameters._configuration["mpi"]
+                    and file_based_communication
+                ):
                     os.remove(memmap)
 
         # Properly close series
@@ -408,16 +465,19 @@ class DataConverter:
             if self.process_targets:
                 del output_series
 
-    def __convert_single_snapshot(self, snapshot_number,
-                                  descriptor_calculation_kwargs,
-                                  target_calculator_kwargs,
-                                  input_path=None,
-                                  output_path=None,
-                                  additional_info_path=None,
-                                  use_memmap=None,
-                                  output_iteration=None,
-                                  input_iteration=None,
-                                  use_fp64=False):
+    def __convert_single_snapshot(
+        self,
+        snapshot_number,
+        descriptor_calculation_kwargs,
+        target_calculator_kwargs,
+        input_path=None,
+        output_path=None,
+        additional_info_path=None,
+        use_memmap=None,
+        output_iteration=None,
+        input_iteration=None,
+        use_fp64=False,
+    ):
         """
         Convert single snapshot from the conversion lists.
 
@@ -481,39 +541,49 @@ class DataConverter:
             descriptor_calculation_kwargs["units"] = original_units["input"]
             descriptor_calculation_kwargs["use_fp64"] = use_fp64
 
-            tmp_input, local_size = self.descriptor_calculator. \
-                calculate_from_qe_out(snapshot["input"],
-                                      **descriptor_calculation_kwargs)
+            tmp_input, local_size = (
+                self.descriptor_calculator.calculate_from_qe_out(
+                    snapshot["input"], **descriptor_calculation_kwargs
+                )
+            )
 
         elif description["input"] is None:
             # In this case, only the output is processed.
             pass
 
         else:
-            raise Exception("Unknown file extension, cannot convert descriptor")
+            raise Exception(
+                "Unknown file extension, cannot convert descriptor."
+            )
 
         if description["input"] is not None:
             # Save data and delete, if not requested otherwise.
             if input_path is not None and input_iteration is None:
                 if self.parameters._configuration["mpi"]:
-                    tmp_input = self.descriptor_calculator. \
-                        gather_descriptors(tmp_input)
+                    tmp_input = self.descriptor_calculator.gather_descriptors(
+                        tmp_input
+                    )
                 if get_rank() == 0:
-                    self.descriptor_calculator.\
-                        write_to_numpy_file(input_path, tmp_input)
+                    self.descriptor_calculator.write_to_numpy_file(
+                        input_path, tmp_input
+                    )
             else:
                 if self.parameters._configuration["mpi"]:
-                    tmp_input, local_offset, local_reach = \
-                        self.descriptor_calculator.convert_local_to_3d(tmp_input)
-                    self.descriptor_calculator. \
-                        write_to_openpmd_iteration(input_iteration,
-                                                   tmp_input,
-                                                   local_offset=local_offset,
-                                                   local_reach=local_reach)
+                    tmp_input, local_offset, local_reach = (
+                        self.descriptor_calculator.convert_local_to_3d(
+                            tmp_input
+                        )
+                    )
+                    self.descriptor_calculator.write_to_openpmd_iteration(
+                        input_iteration,
+                        tmp_input,
+                        local_offset=local_offset,
+                        local_reach=local_reach,
+                    )
                 else:
-                    self.descriptor_calculator. \
-                        write_to_openpmd_iteration(input_iteration,
-                                                   tmp_input)
+                    self.descriptor_calculator.write_to_openpmd_iteration(
+                        input_iteration, tmp_input
+                    )
             del tmp_input
 
         ###########
@@ -525,25 +595,27 @@ class DataConverter:
                 # Parse and/or calculate the output descriptors.
                 if description["output"] == ".cube":
                     target_calculator_kwargs["units"] = original_units[
-                        "output"]
+                        "output"
+                    ]
                     target_calculator_kwargs["use_memmap"] = use_memmap
                     target_calculator_kwargs["use_fp64"] = use_fp64
 
                     # If no units are provided we just assume standard units.
-                    tmp_output = self.target_calculator. \
-                        read_from_cube(snapshot["output"],
-                                       **target_calculator_kwargs)
+                    tmp_output = self.target_calculator.read_from_cube(
+                        snapshot["output"], **target_calculator_kwargs
+                    )
 
                 elif description["output"] == ".xsf":
                     target_calculator_kwargs["units"] = original_units[
-                        "output"]
+                        "output"
+                    ]
                     target_calculator_kwargs["use_memmap"] = use_memmap
                     target_calculator_kwargs["use_fp664"] = use_fp64
 
                     # If no units are provided we just assume standard units.
-                    tmp_output = self.target_calculator. \
-                        read_from_xsf(snapshot["output"],
-                                      **target_calculator_kwargs)
+                    tmp_output = self.target_calculator.read_from_xsf(
+                        snapshot["output"], **target_calculator_kwargs
+                    )
 
                 elif description["output"] is None:
                     # In this case, only the input is processed.
@@ -551,37 +623,39 @@ class DataConverter:
 
                 else:
                     raise Exception(
-                        "Unknown file extension, cannot convert target"
-                        "data.")
+                        "Unknown file extension, cannot convert target data."
+                    )
 
                 if get_rank() == 0:
-                    self.target_calculator.write_to_numpy_file(output_path,
-                                                               tmp_output)
+                    self.target_calculator.write_to_numpy_file(
+                        output_path, tmp_output
+                    )
             else:
                 metadata = None
                 if description["metadata"] is not None:
-                    metadata = [snapshot["metadata"],
-                                description["metadata"]]
+                    metadata = [snapshot["metadata"], description["metadata"]]
                 # Parse and/or calculate the output descriptors.
                 if self.parameters._configuration["mpi"]:
                     target_calculator_kwargs["return_local"] = True
                 if description["output"] == ".cube":
                     target_calculator_kwargs["units"] = original_units[
-                        "output"]
+                        "output"
+                    ]
                     target_calculator_kwargs["use_memmap"] = use_memmap
                     # If no units are provided we just assume standard units.
-                    tmp_output = self.target_calculator. \
-                        read_from_cube(snapshot["output"],
-                                       **target_calculator_kwargs)
+                    tmp_output = self.target_calculator.read_from_cube(
+                        snapshot["output"], **target_calculator_kwargs
+                    )
 
                 elif description["output"] == ".xsf":
                     target_calculator_kwargs["units"] = original_units[
-                        "output"]
+                        "output"
+                    ]
                     target_calculator_kwargs["use_memmap"] = use_memmap
                     # If no units are provided we just assume standard units.
-                    tmp_output = self.target_calculator. \
-                        read_from_xsf(snapshot["output"],
-                                      **target_calculator_kwargs)
+                    tmp_output = self.target_calculator.read_from_xsf(
+                        snapshot["output"], **target_calculator_kwargs
+                    )
 
                 elif description["output"] is None:
                     # In this case, only the input is processed.
@@ -589,28 +663,31 @@ class DataConverter:
 
                 else:
                     raise Exception(
-                        "Unknown file extension, cannot convert target"
-                        "data.")
+                        "Unknown file extension, cannot convert target data."
+                    )
 
                 if self.parameters._configuration["mpi"]:
-                    self.target_calculator. \
-                        write_to_openpmd_iteration(output_iteration,
-                                                   tmp_output[0],
-                                                   feature_from=tmp_output[1],
-                                                   feature_to=tmp_output[2],
-                                                   additional_metadata=metadata)
+                    self.target_calculator.write_to_openpmd_iteration(
+                        output_iteration,
+                        tmp_output[0],
+                        feature_from=tmp_output[1],
+                        feature_to=tmp_output[2],
+                        additional_metadata=metadata,
+                    )
                 else:
-                    self.target_calculator. \
-                        write_to_openpmd_iteration(output_iteration,
-                                                   tmp_output,
-                                                   additional_metadata=metadata)
+                    self.target_calculator.write_to_openpmd_iteration(
+                        output_iteration,
+                        tmp_output,
+                        additional_metadata=metadata,
+                    )
             del tmp_output
 
         # Parse and/or calculate the additional info.
         if description["additional_info"] is not None:
             # Parsing and saving is done using the target calculator.
-            self.target_calculator. \
-                read_additional_calculation_data(snapshot["additional_info"],
-                                                 description["additional_info"])
-            self.target_calculator. \
-                write_additional_calculation_data(additional_info_path)
+            self.target_calculator.read_additional_calculation_data(
+                snapshot["additional_info"], description["additional_info"]
+            )
+            self.target_calculator.write_additional_calculation_data(
+                additional_info_path
+            )
