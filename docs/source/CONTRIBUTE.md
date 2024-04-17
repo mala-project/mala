@@ -92,9 +92,8 @@ the core development team.
 
 ### Formatting code
 
-* MALA uses `black` for code for unified code formatting
-  * For more info on `black` itself, see the respective 
-    [documentation](https://github.com/psf/black)
+* MALA uses [`black`](https://github.com/psf/black) for code formatting
+* The `black` configuration is located in `pyproject.toml`
 * Currently, no automatic code reformatting will be done in the CI, thus
   please ensure that your code is properly formatted before creating a pull 
   request
