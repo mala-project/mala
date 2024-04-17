@@ -1,7 +1,6 @@
 import os
 
 import mala
-from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
 

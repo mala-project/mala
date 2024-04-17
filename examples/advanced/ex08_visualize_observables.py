@@ -1,8 +1,6 @@
 import os
 
-from ase.io import read
 import mala
-import numpy as np
 
 from mala.datahandling.data_repo import data_repo_path
 
