@@ -119,7 +119,7 @@ class AtomicDensity(Descriptor):
                     "No LAMMPS found for descriptor calculation, "
                     "falling back to python."
                 )
-                return self.__calculate_python(outdir, **kwargs)
+                return self.__calculate_python(**kwargs)
             else:
                 return self.__calculate_lammps(outdir, **kwargs)
         else:
