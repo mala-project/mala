@@ -94,8 +94,6 @@ the core development team.
 
 * MALA uses [`black`](https://github.com/psf/black) for code formatting
 * The `black` configuration is located in `pyproject.toml`
-  * For more info on `black` itself, see the respective 
-    [documentation](https://github.com/psf/black)
 * Currently, no automatic code reformatting will be done in the CI, thus
   please ensure that your code is properly formatted before creating a pull 
   request
