@@ -89,10 +89,7 @@ class MinterpyDescriptors(Descriptor):
         # For version compatibility; older lammps versions (the serial version
         # we still use on some machines) have these constants as part of the
         # general LAMMPS import.
-        try:
-            from lammps import constants as lammps_constants
-        except ImportError:
-            from lammps import lammps
+        from lammps import constants as lammps_constants
 
         nx = grid_dimensions[0]
         ny = grid_dimensions[1]

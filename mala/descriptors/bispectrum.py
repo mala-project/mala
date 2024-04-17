@@ -135,10 +135,7 @@ class Bispectrum(Descriptor):
         # For version compatibility; older lammps versions (the serial version
         # we still use on some machines) have these constants as part of the
         # general LAMMPS import.
-        try:
-            from lammps import constants as lammps_constants
-        except ImportError:
-            from lammps import lammps
+        from lammps import constants as lammps_constants
 
         use_fp64 = kwargs.get("use_fp64", False)
 
