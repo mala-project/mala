@@ -4,6 +4,7 @@ import mala
 from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
+
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
@@ -36,7 +37,7 @@ parameters.hyperparameters.checkpoints_each_trial = -1
 parameters.hyperparameters.checkpoint_name = "ex06"
 parameters.hyperparameters.hyper_opt_method = "optuna"
 parameters.hyperparameters.study_name = "ex06"
-parameters.hyperparameters.rdb_storage = 'sqlite:///ex06.db'
+parameters.hyperparameters.rdb_storage = "sqlite:///ex06.db"
 
 # Hyperparameter optimization can be further refined by using ensemble training
 # at each step and by using a different metric then the validation loss
@@ -50,27 +51,37 @@ parameters.running.after_before_training_metric = "band_energy"
 
 data_handler = mala.DataHandler(parameters)
 
-data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                          "Be_snapshot1.out.npy", data_path, "tr",
-                          calculation_output_file=
-                          os.path.join(data_path, "Be_snapshot1.out"))
-data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                          "Be_snapshot2.out.npy", data_path, "va",
-                          calculation_output_file=
-                          os.path.join(data_path, "Be_snapshot2.out"))
+data_handler.add_snapshot(
+    "Be_snapshot1.in.npy",
+    data_path,
+    "Be_snapshot1.out.npy",
+    data_path,
+    "tr",
+    calculation_output_file=os.path.join(data_path, "Be_snapshot1.out"),
+)
+data_handler.add_snapshot(
+    "Be_snapshot2.in.npy",
+    data_path,
+    "Be_snapshot2.out.npy",
+    data_path,
+    "va",
+    calculation_output_file=os.path.join(data_path, "Be_snapshot2.out"),
+)
 data_handler.prepare_data()
 
 
 hyperoptimizer = mala.HyperOpt(parameters, data_handler)
-hyperoptimizer.add_hyperparameter("float", "learning_rate",
-                                  0.0000001, 0.01)
+hyperoptimizer.add_hyperparameter("float", "learning_rate", 0.0000001, 0.01)
 hyperoptimizer.add_hyperparameter("int", "ff_neurons_layer_00", 10, 100)
 hyperoptimizer.add_hyperparameter("int", "ff_neurons_layer_01", 10, 100)
-hyperoptimizer.add_hyperparameter("categorical", "layer_activation_00",
-                                  choices=["ReLU", "Sigmoid"])
-hyperoptimizer.add_hyperparameter("categorical", "layer_activation_01",
-                                  choices=["ReLU", "Sigmoid"])
-hyperoptimizer.add_hyperparameter("categorical", "layer_activation_02",
-                                  choices=["ReLU", "Sigmoid"])
+hyperoptimizer.add_hyperparameter(
+    "categorical", "layer_activation_00", choices=["ReLU", "Sigmoid"]
+)
+hyperoptimizer.add_hyperparameter(
+    "categorical", "layer_activation_01", choices=["ReLU", "Sigmoid"]
+)
+hyperoptimizer.add_hyperparameter(
+    "categorical", "layer_activation_02", choices=["ReLU", "Sigmoid"]
+)
 hyperoptimizer.perform_study()
 hyperoptimizer.set_optimal_parameters()

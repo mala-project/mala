@@ -4,6 +4,7 @@ import mala
 from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
+
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
@@ -29,34 +30,47 @@ def initial_setup():
     parameters.hyperparameters.checkpoint_name = "ex05_checkpoint"
 
     data_handler = mala.DataHandler(parameters)
-    data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                              "Be_snapshot0.out.npy", data_path, "tr")
-    data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                              "Be_snapshot1.out.npy", data_path, "va")
+    data_handler.add_snapshot(
+        "Be_snapshot0.in.npy",
+        data_path,
+        "Be_snapshot0.out.npy",
+        data_path,
+        "tr",
+    )
+    data_handler.add_snapshot(
+        "Be_snapshot1.in.npy",
+        data_path,
+        "Be_snapshot1.out.npy",
+        data_path,
+        "va",
+    )
     data_handler.prepare_data()
 
     hyperoptimizer = mala.HyperOpt(parameters, data_handler)
-    hyperoptimizer.add_hyperparameter("float", "learning_rate",
-                                      0.0000001, 0.01)
+    hyperoptimizer.add_hyperparameter(
+        "float", "learning_rate", 0.0000001, 0.01
+    )
     hyperoptimizer.add_hyperparameter("int", "ff_neurons_layer_00", 10, 100)
     hyperoptimizer.add_hyperparameter("int", "ff_neurons_layer_01", 10, 100)
-    hyperoptimizer.add_hyperparameter("categorical", "layer_activation_00",
-                                      choices=["ReLU", "Sigmoid"])
-    hyperoptimizer.add_hyperparameter("categorical", "layer_activation_01",
-                                      choices=["ReLU", "Sigmoid"])
-    hyperoptimizer.add_hyperparameter("categorical", "layer_activation_02",
-                                      choices=["ReLU", "Sigmoid"])
+    hyperoptimizer.add_hyperparameter(
+        "categorical", "layer_activation_00", choices=["ReLU", "Sigmoid"]
+    )
+    hyperoptimizer.add_hyperparameter(
+        "categorical", "layer_activation_01", choices=["ReLU", "Sigmoid"]
+    )
+    hyperoptimizer.add_hyperparameter(
+        "categorical", "layer_activation_02", choices=["ReLU", "Sigmoid"]
+    )
 
     return parameters, data_handler, hyperoptimizer
 
 
 if mala.HyperOptOptuna.checkpoint_exists("ex05_checkpoint"):
-    parameters, datahandler, hyperoptimizer = \
-        mala.HyperOptOptuna.resume_checkpoint(
-            "ex05_checkpoint")
+    parameters, datahandler, hyperoptimizer = (
+        mala.HyperOptOptuna.resume_checkpoint("ex05_checkpoint")
+    )
 else:
     parameters, datahandler, hyperoptimizer = initial_setup()
 
 # Perform hyperparameter optimization.
 hyperoptimizer.perform_study()
-
