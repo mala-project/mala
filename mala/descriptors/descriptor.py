@@ -5,7 +5,7 @@ import os
 
 import ase
 from ase.units import m
-from ase.neighborlist import NeighborList
+from ase.neighborlist import NeighborList, NewPrimitiveNeighborList
 import numpy as np
 from skspatial.objects import Plane
 
@@ -814,12 +814,12 @@ class Descriptor(PhysicalData):
             # given by the cutoff radius.
             for edge in edges:
                 edge_point = self._grid_to_coord(edge)
-                neighborlist = ase.neighborlist.NeighborList(
+                neighborlist = NeighborList(
                     np.zeros(len(self.atoms) + 1)
                     + [self.parameters.atomic_density_cutoff],
                     bothways=True,
                     self_interaction=False,
-                    primitive=ase.neighborlist.NewPrimitiveNeighborList,
+                    primitive=NewPrimitiveNeighborList,
                 )
 
                 atoms_with_grid_point = self.atoms.copy()

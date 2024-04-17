@@ -2,11 +2,6 @@
 
 import os
 
-try:
-    import horovod.torch as hvd
-except ModuleNotFoundError:
-    # Warning is thrown by Parameters class
-    pass
 import numpy as np
 import torch
 from torch.utils.data import TensorDataset

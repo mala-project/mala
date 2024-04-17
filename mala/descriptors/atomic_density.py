@@ -4,18 +4,7 @@ import os
 
 import ase
 import ase.io
-
-try:
-    from lammps import lammps
-
-    # For version compatibility; older lammps versions (the serial version
-    # we still use on some machines) do not have these constants.
-    try:
-        from lammps import constants as lammps_constants
-    except ImportError:
-        pass
-except ModuleNotFoundError:
-    pass
+from importlib.util import find_spec
 import numpy as np
 from scipy.spatial import distance
 
@@ -125,21 +114,27 @@ class AtomicDensity(Descriptor):
 
     def _calculate(self, outdir, **kwargs):
         if self.parameters._configuration["lammps"]:
-            try:
-                from lammps import lammps
-            except ModuleNotFoundError:
+            if find_spec("lammps") is None:
                 printout(
                     "No LAMMPS found for descriptor calculation, "
                     "falling back to python."
                 )
-                return self.__calculate_python(**kwargs)
-
-            return self.__calculate_lammps(outdir, **kwargs)
+                return self.__calculate_python(outdir, **kwargs)
+            else:
+                return self.__calculate_lammps(outdir, **kwargs)
         else:
             return self.__calculate_python(**kwargs)
 
     def __calculate_lammps(self, outdir, **kwargs):
         """Perform actual Gaussian descriptor calculation."""
+        # For version compatibility; older lammps versions (the serial version
+        # we still use on some machines) have these constants as part of the
+        # general LAMMPS import.
+        try:
+            from lammps import constants as lammps_constants
+        except ImportError:
+            from lammps import lammps
+
         use_fp64 = kwargs.get("use_fp64", False)
         return_directly = kwargs.get("return_directly", False)
 

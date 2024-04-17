@@ -1,7 +1,5 @@
 """Hyperparameter to use with optuna."""
 
-from optuna.trial import Trial
-
 from mala.network.hyperparameter import Hyperparameter
 
 

@@ -17,9 +17,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from mala.common.parameters import printout
-from mala.common.parallelizer import parallel_warn
 from mala.datahandling.fast_tensor_dataset import FastTensorDataset
-from mala.network.network import Network
 from mala.network.runner import Runner
 from mala.datahandling.lazy_load_dataset_single import LazyLoadDatasetSingle
 from mala.datahandling.multi_lazy_load_data_loader import (

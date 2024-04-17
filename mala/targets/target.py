@@ -1,6 +1,6 @@
 """Base class for all target calculators."""
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import itertools
 import json
 import os
@@ -773,7 +773,7 @@ class Target(PhysicalData):
             # rMax/2 because this is the radius around one atom, so half the
             # distance to the next one.
             # Using neighborlists grants us access to the PBC.
-            neighborlist = ase.neighborlist.NeighborList(
+            neighborlist = NeighborList(
                 np.zeros(len(atoms)) + [_rMax / 2.0], bothways=True
             )
             neighborlist.update(atoms)
@@ -880,7 +880,7 @@ class Target(PhysicalData):
 
         # Construct a neighbor list for calculation of distances.
         # With this, the PBC are satisfied.
-        neighborlist = ase.neighborlist.NeighborList(
+        neighborlist = NeighborList(
             np.zeros(len(atoms)) + [_rMax / 2.0], bothways=True
         )
         neighborlist.update(atoms)

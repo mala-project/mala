@@ -1,9 +1,5 @@
 """Represents an entire atomic snapshot (including descriptor/target data)."""
 
-from os.path import join
-
-import numpy as np
-
 from mala.common.json_serializable import JSONSerializable
 
 

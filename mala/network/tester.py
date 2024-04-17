@@ -1,10 +1,5 @@
 """Tester class for testing a network."""
 
-try:
-    import horovod.torch as hvd
-except ModuleNotFoundError:
-    # Warning is thrown by Parameters class
-    pass
 import numpy as np
 
 from mala.common.parameters import printout

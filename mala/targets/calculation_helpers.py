@@ -4,7 +4,6 @@ from ase.units import kB
 import mpmath as mp
 import numpy as np
 from scipy import integrate
-import sys
 
 
 def integrate_values_on_spacing(values, spacing, method, axis=0):

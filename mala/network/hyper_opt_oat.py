@@ -2,7 +2,6 @@
 
 from bisect import bisect
 import itertools
-import os
 import pickle
 
 import numpy as np

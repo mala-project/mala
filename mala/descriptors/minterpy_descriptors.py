@@ -5,20 +5,9 @@ import os
 import ase
 import ase.io
 
-try:
-    from lammps import lammps
-
-    # For version compatibility; older lammps versions (the serial version
-    # we still use on some machines) do not have these constants.
-    try:
-        from lammps import constants as lammps_constants
-    except ImportError:
-        pass
-except ModuleNotFoundError:
-    pass
 import numpy as np
 
-from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
+from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
 from mala.descriptors.atomic_density import AtomicDensity
 
@@ -97,7 +86,13 @@ class MinterpyDescriptors(Descriptor):
             raise Exception("Unsupported unit for Minterpy descriptors.")
 
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
-        from lammps import lammps
+        # For version compatibility; older lammps versions (the serial version
+        # we still use on some machines) have these constants as part of the
+        # general LAMMPS import.
+        try:
+            from lammps import constants as lammps_constants
+        except ImportError:
+            from lammps import lammps
 
         nx = grid_dimensions[0]
         ny = grid_dimensions[1]

@@ -5,10 +5,10 @@ from multiprocessing import shared_memory
 
 import numpy as np
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 
 
-class LazyLoadDatasetSingle(torch.utils.data.Dataset):
+class LazyLoadDatasetSingle(Dataset):
     """
     DataSet class for lazy loading.
 

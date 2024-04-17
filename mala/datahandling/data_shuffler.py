@@ -4,9 +4,7 @@ import os
 
 import numpy as np
 
-import mala
 from mala.common.parameters import (
-    ParametersData,
     Parameters,
     DEFAULT_NP_DATA_DTYPE,
 )

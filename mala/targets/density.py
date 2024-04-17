@@ -1,9 +1,7 @@
 """Electronic density calculation class."""
 
-import os
 import time
 
-import ase.io
 from ase.units import Rydberg, Bohr, m
 from functools import cached_property
 import numpy as np
@@ -20,7 +18,6 @@ from mala.common.parallelizer import (
     get_size,
 )
 from mala.targets.target import Target
-from mala.targets.calculation_helpers import integrate_values_on_spacing
 from mala.targets.cube_parser import read_cube, write_cube
 from mala.targets.calculation_helpers import integrate_values_on_spacing
 from mala.targets.xsf_parser import read_xsf

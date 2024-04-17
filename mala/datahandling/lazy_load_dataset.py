@@ -16,7 +16,7 @@ from mala.common.parameters import DEFAULT_NP_DATA_DTYPE
 from mala.datahandling.snapshot import Snapshot
 
 
-class LazyLoadDataset(torch.utils.data.Dataset):
+class LazyLoadDataset(Dataset):
     """
     DataSet class for lazy loading.
 
