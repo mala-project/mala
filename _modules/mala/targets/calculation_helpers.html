@@ -75,11 +75,12 @@
              
   <h1>Source code for mala.targets.calculation_helpers</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Helper functions for several calculation tasks (such as integration).&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">kB</span>
 <span class="kn">import</span> <span class="nn">mpmath</span> <span class="k">as</span> <span class="nn">mp</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+
 
 <div class="viewcode-block" id="integrate_values_on_spacing"><a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.integrate_values_on_spacing">[docs]</a><span class="k">def</span> <span class="nf">integrate_values_on_spacing</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">spacing</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -114,8 +115,7 @@
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="fermi_function"><a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.fermi_function">[docs]</a><span class="k">def</span> <span class="nf">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
-                   <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="fermi_function"><a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.fermi_function">[docs]</a><span class="k">def</span> <span class="nf">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the Fermi function.</span>
 
@@ -198,8 +198,9 @@
         <span class="n">dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">energy</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">multiplicator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">energy</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="n">fermi_val</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
-                                       <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">fermi_val</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span>
+                <span class="n">energy</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">fermi_val</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
                 <span class="n">secondterm</span> <span class="o">=</span> <span class="mf">0.0</span>
             <span class="k">else</span><span class="p">:</span>
@@ -210,8 +211,9 @@
                 <span class="n">firsterm</span> <span class="o">=</span> <span class="n">fermi_val</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">fermi_val</span><span class="p">)</span>
             <span class="n">multiplicator</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">firsterm</span> <span class="o">+</span> <span class="n">secondterm</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">fermi_val</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
-                                   <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">fermi_val</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span>
+            <span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="n">fermi_val</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
             <span class="n">secondterm</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="k">else</span><span class="p">:</span>
@@ -259,7 +261,7 @@
 <span class="sd">    function_value : float</span>
 <span class="sd">        F0 value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span><span class="o">/</span><span class="n">beta</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="o">/</span> <span class="n">beta</span>
     <span class="k">return</span> <span class="n">results</span></div>
 
 
@@ -280,8 +282,11 @@
 <span class="sd">    function_value : float</span>
 <span class="sd">        F1 value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">((</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="n">x</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-               <span class="o">-</span> <span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="o">-</span> <span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">beta</span> <span class="o">*</span> <span class="n">beta</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">results</span></div>
 
 
@@ -302,9 +307,12 @@
 <span class="sd">    function_value : float</span>
 <span class="sd">        F2 value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">((</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="mi">3</span><span class="o">+</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">-</span>
-               <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">+</span>
-               <span class="mi">2</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span>
+        <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">beta</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">beta</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">results</span></div>
 
 
@@ -325,8 +333,10 @@
 <span class="sd">    function_value : float</span>
 <span class="sd">        S0 value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">+</span>
-               <span class="mf">2.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">beta</span> <span class="o">*</span> <span class="n">beta</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">results</span></div>
 
 
@@ -347,9 +357,11 @@
 <span class="sd">    function_value : float</span>
 <span class="sd">        S1 value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">+</span>
-               <span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">-</span>
-               <span class="mi">3</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">beta</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">beta</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">results</span></div>
 
 
@@ -409,17 +421,20 @@
     <span class="p">}</span>
 
     <span class="c1"># Check if everything makes sense.</span>
-    <span class="k">if</span> <span class="n">I0</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">function_mappings</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="ow">or</span> <span class="n">I1</span> <span class="ow">not</span> <span class="ow">in</span>\
-            <span class="nb">list</span><span class="p">(</span><span class="n">function_mappings</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Could not calculate analytical intergal, &quot;</span>
-                        <span class="s2">&quot;wrong choice of auxiliary functions.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">I0</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">function_mappings</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="ow">or</span> <span class="n">I1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="n">function_mappings</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="s2">&quot;Could not calculate analytical intergal, &quot;</span>
+            <span class="s2">&quot;wrong choice of auxiliary functions.&quot;</span>
+        <span class="p">)</span>
 
     <span class="c1"># Construct the weight vector.</span>
     <span class="n">weights_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">energy_grid</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
     <span class="n">gridsize</span> <span class="o">=</span> <span class="n">energy_grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">energy_grid_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">energy_grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">energy_grid_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">energy_grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
     <span class="n">energy_grid_edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_grid</span>
-    <span class="n">spacing</span> <span class="o">=</span> <span class="p">(</span><span class="n">energy_grid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">spacing</span> <span class="o">=</span> <span class="n">energy_grid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">energy_grid_edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">spacing</span>
     <span class="n">energy_grid_edges</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">spacing</span>
 
@@ -430,14 +445,14 @@
     <span class="n">beta</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">kB</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">gridsize</span><span class="p">):</span>
         <span class="c1"># Some aliases for readibility</span>
-        <span class="n">ei</span> <span class="o">=</span> <span class="n">energy_grid_edges</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">ei_plus</span> <span class="o">=</span> <span class="n">energy_grid_edges</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">ei</span> <span class="o">=</span> <span class="n">energy_grid_edges</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">ei_plus</span> <span class="o">=</span> <span class="n">energy_grid_edges</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
         <span class="n">ei_minus</span> <span class="o">=</span> <span class="n">energy_grid_edges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
         <span class="c1"># Calculate x</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">beta</span><span class="o">*</span><span class="p">(</span><span class="n">ei</span> <span class="o">-</span> <span class="n">fermi_energy</span><span class="p">)</span>
-        <span class="n">x_plus</span> <span class="o">=</span> <span class="n">beta</span><span class="o">*</span><span class="p">(</span><span class="n">ei_plus</span> <span class="o">-</span> <span class="n">fermi_energy</span><span class="p">)</span>
-        <span class="n">x_minus</span> <span class="o">=</span> <span class="n">beta</span><span class="o">*</span><span class="p">(</span><span class="n">ei_minus</span> <span class="o">-</span> <span class="n">fermi_energy</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">ei</span> <span class="o">-</span> <span class="n">fermi_energy</span><span class="p">)</span>
+        <span class="n">x_plus</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">ei_plus</span> <span class="o">-</span> <span class="n">fermi_energy</span><span class="p">)</span>
+        <span class="n">x_minus</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">ei_minus</span> <span class="o">-</span> <span class="n">fermi_energy</span><span class="p">)</span>
 
         <span class="c1"># Calculate the I0 value</span>
         <span class="n">i0</span> <span class="o">=</span> <span class="n">function_mappings</span><span class="p">[</span><span class="n">I0</span><span class="p">](</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
@@ -449,11 +464,12 @@
         <span class="n">i1_plus</span> <span class="o">=</span> <span class="n">function_mappings</span><span class="p">[</span><span class="n">I1</span><span class="p">](</span><span class="n">x_plus</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
         <span class="n">i1_minus</span> <span class="o">=</span> <span class="n">function_mappings</span><span class="p">[</span><span class="n">I1</span><span class="p">](</span><span class="n">x_minus</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
 
-        <span class="n">weights_vector</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">i0_plus</span><span class="o">-</span><span class="n">i0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span>
-                                            <span class="p">((</span><span class="n">ei</span> <span class="o">-</span> <span class="n">fermi_energy</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ei_plus</span> <span class="o">-</span> <span class="n">ei</span><span class="p">)))</span> \
-                            <span class="o">+</span> <span class="p">(</span><span class="n">i0</span><span class="o">-</span><span class="n">i0_minus</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">((</span><span class="n">ei</span> <span class="o">-</span> <span class="n">fermi_energy</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ei</span> <span class="o">-</span> <span class="n">ei_minus</span><span class="p">)))</span> <span class="o">-</span> \
-                            <span class="p">((</span><span class="n">i1_plus</span><span class="o">-</span><span class="n">i1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ei_plus</span><span class="o">-</span><span class="n">ei</span><span class="p">))</span> <span class="o">+</span> <span class="p">((</span><span class="n">i1</span> <span class="o">-</span> <span class="n">i1_minus</span><span class="p">)</span>
-                                                             <span class="o">/</span> <span class="p">(</span><span class="n">ei</span> <span class="o">-</span> <span class="n">ei_minus</span><span class="p">))</span>
+        <span class="n">weights_vector</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">i0_plus</span> <span class="o">-</span> <span class="n">i0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">((</span><span class="n">ei</span> <span class="o">-</span> <span class="n">fermi_energy</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ei_plus</span> <span class="o">-</span> <span class="n">ei</span><span class="p">)))</span>
+            <span class="o">+</span> <span class="p">(</span><span class="n">i0</span> <span class="o">-</span> <span class="n">i0_minus</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">((</span><span class="n">ei</span> <span class="o">-</span> <span class="n">fermi_energy</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ei</span> <span class="o">-</span> <span class="n">ei_minus</span><span class="p">)))</span>
+            <span class="o">-</span> <span class="p">((</span><span class="n">i1_plus</span> <span class="o">-</span> <span class="n">i1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ei_plus</span> <span class="o">-</span> <span class="n">ei</span><span class="p">))</span>
+            <span class="o">+</span> <span class="p">((</span><span class="n">i1</span> <span class="o">-</span> <span class="n">i1_minus</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ei</span> <span class="o">-</span> <span class="n">ei_minus</span><span class="p">))</span>
+        <span class="p">)</span>
 
     <span class="n">integral_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">weights_vector</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">integral_value</span></div>
@@ -486,8 +502,13 @@
 
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">multiple_gaussians</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> \
-        <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="p">((</span><span class="n">grid</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">-</span> <span class="n">centers</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span><span class="o">/</span><span class="n">sigma</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">multiple_gaussians</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">1.0</span>
+        <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+            <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="p">((</span><span class="n">grid</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">-</span> <span class="n">centers</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">multiple_gaussians</span></div>
 </pre></div>

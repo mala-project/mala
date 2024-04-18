@@ -75,20 +75,13 @@
              
   <h1>Source code for mala.descriptors.bispectrum</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Bispectrum descriptor class.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">ase</span>
 <span class="kn">import</span> <span class="nn">ase.io</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">lammps</span>
-    <span class="c1"># For version compatibility; older lammps versions (the serial version</span>
-    <span class="c1"># we still use on some machines) do not have these constants.</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">lammps_constants</span>
-    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-        <span class="k">pass</span>
-<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-    <span class="k">pass</span>
+
+<span class="kn">from</span> <span class="nn">importlib.util</span> <span class="kn">import</span> <span class="n">find_spec</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">distance</span>
 
@@ -196,16 +189,15 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for bispectrum descriptors.&quot;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;lammps&quot;</span><span class="p">]:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">lammps</span>
-            <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;No LAMMPS found for descriptor calculation, &quot;</span>
-                         <span class="s2">&quot;falling back to python.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;lammps&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">printout</span><span class="p">(</span>
+                    <span class="s2">&quot;No LAMMPS found for descriptor calculation, &quot;</span>
+                    <span class="s2">&quot;falling back to python.&quot;</span>
+                <span class="p">)</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_python</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_lammps</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_lammps</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_python</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -216,6 +208,11 @@
 <span class="sd">        Creates a LAMMPS instance with appropriate call parameters and uses</span>
 <span class="sd">        it for the calculation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># For version compatibility; older lammps versions (the serial version</span>
+        <span class="c1"># we still use on some machines) have these constants as part of the</span>
+        <span class="c1"># general LAMMPS import.</span>
+        <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">lammps_constants</span>
+
         <span class="n">use_fp64</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_fp64&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="n">lammps_format</span> <span class="o">=</span> <span class="s2">&quot;lammps-data&quot;</span>
@@ -227,11 +224,19 @@
         <span class="n">nz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
         <span class="c1"># Create LAMMPS instance.</span>
-        <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;twojmax&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span>
-                       <span class="s2">&quot;rcutfac&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span><span class="p">,</span>
-                       <span class="s2">&quot;atom_config_fname&quot;</span><span class="p">:</span> <span class="n">ase_out_path</span><span class="p">}</span>
-        <span class="n">lmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_lammps</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">,</span>
-                                 <span class="n">log_file_name</span><span class="o">=</span><span class="s2">&quot;lammps_bgrid_log.tmp&quot;</span><span class="p">)</span>
+        <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;twojmax&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span>
+            <span class="s2">&quot;rcutfac&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span><span class="p">,</span>
+            <span class="s2">&quot;atom_config_fname&quot;</span><span class="p">:</span> <span class="n">ase_out_path</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">lmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_lammps</span><span class="p">(</span>
+            <span class="n">nx</span><span class="p">,</span>
+            <span class="n">ny</span><span class="p">,</span>
+            <span class="n">nz</span><span class="p">,</span>
+            <span class="n">outdir</span><span class="p">,</span>
+            <span class="n">lammps_dict</span><span class="p">,</span>
+            <span class="n">log_file_name</span><span class="o">=</span><span class="s2">&quot;lammps_bgrid_log.tmp&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># An empty string means that the user wants to use the standard input.</span>
         <span class="c1"># What that is differs depending on serial/parallel execution.</span>
@@ -239,15 +244,17 @@
             <span class="n">filepath</span> <span class="o">=</span> <span class="vm">__file__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;bispectrum&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_z_splitting</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> \
-                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgridlocal.python&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgridlocal.python&quot;</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> \
-                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span>
-                                     <span class="s2">&quot;in.bgridlocal_defaultproc.python&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgridlocal_defaultproc.python&quot;</span>
+                    <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> \
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgrid.python&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgrid.python&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># Do the LAMMPS calculation.</span>
         <span class="n">lmp</span><span class="o">.</span><span class="n">file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span><span class="p">)</span>
@@ -257,11 +264,13 @@
         <span class="n">ncols0</span> <span class="o">=</span> <span class="mi">3</span>
 
         <span class="c1"># Analytical relation for fingerprint length</span>
-        <span class="n">ncoeff</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> \
-                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> \
-                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="n">ncoeff</span> <span class="o">=</span> <span class="n">ncoeff</span> <span class="o">//</span> <span class="mi">24</span>   <span class="c1"># integer division</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">=</span> <span class="n">ncols0</span><span class="o">+</span><span class="n">ncoeff</span>
+        <span class="n">ncoeff</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">ncoeff</span> <span class="o">=</span> <span class="n">ncoeff</span> <span class="o">//</span> <span class="mi">24</span>  <span class="c1"># integer division</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">=</span> <span class="n">ncols0</span> <span class="o">+</span> <span class="n">ncoeff</span>
 
         <span class="c1"># Extract data from LAMMPS calculation.</span>
         <span class="c1"># This is different for the parallel and the serial case.</span>
@@ -269,20 +278,29 @@
         <span class="c1"># the end of this function.</span>
         <span class="c1"># This is not necessarily true for the parallel case.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
-            <span class="n">nrows_local</span> <span class="o">=</span> <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;bgridlocal&quot;</span><span class="p">,</span>
-                                             <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span>
-                                             <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_SIZE_ROWS</span><span class="p">)</span>
-            <span class="n">ncols_local</span> <span class="o">=</span> <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;bgridlocal&quot;</span><span class="p">,</span>
-                                             <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span>
-                                             <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_SIZE_COLS</span><span class="p">)</span>
+            <span class="n">nrows_local</span> <span class="o">=</span> <span class="n">extract_compute_np</span><span class="p">(</span>
+                <span class="n">lmp</span><span class="p">,</span>
+                <span class="s2">&quot;bgridlocal&quot;</span><span class="p">,</span>
+                <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span>
+                <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_SIZE_ROWS</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">ncols_local</span> <span class="o">=</span> <span class="n">extract_compute_np</span><span class="p">(</span>
+                <span class="n">lmp</span><span class="p">,</span>
+                <span class="s2">&quot;bgridlocal&quot;</span><span class="p">,</span>
+                <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span>
+                <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_SIZE_COLS</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">ncols_local</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">+</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Inconsistent number of features.&quot;</span><span class="p">)</span>
 
-            <span class="n">snap_descriptors_np</span> <span class="o">=</span> \
-                <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;bgridlocal&quot;</span><span class="p">,</span>
-                                   <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
-                                   <span class="n">array_shape</span><span class="o">=</span><span class="p">(</span><span class="n">nrows_local</span><span class="p">,</span> <span class="n">ncols_local</span><span class="p">),</span>
-                                   <span class="n">use_fp64</span><span class="o">=</span><span class="n">use_fp64</span><span class="p">)</span>
+            <span class="n">snap_descriptors_np</span> <span class="o">=</span> <span class="n">extract_compute_np</span><span class="p">(</span>
+                <span class="n">lmp</span><span class="p">,</span>
+                <span class="s2">&quot;bgridlocal&quot;</span><span class="p">,</span>
+                <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span>
+                <span class="mi">2</span><span class="p">,</span>
+                <span class="n">array_shape</span><span class="o">=</span><span class="p">(</span><span class="n">nrows_local</span><span class="p">,</span> <span class="n">ncols_local</span><span class="p">),</span>
+                <span class="n">use_fp64</span><span class="o">=</span><span class="n">use_fp64</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">lmp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
             <span class="c1"># Copy the grid dimensions only at the end.</span>
@@ -291,10 +309,14 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Extract data from LAMMPS calculation.</span>
-            <span class="n">snap_descriptors_np</span> <span class="o">=</span> \
-                <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;bgrid&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
-                                   <span class="p">(</span><span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span><span class="p">),</span>
-                                   <span class="n">use_fp64</span><span class="o">=</span><span class="n">use_fp64</span><span class="p">)</span>
+            <span class="n">snap_descriptors_np</span> <span class="o">=</span> <span class="n">extract_compute_np</span><span class="p">(</span>
+                <span class="n">lmp</span><span class="p">,</span>
+                <span class="s2">&quot;bgrid&quot;</span><span class="p">,</span>
+                <span class="mi">0</span><span class="p">,</span>
+                <span class="mi">2</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span><span class="p">),</span>
+                <span class="n">use_fp64</span><span class="o">=</span><span class="n">use_fp64</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">lmp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
             <span class="c1"># switch from x-fastest to z-fastest order (swaps 0th and 2nd</span>
@@ -303,9 +325,9 @@
             <span class="c1"># Copy the grid dimensions only at the end.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">]</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">snap_descriptors_np</span><span class="p">,</span> <span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="n">nz</span>
+                <span class="k">return</span> <span class="n">snap_descriptors_np</span><span class="p">,</span> <span class="n">nx</span> <span class="o">*</span> <span class="n">ny</span> <span class="o">*</span> <span class="n">nz</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">snap_descriptors_np</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">:],</span> <span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="n">nz</span>
+                <span class="k">return</span> <span class="n">snap_descriptors_np</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">:],</span> <span class="n">nx</span> <span class="o">*</span> <span class="n">ny</span> <span class="o">*</span> <span class="n">nz</span>
 
     <span class="k">def</span> <span class="nf">__calculate_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -329,14 +351,17 @@
 <span class="sd">        hard codes them. Compared to the LAMMPS implementation, some</span>
 <span class="sd">        essentially never used options are not maintained/optimized.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Using python for descriptor calculation. &quot;</span>
-                 <span class="s2">&quot;The resulting calculation will be slow for &quot;</span>
-                 <span class="s2">&quot;large systems.&quot;</span><span class="p">)</span>
+        <span class="n">printout</span><span class="p">(</span>
+            <span class="s2">&quot;Using python for descriptor calculation. &quot;</span>
+            <span class="s2">&quot;The resulting calculation will be slow for &quot;</span>
+            <span class="s2">&quot;large systems.&quot;</span>
+        <span class="p">)</span>
 
         <span class="c1"># The entire bispectrum calculation may be extensively profiled.</span>
         <span class="n">profile_calculation</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;profile_calculation&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">profile_calculation</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">time</span>
+
             <span class="n">timing_distances</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">timing_ui</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">timing_zi</span> <span class="o">=</span> <span class="mi">0</span>
@@ -344,16 +369,22 @@
             <span class="n">timing_gridpoints</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="c1"># Set up the array holding the bispectrum descriptors.</span>
-        <span class="n">ncoeff</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> \
-                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> \
-                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="n">ncoeff</span> <span class="o">=</span> <span class="n">ncoeff</span> <span class="o">//</span> <span class="mi">24</span>   <span class="c1"># integer division</span>
+        <span class="n">ncoeff</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">ncoeff</span> <span class="o">=</span> <span class="n">ncoeff</span> <span class="o">//</span> <span class="mi">24</span>  <span class="c1"># integer division</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">=</span> <span class="n">ncoeff</span> <span class="o">+</span> <span class="mi">3</span>
-        <span class="n">bispectrum_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                  <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                  <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                                  <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span><span class="p">),</span>
-                                 <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">bispectrum_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Create a list of all potentially relevant atoms.</span>
         <span class="n">all_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_atom_list</span><span class="p">()</span>
@@ -424,8 +455,9 @@
                     <span class="c1"># Compute the grid point.</span>
                     <span class="k">if</span> <span class="n">profile_calculation</span><span class="p">:</span>
                         <span class="n">t_grid</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-                    <span class="n">bispectrum_np</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> \
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_grid_to_coord</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+                    <span class="n">bispectrum_np</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid_to_coord</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span>
+                    <span class="p">)</span>
 
                     <span class="c1">########</span>
                     <span class="c1"># Distance matrix calculation.</span>
@@ -436,15 +468,30 @@
 
                     <span class="k">if</span> <span class="n">profile_calculation</span><span class="p">:</span>
                         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-                    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span>
-                        <span class="p">[</span><span class="n">bispectrum_np</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]],</span>
-                        <span class="n">all_atoms</span><span class="p">))</span>
-                    <span class="n">distances_cutoff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
-                        <span class="n">distances</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span>
-                            <span class="n">distances</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span><span class="p">)]))</span>
-                    <span class="n">atoms_cutoff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">all_atoms</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span>
-                            <span class="n">distances</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span><span class="p">),</span> <span class="p">:],</span>
-                                              <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span>
+                        <span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span>
+                            <span class="p">[</span><span class="n">bispectrum_np</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]],</span> <span class="n">all_atoms</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">distances_cutoff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+                            <span class="n">distances</span><span class="p">[</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span>
+                                    <span class="n">distances</span>
+                                    <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">atoms_cutoff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span>
+                        <span class="n">all_atoms</span><span class="p">[</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span>
+                                <span class="n">distances</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span>
+                            <span class="p">),</span>
+                            <span class="p">:,</span>
+                        <span class="p">],</span>
+                        <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="p">)</span>
                     <span class="n">nr_atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">atoms_cutoff</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="k">if</span> <span class="n">profile_calculation</span><span class="p">:</span>
                         <span class="n">timing_distances</span> <span class="o">+=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
@@ -458,10 +505,12 @@
 
                     <span class="k">if</span> <span class="n">profile_calculation</span><span class="p">:</span>
                         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-                    <span class="n">ulisttot_r</span><span class="p">,</span> <span class="n">ulisttot_i</span> <span class="o">=</span> \
-                        <span class="bp">self</span><span class="o">.</span><span class="n">__compute_ui</span><span class="p">(</span><span class="n">nr_atoms</span><span class="p">,</span> <span class="n">atoms_cutoff</span><span class="p">,</span>
-                                          <span class="n">distances_cutoff</span><span class="p">,</span>
-                                          <span class="n">bispectrum_np</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+                    <span class="n">ulisttot_r</span><span class="p">,</span> <span class="n">ulisttot_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__compute_ui</span><span class="p">(</span>
+                        <span class="n">nr_atoms</span><span class="p">,</span>
+                        <span class="n">atoms_cutoff</span><span class="p">,</span>
+                        <span class="n">distances_cutoff</span><span class="p">,</span>
+                        <span class="n">bispectrum_np</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span>
+                    <span class="p">)</span>
                     <span class="k">if</span> <span class="n">profile_calculation</span><span class="p">:</span>
                         <span class="n">timing_ui</span> <span class="o">+=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
 
@@ -474,8 +523,9 @@
 
                     <span class="k">if</span> <span class="n">profile_calculation</span><span class="p">:</span>
                         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-                    <span class="n">zlist_r</span><span class="p">,</span> <span class="n">zlist_i</span> <span class="o">=</span> \
-                        <span class="bp">self</span><span class="o">.</span><span class="n">__compute_zi</span><span class="p">(</span><span class="n">ulisttot_r</span><span class="p">,</span> <span class="n">ulisttot_i</span><span class="p">)</span>
+                    <span class="n">zlist_r</span><span class="p">,</span> <span class="n">zlist_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__compute_zi</span><span class="p">(</span>
+                        <span class="n">ulisttot_r</span><span class="p">,</span> <span class="n">ulisttot_i</span>
+                    <span class="p">)</span>
                     <span class="k">if</span> <span class="n">profile_calculation</span><span class="p">:</span>
                         <span class="n">timing_zi</span> <span class="o">+=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
 
@@ -487,9 +537,9 @@
                     <span class="c1">########</span>
                     <span class="k">if</span> <span class="n">profile_calculation</span><span class="p">:</span>
                         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-                    <span class="n">bispectrum_np</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="mi">3</span><span class="p">:]</span> <span class="o">=</span> \
-                        <span class="bp">self</span><span class="o">.</span><span class="n">__compute_bi</span><span class="p">(</span><span class="n">ulisttot_r</span><span class="p">,</span> <span class="n">ulisttot_i</span><span class="p">,</span> <span class="n">zlist_r</span><span class="p">,</span>
-                                          <span class="n">zlist_i</span><span class="p">)</span>
+                    <span class="n">bispectrum_np</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="mi">3</span><span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__compute_bi</span><span class="p">(</span>
+                        <span class="n">ulisttot_r</span><span class="p">,</span> <span class="n">ulisttot_i</span><span class="p">,</span> <span class="n">zlist_r</span><span class="p">,</span> <span class="n">zlist_i</span>
+                    <span class="p">)</span>
                     <span class="k">if</span> <span class="n">profile_calculation</span><span class="p">:</span>
                         <span class="n">timing_gridpoints</span> <span class="o">+=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t_grid</span>
                         <span class="n">timing_bi</span> <span class="o">+=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
@@ -499,13 +549,27 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Python-based bispectrum descriptor calculation timing: &quot;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Index matrix initialization [s]&quot;</span><span class="p">,</span> <span class="n">timing_index_init</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Overall calculation time [s]&quot;</span><span class="p">,</span> <span class="n">timing_total</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calculation time per gridpoint [s/gridpoint]&quot;</span><span class="p">,</span>
-                  <span class="n">timing_gridpoints</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Calculation time per gridpoint [s/gridpoint]&quot;</span><span class="p">,</span>
+                <span class="n">timing_gridpoints</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">),</span>
+            <span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Timing contributions per gridpoint: &quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Distance matrix [s/gridpoint]&quot;</span><span class="p">,</span> <span class="n">timing_distances</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Compute ui [s/gridpoint]&quot;</span><span class="p">,</span> <span class="n">timing_ui</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Compute zi [s/gridpoint]&quot;</span><span class="p">,</span> <span class="n">timing_zi</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Compute bi [s/gridpoint]&quot;</span><span class="p">,</span> <span class="n">timing_bi</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Distance matrix [s/gridpoint]&quot;</span><span class="p">,</span>
+                <span class="n">timing_distances</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Compute ui [s/gridpoint]&quot;</span><span class="p">,</span>
+                <span class="n">timing_ui</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Compute zi [s/gridpoint]&quot;</span><span class="p">,</span>
+                <span class="n">timing_zi</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Compute bi [s/gridpoint]&quot;</span><span class="p">,</span>
+                <span class="n">timing_bi</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">),</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">bispectrum_np</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">)</span>
@@ -558,9 +622,12 @@
 
         <span class="k">def</span> <span class="nf">deltacg</span><span class="p">(</span><span class="n">j1</span><span class="p">,</span> <span class="n">j2</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
             <span class="n">sfaccg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span> <span class="o">-</span> <span class="n">j</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span>
-                           <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j1</span> <span class="o">-</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span>
-                           <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="o">-</span><span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">sfaccg</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span> <span class="o">-</span> <span class="n">j</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j1</span> <span class="o">-</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="o">-</span><span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="o">/</span> <span class="n">sfaccg</span>
+            <span class="p">)</span>
 
         <span class="c1">########</span>
         <span class="c1"># Indices for compute_ui.</span>
@@ -576,23 +643,40 @@
                     <span class="n">idxu_count</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span> <span class="o">=</span> <span class="n">idxu_count</span>
 
-        <span class="n">rootpqarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">rootpqarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span>
-                           <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="n">rootpqarray</span><span class="p">[</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="n">q</span><span class="p">)</span>
 
         <span class="c1"># These are only for optimization purposes.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_one_initialized</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_block</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span>
+            <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_block</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span>
+                <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_one_initialized</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_one_initialized</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_u_block</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">stop</span><span class="o">=</span><span class="n">stop</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">j</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_one_initialized</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_block</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">stop</span><span class="o">=</span><span class="n">stop</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">j</span> <span class="o">+</span> <span class="mi">2</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_one_initialized</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_u_one_initialized</span><span class="p">,</span>
-                                                                 <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_u_block</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">stop</span><span class="o">=</span><span class="n">stop</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">j</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_one_initialized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_one_initialized</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_one_initialized</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_one_initialized</span><span class="p">,</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_block</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">stop</span><span class="o">=</span><span class="n">stop</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">j</span> <span class="o">+</span> <span class="mi">2</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_one_initialized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_one_initialized</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">int32</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_full</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_pos</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_neg</span> <span class="o">=</span> <span class="p">[]</span>
@@ -646,8 +730,11 @@
         <span class="n">idxz_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">j1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j1</span> <span class="o">-</span> <span class="n">j2</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span>
-                                            <span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                    <span class="n">j1</span> <span class="o">-</span> <span class="n">j2</span><span class="p">,</span>
+                    <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span> <span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="mi">2</span><span class="p">,</span>
+                <span class="p">):</span>
                     <span class="k">for</span> <span class="n">mb</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                         <span class="k">for</span> <span class="n">ma</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                             <span class="n">idxz_count</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -655,15 +742,22 @@
         <span class="n">idxz</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">idxz_max</span><span class="p">):</span>
             <span class="n">idxz</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ZIndices</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__index_z_block</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__index_z_block</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="n">idxz_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">j1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j1</span> <span class="o">-</span> <span class="n">j2</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span>
-                                            <span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                    <span class="n">j1</span> <span class="o">-</span> <span class="n">j2</span><span class="p">,</span>
+                    <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span> <span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="mi">2</span><span class="p">,</span>
+                <span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__index_z_block</span><span class="p">[</span><span class="n">j1</span><span class="p">][</span><span class="n">j2</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">idxz_count</span>
 
                     <span class="k">for</span> <span class="n">mb</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
@@ -671,34 +765,55 @@
                             <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">j1</span> <span class="o">=</span> <span class="n">j1</span>
                             <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">j2</span> <span class="o">=</span> <span class="n">j2</span>
                             <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">j</span> <span class="o">=</span> <span class="n">j</span>
-                            <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">ma1min</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
-                                        <span class="mi">2</span> <span class="o">*</span> <span class="n">ma</span> <span class="o">-</span> <span class="n">j</span> <span class="o">-</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">j1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
-                            <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">ma2max</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ma</span> <span class="o">-</span> <span class="n">j</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">idxz</span><span class="p">[</span>
-                                <span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">ma1min</span> <span class="o">-</span> <span class="n">j1</span><span class="p">)</span> <span class="o">+</span> <span class="n">j2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
-                            <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">na</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">j1</span><span class="p">,</span> <span class="p">(</span>
-                                        <span class="mi">2</span> <span class="o">*</span> <span class="n">ma</span> <span class="o">-</span> <span class="n">j</span> <span class="o">+</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">j1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">idxz</span><span class="p">[</span>
-                                                      <span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">ma1min</span> <span class="o">+</span> <span class="mi">1</span>
-                            <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">mb1min</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
-                                        <span class="mi">2</span> <span class="o">*</span> <span class="n">mb</span> <span class="o">-</span> <span class="n">j</span> <span class="o">-</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">j1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
-                            <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">mb2max</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">mb</span> <span class="o">-</span> <span class="n">j</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">idxz</span><span class="p">[</span>
-                                <span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">mb1min</span> <span class="o">-</span> <span class="n">j1</span><span class="p">)</span> <span class="o">+</span> <span class="n">j2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
-                            <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">nb</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">j1</span><span class="p">,</span> <span class="p">(</span>
-                                        <span class="mi">2</span> <span class="o">*</span> <span class="n">mb</span> <span class="o">-</span> <span class="n">j</span> <span class="o">+</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">j1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">idxz</span><span class="p">[</span>
-                                                      <span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">mb1min</span> <span class="o">+</span> <span class="mi">1</span>
+                            <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">ma1min</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+                                <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ma</span> <span class="o">-</span> <span class="n">j</span> <span class="o">-</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">j1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+                            <span class="p">)</span>
+                            <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">ma2max</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="mi">2</span> <span class="o">*</span> <span class="n">ma</span>
+                                <span class="o">-</span> <span class="n">j</span>
+                                <span class="o">-</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">ma1min</span> <span class="o">-</span> <span class="n">j1</span><span class="p">)</span>
+                                <span class="o">+</span> <span class="n">j2</span>
+                            <span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+                            <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">na</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="nb">min</span><span class="p">(</span><span class="n">j1</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ma</span> <span class="o">-</span> <span class="n">j</span> <span class="o">+</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">j1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+                                <span class="o">-</span> <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">ma1min</span>
+                                <span class="o">+</span> <span class="mi">1</span>
+                            <span class="p">)</span>
+                            <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">mb1min</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+                                <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">mb</span> <span class="o">-</span> <span class="n">j</span> <span class="o">-</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">j1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+                            <span class="p">)</span>
+                            <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">mb2max</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="mi">2</span> <span class="o">*</span> <span class="n">mb</span>
+                                <span class="o">-</span> <span class="n">j</span>
+                                <span class="o">-</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">mb1min</span> <span class="o">-</span> <span class="n">j1</span><span class="p">)</span>
+                                <span class="o">+</span> <span class="n">j2</span>
+                            <span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+                            <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">nb</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="nb">min</span><span class="p">(</span><span class="n">j1</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">mb</span> <span class="o">-</span> <span class="n">j</span> <span class="o">+</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">j1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+                                <span class="o">-</span> <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">mb1min</span>
+                                <span class="o">+</span> <span class="mi">1</span>
+                            <span class="p">)</span>
 
                             <span class="n">jju</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_block</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">mb</span> <span class="o">+</span> <span class="n">ma</span>
                             <span class="n">idxz</span><span class="p">[</span><span class="n">idxz_count</span><span class="p">]</span><span class="o">.</span><span class="n">jju</span> <span class="o">=</span> <span class="n">jju</span>
 
                             <span class="n">idxz_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="n">idxcg_block</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                                     <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                                     <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">idxcg_block</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
         <span class="n">idxcg_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">j1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j1</span> <span class="o">-</span> <span class="n">j2</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span>
-                                            <span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                    <span class="n">j1</span> <span class="o">-</span> <span class="n">j2</span><span class="p">,</span>
+                    <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span> <span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="mi">2</span><span class="p">,</span>
+                <span class="p">):</span>
                     <span class="n">idxcg_block</span><span class="p">[</span><span class="n">j1</span><span class="p">][</span><span class="n">j2</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">idxcg_count</span>
                     <span class="k">for</span> <span class="n">m1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                         <span class="k">for</span> <span class="n">m2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
@@ -708,8 +823,11 @@
         <span class="n">idxcg_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">j1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j1</span> <span class="o">-</span> <span class="n">j2</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span>
-                                            <span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                    <span class="n">j1</span> <span class="o">-</span> <span class="n">j2</span><span class="p">,</span>
+                    <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span> <span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="mi">2</span><span class="p">,</span>
+                <span class="p">):</span>
                     <span class="k">for</span> <span class="n">m1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                         <span class="n">aa2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">m1</span> <span class="o">-</span> <span class="n">j1</span>
                         <span class="k">for</span> <span class="n">m2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
@@ -720,27 +838,44 @@
                                 <span class="n">idxcg_count</span> <span class="o">+=</span> <span class="mi">1</span>
                                 <span class="k">continue</span>
                             <span class="n">cgsum</span> <span class="o">=</span> <span class="mf">0.0</span>
-                            <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">aa2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span>
-                                                      <span class="o">-</span><span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">j1</span> <span class="o">-</span> <span class="n">bb2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)),</span>
-                                           <span class="nb">min</span><span class="p">((</span><span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span> <span class="o">-</span> <span class="n">j</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span>
-                                               <span class="nb">min</span><span class="p">((</span><span class="n">j1</span> <span class="o">-</span> <span class="n">aa2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span>
-                                                   <span class="p">(</span><span class="n">j2</span> <span class="o">+</span> <span class="n">bb2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                            <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                                <span class="nb">max</span><span class="p">(</span>
+                                    <span class="mi">0</span><span class="p">,</span>
+                                    <span class="nb">max</span><span class="p">(</span>
+                                        <span class="o">-</span><span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">aa2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span>
+                                        <span class="o">-</span><span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">j1</span> <span class="o">-</span> <span class="n">bb2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span>
+                                    <span class="p">),</span>
+                                <span class="p">),</span>
+                                <span class="nb">min</span><span class="p">(</span>
+                                    <span class="p">(</span><span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span> <span class="o">-</span> <span class="n">j</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span>
+                                    <span class="nb">min</span><span class="p">((</span><span class="n">j1</span> <span class="o">-</span> <span class="n">aa2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">j2</span> <span class="o">+</span> <span class="n">bb2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">),</span>
+                                <span class="p">)</span>
+                                <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                            <span class="p">):</span>
                                 <span class="n">ifac</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">z</span> <span class="o">%</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">1</span>
-                                <span class="n">cgsum</span> <span class="o">+=</span> <span class="n">ifac</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span>
-                                    <span class="p">(</span><span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span> <span class="o">-</span> <span class="n">j</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span>
-                                    <span class="p">(</span><span class="n">j1</span> <span class="o">-</span> <span class="n">aa2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span>
-                                    <span class="p">(</span><span class="n">j2</span> <span class="o">+</span> <span class="n">bb2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span>
-                                    <span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">aa2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span>
-                                    <span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">j1</span> <span class="o">-</span> <span class="n">bb2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">z</span><span class="p">))</span>
+                                <span class="n">cgsum</span> <span class="o">+=</span> <span class="n">ifac</span> <span class="o">/</span> <span class="p">(</span>
+                                    <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+                                    <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span> <span class="o">-</span> <span class="n">j</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span>
+                                    <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j1</span> <span class="o">-</span> <span class="n">aa2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span>
+                                    <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j2</span> <span class="o">+</span> <span class="n">bb2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span>
+                                    <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span>
+                                        <span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">j2</span> <span class="o">+</span> <span class="n">aa2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">z</span>
+                                    <span class="p">)</span>
+                                    <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span>
+                                        <span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">j1</span> <span class="o">-</span> <span class="n">bb2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">z</span>
+                                    <span class="p">)</span>
+                                <span class="p">)</span>
                             <span class="n">cc2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">m</span> <span class="o">-</span> <span class="n">j</span>
                             <span class="n">dcg</span> <span class="o">=</span> <span class="n">deltacg</span><span class="p">(</span><span class="n">j1</span><span class="p">,</span> <span class="n">j2</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
                             <span class="n">sfaccg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-                                <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j1</span> <span class="o">+</span> <span class="n">aa2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span>
-                                    <span class="p">(</span><span class="n">j1</span> <span class="o">-</span> <span class="n">aa2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span>
-                                    <span class="p">(</span><span class="n">j2</span> <span class="o">+</span> <span class="n">bb2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span>
-                                    <span class="p">(</span><span class="n">j2</span> <span class="o">-</span> <span class="n">bb2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span>
-                                    <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="n">cc2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span>
-                                    <span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">cc2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j1</span> <span class="o">+</span> <span class="n">aa2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+                                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j1</span> <span class="o">-</span> <span class="n">aa2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+                                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j2</span> <span class="o">+</span> <span class="n">bb2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+                                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j2</span> <span class="o">-</span> <span class="n">bb2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+                                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j</span> <span class="o">+</span> <span class="n">cc2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+                                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="n">j</span> <span class="o">-</span> <span class="n">cc2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+                                <span class="o">*</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                            <span class="p">)</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">__cglist</span><span class="p">[</span><span class="n">idxcg_count</span><span class="p">]</span> <span class="o">=</span> <span class="n">cgsum</span> <span class="o">*</span> <span class="n">dcg</span> <span class="o">*</span> <span class="n">sfaccg</span>
                             <span class="n">idxcg_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
@@ -772,8 +907,12 @@
                 <span class="n">icga</span> <span class="o">=</span> <span class="n">ma1min</span> <span class="o">*</span> <span class="p">(</span><span class="n">j2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">ma2max</span>
                 <span class="k">for</span> <span class="n">ia</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">na</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__index_z_jjz</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jjz</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__index_z_icgb</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">idxcg_block</span><span class="p">[</span><span class="n">j1</span><span class="p">][</span><span class="n">j2</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">+</span> <span class="n">icgb</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__index_z_icga</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">idxcg_block</span><span class="p">[</span><span class="n">j1</span><span class="p">][</span><span class="n">j2</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">+</span> <span class="n">icga</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__index_z_icgb</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="nb">int</span><span class="p">(</span><span class="n">idxcg_block</span><span class="p">[</span><span class="n">j1</span><span class="p">][</span><span class="n">j2</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">+</span> <span class="n">icgb</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__index_z_icga</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="nb">int</span><span class="p">(</span><span class="n">idxcg_block</span><span class="p">[</span><span class="n">j1</span><span class="p">][</span><span class="n">j2</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">+</span> <span class="n">icga</span>
+                    <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u1r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jju1</span> <span class="o">+</span> <span class="n">ma1</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u1i</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jju1</span> <span class="o">+</span> <span class="n">ma1</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u2r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jju2</span> <span class="o">+</span> <span class="n">ma2</span><span class="p">)</span>
@@ -801,8 +940,11 @@
         <span class="n">idxb_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">j1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j1</span> <span class="o">-</span> <span class="n">j2</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span>
-                                            <span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                    <span class="n">j1</span> <span class="o">-</span> <span class="n">j2</span><span class="p">,</span>
+                    <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span> <span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="mi">2</span><span class="p">,</span>
+                <span class="p">):</span>
                     <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;=</span> <span class="n">j1</span><span class="p">:</span>
                         <span class="n">idxb_count</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__index_b_max</span> <span class="o">=</span> <span class="n">idxb_count</span>
@@ -813,7 +955,11 @@
         <span class="n">idxb_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">j1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j1</span> <span class="o">-</span> <span class="n">j2</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span> <span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                    <span class="n">j1</span> <span class="o">-</span> <span class="n">j2</span><span class="p">,</span>
+                    <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span> <span class="n">j1</span> <span class="o">+</span> <span class="n">j2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="mi">2</span><span class="p">,</span>
+                <span class="p">):</span>
                     <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;=</span> <span class="n">j1</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">__index_b</span><span class="p">[</span><span class="n">idxb_count</span><span class="p">]</span><span class="o">.</span><span class="n">j1</span> <span class="o">=</span> <span class="n">j1</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">__index_b</span><span class="p">[</span><span class="n">idxb_count</span><span class="p">]</span><span class="o">.</span><span class="n">j2</span> <span class="o">=</span> <span class="n">j2</span>
@@ -835,8 +981,12 @@
 <span class="sd">        may help.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Precompute and prepare ui stuff</span>
-        <span class="n">theta0</span> <span class="o">=</span> <span class="p">(</span><span class="n">distances_cutoff</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmin0</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rfac0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmin0</span><span class="p">)</span>
+        <span class="n">theta0</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">distances_cutoff</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmin0</span><span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rfac0</span>
+            <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+            <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmin0</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="n">z0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">distances_cutoff</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">theta0</span><span class="p">))</span>
 
         <span class="n">ulist_r_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nr_atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
@@ -844,7 +994,9 @@
         <span class="n">ulist_i_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nr_atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="n">ulisttot_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="n">ulisttot_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-        <span class="n">r0inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">distances_cutoff</span><span class="o">*</span><span class="n">distances_cutoff</span> <span class="o">+</span> <span class="n">z0</span><span class="o">*</span><span class="n">z0</span><span class="p">))</span>
+        <span class="n">r0inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span>
+            <span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">distances_cutoff</span> <span class="o">*</span> <span class="n">distances_cutoff</span> <span class="o">+</span> <span class="n">z0</span> <span class="o">*</span> <span class="n">z0</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="n">ulisttot_r</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_u_one_initialized</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
         <span class="n">distance_vector</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">atoms_cutoff</span> <span class="o">-</span> <span class="n">grid</span><span class="p">)</span>
 
@@ -863,36 +1015,48 @@
                 <span class="k">if</span> <span class="n">jju_outer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_full</span><span class="p">:</span>
                     <span class="n">rootpq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rootpq_full_1</span><span class="p">[</span><span class="n">jju1</span><span class="p">]</span>
                     <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">rootpq</span> <span class="o">*</span> <span class="p">(</span>
-                            <span class="n">a_r</span> <span class="o">*</span> <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]]</span> <span class="o">+</span>
-                            <span class="n">a_i</span> <span class="o">*</span>
-                            <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]])</span>
+                        <span class="n">a_r</span> <span class="o">*</span> <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]]</span>
+                        <span class="o">+</span> <span class="n">a_i</span> <span class="o">*</span> <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]]</span>
+                    <span class="p">)</span>
                     <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">rootpq</span> <span class="o">*</span> <span class="p">(</span>
-                            <span class="n">a_r</span> <span class="o">*</span> <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]]</span> <span class="o">-</span>
-                            <span class="n">a_i</span> <span class="o">*</span>
-                            <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]])</span>
+                        <span class="n">a_r</span> <span class="o">*</span> <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]]</span>
+                        <span class="o">-</span> <span class="n">a_i</span> <span class="o">*</span> <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]]</span>
+                    <span class="p">)</span>
 
                     <span class="n">rootpq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rootpq_full_2</span><span class="p">[</span><span class="n">jju1</span><span class="p">]</span>
-                    <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">rootpq</span> <span class="o">*</span> <span class="p">(</span>
-                            <span class="n">b_r</span> <span class="o">*</span> <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]]</span> <span class="o">+</span>
-                            <span class="n">b_i</span> <span class="o">*</span>
-                            <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]])</span>
-                    <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">rootpq</span> <span class="o">*</span> <span class="p">(</span>
-                            <span class="n">b_r</span> <span class="o">*</span> <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]]</span> <span class="o">-</span>
-                            <span class="n">b_i</span> <span class="o">*</span>
-                            <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]])</span>
+                    <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="o">-</span><span class="mf">1.0</span>
+                        <span class="o">*</span> <span class="n">rootpq</span>
+                        <span class="o">*</span> <span class="p">(</span>
+                            <span class="n">b_r</span> <span class="o">*</span> <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]]</span>
+                            <span class="o">+</span> <span class="n">b_i</span> <span class="o">*</span> <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]]</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="o">-</span><span class="mf">1.0</span>
+                        <span class="o">*</span> <span class="n">rootpq</span>
+                        <span class="o">*</span> <span class="p">(</span>
+                            <span class="n">b_r</span> <span class="o">*</span> <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]]</span>
+                            <span class="o">-</span> <span class="n">b_i</span> <span class="o">*</span> <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_full</span><span class="p">[</span><span class="n">jju1</span><span class="p">]]</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
                     <span class="n">jju1</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="n">jju_outer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">:</span>
-                    <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">ulist_r_ij</span><span class="p">[:,</span>
-                                                            <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span>
-                    <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span> <span class="o">=</span> <span class="o">-</span><span class="n">ulist_i_ij</span><span class="p">[:,</span>
-                                                             <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span>
+                    <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span>
+                    <span class="p">)</span>
+                    <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="o">-</span><span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span>
+                    <span class="p">)</span>
                     <span class="n">jju2</span> <span class="o">+=</span> <span class="mi">1</span>
 
                 <span class="k">if</span> <span class="n">jju_outer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">:</span>
-                    <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span> <span class="o">=</span> <span class="o">-</span><span class="n">ulist_r_ij</span><span class="p">[:,</span>
-                                                             <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span>
-                    <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span> <span class="o">=</span> <span class="n">ulist_i_ij</span><span class="p">[:,</span>
-                                                            <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span>
+                    <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="o">-</span><span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span>
+                    <span class="p">)</span>
+                    <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span>
+                    <span class="p">)</span>
                     <span class="n">jju3</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="c1"># This emulates add_uarraytot.</span>
@@ -901,15 +1065,20 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_switchflag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">sfac</span> <span class="o">+=</span> <span class="mf">1.0</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">rcutfac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span> <span class="o">-</span>
-                                   <span class="bp">self</span><span class="o">.</span><span class="n">rmin0</span><span class="p">)</span>
+                <span class="n">rcutfac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmin0</span>
+                <span class="p">)</span>
                 <span class="k">if</span> <span class="n">nr_atoms</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">sfac</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span>
-                        <span class="p">(</span><span class="n">distances_cutoff</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmin0</span><span class="p">)</span> <span class="o">*</span> <span class="n">rcutfac</span><span class="p">)</span>
-                                  <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+                    <span class="n">sfac</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">((</span><span class="n">distances_cutoff</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmin0</span><span class="p">)</span> <span class="o">*</span> <span class="n">rcutfac</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span>
+                    <span class="p">)</span>
                     <span class="n">sfac</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">distances_cutoff</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmin0</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">1.0</span>
-                    <span class="n">sfac</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">distances_cutoff</span> <span class="o">&gt;</span>
-                                  <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.0</span>
+                    <span class="n">sfac</span><span class="p">[</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                            <span class="n">distances_cutoff</span>
+                            <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">sfac</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">distances_cutoff</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmin0</span> <span class="k">else</span> <span class="n">sfac</span>
                     <span class="n">sfac</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="k">if</span> <span class="n">distances_cutoff</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmin0</span> <span class="k">else</span> <span class="n">sfac</span>
@@ -948,24 +1117,36 @@
 <span class="sd">        A different route that then may employ just-in-time compilation</span>
 <span class="sd">        could be fruitful.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">tmp_real</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cglist</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_icgb</span><span class="p">]</span> <span class="o">*</span> \
-                   <span class="bp">self</span><span class="o">.</span><span class="n">__cglist</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_icga</span><span class="p">]</span> <span class="o">*</span> \
-                   <span class="p">(</span><span class="n">ulisttot_r</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u1r</span><span class="p">]</span> <span class="o">*</span> <span class="n">ulisttot_r</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u2r</span><span class="p">]</span>
-                    <span class="o">-</span> <span class="n">ulisttot_i</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u1i</span><span class="p">]</span> <span class="o">*</span> <span class="n">ulisttot_i</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u2i</span><span class="p">])</span>
-        <span class="n">tmp_imag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cglist</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_icgb</span><span class="p">]</span> <span class="o">*</span> \
-                   <span class="bp">self</span><span class="o">.</span><span class="n">__cglist</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_icga</span><span class="p">]</span> <span class="o">*</span> \
-                   <span class="p">(</span><span class="n">ulisttot_r</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u1r</span><span class="p">]</span> <span class="o">*</span> <span class="n">ulisttot_i</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u2i</span><span class="p">]</span>
-                    <span class="o">+</span> <span class="n">ulisttot_i</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u1i</span><span class="p">]</span> <span class="o">*</span> <span class="n">ulisttot_r</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u2r</span><span class="p">])</span>
+        <span class="n">tmp_real</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cglist</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_icgb</span><span class="p">]</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cglist</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_icga</span><span class="p">]</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">ulisttot_r</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u1r</span><span class="p">]</span> <span class="o">*</span> <span class="n">ulisttot_r</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u2r</span><span class="p">]</span>
+                <span class="o">-</span> <span class="n">ulisttot_i</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u1i</span><span class="p">]</span>
+                <span class="o">*</span> <span class="n">ulisttot_i</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u2i</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">tmp_imag</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cglist</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_icgb</span><span class="p">]</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cglist</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_icga</span><span class="p">]</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">ulisttot_r</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u1r</span><span class="p">]</span> <span class="o">*</span> <span class="n">ulisttot_i</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u2i</span><span class="p">]</span>
+                <span class="o">+</span> <span class="n">ulisttot_i</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u1i</span><span class="p">]</span>
+                <span class="o">*</span> <span class="n">ulisttot_r</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_u2r</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="c1"># Summation over an array based on indices stored in a different</span>
         <span class="c1"># array.</span>
         <span class="c1"># Taken from: https://stackoverflow.com/questions/67108215/how-to-get-sum-of-values-in-a-numpy-array-based-on-another-array-with-repetitive</span>
         <span class="c1"># Under &quot;much better version&quot;.</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_jjz</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                              <span class="n">return_inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__index_z_jjz</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_inverse</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
         <span class="n">zlist_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">tmp_real</span><span class="p">)</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_jjz</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                              <span class="n">return_inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__index_z_jjz</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_inverse</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
         <span class="n">zlist_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">tmp_imag</span><span class="p">)</span>
 
         <span class="c1"># Commented out for efficiency reasons. May be commented in at a later</span>
@@ -991,8 +1172,8 @@
         <span class="c1"># This also has some implications for the rest of the function.</span>
         <span class="c1"># This currently really only works for one element.</span>
         <span class="n">number_elements</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">number_element_pairs</span> <span class="o">=</span> <span class="n">number_elements</span><span class="o">*</span><span class="n">number_elements</span>
-        <span class="n">number_element_triples</span> <span class="o">=</span> <span class="n">number_element_pairs</span><span class="o">*</span><span class="n">number_elements</span>
+        <span class="n">number_element_pairs</span> <span class="o">=</span> <span class="n">number_elements</span> <span class="o">*</span> <span class="n">number_elements</span>
+        <span class="n">number_element_triples</span> <span class="o">=</span> <span class="n">number_element_pairs</span> <span class="o">*</span> <span class="n">number_elements</span>
         <span class="n">ielem</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">blist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_b_max</span> <span class="o">*</span> <span class="n">number_element_triples</span><span class="p">)</span>
         <span class="n">itriple</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1000,7 +1181,7 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bzero_flag</span><span class="p">:</span>
             <span class="n">wself</span> <span class="o">=</span> <span class="mf">1.0</span>
-            <span class="n">bzero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">bzero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">www</span> <span class="o">=</span> <span class="n">wself</span> <span class="o">*</span> <span class="n">wself</span> <span class="o">*</span> <span class="n">wself</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bnorm_flag</span><span class="p">:</span>
@@ -1018,35 +1199,50 @@
                         <span class="n">jjz</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_z_block</span><span class="p">[</span><span class="n">j1</span><span class="p">][</span><span class="n">j2</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
                         <span class="n">jju</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_u_block</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
                         <span class="n">sumzu</span> <span class="o">=</span> <span class="mf">0.0</span>
-                        <span class="k">for</span> <span class="n">mb</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">j</span><span class="o">/</span><span class="mi">2</span><span class="p">))):</span>
+                        <span class="k">for</span> <span class="n">mb</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">j</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))):</span>
                             <span class="k">for</span> <span class="n">ma</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                                <span class="n">sumzu</span> <span class="o">+=</span> <span class="n">ulisttot_r</span><span class="p">[</span><span class="n">elem3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span> <span class="o">+</span> <span class="n">jju</span><span class="p">]</span> <span class="o">*</span> \
-                                         <span class="n">zlist_r</span><span class="p">[</span><span class="n">jjz</span><span class="p">]</span> <span class="o">+</span> <span class="n">ulisttot_i</span><span class="p">[</span>
-                                             <span class="n">elem3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span> <span class="o">+</span> <span class="n">jju</span><span class="p">]</span> <span class="o">*</span> <span class="n">zlist_i</span><span class="p">[</span>
-                                             <span class="n">jjz</span><span class="p">]</span>
+                                <span class="n">sumzu</span> <span class="o">+=</span> <span class="p">(</span>
+                                    <span class="n">ulisttot_r</span><span class="p">[</span>
+                                        <span class="n">elem3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span> <span class="o">+</span> <span class="n">jju</span>
+                                    <span class="p">]</span>
+                                    <span class="o">*</span> <span class="n">zlist_r</span><span class="p">[</span><span class="n">jjz</span><span class="p">]</span>
+                                    <span class="o">+</span> <span class="n">ulisttot_i</span><span class="p">[</span>
+                                        <span class="n">elem3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span> <span class="o">+</span> <span class="n">jju</span>
+                                    <span class="p">]</span>
+                                    <span class="o">*</span> <span class="n">zlist_i</span><span class="p">[</span><span class="n">jjz</span><span class="p">]</span>
+                                <span class="p">)</span>
                                 <span class="n">jjz</span> <span class="o">+=</span> <span class="mi">1</span>
                                 <span class="n">jju</span> <span class="o">+=</span> <span class="mi">1</span>
                         <span class="k">if</span> <span class="n">j</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                             <span class="n">mb</span> <span class="o">=</span> <span class="n">j</span> <span class="o">//</span> <span class="mi">2</span>
                             <span class="k">for</span> <span class="n">ma</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mb</span><span class="p">):</span>
-                                <span class="n">sumzu</span> <span class="o">+=</span> <span class="n">ulisttot_r</span><span class="p">[</span><span class="n">elem3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span> <span class="o">+</span> <span class="n">jju</span><span class="p">]</span> <span class="o">*</span> \
-                                         <span class="n">zlist_r</span><span class="p">[</span><span class="n">jjz</span><span class="p">]</span> <span class="o">+</span> <span class="n">ulisttot_i</span><span class="p">[</span>
-                                             <span class="n">elem3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span> <span class="o">+</span> <span class="n">jju</span><span class="p">]</span> <span class="o">*</span> <span class="n">zlist_i</span><span class="p">[</span>
-                                             <span class="n">jjz</span><span class="p">]</span>
+                                <span class="n">sumzu</span> <span class="o">+=</span> <span class="p">(</span>
+                                    <span class="n">ulisttot_r</span><span class="p">[</span>
+                                        <span class="n">elem3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span> <span class="o">+</span> <span class="n">jju</span>
+                                    <span class="p">]</span>
+                                    <span class="o">*</span> <span class="n">zlist_r</span><span class="p">[</span><span class="n">jjz</span><span class="p">]</span>
+                                    <span class="o">+</span> <span class="n">ulisttot_i</span><span class="p">[</span>
+                                        <span class="n">elem3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span> <span class="o">+</span> <span class="n">jju</span>
+                                    <span class="p">]</span>
+                                    <span class="o">*</span> <span class="n">zlist_i</span><span class="p">[</span><span class="n">jjz</span><span class="p">]</span>
+                                <span class="p">)</span>
                                 <span class="n">jjz</span> <span class="o">+=</span> <span class="mi">1</span>
                                 <span class="n">jju</span> <span class="o">+=</span> <span class="mi">1</span>
                             <span class="n">sumzu</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
-                                    <span class="n">ulisttot_r</span><span class="p">[</span><span class="n">elem3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span> <span class="o">+</span> <span class="n">jju</span><span class="p">]</span> <span class="o">*</span>
-                                    <span class="n">zlist_r</span><span class="p">[</span><span class="n">jjz</span><span class="p">]</span> <span class="o">+</span> <span class="n">ulisttot_i</span><span class="p">[</span>
-                                        <span class="n">elem3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span> <span class="o">+</span> <span class="n">jju</span><span class="p">]</span> <span class="o">*</span> <span class="n">zlist_i</span><span class="p">[</span>
-                                            <span class="n">jjz</span><span class="p">])</span>
+                                <span class="n">ulisttot_r</span><span class="p">[</span><span class="n">elem3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span> <span class="o">+</span> <span class="n">jju</span><span class="p">]</span>
+                                <span class="o">*</span> <span class="n">zlist_r</span><span class="p">[</span><span class="n">jjz</span><span class="p">]</span>
+                                <span class="o">+</span> <span class="n">ulisttot_i</span><span class="p">[</span><span class="n">elem3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_max</span> <span class="o">+</span> <span class="n">jju</span><span class="p">]</span>
+                                <span class="o">*</span> <span class="n">zlist_i</span><span class="p">[</span><span class="n">jjz</span><span class="p">]</span>
+                            <span class="p">)</span>
                         <span class="n">blist</span><span class="p">[</span><span class="n">itriple</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_b_max</span> <span class="o">+</span> <span class="n">jjb</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">sumzu</span>
                     <span class="n">itriple</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">idouble</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bzero_flag</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">wselfall_flag</span><span class="p">:</span>
-                <span class="n">itriple</span> <span class="o">=</span> <span class="p">(</span><span class="n">ielem</span> <span class="o">*</span> <span class="n">number_elements</span> <span class="o">+</span> <span class="n">ielem</span><span class="p">)</span> <span class="o">*</span> <span class="n">number_elements</span> <span class="o">+</span> <span class="n">ielem</span>
+                <span class="n">itriple</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">ielem</span> <span class="o">*</span> <span class="n">number_elements</span> <span class="o">+</span> <span class="n">ielem</span>
+                <span class="p">)</span> <span class="o">*</span> <span class="n">number_elements</span> <span class="o">+</span> <span class="n">ielem</span>
                 <span class="k">for</span> <span class="n">jjb</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_b_max</span><span class="p">):</span>
                     <span class="n">j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_b</span><span class="p">[</span><span class="n">jjb</span><span class="p">]</span><span class="o">.</span><span class="n">j</span>
                     <span class="n">blist</span><span class="p">[</span><span class="n">itriple</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_b_max</span> <span class="o">+</span> <span class="n">jjb</span><span class="p">]</span> <span class="o">-=</span> <span class="n">bzero</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
@@ -1057,23 +1253,21 @@
                         <span class="k">for</span> <span class="n">elem3</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_elements</span><span class="p">):</span>
                             <span class="k">for</span> <span class="n">jjb</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__index_b_max</span><span class="p">):</span>
                                 <span class="n">j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_b</span><span class="p">[</span><span class="n">jjb</span><span class="p">]</span><span class="o">.</span><span class="n">j</span>
-                                <span class="n">blist</span><span class="p">[</span><span class="n">itriple</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_b_max</span> <span class="o">+</span> <span class="n">jjb</span><span class="p">]</span> <span class="o">-=</span> <span class="n">bzero</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                                <span class="n">blist</span><span class="p">[</span>
+                                    <span class="n">itriple</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_b_max</span> <span class="o">+</span> <span class="n">jjb</span>
+                                <span class="p">]</span> <span class="o">-=</span> <span class="n">bzero</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
                             <span class="n">itriple</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="c1"># Untested  &amp; Unoptimized</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quadraticflag</span><span class="p">:</span>
-            <span class="n">xyz_length</span> <span class="o">=</span> <span class="mi">3</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> \
-                <span class="k">else</span> <span class="mi">0</span>
+            <span class="n">xyz_length</span> <span class="o">=</span> <span class="mi">3</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="k">else</span> <span class="mi">0</span>
             <span class="n">ncount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">-</span> <span class="n">xyz_length</span>
             <span class="k">for</span> <span class="n">icoeff</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncount</span><span class="p">):</span>
                 <span class="n">bveci</span> <span class="o">=</span> <span class="n">blist</span><span class="p">[</span><span class="n">icoeff</span><span class="p">]</span>
-                <span class="n">blist</span><span class="p">[</span><span class="mi">3</span> <span class="o">+</span> <span class="n">ncount</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">bveci</span> <span class="o">*</span> \
-                                                     <span class="n">bveci</span>
+                <span class="n">blist</span><span class="p">[</span><span class="mi">3</span> <span class="o">+</span> <span class="n">ncount</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">bveci</span> <span class="o">*</span> <span class="n">bveci</span>
                 <span class="n">ncount</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">for</span> <span class="n">jcoeff</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">icoeff</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ncount</span><span class="p">):</span>
-                    <span class="n">blist</span><span class="p">[</span><span class="n">xyz_length</span> <span class="o">+</span> <span class="n">ncount</span><span class="p">]</span> <span class="o">=</span> <span class="n">bveci</span> <span class="o">*</span> \
-                                                         <span class="n">blist</span><span class="p">[</span>
-                                                             <span class="n">jcoeff</span><span class="p">]</span>
+                    <span class="n">blist</span><span class="p">[</span><span class="n">xyz_length</span> <span class="o">+</span> <span class="n">ncount</span><span class="p">]</span> <span class="o">=</span> <span class="n">bveci</span> <span class="o">*</span> <span class="n">blist</span><span class="p">[</span><span class="n">jcoeff</span><span class="p">]</span>
                     <span class="n">ncount</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="k">return</span> <span class="n">blist</span></div>

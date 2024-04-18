@@ -75,6 +75,7 @@
              
   <h1>Source code for mala.targets.ldos</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;LDOS calculation class.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
 
 <span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">Bohr</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">m</span>
@@ -82,14 +83,22 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_size</span><span class="p">,</span> \
-    <span class="n">barrier</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_comm</span><span class="p">,</span>
+    <span class="n">printout</span><span class="p">,</span>
+    <span class="n">get_rank</span><span class="p">,</span>
+    <span class="n">get_size</span><span class="p">,</span>
+    <span class="n">barrier</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span>
 <span class="kn">from</span> <span class="nn">mala.targets.cube_parser</span> <span class="kn">import</span> <span class="n">read_cube</span>
 <span class="kn">from</span> <span class="nn">mala.targets.xsf_parser</span> <span class="kn">import</span> <span class="n">read_xsf</span>
 <span class="kn">from</span> <span class="nn">mala.targets.target</span> <span class="kn">import</span> <span class="n">Target</span>
-<span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="n">fermi_function</span><span class="p">,</span> \
-    <span class="n">analytical_integration</span><span class="p">,</span> <span class="n">integrate_values_on_spacing</span>
+<span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">fermi_function</span><span class="p">,</span>
+    <span class="n">analytical_integration</span><span class="p">,</span>
+    <span class="n">integrate_values_on_spacing</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mala.targets.dos</span> <span class="kn">import</span> <span class="n">DOS</span>
 <span class="kn">from</span> <span class="nn">mala.targets.density</span> <span class="kn">import</span> <span class="n">Density</span>
 
@@ -165,8 +174,9 @@
         <span class="k">return</span> <span class="n">return_ldos_object</span></div>
 
 <div class="viewcode-block" id="LDOS.from_cube_file"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_cube_file">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_cube_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path_name_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span>
-                       <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_cube_file</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path_name_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span> <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an LDOS calculator from multiple cube files.</span>
 
@@ -191,13 +201,15 @@
 <span class="sd">            If run in MPI parallel mode, such a file MUST be provided.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">return_ldos_object</span> <span class="o">=</span> <span class="n">LDOS</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-        <span class="n">return_ldos_object</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span><span class="n">path_name_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span>
-                                          <span class="n">use_memmap</span><span class="o">=</span><span class="n">use_memmap</span><span class="p">)</span>
+        <span class="n">return_ldos_object</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span>
+            <span class="n">path_name_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span> <span class="n">use_memmap</span><span class="o">=</span><span class="n">use_memmap</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">return_ldos_object</span></div>
 
 <div class="viewcode-block" id="LDOS.from_xsf_file"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_xsf_file">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_xsf_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path_name_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span>
-                      <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_xsf_file</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path_name_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span> <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an LDOS calculator from multiple xsf files.</span>
 
@@ -222,8 +234,9 @@
 <span class="sd">            If run in MPI parallel mode, such a file MUST be provided.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">return_ldos_object</span> <span class="o">=</span> <span class="n">LDOS</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-        <span class="n">return_ldos_object</span><span class="o">.</span><span class="n">read_from_xsf</span><span class="p">(</span><span class="n">path_name_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span>
-                                         <span class="n">use_memmap</span><span class="o">=</span><span class="n">use_memmap</span><span class="p">)</span>
+        <span class="n">return_ldos_object</span><span class="o">.</span><span class="n">read_from_xsf</span><span class="p">(</span>
+            <span class="n">path_name_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span> <span class="n">use_memmap</span><span class="o">=</span><span class="n">use_memmap</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">return_ldos_object</span></div>
 
 <div class="viewcode-block" id="LDOS.from_openpmd_file"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_openpmd_file">[docs]</a>    <span class="nd">@classmethod</span>
@@ -271,15 +284,18 @@
 
 <span class="sd">        Needed for OpenPMD interface.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">m</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="n">J</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">m</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">J</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">si_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dictionary containing the SI unit dimensions in OpenPMD format.&quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">M</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">L</span><span class="p">:</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span>
-                <span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">T</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">M</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">L</span><span class="p">:</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">T</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="p">}</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">local_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -345,8 +361,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_energy</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
-                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No cached LDOS available to calculate this property.&quot;</span>
+            <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -354,8 +371,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
-                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No cached LDOS available to calculate this property.&quot;</span>
+            <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">entropy_contribution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -363,8 +381,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_entropy_contribution</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
-                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No cached LDOS available to calculate this property.&quot;</span>
+            <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -377,8 +396,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_number_of_electrons</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
-                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No cached LDOS available to calculate this property.&quot;</span>
+            <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">fermi_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -391,8 +411,7 @@
 <span class="sd">        from how this quantity is calculated. Calculated via cached LDOS</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span> \
-                <span class="n">get_self_consistent_fermi_energy</span><span class="p">()</span>
+            <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_self_consistent_fermi_energy</span><span class="p">()</span>
 
             <span class="c1"># Now that we have a new Fermi energy, we should uncache the</span>
             <span class="c1"># old number of electrons.</span>
@@ -412,8 +431,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
-                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No cached LDOS available to calculate this property.&quot;</span>
+            <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -421,24 +441,27 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
-                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No cached LDOS available to calculate this property.&quot;</span>
+            <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">_density_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">Density</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
-                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No cached LDOS available to calculate this property.&quot;</span>
+            <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">_density_of_states_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
-                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No cached LDOS available to calculate this property.&quot;</span>
+            <span class="p">)</span>
 
     <span class="c1">##############################</span>
     <span class="c1"># Methods</span>
@@ -475,9 +498,9 @@
         <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/(eV*A^3)&quot;</span> <span class="ow">or</span> <span class="n">in_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">array</span>
         <span class="k">elif</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/(eV*Bohr^3)&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Bohr</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/(Ry*Bohr^3)&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Rydberg</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Rydberg</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Bohr</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for LDOS.&quot;</span><span class="p">)</span></div>
 
@@ -515,8 +538,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for LDOS.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LDOS.read_from_cube"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_cube">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span>
-                       <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS.read_from_cube"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_cube">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_cube</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span> <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the LDOS data from multiple cube files.</span>
 
@@ -547,11 +571,13 @@
         <span class="c1"># tmp.pp003ELEMENT_ldos.cube</span>
         <span class="c1"># ...</span>
         <span class="c1"># tmp.pp100ELEMENT_ldos.cube</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_from_qe_files</span><span class="p">(</span><span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span>
-                                        <span class="n">use_memmap</span><span class="p">,</span> <span class="s2">&quot;.cube&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_from_qe_files</span><span class="p">(</span>
+            <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">use_memmap</span><span class="p">,</span> <span class="s2">&quot;.cube&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
 
-<div class="viewcode-block" id="LDOS.read_from_xsf"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_xsf">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_xsf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span>
-                      <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS.read_from_xsf"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_xsf">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_xsf</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span> <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the LDOS data from multiple .xsf files.</span>
 
@@ -574,8 +600,9 @@
 <span class="sd">            Usage will reduce RAM footprint while SIGNIFICANTLY</span>
 <span class="sd">            impacting disk usage and</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_from_qe_files</span><span class="p">(</span><span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span>
-                                        <span class="n">use_memmap</span><span class="p">,</span> <span class="s2">&quot;.xsf&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_from_qe_files</span><span class="p">(</span>
+            <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">use_memmap</span><span class="p">,</span> <span class="s2">&quot;.xsf&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="LDOS.read_from_array"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_array">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -607,21 +634,31 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">emin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
 
-        <span class="n">emax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span> <span class="o">+</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">*</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
+        <span class="n">emax</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
+        <span class="p">)</span>
         <span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
-        <span class="n">linspace_array</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">linspace_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">linspace_array</span></div>
 
-<div class="viewcode-block" id="LDOS.get_total_energy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_total_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                         <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                         <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                         <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
-                         <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
-                         <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qe_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                         <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">create_qe_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                         <span class="n">return_energy_contributions</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS.get_total_energy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_total_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_energy</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
+        <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
+        <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">qe_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">create_qe_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">return_energy_contributions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the total energy from LDOS or given DOS + density data.</span>
 
@@ -703,18 +740,22 @@
             <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy</span>
             <span class="k">if</span> <span class="n">fermi_energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Warning: No fermi energy was provided or could be &quot;</span>
-                         <span class="s2">&quot;calculated from electronic structure data. &quot;</span>
-                         <span class="s2">&quot;Using the DFT fermi energy, this may &quot;</span>
-                         <span class="s2">&quot;yield unexpected results&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">printout</span><span class="p">(</span>
+                    <span class="s2">&quot;Warning: No fermi energy was provided or could be &quot;</span>
+                    <span class="s2">&quot;calculated from electronic structure data. &quot;</span>
+                    <span class="s2">&quot;Using the DFT fermi energy, this may &quot;</span>
+                    <span class="s2">&quot;yield unexpected results&quot;</span><span class="p">,</span>
+                    <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
         <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>
 
         <span class="c1"># Here we check whether we will use our internal, cached</span>
         <span class="c1"># LDOS, or calculate everything from scratch.</span>
-        <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">dos_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                                     <span class="ow">and</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="n">dos_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">):</span>
 
             <span class="c1"># In this case we calculate everything from scratch,</span>
             <span class="c1"># because the user either provided LDOS data OR density +</span>
@@ -722,17 +763,19 @@
 
             <span class="c1"># Calculate DOS data if need be.</span>
             <span class="k">if</span> <span class="n">dos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span>
-                                                      <span class="n">voxel</span><span class="o">=</span>
-                                                      <span class="n">voxel</span><span class="p">,</span>
-                                                      <span class="n">integration_method</span><span class="o">=</span>
-                                                      <span class="n">grid_integration_method</span><span class="p">)</span>
+                <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span>
+                    <span class="n">ldos_data</span><span class="p">,</span>
+                    <span class="n">voxel</span><span class="o">=</span><span class="n">voxel</span><span class="p">,</span>
+                    <span class="n">integration_method</span><span class="o">=</span><span class="n">grid_integration_method</span><span class="p">,</span>
+                <span class="p">)</span>
 
             <span class="c1"># Calculate density data if need be.</span>
             <span class="k">if</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">density_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span>
-                                                <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
-                                                <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
+                <span class="n">density_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span>
+                    <span class="n">ldos_data</span><span class="p">,</span>
+                    <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+                    <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">,</span>
+                <span class="p">)</span>
 
             <span class="c1"># Now we can create calculation objects to get the necessary</span>
             <span class="c1"># quantities.</span>
@@ -743,33 +786,40 @@
             <span class="c1"># quantities to construct the total energy.</span>
             <span class="c1"># (According to Eq. 9 in [1])</span>
             <span class="c1"># Band energy (kinetic energy)</span>
-            <span class="n">e_band</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span>
-                                                    <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
-                                                    <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
-                                                    <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
+            <span class="n">e_band</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span>
+                <span class="n">dos_data</span><span class="p">,</span>
+                <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+                <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+                <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="c1"># Smearing / Entropy contribution</span>
-            <span class="n">e_entropy_contribution</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span> \
-                <span class="n">get_entropy_contribution</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
-                                         <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
-                                         <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
+            <span class="n">e_entropy_contribution</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_entropy_contribution</span><span class="p">(</span>
+                <span class="n">dos_data</span><span class="p">,</span>
+                <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+                <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+                <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="c1"># Density based energy contributions (via QE)</span>
-            <span class="n">density_contributions</span> \
-                <span class="o">=</span> <span class="n">density_calculator</span><span class="o">.</span> \
-                <span class="n">get_energy_contributions</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span>
-                                         <span class="n">qe_input_data</span><span class="o">=</span><span class="n">qe_input_data</span><span class="p">,</span>
-                                         <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="n">atoms_Angstrom</span><span class="p">,</span>
-                                         <span class="n">qe_pseudopotentials</span><span class="o">=</span>
-                                         <span class="n">qe_pseudopotentials</span><span class="p">,</span>
-                                         <span class="n">create_file</span><span class="o">=</span><span class="n">create_qe_file</span><span class="p">)</span>
+            <span class="n">density_contributions</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">density_calculator</span><span class="o">.</span><span class="n">get_energy_contributions</span><span class="p">(</span>
+                    <span class="n">density_data</span><span class="p">,</span>
+                    <span class="n">qe_input_data</span><span class="o">=</span><span class="n">qe_input_data</span><span class="p">,</span>
+                    <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="n">atoms_Angstrom</span><span class="p">,</span>
+                    <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="n">qe_pseudopotentials</span><span class="p">,</span>
+                    <span class="n">create_file</span><span class="o">=</span><span class="n">create_qe_file</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># In this case, we use cached propeties wherever possible.</span>
             <span class="n">ldos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span>
             <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No input data provided to caculate &quot;</span>
-                                <span class="s2">&quot;total energy. Provide EITHER LDOS&quot;</span>
-                                <span class="s2">&quot; OR DOS and density.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;No input data provided to caculate &quot;</span>
+                    <span class="s2">&quot;total energy. Provide EITHER LDOS&quot;</span>
+                    <span class="s2">&quot; OR DOS and density.&quot;</span>
+                <span class="p">)</span>
 
             <span class="c1"># With these calculator objects we can calculate all the necessary</span>
             <span class="c1"># quantities to construct the total energy.</span>
@@ -781,33 +831,42 @@
             <span class="n">e_entropy_contribution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy_contribution</span>
 
             <span class="c1"># Density based energy contributions (via QE)</span>
-            <span class="n">density_contributions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_calculator</span><span class="o">.</span>\
-                <span class="n">total_energy_contributions</span>
+            <span class="n">density_contributions</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_density_calculator</span><span class="o">.</span><span class="n">total_energy_contributions</span>
+            <span class="p">)</span>
 
-        <span class="n">e_total</span> <span class="o">=</span> <span class="n">e_band</span> <span class="o">+</span> <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_rho_times_v_hxc&quot;</span><span class="p">]</span> <span class="o">+</span> \
-            <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_hartree&quot;</span><span class="p">]</span> <span class="o">+</span> \
-            <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_xc&quot;</span><span class="p">]</span> <span class="o">+</span> \
-            <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_ewald&quot;</span><span class="p">]</span> <span class="o">+</span>\
-            <span class="n">e_entropy_contribution</span>
+        <span class="n">e_total</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">e_band</span>
+            <span class="o">+</span> <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_rho_times_v_hxc&quot;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_hartree&quot;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_xc&quot;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_ewald&quot;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">e_entropy_contribution</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="n">return_energy_contributions</span><span class="p">:</span>
-            <span class="n">energy_contribtuons</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;e_band&quot;</span><span class="p">:</span> <span class="n">e_band</span><span class="p">,</span>
-                                   <span class="s2">&quot;e_rho_times_v_hxc&quot;</span><span class="p">:</span>
-                                       <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_rho_times_v_hxc&quot;</span><span class="p">],</span>
-                                   <span class="s2">&quot;e_hartree&quot;</span><span class="p">:</span>
-                                       <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_hartree&quot;</span><span class="p">],</span>
-                                   <span class="s2">&quot;e_xc&quot;</span><span class="p">:</span>
-                                       <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_xc&quot;</span><span class="p">],</span>
-                                   <span class="s2">&quot;e_ewald&quot;</span><span class="p">:</span> <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_ewald&quot;</span><span class="p">],</span>
-                                   <span class="s2">&quot;e_entropy_contribution&quot;</span><span class="p">:</span>
-                                       <span class="n">e_entropy_contribution</span><span class="p">}</span>
+            <span class="n">energy_contribtuons</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;e_band&quot;</span><span class="p">:</span> <span class="n">e_band</span><span class="p">,</span>
+                <span class="s2">&quot;e_rho_times_v_hxc&quot;</span><span class="p">:</span> <span class="n">density_contributions</span><span class="p">[</span>
+                    <span class="s2">&quot;e_rho_times_v_hxc&quot;</span>
+                <span class="p">],</span>
+                <span class="s2">&quot;e_hartree&quot;</span><span class="p">:</span> <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_hartree&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;e_xc&quot;</span><span class="p">:</span> <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_xc&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;e_ewald&quot;</span><span class="p">:</span> <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_ewald&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;e_entropy_contribution&quot;</span><span class="p">:</span> <span class="n">e_entropy_contribution</span><span class="p">,</span>
+            <span class="p">}</span>
             <span class="k">return</span> <span class="n">e_total</span><span class="p">,</span> <span class="n">energy_contribtuons</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">e_total</span></div>
 
-<div class="viewcode-block" id="LDOS.get_band_energy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_band_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
-                        <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS.get_band_energy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_band_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
+        <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the band energy from given LDOS data.</span>
 
@@ -848,8 +907,9 @@
 <span class="sd">            Band energy in eV.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No LDOS data provided, cannot calculate&quot;</span>
-                            <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No LDOS data provided, cannot calculate this quantity.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Here we check whether we will use our internal, cached</span>
         <span class="c1"># LDOS, or calculate everything from scratch.</span>
@@ -858,24 +918,31 @@
             <span class="k">if</span> <span class="n">voxel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span>
 
-            <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel</span><span class="p">,</span>
-                                                  <span class="n">integration_method</span><span class="o">=</span>
-                                                  <span class="n">grid_integration_method</span><span class="p">)</span>
+            <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span>
+                <span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="n">grid_integration_method</span>
+            <span class="p">)</span>
 
             <span class="c1"># Once we have the DOS, we can use a DOS object to calculate</span>
             <span class="c1"># the band energy.</span>
             <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span> \
-                <span class="n">get_band_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
-                                <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
-                                <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span>
+                <span class="n">dos_data</span><span class="p">,</span>
+                <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+                <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+                <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states_calculator</span><span class="o">.</span><span class="n">band_energy</span></div>
 
-<div class="viewcode-block" id="LDOS.get_entropy_contribution"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_entropy_contribution">[docs]</a>    <span class="k">def</span> <span class="nf">get_entropy_contribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                 <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                 <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
-                                 <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS.get_entropy_contribution"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_entropy_contribution">[docs]</a>    <span class="k">def</span> <span class="nf">get_entropy_contribution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
+        <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the entropy contribution from given LDOS data.</span>
 
@@ -916,8 +983,9 @@
 <span class="sd">            Band energy in eV.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No LDOS data provided, cannot calculate&quot;</span>
-                            <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No LDOS data provided, cannot calculate this quantity.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Here we check whether we will use our internal, cached</span>
         <span class="c1"># LDOS, or calculate everything from scratch.</span>
@@ -926,24 +994,31 @@
             <span class="k">if</span> <span class="n">voxel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span>
 
-            <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel</span><span class="p">,</span>
-                                                  <span class="n">integration_method</span><span class="o">=</span>
-                                                  <span class="n">grid_integration_method</span><span class="p">)</span>
+            <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span>
+                <span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="n">grid_integration_method</span>
+            <span class="p">)</span>
 
             <span class="c1"># Once we have the DOS, we can use a DOS object to calculate</span>
             <span class="c1"># the band energy.</span>
             <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span> \
-                <span class="n">get_entropy_contribution</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
-                                         <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
-                                         <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_entropy_contribution</span><span class="p">(</span>
+                <span class="n">dos_data</span><span class="p">,</span>
+                <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+                <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+                <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states_calculator</span><span class="o">.</span><span class="n">entropy_contribution</span></div>
 
-<div class="viewcode-block" id="LDOS.get_number_of_electrons"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_number_of_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
-                                <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS.get_number_of_electrons"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_number_of_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
+        <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the number of electrons from given LDOS data.</span>
 
@@ -984,8 +1059,9 @@
 <span class="sd">            Number of electrons.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No LDOS data provided, cannot calculate&quot;</span>
-                            <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No LDOS data provided, cannot calculate this quantity.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Here we check whether we will use our internal, cached</span>
         <span class="c1"># LDOS, or calculate everything from scratch.</span>
@@ -993,24 +1069,30 @@
             <span class="c1"># The number of electrons is calculated using the DOS.</span>
             <span class="k">if</span> <span class="n">voxel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span>
-            <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel</span><span class="p">,</span>
-                                                  <span class="n">integration_method</span><span class="o">=</span>
-                                                  <span class="n">grid_integration_method</span><span class="p">)</span>
+            <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span>
+                <span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="n">grid_integration_method</span>
+            <span class="p">)</span>
 
             <span class="c1"># Once we have the DOS, we can use a DOS object to calculate the</span>
             <span class="c1"># number of electrons.</span>
             <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span> \
-                <span class="n">get_number_of_electrons</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
-                                        <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
-                                        <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_number_of_electrons</span><span class="p">(</span>
+                <span class="n">dos_data</span><span class="p">,</span>
+                <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+                <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+                <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states_calculator</span><span class="o">.</span><span class="n">number_of_electrons</span></div>
 
-<div class="viewcode-block" id="LDOS.get_self_consistent_fermi_energy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_self_consistent_fermi_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                         <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                         <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
-                                         <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS.get_self_consistent_fermi_energy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_self_consistent_fermi_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_self_consistent_fermi_energy</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
+        <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the self-consistent Fermi energy.</span>
 
@@ -1054,30 +1136,38 @@
 <span class="sd">            :math:`\epsilon_F` in eV.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No LDOS data provided, cannot calculate&quot;</span>
-                            <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No LDOS data provided, cannot calculate this quantity.&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># The Fermi energy is calculated using the DOS.</span>
             <span class="k">if</span> <span class="n">voxel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span>
-            <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel</span><span class="p">,</span>
-                                                  <span class="n">integration_method</span><span class="o">=</span>
-                                                  <span class="n">grid_integration_method</span><span class="p">)</span>
+            <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span>
+                <span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="n">grid_integration_method</span>
+            <span class="p">)</span>
 
             <span class="c1"># Once we have the DOS, we can use a DOS object to calculate the</span>
             <span class="c1"># number of electrons.</span>
             <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span> \
-                <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span>
-                                                 <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
-                                                 <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span>
+                <span class="n">dos_data</span><span class="p">,</span>
+                <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+                <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states_calculator</span><span class="o">.</span><span class="n">fermi_energy</span></div>
 
-<div class="viewcode-block" id="LDOS.get_density"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density">[docs]</a>    <span class="k">def</span> <span class="nf">get_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">conserve_dimensions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
-                    <span class="n">gather_density</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS.get_density"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density">[docs]</a>    <span class="k">def</span> <span class="nf">get_density</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">conserve_dimensions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
+        <span class="n">gather_density</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the density from given LDOS data.</span>
 
@@ -1132,10 +1222,13 @@
             <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy</span>
             <span class="k">if</span> <span class="n">fermi_energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Warning: No fermi energy was provided or could be &quot;</span>
-                         <span class="s2">&quot;calculated from electronic structure data. &quot;</span>
-                         <span class="s2">&quot;Using the DFT fermi energy, this may &quot;</span>
-                         <span class="s2">&quot;yield unexpected results&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">printout</span><span class="p">(</span>
+                    <span class="s2">&quot;Warning: No fermi energy was provided or could be &quot;</span>
+                    <span class="s2">&quot;calculated from electronic structure data. &quot;</span>
+                    <span class="s2">&quot;Using the DFT fermi energy, this may &quot;</span>
+                    <span class="s2">&quot;yield unexpected results&quot;</span><span class="p">,</span>
+                    <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
         <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>
@@ -1143,8 +1236,9 @@
         <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ldos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span>
             <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No LDOS data provided, cannot calculate&quot;</span>
-                                <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;No LDOS data provided, cannot calculate this quantity.&quot;</span>
+                <span class="p">)</span>
 
         <span class="n">ldos_data_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -1156,8 +1250,13 @@
             <span class="c1"># We have the LDOS as (gridx, gridy, gridz, energygrid),</span>
             <span class="c1"># so some reshaping needs to be done.</span>
             <span class="n">ldos_data_used</span> <span class="o">=</span> <span class="n">ldos_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
-                <span class="p">[</span><span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                 <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+                <span class="p">[</span>
+                    <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="o">*</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="o">*</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                    <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
             <span class="c1"># We now have the LDOS as gridpoints x energygrid.</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -1165,36 +1264,47 @@
 
         <span class="c1"># Build the energy grid and calculate the fermi function.</span>
         <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
-        <span class="n">fermi_values</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
-                                      <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">fermi_values</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span>
+            <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
 
         <span class="c1"># Calculate the number of electrons.</span>
         <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
-            <span class="n">density_values</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">ldos_data_used</span> <span class="o">*</span> <span class="n">fermi_values</span><span class="p">,</span>
-                                             <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">density_values</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
+                <span class="n">ldos_data_used</span> <span class="o">*</span> <span class="n">fermi_values</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;simps&quot;</span><span class="p">:</span>
-            <span class="n">density_values</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span><span class="n">ldos_data_used</span> <span class="o">*</span> <span class="n">fermi_values</span><span class="p">,</span>
-                                             <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">density_values</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span>
+                <span class="n">ldos_data_used</span> <span class="o">*</span> <span class="n">fermi_values</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;analytical&quot;</span><span class="p">:</span>
-            <span class="n">density_values</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span><span class="n">ldos_data_used</span><span class="p">,</span> <span class="s2">&quot;F0&quot;</span><span class="p">,</span> <span class="s2">&quot;F1&quot;</span><span class="p">,</span>
-                                                    <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
-                                                    <span class="n">temperature</span><span class="p">)</span>
+            <span class="n">density_values</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span>
+                <span class="n">ldos_data_used</span><span class="p">,</span>
+                <span class="s2">&quot;F0&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;F1&quot;</span><span class="p">,</span>
+                <span class="n">fermi_energy</span><span class="p">,</span>
+                <span class="n">energy_grid</span><span class="p">,</span>
+                <span class="n">temperature</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Now we have the full density; We now need to collect it, in the</span>
         <span class="c1"># MPI case.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">gather_density</span><span class="p">:</span>
-            <span class="n">density_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">density_values</span><span class="p">,</span>
-                                        <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">density_values</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">])</span>
-            <span class="n">density_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">local_grid</span><span class="p">,</span> <span class="n">density_values</span><span class="p">),</span>
-                                            <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">density_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="n">density_values</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">density_values</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">density_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">local_grid</span><span class="p">,</span> <span class="n">density_values</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span>
             <span class="n">full_density</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gather_density</span><span class="p">(</span><span class="n">density_values</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">ldos_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">full_density</span><span class="p">)</span>
-                <span class="n">full_density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">full_density</span><span class="p">,</span> <span class="p">[</span><span class="n">ldos_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span>
-                                                         <span class="n">ldos_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span>
-                                                         <span class="n">ldos_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="n">full_density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                    <span class="n">full_density</span><span class="p">,</span>
+                    <span class="p">[</span><span class="n">ldos_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">ldos_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">ldos_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="p">)</span>
             <span class="k">return</span> <span class="n">full_density</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">conserve_dimensions</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -1207,16 +1317,23 @@
                 <span class="n">density_values</span> <span class="o">=</span> <span class="n">density_values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                    <span class="n">grid_length</span> <span class="o">=</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> \
-                                  <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="n">grid_length</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="o">*</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="o">*</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">grid_length</span> <span class="o">=</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">density_values</span> <span class="o">=</span> <span class="n">density_values</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">grid_length</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
             <span class="k">return</span> <span class="n">density_values</span></div>
 
-<div class="viewcode-block" id="LDOS.get_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                              <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
-                              <span class="n">gather_dos</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS.get_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_density_of_states</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
+        <span class="n">gather_dos</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the density of states from given LDOS data.</span>
 
@@ -1254,8 +1371,9 @@
         <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ldos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span>
             <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No LDOS data provided, cannot calculate&quot;</span>
-                                <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;No LDOS data provided, cannot calculate this quantity.&quot;</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">voxel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span>
@@ -1265,8 +1383,10 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown LDOS shape, cannot calculate DOS.&quot;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">!=</span> <span class="s2">&quot;summation&quot;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;If using a 2D LDOS array, you can only &quot;</span>
-                                <span class="s2">&quot;use summation as integration method.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;If using a 2D LDOS array, you can only &quot;</span>
+                    <span class="s2">&quot;use summation as integration method.&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># We have the LDOS as (gridx, gridy, gridz, energygrid), no</span>
         <span class="c1"># further operation is necessary.</span>
@@ -1283,48 +1403,58 @@
         <span class="k">if</span> <span class="n">integration_method</span> <span class="o">!=</span> <span class="s2">&quot;summation&quot;</span><span class="p">:</span>
             <span class="c1"># X</span>
             <span class="k">if</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">integrate_values_on_spacing</span><span class="p">(</span><span class="n">dos_values</span><span class="p">,</span>
-                                                         <span class="n">grid_spacing_x</span><span class="p">,</span>
-                                                         <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                                         <span class="n">method</span><span class="o">=</span>
-                                                         <span class="n">integration_method</span><span class="p">)</span>
+                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">integrate_values_on_spacing</span><span class="p">(</span>
+                    <span class="n">dos_values</span><span class="p">,</span>
+                    <span class="n">grid_spacing_x</span><span class="p">,</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dos_values</span><span class="p">,</span> <span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                                     <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                                                     <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                    <span class="n">dos_values</span><span class="p">,</span>
+                    <span class="p">(</span>
+                        <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                        <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
                 <span class="n">dos_values</span> <span class="o">*=</span> <span class="n">grid_spacing_x</span>
 
             <span class="c1"># Y</span>
             <span class="k">if</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">integrate_values_on_spacing</span><span class="p">(</span><span class="n">dos_values</span><span class="p">,</span>
-                                                         <span class="n">grid_spacing_y</span><span class="p">,</span>
-                                                         <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                                         <span class="n">method</span><span class="o">=</span>
-                                                         <span class="n">integration_method</span><span class="p">)</span>
+                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">integrate_values_on_spacing</span><span class="p">(</span>
+                    <span class="n">dos_values</span><span class="p">,</span>
+                    <span class="n">grid_spacing_y</span><span class="p">,</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dos_values</span><span class="p">,</span> <span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                                                     <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                    <span class="n">dos_values</span><span class="p">,</span> <span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                <span class="p">)</span>
                 <span class="n">dos_values</span> <span class="o">*=</span> <span class="n">grid_spacing_y</span>
 
             <span class="c1"># Z</span>
             <span class="k">if</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">integrate_values_on_spacing</span><span class="p">(</span><span class="n">dos_values</span><span class="p">,</span>
-                                                         <span class="n">grid_spacing_z</span><span class="p">,</span>
-                                                         <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                                         <span class="n">method</span><span class="o">=</span>
-                                                         <span class="n">integration_method</span><span class="p">)</span>
+                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">integrate_values_on_spacing</span><span class="p">(</span>
+                    <span class="n">dos_values</span><span class="p">,</span>
+                    <span class="n">grid_spacing_z</span><span class="p">,</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dos_values</span><span class="p">,</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
                 <span class="n">dos_values</span> <span class="o">*=</span> <span class="n">grid_spacing_z</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-                                    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="o">*</span> \
-                             <span class="n">voxel</span><span class="o">.</span><span class="n">volume</span>
+                <span class="n">dos_values</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="n">voxel</span><span class="o">.</span><span class="n">volume</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="o">*</span> \
-                             <span class="n">voxel</span><span class="o">.</span><span class="n">volume</span>
+                <span class="n">dos_values</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="o">*</span> <span class="n">voxel</span><span class="o">.</span><span class="n">volume</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">gather_dos</span><span class="p">:</span>
             <span class="c1"># I think we should refrain from top-level MPI imports; the first</span>
@@ -1334,15 +1464,19 @@
             <span class="n">comm</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span>
             <span class="n">comm</span><span class="o">.</span><span class="n">Barrier</span><span class="p">()</span>
             <span class="n">dos_values_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">dos_values</span><span class="p">)</span>
-            <span class="n">comm</span><span class="o">.</span><span class="n">Reduce</span><span class="p">([</span><span class="n">dos_values</span><span class="p">,</span> <span class="n">MPI</span><span class="o">.</span><span class="n">DOUBLE</span><span class="p">],</span>
-                        <span class="p">[</span><span class="n">dos_values_full</span><span class="p">,</span> <span class="n">MPI</span><span class="o">.</span><span class="n">DOUBLE</span><span class="p">],</span>
-                        <span class="n">op</span><span class="o">=</span><span class="n">MPI</span><span class="o">.</span><span class="n">SUM</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">comm</span><span class="o">.</span><span class="n">Reduce</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">dos_values</span><span class="p">,</span> <span class="n">MPI</span><span class="o">.</span><span class="n">DOUBLE</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">dos_values_full</span><span class="p">,</span> <span class="n">MPI</span><span class="o">.</span><span class="n">DOUBLE</span><span class="p">],</span>
+                <span class="n">op</span><span class="o">=</span><span class="n">MPI</span><span class="o">.</span><span class="n">SUM</span><span class="p">,</span>
+                <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="k">return</span> <span class="n">dos_values_full</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">dos_values</span></div>
 
-<div class="viewcode-block" id="LDOS.get_atomic_forces"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_atomic_forces">[docs]</a>    <span class="k">def</span> <span class="nf">get_atomic_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">dE_dd</span><span class="p">,</span> <span class="n">used_data_handler</span><span class="p">,</span>
-                          <span class="n">snapshot_number</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS.get_atomic_forces"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_atomic_forces">[docs]</a>    <span class="k">def</span> <span class="nf">get_atomic_forces</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">dE_dd</span><span class="p">,</span> <span class="n">used_data_handler</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the atomic forces, currently work in progress.</span>
 
@@ -1419,8 +1553,9 @@
         <span class="k">if</span> <span class="n">use_pickled_comm</span><span class="p">:</span>
             <span class="n">density_list</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">density_values</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">sendcounts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">density_values</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-                                              <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">sendcounts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">density_values</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># print(&quot;sendcounts: {}, total: {}&quot;.format(sendcounts,</span>
                 <span class="c1">#                                          sum(sendcounts)))</span>
@@ -1428,19 +1563,19 @@
                 <span class="c1"># Preparing the list of buffers.</span>
                 <span class="n">density_list</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">get_size</span><span class="p">()):</span>
-                    <span class="n">density_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">sendcounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mi">4</span><span class="p">,</span>
-                                                 <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
+                    <span class="n">density_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">sendcounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                    <span class="p">)</span>
                 <span class="c1"># No MPI necessary for first rank. For all the others,</span>
                 <span class="c1"># collect the buffers.</span>
                 <span class="n">density_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">density_values</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">get_size</span><span class="p">()):</span>
-                    <span class="n">comm</span><span class="o">.</span><span class="n">Recv</span><span class="p">(</span><span class="n">density_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">source</span><span class="o">=</span><span class="n">i</span><span class="p">,</span>
-                              <span class="n">tag</span><span class="o">=</span><span class="mi">100</span><span class="o">+</span><span class="n">i</span><span class="p">)</span>
-                    <span class="n">density_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> \
-                        <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">density_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                                   <span class="p">(</span><span class="n">sendcounts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">4</span><span class="p">))</span>
+                    <span class="n">comm</span><span class="o">.</span><span class="n">Recv</span><span class="p">(</span><span class="n">density_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">source</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">100</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span>
+                    <span class="n">density_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                        <span class="n">density_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="p">(</span><span class="n">sendcounts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">4</span><span class="p">)</span>
+                    <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">comm</span><span class="o">.</span><span class="n">Send</span><span class="p">(</span><span class="n">density_values</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">get_rank</span><span class="p">()</span><span class="o">+</span><span class="mi">100</span><span class="p">)</span>
+                <span class="n">comm</span><span class="o">.</span><span class="n">Send</span><span class="p">(</span><span class="n">density_values</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">+</span> <span class="mi">100</span><span class="p">)</span>
             <span class="n">barrier</span><span class="p">()</span>
         <span class="c1"># if get_rank() == 0:</span>
         <span class="c1">#     printout(np.shape(all_snap_descriptors_list[0]))</span>
@@ -1458,28 +1593,30 @@
             <span class="n">nx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">ny</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">nz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-            <span class="n">full_density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-                <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="n">full_density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
             <span class="c1"># Fill the full density array.</span>
             <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">local_density</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">density_list</span><span class="p">):</span>
                 <span class="c1"># We glue the individual cells back together, and transpose.</span>
                 <span class="n">first_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
                 <span class="n">first_y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
                 <span class="n">first_z</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
-                <span class="n">last_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span>
-                <span class="n">last_y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span>
-                <span class="n">last_z</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span>
-                <span class="n">full_density</span><span class="p">[</span><span class="n">first_x</span><span class="p">:</span><span class="n">last_x</span><span class="p">,</span>
-                             <span class="n">first_y</span><span class="p">:</span><span class="n">last_y</span><span class="p">,</span>
-                             <span class="n">first_z</span><span class="p">:</span><span class="n">last_z</span><span class="p">]</span> <span class="o">=</span> \
-                    <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">local_density</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">],</span>
-                               <span class="p">[</span><span class="n">last_z</span><span class="o">-</span><span class="n">first_z</span><span class="p">,</span> <span class="n">last_y</span><span class="o">-</span><span class="n">first_y</span><span class="p">,</span>
-                                <span class="n">last_x</span><span class="o">-</span><span class="n">first_x</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+                <span class="n">last_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">last_y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">last_z</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">full_density</span><span class="p">[</span>
+                    <span class="n">first_x</span><span class="p">:</span><span class="n">last_x</span><span class="p">,</span> <span class="n">first_y</span><span class="p">:</span><span class="n">last_y</span><span class="p">,</span> <span class="n">first_z</span><span class="p">:</span><span class="n">last_z</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                    <span class="n">local_density</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">last_z</span> <span class="o">-</span> <span class="n">first_z</span><span class="p">,</span> <span class="n">last_y</span> <span class="o">-</span> <span class="n">first_y</span><span class="p">,</span> <span class="n">last_x</span> <span class="o">-</span> <span class="n">first_x</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
+                    <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+                <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">full_density</span>
 
-    <span class="k">def</span> <span class="nf">_read_from_qe_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span>
-                            <span class="n">use_memmap</span><span class="p">,</span> <span class="n">file_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_read_from_qe_files</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">use_memmap</span><span class="p">,</span> <span class="n">file_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the LDOS from QE produced files, i.e. one file per energy level.</span>
 
@@ -1511,17 +1648,23 @@
 
         <span class="c1"># Iterate over the amount of specified LDOS input files.</span>
         <span class="c1"># QE is a Fortran code, so everything is 1 based.</span>
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Reading &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">)</span> <span class="o">+</span>
-                 <span class="s2">&quot; LDOS files from&quot;</span><span class="o">+</span><span class="n">path_scheme</span><span class="o">+</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">printout</span><span class="p">(</span>
+            <span class="s2">&quot;Reading &quot;</span>
+            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">&quot; LDOS files from&quot;</span>
+            <span class="o">+</span> <span class="n">path_scheme</span>
+            <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+            <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">ldos_data</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
-            <span class="n">local_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">/</span>
-                                      <span class="n">get_size</span><span class="p">()))</span>
-            <span class="n">start_index</span> <span class="o">=</span> <span class="n">get_rank</span><span class="p">()</span><span class="o">*</span><span class="n">local_size</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span> <span class="o">==</span> <span class="n">get_size</span><span class="p">():</span>
-                <span class="n">local_size</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">%</span> \
-                                     <span class="n">get_size</span><span class="p">()</span>
-            <span class="n">end_index</span> <span class="o">=</span> <span class="n">start_index</span><span class="o">+</span><span class="n">local_size</span>
+            <span class="n">local_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">/</span> <span class="n">get_size</span><span class="p">())</span>
+            <span class="p">)</span>
+            <span class="n">start_index</span> <span class="o">=</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">*</span> <span class="n">local_size</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">get_size</span><span class="p">():</span>
+                <span class="n">local_size</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">%</span> <span class="n">get_size</span><span class="p">()</span>
+            <span class="n">end_index</span> <span class="o">=</span> <span class="n">start_index</span> <span class="o">+</span> <span class="n">local_size</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">start_index</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="n">end_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">+</span> <span class="mi">1</span>
@@ -1544,13 +1687,14 @@
             <span class="c1"># in which we want to store the LDOS.</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">start_index</span><span class="p">:</span>
                 <span class="n">data_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-                <span class="n">ldos_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                      <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">local_size</span><span class="p">),</span>
-                                     <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">)</span>
+                <span class="n">ldos_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">local_size</span><span class="p">),</span>
+                    <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">,</span>
+                <span class="p">)</span>
 
             <span class="c1"># Convert and then append the LDOS data.</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
-            <span class="n">ldos_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">i</span><span class="o">-</span><span class="n">start_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:]</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
+            <span class="n">ldos_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">i</span> <span class="o">-</span> <span class="n">start_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
 
         <span class="c1"># We have to gather the LDOS either file based or not.</span>
@@ -1558,30 +1702,37 @@
             <span class="n">barrier</span><span class="p">()</span>
             <span class="n">data_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">return_local</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">start_index</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">end_index</span><span class="o">-</span><span class="mi">1</span>
+                <span class="k">return</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">start_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">end_index</span> <span class="o">-</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="n">use_memmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">ldos_data_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span><span class="n">use_memmap</span><span class="p">,</span>
-                                               <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                                      <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                                      <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                                                      <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                                      <span class="n">ldos_gridsize</span><span class="p">),</span>
-                                               <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w+&quot;</span><span class="p">,</span>
-                                               <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">)</span>
+                    <span class="n">ldos_data_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span>
+                        <span class="n">use_memmap</span><span class="p">,</span>
+                        <span class="n">shape</span><span class="o">=</span><span class="p">(</span>
+                            <span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                            <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                            <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w+&quot;</span><span class="p">,</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="n">barrier</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">ldos_data_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span><span class="n">use_memmap</span><span class="p">,</span>
-                                               <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                                      <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                                      <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                                                      <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                                      <span class="n">ldos_gridsize</span><span class="p">),</span>
-                                               <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r+&quot;</span><span class="p">,</span>
-                                               <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">)</span>
+                    <span class="n">ldos_data_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span>
+                        <span class="n">use_memmap</span><span class="p">,</span>
+                        <span class="n">shape</span><span class="o">=</span><span class="p">(</span>
+                            <span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                            <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                            <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r+&quot;</span><span class="p">,</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="n">barrier</span><span class="p">()</span>
-                <span class="n">ldos_data_full</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">start_index</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">end_index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">ldos_data_full</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">start_index</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">end_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">ldos_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+                <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="o">=</span> <span class="n">ldos_data_full</span>
                 <span class="k">return</span> <span class="n">ldos_data_full</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1589,34 +1740,52 @@
 
                 <span class="c1"># First get the indices from all the ranks.</span>
                 <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-                    <span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">([</span><span class="n">get_rank</span><span class="p">(),</span> <span class="n">start_index</span><span class="p">,</span> <span class="n">end_index</span><span class="p">],</span>
-                                <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+                    <span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">([</span><span class="n">get_rank</span><span class="p">(),</span> <span class="n">start_index</span><span class="p">,</span> <span class="n">end_index</span><span class="p">],</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="p">)</span>
                 <span class="n">ldos_data_full</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">ldos_data_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                               <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                               <span class="n">ldos_gridsize</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">)</span>
-                    <span class="n">ldos_data_full</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">start_index</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">end_index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> \
-                        <span class="n">ldos_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+                    <span class="n">ldos_data_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                            <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                            <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">ldos_data_full</span><span class="p">[</span>
+                        <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">start_index</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">end_index</span> <span class="o">-</span> <span class="mi">1</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="n">ldos_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
 
                     <span class="c1"># No MPI necessary for first rank. For all the others,</span>
                     <span class="c1"># collect the buffers.</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">get_size</span><span class="p">()):</span>
                         <span class="n">local_start</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
                         <span class="n">local_end</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
-                        <span class="n">local_size</span> <span class="o">=</span> <span class="n">local_end</span><span class="o">-</span><span class="n">local_start</span>
-                        <span class="n">ldos_local</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">local_size</span><span class="o">*</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span>
-                                              <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                                              <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">)</span>
+                        <span class="n">local_size</span> <span class="o">=</span> <span class="n">local_end</span> <span class="o">-</span> <span class="n">local_start</span>
+                        <span class="n">ldos_local</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span>
+                            <span class="n">local_size</span>
+                            <span class="o">*</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="o">*</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="o">*</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                            <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">,</span>
+                        <span class="p">)</span>
                         <span class="n">comm</span><span class="o">.</span><span class="n">Recv</span><span class="p">(</span><span class="n">ldos_local</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">100</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span>
-                        <span class="n">ldos_data_full</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">local_start</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">local_end</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> \
-                            <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ldos_local</span><span class="p">,</span> <span class="p">(</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                                    <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                                    <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                                                    <span class="n">local_size</span><span class="p">))[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+                        <span class="n">ldos_data_full</span><span class="p">[</span>
+                            <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">local_start</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">local_end</span> <span class="o">-</span> <span class="mi">1</span>
+                        <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                            <span class="n">ldos_local</span><span class="p">,</span>
+                            <span class="p">(</span>
+                                <span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                <span class="n">local_size</span><span class="p">,</span>
+                            <span class="p">),</span>
+                        <span class="p">)[</span>
+                            <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:</span>
+                        <span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">comm</span><span class="o">.</span><span class="n">Send</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                              <span class="n">tag</span><span class="o">=</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">+</span> <span class="mi">100</span><span class="p">)</span>
+                    <span class="n">comm</span><span class="o">.</span><span class="n">Send</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">+</span> <span class="mi">100</span><span class="p">)</span>
                 <span class="n">barrier</span><span class="p">()</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="o">=</span> <span class="n">ldos_data_full</span>
                 <span class="k">return</span> <span class="n">ldos_data_full</span>

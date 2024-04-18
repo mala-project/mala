@@ -75,6 +75,7 @@
              
   <h1>Source code for mala.targets.atomic_force</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Electronic density calculation class.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">Bohr</span>
 
 <span class="kn">from</span> <span class="nn">.target</span> <span class="kn">import</span> <span class="n">Target</span>
@@ -131,7 +132,7 @@
         <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;eV/Ang&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">array</span>
         <span class="k">elif</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;Ry/Bohr&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="n">Rydberg</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="n">Rydberg</span> <span class="o">/</span> <span class="n">Bohr</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for atomic forces.&quot;</span><span class="p">)</span></div></div>
 </pre></div>

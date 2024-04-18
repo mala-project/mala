@@ -75,6 +75,7 @@
              
   <h1>Source code for mala.datahandling.data_handler_base</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Base class for all data handling (loading, shuffling, etc.).&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -105,8 +106,12 @@
 <span class="sd">        be created by this class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">descriptor_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span>
+        <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">descriptor_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span> <span class="n">ParametersData</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">use_horovod</span>
 
@@ -152,11 +157,18 @@
     <span class="c1"># Adding/Deleting data</span>
     <span class="c1">########################</span>
 
-<div class="viewcode-block" id="DataHandlerBase.add_snapshot"><a class="viewcode-back" href="../../../api/mala.datahandling.data_handler_base.html#mala.datahandling.data_handler_base.DataHandlerBase.add_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="p">,</span> <span class="n">input_directory</span><span class="p">,</span>
-                     <span class="n">output_file</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">,</span>
-                     <span class="n">add_snapshot_as</span><span class="p">,</span>
-                     <span class="n">output_units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span> <span class="n">input_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
-                     <span class="n">calculation_output_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">snapshot_type</span><span class="o">=</span><span class="s2">&quot;numpy&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="DataHandlerBase.add_snapshot"><a class="viewcode-back" href="../../../api/mala.datahandling.data_handler_base.html#mala.datahandling.data_handler_base.DataHandlerBase.add_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_file</span><span class="p">,</span>
+        <span class="n">input_directory</span><span class="p">,</span>
+        <span class="n">output_file</span><span class="p">,</span>
+        <span class="n">output_directory</span><span class="p">,</span>
+        <span class="n">add_snapshot_as</span><span class="p">,</span>
+        <span class="n">output_units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span>
+        <span class="n">input_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+        <span class="n">calculation_output_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">snapshot_type</span><span class="o">=</span><span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a snapshot to the data pipeline.</span>
 
@@ -195,13 +207,17 @@
 <span class="sd">            Either &quot;numpy&quot; or &quot;openpmd&quot; based on what kind of files you</span>
 <span class="sd">            want to operate on.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">snapshot</span> <span class="o">=</span> <span class="n">Snapshot</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">input_directory</span><span class="p">,</span>
-                            <span class="n">output_file</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">,</span>
-                            <span class="n">add_snapshot_as</span><span class="p">,</span>
-                            <span class="n">input_units</span><span class="o">=</span><span class="n">input_units</span><span class="p">,</span>
-                            <span class="n">output_units</span><span class="o">=</span><span class="n">output_units</span><span class="p">,</span>
-                            <span class="n">calculation_output</span><span class="o">=</span><span class="n">calculation_output_file</span><span class="p">,</span>
-                            <span class="n">snapshot_type</span><span class="o">=</span><span class="n">snapshot_type</span><span class="p">)</span>
+        <span class="n">snapshot</span> <span class="o">=</span> <span class="n">Snapshot</span><span class="p">(</span>
+            <span class="n">input_file</span><span class="p">,</span>
+            <span class="n">input_directory</span><span class="p">,</span>
+            <span class="n">output_file</span><span class="p">,</span>
+            <span class="n">output_directory</span><span class="p">,</span>
+            <span class="n">add_snapshot_as</span><span class="p">,</span>
+            <span class="n">input_units</span><span class="o">=</span><span class="n">input_units</span><span class="p">,</span>
+            <span class="n">output_units</span><span class="o">=</span><span class="n">output_units</span><span class="p">,</span>
+            <span class="n">calculation_output</span><span class="o">=</span><span class="n">calculation_output_file</span><span class="p">,</span>
+            <span class="n">snapshot_type</span><span class="o">=</span><span class="n">snapshot_type</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DataHandlerBase.clear_data"><a class="viewcode-back" href="../../../api/mala.datahandling.data_handler_base.html#mala.datahandling.data_handler_base.DataHandlerBase.clear_data">[docs]</a>    <span class="k">def</span> <span class="nf">clear_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -230,18 +246,29 @@
             <span class="c1"># Descriptors.</span>
             <span class="c1">####################</span>
 
-            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Checking descriptor file &quot;</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">,</span>
-                     <span class="s2">&quot;at&quot;</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;Checking descriptor file &quot;</span><span class="p">,</span>
+                <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">,</span>
+                <span class="s2">&quot;at&quot;</span><span class="p">,</span>
+                <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
+                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
-                <span class="n">tmp_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
-                    <span class="n">read_dimensions_from_numpy_file</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
-                                 <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">))</span>
+                <span class="n">tmp_dimension</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">read_dimensions_from_numpy_file</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
+                            <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
             <span class="k">elif</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span><span class="p">:</span>
-                <span class="n">tmp_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
-                    <span class="n">read_dimensions_from_openpmd_file</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
-                                 <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">),</span> <span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">)</span>
+                <span class="n">tmp_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">read_dimensions_from_openpmd_file</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span>
+                    <span class="p">),</span>
+                    <span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown snapshot file type.&quot;</span><span class="p">)</span>
 
@@ -255,24 +282,40 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span> <span class="o">=</span> <span class="n">tmp_input_dimension</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span> <span class="o">!=</span> <span class="n">tmp_input_dimension</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid snapshot entered at &quot;</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span>
-                                    <span class="n">input_npy_file</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Invalid snapshot entered at &quot;</span><span class="p">,</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">,</span>
+                    <span class="p">)</span>
             <span class="c1">####################</span>
             <span class="c1"># Targets.</span>
             <span class="c1">####################</span>
 
-            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Checking targets file &quot;</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span> <span class="s2">&quot;at&quot;</span><span class="p">,</span>
-                     <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;Checking targets file &quot;</span><span class="p">,</span>
+                <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
+                <span class="s2">&quot;at&quot;</span><span class="p">,</span>
+                <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
-                <span class="n">tmp_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                    <span class="n">read_dimensions_from_numpy_file</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
-                                 <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">))</span>
+                <span class="n">tmp_dimension</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_dimensions_from_numpy_file</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                            <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
             <span class="k">elif</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span><span class="p">:</span>
-                <span class="n">tmp_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                    <span class="n">read_dimensions_from_openpmd_file</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
-                                 <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">),</span> <span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">)</span>
+                <span class="n">tmp_dimension</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_dimensions_from_openpmd_file</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                            <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown snapshot file type.&quot;</span><span class="p">)</span>
 
@@ -283,8 +326,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span> <span class="o">=</span> <span class="n">tmp_output_dimension</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span> <span class="o">!=</span> <span class="n">tmp_output_dimension</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid snapshot entered at &quot;</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span>
-                                    <span class="n">output_npy_file</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Invalid snapshot entered at &quot;</span><span class="p">,</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
+                    <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">tmp_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span> <span class="o">!=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Inconsistent snapshot data provided.&quot;</span><span class="p">)</span>

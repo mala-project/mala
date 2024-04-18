@@ -75,7 +75,8 @@
              
   <h1>Source code for mala.targets.target</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Base class for all target calculators.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -139,14 +140,17 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Wrong type of parameters for Targets class.&quot;</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">targettype</span> <span class="o">==</span> <span class="s1">&#39;LDOS&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">targettype</span> <span class="o">==</span> <span class="s2">&quot;LDOS&quot;</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">mala.targets.ldos</span> <span class="kn">import</span> <span class="n">LDOS</span>
+
                 <span class="n">target</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="n">LDOS</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">LDOS</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">targettype</span> <span class="o">==</span> <span class="s1">&#39;DOS&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">targettype</span> <span class="o">==</span> <span class="s2">&quot;DOS&quot;</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">mala.targets.dos</span> <span class="kn">import</span> <span class="n">DOS</span>
+
                 <span class="n">target</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="n">DOS</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">DOS</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">targettype</span> <span class="o">==</span> <span class="s1">&#39;Density&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">targettype</span> <span class="o">==</span> <span class="s2">&quot;Density&quot;</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">mala.targets.density</span> <span class="kn">import</span> <span class="n">Density</span>
+
                 <span class="n">target</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="n">Density</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">Density</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -171,7 +175,7 @@
 <span class="sd">        params : mala.Parameters</span>
 <span class="sd">            The parameters object with which this object was created.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">params_arg</span><span class="p">,</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params_arg</span><span class="p">,)</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
@@ -194,19 +198,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;occupations&quot;</span><span class="p">:</span> <span class="s1">&#39;smearing&#39;</span><span class="p">,</span>
-                <span class="s2">&quot;calculation&quot;</span><span class="p">:</span> <span class="s1">&#39;scf&#39;</span><span class="p">,</span>
-                <span class="s2">&quot;restart_mode&quot;</span><span class="p">:</span> <span class="s1">&#39;from_scratch&#39;</span><span class="p">,</span>
-                <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="s1">&#39;MALA&#39;</span><span class="p">,</span>
-                <span class="s2">&quot;pseudo_dir&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">pseudopotential_path</span><span class="p">,</span>
-                <span class="s2">&quot;outdir&quot;</span><span class="p">:</span> <span class="s1">&#39;./&#39;</span><span class="p">,</span>
-                <span class="s2">&quot;ibrav&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="s2">&quot;smearing&quot;</span><span class="p">:</span> <span class="s1">&#39;fermi-dirac&#39;</span><span class="p">,</span>
-                <span class="s2">&quot;degauss&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="s2">&quot;ecutrho&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="s2">&quot;ecutwfc&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="s2">&quot;nosym&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s2">&quot;noinv&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;occupations&quot;</span><span class="p">:</span> <span class="s2">&quot;smearing&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;calculation&quot;</span><span class="p">:</span> <span class="s2">&quot;scf&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;restart_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;from_scratch&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;MALA&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;pseudo_dir&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">pseudopotential_path</span><span class="p">,</span>
+            <span class="s2">&quot;outdir&quot;</span><span class="p">:</span> <span class="s2">&quot;./&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ibrav&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;smearing&quot;</span><span class="p">:</span> <span class="s2">&quot;fermi-dirac&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;degauss&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;ecutrho&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;ecutwfc&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;nosym&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;noinv&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
 
         <span class="c1"># It has been shown that the number of k-points</span>
@@ -263,8 +267,9 @@
     <span class="k">def</span> <span class="nf">qe_input_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Input data for QE TEM calls.&quot;&quot;&quot;</span>
         <span class="c1"># Update the pseudopotential path from Parameters.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_qe_input_data</span><span class="p">[</span><span class="s2">&quot;pseudo_dir&quot;</span><span class="p">]</span> <span class="o">=</span> \
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qe_input_data</span><span class="p">[</span><span class="s2">&quot;pseudo_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">pseudopotential_path</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qe_input_data</span>
 
     <span class="nd">@qe_input_data</span><span class="o">.</span><span class="n">setter</span>
@@ -301,8 +306,9 @@
 <span class="sd">            Data in MALA units.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No unit conversion method implemented for&quot;</span>
-                        <span class="s2">&quot; this target type.&quot;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="s2">&quot;No unit conversion method implemented for this target type.&quot;</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Target.backconvert_units"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="nd">@abstractmethod</span>
@@ -324,8 +330,10 @@
 <span class="sd">            Data in out_units.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No unit back conversion method implemented &quot;</span>
-                        <span class="s2">&quot;for this target type.&quot;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="s2">&quot;No unit back conversion method implemented &quot;</span>
+            <span class="s2">&quot;for this target type.&quot;</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Target.read_additional_calculation_data"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.read_additional_calculation_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -368,11 +376,15 @@
                 <span class="k">elif</span> <span class="n">file_ending</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
                     <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;json&quot;</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Could not guess type of additional &quot;</span>
-                                    <span class="s2">&quot;calculation data provided to MALA.&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Could not guess type of additional &quot;</span>
+                        <span class="s2">&quot;calculation data provided to MALA.&quot;</span>
+                    <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Could not guess type of additional &quot;</span>
-                                <span class="s2">&quot;calculation data provided to MALA.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Could not guess type of additional &quot;</span>
+                    <span class="s2">&quot;calculation data provided to MALA.&quot;</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;espresso-out&quot;</span><span class="p">:</span>
             <span class="c1"># Reset everything.</span>
@@ -389,8 +401,9 @@
             <span class="c1"># Read the file.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">)</span>
             <span class="n">vol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span><span class="o">.</span>\
-                <span class="n">get_fermi_level</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span><span class="o">.</span><span class="n">get_fermi_level</span><span class="p">()</span>
+            <span class="p">)</span>
 
             <span class="c1"># Parse the file for energy values.</span>
             <span class="n">total_energy</span> <span class="o">=</span> <span class="kc">None</span>
@@ -404,33 +417,40 @@
                     <span class="k">if</span> <span class="s2">&quot;End of self-consistent calculation&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                         <span class="n">past_calculation_part</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">if</span> <span class="s2">&quot;number of electrons       =&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> \
-                            <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span>
+                            <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="p">)</span>
                     <span class="k">if</span> <span class="s2">&quot;Fermi-Dirac smearing, width (Ry)=&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> \
-                                           <span class="n">Rydberg</span> <span class="o">/</span> <span class="n">kB</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="n">Rydberg</span> <span class="o">/</span> <span class="n">kB</span>
+                        <span class="p">)</span>
                     <span class="k">if</span> <span class="s2">&quot;convergence has been achieved&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                         <span class="k">break</span>
                     <span class="k">if</span> <span class="s2">&quot;FFT dimensions&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                         <span class="n">dims</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dims</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dims</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">dims</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span>
-                                                      <span class="n">split</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                            <span class="p">(</span><span class="n">dims</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="p">)</span>
                     <span class="k">if</span> <span class="s2">&quot;bravais-lattice index&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ibrav&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
                     <span class="k">if</span> <span class="s2">&quot;kinetic-energy cutoff&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutwfc&quot;</span><span class="p">]</span> \
-                            <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;Ry&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutwfc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                            <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;Ry&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="p">)</span>
                     <span class="k">if</span> <span class="s2">&quot;charge density cutoff&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutrho&quot;</span><span class="p">]</span> \
-                            <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;Ry&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutrho&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                            <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;Ry&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="p">)</span>
                     <span class="k">if</span> <span class="s2">&quot;smearing, width&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;degauss&quot;</span><span class="p">]</span> \
-                            <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;degauss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                            <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="p">)</span>
                     <span class="k">if</span> <span class="n">pseudolinefound</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">qe_pseudopotentials</span><span class="p">[</span><span class="n">lastpseudo</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> \
-                            <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">qe_pseudopotentials</span><span class="p">[</span><span class="n">lastpseudo</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                        <span class="p">)</span>
                         <span class="n">pseudolinefound</span> <span class="o">=</span> <span class="kc">False</span>
                         <span class="n">lastpseudo</span> <span class="o">=</span> <span class="kc">None</span>
                     <span class="k">if</span> <span class="s2">&quot;PseudoPot.&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
@@ -438,51 +458,61 @@
                         <span class="n">lastpseudo</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;for&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;read&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="k">if</span> <span class="s2">&quot;total energy&quot;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">and</span> <span class="n">past_calculation_part</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">total_energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="n">total_energy</span> \
-                                <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;Ry&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="n">total_energy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                                <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;Ry&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="p">)</span>
                     <span class="k">if</span> <span class="s2">&quot;smearing contrib.&quot;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">and</span> <span class="n">past_calculation_part</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">entropy_contribution</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="n">entropy_contribution</span> \
-                                <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;Ry&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="n">entropy_contribution</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                                <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;Ry&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="p">)</span>
                     <span class="k">if</span> <span class="s2">&quot;set verbosity=&#39;high&#39; to print them.&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                         <span class="n">bands_included</span> <span class="o">=</span> <span class="kc">False</span>
 
             <span class="c1"># The voxel is needed for e.g. LDOS integration.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_sigma</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_sigma</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">AtomicDensity</span><span class="o">.</span><span class="n">get_optimal_sigma</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">)</span>
+            <span class="p">)</span>
 
             <span class="c1"># This is especially important for size extrapolation.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">/</span> \
-                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span>
+            <span class="p">)</span>
 
             <span class="c1"># Unit conversion</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">*</span><span class="n">Rydberg</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span> <span class="o">=</span> <span class="n">total_energy</span> <span class="o">*</span> <span class="n">Rydberg</span>
             <span class="k">if</span> <span class="n">entropy_contribution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">entropy_contribution_dft_calculation</span> <span class="o">=</span> <span class="n">entropy_contribution</span> <span class="o">*</span> <span class="n">Rydberg</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">entropy_contribution_dft_calculation</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">entropy_contribution</span> <span class="o">*</span> <span class="n">Rydberg</span>
+                <span class="p">)</span>
 
             <span class="c1"># Calculate band energy, if the necessary data is included in</span>
             <span class="c1"># the output file.</span>
             <span class="k">if</span> <span class="n">bands_included</span><span class="p">:</span>
                 <span class="n">eigs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span><span class="o">.</span><span class="n">band_structure</span><span class="p">()</span><span class="o">.</span>
-                    <span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span>
+                    <span class="o">.</span><span class="n">band_structure</span><span class="p">()</span>
+                    <span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+                <span class="p">)</span>
                 <span class="n">kweights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span><span class="o">.</span><span class="n">get_k_point_weights</span><span class="p">()</span>
-                <span class="n">eband_per_band</span> <span class="o">=</span> <span class="n">eigs</span> <span class="o">*</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">eigs</span><span class="p">,</span>
-                                                       <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span><span class="p">,</span>
-                                                       <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
-                                                       <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">eband_per_band</span> <span class="o">=</span> <span class="n">eigs</span> <span class="o">*</span> <span class="n">fermi_function</span><span class="p">(</span>
+                    <span class="n">eigs</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+                    <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="n">eband_per_band</span> <span class="o">=</span> <span class="n">kweights</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">eband_per_band</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">eband_per_band</span><span class="p">)</span>
-                <span class="n">enum_per_band</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">eigs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span><span class="p">,</span>
-                                               <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
-                                               <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">enum_per_band</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span>
+                    <span class="n">eigs</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+                    <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="n">enum_per_band</span> <span class="o">=</span> <span class="n">kweights</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">enum_per_band</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">enum_per_band</span><span class="p">)</span>
 
@@ -505,24 +535,25 @@
 
             <span class="c1"># The voxel is needed for e.g. LDOS integration.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_sigma</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_sigma</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">AtomicDensity</span><span class="o">.</span><span class="n">get_optimal_sigma</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">)</span>
+            <span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;No number of electrons per atom provided, &quot;</span>
-                         <span class="s2">&quot;MALA cannot guess the number of electrons &quot;</span>
-                         <span class="s2">&quot;in the cell with this. Energy calculations may be&quot;</span>
-                         <span class="s2">&quot;wrong.&quot;</span><span class="p">)</span>
+                <span class="n">printout</span><span class="p">(</span>
+                    <span class="s2">&quot;No number of electrons per atom provided, &quot;</span>
+                    <span class="s2">&quot;MALA cannot guess the number of electrons &quot;</span>
+                    <span class="s2">&quot;in the cell with this. Energy calculations may be&quot;</span>
+                    <span class="s2">&quot;wrong.&quot;</span>
+                <span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span> <span class="o">*</span> \
-                                                 <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span>
+                <span class="p">)</span>
         <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">json_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
@@ -577,34 +608,42 @@
             <span class="s2">&quot;total_energy_dft_calculation&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span><span class="p">,</span>
             <span class="s2">&quot;grid_dimensions&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">),</span>
             <span class="s2">&quot;electrons_per_atom&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span><span class="p">,</span>
-            <span class="s2">&quot;number_of_electrons_from_eigenvals&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span><span class="p">,</span>
+            <span class="s2">&quot;number_of_electrons_from_eigenvals&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span><span class="p">,</span>
             <span class="s2">&quot;ibrav&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ibrav&quot;</span><span class="p">],</span>
             <span class="s2">&quot;ecutwfc&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutwfc&quot;</span><span class="p">],</span>
             <span class="s2">&quot;ecutrho&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutrho&quot;</span><span class="p">],</span>
             <span class="s2">&quot;degauss&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;degauss&quot;</span><span class="p">],</span>
             <span class="s2">&quot;pseudopotentials&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qe_pseudopotentials</span><span class="p">,</span>
-            <span class="s2">&quot;entropy_contribution_dft_calculation&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy_contribution_dft_calculation</span>
+            <span class="s2">&quot;entropy_contribution_dft_calculation&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy_contribution_dft_calculation</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;voxel&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="o">.</span><span class="n">todict</span><span class="p">()</span>
-            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;voxel&quot;</span><span class="p">][</span><span class="s2">&quot;array&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;voxel&quot;</span><span class="p">][</span><span class="s2">&quot;array&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;voxel&quot;</span><span class="p">][</span><span class="s2">&quot;array&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="p">)</span>
             <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;voxel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;pbc&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">todict</span><span class="p">()</span>
-            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;numbers&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;numbers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;numbers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="p">)</span>
+            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;cell&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="p">)</span>
+            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;cell&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;cell&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;pbc&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="p">)</span>
+            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;pbc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;pbc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="n">return_string</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">additional_calculation_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span>
-                          <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span>
+                    <span class="n">additional_calculation_data</span><span class="p">,</span>
+                    <span class="n">f</span><span class="p">,</span>
+                    <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">additional_calculation_data</span></div>
 
@@ -626,8 +665,13 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">write_to_numpy_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">target_data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{},</span>
-                              <span class="n">internal_iteration_number</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">,</span>
+        <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">internal_iteration_number</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write data to a numpy file.</span>
 
@@ -654,14 +698,16 @@
                 <span class="n">path</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">get_target</span><span class="p">(),</span>
                 <span class="n">additional_attributes</span><span class="o">=</span><span class="n">additional_attributes</span><span class="p">,</span>
-                <span class="n">internal_iteration_number</span><span class="o">=</span><span class="n">internal_iteration_number</span><span class="p">)</span>
+                <span class="n">internal_iteration_number</span><span class="o">=</span><span class="n">internal_iteration_number</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># The feature dimension may be undefined.</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">write_to_openpmd_file</span><span class="p">(</span>
                 <span class="n">path</span><span class="p">,</span>
                 <span class="n">array</span><span class="p">,</span>
                 <span class="n">additional_attributes</span><span class="o">=</span><span class="n">additional_attributes</span><span class="p">,</span>
-                <span class="n">internal_iteration_number</span><span class="o">=</span><span class="n">internal_iteration_number</span><span class="p">)</span></div>
+                <span class="n">internal_iteration_number</span><span class="o">=</span><span class="n">internal_iteration_number</span><span class="p">,</span>
+            <span class="p">)</span></div>
 
     <span class="c1"># Accessing target data</span>
     <span class="c1">########################</span>
@@ -695,8 +741,15 @@
 
 <div class="viewcode-block" id="Target.get_real_space_grid"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_real_space_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_real_space_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the real space grid.&quot;&quot;&quot;</span>
-        <span class="n">grid3D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                           <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">grid3D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                <span class="mi">3</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
                 <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
@@ -704,10 +757,9 @@
         <span class="k">return</span> <span class="n">grid3D</span></div>
 
 <div class="viewcode-block" id="Target.radial_distribution_function_from_atoms"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.radial_distribution_function_from_atoms">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">radial_distribution_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span>
-                                                <span class="n">number_of_bins</span><span class="p">,</span>
-                                                <span class="n">rMax</span><span class="o">=</span><span class="s2">&quot;mic&quot;</span><span class="p">,</span>
-                                                <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mala&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">radial_distribution_function_from_atoms</span><span class="p">(</span>
+        <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="p">,</span> <span class="n">rMax</span><span class="o">=</span><span class="s2">&quot;mic&quot;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mala&quot;</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the radial distribution function (RDF).</span>
 
@@ -765,12 +817,15 @@
             <span class="n">_rMax</span> <span class="o">=</span> <span class="n">Target</span><span class="o">.</span><span class="n">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;2mic&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;asap3&quot;</span><span class="p">:</span>
-                <span class="n">_rMax_possible</span> <span class="o">=</span> <span class="n">Target</span><span class="o">.</span><span class="n">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
-                                                                <span class="n">method</span><span class="o">=</span><span class="s2">&quot;2mic&quot;</span><span class="p">)</span>
+                <span class="n">_rMax_possible</span> <span class="o">=</span> <span class="n">Target</span><span class="o">.</span><span class="n">_get_ideal_rmax_for_rdf</span><span class="p">(</span>
+                    <span class="n">atoms</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;2mic&quot;</span>
+                <span class="p">)</span>
                 <span class="k">if</span> <span class="n">rMax</span> <span class="o">&gt;</span> <span class="n">_rMax_possible</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;ASAP3 calculation fo RDF cannot work &quot;</span>
-                                    <span class="s2">&quot;with radii that are bigger then the &quot;</span>
-                                    <span class="s2">&quot;cell.&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;ASAP3 calculation fo RDF cannot work &quot;</span>
+                        <span class="s2">&quot;with radii that are bigger then the &quot;</span>
+                        <span class="s2">&quot;cell.&quot;</span>
+                    <span class="p">)</span>
             <span class="n">_rMax</span> <span class="o">=</span> <span class="n">rMax</span>
 
         <span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span>
@@ -787,21 +842,23 @@
                         <span class="n">parallel_warn</span><span class="p">(</span>
                             <span class="s2">&quot;Calculating RDF with a radius larger then the &quot;</span>
                             <span class="s2">&quot;unit cell. While this will work numerically, be &quot;</span>
-                            <span class="s2">&quot;cautious about the physicality of its results&quot;</span><span class="p">)</span>
+                            <span class="s2">&quot;cautious about the physicality of its results&quot;</span>
+                        <span class="p">)</span>
 
             <span class="c1"># Calculate all the distances.</span>
             <span class="c1"># rMax/2 because this is the radius around one atom, so half the</span>
             <span class="c1"># distance to the next one.</span>
             <span class="c1"># Using neighborlists grants us access to the PBC.</span>
-            <span class="n">neighborlist</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">neighborlist</span><span class="o">.</span><span class="n">NeighborList</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span> <span class="o">+</span>
-                                                         <span class="p">[</span><span class="n">_rMax</span><span class="o">/</span><span class="mf">2.0</span><span class="p">],</span>
-                                                         <span class="n">bothways</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">neighborlist</span> <span class="o">=</span> <span class="n">NeighborList</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span> <span class="o">+</span> <span class="p">[</span><span class="n">_rMax</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">],</span> <span class="n">bothways</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
             <span class="n">neighborlist</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)):</span>
                 <span class="n">indices</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">neighborlist</span><span class="o">.</span><span class="n">get_neighbors</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-                <span class="n">dm</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">([</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()[</span><span class="n">i</span><span class="p">]],</span>
-                                    <span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span> <span class="o">+</span> <span class="n">offsets</span> <span class="o">@</span>
-                                    <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">())</span>
+                <span class="n">dm</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()[</span><span class="n">i</span><span class="p">]],</span>
+                    <span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span> <span class="o">+</span> <span class="n">offsets</span> <span class="o">@</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span>
+                <span class="p">)</span>
                 <span class="n">index</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">dm</span> <span class="o">/</span> <span class="n">dr</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
                 <span class="n">index</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
                 <span class="n">out_of_scope</span> <span class="o">=</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="n">number_of_bins</span>
@@ -815,13 +872,15 @@
             <span class="n">norm</span> <span class="o">=</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">dr</span> <span class="o">*</span> <span class="n">phi</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="n">rr</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span><span class="p">)</span>
-                <span class="n">rdf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/=</span> <span class="p">(</span><span class="n">norm</span> <span class="o">*</span> <span class="p">((</span><span class="n">rr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">dr</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span><span class="p">))</span>
+                <span class="n">rdf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/=</span> <span class="n">norm</span> <span class="o">*</span> <span class="p">((</span><span class="n">rr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">dr</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.0</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;asap3&quot;</span><span class="p">:</span>
             <span class="c1"># ASAP3 loads MPI which takes a long time to import, so</span>
             <span class="c1"># we&#39;ll only do that when absolutely needed.</span>
             <span class="kn">from</span> <span class="nn">asap3.analysis.rdf</span> <span class="kn">import</span> <span class="n">RadialDistributionFunction</span>
-            <span class="n">rdf</span> <span class="o">=</span> <span class="n">RadialDistributionFunction</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">_rMax</span><span class="p">,</span>
-                                             <span class="n">number_of_bins</span><span class="p">)</span><span class="o">.</span><span class="n">get_rdf</span><span class="p">()</span>
+
+            <span class="n">rdf</span> <span class="o">=</span> <span class="n">RadialDistributionFunction</span><span class="p">(</span>
+                <span class="n">atoms</span><span class="p">,</span> <span class="n">_rMax</span><span class="p">,</span> <span class="n">number_of_bins</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">get_rdf</span><span class="p">()</span>
             <span class="n">rr</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="n">rr</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span><span class="p">)</span>
@@ -831,9 +890,9 @@
         <span class="k">return</span> <span class="n">rdf</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">rr</span></div>
 
 <div class="viewcode-block" id="Target.three_particle_correlation_function_from_atoms"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.three_particle_correlation_function_from_atoms">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">three_particle_correlation_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span>
-                                                       <span class="n">number_of_bins</span><span class="p">,</span>
-                                                       <span class="n">rMax</span><span class="o">=</span><span class="s2">&quot;mic&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">three_particle_correlation_function_from_atoms</span><span class="p">(</span>
+        <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="p">,</span> <span class="n">rMax</span><span class="o">=</span><span class="s2">&quot;mic&quot;</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the three particle correlation function (TPCF).</span>
 
@@ -881,22 +940,25 @@
 
         <span class="c1"># TPCF is a function of three radii.</span>
         <span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span>
-        <span class="n">dr</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">_rMax</span><span class="o">/</span><span class="n">number_of_bins</span><span class="p">)</span>
-        <span class="n">tpcf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                        <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">dr</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">_rMax</span> <span class="o">/</span> <span class="n">number_of_bins</span><span class="p">)</span>
+        <span class="n">tpcf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
         <span class="n">cell</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
         <span class="n">pbc</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_pbc</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">pbc</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="n">_rMax</span> <span class="o">&gt;</span> <span class="n">cell</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot calculate RDF with this radius. &quot;</span>
-                                    <span class="s2">&quot;Please choose a smaller value.&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Cannot calculate RDF with this radius. &quot;</span>
+                        <span class="s2">&quot;Please choose a smaller value.&quot;</span>
+                    <span class="p">)</span>
 
         <span class="c1"># Construct a neighbor list for calculation of distances.</span>
         <span class="c1"># With this, the PBC are satisfied.</span>
-        <span class="n">neighborlist</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">neighborlist</span><span class="o">.</span><span class="n">NeighborList</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span> <span class="o">+</span>
-                                                     <span class="p">[</span><span class="n">_rMax</span><span class="o">/</span><span class="mf">2.0</span><span class="p">],</span>
-                                                     <span class="n">bothways</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">neighborlist</span> <span class="o">=</span> <span class="n">NeighborList</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span> <span class="o">+</span> <span class="p">[</span><span class="n">_rMax</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">],</span> <span class="n">bothways</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
         <span class="n">neighborlist</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
 
         <span class="c1"># To calculate the TPCF we calculate the three distances between</span>
@@ -911,31 +973,42 @@
             <span class="c1"># Generate all pairs of atoms, and calculate distances of</span>
             <span class="c1"># reference atom to them.</span>
             <span class="n">indices</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">neighborlist</span><span class="o">.</span><span class="n">get_neighbors</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-            <span class="n">neighbor_pairs</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span>\
-                <span class="n">combinations</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">offsets</span><span class="p">)),</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">neighbor_pairs</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span>
+                <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">offsets</span><span class="p">)),</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span>
+            <span class="p">)</span>
             <span class="n">neighbor_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">neighbor_pairs</span><span class="p">)</span>
-            <span class="n">pair_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">pair1</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> \
-                                                       <span class="n">pair1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">@</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span>
-                                                       <span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">pair2</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> \
-                                                       <span class="n">pair2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">@</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()))</span>
-                                       <span class="k">for</span> <span class="n">pair1</span><span class="p">,</span> <span class="n">pair2</span> <span class="ow">in</span> <span class="n">neighbor_list</span><span class="p">])</span>
+            <span class="n">pair_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">pair1</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                            <span class="o">+</span> <span class="n">pair1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">@</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span>
+                            <span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">pair2</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                            <span class="o">+</span> <span class="n">pair2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">@</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">pair1</span><span class="p">,</span> <span class="n">pair2</span> <span class="ow">in</span> <span class="n">neighbor_list</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
             <span class="n">dists_between_atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">])</span> <span class="o">+</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">])</span> <span class="o">+</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]))</span>
-            <span class="n">pair_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">pair_positions</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">neighbor_list</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span>
-                                                         <span class="mi">3</span><span class="p">),</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">])</span>
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">])</span>
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">])</span>
+            <span class="p">)</span>
+            <span class="n">pair_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="n">pair_positions</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">neighbor_list</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span>
+            <span class="p">)</span>
             <span class="n">all_dists</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">([</span><span class="n">pos1</span><span class="p">],</span> <span class="n">pair_positions</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
             <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">neighbor_pair</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">neighbor_list</span><span class="p">):</span>
-                <span class="n">r1</span> <span class="o">=</span> <span class="n">all_dists</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">idx</span><span class="p">]</span>
-                <span class="n">r2</span> <span class="o">=</span> <span class="n">all_dists</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">r1</span> <span class="o">=</span> <span class="n">all_dists</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">idx</span><span class="p">]</span>
+                <span class="n">r2</span> <span class="o">=</span> <span class="n">all_dists</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
 
                 <span class="c1"># We don&#39;t need to do any calculation if either of the</span>
                 <span class="c1"># atoms are already out of range.</span>
                 <span class="k">if</span> <span class="n">r1</span> <span class="o">&lt;</span> <span class="n">_rMax</span> <span class="ow">and</span> <span class="n">r2</span> <span class="o">&lt;</span> <span class="n">_rMax</span><span class="p">:</span>
                     <span class="n">r3</span> <span class="o">=</span> <span class="n">dists_between_atoms</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">r3</span> <span class="o">&lt;</span> <span class="n">_rMax</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">r1</span><span class="o">-</span><span class="n">r2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">r3</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">r1</span><span class="o">+</span><span class="n">r2</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">r3</span> <span class="o">&lt;</span> <span class="n">_rMax</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">r1</span> <span class="o">-</span> <span class="n">r2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">r3</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">r1</span> <span class="o">+</span> <span class="n">r2</span><span class="p">):</span>
                         <span class="c1"># print(r1, r2, r3)</span>
                         <span class="n">id1</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">r1</span> <span class="o">/</span> <span class="n">dr</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
                         <span class="n">id2</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">r2</span> <span class="o">/</span> <span class="n">dr</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
@@ -944,8 +1017,9 @@
 
         <span class="c1"># Normalize the TPCF and calculate the distances.</span>
         <span class="c1"># This loop takes almost no time compared to the one above.</span>
-        <span class="n">rr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
-                       <span class="n">number_of_bins</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">rr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
         <span class="n">phi</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span> <span class="o">/</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="mf">8.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">dr</span> <span class="o">*</span> <span class="n">phi</span> <span class="o">*</span> <span class="n">phi</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
@@ -954,18 +1028,20 @@
                     <span class="n">r1</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span>
                     <span class="n">r2</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span>
                     <span class="n">r3</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span>
-                    <span class="n">tpcf</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">/=</span> <span class="p">(</span><span class="n">norm</span> <span class="o">*</span> <span class="n">r1</span> <span class="o">*</span> <span class="n">r2</span> <span class="o">*</span> <span class="n">r3</span>
-                                      <span class="o">*</span> <span class="n">dr</span> <span class="o">*</span> <span class="n">dr</span> <span class="o">*</span> <span class="n">dr</span><span class="p">)</span>
+                    <span class="n">tpcf</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">/=</span> <span class="n">norm</span> <span class="o">*</span> <span class="n">r1</span> <span class="o">*</span> <span class="n">r2</span> <span class="o">*</span> <span class="n">r3</span> <span class="o">*</span> <span class="n">dr</span> <span class="o">*</span> <span class="n">dr</span> <span class="o">*</span> <span class="n">dr</span>
                     <span class="n">rr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">r1</span>
                     <span class="n">rr</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">r2</span>
                     <span class="n">rr</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">r3</span>
         <span class="k">return</span> <span class="n">tpcf</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">rr</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span></div>
 
 <div class="viewcode-block" id="Target.static_structure_factor_from_atoms"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.static_structure_factor_from_atoms">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">static_structure_factor_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="p">,</span>
-                                           <span class="n">kMax</span><span class="p">,</span>
-                                           <span class="n">radial_distribution_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                           <span class="n">calculation_type</span><span class="o">=</span><span class="s2">&quot;direct&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">static_structure_factor_from_atoms</span><span class="p">(</span>
+        <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span>
+        <span class="n">number_of_bins</span><span class="p">,</span>
+        <span class="n">kMax</span><span class="p">,</span>
+        <span class="n">radial_distribution_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">calculation_type</span><span class="o">=</span><span class="s2">&quot;direct&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the static structure factor (SSF).</span>
 
@@ -1010,11 +1086,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">calculation_type</span> <span class="o">==</span> <span class="s2">&quot;fourier_transform&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">radial_distribution_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">rMax</span> <span class="o">=</span> <span class="n">Target</span><span class="o">.</span><span class="n">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span><span class="o">*</span><span class="mi">6</span>
-                <span class="n">radial_distribution_function</span> <span class="o">=</span> <span class="n">Target</span><span class="o">.</span>\
-                    <span class="n">radial_distribution_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">rMax</span><span class="o">=</span><span class="n">rMax</span><span class="p">,</span>
-                                                            <span class="n">number_of_bins</span><span class="o">=</span>
-                                                            <span class="mi">1500</span><span class="p">)</span>
+                <span class="n">rMax</span> <span class="o">=</span> <span class="n">Target</span><span class="o">.</span><span class="n">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span> <span class="o">*</span> <span class="mi">6</span>
+                <span class="n">radial_distribution_function</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">Target</span><span class="o">.</span><span class="n">radial_distribution_function_from_atoms</span><span class="p">(</span>
+                        <span class="n">atoms</span><span class="p">,</span> <span class="n">rMax</span><span class="o">=</span><span class="n">rMax</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="o">=</span><span class="mi">1500</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
             <span class="n">rdf</span> <span class="o">=</span> <span class="n">radial_distribution_function</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">radii</span> <span class="o">=</span> <span class="n">radial_distribution_function</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
@@ -1024,14 +1101,15 @@
 
             <span class="c1"># Fourier transform the RDF by calculating the integral at each</span>
             <span class="c1"># k-point we investigate.</span>
-            <span class="n">rho</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span><span class="o">/</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
+            <span class="n">rho</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span> <span class="o">/</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="c1"># Construct integrand.</span>
-                <span class="n">kpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dk</span><span class="o">*</span><span class="n">i</span><span class="p">)</span>
-                <span class="n">kr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">radii</span><span class="p">)</span><span class="o">*</span><span class="n">kpoints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">integrand</span> <span class="o">=</span> <span class="p">(</span><span class="n">rdf</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">radii</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">kr</span><span class="p">)</span><span class="o">/</span><span class="n">kpoints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">structure_factor</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rho</span> <span class="o">*</span> <span class="n">simps</span><span class="p">(</span><span class="n">integrand</span><span class="p">,</span>
-                                                               <span class="n">radii</span><span class="p">))</span>
+                <span class="n">kpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dk</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">kr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">radii</span><span class="p">)</span> <span class="o">*</span> <span class="n">kpoints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">integrand</span> <span class="o">=</span> <span class="p">(</span><span class="n">rdf</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">radii</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">kr</span><span class="p">)</span> <span class="o">/</span> <span class="n">kpoints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">structure_factor</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span>
+                    <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">simps</span><span class="p">(</span><span class="n">integrand</span><span class="p">,</span> <span class="n">radii</span><span class="p">)</span>
+                <span class="p">)</span>
 
             <span class="k">return</span> <span class="n">structure_factor</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">kpoints</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
 
@@ -1044,12 +1122,15 @@
             <span class="c1"># The structure factor is undefined for wave vectors smaller</span>
             <span class="c1"># then this number.</span>
             <span class="n">dk</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">kMax</span> <span class="o">/</span> <span class="n">number_of_bins</span><span class="p">)</span>
-            <span class="n">dk_threedimensional</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span><span class="o">.</span><span class="n">reciprocal</span><span class="p">()</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+            <span class="n">dk_threedimensional</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span><span class="o">.</span><span class="n">reciprocal</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
 
             <span class="c1"># From this, the necessary dimensions of the k-grid for this</span>
             <span class="c1"># particular k-max can be determined as</span>
-            <span class="n">kgrid_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">dk_threedimensional</span><span class="p">),</span>
-                                           <span class="p">[</span><span class="n">kMax</span><span class="p">,</span> <span class="n">kMax</span><span class="p">,</span> <span class="n">kMax</span><span class="p">]))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">kgrid_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">dk_threedimensional</span><span class="p">),</span> <span class="p">[</span><span class="n">kMax</span><span class="p">,</span> <span class="n">kMax</span><span class="p">,</span> <span class="n">kMax</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calculating SSF on k-grid of size&quot;</span><span class="p">,</span> <span class="n">kgrid_size</span><span class="p">)</span>
 
             <span class="c1"># k-grids:</span>
@@ -1064,7 +1145,7 @@
                             <span class="n">kgrid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k_point</span><span class="p">)</span>
             <span class="n">kpoints</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="n">kpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dk</span><span class="o">*</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">kpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dk</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span>
 
             <span class="c1"># The first will hold S(|k|) (i.e., what we are actually interested</span>
             <span class="c1"># in, the second will hold lists of all S(k) corresponding to the</span>
@@ -1081,7 +1162,9 @@
             <span class="n">cosine_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">dot_product</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">sine_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">dot_product</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">del</span> <span class="n">dot_product</span>
-            <span class="n">s_values</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">cosine_sum</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">sine_sum</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+            <span class="n">s_values</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">cosine_sum</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">sine_sum</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="n">atoms</span>
+            <span class="p">)</span>
             <span class="k">del</span> <span class="n">cosine_sum</span>
             <span class="k">del</span> <span class="n">sine_sum</span>
 
@@ -1100,11 +1183,13 @@
             <span class="k">return</span> <span class="n">structure_factor</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">kpoints</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Static structure factor calculation method &quot;</span>
-                            <span class="s2">&quot;unsupported.&quot;</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Static structure factor calculation method unsupported.&quot;</span>
+            <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.get_radial_distribution_function"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_radial_distribution_function">[docs]</a>    <span class="k">def</span> <span class="nf">get_radial_distribution_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span>
-                                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mala&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.get_radial_distribution_function"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_radial_distribution_function">[docs]</a>    <span class="k">def</span> <span class="nf">get_radial_distribution_function</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mala&quot;</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the radial distribution function (RDF).</span>
 
@@ -1136,15 +1221,12 @@
 <span class="sd">            automatically calculated.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">Target</span><span class="o">.</span>\
-            <span class="n">radial_distribution_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
-                                                    <span class="n">number_of_bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span>
-                                                    <span class="n">parameters</span><span class="o">.</span>
-                                                    <span class="n">rdf_parameters</span>
-                                                    <span class="p">[</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">],</span>
-                                                    <span class="n">rMax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                                    <span class="n">rdf_parameters</span><span class="p">[</span><span class="s2">&quot;rMax&quot;</span><span class="p">],</span>
-                                                    <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Target</span><span class="o">.</span><span class="n">radial_distribution_function_from_atoms</span><span class="p">(</span>
+            <span class="n">atoms</span><span class="p">,</span>
+            <span class="n">number_of_bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">rdf_parameters</span><span class="p">[</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">],</span>
+            <span class="n">rMax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">rdf_parameters</span><span class="p">[</span><span class="s2">&quot;rMax&quot;</span><span class="p">],</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Target.get_three_particle_correlation_function"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_three_particle_correlation_function">[docs]</a>    <span class="k">def</span> <span class="nf">get_three_particle_correlation_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1166,14 +1248,11 @@
 <span class="sd">            The radii at which the TPCF was calculated (for plotting),</span>
 <span class="sd">            [rMax, rMax, rMax].</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">Target</span><span class="o">.</span>\
-            <span class="n">three_particle_correlation_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
-                                                           <span class="n">number_of_bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span>
-                                                           <span class="n">parameters</span><span class="o">.</span>
-                                                           <span class="n">tpcf_parameters</span>
-                                                           <span class="p">[</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">],</span>
-                                                           <span class="n">rMax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                                           <span class="n">tpcf_parameters</span><span class="p">[</span><span class="s2">&quot;rMax&quot;</span><span class="p">])</span></div>
+        <span class="k">return</span> <span class="n">Target</span><span class="o">.</span><span class="n">three_particle_correlation_function_from_atoms</span><span class="p">(</span>
+            <span class="n">atoms</span><span class="p">,</span>
+            <span class="n">number_of_bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">tpcf_parameters</span><span class="p">[</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">],</span>
+            <span class="n">rMax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">tpcf_parameters</span><span class="p">[</span><span class="s2">&quot;rMax&quot;</span><span class="p">],</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Target.get_static_structure_factor"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_static_structure_factor">[docs]</a>    <span class="k">def</span> <span class="nf">get_static_structure_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1195,16 +1274,20 @@
 <span class="sd">            The k-points  at which the SSF was calculated (for plotting),</span>
 <span class="sd">            as [kMax] array.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">Target</span><span class="o">.</span><span class="n">static_structure_factor_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
-                                                         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                                         <span class="n">ssf_parameters</span><span class="p">[</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">],</span>
-                                                         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                                         <span class="n">ssf_parameters</span><span class="p">[</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">])</span></div>
+        <span class="k">return</span> <span class="n">Target</span><span class="o">.</span><span class="n">static_structure_factor_from_atoms</span><span class="p">(</span>
+            <span class="n">atoms</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ssf_parameters</span><span class="p">[</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ssf_parameters</span><span class="p">[</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">],</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Target.write_tem_input_file"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.write_tem_input_file">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">write_tem_input_file</span><span class="p">(</span><span class="n">atoms_Angstrom</span><span class="p">,</span> <span class="n">qe_input_data</span><span class="p">,</span>
-                             <span class="n">qe_pseudopotentials</span><span class="p">,</span>
-                             <span class="n">grid_dimensions</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">write_tem_input_file</span><span class="p">(</span>
+        <span class="n">atoms_Angstrom</span><span class="p">,</span>
+        <span class="n">qe_input_data</span><span class="p">,</span>
+        <span class="n">qe_pseudopotentials</span><span class="p">,</span>
+        <span class="n">grid_dimensions</span><span class="p">,</span>
+        <span class="n">kpoints</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write a QE-style input file for the total energy module.</span>
 
@@ -1233,9 +1316,11 @@
 <span class="sd">            k-grid used, usually None or (1,1,1) for TEM calculations.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Specify grid dimensions, if any are given.</span>
-        <span class="k">if</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> \
-                <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> \
-                <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
+            <span class="ow">and</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
+            <span class="ow">and</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
+        <span class="p">):</span>
             <span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;nr1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;nr2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;nr3&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
@@ -1248,10 +1333,14 @@
         <span class="c1"># the DFT calculation. If symmetry is then on in here, that</span>
         <span class="c1"># leads to errors.</span>
         <span class="c1"># qe_input_data[&quot;nosym&quot;] = False</span>
-        <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;mala.pw.scf.in&quot;</span><span class="p">,</span> <span class="n">atoms_Angstrom</span><span class="p">,</span> <span class="s2">&quot;espresso-in&quot;</span><span class="p">,</span>
-                     <span class="n">input_data</span><span class="o">=</span><span class="n">qe_input_data</span><span class="p">,</span>
-                     <span class="n">pseudopotentials</span><span class="o">=</span><span class="n">qe_pseudopotentials</span><span class="p">,</span>
-                     <span class="n">kpts</span><span class="o">=</span><span class="n">kpoints</span><span class="p">)</span></div>
+        <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s2">&quot;mala.pw.scf.in&quot;</span><span class="p">,</span>
+            <span class="n">atoms_Angstrom</span><span class="p">,</span>
+            <span class="s2">&quot;espresso-in&quot;</span><span class="p">,</span>
+            <span class="n">input_data</span><span class="o">=</span><span class="n">qe_input_data</span><span class="p">,</span>
+            <span class="n">pseudopotentials</span><span class="o">=</span><span class="n">qe_pseudopotentials</span><span class="p">,</span>
+            <span class="n">kpts</span><span class="o">=</span><span class="n">kpoints</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Target.restrict_data"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.restrict_data">[docs]</a>    <span class="k">def</span> <span class="nf">restrict_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1288,30 +1377,43 @@
         <span class="k">return</span> <span class="n">array_dimensions</span>
 
     <span class="k">def</span> <span class="nf">_process_additional_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">additional_metadata</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">additional_metadata</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                              <span class="n">additional_metadata</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
+            <span class="n">additional_metadata</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">additional_metadata</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_set_openpmd_attribtues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_set_openpmd_attribtues</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
 
         <span class="c1"># If no atoms have been read, neither have any of the other</span>
         <span class="c1"># properties.</span>
-        <span class="n">additional_calculation_data</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">write_additional_calculation_data</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">return_string</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">additional_calculation_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_additional_calculation_data</span><span class="p">(</span>
+            <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">return_string</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">additional_calculation_data</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;atoms&quot;</span> <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;voxel&quot;</span> <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;grid_dimensions&quot;</span> \
-                    <span class="ow">and</span> <span class="n">key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;pseudopotentials&quot;</span> <span class="ow">and</span> \
-                    <span class="n">additional_calculation_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;atoms&quot;</span>
+                <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;voxel&quot;</span>
+                <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;grid_dimensions&quot;</span>
+                <span class="ow">and</span> <span class="n">key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;pseudopotentials&quot;</span>
+                <span class="ow">and</span> <span class="n">additional_calculation_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">):</span>
                 <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">additional_calculation_data</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;pseudopotentials&quot;</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">pseudokey</span> <span class="ow">in</span> \
-                        <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;pseudopotentials&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;psp_&quot;</span> <span class="o">+</span> <span class="n">pseudokey</span><span class="p">,</span>
-                                            <span class="n">additional_calculation_data</span><span class="p">[</span>
-                                                <span class="s2">&quot;pseudopotentials&quot;</span><span class="p">][</span><span class="n">pseudokey</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">pseudokey</span> <span class="ow">in</span> <span class="n">additional_calculation_data</span><span class="p">[</span>
+                    <span class="s2">&quot;pseudopotentials&quot;</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span>
+                        <span class="s2">&quot;psp_&quot;</span> <span class="o">+</span> <span class="n">pseudokey</span><span class="p">,</span>
+                        <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;pseudopotentials&quot;</span><span class="p">][</span>
+                            <span class="n">pseudokey</span>
+                        <span class="p">],</span>
+                    <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_process_openpmd_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_process_openpmd_attributes</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_process_openpmd_attributes</span><span class="p">(</span>
+            <span class="n">series</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span>
+        <span class="p">)</span>
 
         <span class="c1"># Process the atoms, which can only be done if we have voxel info.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1335,55 +1437,91 @@
             <span class="n">cell</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">cell</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">cell</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">(</span><span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="n">numbers</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span>\
-                <span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;periodic_boundary_conditions_x&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span>\
-                <span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;periodic_boundary_conditions_y&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span>\
-                <span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;periodic_boundary_conditions_z&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">(</span>
+                <span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="n">numbers</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span>
+                <span class="s2">&quot;periodic_boundary_conditions_x&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span>
+                <span class="s2">&quot;periodic_boundary_conditions_y&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span>
+                <span class="s2">&quot;periodic_boundary_conditions_z&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Process all the regular meta info.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;fermi_energy_dft&quot;</span><span class="p">,</span>
-                                                    <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;temperature&quot;</span><span class="p">,</span>
-                                                    <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;number_of_electrons_exact&quot;</span><span class="p">,</span>
-                                                    <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;band_energy_dft_calculation&quot;</span><span class="p">,</span>
-                                                    <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;total_energy_dft_calculation&quot;</span><span class="p">,</span>
-                                                    <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;electrons_per_atom&quot;</span><span class="p">,</span>
-                                                    <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenval</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;number_of_electrons_from_eigenvals&quot;</span><span class="p">,</span>
-                                                    <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ibrav&quot;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;ibrav&quot;</span><span class="p">,</span>
-                                                    <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ibrav&quot;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutwfc&quot;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;ecutwfc&quot;</span><span class="p">,</span>
-                                                    <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutwfc&quot;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutrho&quot;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;ecutrho&quot;</span><span class="p">,</span>
-                                                    <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutrho&quot;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;degauss&quot;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;degauss&quot;</span><span class="p">,</span>
-                                                    <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;degauss&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span>
+            <span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;fermi_energy_dft&quot;</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span>
+            <span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span>
+                <span class="n">iteration</span><span class="p">,</span>
+                <span class="s2">&quot;number_of_electrons_exact&quot;</span><span class="p">,</span>
+                <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span>
+                <span class="n">iteration</span><span class="p">,</span>
+                <span class="s2">&quot;band_energy_dft_calculation&quot;</span><span class="p">,</span>
+                <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span>
+                <span class="n">iteration</span><span class="p">,</span>
+                <span class="s2">&quot;total_energy_dft_calculation&quot;</span><span class="p">,</span>
+                <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span>
+            <span class="n">iteration</span><span class="p">,</span>
+            <span class="s2">&quot;electrons_per_atom&quot;</span><span class="p">,</span>
+            <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenval</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span>
+                <span class="n">iteration</span><span class="p">,</span>
+                <span class="s2">&quot;number_of_electrons_from_eigenvals&quot;</span><span class="p">,</span>
+                <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ibrav&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span>
+            <span class="n">iteration</span><span class="p">,</span> <span class="s2">&quot;ibrav&quot;</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ibrav&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutwfc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span>
+                <span class="n">iteration</span><span class="p">,</span>
+                <span class="s2">&quot;ecutwfc&quot;</span><span class="p">,</span>
+                <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutwfc&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutrho&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span>
+                <span class="n">iteration</span><span class="p">,</span>
+                <span class="s2">&quot;ecutrho&quot;</span><span class="p">,</span>
+                <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutrho&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;degauss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span>
+                <span class="n">iteration</span><span class="p">,</span>
+                <span class="s2">&quot;degauss&quot;</span><span class="p">,</span>
+                <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;degauss&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="c1"># Take care of the pseudopotentials.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;pseudopotentials&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">iteration</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
             <span class="k">if</span> <span class="s2">&quot;psp&quot;</span> <span class="ow">in</span> <span class="n">attribute</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">qe_pseudopotentials</span><span class="p">[</span><span class="n">attribute</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;psp_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">qe_pseudopotentials</span><span class="p">[</span><span class="n">attribute</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;psp_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
+                <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_set_geometry_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
         <span class="c1"># Geometry: Save the cell parameters and angles of the grid.</span>
@@ -1398,7 +1536,7 @@
         <span class="n">spacing</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">grid_spacing</span>
         <span class="k">if</span> <span class="s2">&quot;angles&quot;</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
             <span class="n">angles</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;angles&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">Cell</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">cell</span><span class="o">=</span><span class="n">spacing</span><span class="o">+</span><span class="n">angles</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">Cell</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">cell</span><span class="o">=</span><span class="n">spacing</span> <span class="o">+</span> <span class="n">angles</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span>
@@ -1406,7 +1544,7 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mic&quot;</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;mic&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;2mic&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.0001</span>
         <span class="k">else</span><span class="p">:</span>

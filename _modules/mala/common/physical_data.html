@@ -75,6 +75,7 @@
              
   <h1>Source code for mala.common.physical_data</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Base class for all calculators that deal with physical data.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -143,7 +144,9 @@
     <span class="c1">#   because there is no need to.</span>
     <span class="c1">##############################</span>
 
-<div class="viewcode-block" id="PhysicalData.read_from_numpy_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_from_numpy_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_numpy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reshape</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="PhysicalData.read_from_numpy_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_from_numpy_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_numpy_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reshape</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the data from a numpy file.</span>
 
@@ -168,17 +171,19 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">loaded_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">():]</span>
+            <span class="n">loaded_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()</span> <span class="p">:]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_array</span><span class="p">(</span><span class="n">loaded_array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">loaded_array</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">reshape</span><span class="p">:</span>
                 <span class="n">array_dims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
-                <span class="n">array</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()</span> <span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
-                    <span class="n">array_dims</span>
-                <span class="p">)</span>
+                <span class="n">array</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span>
+                    <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()</span> <span class="p">:</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">array_dims</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()</span> <span class="p">:]</span>
+                <span class="n">array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span>
+                    <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()</span> <span class="p">:</span>
+                <span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_array</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PhysicalData.read_from_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_from_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -216,15 +221,19 @@
         <span class="c1">#                         {&quot;defer_iteration_parsing&quot;: True} |</span>
         <span class="c1">#                         self.parameters.</span>
         <span class="c1">#                             _configuration[&quot;openpmd_configuration&quot;]))</span>
-        <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span>
+            <span class="s2">&quot;openpmd_configuration&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">options</span><span class="p">[</span><span class="s2">&quot;defer_iteration_parsing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">read_only</span><span class="p">,</span>
-                           <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">options</span><span class="p">))</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+            <span class="n">path</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">read_only</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="c1"># Check if this actually MALA compatible data.</span>
         <span class="k">if</span> <span class="n">series</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;is_mala_data&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Non-MALA data detected, cannot work with this &quot;</span>
-                            <span class="s2">&quot;data.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Non-MALA data detected, cannot work with this data.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># A bit clanky, but this way only the FIRST iteration is loaded,</span>
         <span class="c1"># which is what we need for loading from a single file that</span>
@@ -243,24 +252,35 @@
         <span class="c1"># the feature dimension with 0,1,... ? I can&#39;t think of one.</span>
         <span class="c1"># But there may be in the future, and this&#39;ll break</span>
         <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                             <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()),</span>
-                            <span class="n">dtype</span><span class="o">=</span><span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">(),</span>
+                <span class="p">),</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> \
-               <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> \
-               <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">or</span> \
-               <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">():</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot load data into array, wrong &quot;</span>
-                                <span class="s2">&quot;shape provided.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="ow">or</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="ow">or</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="ow">or</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot load data into array, wrong shape provided.&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># Only check this once, since we do not save arrays with different</span>
         <span class="c1"># units throughout the feature dimension.</span>
         <span class="c1"># Later, we can merge this unit check with the unit conversion</span>
         <span class="c1"># MALA does naturally.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">mesh</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)]</span><span class="o">.</span><span class="n">unit_SI</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">si_unit_conversion</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;MALA currently cannot operate with OpenPMD &quot;</span>
-                            <span class="s2">&quot;files with non-MALA units.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;MALA currently cannot operate with OpenPMD &quot;</span>
+                <span class="s2">&quot;files with non-MALA units.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Deal with `granularity` items of the vectors at a time</span>
         <span class="c1"># Or in the openPMD layout: with `granularity` record components</span>
@@ -272,21 +292,35 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">array_shape</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span>
             <span class="n">data_type</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">dtype</span>
-        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">(),</span> <span class="n">array_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">(),</span>
-                          <span class="n">granularity</span><span class="p">):</span>
-            <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">base</span> <span class="o">+</span> <span class="n">granularity</span><span class="p">,</span> <span class="n">array_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">(),</span>
+            <span class="n">array_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">(),</span>
+            <span class="n">granularity</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+                <span class="n">base</span> <span class="o">+</span> <span class="n">granularity</span><span class="p">,</span> <span class="n">array_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()</span>
+            <span class="p">)</span>
             <span class="n">transposed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span>
                 <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">base</span><span class="p">,</span> <span class="n">array_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">array_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">array_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
-                <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
                 <span class="n">mesh</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span><span class="o">.</span><span class="n">load_chunk</span><span class="p">(</span><span class="n">transposed</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">base</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:])</span>
             <span class="n">series</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">base</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">():</span><span class="n">end</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()]</span> \
-                    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">transposed</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+                <span class="n">data</span><span class="p">[</span>
+                    <span class="p">:,</span>
+                    <span class="p">:,</span>
+                    <span class="p">:,</span>
+                    <span class="n">base</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()</span> <span class="p">:</span> <span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">(),</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">transposed</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">base</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">():</span><span class="n">end</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()]</span> \
-                    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">transposed</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+                <span class="n">array</span><span class="p">[</span>
+                    <span class="p">:,</span>
+                    <span class="p">:,</span>
+                    <span class="p">:,</span>
+                    <span class="n">base</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()</span> <span class="p">:</span> <span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">(),</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">transposed</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
 
         <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_array</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
@@ -308,13 +342,16 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">loaded_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mmap_mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">read_dtype</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_dimensions</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">loaded_array</span><span class="p">)),</span> \
-                   <span class="n">loaded_array</span><span class="o">.</span><span class="n">dtype</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_dimensions</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">loaded_array</span><span class="p">)),</span>
+                <span class="n">loaded_array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_dimensions</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">loaded_array</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="PhysicalData.read_dimensions_from_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_dimensions_from_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_dimensions_from_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                          <span class="n">read_dtype</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="PhysicalData.read_dimensions_from_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_dimensions_from_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_dimensions_from_openpmd_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">read_dtype</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read only the dimensions from a openPMD file.</span>
 
@@ -328,6 +365,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">comm</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+
             <span class="c1"># The union operator for dicts is only supported starting with</span>
             <span class="c1"># python 3.9. Currently, MALA works down to python 3.8; For now,</span>
             <span class="c1"># I think it is good to keep it that way.</span>
@@ -339,17 +377,18 @@
             <span class="c1">#                         self.parameters.</span>
             <span class="c1">#                             _configuration[&quot;openpmd_configuration&quot;]))</span>
             <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span>
-                <span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="s2">&quot;openpmd_configuration&quot;</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">options</span><span class="p">[</span><span class="s2">&quot;defer_iteration_parsing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">path</span><span class="p">,</span>
-                               <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">read_only</span><span class="p">,</span>
-                               <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">options</span><span class="p">))</span>
+            <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                <span class="n">path</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">read_only</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+            <span class="p">)</span>
 
             <span class="c1"># Check if this actually MALA compatible data.</span>
             <span class="k">if</span> <span class="n">series</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;is_mala_data&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                    <span class="s2">&quot;Non-MALA data detected, cannot work with this &quot;</span>
-                    <span class="s2">&quot;data.&quot;</span><span class="p">)</span>
+                    <span class="s2">&quot;Non-MALA data detected, cannot work with this data.&quot;</span>
+                <span class="p">)</span>
 
             <span class="c1"># A bit clanky, but this way only the FIRST iteration is loaded,</span>
             <span class="c1"># which is what we need for loading from a single file that</span>
@@ -359,8 +398,12 @@
             <span class="c1"># and no others.</span>
             <span class="k">for</span> <span class="n">current_iteration</span> <span class="ow">in</span> <span class="n">series</span><span class="o">.</span><span class="n">read_iterations</span><span class="p">():</span>
                 <span class="n">mesh</span> <span class="o">=</span> <span class="n">current_iteration</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_name</span><span class="p">]</span>
-                <span class="n">tuple_from_file</span> <span class="o">=</span> <span class="p">[</span><span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                   <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">mesh</span><span class="p">)]</span>
+                <span class="n">tuple_from_file</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">mesh</span><span class="p">),</span>
+                <span class="p">]</span>
                 <span class="n">loaded_dtype</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
                 <span class="k">break</span>
             <span class="n">series</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -370,8 +413,10 @@
         <span class="k">if</span> <span class="n">comm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tuple_from_file</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">tuple_from_file</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">read_dtype</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_dimensions</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">tuple_from_file</span><span class="p">)),</span> \
-                   <span class="n">loaded_dtype</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_dimensions</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">tuple_from_file</span><span class="p">)),</span>
+                <span class="n">loaded_dtype</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_dimensions</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">tuple_from_file</span><span class="p">))</span></div>
 
@@ -418,8 +463,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">=</span> <span class="n">feature_size</span></div>
 
-<div class="viewcode-block" id="PhysicalData.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{},</span>
-                              <span class="n">internal_iteration_number</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="PhysicalData.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">,</span>
+        <span class="n">array</span><span class="p">,</span>
+        <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">internal_iteration_number</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write data to an OpenPMD file.</span>
 
@@ -449,21 +499,24 @@
             <span class="k">if</span> <span class="n">file_name</span> <span class="o">==</span> <span class="n">file_ending</span><span class="p">:</span>
                 <span class="n">path</span> <span class="o">+=</span> <span class="s2">&quot;.h5&quot;</span>
             <span class="k">elif</span> <span class="n">file_ending</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">io</span><span class="o">.</span><span class="n">file_extensions</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid file ending selected: &quot;</span> <span class="o">+</span>
-                                <span class="n">file_ending</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid file ending selected: &quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
                 <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
                     <span class="n">path</span><span class="p">,</span>
                     <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
                     <span class="n">get_comm</span><span class="p">(),</span>
                     <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
                     <span class="n">path</span><span class="p">,</span>
                     <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
                     <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
             <span class="n">series</span> <span class="o">=</span> <span class="n">path</span>
 
@@ -478,18 +531,24 @@
         <span class="c1"># This function may be called without the feature dimension</span>
         <span class="c1"># explicitly set (i.e. during testing or post-processing).</span>
         <span class="c1"># We have to check for that.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span>
-                                                     <span class="bp">self</span><span class="o">.</span><span class="n">SkipArrayWriting</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkipArrayWriting</span>
+        <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_feature_size_from_array</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">write_to_openpmd_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">series</span></div>
 
-<div class="viewcode-block" id="PhysicalData.write_to_openpmd_iteration"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span>
-                                   <span class="n">local_offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                   <span class="n">local_reach</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                   <span class="n">additional_metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                   <span class="n">feature_from</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">feature_to</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PhysicalData.write_to_openpmd_iteration"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_iteration</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">iteration</span><span class="p">,</span>
+        <span class="n">array</span><span class="p">,</span>
+        <span class="n">local_offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">local_reach</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">additional_metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">feature_from</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">feature_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write a file within an OpenPMD iteration.</span>
 
@@ -532,39 +591,50 @@
             <span class="n">atomic_numbers</span> <span class="o">=</span> <span class="n">atoms_ase</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">()</span>
             <span class="n">positions</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
                 <span class="c1"># Need bugfix https://github.com/openPMD/openPMD-api/pull/1357</span>
-                <span class="n">atomic_positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="k">if</span> <span class="n">io</span><span class="o">.</span><span class="n">__version__</span> <span class="o">&gt;=</span> <span class="s1">&#39;0.15.0&#39;</span> <span class="k">else</span>
-                <span class="n">io</span><span class="o">.</span><span class="n">Datatype</span><span class="o">.</span><span class="n">DOUBLE</span><span class="p">,</span>
-                <span class="n">atomic_positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-            <span class="n">numbers</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
-                                 <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;periodic_boundary_conditions_x&quot;</span><span class="p">,</span>
-                                    <span class="n">atoms_ase</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;periodic_boundary_conditions_y&quot;</span><span class="p">,</span>
-                                    <span class="n">atoms_ase</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;periodic_boundary_conditions_z&quot;</span><span class="p">,</span>
-                                    <span class="n">atoms_ase</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="p">(</span>
+                    <span class="n">atomic_positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
+                    <span class="k">if</span> <span class="n">io</span><span class="o">.</span><span class="n">__version__</span> <span class="o">&gt;=</span> <span class="s2">&quot;0.15.0&quot;</span>
+                    <span class="k">else</span> <span class="n">io</span><span class="o">.</span><span class="n">Datatype</span><span class="o">.</span><span class="n">DOUBLE</span>
+                <span class="p">),</span>
+                <span class="n">atomic_positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">numbers</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span>
+                <span class="s2">&quot;periodic_boundary_conditions_x&quot;</span><span class="p">,</span> <span class="n">atoms_ase</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span>
+                <span class="s2">&quot;periodic_boundary_conditions_y&quot;</span><span class="p">,</span> <span class="n">atoms_ase</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span>
+                <span class="s2">&quot;periodic_boundary_conditions_z&quot;</span><span class="p">,</span> <span class="n">atoms_ase</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="p">)</span>
             <span class="c1"># atoms_openpmd[&quot;position&quot;].time_offset = 0.0</span>
             <span class="c1"># atoms_openpmd[&quot;positionOffset&quot;].time_offset = 0.0</span>
             <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms_ase</span><span class="p">)):</span>
                 <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">reset_dataset</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span>
                 <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">reset_dataset</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
-                <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;positionOffset&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">reset_dataset</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span>
+                <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;positionOffset&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">reset_dataset</span><span class="p">(</span>
+                    <span class="n">positions</span>
+                <span class="p">)</span>
 
                 <span class="n">atoms_openpmd_position</span> <span class="o">=</span> <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span>
                 <span class="n">atoms_openpmd_number</span> <span class="o">=</span> <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span>
                 <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">atoms_openpmd_position</span><span class="o">.</span><span class="n">store_chunk</span><span class="p">(</span><span class="n">atomic_positions</span><span class="p">[</span><span class="n">atom</span><span class="p">])</span>
                     <span class="n">atoms_openpmd_number</span><span class="o">.</span><span class="n">store_chunk</span><span class="p">(</span>
-                        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">atomic_numbers</span><span class="p">[</span><span class="n">atom</span><span class="p">]]))</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">atomic_numbers</span><span class="p">[</span><span class="n">atom</span><span class="p">]])</span>
+                    <span class="p">)</span>
                 <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;positionOffset&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">make_constant</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
                 <span class="c1"># Positions are stored in Angstrom.</span>
                 <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="mf">1.0e-10</span>
                 <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;positionOffset&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="mf">1.0e-10</span>
 
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">dataset</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-            <span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkipArrayWriting</span><span class="p">)</span> <span class="k">else</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
-                <span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">)</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">array</span><span class="o">.</span><span class="n">dataset</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkipArrayWriting</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="c1"># Global feature sizes:</span>
         <span class="n">feature_global_from</span> <span class="o">=</span> <span class="mi">0</span>
@@ -592,11 +662,14 @@
             <span class="n">feature_to</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">feature_to</span> <span class="o">-</span> <span class="n">feature_from</span> <span class="o">!=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
-<span class="s2">[write_to_openpmd_iteration] Internal error, called function with</span>
-<span class="s2">wrong parameters. Specification of features (</span><span class="si">{}</span><span class="s2"> - </span><span class="si">{}</span><span class="s2">) on rank </span><span class="si">{}</span><span class="s2"> does not</span>
-<span class="s2">match the array dimensions (extent </span><span class="si">{}</span><span class="s2"> in the feature dimension)&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">feature_from</span><span class="p">,</span> <span class="n">feature_to</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">(),</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;\</span>
+<span class="sd">[write_to_openpmd_iteration] Internal error, called function with</span>
+<span class="sd">wrong parameters. Specification of features ({} - {}) on rank {} does not</span>
+<span class="sd">match the array dimensions (extent {} in the feature dimension)&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">feature_from</span><span class="p">,</span> <span class="n">feature_to</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">(),</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="c1"># See above - will currently break for density of states,</span>
         <span class="c1"># which is something we never do though anyway.</span>
@@ -614,9 +687,11 @@
         <span class="c1">#    features are written from all ranks.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
             <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+
             <span class="n">my_iteration_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">granularity</span><span class="p">))</span>
-            <span class="n">highest_iteration_count</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span><span class="o">.</span><span class="n">allreduce</span><span class="p">(</span><span class="n">my_iteration_count</span><span class="p">,</span>
-                                                           <span class="n">op</span><span class="o">=</span><span class="n">MPI</span><span class="o">.</span><span class="n">MAX</span><span class="p">)</span>
+            <span class="n">highest_iteration_count</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span><span class="o">.</span><span class="n">allreduce</span><span class="p">(</span>
+                <span class="n">my_iteration_count</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">MPI</span><span class="o">.</span><span class="n">MAX</span>
+            <span class="p">)</span>
             <span class="n">extra_flushes</span> <span class="o">=</span> <span class="n">highest_iteration_count</span> <span class="o">-</span> <span class="n">my_iteration_count</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">extra_flushes</span> <span class="o">=</span> <span class="mi">0</span>
@@ -624,8 +699,9 @@
         <span class="c1"># Second loop: Write heavy data</span>
         <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">granularity</span><span class="p">):</span>
             <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">base</span> <span class="o">+</span> <span class="n">granularity</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
-            <span class="n">transposed</span> <span class="o">=</span> \
-                <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">base</span><span class="p">:</span><span class="n">end</span><span class="p">],</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">transposed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
+                <span class="n">array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">base</span><span class="p">:</span><span class="n">end</span><span class="p">],</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
                 <span class="c1"># i is the index within the array passed to this function.</span>
                 <span class="c1"># The feature corresponding to this index is offset</span>
@@ -633,8 +709,9 @@
                 <span class="n">current_feature</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">feature_from</span>
                 <span class="n">mesh_component</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">current_feature</span><span class="p">)]</span>
 
-                <span class="n">mesh_component</span><span class="p">[</span><span class="n">x_from</span><span class="p">:</span><span class="n">x_to</span><span class="p">,</span> <span class="n">y_from</span><span class="p">:</span><span class="n">y_to</span><span class="p">,</span> <span class="n">z_from</span><span class="p">:</span><span class="n">z_to</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">mesh_component</span><span class="p">[</span><span class="n">x_from</span><span class="p">:</span><span class="n">x_to</span><span class="p">,</span> <span class="n">y_from</span><span class="p">:</span><span class="n">y_to</span><span class="p">,</span> <span class="n">z_from</span><span class="p">:</span><span class="n">z_to</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">transposed</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">base</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+                <span class="p">)</span>
 
             <span class="n">iteration</span><span class="o">.</span><span class="n">series_flush</span><span class="p">()</span>
 
@@ -679,9 +756,9 @@
         <span class="c1"># MALA internally operates in Angstrom (10^-10 m)</span>
         <span class="n">mesh</span><span class="o">.</span><span class="n">grid_unit_SI</span> <span class="o">=</span> <span class="mf">1e-10</span>
 
-        <span class="n">mesh</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> \
-            <span class="s2">&quot;This is a special geometry, &quot;</span> \
-            <span class="s2">&quot;based on the cartesian geometry.&quot;</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;This is a special geometry, based on the cartesian geometry.&quot;</span>
+        <span class="p">)</span>
 
         <span class="c1"># Fill geometry information (if provided)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_geometry_info</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
@@ -698,8 +775,9 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_get_attribute_if_attribute_exists</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span>
-                                           <span class="n">default_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_get_attribute_if_attribute_exists</span><span class="p">(</span>
+        <span class="n">iteration</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
         <span class="k">if</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">iteration</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

@@ -75,12 +75,7 @@
              
   <h1>Source code for mala.network.predictor</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Tester class for testing a network.&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">ase.io</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
-<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-    <span class="c1"># Warning is thrown by Parameters class</span>
-    <span class="k">pass</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
@@ -111,9 +106,11 @@
         <span class="c1"># copy the parameters into the class.</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Predictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inference_data_grid</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> \
-                              <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> \
-                              <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
@@ -139,14 +136,18 @@
 <span class="sd">            Precicted LDOS for these atomic positions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inference_data_grid</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> \
-                              <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> \
-                              <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
-            <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">path_to_file</span><span class="p">,</span> <span class="s2">&quot;espresso-out&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_for_atoms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span>
-                                      <span class="n">gather_ldos</span><span class="o">=</span><span class="n">gather_ldos</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
+            <span class="n">path_to_file</span><span class="p">,</span> <span class="s2">&quot;espresso-out&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_for_atoms</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="n">gather_ldos</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Predictor.predict_for_atoms"><a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor.predict_for_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">predict_for_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -186,10 +187,11 @@
             <span class="n">new_cell</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
 
             <span class="c1"># We only need the diagonal elements.</span>
-            <span class="n">factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">new_cell</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">old_cell</span><span class="p">)</span>
+            <span class="n">factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">new_cell</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">old_cell</span><span class="p">)</span>
             <span class="n">factor</span> <span class="o">=</span> <span class="n">factor</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">factor</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">grid_dimensions</span>
+            <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">)</span>
 
@@ -201,13 +203,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">invalidate_target</span><span class="p">()</span>
 
         <span class="c1"># Calculate descriptors.</span>
-        <span class="n">snap_descriptors</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
-            <span class="n">calculate_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">)</span>
+        <span class="n">snap_descriptors</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">calculate_from_atoms</span><span class="p">(</span>
+                <span class="n">atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="c1"># Provide info from current snapshot to target calculator.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
-            <span class="n">read_additional_calculation_data</span><span class="p">([</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">],</span>
-                                             <span class="s2">&quot;atoms+grid&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">],</span> <span class="s2">&quot;atoms+grid&quot;</span>
+        <span class="p">)</span>
         <span class="n">feature_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">fingerprint_length</span>
 
         <span class="c1"># The actual calculation of the LDOS from the descriptors depends</span>
@@ -216,8 +221,11 @@
         <span class="c1"># case, everything is forwarded at once.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">gather_ldos</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="n">snap_descriptors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
-                    <span class="n">gather_descriptors</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span>
+                <span class="n">snap_descriptors</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">gather_descriptors</span><span class="p">(</span>
+                        <span class="n">snap_descriptors</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
 
                 <span class="c1"># Just entering the forwarding function to wait for the</span>
                 <span class="c1"># main rank further down.</span>
@@ -227,41 +235,44 @@
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">local_grid</span> <span class="o">=</span> \
-                        <span class="n">snap_descriptors</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">y_planes</span> <span class="o">=</span> \
-                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>\
-                        <span class="n">use_y_splitting</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">local_grid</span> <span class="o">=</span> <span class="n">snap_descriptors</span><span class="p">[</span>
+                        <span class="p">:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span>
+                    <span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">y_planes</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_y_splitting</span>
+                    <span class="p">)</span>
                     <span class="n">snap_descriptors</span> <span class="o">=</span> <span class="n">snap_descriptors</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">:]</span>
                     <span class="n">feature_length</span> <span class="o">-=</span> <span class="mi">3</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot calculate the local grid without &quot;</span>
-                                    <span class="s2">&quot;calculating the xyz positions of the &quot;</span>
-                                    <span class="s2">&quot;descriptors. Please revise your &quot;</span>
-                                    <span class="s2">&quot;script. The local grid is crucial&quot;</span>
-                                    <span class="s2">&quot; for parallel inference&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Cannot calculate the local grid without &quot;</span>
+                        <span class="s2">&quot;calculating the xyz positions of the &quot;</span>
+                        <span class="s2">&quot;descriptors. Please revise your &quot;</span>
+                        <span class="s2">&quot;script. The local grid is crucial&quot;</span>
+                        <span class="s2">&quot; for parallel inference&quot;</span>
+                    <span class="p">)</span>
 
-                <span class="n">snap_descriptors</span> <span class="o">=</span> \
-                    <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+                <span class="n">snap_descriptors</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span> \
-                    <span class="n">_forward_snap_descriptors</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">,</span> <span class="n">local_size</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_snap_descriptors</span><span class="p">(</span>
+                    <span class="n">snap_descriptors</span><span class="p">,</span> <span class="n">local_size</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
                 <span class="n">snap_descriptors</span> <span class="o">=</span> <span class="n">snap_descriptors</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">:]</span>
                 <span class="n">feature_length</span> <span class="o">-=</span> <span class="mi">3</span>
 
-            <span class="n">snap_descriptors</span> <span class="o">=</span> \
-                <span class="n">snap_descriptors</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
-                    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">feature_length</span><span class="p">])</span>
-            <span class="n">snap_descriptors</span> <span class="o">=</span> \
-                <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+            <span class="n">snap_descriptors</span> <span class="o">=</span> <span class="n">snap_descriptors</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">feature_length</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">snap_descriptors</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_snap_descriptors</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_forward_snap_descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snap_descriptors</span><span class="p">,</span>
-                                  <span class="n">local_data_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_forward_snap_descriptors</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">snap_descriptors</span><span class="p">,</span> <span class="n">local_data_size</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward a scaled tensor of descriptors through the NN.&quot;&quot;&quot;</span>
         <span class="c1"># Ensure the Network is on the correct device.</span>
         <span class="c1"># This line is necessary because GPU acceleration may have been</span>
@@ -270,40 +281,50 @@
 
         <span class="k">if</span> <span class="n">local_data_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">local_data_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span>
-        <span class="n">predicted_outputs</span> <span class="o">=</span> \
-            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">local_data_size</span><span class="p">,</span>
-                      <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">feature_size</span><span class="p">))</span>
+        <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">local_data_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">feature_size</span><span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="c1"># Only predict if there is something to predict.</span>
         <span class="c1"># Elsewise, we just wait at the barrier down below.</span>
         <span class="k">if</span> <span class="n">local_data_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
-                <span class="n">_correct_batch_size_for_testing</span><span class="p">(</span><span class="n">local_data_size</span><span class="p">,</span>
-                                                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">)</span>
+            <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_correct_batch_size_for_testing</span><span class="p">(</span>
+                <span class="n">local_data_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">optimal_batch_size</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">:</span>
-                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Had to readjust batch size from&quot;</span><span class="p">,</span>
-                         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">,</span> <span class="s2">&quot;to&quot;</span><span class="p">,</span>
-                         <span class="n">optimal_batch_size</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">printout</span><span class="p">(</span>
+                    <span class="s2">&quot;Had to readjust batch size from&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">,</span>
+                    <span class="s2">&quot;to&quot;</span><span class="p">,</span>
+                    <span class="n">optimal_batch_size</span><span class="p">,</span>
+                    <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="o">=</span> <span class="n">optimal_batch_size</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_data_size</span> <span class="o">/</span>
-                                                      <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                                      <span class="n">mini_batch_size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                <span class="n">local_data_size</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span>
+            <span class="p">)</span>
 
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span><span class="p">):</span>
-                <span class="n">inputs</span> <span class="o">=</span> <span class="n">snap_descriptors</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">:</span>
-                                          <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">]</span>
+                <span class="n">inputs</span> <span class="o">=</span> <span class="n">snap_descriptors</span><span class="p">[</span>
+                    <span class="n">i</span>
+                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span>
+                <span class="p">]</span>
                 <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
-                <span class="n">predicted_outputs</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">:</span>
-                                          <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">]</span> \
-                    <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span>\
-                    <span class="n">inverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span><span class="o">.</span>
-                                      <span class="n">to</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">),</span> <span class="n">as_numpy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">predicted_outputs</span><span class="p">[</span>
+                    <span class="n">i</span>
+                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">),</span> <span class="n">as_numpy</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
 
             <span class="c1"># Restricting the actual quantities to physical meaningful values,</span>
             <span class="c1"># i.e. restricting the (L)DOS to positive values.</span>
-            <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
-                <span class="n">restrict_data</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+            <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">restrict_data</span><span class="p">(</span>
+                <span class="n">predicted_outputs</span>
+            <span class="p">)</span>
         <span class="n">barrier</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">predicted_outputs</span></div>
 </pre></div>

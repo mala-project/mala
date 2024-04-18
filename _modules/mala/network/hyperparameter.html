@@ -75,6 +75,7 @@
              
   <h1>Source code for mala.network.hyperparameter</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Interface function to get the correct type of hyperparameter.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">mala.common.json_serializable</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
 
 
@@ -125,8 +126,15 @@
 <span class="sd">        Hyperparameter in desired format.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">hotype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">hotype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Hyperparameter instance.</span>
 
@@ -172,29 +180,50 @@
         <span class="n">hparam</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">cls</span> <span class="o">==</span> <span class="n">Hyperparameter</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">hotype</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_optuna</span> <span class="kn">import</span> \
-                    <span class="n">HyperparameterOptuna</span>
-                <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterOptuna</span><span class="p">(</span><span class="n">hotype</span><span class="o">=</span><span class="n">hotype</span><span class="p">,</span>
-                                              <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                                              <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span>
-                                              <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
+                <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_optuna</span> <span class="kn">import</span> <span class="p">(</span>
+                    <span class="n">HyperparameterOptuna</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterOptuna</span><span class="p">(</span>
+                    <span class="n">hotype</span><span class="o">=</span><span class="n">hotype</span><span class="p">,</span>
+                    <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span>
+                    <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span>
+                    <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="n">hotype</span> <span class="o">==</span> <span class="s2">&quot;naswot&quot;</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_naswot</span> <span class="kn">import</span> \
-                    <span class="n">HyperparameterNASWOT</span>
-                <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterNASWOT</span><span class="p">(</span><span class="n">hotype</span><span class="o">=</span><span class="n">hotype</span><span class="p">,</span>
-                                              <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                                              <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span>
-                                              <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
+                <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_naswot</span> <span class="kn">import</span> <span class="p">(</span>
+                    <span class="n">HyperparameterNASWOT</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterNASWOT</span><span class="p">(</span>
+                    <span class="n">hotype</span><span class="o">=</span><span class="n">hotype</span><span class="p">,</span>
+                    <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span>
+                    <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span>
+                    <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="n">hotype</span> <span class="o">==</span> <span class="s2">&quot;oat&quot;</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_oat</span> <span class="kn">import</span> <span class="n">HyperparameterOAT</span>
-                <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterOAT</span><span class="p">(</span><span class="n">hotype</span><span class="o">=</span><span class="n">hotype</span><span class="p">,</span>
-                                           <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                                           <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
+
+                <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterOAT</span><span class="p">(</span>
+                    <span class="n">hotype</span><span class="o">=</span><span class="n">hotype</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="n">hotype</span> <span class="o">==</span> <span class="s2">&quot;acsd&quot;</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_acsd</span> <span class="kn">import</span> <span class="n">HyperparameterACSD</span>
-                <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterACSD</span><span class="p">(</span><span class="n">hotype</span><span class="o">=</span><span class="n">hotype</span><span class="p">,</span>
-                                            <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                                            <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
+                <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_acsd</span> <span class="kn">import</span> <span class="p">(</span>
+                    <span class="n">HyperparameterACSD</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterACSD</span><span class="p">(</span>
+                    <span class="n">hotype</span><span class="o">=</span><span class="n">hotype</span><span class="p">,</span>
+                    <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span>
+                    <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span>
+                    <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">,</span>
+                <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">hparam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported hyperparameter.&quot;</span><span class="p">)</span>
@@ -202,8 +231,15 @@
             <span class="n">hparam</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Hyperparameter</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">hparam</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hotype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                 <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">hotype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Hyperparameter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opttype</span> <span class="o">=</span> <span class="n">opttype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>

@@ -75,6 +75,7 @@
              
   <h1>Source code for mala.datahandling.lazy_load_dataset</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;DataSet for lazy-loading.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -91,7 +92,7 @@
 <span class="kn">from</span> <span class="nn">mala.datahandling.snapshot</span> <span class="kn">import</span> <span class="n">Snapshot</span>
 
 
-<div class="viewcode-block" id="LazyLoadDataset"><a class="viewcode-back" href="../../../api/mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset">[docs]</a><span class="k">class</span> <span class="nc">LazyLoadDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+<div class="viewcode-block" id="LazyLoadDataset"><a class="viewcode-back" href="../../../api/mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset">[docs]</a><span class="k">class</span> <span class="nc">LazyLoadDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    DataSet class for lazy loading.</span>
 
@@ -129,10 +130,17 @@
 <span class="sd">        If True, then the gradient is stored for the inputs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dimension</span><span class="p">,</span> <span class="n">output_dimension</span><span class="p">,</span> <span class="n">input_data_scaler</span><span class="p">,</span>
-                 <span class="n">output_data_scaler</span><span class="p">,</span> <span class="n">descriptor_calculator</span><span class="p">,</span>
-                 <span class="n">target_calculator</span><span class="p">,</span> <span class="n">use_horovod</span><span class="p">,</span>
-                 <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_dimension</span><span class="p">,</span>
+        <span class="n">output_dimension</span><span class="p">,</span>
+        <span class="n">input_data_scaler</span><span class="p">,</span>
+        <span class="n">output_data_scaler</span><span class="p">,</span>
+        <span class="n">descriptor_calculator</span><span class="p">,</span>
+        <span class="n">target_calculator</span><span class="p">,</span>
+        <span class="n">use_horovod</span><span class="p">,</span>
+        <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span> <span class="o">=</span> <span class="n">input_dimension</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span> <span class="o">=</span> <span class="n">output_dimension</span>
@@ -142,8 +150,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">target_calculator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_size</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
-            <span class="n">descriptors_contain_xyz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -205,44 +214,56 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Load the data into RAM.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
-                <span class="n">read_from_numpy_file</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
-                             <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">),</span>
-                                <span class="n">units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_units</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                <span class="n">read_from_numpy_file</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
-                             <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">),</span>
-                             <span class="n">units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_units</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_units</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_units</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
-                <span class="n">read_from_openpmd_file</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
-                             <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                <span class="n">read_from_openpmd_file</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
-                             <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">read_from_openpmd_file</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_openpmd_file</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="c1"># Transform the data.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
-                                     <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">]</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_requires_grad</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
-                                      <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">]</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_outputs_directly</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                    <span class="n">DEFAULT_NP_DATA_DTYPE</span>
+                <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">)</span>
 
@@ -258,9 +279,11 @@
                     <span class="n">file_index</span> <span class="o">=</span> <span class="n">i</span>
 
                     <span class="c1"># From the end of previous file to beginning of new.</span>
-                    <span class="k">if</span> <span class="n">index_in_file</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span> <span class="ow">and</span> \
-                       <span class="n">is_start</span><span class="p">:</span>
-                        <span class="n">file_index</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">index_in_file</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span>
+                        <span class="ow">and</span> <span class="n">is_start</span>
+                    <span class="p">):</span>
+                        <span class="n">file_index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
                         <span class="n">index_in_file</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="k">break</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -297,35 +320,44 @@
             <span class="c1"># Find out if new data is needed.</span>
             <span class="k">if</span> <span class="n">file_index</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">get_new_data</span><span class="p">(</span><span class="n">file_index</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="n">index_in_file</span><span class="p">],</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">[</span><span class="n">index_in_file</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="n">index_in_file</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">[</span><span class="n">index_in_file</span><span class="p">],</span>
+            <span class="p">)</span>
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
             <span class="c1"># If a slice is requested, we have to find out if it spans files.</span>
-            <span class="n">file_index_start</span><span class="p">,</span> <span class="n">index_in_file_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
-                <span class="n">_get_file_index</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">is_slice</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">is_start</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">file_index_stop</span><span class="p">,</span> <span class="n">index_in_file_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
-                <span class="n">_get_file_index</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">stop</span><span class="p">,</span> <span class="n">is_slice</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">file_index_start</span><span class="p">,</span> <span class="n">index_in_file_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_file_index</span><span class="p">(</span>
+                <span class="n">idx</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">is_slice</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">is_start</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="n">file_index_stop</span><span class="p">,</span> <span class="n">index_in_file_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_file_index</span><span class="p">(</span>
+                <span class="n">idx</span><span class="o">.</span><span class="n">stop</span><span class="p">,</span> <span class="n">is_slice</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
 
             <span class="c1"># If it does, we cannot deliver.</span>
             <span class="c1"># Take care though, if a full snapshot is requested,</span>
             <span class="c1"># the stop index will point to the wrong file.</span>
             <span class="k">if</span> <span class="n">file_index_start</span> <span class="o">!=</span> <span class="n">file_index_stop</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">index_in_file_stop</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">index_in_file_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index_stop</span><span class="p">]</span><span class="o">.</span>\
-                        <span class="n">grid_size</span>
+                    <span class="n">index_in_file_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span>
+                        <span class="n">file_index_stop</span>
+                    <span class="p">]</span><span class="o">.</span><span class="n">grid_size</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Lazy loading currently only supports &quot;</span>
-                                    <span class="s2">&quot;slices in one file. &quot;</span>
-                                    <span class="s2">&quot;You have requested a slice over two &quot;</span>
-                                    <span class="s2">&quot;files.&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Lazy loading currently only supports &quot;</span>
+                        <span class="s2">&quot;slices in one file. &quot;</span>
+                        <span class="s2">&quot;You have requested a slice over two &quot;</span>
+                        <span class="s2">&quot;files.&quot;</span>
+                    <span class="p">)</span>
 
             <span class="c1"># Find out if new data is needed.</span>
             <span class="n">file_index</span> <span class="o">=</span> <span class="n">file_index_start</span>
             <span class="k">if</span> <span class="n">file_index</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">get_new_data</span><span class="p">(</span><span class="n">file_index</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="n">index_in_file_start</span><span class="p">:</span><span class="n">index_in_file_stop</span><span class="p">],</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">[</span><span class="n">index_in_file_start</span><span class="p">:</span><span class="n">index_in_file_stop</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="n">index_in_file_start</span><span class="p">:</span><span class="n">index_in_file_stop</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">[</span><span class="n">index_in_file_start</span><span class="p">:</span><span class="n">index_in_file_stop</span><span class="p">],</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid idx provided.&quot;</span><span class="p">)</span>
 

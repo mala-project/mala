@@ -75,6 +75,7 @@
              
   <h1>Source code for mala.datahandling.data_scaler</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;DataScaler class for scaling DFT data.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">pickle</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -129,8 +130,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mins</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">total_max</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_max</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -193,24 +194,29 @@
                         <span class="n">old_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stds</span>
 
                         <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">=</span> \
-                                <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">/</span>\
-                                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span> \
-                                <span class="o">*</span> <span class="n">old_mean</span> <span class="o">+</span> <span class="n">current_data_count</span> <span class="o">/</span> \
-                                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span>\
+                            <span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span>
+                                <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span>
+                                <span class="o">*</span> <span class="n">old_mean</span>
+                                <span class="o">+</span> <span class="n">current_data_count</span>
+                                <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span>
                                 <span class="o">*</span> <span class="n">new_mean</span>
+                            <span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">=</span> <span class="n">new_mean</span>
                         <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stds</span><span class="o">.</span><span class="n">size</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">stds</span> <span class="o">=</span> \
-                                <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">/</span> \
-                                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span> \
-                                <span class="o">*</span> <span class="n">old_std</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">current_data_count</span> <span class="o">/</span> \
-                                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span> <span class="o">*</span>\
-                                <span class="n">new_std</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> \
-                                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">*</span> <span class="n">current_data_count</span><span class="p">)</span>\
-                                <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span>\
-                                <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">old_mean</span> <span class="o">-</span> <span class="n">new_mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">stds</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span>
+                                <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span>
+                                <span class="o">*</span> <span class="n">old_std</span><span class="o">**</span><span class="mi">2</span>
+                                <span class="o">+</span> <span class="n">current_data_count</span>
+                                <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span>
+                                <span class="o">*</span> <span class="n">new_std</span><span class="o">**</span><span class="mi">2</span>
+                                <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">*</span> <span class="n">current_data_count</span><span class="p">)</span>
+                                <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span>
+                                <span class="o">**</span> <span class="mi">2</span>
+                                <span class="o">*</span> <span class="p">(</span><span class="n">old_mean</span> <span class="o">-</span> <span class="n">new_mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                            <span class="p">)</span>
 
                             <span class="bp">self</span><span class="o">.</span><span class="n">stds</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stds</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
@@ -241,8 +247,9 @@
                     <span class="c1">##########################</span>
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span><span class="p">:</span>
-                        <span class="n">current_data_count</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unscaled</span><span class="o">.</span><span class="n">size</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>\
-                                             <span class="o">*</span> <span class="nb">list</span><span class="p">(</span><span class="n">unscaled</span><span class="o">.</span><span class="n">size</span><span class="p">())[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">current_data_count</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="nb">list</span><span class="p">(</span><span class="n">unscaled</span><span class="o">.</span><span class="n">size</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">list</span><span class="p">(</span><span class="n">unscaled</span><span class="o">.</span><span class="n">size</span><span class="p">())[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="p">)</span>
 
                         <span class="n">new_mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">unscaled</span><span class="p">)</span>
                         <span class="n">new_std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">unscaled</span><span class="p">)</span>
@@ -250,28 +257,31 @@
                         <span class="n">old_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span>
                         <span class="n">old_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span>
 
-                        <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span> <span class="o">=</span> \
-                            <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">/</span> \
-                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span> <span class="o">*</span> \
-                            <span class="n">old_mean</span> <span class="o">+</span> <span class="n">current_data_count</span> <span class="o">/</span> \
-                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span> <span class="o">*</span>\
-                            <span class="n">new_mean</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span>
+                            <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span>
+                            <span class="o">*</span> <span class="n">old_mean</span>
+                            <span class="o">+</span> <span class="n">current_data_count</span>
+                            <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span>
+                            <span class="o">*</span> <span class="n">new_mean</span>
+                        <span class="p">)</span>
 
                         <span class="c1"># This equation is taken from the Sandia code. It</span>
                         <span class="c1"># presumably works, but it gets slighly different</span>
                         <span class="c1"># results.</span>
                         <span class="c1"># Maybe we should check it at some point .</span>
                         <span class="c1"># I think it is merely an issue of numerical accuracy.</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span> <span class="o">=</span> \
-                            <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">/</span> \
-                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span> <span class="o">*</span> \
-                            <span class="n">old_std</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> \
-                            <span class="n">current_data_count</span> <span class="o">/</span> \
-                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span> \
-                            <span class="o">*</span> <span class="n">new_std</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> \
-                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">*</span> <span class="n">current_data_count</span><span class="p">)</span> <span class="o">/</span> \
-                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span> \
-                            <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">old_mean</span> <span class="o">-</span> <span class="n">new_mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span>
+                            <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span>
+                            <span class="o">*</span> <span class="n">old_std</span><span class="o">**</span><span class="mi">2</span>
+                            <span class="o">+</span> <span class="n">current_data_count</span>
+                            <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span>
+                            <span class="o">*</span> <span class="n">new_std</span><span class="o">**</span><span class="mi">2</span>
+                            <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">*</span> <span class="n">current_data_count</span><span class="p">)</span>
+                            <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+</span> <span class="n">current_data_count</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                            <span class="o">*</span> <span class="p">(</span><span class="n">old_mean</span> <span class="o">-</span> <span class="n">new_mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                        <span class="p">)</span>
 
                         <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_std</span><span class="p">)</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+=</span> <span class="n">current_data_count</span>
@@ -359,8 +369,10 @@
             <span class="k">pass</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cantransform</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Transformation cannot be done, this DataScaler &quot;</span>
-                            <span class="s2">&quot;was never initialized&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Transformation cannot be done, this DataScaler &quot;</span>
+                <span class="s2">&quot;was never initialized&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Perform the actual scaling, but use no_grad to make sure</span>
         <span class="c1"># that the next couple of iterations stay untracked.</span>
@@ -377,7 +389,7 @@
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
                     <span class="n">unscaled</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span>
-                    <span class="n">unscaled</span> <span class="o">/=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxs</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span><span class="p">)</span>
+                    <span class="n">unscaled</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxs</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span>
 
             <span class="k">else</span><span class="p">:</span>
 
@@ -391,7 +403,7 @@
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
                     <span class="n">unscaled</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span>
-                    <span class="n">unscaled</span> <span class="o">/=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span><span class="p">)</span></div>
+                    <span class="n">unscaled</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span></div>
 
 <div class="viewcode-block" id="DataScaler.inverse_transform"><a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.inverse_transform">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaled</span><span class="p">,</span> <span class="n">as_numpy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -420,8 +432,10 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cantransform</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Backtransformation cannot be done, this &quot;</span>
-                                <span class="s2">&quot;DataScaler was never initialized&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Backtransformation cannot be done, this &quot;</span>
+                    <span class="s2">&quot;DataScaler was never initialized&quot;</span>
+                <span class="p">)</span>
 
             <span class="c1"># Perform the actual scaling, but use no_grad to make sure</span>
             <span class="c1"># that the next couple of iterations stay untracked.</span>
@@ -436,8 +450,9 @@
                         <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">scaled</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">stds</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span>
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
-                        <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">scaled</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxs</span>
-                                            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span>
+                        <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">scaled</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxs</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span><span class="p">)</span>
+                        <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span>
 
                 <span class="k">else</span><span class="p">:</span>
 
@@ -449,9 +464,10 @@
                         <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">scaled</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span>
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
-                        <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">scaled</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_max</span>
-                                            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span>
-<span class="c1">#</span>
+                        <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">scaled</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span><span class="p">)</span>
+                        <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span>
+        <span class="c1">#</span>
         <span class="k">if</span> <span class="n">as_numpy</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">unscaled</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -474,7 +490,7 @@
             <span class="k">if</span> <span class="n">hvd</span><span class="o">.</span><span class="n">rank</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span>
         <span class="k">if</span> <span class="n">save_format</span> <span class="o">==</span> <span class="s2">&quot;pickle&quot;</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
                 <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported parameter save format.&quot;</span><span class="p">)</span></div>
@@ -499,7 +515,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">save_format</span> <span class="o">==</span> <span class="s2">&quot;pickle&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">loaded_scaler</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+                <span class="n">loaded_scaler</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">loaded_scaler</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

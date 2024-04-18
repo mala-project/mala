@@ -132,9 +132,10 @@
 
 <span class="sd">------------------------------------------------------------------------------</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">DEBUGMODE</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="k">else</span><span class="p">:</span>
     <span class="n">DEBUGMODE</span> <span class="o">=</span> <span class="kc">False</span>
@@ -142,6 +143,8 @@
 
 <span class="k">def</span> <span class="nf">_debug</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">DEBUGMODE</span>
+
+
 <span class="c1">#    if DEBUGMODE:</span>
 <span class="c1">#        print &quot; &quot;.join(map(str, args))</span>
 
@@ -152,7 +155,7 @@
 
 <span class="sd">    Done by returning output in the correct format, matching the</span>
 <span class="sd">    metadata of the source cube file and replacing volumetric</span>
-<span class="sd">    data with static data provided as arg to the constructor. </span>
+<span class="sd">    data with static data provided as arg to the constructor.</span>
 <span class="sd">    Doesn&#39;t copy atoms metadata, retains number of atoms, but</span>
 <span class="sd">    returns dummy atoms</span>
 <span class="sd">    Mimics file object&#39;s readline method.</span>
@@ -174,20 +177,24 @@
         <span class="n">src</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
         <span class="n">src</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
         <span class="n">_debug</span><span class="p">(</span><span class="n">srcname</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot; Cubefile created by cubetools.py</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> 
-                      <span class="s2">&quot;  source: </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">srcname</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot; Cubefile created by cubetools.py</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;  source: </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">srcname</span><span class="p">),</span>
+        <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>  <span class="c1"># read natm and origin</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">natm</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
         <span class="c1"># read cube dim and vectors along 3 axes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ny</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nz</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
-                                     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ny</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nz</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+        <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">remvals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nz</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">remrows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nx</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ny</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remrows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ny</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natm</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0:^ 8d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{0:&lt; 12.6f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="mi">4</span>
-                              <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{0:^ 8d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{0:&lt; 12.6f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Close Cube file.&quot;&quot;&quot;</span>
@@ -212,11 +219,11 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remvals</span> <span class="o">&lt;=</span> <span class="mi">6</span><span class="p">:</span>
                 <span class="n">nval</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remvals</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">remrows</span> <span class="o">-=</span> <span class="mi">1</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">remvals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nz</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">remvals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nz</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">nval</span> <span class="o">=</span> <span class="mi">6</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">remvals</span> <span class="o">-=</span> <span class="n">nval</span>
-            <span class="k">return</span> <span class="s2">&quot; </span><span class="si">{0: .5E}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">const</span><span class="p">)</span><span class="o">*</span><span class="n">nval</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="k">return</span> <span class="s2">&quot; </span><span class="si">{0: .5E}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">const</span><span class="p">)</span> <span class="o">*</span> <span class="n">nval</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">return</span> <span class="n">retval</span></div></div>
@@ -227,7 +234,7 @@
 <span class="sd">    Read a line from cube file.</span>
 
 <span class="sd">    First field is an int and the remaining fields are floats.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    cube : TextIO</span>
@@ -266,7 +273,7 @@
 <div class="viewcode-block" id="read_cube"><a class="viewcode-back" href="../../../api/mala.targets.cube_parser.html#mala.targets.cube_parser.read_cube">[docs]</a><span class="k">def</span> <span class="nf">read_cube</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read cube file into numpy array.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    fname : string</span>
@@ -278,19 +285,19 @@
 <span class="sd">        Data from cube file.</span>
 
 <span class="sd">    meta : dict</span>
-<span class="sd">        Meta data from cube file.</span>
+<span class="sd">        Metadata from cube file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">meta</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cube</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cube</span><span class="p">:</span>
         <span class="c1"># ignore comments</span>
         <span class="n">cube</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
         <span class="n">cube</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-        <span class="n">natm</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;org&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span>
-        <span class="n">nx</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;xvec&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span>
-        <span class="n">ny</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;yvec&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span>
-        <span class="n">nz</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;zvec&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span>
-        <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;atoms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">natm</span><span class="p">)]</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="n">nz</span><span class="p">))</span>
+        <span class="n">natm</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;org&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span>
+        <span class="n">nx</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;xvec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span>
+        <span class="n">ny</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;yvec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span>
+        <span class="n">nz</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;zvec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">natm</span><span class="p">)]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nx</span> <span class="o">*</span> <span class="n">ny</span> <span class="o">*</span> <span class="n">nz</span><span class="p">))</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cube</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
@@ -306,7 +313,7 @@
 
 <span class="sd">    One contains the real part and the other contains the</span>
 <span class="sd">    imag part. If only one filename given, other filename is inferred.</span>
-<span class="sd">    </span>
+
 <span class="sd">    params:</span>
 
 <span class="sd">    returns: np.array (real part + j*imag part)</span>
@@ -327,14 +334,14 @@
 <span class="sd">    meta : dict</span>
 <span class="sd">        Meta data from cube file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ifname</span> <span class="o">=</span> <span class="n">ifname</span> <span class="ow">or</span> <span class="n">rfname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;real&#39;</span><span class="p">,</span> <span class="s1">&#39;imag&#39;</span><span class="p">)</span>
+    <span class="n">ifname</span> <span class="o">=</span> <span class="n">ifname</span> <span class="ow">or</span> <span class="n">rfname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;real&quot;</span><span class="p">,</span> <span class="s2">&quot;imag&quot;</span><span class="p">)</span>
     <span class="n">_debug</span><span class="p">(</span><span class="s2">&quot;reading from files&quot;</span><span class="p">,</span> <span class="n">rfname</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">,</span> <span class="n">ifname</span><span class="p">)</span>
     <span class="n">re</span><span class="p">,</span> <span class="n">im</span> <span class="o">=</span> <span class="n">read_cube</span><span class="p">(</span><span class="n">rfname</span><span class="p">),</span> <span class="n">read_cube</span><span class="p">(</span><span class="n">ifname</span><span class="p">)</span>
-    <span class="n">fin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">re</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;complex128&#39;</span><span class="p">)</span>
+    <span class="n">fin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">re</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;complex128&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">re</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">im</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
         <span class="n">_debug</span><span class="p">(</span><span class="s2">&quot;warning: meta data mismatch, real part metadata retained&quot;</span><span class="p">)</span>
-    <span class="n">fin</span> <span class="o">+=</span> <span class="n">re</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
-    <span class="n">fin</span> <span class="o">+=</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">im</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">fin</span> <span class="o">+=</span> <span class="n">re</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">fin</span> <span class="o">+=</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">im</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">fin</span><span class="p">,</span> <span class="n">re</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
 
 
@@ -360,14 +367,14 @@
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cube</span><span class="p">:</span>
         <span class="c1"># first two lines are comments</span>
         <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; Cubefile created by cubetools.py</span><span class="se">\n</span><span class="s2">  source: none</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">natm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;atoms&#39;</span><span class="p">])</span>
+        <span class="n">natm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">])</span>
         <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">natm</span><span class="p">,</span> <span class="o">*</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;org&#39;</span><span class="p">]))</span>  <span class="c1"># 3rd line #atoms and origin</span>
-        <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="o">*</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;xvec&#39;</span><span class="p">]))</span>
-        <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">ny</span><span class="p">,</span> <span class="o">*</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;yvec&#39;</span><span class="p">]))</span>
-        <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">nz</span><span class="p">,</span> <span class="o">*</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;zvec&#39;</span><span class="p">]))</span>
-        <span class="k">for</span> <span class="n">atom_mass</span><span class="p">,</span> <span class="n">atom_pos</span> <span class="ow">in</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;atoms&#39;</span><span class="p">]:</span>
-            <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">atom_mass</span><span class="p">,</span> <span class="o">*</span><span class="n">atom_pos</span><span class="p">))</span>    <span class="c1"># skip the newline</span>
+        <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">natm</span><span class="p">,</span> <span class="o">*</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;org&quot;</span><span class="p">]))</span>  <span class="c1"># 3rd line #atoms and origin</span>
+        <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="o">*</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;xvec&quot;</span><span class="p">]))</span>
+        <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">ny</span><span class="p">,</span> <span class="o">*</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;yvec&quot;</span><span class="p">]))</span>
+        <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">nz</span><span class="p">,</span> <span class="o">*</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;zvec&quot;</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">atom_mass</span><span class="p">,</span> <span class="n">atom_pos</span> <span class="ow">in</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">]:</span>
+            <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">atom_mass</span><span class="p">,</span> <span class="o">*</span><span class="n">atom_pos</span><span class="p">))</span>  <span class="c1"># skip the newline</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nx</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ny</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nz</span><span class="p">):</span>
@@ -402,7 +409,7 @@
 <span class="sd">    ifname: string</span>
 <span class="sd">        optional, filename of cube file containing imag part</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ifname</span> <span class="o">=</span> <span class="n">ifname</span> <span class="ow">or</span> <span class="n">rfname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;real&#39;</span><span class="p">,</span> <span class="s1">&#39;imag&#39;</span><span class="p">)</span>
+    <span class="n">ifname</span> <span class="o">=</span> <span class="n">ifname</span> <span class="ow">or</span> <span class="n">rfname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;real&quot;</span><span class="p">,</span> <span class="s2">&quot;imag&quot;</span><span class="p">)</span>
     <span class="n">_debug</span><span class="p">(</span><span class="s2">&quot;writing data to files&quot;</span><span class="p">,</span> <span class="n">rfname</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">,</span> <span class="n">ifname</span><span class="p">)</span>
     <span class="n">write_cube</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">rfname</span><span class="p">)</span>
     <span class="n">write_cube</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">ifname</span><span class="p">)</span></div>

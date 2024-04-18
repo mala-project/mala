@@ -75,6 +75,7 @@
              
   <h1>Source code for mala.datageneration.trajectory_analyzer</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Tools for analyzing a trajectory.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
@@ -106,12 +107,20 @@
 <span class="sd">        one will be generated ad-hoc (recommended).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">,</span> <span class="n">temperatures</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">malada_compatability</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The class TrajectoryAnalyzer is experimental. The algorithms &quot;</span>
-             <span class="s2">&quot;within have been tested, but the API may still be subject to &quot;</span>
-             <span class="s2">&quot;large changes.&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">,</span>
+        <span class="n">trajectory</span><span class="p">,</span>
+        <span class="n">temperatures</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">malada_compatability</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;The class TrajectoryAnalyzer is experimental. The algorithms &quot;</span>
+            <span class="s2">&quot;within have been tested, but the API may still be subject to &quot;</span>
+            <span class="s2">&quot;large changes.&quot;</span>
+        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">:</span> <span class="n">ParametersDataGeneration</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">datageneration</span>
 
@@ -187,8 +196,9 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Cutoff for the snapshot correlation analysis.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_snapshot_correlation_cutoff</span><span class="p">()</span>
 
-<div class="viewcode-block" id="TrajectoryAnalyzer.get_first_snapshot"><a class="viewcode-back" href="../../../api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_first_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">get_first_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">equilibrated_snapshot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                           <span class="n">distance_threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TrajectoryAnalyzer.get_first_snapshot"><a class="viewcode-back" href="../../../api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_first_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">get_first_snapshot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">equilibrated_snapshot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">distance_threshold</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate distance metrics/first equilibrated timestep on a trajectory.</span>
 
@@ -220,39 +230,55 @@
         <span class="k">if</span> <span class="n">equilibrated_snapshot</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">equilibrated_snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span>
-                                         <span class="n">_calculate_distance_between_snapshots</span>
-                                         <span class="p">(</span><span class="n">equilibrated_snapshot</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="s2">&quot;rdf&quot;</span><span class="p">,</span>
-                                          <span class="s2">&quot;cosine_distance&quot;</span><span class="p">,</span> <span class="n">save_rdf1</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_distance_between_snapshots</span><span class="p">(</span>
+                    <span class="n">equilibrated_snapshot</span><span class="p">,</span>
+                    <span class="n">step</span><span class="p">,</span>
+                    <span class="s2">&quot;rdf&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;cosine_distance&quot;</span><span class="p">,</span>
+                    <span class="n">save_rdf1</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="c1"># Now, we denoise the distance metrics.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__denoise</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics</span><span class="p">)</span>
 
         <span class="c1"># Which snapshots are considered depends on how we denoise the</span>
         <span class="c1"># distance metrics.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">first_considered_snapshot</span> <span class="o">=</span> \
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_considered_snapshot</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_considered_snapshot</span> <span class="o">=</span> \
-            <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span>\
-            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span>
-        <span class="n">considered_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_considered_snapshot</span> <span class="o">-</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">first_considered_snapshot</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_considered_snapshot</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span>
+        <span class="p">)</span>
+        <span class="n">considered_length</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_considered_snapshot</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_considered_snapshot</span>
+        <span class="p">)</span>
 
         <span class="c1"># Next, the average of the presumed equilibrated part is calculated,</span>
         <span class="c1"># and then the first N number of times teps which are below this</span>
         <span class="c1"># average is calculated.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">average_distance_equilibrated</span> <span class="o">=</span> <span class="n">distance_threshold</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_distance_equilibrated</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">average_distance_equilibrated</span> <span class="o">=</span> \
-                <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">[</span><span class="n">considered_length</span> <span class="o">-</span>
-                                                       <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_estimated_equilibrium</span> <span class="o">*</span> <span class="n">considered_length</span><span class="p">):</span>
-                                                       <span class="bp">self</span><span class="o">.</span><span class="n">last_considered_snapshot</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">average_distance_equilibrated</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">[</span>
+                    <span class="n">considered_length</span>
+                    <span class="o">-</span> <span class="nb">int</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_estimated_equilibrium</span>
+                        <span class="o">*</span> <span class="n">considered_length</span>
+                    <span class="p">)</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_considered_snapshot</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
         <span class="n">is_below</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">first_snapshot</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_considered_snapshot</span> <span class="o">&lt;=</span> <span class="n">idx</span> \
-                    <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_considered_snapshot</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">first_considered_snapshot</span>
+                <span class="o">&lt;=</span> <span class="n">idx</span>
+                <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_considered_snapshot</span>
+            <span class="p">):</span>
                 <span class="k">if</span> <span class="n">is_below</span><span class="p">:</span>
                     <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_distance_equilibrated</span><span class="p">:</span>
@@ -260,12 +286,16 @@
                 <span class="k">if</span> <span class="n">dist</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_distance_equilibrated</span><span class="p">:</span>
                     <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="n">is_below</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="k">if</span> <span class="n">counter</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span>\
-                        <span class="n">trajectory_analysis_below_average_counter</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">counter</span>
+                    <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_below_average_counter</span>
+                <span class="p">):</span>
                     <span class="n">first_snapshot</span> <span class="o">=</span> <span class="n">idx</span>
                     <span class="k">break</span>
 
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;First equilibrated timestep of trajectory is&quot;</span><span class="p">,</span> <span class="n">first_snapshot</span><span class="p">)</span>
+        <span class="n">printout</span><span class="p">(</span>
+            <span class="s2">&quot;First equilibrated timestep of trajectory is&quot;</span><span class="p">,</span> <span class="n">first_snapshot</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">first_snapshot</span></div>
 
 <div class="viewcode-block" id="TrajectoryAnalyzer.get_snapshot_correlation_cutoff"><a class="viewcode-back" href="../../../api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_snapshot_correlation_cutoff">[docs]</a>    <span class="k">def</span> <span class="nf">get_snapshot_correlation_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -307,100 +337,134 @@
 <span class="sd">        filename_uncorrelated_snapshots : string</span>
 <span class="sd">            Name of the file in which to save the uncorrelated snapshots.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">filename_base</span> <span class="o">=</span> \
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename_uncorrelated_snapshots</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">allowed_temp_diff_K</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span>
-                               <span class="n">trajectory_analysis_temperature_tolerance_percent</span>
-                               <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">temperature</span>
+        <span class="n">filename_base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span>
+            <span class="n">filename_uncorrelated_snapshots</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">allowed_temp_diff_K</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_temperature_tolerance_percent</span> <span class="o">/</span> <span class="mi">100</span>
+        <span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">temperature</span>
         <span class="n">current_snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_snapshot</span>
-        <span class="n">begin_snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_snapshot</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">begin_snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_snapshot</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">end_snapshot</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">)</span>
         <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">md_iteration</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">begin_snapshot</span><span class="p">,</span> <span class="n">end_snapshot</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__check_if_snapshot_is_valid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                                                 <span class="bp">self</span><span class="o">.</span><span class="n">temperatures</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                                                 <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="n">current_snapshot</span><span class="p">],</span>
-                                                 <span class="bp">self</span><span class="o">.</span><span class="n">temperatures</span><span class="p">[</span><span class="n">current_snapshot</span><span class="p">],</span>
-                                                 <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_correlation_cutoff</span><span class="p">,</span>
-                                                 <span class="n">allowed_temp_diff_K</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__check_if_snapshot_is_valid</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">temperatures</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="n">current_snapshot</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">temperatures</span><span class="p">[</span><span class="n">current_snapshot</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_correlation_cutoff</span><span class="p">,</span>
+                <span class="n">allowed_temp_diff_K</span><span class="p">,</span>
+            <span class="p">):</span>
                 <span class="n">current_snapshot</span> <span class="o">=</span> <span class="n">i</span>
                 <span class="n">md_iteration</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_snapshot</span><span class="p">)</span>
                 <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">md_iteration</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">md_iteration</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">traj_writer</span> <span class="o">=</span> <span class="n">TrajectoryWriter</span><span class="p">(</span><span class="n">filename_base</span><span class="o">+</span><span class="s2">&quot;.traj&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+                <span class="n">traj_writer</span> <span class="o">=</span> <span class="n">TrajectoryWriter</span><span class="p">(</span>
+                    <span class="n">filename_base</span> <span class="o">+</span> <span class="s2">&quot;.traj&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">traj_writer</span> <span class="o">=</span> <span class="n">TrajectoryWriter</span><span class="p">(</span><span class="n">filename_base</span><span class="o">+</span><span class="s2">&quot;.traj&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
-            <span class="n">atoms_to_write</span> <span class="o">=</span> <span class="n">Descriptor</span><span class="o">.</span><span class="n">enforce_pbc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="n">md_iteration</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+                <span class="n">traj_writer</span> <span class="o">=</span> <span class="n">TrajectoryWriter</span><span class="p">(</span>
+                    <span class="n">filename_base</span> <span class="o">+</span> <span class="s2">&quot;.traj&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;a&quot;</span>
+                <span class="p">)</span>
+            <span class="n">atoms_to_write</span> <span class="o">=</span> <span class="n">Descriptor</span><span class="o">.</span><span class="n">enforce_pbc</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="n">md_iteration</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="p">)</span>
             <span class="n">traj_writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms_to_write</span><span class="p">)</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename_base</span><span class="o">+</span><span class="s2">&quot;_numbers.npy&quot;</span><span class="p">,</span> <span class="n">md_iteration</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename_base</span> <span class="o">+</span> <span class="s2">&quot;_numbers.npy&quot;</span><span class="p">,</span> <span class="n">md_iteration</span><span class="p">)</span>
         <span class="n">printout</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="s2">&quot;possible snapshots found in MD trajectory.&quot;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_analyze_distance_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">):</span>
         <span class="c1"># distance metric usefdfor the snapshot parsing (realspace similarity</span>
         <span class="c1"># of the snapshot), we first find the center of the equilibrated part</span>
         <span class="c1"># of the trajectory and calculate the differences w.r.t to to it.</span>
-        <span class="n">center</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">)[</span>
-                          <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_snapshot</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_snapshot</span>
+        <span class="n">center</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">int</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_snapshot</span>
+                <span class="p">)</span>
+                <span class="o">/</span> <span class="mi">2</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_snapshot</span>
+        <span class="p">)</span>
         <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_estimated_equilibrium</span> <span class="o">*</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_estimated_equilibrium</span>
+            <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distances_realspace</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__saved_rdf</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">center</span> <span class="o">-</span> <span class="n">width</span><span class="p">,</span> <span class="n">center</span> <span class="o">+</span> <span class="n">width</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">distances_realspace</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_distance_between_snapshots</span><span class="p">(</span>
-                    <span class="n">trajectory</span><span class="p">[</span><span class="n">center</span><span class="p">],</span> <span class="n">trajectory</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                    <span class="s2">&quot;realspace&quot;</span><span class="p">,</span> <span class="s2">&quot;minimal_distance&quot;</span><span class="p">,</span> <span class="n">save_rdf1</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                    <span class="n">trajectory</span><span class="p">[</span><span class="n">center</span><span class="p">],</span>
+                    <span class="n">trajectory</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="s2">&quot;realspace&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;minimal_distance&quot;</span><span class="p">,</span>
+                    <span class="n">save_rdf1</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="c1"># From these metrics, we assume mean - 2.576 std as limit.</span>
         <span class="c1"># This translates to a confidence interval of ~99%, which should</span>
         <span class="c1"># make any coincidental similarites unlikely.</span>
         <span class="n">cutoff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distances_realspace</span><span class="p">)</span> <span class="o">-</span> <span class="mf">2.576</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">distances_realspace</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distances_realspace</span>
+        <span class="p">)</span>
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Distance metric cutoff is&quot;</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cutoff</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_distance_between_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot1</span><span class="p">,</span> <span class="n">snapshot2</span><span class="p">,</span>
-                                              <span class="n">distance_metric</span><span class="p">,</span> <span class="n">reduction</span><span class="p">,</span>
-                                              <span class="n">save_rdf1</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_calculate_distance_between_snapshots</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">snapshot1</span><span class="p">,</span>
+        <span class="n">snapshot2</span><span class="p">,</span>
+        <span class="n">distance_metric</span><span class="p">,</span>
+        <span class="n">reduction</span><span class="p">,</span>
+        <span class="n">save_rdf1</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="k">if</span> <span class="n">distance_metric</span> <span class="o">==</span> <span class="s2">&quot;realspace&quot;</span><span class="p">:</span>
             <span class="n">positions1</span> <span class="o">=</span> <span class="n">snapshot1</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
             <span class="n">positions2</span> <span class="o">=</span> <span class="n">snapshot2</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;minimal_distance&quot;</span><span class="p">:</span>
-                <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span><span class="n">positions1</span><span class="p">,</span> <span class="n">positions2</span><span class="p">),</span>
-                                 <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span>
+                    <span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span><span class="n">positions1</span><span class="p">,</span> <span class="n">positions2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+                <span class="p">)</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;cosine_distance&quot;</span><span class="p">:</span>
                 <span class="n">number_of_atoms</span> <span class="o">=</span> <span class="n">snapshot1</span><span class="o">.</span><span class="n">get_number_of_atoms</span><span class="p">()</span>
-                <span class="n">result</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cosine</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">positions1</span><span class="p">,</span>
-                                                    <span class="p">[</span><span class="n">number_of_atoms</span><span class="o">*</span><span class="mi">3</span><span class="p">]),</span>
-                                         <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">positions2</span><span class="p">,</span>
-                                                    <span class="p">[</span><span class="n">number_of_atoms</span><span class="o">*</span><span class="mi">3</span><span class="p">]))</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cosine</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">positions1</span><span class="p">,</span> <span class="p">[</span><span class="n">number_of_atoms</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">positions2</span><span class="p">,</span> <span class="p">[</span><span class="n">number_of_atoms</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]),</span>
+                <span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown distance metric reduction.&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">distance_metric</span> <span class="o">==</span> <span class="s2">&quot;rdf&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">save_rdf1</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__saved_rdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__saved_rdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
-                        <span class="n">get_radial_distribution_function</span><span class="p">(</span><span class="n">snapshot1</span><span class="p">,</span>
-                                                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;asap3&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__saved_rdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">get_radial_distribution_function</span><span class="p">(</span>
+                        <span class="n">snapshot1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;asap3&quot;</span>
+                    <span class="p">)[</span>
+                        <span class="mi">0</span>
+                    <span class="p">]</span>
                 <span class="n">rdf1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__saved_rdf</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">rdf1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
-                        <span class="n">get_radial_distribution_function</span><span class="p">(</span><span class="n">snapshot1</span><span class="p">,</span>
-                                                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;asap3&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">rdf2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
-                <span class="n">get_radial_distribution_function</span><span class="p">(</span><span class="n">snapshot2</span><span class="p">,</span>
-                                                 <span class="n">method</span><span class="o">=</span><span class="s2">&quot;asap3&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">rdf1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">get_radial_distribution_function</span><span class="p">(</span>
+                    <span class="n">snapshot1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;asap3&quot;</span>
+                <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">rdf2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">get_radial_distribution_function</span><span class="p">(</span>
+                <span class="n">snapshot2</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;asap3&quot;</span>
+            <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;minimal_distance&quot;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Combination of distance metric and reduction &quot;</span>
-                                <span class="s2">&quot;not supported.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Combination of distance metric and reduction &quot;</span>
+                    <span class="s2">&quot;not supported.&quot;</span>
+                <span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;cosine_distance&quot;</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cosine</span><span class="p">(</span><span class="n">rdf1</span><span class="p">,</span> <span class="n">rdf2</span><span class="p">)</span>
@@ -413,29 +477,34 @@
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="k">def</span> <span class="nf">__denoise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">):</span>
-        <span class="n">denoised_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span><span class="p">)</span>
-                                      <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span>
-                                      <span class="n">trajectory_analysis_denoising_width</span><span class="p">,</span>
-                                      <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)</span>
+        <span class="n">denoised_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span>
+            <span class="n">signal</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span><span class="p">)</span>
+            <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">denoised_signal</span>
 
-    <span class="k">def</span> <span class="nf">__check_if_snapshot_is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_to_test</span><span class="p">,</span> <span class="n">temp_to_test</span><span class="p">,</span>
-                                     <span class="n">reference_snapshot</span><span class="p">,</span> <span class="n">reference_temp</span><span class="p">,</span>
-                                     <span class="n">distance_metric</span><span class="p">,</span>
-                                     <span class="n">allowed_temp_diff</span><span class="p">):</span>
-        <span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
-            <span class="n">_calculate_distance_between_snapshots</span><span class="p">(</span><span class="n">snapshot_to_test</span><span class="p">,</span>
-                                                  <span class="n">reference_snapshot</span><span class="p">,</span>
-                                                   <span class="s2">&quot;realspace&quot;</span><span class="p">,</span>
-                                                   <span class="s2">&quot;minimal_distance&quot;</span><span class="p">)</span>
-        <span class="n">temp_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">temp_to_test</span><span class="o">-</span><span class="n">reference_temp</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__check_if_snapshot_is_valid</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">snapshot_to_test</span><span class="p">,</span>
+        <span class="n">temp_to_test</span><span class="p">,</span>
+        <span class="n">reference_snapshot</span><span class="p">,</span>
+        <span class="n">reference_temp</span><span class="p">,</span>
+        <span class="n">distance_metric</span><span class="p">,</span>
+        <span class="n">allowed_temp_diff</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_distance_between_snapshots</span><span class="p">(</span>
+            <span class="n">snapshot_to_test</span><span class="p">,</span>
+            <span class="n">reference_snapshot</span><span class="p">,</span>
+            <span class="s2">&quot;realspace&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;minimal_distance&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">temp_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">temp_to_test</span> <span class="o">-</span> <span class="n">reference_temp</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">distance</span> <span class="o">&gt;</span> <span class="n">distance_metric</span> <span class="ow">and</span> <span class="n">temp_diff</span> <span class="o">&lt;</span> <span class="n">allowed_temp_diff</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span></div>
-
-
 </pre></div>
 
            </div>

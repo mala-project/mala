@@ -55,6 +55,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#branching-strategy">Branching strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#developing-code">Developing code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#formatting-code">Formatting code</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#adding-dependencies">Adding dependencies</a></li>
 </ul>
 </li>
@@ -183,6 +184,16 @@ for docstrings</p></li>
 <li><p>If you’re adding code that should be tested, add tests</p></li>
 <li><p>If you’re adding or modifying examples, make sure to add them to <code class="docutils literal notranslate"><span class="pre">test_examples.py</span></code></p></li>
 </ul>
+<div class="section" id="formatting-code">
+<h3>Formatting code<a class="headerlink" href="#formatting-code" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>MALA uses <a class="reference external" href="https://github.com/psf/black"><code class="docutils literal notranslate"><span class="pre">black</span></code></a> for code formatting</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">black</span></code> configuration is located in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code></p></li>
+<li><p>Currently, no automatic code reformatting will be done in the CI, thus
+please ensure that your code is properly formatted before creating a pull
+request</p></li>
+</ul>
+</div>
 <div class="section" id="adding-dependencies">
 <h3>Adding dependencies<a class="headerlink" href="#adding-dependencies" title="Permalink to this headline"></a></h3>
 <p>If you add additional dependencies, make sure to add them to <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code>

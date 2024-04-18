@@ -75,6 +75,7 @@
              
   <h1>Source code for mala.datahandling.data_converter</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;DataConverter class for converting snapshots into numpy arrays.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
@@ -85,15 +86,9 @@
 <span class="kn">from</span> <span class="nn">mala.targets.target</span> <span class="kn">import</span> <span class="n">Target</span>
 <span class="kn">from</span> <span class="nn">mala.version</span> <span class="kn">import</span> <span class="n">__version__</span> <span class="k">as</span> <span class="n">mala_version</span>
 
-<span class="n">descriptor_input_types</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;espresso-out&quot;</span>
-<span class="p">]</span>
-<span class="n">target_input_types</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;.cube&quot;</span><span class="p">,</span> <span class="s2">&quot;.xsf&quot;</span>
-<span class="p">]</span>
-<span class="n">additional_info_input_types</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;espresso-out&quot;</span>
-<span class="p">]</span>
+<span class="n">descriptor_input_types</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">]</span>
+<span class="n">target_input_types</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;.cube&quot;</span><span class="p">,</span> <span class="s2">&quot;.xsf&quot;</span><span class="p">]</span>
+<span class="n">additional_info_input_types</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="DataConverter"><a class="viewcode-back" href="../../../api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter">[docs]</a><span class="k">class</span> <span class="nc">DataConverter</span><span class="p">:</span>
@@ -126,8 +121,9 @@
 <span class="sd">        Target calculator used for parsing/converting target data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">descriptor_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">descriptor_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span> <span class="n">ParametersData</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span> <span class="o">=</span> <span class="n">parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">target_calculator</span>
@@ -140,8 +136,9 @@
 
         <span class="k">if</span> <span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_z_splitting</span><span class="p">:</span>
             <span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_z_splitting</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Disabling z-splitting for preprocessing.&quot;</span><span class="p">,</span>
-                     <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;Disabling z-splitting for preprocessing.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__snapshots_to_convert</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span> <span class="o">=</span> <span class="p">[]</span>
@@ -152,16 +149,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">process_targets</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">process_additional_info</span> <span class="o">=</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="DataConverter.add_snapshot"><a class="viewcode-back" href="../../../api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.add_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor_input_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                     <span class="n">descriptor_input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                     <span class="n">target_input_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                     <span class="n">target_input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                     <span class="n">additional_info_input_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                     <span class="n">additional_info_input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                     <span class="n">descriptor_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                     <span class="n">metadata_input_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                     <span class="n">metadata_input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                     <span class="n">target_units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DataConverter.add_snapshot"><a class="viewcode-back" href="../../../api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.add_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">descriptor_input_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">descriptor_input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_input_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">additional_info_input_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">additional_info_input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">descriptor_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">metadata_input_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">metadata_input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a snapshot to be processed.</span>
 
@@ -215,17 +215,17 @@
         <span class="k">if</span> <span class="n">descriptor_input_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">descriptor_input_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                    <span class="s2">&quot;Cannot process descriptor data with no path &quot;</span>
-                    <span class="s2">&quot;given.&quot;</span><span class="p">)</span>
+                    <span class="s2">&quot;Cannot process descriptor data with no path given.&quot;</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="n">descriptor_input_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">descriptor_input_types</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                    <span class="s2">&quot;Cannot process this type of descriptor data.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot process this type of descriptor data.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">process_descriptors</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">if</span> <span class="n">target_input_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">target_input_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot process target data with no path &quot;</span>
-                                <span class="s2">&quot;given.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot process target data with no path given.&quot;</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="n">target_input_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">target_input_types</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot process this type of target data.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">process_targets</span> <span class="o">=</span> <span class="kc">True</span>
@@ -233,48 +233,63 @@
         <span class="k">if</span> <span class="n">additional_info_input_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">metadata_input_type</span> <span class="o">=</span> <span class="n">additional_info_input_type</span>
             <span class="k">if</span> <span class="n">additional_info_input_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot process additional info data with &quot;</span>
-                                <span class="s2">&quot;no path given.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot process additional info data with &quot;</span>
+                    <span class="s2">&quot;no path given.&quot;</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="n">additional_info_input_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">additional_info_input_types</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                    <span class="s2">&quot;Cannot process this type of additional info &quot;</span>
-                    <span class="s2">&quot;data.&quot;</span><span class="p">)</span>
+                    <span class="s2">&quot;Cannot process this type of additional info data.&quot;</span>
+                <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">process_additional_info</span> <span class="o">=</span> <span class="kc">True</span>
 
             <span class="n">metadata_input_path</span> <span class="o">=</span> <span class="n">additional_info_input_path</span>
 
         <span class="k">if</span> <span class="n">metadata_input_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">metadata_input_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot process additional info data with &quot;</span>
-                                <span class="s2">&quot;no path given.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot process additional info data with &quot;</span>
+                    <span class="s2">&quot;no path given.&quot;</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="n">metadata_input_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">additional_info_input_types</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                    <span class="s2">&quot;Cannot process this type of additional info &quot;</span>
-                    <span class="s2">&quot;data.&quot;</span><span class="p">)</span>
+                    <span class="s2">&quot;Cannot process this type of additional info data.&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># Assign info.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshots_to_convert</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">descriptor_input_path</span><span class="p">,</span>
-                                            <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">target_input_path</span><span class="p">,</span>
-                                            <span class="s2">&quot;additional_info&quot;</span><span class="p">:</span>
-                                                <span class="n">additional_info_input_path</span><span class="p">,</span>
-                                            <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata_input_path</span><span class="p">})</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">descriptor_input_type</span><span class="p">,</span>
-                                            <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">target_input_type</span><span class="p">,</span>
-                                            <span class="s2">&quot;additional_info&quot;</span><span class="p">:</span>
-                                                <span class="n">additional_info_input_type</span><span class="p">,</span>
-                                            <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata_input_type</span><span class="p">})</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">descriptor_units</span><span class="p">,</span>
-                                      <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">target_units</span><span class="p">})</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshots_to_convert</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">descriptor_input_path</span><span class="p">,</span>
+                <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">target_input_path</span><span class="p">,</span>
+                <span class="s2">&quot;additional_info&quot;</span><span class="p">:</span> <span class="n">additional_info_input_path</span><span class="p">,</span>
+                <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata_input_path</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">descriptor_input_type</span><span class="p">,</span>
+                <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">target_input_type</span><span class="p">,</span>
+                <span class="s2">&quot;additional_info&quot;</span><span class="p">:</span> <span class="n">additional_info_input_type</span><span class="p">,</span>
+                <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata_input_type</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">descriptor_units</span><span class="p">,</span> <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">target_units</span><span class="p">}</span>
+        <span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataConverter.convert_snapshots"><a class="viewcode-back" href="../../../api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.convert_snapshots">[docs]</a>    <span class="k">def</span> <span class="nf">convert_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">complete_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">descriptor_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">target_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">additional_info_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">naming_scheme</span><span class="o">=</span><span class="s2">&quot;ELEM_snapshot*.npy&quot;</span><span class="p">,</span> <span class="n">starts_at</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                          <span class="n">file_based_communication</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                          <span class="n">descriptor_calculation_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">target_calculator_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">use_fp64</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="DataConverter.convert_snapshots"><a class="viewcode-back" href="../../../api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.convert_snapshots">[docs]</a>    <span class="k">def</span> <span class="nf">convert_snapshots</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">complete_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">descriptor_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">additional_info_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">naming_scheme</span><span class="o">=</span><span class="s2">&quot;ELEM_snapshot*.npy&quot;</span><span class="p">,</span>
+        <span class="n">starts_at</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">file_based_communication</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">descriptor_calculation_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_calculator_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_fp64</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the snapshots in the list to numpy arrays.</span>
 
@@ -333,8 +348,9 @@
                 <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
 
                 <span class="k">if</span> <span class="n">file_ending</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">io</span><span class="o">.</span><span class="n">file_extensions</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid file ending selected: &quot;</span> <span class="o">+</span>
-                                    <span class="n">file_ending</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Invalid file ending selected: &quot;</span> <span class="o">+</span> <span class="n">file_ending</span>
+                    <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">file_ending</span> <span class="o">=</span> <span class="s2">&quot;npy&quot;</span>
 
@@ -360,14 +376,24 @@
             <span class="n">additional_info_save_path</span> <span class="o">=</span> <span class="n">complete_save_path</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_targets</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">target_save_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No target path specified, cannot process &quot;</span>
-                                <span class="s2">&quot;data.&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_descriptors</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">descriptor_save_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No descriptor path specified, cannot &quot;</span>
-                                <span class="s2">&quot;process data.&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_additional_info</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">additional_info_save_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No additional info path specified, cannot &quot;</span>
-                                <span class="s2">&quot;process data.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;No target path specified, cannot process data.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">process_descriptors</span> <span class="ow">is</span> <span class="kc">True</span>
+                <span class="ow">and</span> <span class="n">descriptor_save_path</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;No descriptor path specified, cannot process data.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">process_additional_info</span> <span class="ow">is</span> <span class="kc">True</span>
+                <span class="ow">and</span> <span class="n">additional_info_save_path</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;No additional info path specified, cannot &quot;</span>
+                    <span class="s2">&quot;process data.&quot;</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">file_ending</span> <span class="o">!=</span> <span class="s2">&quot;npy&quot;</span><span class="p">:</span>
             <span class="n">snapshot_name</span> <span class="o">=</span> <span class="n">naming_scheme</span>
@@ -376,19 +402,27 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_descriptors</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
                     <span class="n">input_series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">descriptor_save_path</span><span class="p">,</span>
-                                     <span class="n">series_name</span> <span class="o">+</span> <span class="s2">&quot;.in.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">),</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="n">descriptor_save_path</span><span class="p">,</span>
+                            <span class="n">series_name</span> <span class="o">+</span> <span class="s2">&quot;.in.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">,</span>
+                        <span class="p">),</span>
                         <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
                         <span class="n">get_comm</span><span class="p">(),</span>
                         <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">openpmd_configuration</span><span class="p">))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">openpmd_configuration</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">input_series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">descriptor_save_path</span><span class="p">,</span>
-                                     <span class="n">series_name</span> <span class="o">+</span> <span class="s2">&quot;.in.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">),</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="n">descriptor_save_path</span><span class="p">,</span>
+                            <span class="n">series_name</span> <span class="o">+</span> <span class="s2">&quot;.in.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">,</span>
+                        <span class="p">),</span>
                         <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
                         <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">openpmd_configuration</span><span class="p">))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">openpmd_configuration</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
                 <span class="n">input_series</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;is_mala_data&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="n">input_series</span><span class="o">.</span><span class="n">set_software</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MALA&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;x.x.x&quot;</span><span class="p">)</span>
                 <span class="n">input_series</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span>
@@ -396,19 +430,27 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_targets</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
                     <span class="n">output_series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">target_save_path</span><span class="p">,</span>
-                                     <span class="n">series_name</span> <span class="o">+</span> <span class="s2">&quot;.out.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">),</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="n">target_save_path</span><span class="p">,</span>
+                            <span class="n">series_name</span> <span class="o">+</span> <span class="s2">&quot;.out.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">,</span>
+                        <span class="p">),</span>
                         <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
                         <span class="n">get_comm</span><span class="p">(),</span>
                         <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">openpmd_configuration</span><span class="p">))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">openpmd_configuration</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">output_series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">target_save_path</span><span class="p">,</span>
-                                     <span class="n">series_name</span> <span class="o">+</span> <span class="s2">&quot;.out.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">),</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="n">target_save_path</span><span class="p">,</span>
+                            <span class="n">series_name</span> <span class="o">+</span> <span class="s2">&quot;.out.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">,</span>
+                        <span class="p">),</span>
                         <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
                         <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">openpmd_configuration</span><span class="p">))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">openpmd_configuration</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
 
                 <span class="n">output_series</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;is_mala_data&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="n">output_series</span><span class="o">.</span><span class="n">set_software</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MALA&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">mala_version</span><span class="p">)</span>
@@ -421,8 +463,9 @@
 
             <span class="c1"># Create the paths as needed.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_additional_info</span><span class="p">:</span>
-                <span class="n">info_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">additional_info_save_path</span><span class="p">,</span>
-                                         <span class="n">snapshot_name</span> <span class="o">+</span> <span class="s2">&quot;.info.json&quot;</span><span class="p">)</span>
+                <span class="n">info_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="n">additional_info_save_path</span><span class="p">,</span> <span class="n">snapshot_name</span> <span class="o">+</span> <span class="s2">&quot;.info.json&quot;</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">info_path</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">input_iteration</span> <span class="o">=</span> <span class="kc">None</span>
@@ -431,22 +474,27 @@
             <span class="k">if</span> <span class="n">file_ending</span> <span class="o">==</span> <span class="s2">&quot;npy&quot;</span><span class="p">:</span>
                 <span class="c1"># Create the actual paths, if needed.</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_descriptors</span><span class="p">:</span>
-                    <span class="n">descriptor_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">descriptor_save_path</span><span class="p">,</span>
-                                                   <span class="n">snapshot_name</span> <span class="o">+</span> <span class="s2">&quot;.in.&quot;</span> <span class="o">+</span>
-                                                   <span class="n">file_ending</span><span class="p">)</span>
+                    <span class="n">descriptor_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">descriptor_save_path</span><span class="p">,</span>
+                        <span class="n">snapshot_name</span> <span class="o">+</span> <span class="s2">&quot;.in.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">descriptor_path</span> <span class="o">=</span> <span class="kc">None</span>
 
                 <span class="n">memmap</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_targets</span><span class="p">:</span>
-                    <span class="n">target_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">target_save_path</span><span class="p">,</span>
-                                               <span class="n">snapshot_name</span> <span class="o">+</span> <span class="s2">&quot;.out.&quot;</span><span class="o">+</span>
-                                               <span class="n">file_ending</span><span class="p">)</span>
+                    <span class="n">target_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">target_save_path</span><span class="p">,</span>
+                        <span class="n">snapshot_name</span> <span class="o">+</span> <span class="s2">&quot;.out.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">,</span>
+                    <span class="p">)</span>
                     <span class="c1"># A memory mapped file is used as buffer for distributed cases.</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> \
-                            <span class="n">file_based_communication</span><span class="p">:</span>
-                        <span class="n">memmap</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">target_save_path</span><span class="p">,</span> <span class="n">snapshot_name</span> <span class="o">+</span>
-                                              <span class="s2">&quot;.out.npy_temp&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span>
+                        <span class="ow">and</span> <span class="n">file_based_communication</span>
+                    <span class="p">):</span>
+                        <span class="n">memmap</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="n">target_save_path</span><span class="p">,</span> <span class="n">snapshot_name</span> <span class="o">+</span> <span class="s2">&quot;.out.npy_temp&quot;</span>
+                        <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">target_path</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
@@ -454,27 +502,36 @@
                 <span class="n">target_path</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">memmap</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_descriptors</span><span class="p">:</span>
-                    <span class="n">input_iteration</span> <span class="o">=</span> <span class="n">input_series</span><span class="o">.</span><span class="n">write_iterations</span><span class="p">()[</span><span class="n">i</span> <span class="o">+</span> <span class="n">starts_at</span><span class="p">]</span>
+                    <span class="n">input_iteration</span> <span class="o">=</span> <span class="n">input_series</span><span class="o">.</span><span class="n">write_iterations</span><span class="p">()[</span>
+                        <span class="n">i</span> <span class="o">+</span> <span class="n">starts_at</span>
+                    <span class="p">]</span>
                     <span class="n">input_iteration</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">starts_at</span>
                     <span class="n">input_iteration</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_targets</span><span class="p">:</span>
-                    <span class="n">output_iteration</span> <span class="o">=</span> <span class="n">output_series</span><span class="o">.</span><span class="n">write_iterations</span><span class="p">()[</span><span class="n">i</span> <span class="o">+</span> <span class="n">starts_at</span><span class="p">]</span>
+                    <span class="n">output_iteration</span> <span class="o">=</span> <span class="n">output_series</span><span class="o">.</span><span class="n">write_iterations</span><span class="p">()[</span>
+                        <span class="n">i</span> <span class="o">+</span> <span class="n">starts_at</span>
+                    <span class="p">]</span>
                     <span class="n">output_iteration</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">starts_at</span>
                     <span class="n">output_iteration</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">__convert_single_snapshot</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">descriptor_calculation_kwargs</span><span class="p">,</span>
-                                           <span class="n">target_calculator_kwargs</span><span class="p">,</span>
-                                           <span class="n">input_path</span><span class="o">=</span><span class="n">descriptor_path</span><span class="p">,</span>
-                                           <span class="n">output_path</span><span class="o">=</span><span class="n">target_path</span><span class="p">,</span>
-                                           <span class="n">use_memmap</span><span class="o">=</span><span class="n">memmap</span><span class="p">,</span>
-                                           <span class="n">input_iteration</span><span class="o">=</span><span class="n">input_iteration</span><span class="p">,</span>
-                                           <span class="n">output_iteration</span><span class="o">=</span><span class="n">output_iteration</span><span class="p">,</span>
-                                           <span class="n">additional_info_path</span><span class="o">=</span><span class="n">info_path</span><span class="p">,</span>
-                                           <span class="n">use_fp64</span><span class="o">=</span><span class="n">use_fp64</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__convert_single_snapshot</span><span class="p">(</span>
+                <span class="n">i</span><span class="p">,</span>
+                <span class="n">descriptor_calculation_kwargs</span><span class="p">,</span>
+                <span class="n">target_calculator_kwargs</span><span class="p">,</span>
+                <span class="n">input_path</span><span class="o">=</span><span class="n">descriptor_path</span><span class="p">,</span>
+                <span class="n">output_path</span><span class="o">=</span><span class="n">target_path</span><span class="p">,</span>
+                <span class="n">use_memmap</span><span class="o">=</span><span class="n">memmap</span><span class="p">,</span>
+                <span class="n">input_iteration</span><span class="o">=</span><span class="n">input_iteration</span><span class="p">,</span>
+                <span class="n">output_iteration</span><span class="o">=</span><span class="n">output_iteration</span><span class="p">,</span>
+                <span class="n">additional_info_path</span><span class="o">=</span><span class="n">info_path</span><span class="p">,</span>
+                <span class="n">use_fp64</span><span class="o">=</span><span class="n">use_fp64</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> \
-                        <span class="ow">and</span> <span class="n">file_based_communication</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span>
+                    <span class="ow">and</span> <span class="n">file_based_communication</span>
+                <span class="p">):</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">memmap</span><span class="p">)</span>
 
         <span class="c1"># Properly close series</span>
@@ -484,16 +541,19 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_targets</span><span class="p">:</span>
                 <span class="k">del</span> <span class="n">output_series</span></div>
 
-    <span class="k">def</span> <span class="nf">__convert_single_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">,</span>
-                                  <span class="n">descriptor_calculation_kwargs</span><span class="p">,</span>
-                                  <span class="n">target_calculator_kwargs</span><span class="p">,</span>
-                                  <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                  <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                  <span class="n">additional_info_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                  <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                  <span class="n">output_iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                  <span class="n">input_iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                  <span class="n">use_fp64</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__convert_single_snapshot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">snapshot_number</span><span class="p">,</span>
+        <span class="n">descriptor_calculation_kwargs</span><span class="p">,</span>
+        <span class="n">target_calculator_kwargs</span><span class="p">,</span>
+        <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">additional_info_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">output_iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">input_iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_fp64</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert single snapshot from the conversion lists.</span>
 
@@ -557,39 +617,49 @@
             <span class="n">descriptor_calculation_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span>
             <span class="n">descriptor_calculation_kwargs</span><span class="p">[</span><span class="s2">&quot;use_fp64&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_fp64</span>
 
-            <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
-                <span class="n">calculate_from_qe_out</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">],</span>
-                                      <span class="o">**</span><span class="n">descriptor_calculation_kwargs</span><span class="p">)</span>
+            <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">calculate_from_qe_out</span><span class="p">(</span>
+                    <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">descriptor_calculation_kwargs</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># In this case, only the output is processed.</span>
             <span class="k">pass</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown file extension, cannot convert descriptor&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Unknown file extension, cannot convert descriptor.&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Save data and delete, if not requested otherwise.</span>
             <span class="k">if</span> <span class="n">input_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">input_iteration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
-                    <span class="n">tmp_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
-                        <span class="n">gather_descriptors</span><span class="p">(</span><span class="n">tmp_input</span><span class="p">)</span>
+                    <span class="n">tmp_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">gather_descriptors</span><span class="p">(</span>
+                        <span class="n">tmp_input</span>
+                    <span class="p">)</span>
                 <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
-                        <span class="n">write_to_numpy_file</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="n">tmp_input</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">write_to_numpy_file</span><span class="p">(</span>
+                        <span class="n">input_path</span><span class="p">,</span> <span class="n">tmp_input</span>
+                    <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
-                    <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_offset</span><span class="p">,</span> <span class="n">local_reach</span> <span class="o">=</span> \
-                        <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">convert_local_to_3d</span><span class="p">(</span><span class="n">tmp_input</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
-                        <span class="n">write_to_openpmd_iteration</span><span class="p">(</span><span class="n">input_iteration</span><span class="p">,</span>
-                                                   <span class="n">tmp_input</span><span class="p">,</span>
-                                                   <span class="n">local_offset</span><span class="o">=</span><span class="n">local_offset</span><span class="p">,</span>
-                                                   <span class="n">local_reach</span><span class="o">=</span><span class="n">local_reach</span><span class="p">)</span>
+                    <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_offset</span><span class="p">,</span> <span class="n">local_reach</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">convert_local_to_3d</span><span class="p">(</span>
+                            <span class="n">tmp_input</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">write_to_openpmd_iteration</span><span class="p">(</span>
+                        <span class="n">input_iteration</span><span class="p">,</span>
+                        <span class="n">tmp_input</span><span class="p">,</span>
+                        <span class="n">local_offset</span><span class="o">=</span><span class="n">local_offset</span><span class="p">,</span>
+                        <span class="n">local_reach</span><span class="o">=</span><span class="n">local_reach</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
-                        <span class="n">write_to_openpmd_iteration</span><span class="p">(</span><span class="n">input_iteration</span><span class="p">,</span>
-                                                   <span class="n">tmp_input</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">write_to_openpmd_iteration</span><span class="p">(</span>
+                        <span class="n">input_iteration</span><span class="p">,</span> <span class="n">tmp_input</span>
+                    <span class="p">)</span>
             <span class="k">del</span> <span class="n">tmp_input</span>
 
         <span class="c1">###########</span>
@@ -601,25 +671,27 @@
                 <span class="c1"># Parse and/or calculate the output descriptors.</span>
                 <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.cube&quot;</span><span class="p">:</span>
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span>
-                        <span class="s2">&quot;output&quot;</span><span class="p">]</span>
+                        <span class="s2">&quot;output&quot;</span>
+                    <span class="p">]</span>
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_memmap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_memmap</span>
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_fp64&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_fp64</span>
 
                     <span class="c1"># If no units are provided we just assume standard units.</span>
-                    <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                        <span class="n">read_from_cube</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span>
-                                       <span class="o">**</span><span class="n">target_calculator_kwargs</span><span class="p">)</span>
+                    <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span>
+                        <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">target_calculator_kwargs</span>
+                    <span class="p">)</span>
 
                 <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.xsf&quot;</span><span class="p">:</span>
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span>
-                        <span class="s2">&quot;output&quot;</span><span class="p">]</span>
+                        <span class="s2">&quot;output&quot;</span>
+                    <span class="p">]</span>
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_memmap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_memmap</span>
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_fp664&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_fp64</span>
 
                     <span class="c1"># If no units are provided we just assume standard units.</span>
-                    <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                        <span class="n">read_from_xsf</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span>
-                                      <span class="o">**</span><span class="n">target_calculator_kwargs</span><span class="p">)</span>
+                    <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_xsf</span><span class="p">(</span>
+                        <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">target_calculator_kwargs</span>
+                    <span class="p">)</span>
 
                 <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="c1"># In this case, only the input is processed.</span>
@@ -627,37 +699,39 @@
 
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                        <span class="s2">&quot;Unknown file extension, cannot convert target&quot;</span>
-                        <span class="s2">&quot;data.&quot;</span><span class="p">)</span>
+                        <span class="s2">&quot;Unknown file extension, cannot convert target data.&quot;</span>
+                    <span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">write_to_numpy_file</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span>
-                                                               <span class="n">tmp_output</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">write_to_numpy_file</span><span class="p">(</span>
+                        <span class="n">output_path</span><span class="p">,</span> <span class="n">tmp_output</span>
+                    <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">metadata</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">metadata</span> <span class="o">=</span> <span class="p">[</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">],</span>
-                                <span class="n">description</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]]</span>
+                    <span class="n">metadata</span> <span class="o">=</span> <span class="p">[</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">],</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]]</span>
                 <span class="c1"># Parse and/or calculate the output descriptors.</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;return_local&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.cube&quot;</span><span class="p">:</span>
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span>
-                        <span class="s2">&quot;output&quot;</span><span class="p">]</span>
+                        <span class="s2">&quot;output&quot;</span>
+                    <span class="p">]</span>
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_memmap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_memmap</span>
                     <span class="c1"># If no units are provided we just assume standard units.</span>
-                    <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                        <span class="n">read_from_cube</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span>
-                                       <span class="o">**</span><span class="n">target_calculator_kwargs</span><span class="p">)</span>
+                    <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span>
+                        <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">target_calculator_kwargs</span>
+                    <span class="p">)</span>
 
                 <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.xsf&quot;</span><span class="p">:</span>
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span>
-                        <span class="s2">&quot;output&quot;</span><span class="p">]</span>
+                        <span class="s2">&quot;output&quot;</span>
+                    <span class="p">]</span>
                     <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_memmap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_memmap</span>
                     <span class="c1"># If no units are provided we just assume standard units.</span>
-                    <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                        <span class="n">read_from_xsf</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span>
-                                      <span class="o">**</span><span class="n">target_calculator_kwargs</span><span class="p">)</span>
+                    <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_xsf</span><span class="p">(</span>
+                        <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">target_calculator_kwargs</span>
+                    <span class="p">)</span>
 
                 <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="c1"># In this case, only the input is processed.</span>
@@ -665,31 +739,34 @@
 
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                        <span class="s2">&quot;Unknown file extension, cannot convert target&quot;</span>
-                        <span class="s2">&quot;data.&quot;</span><span class="p">)</span>
+                        <span class="s2">&quot;Unknown file extension, cannot convert target data.&quot;</span>
+                    <span class="p">)</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                        <span class="n">write_to_openpmd_iteration</span><span class="p">(</span><span class="n">output_iteration</span><span class="p">,</span>
-                                                   <span class="n">tmp_output</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                                   <span class="n">feature_from</span><span class="o">=</span><span class="n">tmp_output</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                                   <span class="n">feature_to</span><span class="o">=</span><span class="n">tmp_output</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                                                   <span class="n">additional_metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">write_to_openpmd_iteration</span><span class="p">(</span>
+                        <span class="n">output_iteration</span><span class="p">,</span>
+                        <span class="n">tmp_output</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="n">feature_from</span><span class="o">=</span><span class="n">tmp_output</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="n">feature_to</span><span class="o">=</span><span class="n">tmp_output</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                        <span class="n">additional_metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                        <span class="n">write_to_openpmd_iteration</span><span class="p">(</span><span class="n">output_iteration</span><span class="p">,</span>
-                                                   <span class="n">tmp_output</span><span class="p">,</span>
-                                                   <span class="n">additional_metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">write_to_openpmd_iteration</span><span class="p">(</span>
+                        <span class="n">output_iteration</span><span class="p">,</span>
+                        <span class="n">tmp_output</span><span class="p">,</span>
+                        <span class="n">additional_metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+                    <span class="p">)</span>
             <span class="k">del</span> <span class="n">tmp_output</span>
 
         <span class="c1"># Parse and/or calculate the additional info.</span>
         <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;additional_info&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Parsing and saving is done using the target calculator.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;additional_info&quot;</span><span class="p">],</span>
-                                                 <span class="n">description</span><span class="p">[</span><span class="s2">&quot;additional_info&quot;</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                <span class="n">write_additional_calculation_data</span><span class="p">(</span><span class="n">additional_info_path</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
+                <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;additional_info&quot;</span><span class="p">],</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;additional_info&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">write_additional_calculation_data</span><span class="p">(</span>
+                <span class="n">additional_info_path</span>
+            <span class="p">)</span></div>
 </pre></div>
 
            </div>

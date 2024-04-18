@@ -75,6 +75,7 @@
              
   <h1>Source code for mala.network.hyper_opt</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Base class for all hyperparameter optimizers.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">ABC</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -122,16 +123,20 @@
         <span class="k">if</span> <span class="bp">cls</span> <span class="o">==</span> <span class="n">HyperOpt</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">mala.network.hyper_opt_optuna</span> <span class="kn">import</span> <span class="n">HyperOptOptuna</span>
-                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptOptuna</span><span class="p">)</span><span class="o">.</span>\
-                    <span class="fm">__new__</span><span class="p">(</span><span class="n">HyperOptOptuna</span><span class="p">)</span>
+
+                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptOptuna</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span>
+                    <span class="n">HyperOptOptuna</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span> <span class="o">==</span> <span class="s2">&quot;oat&quot;</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">mala.network.hyper_opt_oat</span> <span class="kn">import</span> <span class="n">HyperOptOAT</span>
-                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptOAT</span><span class="p">)</span><span class="o">.</span>\
-                    <span class="fm">__new__</span><span class="p">(</span><span class="n">HyperOptOAT</span><span class="p">)</span>
+
+                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptOAT</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">HyperOptOAT</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span> <span class="o">==</span> <span class="s2">&quot;naswot&quot;</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">mala.network.hyper_opt_naswot</span> <span class="kn">import</span> <span class="n">HyperOptNASWOT</span>
-                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptNASWOT</span><span class="p">)</span><span class="o">.</span>\
-                    <span class="fm">__new__</span><span class="p">(</span><span class="n">HyperOptNASWOT</span><span class="p">)</span>
+
+                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptNASWOT</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span>
+                    <span class="n">HyperOptNASWOT</span>
+                <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">hoptimizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown hyperparameter optimizer requested.&quot;</span><span class="p">)</span>
@@ -140,15 +145,17 @@
 
         <span class="k">return</span> <span class="n">hoptimizer</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span> <span class="o">=</span> <span class="n">params</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">ObjectiveBase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_pkl_checkpoints</span> <span class="o">=</span> <span class="n">use_pkl_checkpoints</span>
 
-<div class="viewcode-block" id="HyperOpt.add_hyperparameter"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt.add_hyperparameter">[docs]</a>    <span class="k">def</span> <span class="nf">add_hyperparameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                           <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperOpt.add_hyperparameter"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt.add_hyperparameter">[docs]</a>    <span class="k">def</span> <span class="nf">add_hyperparameter</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a hyperparameter to the current investigation.</span>
 
@@ -181,15 +188,16 @@
 <span class="sd">        choices :</span>
 <span class="sd">            List of possible choices (for categorical parameter).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span>\
-            <span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">Hyperparameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span>
-                               <span class="n">hyper_opt_method</span><span class="p">,</span>
-                               <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span>
-                               <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                               <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span>
-                               <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span>
-                               <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">))</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">Hyperparameter</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span><span class="p">,</span>
+                <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span>
+                <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span>
+                <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="HyperOpt.clear_hyperparameters"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt.clear_hyperparameters">[docs]</a>    <span class="k">def</span> <span class="nf">clear_hyperparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear the list of hyperparameters that are to be investigated.&quot;&quot;&quot;</span>
@@ -225,22 +233,26 @@
 
     <span class="k">def</span> <span class="nf">_save_params_and_scaler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Saving the Scalers is straight forward.</span>
-        <span class="n">iscaler_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoint_name</span> \
-            <span class="o">+</span> <span class="s2">&quot;_iscaler.pkl&quot;</span>
-        <span class="n">oscaler_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoint_name</span> \
-            <span class="o">+</span> <span class="s2">&quot;_oscaler.pkl&quot;</span>
+        <span class="n">iscaler_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoint_name</span> <span class="o">+</span> <span class="s2">&quot;_iscaler.pkl&quot;</span>
+        <span class="p">)</span>
+        <span class="n">oscaler_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoint_name</span> <span class="o">+</span> <span class="s2">&quot;_oscaler.pkl&quot;</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">iscaler_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">oscaler_name</span><span class="p">)</span>
 
         <span class="c1"># For the parameters we have to make sure we choose the correct</span>
         <span class="c1"># format.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_pkl_checkpoints</span><span class="p">:</span>
-            <span class="n">param_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoint_name</span> \
-                         <span class="o">+</span> <span class="s2">&quot;_params.pkl&quot;</span>
+            <span class="n">param_name</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoint_name</span> <span class="o">+</span> <span class="s2">&quot;_params.pkl&quot;</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">save_as_pickle</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">param_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoint_name</span> \
-                         <span class="o">+</span> <span class="s2">&quot;_params.json&quot;</span>
+            <span class="n">param_name</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoint_name</span> <span class="o">+</span> <span class="s2">&quot;_params.json&quot;</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">save_as_json</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
 
 <div class="viewcode-block" id="HyperOpt.checkpoint_exists"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt.checkpoint_exists">[docs]</a>    <span class="nd">@classmethod</span>
@@ -271,12 +283,14 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">param_name</span> <span class="o">=</span> <span class="n">checkpoint_name</span> <span class="o">+</span> <span class="s2">&quot;_params.json&quot;</span>
 
-        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">,</span> <span class="p">[</span><span class="n">iscaler_name</span><span class="p">,</span> <span class="n">oscaler_name</span><span class="p">,</span>
-                                        <span class="n">param_name</span><span class="p">]))</span></div>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="nb">map</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">,</span> <span class="p">[</span><span class="n">iscaler_name</span><span class="p">,</span> <span class="n">oscaler_name</span><span class="p">,</span> <span class="n">param_name</span><span class="p">])</span>
+        <span class="p">)</span></div>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_resume_checkpoint</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">no_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                           <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_resume_checkpoint</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">no_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prepare resumption of hyperparameter optimization from a checkpoint.</span>
 
@@ -304,8 +318,10 @@
 <span class="sd">        new_hyperopt : HyperOptOptuna</span>
 <span class="sd">            The hyperparameter optimizer reconstructed from the checkpoint.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Loading hyperparameter optimization from checkpoint.&quot;</span><span class="p">,</span>
-                 <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">printout</span><span class="p">(</span>
+            <span class="s2">&quot;Loading hyperparameter optimization from checkpoint.&quot;</span><span class="p">,</span>
+            <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="c1"># The names are based upon the checkpoint name.</span>
         <span class="n">iscaler_name</span> <span class="o">=</span> <span class="n">checkpoint_name</span> <span class="o">+</span> <span class="s2">&quot;_iscaler.pkl&quot;</span>
         <span class="n">oscaler_name</span> <span class="o">=</span> <span class="n">checkpoint_name</span> <span class="o">+</span> <span class="s2">&quot;_oscaler.pkl&quot;</span>
@@ -325,10 +341,12 @@
         <span class="c1"># Create a new data handler and prepare the data.</span>
         <span class="k">if</span> <span class="n">no_data</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">loaded_params</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">use_lazy_loading</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">new_datahandler</span> <span class="o">=</span> <span class="n">DataHandler</span><span class="p">(</span><span class="n">loaded_params</span><span class="p">,</span>
-                                      <span class="n">input_data_scaler</span><span class="o">=</span><span class="n">loaded_iscaler</span><span class="p">,</span>
-                                      <span class="n">output_data_scaler</span><span class="o">=</span><span class="n">loaded_oscaler</span><span class="p">,</span>
-                                      <span class="n">clear_data</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">new_datahandler</span> <span class="o">=</span> <span class="n">DataHandler</span><span class="p">(</span>
+            <span class="n">loaded_params</span><span class="p">,</span>
+            <span class="n">input_data_scaler</span><span class="o">=</span><span class="n">loaded_iscaler</span><span class="p">,</span>
+            <span class="n">output_data_scaler</span><span class="o">=</span><span class="n">loaded_oscaler</span><span class="p">,</span>
+            <span class="n">clear_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">new_datahandler</span><span class="o">.</span><span class="n">prepare_data</span><span class="p">(</span><span class="n">reparametrize_scaler</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">loaded_params</span><span class="p">,</span> <span class="n">new_datahandler</span><span class="p">,</span> <span class="n">optimizer_name</span></div>

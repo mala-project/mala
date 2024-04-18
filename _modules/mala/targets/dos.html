@@ -75,6 +75,7 @@
              
   <h1>Source code for mala.targets.dos</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;DOS calculation class.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
 
 <span class="kn">import</span> <span class="nn">ase.io</span>
@@ -86,8 +87,13 @@
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">printout</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">barrier</span><span class="p">,</span> <span class="n">get_comm</span>
 <span class="kn">from</span> <span class="nn">mala.targets.target</span> <span class="kn">import</span> <span class="n">Target</span>
-<span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="n">fermi_function</span><span class="p">,</span> <span class="n">gaussians</span><span class="p">,</span> \
-    <span class="n">analytical_integration</span><span class="p">,</span> <span class="n">get_beta</span><span class="p">,</span> <span class="n">entropy_multiplicator</span>
+<span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">fermi_function</span><span class="p">,</span>
+    <span class="n">gaussians</span><span class="p">,</span>
+    <span class="n">analytical_integration</span><span class="p">,</span>
+    <span class="n">get_beta</span><span class="p">,</span>
+    <span class="n">entropy_multiplicator</span><span class="p">,</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="DOS"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS">[docs]</a><span class="k">class</span> <span class="nc">DOS</span><span class="p">(</span><span class="n">Target</span><span class="p">):</span>
@@ -130,18 +136,22 @@
         <span class="n">return_dos_object</span><span class="o">.</span><span class="n">fermi_energy_dft</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
         <span class="n">return_dos_object</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">temperature</span>
         <span class="n">return_dos_object</span><span class="o">.</span><span class="n">voxel</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">voxel</span>
-        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> \
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">ldos_object</span><span class="o">.</span><span class="n">number_of_electrons_exact</span>
-        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span> <span class="o">=</span> \
+        <span class="p">)</span>
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">ldos_object</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span>
+        <span class="p">)</span>
         <span class="n">return_dos_object</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">atoms</span>
         <span class="n">return_dos_object</span><span class="o">.</span><span class="n">qe_input_data</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">qe_input_data</span>
         <span class="n">return_dos_object</span><span class="o">.</span><span class="n">qe_pseudopotentials</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">qe_pseudopotentials</span>
-        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span> <span class="o">=</span> \
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">ldos_object</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span>
+        <span class="p">)</span>
         <span class="n">return_dos_object</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">kpoints</span>
-        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span> <span class="o">=</span> \
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">ldos_object</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span>
+        <span class="p">)</span>
         <span class="n">return_dos_object</span><span class="o">.</span><span class="n">local_grid</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">local_grid</span>
         <span class="n">return_dos_object</span><span class="o">.</span><span class="n">_parameters_full</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">_parameters_full</span>
 
@@ -290,8 +300,11 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dictionary containing the SI unit dimensions in OpenPMD format.&quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">M</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">L</span><span class="p">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span>
-                <span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">T</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">M</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">L</span><span class="p">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">T</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="p">}</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -334,8 +347,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached DOS available to calculate this &quot;</span>
-                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No cached DOS available to calculate this property.&quot;</span>
+            <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -348,8 +362,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_number_of_electrons</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached DOS available to calculate this &quot;</span>
-                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No cached DOS available to calculate this property.&quot;</span>
+            <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">fermi_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -362,8 +377,7 @@
 <span class="sd">        from how this quantity is calculated. Calculated via cached DOS.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span> \
-                <span class="n">get_self_consistent_fermi_energy</span><span class="p">()</span>
+            <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_self_consistent_fermi_energy</span><span class="p">()</span>
 
             <span class="c1"># Now that we have a new Fermi energy, we should uncache the</span>
             <span class="c1"># old number of electrons.</span>
@@ -384,8 +398,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_entropy_contribution</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached DOS available to calculate this &quot;</span>
-                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No cached DOS available to calculate this property.&quot;</span>
+            <span class="p">)</span>
 
 <div class="viewcode-block" id="DOS.uncache_properties"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.uncache_properties">[docs]</a>    <span class="k">def</span> <span class="nf">uncache_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Uncache all cached properties of this calculator.&quot;&quot;&quot;</span>
@@ -431,7 +446,7 @@
         <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/eV&quot;</span> <span class="ow">or</span> <span class="n">in_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">array</span>
         <span class="k">elif</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/Ry&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Rydberg</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Rydberg</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for LDOS.&quot;</span><span class="p">)</span></div>
 
@@ -486,7 +501,7 @@
         <span class="n">return_dos_values</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Open the file, then iterate through its contents.</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
             <span class="n">lines</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
             <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -495,8 +510,10 @@
                 <span class="k">if</span> <span class="s2">&quot;#&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dos_line</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">:</span>
                     <span class="n">e_val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dos_line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
                     <span class="n">dosval</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dos_line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">e_val</span><span class="o">-</span><span class="n">energy_grid</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>\
-                            <span class="n">ldos_gridspacing_ev</span><span class="o">*</span><span class="mf">0.98</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">e_val</span> <span class="o">-</span> <span class="n">energy_grid</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                        <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span> <span class="o">*</span> <span class="mf">0.98</span>
+                    <span class="p">):</span>
                         <span class="n">return_dos_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dosval</span><span class="p">)</span>
                         <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 
@@ -533,17 +550,19 @@
             <span class="n">atoms_object</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">)</span>
         <span class="n">kweights</span> <span class="o">=</span> <span class="n">atoms_object</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span><span class="o">.</span><span class="n">get_k_point_weights</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">kweights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;QE output file does not contain band information.&quot;</span>
-                            <span class="s2">&quot;Rerun calculation with verbosity set to &#39;high&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;QE output file does not contain band information.&quot;</span>
+                <span class="s2">&quot;Rerun calculation with verbosity set to &#39;high&#39;.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Get the gaussians for all energy values and calculate the DOS per</span>
         <span class="c1"># band.</span>
-        <span class="n">dos_per_band</span> <span class="o">=</span> <span class="n">gaussians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span><span class="p">,</span>
-                                 <span class="n">atoms_object</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span><span class="o">.</span>
-                                 <span class="n">band_structure</span><span class="p">()</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span>
-                                 <span class="n">smearing_factor</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                 <span class="n">ldos_gridspacing_ev</span><span class="p">)</span>
-        <span class="n">dos_per_band</span> <span class="o">=</span> <span class="n">kweights</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span><span class="o">*</span><span class="n">dos_per_band</span>
+        <span class="n">dos_per_band</span> <span class="o">=</span> <span class="n">gaussians</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span><span class="p">,</span>
+            <span class="n">atoms_object</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span><span class="o">.</span><span class="n">band_structure</span><span class="p">()</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span>
+            <span class="n">smearing_factor</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">dos_per_band</span> <span class="o">=</span> <span class="n">kweights</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">dos_per_band</span>
 
         <span class="c1"># QE gives the band energies in eV, so no conversion necessary here.</span>
         <span class="n">dos_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dos_per_band</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
@@ -580,16 +599,23 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">emin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
 
-        <span class="n">emax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span> <span class="o">+</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">*</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
+        <span class="n">emax</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
+        <span class="p">)</span>
         <span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
-        <span class="n">linspace_array</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">linspace_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">linspace_array</span></div>
 
-<div class="viewcode-block" id="DOS.get_band_energy"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_band_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
-                        <span class="n">broadcast_band_energy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="DOS.get_band_energy"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_band_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
+        <span class="n">broadcast_band_energy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the band energy from given DOS data.</span>
 
@@ -624,17 +650,21 @@
         <span class="c1"># Parse the parameters.</span>
         <span class="c1"># Parse the parameters.</span>
         <span class="k">if</span> <span class="n">dos_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No DOS data provided, cannot calculate&quot;</span>
-                            <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No DOS data provided, cannot calculate this quantity.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Here we check whether we will use our internal, cached</span>
         <span class="c1"># DOS, or calculate everything from scratch.</span>
         <span class="k">if</span> <span class="n">dos_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fermi_energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Warning: No fermi energy was provided or could be &quot;</span>
-                         <span class="s2">&quot;calculated from electronic structure data. &quot;</span>
-                         <span class="s2">&quot;Using the DFT fermi energy, this may &quot;</span>
-                         <span class="s2">&quot;yield unexpected results&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">printout</span><span class="p">(</span>
+                    <span class="s2">&quot;Warning: No fermi energy was provided or could be &quot;</span>
+                    <span class="s2">&quot;calculated from electronic structure data. &quot;</span>
+                    <span class="s2">&quot;Using the DFT fermi energy, this may &quot;</span>
+                    <span class="s2">&quot;yield unexpected results&quot;</span><span class="p">,</span>
+                    <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span>
@@ -645,11 +675,13 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">broadcast_band_energy</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span>
-                <span class="n">band_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__band_energy_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span>
-                                                          <span class="n">energy_grid</span><span class="p">,</span>
-                                                          <span class="n">fermi_energy</span><span class="p">,</span>
-                                                          <span class="n">temperature</span><span class="p">,</span>
-                                                          <span class="n">integration_method</span><span class="p">)</span>
+                <span class="n">band_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__band_energy_from_dos</span><span class="p">(</span>
+                    <span class="n">dos_data</span><span class="p">,</span>
+                    <span class="n">energy_grid</span><span class="p">,</span>
+                    <span class="n">fermi_energy</span><span class="p">,</span>
+                    <span class="n">temperature</span><span class="p">,</span>
+                    <span class="n">integration_method</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">band_energy</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -658,17 +690,29 @@
             <span class="k">return</span> <span class="n">band_energy</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__band_energy_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
-                                               <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
-                                               <span class="n">integration_method</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__band_energy_from_dos</span><span class="p">(</span>
+                <span class="n">dos_data</span><span class="p">,</span>
+                <span class="n">energy_grid</span><span class="p">,</span>
+                <span class="n">fermi_energy</span><span class="p">,</span>
+                <span class="n">temperature</span><span class="p">,</span>
+                <span class="n">integration_method</span><span class="p">,</span>
+            <span class="p">)</span>
 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__band_energy_from_dos</span><span class="p">(</span>
+            <span class="n">dos_data</span><span class="p">,</span>
+            <span class="n">energy_grid</span><span class="p">,</span>
+            <span class="n">fermi_energy</span><span class="p">,</span>
+            <span class="n">temperature</span><span class="p">,</span>
+            <span class="n">integration_method</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__band_energy_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
-                                           <span class="n">temperature</span><span class="p">,</span> <span class="n">integration_method</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="DOS.get_number_of_electrons"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_number_of_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="DOS.get_number_of_electrons"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_number_of_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the number of electrons from given DOS data.</span>
 
@@ -698,17 +742,21 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Parse the parameters.</span>
         <span class="k">if</span> <span class="n">dos_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No DOS data provided, cannot calculate&quot;</span>
-                            <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No DOS data provided, cannot calculate this quantity.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Here we check whether we will use our internal, cached</span>
         <span class="c1"># DOS, or calculate everything from scratch.</span>
         <span class="k">if</span> <span class="n">dos_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fermi_energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Warning: No fermi energy was provided or could be &quot;</span>
-                         <span class="s2">&quot;calculated from electronic structure data. &quot;</span>
-                         <span class="s2">&quot;Using the DFT fermi energy, this may &quot;</span>
-                         <span class="s2">&quot;yield unexpected results&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">printout</span><span class="p">(</span>
+                    <span class="s2">&quot;Warning: No fermi energy was provided or could be &quot;</span>
+                    <span class="s2">&quot;calculated from electronic structure data. &quot;</span>
+                    <span class="s2">&quot;Using the DFT fermi energy, this may &quot;</span>
+                    <span class="s2">&quot;yield unexpected results&quot;</span><span class="p">,</span>
+                    <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span>
@@ -717,14 +765,22 @@
         <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>
         <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_electrons_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
-                                                   <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
-                                                   <span class="n">integration_method</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_electrons_from_dos</span><span class="p">(</span>
+            <span class="n">dos_data</span><span class="p">,</span>
+            <span class="n">energy_grid</span><span class="p">,</span>
+            <span class="n">fermi_energy</span><span class="p">,</span>
+            <span class="n">temperature</span><span class="p">,</span>
+            <span class="n">integration_method</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
-<div class="viewcode-block" id="DOS.get_entropy_contribution"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_entropy_contribution">[docs]</a>    <span class="k">def</span> <span class="nf">get_entropy_contribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                 <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                 <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
-                                 <span class="n">broadcast_entropy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="DOS.get_entropy_contribution"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_entropy_contribution">[docs]</a>    <span class="k">def</span> <span class="nf">get_entropy_contribution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
+        <span class="n">broadcast_entropy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the entropy contribution to the total energy.</span>
 
@@ -758,17 +814,21 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Parse the parameters.</span>
         <span class="k">if</span> <span class="n">dos_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No DOS data provided, cannot calculate&quot;</span>
-                            <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No DOS data provided, cannot calculate this quantity.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Here we check whether we will use our internal, cached</span>
         <span class="c1"># DOS, or calculate everything from scratch.</span>
         <span class="k">if</span> <span class="n">dos_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fermi_energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Warning: No fermi energy was provided or could be &quot;</span>
-                         <span class="s2">&quot;calculated from electronic structure data. &quot;</span>
-                         <span class="s2">&quot;Using the DFT fermi energy, this may &quot;</span>
-                         <span class="s2">&quot;yield unexpected results&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">printout</span><span class="p">(</span>
+                    <span class="s2">&quot;Warning: No fermi energy was provided or could be &quot;</span>
+                    <span class="s2">&quot;calculated from electronic structure data. &quot;</span>
+                    <span class="s2">&quot;Using the DFT fermi energy, this may &quot;</span>
+                    <span class="s2">&quot;yield unexpected results&quot;</span><span class="p">,</span>
+                    <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span>
@@ -779,10 +839,13 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">broadcast_entropy</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span>
-                <span class="n">entropy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span> \
-                    <span class="n">__entropy_contribution_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
-                                                    <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
-                                                    <span class="n">integration_method</span><span class="p">)</span>
+                <span class="n">entropy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entropy_contribution_from_dos</span><span class="p">(</span>
+                    <span class="n">dos_data</span><span class="p">,</span>
+                    <span class="n">energy_grid</span><span class="p">,</span>
+                    <span class="n">fermi_energy</span><span class="p">,</span>
+                    <span class="n">temperature</span><span class="p">,</span>
+                    <span class="n">integration_method</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">entropy</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -791,14 +854,21 @@
             <span class="k">return</span> <span class="n">entropy</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span> \
-                <span class="n">__entropy_contribution_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
-                                                <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
-                                                <span class="n">integration_method</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__entropy_contribution_from_dos</span><span class="p">(</span>
+                <span class="n">dos_data</span><span class="p">,</span>
+                <span class="n">energy_grid</span><span class="p">,</span>
+                <span class="n">fermi_energy</span><span class="p">,</span>
+                <span class="n">temperature</span><span class="p">,</span>
+                <span class="n">integration_method</span><span class="p">,</span>
+            <span class="p">)</span></div>
 
-<div class="viewcode-block" id="DOS.get_self_consistent_fermi_energy"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_self_consistent_fermi_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                         <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
-                                         <span class="n">broadcast_fermi_energy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="DOS.get_self_consistent_fermi_energy"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_self_consistent_fermi_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_self_consistent_fermi_energy</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
+        <span class="n">broadcast_fermi_energy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the self-consistent Fermi energy.</span>
 
@@ -835,8 +905,9 @@
         <span class="k">if</span> <span class="n">dos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span>
             <span class="k">if</span> <span class="n">dos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No DOS data provided, cannot calculate&quot;</span>
-                                <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;No DOS data provided, cannot calculate this quantity.&quot;</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>
@@ -844,15 +915,20 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">broadcast_fermi_energy</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span>
-                <span class="n">fermi_energy_sc</span> <span class="o">=</span> <span class="n">toms748</span><span class="p">(</span><span class="k">lambda</span> <span class="n">fermi_sc</span><span class="p">:</span>
-                                          <span class="p">(</span><span class="bp">self</span><span class="o">.</span>
-                                           <span class="n">__number_of_electrons_from_dos</span>
-                                           <span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
-                                            <span class="n">fermi_sc</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
-                                            <span class="n">integration_method</span><span class="p">)</span>
-                                           <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span><span class="p">),</span>
-                                          <span class="n">a</span><span class="o">=</span><span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                          <span class="n">b</span><span class="o">=</span><span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">fermi_energy_sc</span> <span class="o">=</span> <span class="n">toms748</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">fermi_sc</span><span class="p">:</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_electrons_from_dos</span><span class="p">(</span>
+                            <span class="n">dos_data</span><span class="p">,</span>
+                            <span class="n">energy_grid</span><span class="p">,</span>
+                            <span class="n">fermi_sc</span><span class="p">,</span>
+                            <span class="n">temperature</span><span class="p">,</span>
+                            <span class="n">integration_method</span><span class="p">,</span>
+                        <span class="p">)</span>
+                        <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span>
+                    <span class="p">),</span>
+                    <span class="n">a</span><span class="o">=</span><span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">b</span><span class="o">=</span><span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">fermi_energy_sc</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -861,15 +937,20 @@
             <span class="k">return</span> <span class="n">fermi_energy_sc</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span>
-            <span class="n">fermi_energy_sc</span> <span class="o">=</span> <span class="n">toms748</span><span class="p">(</span><span class="k">lambda</span> <span class="n">fermi_sc</span><span class="p">:</span>
-                                      <span class="p">(</span><span class="bp">self</span><span class="o">.</span>
-                                       <span class="n">__number_of_electrons_from_dos</span>
-                                       <span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
-                                        <span class="n">fermi_sc</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
-                                        <span class="n">integration_method</span><span class="p">)</span>
-                                       <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span><span class="p">),</span>
-                                      <span class="n">a</span><span class="o">=</span><span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                      <span class="n">b</span><span class="o">=</span><span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">fermi_energy_sc</span> <span class="o">=</span> <span class="n">toms748</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">fermi_sc</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_electrons_from_dos</span><span class="p">(</span>
+                        <span class="n">dos_data</span><span class="p">,</span>
+                        <span class="n">energy_grid</span><span class="p">,</span>
+                        <span class="n">fermi_sc</span><span class="p">,</span>
+                        <span class="n">temperature</span><span class="p">,</span>
+                        <span class="n">integration_method</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span>
+                <span class="p">),</span>
+                <span class="n">a</span><span class="o">=</span><span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">b</span><span class="o">=</span><span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
             <span class="k">return</span> <span class="n">fermi_energy_sc</span></div>
 
 <div class="viewcode-block" id="DOS.get_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -898,82 +979,96 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">array</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__number_of_electrons_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
-                                       <span class="n">temperature</span><span class="p">,</span> <span class="n">integration_method</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__number_of_electrons_from_dos</span><span class="p">(</span>
+        <span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">integration_method</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the number of electrons from DOS data.&quot;&quot;&quot;</span>
         <span class="c1"># Calculate the energy levels and the Fermi function.</span>
 
-        <span class="n">fermi_vals</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
-                                    <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">fermi_vals</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span>
+            <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
         <span class="c1"># Calculate the number of electrons.</span>
         <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
-            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">dos_data</span> <span class="o">*</span> <span class="n">fermi_vals</span><span class="p">,</span>
-                                                  <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
+                <span class="n">dos_data</span> <span class="o">*</span> <span class="n">fermi_vals</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;simps&quot;</span><span class="p">:</span>
-            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span><span class="n">dos_data</span> <span class="o">*</span> <span class="n">fermi_vals</span><span class="p">,</span>
-                                                  <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span>
+                <span class="n">dos_data</span> <span class="o">*</span> <span class="n">fermi_vals</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
             <span class="n">dos_pointer</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">dos_data</span><span class="p">)</span>
             <span class="n">number_of_electrons</span><span class="p">,</span> <span class="n">abserr</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
-                <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">dos_pointer</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">*</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
-                                                          <span class="n">temperature</span><span class="p">,</span>
-                                                          <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-                <span class="n">points</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">)</span>
+                <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">dos_pointer</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">fermi_function</span><span class="p">(</span>
+                    <span class="n">e</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">),</span>
+                <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+                <span class="n">points</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;analytical&quot;</span><span class="p">:</span>
-            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="s2">&quot;F0&quot;</span><span class="p">,</span> <span class="s2">&quot;F1&quot;</span><span class="p">,</span>
-                                                         <span class="n">fermi_energy</span><span class="p">,</span>
-                                                         <span class="n">energy_grid</span><span class="p">,</span>
-                                                         <span class="n">temperature</span><span class="p">)</span>
+            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span>
+                <span class="n">dos_data</span><span class="p">,</span> <span class="s2">&quot;F0&quot;</span><span class="p">,</span> <span class="s2">&quot;F1&quot;</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">temperature</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">number_of_electrons</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__band_energy_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
-                               <span class="n">temperature</span><span class="p">,</span> <span class="n">integration_method</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__band_energy_from_dos</span><span class="p">(</span>
+        <span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">integration_method</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the band energy from DOS data.&quot;&quot;&quot;</span>
         <span class="c1"># Calculate the energy levels and the Fermi function.</span>
-        <span class="n">fermi_vals</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
-                                    <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">fermi_vals</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span>
+            <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
 
         <span class="c1"># Calculate the band energy.</span>
         <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
-            <span class="n">band_energy</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">dos_data</span> <span class="o">*</span> <span class="p">(</span><span class="n">energy_grid</span> <span class="o">*</span>
-                                                      <span class="n">fermi_vals</span><span class="p">),</span>
-                                          <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">band_energy</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
+                <span class="n">dos_data</span> <span class="o">*</span> <span class="p">(</span><span class="n">energy_grid</span> <span class="o">*</span> <span class="n">fermi_vals</span><span class="p">),</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;simps&quot;</span><span class="p">:</span>
-            <span class="n">band_energy</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span><span class="n">dos_data</span> <span class="o">*</span> <span class="p">(</span><span class="n">energy_grid</span> <span class="o">*</span>
-                                                      <span class="n">fermi_vals</span><span class="p">),</span>
-                                          <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">band_energy</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span>
+                <span class="n">dos_data</span> <span class="o">*</span> <span class="p">(</span><span class="n">energy_grid</span> <span class="o">*</span> <span class="n">fermi_vals</span><span class="p">),</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
             <span class="n">dos_pointer</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">dos_data</span><span class="p">)</span>
             <span class="n">band_energy</span><span class="p">,</span> <span class="n">abserr</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
-                <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">dos_pointer</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">*</span> <span class="n">e</span> <span class="o">*</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
-                                                              <span class="n">temperature</span><span class="p">,</span>
-                                                              <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-                <span class="n">points</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">)</span>
+                <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">dos_pointer</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">e</span>
+                <span class="o">*</span> <span class="n">fermi_function</span><span class="p">(</span>
+                    <span class="n">e</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">),</span>
+                <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+                <span class="n">points</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;analytical&quot;</span><span class="p">:</span>
-            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="s2">&quot;F0&quot;</span><span class="p">,</span> <span class="s2">&quot;F1&quot;</span><span class="p">,</span>
-                                                         <span class="n">fermi_energy</span><span class="p">,</span>
-                                                         <span class="n">energy_grid</span><span class="p">,</span>
-                                                         <span class="n">temperature</span><span class="p">)</span>
-            <span class="n">band_energy_minus_uN</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="s2">&quot;F1&quot;</span><span class="p">,</span> <span class="s2">&quot;F2&quot;</span><span class="p">,</span>
-                                                          <span class="n">fermi_energy</span><span class="p">,</span>
-                                                          <span class="n">energy_grid</span><span class="p">,</span>
-                                                          <span class="n">temperature</span><span class="p">)</span>
-            <span class="n">band_energy</span> <span class="o">=</span> <span class="n">band_energy_minus_uN</span> <span class="o">+</span> <span class="n">fermi_energy</span> <span class="o">*</span> \
-                          <span class="n">number_of_electrons</span>
+            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span>
+                <span class="n">dos_data</span><span class="p">,</span> <span class="s2">&quot;F0&quot;</span><span class="p">,</span> <span class="s2">&quot;F1&quot;</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">temperature</span>
+            <span class="p">)</span>
+            <span class="n">band_energy_minus_uN</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span>
+                <span class="n">dos_data</span><span class="p">,</span> <span class="s2">&quot;F1&quot;</span><span class="p">,</span> <span class="s2">&quot;F2&quot;</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">temperature</span>
+            <span class="p">)</span>
+            <span class="n">band_energy</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">band_energy_minus_uN</span> <span class="o">+</span> <span class="n">fermi_energy</span> <span class="o">*</span> <span class="n">number_of_electrons</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">band_energy</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__entropy_contribution_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
-                                        <span class="n">temperature</span><span class="p">,</span> <span class="n">integration_method</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__entropy_contribution_from_dos</span><span class="p">(</span>
+        <span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">integration_method</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the entropy contribution to the total energy from DOS data.</span>
 
@@ -981,31 +1076,36 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Calculate the entropy contribution to the energy.</span>
         <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
-            <span class="n">multiplicator</span> <span class="o">=</span> <span class="n">entropy_multiplicator</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
-                                                  <span class="n">temperature</span><span class="p">)</span>
-            <span class="n">entropy_contribution</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">dos_data</span> <span class="o">*</span> <span class="n">multiplicator</span><span class="p">,</span>
-                                                   <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">multiplicator</span> <span class="o">=</span> <span class="n">entropy_multiplicator</span><span class="p">(</span>
+                <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span>
+            <span class="p">)</span>
+            <span class="n">entropy_contribution</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
+                <span class="n">dos_data</span> <span class="o">*</span> <span class="n">multiplicator</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="p">)</span>
             <span class="n">entropy_contribution</span> <span class="o">/=</span> <span class="n">get_beta</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;simps&quot;</span><span class="p">:</span>
-            <span class="n">multiplicator</span> <span class="o">=</span> <span class="n">entropy_multiplicator</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
-                                                  <span class="n">temperature</span><span class="p">)</span>
-            <span class="n">entropy_contribution</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span><span class="n">dos_data</span> <span class="o">*</span> <span class="n">multiplicator</span><span class="p">,</span>
-                                                   <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">multiplicator</span> <span class="o">=</span> <span class="n">entropy_multiplicator</span><span class="p">(</span>
+                <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span>
+            <span class="p">)</span>
+            <span class="n">entropy_contribution</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span>
+                <span class="n">dos_data</span> <span class="o">*</span> <span class="n">multiplicator</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="p">)</span>
             <span class="n">entropy_contribution</span> <span class="o">/=</span> <span class="n">get_beta</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
             <span class="n">dos_pointer</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">dos_data</span><span class="p">)</span>
             <span class="n">entropy_contribution</span><span class="p">,</span> <span class="n">abserr</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
-                <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">dos_pointer</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">*</span>
-                          <span class="n">entropy_multiplicator</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
-                                                <span class="n">temperature</span><span class="p">),</span>
-                <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-                <span class="n">points</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">)</span>
+                <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">dos_pointer</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">entropy_multiplicator</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">),</span>
+                <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+                <span class="n">points</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">entropy_contribution</span> <span class="o">/=</span> <span class="n">get_beta</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;analytical&quot;</span><span class="p">:</span>
-            <span class="n">entropy_contribution</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="s2">&quot;S0&quot;</span><span class="p">,</span> <span class="s2">&quot;S1&quot;</span><span class="p">,</span>
-                                                          <span class="n">fermi_energy</span><span class="p">,</span>
-                                                          <span class="n">energy_grid</span><span class="p">,</span>
-                                                          <span class="n">temperature</span><span class="p">)</span>
+            <span class="n">entropy_contribution</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span>
+                <span class="n">dos_data</span><span class="p">,</span> <span class="s2">&quot;S0&quot;</span><span class="p">,</span> <span class="s2">&quot;S1&quot;</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">temperature</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span>
 

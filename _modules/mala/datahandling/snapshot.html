@@ -75,9 +75,6 @@
              
   <h1>Source code for mala.datahandling.snapshot</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Represents an entire atomic snapshot (including descriptor/target data).&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
-
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.json_serializable</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
 
@@ -126,12 +123,18 @@
 <span class="sd">        Default is None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_npy_file</span><span class="p">,</span> <span class="n">input_npy_directory</span><span class="p">,</span>
-                 <span class="n">output_npy_file</span><span class="p">,</span>  <span class="n">output_npy_directory</span><span class="p">,</span>
-                 <span class="n">snapshot_function</span><span class="p">,</span>
-                 <span class="n">input_units</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">output_units</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-                 <span class="n">calculation_output</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-                 <span class="n">snapshot_type</span><span class="o">=</span><span class="s2">&quot;openpmd&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_npy_file</span><span class="p">,</span>
+        <span class="n">input_npy_directory</span><span class="p">,</span>
+        <span class="n">output_npy_file</span><span class="p">,</span>
+        <span class="n">output_npy_directory</span><span class="p">,</span>
+        <span class="n">snapshot_function</span><span class="p">,</span>
+        <span class="n">input_units</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">output_units</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">calculation_output</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">snapshot_type</span><span class="o">=</span><span class="s2">&quot;openpmd&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Snapshot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="c1"># Inputs.</span>
@@ -177,12 +180,14 @@
 <span class="sd">            The object as read from the JSON file.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">deserialized_object</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;input_npy_file&quot;</span><span class="p">],</span>
-                                  <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;input_npy_directory&quot;</span><span class="p">],</span>
-                                  <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;output_npy_file&quot;</span><span class="p">],</span>
-                                  <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;output_npy_directory&quot;</span><span class="p">],</span>
-                                  <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;snapshot_function&quot;</span><span class="p">],</span>
-                                  <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;snapshot_type&quot;</span><span class="p">])</span>
+        <span class="n">deserialized_object</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;input_npy_file&quot;</span><span class="p">],</span>
+            <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;input_npy_directory&quot;</span><span class="p">],</span>
+            <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;output_npy_file&quot;</span><span class="p">],</span>
+            <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;output_npy_directory&quot;</span><span class="p">],</span>
+            <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;snapshot_function&quot;</span><span class="p">],</span>
+            <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;snapshot_type&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">json_dict</span><span class="p">:</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="n">deserialized_object</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">deserialized_object</span></div></div>

@@ -75,15 +75,16 @@
              
   <h1>Source code for mala.datahandling.lazy_load_dataset_single</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;DataSet for lazy-loading.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">shared_memory</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
 
-<div class="viewcode-block" id="LazyLoadDatasetSingle"><a class="viewcode-back" href="../../../api/mala.datahandling.lazy_load_dataset_single.html#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle">[docs]</a><span class="k">class</span> <span class="nc">LazyLoadDatasetSingle</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+<div class="viewcode-block" id="LazyLoadDatasetSingle"><a class="viewcode-back" href="../../../api/mala.datahandling.lazy_load_dataset_single.html#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle">[docs]</a><span class="k">class</span> <span class="nc">LazyLoadDatasetSingle</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    DataSet class for lazy loading.</span>
 
@@ -121,10 +122,19 @@
 <span class="sd">        If True, then the gradient is stored for the inputs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">,</span> <span class="n">input_dimension</span><span class="p">,</span> <span class="n">output_dimension</span><span class="p">,</span>
-                 <span class="n">input_data_scaler</span><span class="p">,</span> <span class="n">output_data_scaler</span><span class="p">,</span> <span class="n">descriptor_calculator</span><span class="p">,</span>
-                 <span class="n">target_calculator</span><span class="p">,</span> <span class="n">use_horovod</span><span class="p">,</span>
-                 <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="p">,</span>
+        <span class="n">snapshot</span><span class="p">,</span>
+        <span class="n">input_dimension</span><span class="p">,</span>
+        <span class="n">output_dimension</span><span class="p">,</span>
+        <span class="n">input_data_scaler</span><span class="p">,</span>
+        <span class="n">output_data_scaler</span><span class="p">,</span>
+        <span class="n">descriptor_calculator</span><span class="p">,</span>
+        <span class="n">target_calculator</span><span class="p">,</span>
+        <span class="n">use_horovod</span><span class="p">,</span>
+        <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span> <span class="o">=</span> <span class="n">snapshot</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span> <span class="o">=</span> <span class="n">input_dimension</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span> <span class="o">=</span> <span class="n">output_dimension</span>
@@ -134,8 +144,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">target_calculator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_size</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
-            <span class="n">descriptors_contain_xyz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -159,25 +170,45 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get array shape and data types</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">input_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
-                <span class="n">read_dimensions_from_numpy_file</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
-                             <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">),</span> <span class="n">read_dtype</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dtype</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">read_dimensions_from_numpy_file</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="n">read_dtype</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">output_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                <span class="n">read_dimensions_from_numpy_file</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
-                             <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">),</span> <span class="n">read_dtype</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dtype</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_dimensions_from_numpy_file</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="n">read_dtype</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">input_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
-                <span class="n">read_dimensions_from_openpmd_file</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
-                             <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">),</span> <span class="n">read_dtype</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dtype</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">read_dimensions_from_openpmd_file</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="n">read_dtype</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">output_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                <span class="n">read_dimensions_from_openpmd_file</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
-                             <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">),</span> <span class="n">read_dtype</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dtype</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_dimensions_from_openpmd_file</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="n">read_dtype</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid snapshot type selected.&quot;</span><span class="p">)</span>
 
@@ -185,8 +216,9 @@
         <span class="c1"># usage to data in FP32 type (which is a good idea anyway to save</span>
         <span class="c1"># memory)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dtype</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dtype</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;LazyLoadDatasetSingle requires numpy data in &quot;</span>
-                            <span class="s2">&quot;FP32.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;LazyLoadDatasetSingle requires numpy data in FP32.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Allocate shared memory buffer</span>
         <span class="n">input_bytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dtype</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_shape</span><span class="p">)</span>
@@ -240,16 +272,22 @@
         <span class="n">input_shm</span> <span class="o">=</span> <span class="n">shared_memory</span><span class="o">.</span><span class="n">SharedMemory</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_shm_name</span><span class="p">)</span>
         <span class="n">output_shm</span> <span class="o">=</span> <span class="n">shared_memory</span><span class="o">.</span><span class="n">SharedMemory</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_shm_name</span><span class="p">)</span>
 
-        <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
-                                       <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">],</span>
-                                <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="n">input_shm</span><span class="o">.</span><span class="n">buf</span><span class="p">)</span>
-        <span class="n">output_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
-                                        <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">],</span>
-                                 <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="n">output_shm</span><span class="o">.</span><span class="n">buf</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">len</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">:]</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span>
+            <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+            <span class="n">buffer</span><span class="o">=</span><span class="n">input_shm</span><span class="o">.</span><span class="n">buf</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">output_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span>
+            <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+            <span class="n">buffer</span><span class="o">=</span><span class="n">output_shm</span><span class="o">.</span><span class="n">buf</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="p">:]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">idx</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">:(</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">]</span>
+            <span class="n">batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span>
+                <span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="p">:</span> <span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
+            <span class="p">]</span>
         <span class="c1"># print(batch.shape)</span>
 
         <span class="n">input_batch</span> <span class="o">=</span> <span class="n">input_data</span><span class="p">[</span><span class="n">batch</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
@@ -296,7 +334,6 @@
 <span class="sd">        single dataset object is used back to back.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">)</span></div></div>
-
 </pre></div>
 
            </div>

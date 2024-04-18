@@ -75,7 +75,6 @@
              
   <h1>Source code for mala.network.hyperparameter_acsd</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Hyperparameter to use with optuna.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">optuna.trial</span> <span class="kn">import</span> <span class="n">Trial</span>
 
 <span class="kn">from</span> <span class="nn">mala.network.hyperparameter</span> <span class="kn">import</span> <span class="n">Hyperparameter</span>
 
@@ -112,12 +111,18 @@
 <span class="sd">        List of possible choices (for categorical parameter).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hotype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">HyperparameterACSD</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span>
-                                                 <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                                                 <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span>
-                                                 <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span>
-                                                 <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">hotype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HyperparameterACSD</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span>
+        <span class="p">)</span>
 
         <span class="c1"># For now, only three types of hyperparameters are allowed:</span>
         <span class="c1"># Lists, floats and ints.</span>

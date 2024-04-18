@@ -75,21 +75,25 @@
              
   <h1>Source code for mala.targets.density</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Electronic density calculation class.&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
+
 <span class="kn">import</span> <span class="nn">time</span>
 
-<span class="kn">import</span> <span class="nn">ase.io</span>
 <span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">Bohr</span><span class="p">,</span> <span class="n">m</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">total_energy</span> <span class="k">as</span> <span class="nn">te</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="k">pass</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">parallel_warn</span><span class="p">,</span> <span class="n">barrier</span><span class="p">,</span> <span class="n">get_size</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">printout</span><span class="p">,</span>
+    <span class="n">parallel_warn</span><span class="p">,</span>
+    <span class="n">barrier</span><span class="p">,</span>
+    <span class="n">get_size</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mala.targets.target</span> <span class="kn">import</span> <span class="n">Target</span>
-<span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="n">integrate_values_on_spacing</span>
 <span class="kn">from</span> <span class="nn">mala.targets.cube_parser</span> <span class="kn">import</span> <span class="n">read_cube</span><span class="p">,</span> <span class="n">write_cube</span>
 <span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="n">integrate_values_on_spacing</span>
 <span class="kn">from</span> <span class="nn">mala.targets.xsf_parser</span> <span class="kn">import</span> <span class="n">read_xsf</span>
@@ -269,20 +273,25 @@
         <span class="n">return_density_object</span><span class="o">.</span><span class="n">fermi_energy_dft</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
         <span class="n">return_density_object</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">temperature</span>
         <span class="n">return_density_object</span><span class="o">.</span><span class="n">voxel</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">voxel</span>
-        <span class="n">return_density_object</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span>\
-            <span class="n">number_of_electrons_exact</span>
-        <span class="n">return_density_object</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span>\
-            <span class="n">band_energy_dft_calculation</span>
+        <span class="n">return_density_object</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ldos_object</span><span class="o">.</span><span class="n">number_of_electrons_exact</span>
+        <span class="p">)</span>
+        <span class="n">return_density_object</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ldos_object</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span>
+        <span class="p">)</span>
         <span class="n">return_density_object</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">grid_dimensions</span>
         <span class="n">return_density_object</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">atoms</span>
         <span class="n">return_density_object</span><span class="o">.</span><span class="n">qe_input_data</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">qe_input_data</span>
-        <span class="n">return_density_object</span><span class="o">.</span><span class="n">qe_pseudopotentials</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span>\
-            <span class="n">qe_pseudopotentials</span>
-        <span class="n">return_density_object</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span> <span class="o">=</span> \
+        <span class="n">return_density_object</span><span class="o">.</span><span class="n">qe_pseudopotentials</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ldos_object</span><span class="o">.</span><span class="n">qe_pseudopotentials</span>
+        <span class="p">)</span>
+        <span class="n">return_density_object</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">ldos_object</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span>
+        <span class="p">)</span>
         <span class="n">return_density_object</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">kpoints</span>
-        <span class="n">return_density_object</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span> <span class="o">=</span> \
+        <span class="n">return_density_object</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">ldos_object</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span>
+        <span class="p">)</span>
         <span class="n">return_density_object</span><span class="o">.</span><span class="n">local_grid</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">local_grid</span>
         <span class="n">return_density_object</span><span class="o">.</span><span class="n">_parameters_full</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">_parameters_full</span>
         <span class="n">return_density_object</span><span class="o">.</span><span class="n">y_planes</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">y_planes</span>
@@ -365,8 +374,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_number_of_electrons</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached density available to &quot;</span>
-                            <span class="s2">&quot;calculate this property.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No cached density available to calculate this property.&quot;</span>
+            <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">total_energy_contributions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -378,8 +388,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_contributions</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached density available to &quot;</span>
-                            <span class="s2">&quot;calculate this property.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;No cached density available to calculate this property.&quot;</span>
+            <span class="p">)</span>
 
 <div class="viewcode-block" id="Density.uncache_properties"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.uncache_properties">[docs]</a>    <span class="k">def</span> <span class="nf">uncache_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Uncache all cached properties of this calculator.&quot;&quot;&quot;</span>
@@ -422,7 +433,7 @@
         <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/A^3&quot;</span> <span class="ow">or</span> <span class="n">in_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">array</span>
         <span class="k">elif</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/Bohr^3&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Bohr</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for density.&quot;</span><span class="p">)</span></div>
 
@@ -488,7 +499,7 @@
 <span class="sd">            Units the density is saved in. Usually none.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Reading density from .cube file &quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">data</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">read_xsf</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">read_xsf</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="n">data</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -508,9 +519,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="n">array</span>
         <span class="k">return</span> <span class="n">array</span></div>
 
-<div class="viewcode-block" id="Density.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                              <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{},</span>
-                              <span class="n">internal_iteration_number</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="Density.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">,</span>
+        <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">internal_iteration_number</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write data to a numpy file.</span>
 
@@ -533,25 +548,27 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span>\
-                    <span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">,</span>
-                                                           <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span>
-                                                           <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-                                          <span class="n">internal_iteration_number</span><span class="o">=</span>
-                                          <span class="n">internal_iteration_number</span><span class="p">)</span>
+                <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">write_to_openpmd_file</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                    <span class="n">internal_iteration_number</span><span class="o">=</span><span class="n">internal_iteration_number</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span>\
-                    <span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">,</span>
-                                          <span class="n">internal_iteration_number</span><span class="o">=</span>
-                                          <span class="n">internal_iteration_number</span><span class="p">)</span>
+                <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">write_to_openpmd_file</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">,</span>
+                    <span class="n">internal_iteration_number</span><span class="o">=</span><span class="n">internal_iteration_number</span><span class="p">,</span>
+                <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span>\
-                <span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span>
-                                      <span class="n">internal_iteration_number</span><span class="o">=</span>
-                                      <span class="n">internal_iteration_number</span><span class="p">)</span></div>
+            <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">write_to_openpmd_file</span><span class="p">(</span>
+                <span class="n">path</span><span class="p">,</span>
+                <span class="n">array</span><span class="p">,</span>
+                <span class="n">internal_iteration_number</span><span class="o">=</span><span class="n">internal_iteration_number</span><span class="p">,</span>
+            <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Density.write_to_cube"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.write_to_cube">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                      <span class="n">grid_dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Density.write_to_cube"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.write_to_cube">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_cube</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write the density data in a cube file.</span>
 
@@ -573,10 +590,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">grid_dimensions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No grid or atom data provided. &quot;</span>
-                                <span class="s2">&quot;Please note that these are only optional &quot;</span>
-                                <span class="s2">&quot;if the density saved in the calculator is &quot;</span>
-                                <span class="s2">&quot;used and have to be provided otherwise.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;No grid or atom data provided. &quot;</span>
+                    <span class="s2">&quot;Please note that these are only optional &quot;</span>
+                    <span class="s2">&quot;if the density saved in the calculator is &quot;</span>
+                    <span class="s2">&quot;used and have to be provided otherwise.&quot;</span>
+                <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">density_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span>
             <span class="n">grid_dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span>
@@ -591,7 +610,14 @@
         <span class="n">atom_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)):</span>
             <span class="n">atom_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">atoms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">number</span><span class="p">,</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span> <span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">atoms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">position</span> <span class="o">/</span> <span class="n">Bohr</span><span class="p">)))</span>
+                <span class="p">(</span>
+                    <span class="n">atoms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>
+                    <span class="p">[</span>
+                        <span class="mf">4.0</span><span class="p">,</span>
+                    <span class="p">]</span>
+                    <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">atoms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">position</span> <span class="o">/</span> <span class="n">Bohr</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">atom_list</span>
         <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;org&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
@@ -603,8 +629,9 @@
     <span class="c1"># Calculations</span>
     <span class="c1">##############</span>
 
-<div class="viewcode-block" id="Density.get_number_of_electrons"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_number_of_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Density.get_number_of_electrons"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_number_of_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the number of electrons from given density data.</span>
 
@@ -631,8 +658,10 @@
         <span class="k">if</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">density_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span>
             <span class="k">if</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No density data provided, cannot calculate&quot;</span>
-                                <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;No density data provided, cannot calculate&quot;</span>
+                    <span class="s2">&quot; this quantity.&quot;</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">voxel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span>
@@ -641,11 +670,15 @@
         <span class="n">data_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">density_data</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown Density shape, cannot calculate &quot;</span>
-                                <span class="s2">&quot;number of electrons.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Unknown Density shape, cannot calculate &quot;</span>
+                    <span class="s2">&quot;number of electrons.&quot;</span>
+                <span class="p">)</span>
             <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">!=</span> <span class="s2">&quot;summation&quot;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;If using a 1D density array, you can only&quot;</span>
-                                <span class="s2">&quot; use summation as integration method.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;If using a 1D density array, you can only&quot;</span>
+                    <span class="s2">&quot; use summation as integration method.&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># We integrate along the three axis in space.</span>
         <span class="c1"># If there is only one point in a certain direction we do not</span>
@@ -662,47 +695,60 @@
 
             <span class="c1"># X</span>
             <span class="k">if</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">number_of_electrons</span> <span class="o">=</span> \
-                    <span class="n">integrate_values_on_spacing</span><span class="p">(</span><span class="n">number_of_electrons</span><span class="p">,</span>
-                                                <span class="n">grid_spacing_bohr_x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                                <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">)</span>
+                <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">integrate_values_on_spacing</span><span class="p">(</span>
+                    <span class="n">number_of_electrons</span><span class="p">,</span>
+                    <span class="n">grid_spacing_bohr_x</span><span class="p">,</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">number_of_electrons</span> <span class="o">=</span>\
-                    <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">number_of_electrons</span><span class="p">,</span> <span class="p">(</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                                     <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+                <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                    <span class="n">number_of_electrons</span><span class="p">,</span> <span class="p">(</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="p">)</span>
                 <span class="n">number_of_electrons</span> <span class="o">*=</span> <span class="n">grid_spacing_bohr_x</span>
 
             <span class="c1"># Y</span>
             <span class="k">if</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">number_of_electrons</span> <span class="o">=</span> \
-                    <span class="n">integrate_values_on_spacing</span><span class="p">(</span><span class="n">number_of_electrons</span><span class="p">,</span>
-                                                <span class="n">grid_spacing_bohr_y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                                <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">)</span>
+                <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">integrate_values_on_spacing</span><span class="p">(</span>
+                    <span class="n">number_of_electrons</span><span class="p">,</span>
+                    <span class="n">grid_spacing_bohr_y</span><span class="p">,</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">number_of_electrons</span> <span class="o">=</span> \
-                    <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">number_of_electrons</span><span class="p">,</span> <span class="p">(</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+                <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                    <span class="n">number_of_electrons</span><span class="p">,</span> <span class="p">(</span><span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="p">)</span>
                 <span class="n">number_of_electrons</span> <span class="o">*=</span> <span class="n">grid_spacing_bohr_y</span>
 
             <span class="c1"># Z</span>
             <span class="k">if</span> <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">number_of_electrons</span> <span class="o">=</span> \
-                    <span class="n">integrate_values_on_spacing</span><span class="p">(</span><span class="n">number_of_electrons</span><span class="p">,</span>
-                                                <span class="n">grid_spacing_bohr_z</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                                <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">)</span>
+                <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">integrate_values_on_spacing</span><span class="p">(</span>
+                    <span class="n">number_of_electrons</span><span class="p">,</span>
+                    <span class="n">grid_spacing_bohr_z</span><span class="p">,</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">number_of_electrons</span> <span class="o">*=</span> <span class="n">grid_spacing_bohr_z</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> \
-                                      <span class="o">*</span> <span class="n">voxel</span><span class="o">.</span><span class="n">volume</span>
+                <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="n">voxel</span><span class="o">.</span><span class="n">volume</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> \
-                                      <span class="n">voxel</span><span class="o">.</span><span class="n">volume</span>
+                <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">voxel</span><span class="o">.</span><span class="n">volume</span>
+                <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">number_of_electrons</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Density.get_density"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_density">[docs]</a>    <span class="k">def</span> <span class="nf">get_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">convert_to_threedimensional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="n">grid_dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Density.get_density"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_density">[docs]</a>    <span class="k">def</span> <span class="nf">get_density</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">convert_to_threedimensional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">grid_dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the electronic density, based on density data.</span>
 
@@ -748,23 +794,33 @@
                     <span class="c1">#                                   last_y-first_y,</span>
                     <span class="c1">#                                   last_z-first_z],</span>
                     <span class="c1">#                                  dtype=np.float64)</span>
-                    <span class="n">density_data</span> <span class="o">=</span> \
-                        <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span>
-                                   <span class="p">[</span><span class="n">last_z</span> <span class="o">-</span> <span class="n">first_z</span><span class="p">,</span> <span class="n">last_y</span> <span class="o">-</span> <span class="n">first_y</span><span class="p">,</span>
-                                    <span class="n">last_x</span> <span class="o">-</span> <span class="n">first_x</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+                    <span class="n">density_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                        <span class="n">density_data</span><span class="p">,</span>
+                        <span class="p">[</span>
+                            <span class="n">last_z</span> <span class="o">-</span> <span class="n">first_z</span><span class="p">,</span>
+                            <span class="n">last_y</span> <span class="o">-</span> <span class="n">first_y</span><span class="p">,</span>
+                            <span class="n">last_x</span> <span class="o">-</span> <span class="n">first_x</span><span class="p">,</span>
+                            <span class="mi">1</span><span class="p">,</span>
+                        <span class="p">],</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
                     <span class="k">return</span> <span class="n">density_data</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">grid_dimensions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">grid_dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span>
-                    <span class="k">return</span> <span class="n">density_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">grid_dimensions</span><span class="o">+</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="k">return</span> <span class="n">density_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">grid_dimensions</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">density_data</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown density data shape.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Density.get_energy_contributions"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_energy_contributions">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_contributions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">create_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                 <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qe_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                 <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Density.get_energy_contributions"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_energy_contributions">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_contributions</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">create_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">qe_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract density based energy contributions from Quantum Espresso.</span>
 
@@ -807,27 +863,39 @@
         <span class="k">if</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">density_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span>
             <span class="k">if</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No density data provided, cannot calculate&quot;</span>
-                                <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;No density data provided, cannot calculate&quot;</span>
+                    <span class="s2">&quot; this quantity.&quot;</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">atoms_Angstrom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">atoms_Angstrom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__setup_total_energy_module</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span> <span class="n">atoms_Angstrom</span><span class="p">,</span>
-                                         <span class="n">create_file</span><span class="o">=</span><span class="n">create_file</span><span class="p">,</span>
-                                         <span class="n">qe_input_data</span><span class="o">=</span><span class="n">qe_input_data</span><span class="p">,</span>
-                                         <span class="n">qe_pseudopotentials</span><span class="o">=</span>
-                                         <span class="n">qe_pseudopotentials</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__setup_total_energy_module</span><span class="p">(</span>
+            <span class="n">density_data</span><span class="p">,</span>
+            <span class="n">atoms_Angstrom</span><span class="p">,</span>
+            <span class="n">create_file</span><span class="o">=</span><span class="n">create_file</span><span class="p">,</span>
+            <span class="n">qe_input_data</span><span class="o">=</span><span class="n">qe_input_data</span><span class="p">,</span>
+            <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="n">qe_pseudopotentials</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Get and return the energies.</span>
-        <span class="n">energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">get_energies</span><span class="p">())</span><span class="o">*</span><span class="n">Rydberg</span>
-        <span class="n">energies_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;e_rho_times_v_hxc&quot;</span><span class="p">:</span> <span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                         <span class="s2">&quot;e_hartree&quot;</span><span class="p">:</span> <span class="n">energies</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;e_xc&quot;</span><span class="p">:</span> <span class="n">energies</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                         <span class="s2">&quot;e_ewald&quot;</span><span class="p">:</span> <span class="n">energies</span><span class="p">[</span><span class="mi">3</span><span class="p">]}</span>
+        <span class="n">energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">get_energies</span><span class="p">())</span> <span class="o">*</span> <span class="n">Rydberg</span>
+        <span class="n">energies_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;e_rho_times_v_hxc&quot;</span><span class="p">:</span> <span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s2">&quot;e_hartree&quot;</span><span class="p">:</span> <span class="n">energies</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="s2">&quot;e_xc&quot;</span><span class="p">:</span> <span class="n">energies</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="s2">&quot;e_ewald&quot;</span><span class="p">:</span> <span class="n">energies</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+        <span class="p">}</span>
         <span class="k">return</span> <span class="n">energies_dict</span></div>
 
-<div class="viewcode-block" id="Density.get_atomic_forces"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_atomic_forces">[docs]</a>    <span class="k">def</span> <span class="nf">get_atomic_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">create_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                          <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qe_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Density.get_atomic_forces"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_atomic_forces">[docs]</a>    <span class="k">def</span> <span class="nf">get_atomic_forces</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">create_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">qe_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the atomic forces.</span>
 
@@ -871,24 +939,31 @@
         <span class="k">if</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">density_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span>
             <span class="k">if</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No density data provided, cannot calculate&quot;</span>
-                                <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;No density data provided, cannot calculate&quot;</span>
+                    <span class="s2">&quot; this quantity.&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># First, set up the total energy module for calculation.</span>
         <span class="k">if</span> <span class="n">atoms_Angstrom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">atoms_Angstrom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__setup_total_energy_module</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span> <span class="n">atoms_Angstrom</span><span class="p">,</span>
-                                         <span class="n">create_file</span><span class="o">=</span><span class="n">create_file</span><span class="p">,</span>
-                                         <span class="n">qe_input_data</span><span class="o">=</span><span class="n">qe_input_data</span><span class="p">,</span>
-                                         <span class="n">qe_pseudopotentials</span><span class="o">=</span>
-                                         <span class="n">qe_pseudopotentials</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__setup_total_energy_module</span><span class="p">(</span>
+            <span class="n">density_data</span><span class="p">,</span>
+            <span class="n">atoms_Angstrom</span><span class="p">,</span>
+            <span class="n">create_file</span><span class="o">=</span><span class="n">create_file</span><span class="p">,</span>
+            <span class="n">qe_input_data</span><span class="o">=</span><span class="n">qe_input_data</span><span class="p">,</span>
+            <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="n">qe_pseudopotentials</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Now calculate the forces.</span>
-        <span class="n">atomic_forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">calc_forces</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms_Angstrom</span><span class="p">)))</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="n">atomic_forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="n">te</span><span class="o">.</span><span class="n">calc_forces</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms_Angstrom</span><span class="p">))</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
 
         <span class="c1"># QE returns the forces in Ry/Bohr.</span>
-        <span class="n">atomic_forces</span> <span class="o">=</span> <span class="n">AtomicForce</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="n">atomic_forces</span><span class="p">,</span>
-                                                  <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;Ry/Bohr&quot;</span><span class="p">)</span>
+        <span class="n">atomic_forces</span> <span class="o">=</span> <span class="n">AtomicForce</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span>
+            <span class="n">atomic_forces</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;Ry/Bohr&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">atomic_forces</span></div>
 
 <div class="viewcode-block" id="Density.get_scaled_positions_for_qe"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_scaled_positions_for_qe">[docs]</a>    <span class="nd">@staticmethod</span>
@@ -913,7 +988,7 @@
 <span class="sd">            The scaled positions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">principal_axis</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">scaled_positions</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span><span class="o">/</span><span class="n">principal_axis</span>
+        <span class="n">scaled_positions</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span> <span class="o">/</span> <span class="n">principal_axis</span>
         <span class="k">return</span> <span class="n">scaled_positions</span></div>
 
     <span class="c1"># Private methods</span>
@@ -928,9 +1003,14 @@
         <span class="c1"># Feature size is always 1 in this case, no need to do anything.</span>
         <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="nf">__setup_total_energy_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density_data</span><span class="p">,</span> <span class="n">atoms_Angstrom</span><span class="p">,</span>
-                                    <span class="n">create_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">qe_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                    <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__setup_total_energy_module</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">density_data</span><span class="p">,</span>
+        <span class="n">atoms_Angstrom</span><span class="p">,</span>
+        <span class="n">create_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">qe_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="k">if</span> <span class="n">create_file</span><span class="p">:</span>
             <span class="c1"># If not otherwise specified, use values as read in.</span>
             <span class="k">if</span> <span class="n">qe_input_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -938,10 +1018,13 @@
             <span class="k">if</span> <span class="n">qe_pseudopotentials</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">qe_pseudopotentials</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qe_pseudopotentials</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">write_tem_input_file</span><span class="p">(</span><span class="n">atoms_Angstrom</span><span class="p">,</span> <span class="n">qe_input_data</span><span class="p">,</span>
-                                      <span class="n">qe_pseudopotentials</span><span class="p">,</span>
-                                      <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">,</span>
-                                      <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_tem_input_file</span><span class="p">(</span>
+                <span class="n">atoms_Angstrom</span><span class="p">,</span>
+                <span class="n">qe_input_data</span><span class="p">,</span>
+                <span class="n">qe_pseudopotentials</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># initialize the total energy module.</span>
         <span class="c1"># FIXME: So far, the total energy module can only be initialized once.</span>
@@ -952,8 +1035,11 @@
         <span class="c1"># for this.</span>
 
         <span class="k">if</span> <span class="n">Density</span><span class="o">.</span><span class="n">te_mutex</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;MALA: Starting QuantumEspresso to get density-based&quot;</span>
-                     <span class="s2">&quot; energy contributions.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;MALA: Starting QuantumEspresso to get density-based&quot;</span>
+                <span class="s2">&quot; energy contributions.&quot;</span><span class="p">,</span>
+                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">barrier</span><span class="p">()</span>
             <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
             <span class="n">te</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_planes</span><span class="p">)</span>
@@ -964,9 +1050,11 @@
             <span class="n">Density</span><span class="o">.</span><span class="n">te_mutex</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;MALA: QuantumEspresso setup done.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;MALA: QuantumEspresso is already running. Except for&quot;</span>
-                     <span class="s2">&quot; the atomic positions, no new parameters will be used.&quot;</span><span class="p">,</span>
-                     <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;MALA: QuantumEspresso is already running. Except for&quot;</span>
+                <span class="s2">&quot; the atomic positions, no new parameters will be used.&quot;</span><span class="p">,</span>
+                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># Before we proceed, some sanity checks are necessary.</span>
         <span class="c1"># Is the calculation spinpolarized?</span>
@@ -978,67 +1066,83 @@
         <span class="n">number_of_atoms</span> <span class="o">=</span> <span class="n">te</span><span class="o">.</span><span class="n">get_nat</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">create_file</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">number_of_atoms</span> <span class="o">!=</span> <span class="n">atoms_Angstrom</span><span class="o">.</span><span class="n">get_global_number_of_atoms</span><span class="p">():</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Number of atoms is inconsistent between MALA &quot;</span>
-                                <span class="s2">&quot;and Quantum Espresso.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Number of atoms is inconsistent between MALA &quot;</span>
+                    <span class="s2">&quot;and Quantum Espresso.&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># We need to find out if the grid dimensions are consistent.</span>
         <span class="c1"># That depends on the form of the density data we received.</span>
         <span class="n">number_of_gridpoints</span> <span class="o">=</span> <span class="n">te</span><span class="o">.</span><span class="n">get_nnr</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="n">number_of_gridpoints_mala</span> <span class="o">=</span> <span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> \
-                                        <span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> \
-                                        <span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">number_of_gridpoints_mala</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="o">*</span> <span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="o">*</span> <span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">number_of_gridpoints_mala</span> <span class="o">=</span> <span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Density data has wrong dimensions. &quot;</span><span class="p">)</span>
 
         <span class="c1"># If MPI is enabled, we NEED z-splitting for this to work.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">use_mpi</span> <span class="ow">and</span> \
-                <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_z_splitting</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot calculate the total energy if &quot;</span>
-                            <span class="s2">&quot;the real space grid was not split in &quot;</span>
-                            <span class="s2">&quot;z-direction.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">use_mpi</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_z_splitting</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Cannot calculate the total energy if &quot;</span>
+                <span class="s2">&quot;the real space grid was not split in &quot;</span>
+                <span class="s2">&quot;z-direction.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Check if we need to test the grid points.</span>
         <span class="c1"># We skip the check only if z-splitting is enabled and unequal</span>
         <span class="c1"># z-splits are to be expected, and no</span>
         <span class="c1"># y-splitting is enabled (since y-splitting currently works</span>
         <span class="c1"># for equal z-splitting anyway).</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">use_mpi</span> <span class="ow">and</span> \
-           <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_y_splitting</span> <span class="o">==</span> <span class="mi">0</span> \
-           <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">get_size</span><span class="p">())</span> <span class="o">!=</span> \
-                  <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">get_size</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">use_mpi</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_y_splitting</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">get_size</span><span class="p">())</span>
+            <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">get_size</span><span class="p">())</span>
+        <span class="p">):</span>
             <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">number_of_gridpoints_mala</span> <span class="o">!=</span> <span class="n">number_of_gridpoints</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Grid is inconsistent between MALA and&quot;</span>
-                                <span class="s2">&quot; Quantum Espresso&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Grid is inconsistent between MALA and Quantum Espresso&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># Now we need to reshape the density.</span>
         <span class="n">density_for_qe</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="n">density_for_qe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span> <span class="p">[</span><span class="n">number_of_gridpoints</span><span class="p">,</span>
-                                                       <span class="mi">1</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+            <span class="n">density_for_qe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="n">density_data</span><span class="p">,</span> <span class="p">[</span><span class="n">number_of_gridpoints</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;F&quot;</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">parallel_warn</span><span class="p">(</span><span class="s2">&quot;Using 1D density to calculate the total energy&quot;</span>
-                          <span class="s2">&quot; requires reshaping of this data. &quot;</span>
-                          <span class="s2">&quot;This is unproblematic, as long as you provided t&quot;</span>
-                          <span class="s2">&quot;he correct grid_dimensions.&quot;</span><span class="p">)</span>
-            <span class="n">density_for_qe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span>
-                                              <span class="n">convert_to_threedimensional</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">parallel_warn</span><span class="p">(</span>
+                <span class="s2">&quot;Using 1D density to calculate the total energy&quot;</span>
+                <span class="s2">&quot; requires reshaping of this data. &quot;</span>
+                <span class="s2">&quot;This is unproblematic, as long as you provided t&quot;</span>
+                <span class="s2">&quot;he correct grid_dimensions.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">density_for_qe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span>
+                <span class="n">density_data</span><span class="p">,</span> <span class="n">convert_to_threedimensional</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
 
-            <span class="n">density_for_qe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">density_for_qe</span><span class="p">,</span>
-                                        <span class="p">[</span><span class="n">number_of_gridpoints_mala</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-                                        <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+            <span class="n">density_for_qe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="n">density_for_qe</span><span class="p">,</span> <span class="p">[</span><span class="n">number_of_gridpoints_mala</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;F&quot;</span>
+            <span class="p">)</span>
 
             <span class="c1"># If there is an inconsistency between MALA and QE (which</span>
             <span class="c1"># can only happen in the uneven z-splitting case at the moment)</span>
             <span class="c1"># we need to pad the density array.</span>
             <span class="k">if</span> <span class="n">density_for_qe</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">number_of_gridpoints</span><span class="p">:</span>
                 <span class="n">grid_diff</span> <span class="o">=</span> <span class="n">number_of_gridpoints</span> <span class="o">-</span> <span class="n">number_of_gridpoints_mala</span>
-                <span class="n">density_for_qe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">density_for_qe</span><span class="p">,</span>
-                                        <span class="n">pad_width</span><span class="o">=</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">grid_diff</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
+                <span class="n">density_for_qe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+                    <span class="n">density_for_qe</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">grid_diff</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                <span class="p">)</span>
 
         <span class="c1"># QE has the density in 1/Bohr^3</span>
         <span class="n">density_for_qe</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backconvert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;1/Bohr^3&quot;</span><span class="p">)</span>
@@ -1048,19 +1152,23 @@
         <span class="c1"># instantiate the process with the file.</span>
         <span class="n">positions_for_qe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_scaled_positions_for_qe</span><span class="p">(</span><span class="n">atoms_Angstrom</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span>\
-                <span class="n">use_atomic_density_energy_formula</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_atomic_density_energy_formula</span><span class="p">:</span>
             <span class="c1"># Calculate the Gaussian descriptors for the calculation of the</span>
             <span class="c1"># structure factors.</span>
             <span class="n">barrier</span><span class="p">()</span>
             <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
-            <span class="n">gaussian_descriptors</span> <span class="o">=</span> \
+            <span class="n">gaussian_descriptors</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_get_gaussian_descriptors_for_structure_factors</span><span class="p">(</span>
-                    <span class="n">atoms_Angstrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">)</span>
+                    <span class="n">atoms_Angstrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
             <span class="n">barrier</span><span class="p">()</span>
             <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
-            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;time used by gaussian descriptors: &quot;</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span>
-                     <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;time used by gaussian descriptors: &quot;</span><span class="p">,</span>
+                <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span>
+                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="c1">#</span>
             <span class="c1"># Check normalization of the Gaussian descriptors</span>
@@ -1081,13 +1189,18 @@
             <span class="n">atoms_reference</span> <span class="o">=</span> <span class="n">atoms_Angstrom</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="k">del</span> <span class="n">atoms_reference</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
             <span class="n">atoms_reference</span><span class="o">.</span><span class="n">set_positions</span><span class="p">([(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)])</span>
-            <span class="n">reference_gaussian_descriptors</span> <span class="o">=</span> \
+            <span class="n">reference_gaussian_descriptors</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_get_gaussian_descriptors_for_structure_factors</span><span class="p">(</span>
-                    <span class="n">atoms_reference</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">)</span>
+                    <span class="n">atoms_reference</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
             <span class="n">barrier</span><span class="p">()</span>
             <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
-            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;time used by reference gaussian descriptors: &quot;</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span>
-                     <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;time used by reference gaussian descriptors: &quot;</span><span class="p">,</span>
+                <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span>
+                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="c1">#</span>
             <span class="c1"># Check normalization of the reference Gaussian descriptors</span>
@@ -1105,50 +1218,59 @@
 
         <span class="c1"># If the Gaussian formula is used, both the calculation of the</span>
         <span class="c1"># Ewald energy and the structure factor can be skipped.</span>
-        <span class="n">te</span><span class="o">.</span><span class="n">set_positions</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">positions_for_qe</span><span class="p">),</span> <span class="n">number_of_atoms</span><span class="p">,</span>
-                         <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span> \
-                         <span class="n">use_atomic_density_energy_formula</span><span class="p">,</span>
-                         <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span> \
-                         <span class="n">use_atomic_density_energy_formula</span><span class="p">)</span>
+        <span class="n">te</span><span class="o">.</span><span class="n">set_positions</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">positions_for_qe</span><span class="p">),</span>
+            <span class="n">number_of_atoms</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_atomic_density_energy_formula</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_atomic_density_energy_formula</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">barrier</span><span class="p">()</span>
         <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;time used by set_positions: &quot;</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span>
-                 <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;time used by set_positions: &quot;</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
         <span class="n">barrier</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span>\
-                <span class="n">use_atomic_density_energy_formula</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_atomic_density_energy_formula</span><span class="p">:</span>
             <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
-            <span class="n">gaussian_descriptors</span> <span class="o">=</span> \
-                <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">gaussian_descriptors</span><span class="p">,</span>
-                           <span class="p">[</span><span class="n">number_of_gridpoints_mala</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
-            <span class="n">reference_gaussian_descriptors</span> <span class="o">=</span> \
-                <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">reference_gaussian_descriptors</span><span class="p">,</span>
-                           <span class="p">[</span><span class="n">number_of_gridpoints_mala</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+            <span class="n">gaussian_descriptors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="n">gaussian_descriptors</span><span class="p">,</span>
+                <span class="p">[</span><span class="n">number_of_gridpoints_mala</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="n">order</span><span class="o">=</span><span class="s2">&quot;F&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">reference_gaussian_descriptors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="n">reference_gaussian_descriptors</span><span class="p">,</span>
+                <span class="p">[</span><span class="n">number_of_gridpoints_mala</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="n">order</span><span class="o">=</span><span class="s2">&quot;F&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="c1"># If there is an inconsistency between MALA and QE (which</span>
             <span class="c1"># can only happen in the uneven z-splitting case at the moment)</span>
             <span class="c1"># we need to pad the gaussian descriptor arrays.</span>
             <span class="k">if</span> <span class="n">number_of_gridpoints_mala</span> <span class="o">&lt;</span> <span class="n">number_of_gridpoints</span><span class="p">:</span>
                 <span class="n">grid_diff</span> <span class="o">=</span> <span class="n">number_of_gridpoints</span> <span class="o">-</span> <span class="n">number_of_gridpoints_mala</span>
-                <span class="n">gaussian_descriptors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">gaussian_descriptors</span><span class="p">,</span>
-                                            <span class="n">pad_width</span><span class="o">=</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">grid_diff</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
-                <span class="n">reference_gaussian_descriptors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">reference_gaussian_descriptors</span><span class="p">,</span>
-                                            <span class="n">pad_width</span><span class="o">=</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">grid_diff</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
+                <span class="n">gaussian_descriptors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+                    <span class="n">gaussian_descriptors</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">grid_diff</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                <span class="p">)</span>
+                <span class="n">reference_gaussian_descriptors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+                    <span class="n">reference_gaussian_descriptors</span><span class="p">,</span>
+                    <span class="n">pad_width</span><span class="o">=</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">grid_diff</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+                <span class="p">)</span>
 
-            <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span>\
-                <span class="n">atomic_density_sigma</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_sigma</span>
             <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">/</span> <span class="n">Bohr</span>
-            <span class="n">te</span><span class="o">.</span><span class="n">set_positions_gauss</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">verbosity</span><span class="p">,</span>
-                                   <span class="n">gaussian_descriptors</span><span class="p">,</span>
-                                   <span class="n">reference_gaussian_descriptors</span><span class="p">,</span>
-                                   <span class="n">sigma</span><span class="p">,</span>
-                                   <span class="n">number_of_gridpoints</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">te</span><span class="o">.</span><span class="n">set_positions_gauss</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">verbosity</span><span class="p">,</span>
+                <span class="n">gaussian_descriptors</span><span class="p">,</span>
+                <span class="n">reference_gaussian_descriptors</span><span class="p">,</span>
+                <span class="n">sigma</span><span class="p">,</span>
+                <span class="n">number_of_gridpoints</span><span class="p">,</span>
+                <span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">barrier</span><span class="p">()</span>
             <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
-            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;time used by set_positions_gauss: &quot;</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span>
-                     <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;time used by set_positions_gauss: &quot;</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span>
+            <span class="p">)</span>
 
         <span class="c1"># Now we can set the new density.</span>
         <span class="n">barrier</span><span class="p">()</span>
@@ -1156,16 +1278,16 @@
         <span class="n">te</span><span class="o">.</span><span class="n">set_rho_of_r</span><span class="p">(</span><span class="n">density_for_qe</span><span class="p">,</span> <span class="n">number_of_gridpoints</span><span class="p">,</span> <span class="n">nr_spin_channels</span><span class="p">)</span>
         <span class="n">barrier</span><span class="p">()</span>
         <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;time used by set_rho_of_r: &quot;</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span>
-                 <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;time used by set_rho_of_r: &quot;</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">atoms_Angstrom</span>
 
     <span class="k">def</span> <span class="nf">_get_gaussian_descriptors_for_structure_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
         <span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">AtomicDensity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="p">)</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;return_directly&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;use_fp64&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
-        <span class="k">return</span> <span class="n">descriptor_calculator</span><span class="o">.</span>\
-            <span class="n">calculate_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)[:,</span> <span class="mi">6</span><span class="p">:]</span></div>
+        <span class="k">return</span> <span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">calculate_from_atoms</span><span class="p">(</span>
+            <span class="n">atoms</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)[:,</span> <span class="mi">6</span><span class="p">:]</span></div>
 </pre></div>
 
            </div>
