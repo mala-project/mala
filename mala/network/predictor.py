@@ -1,10 +1,5 @@
 """Tester class for testing a network."""
-import ase.io
-try:
-    import horovod.torch as hvd
-except ModuleNotFoundError:
-    # Warning is thrown by Parameters class
-    pass
+
 import numpy as np
 import torch
 
@@ -35,9 +30,11 @@ class Predictor(Runner):
         # copy the parameters into the class.
         super(Predictor, self).__init__(params, network, data)
         self.data.grid_dimension = self.parameters.inference_data_grid
-        self.data.grid_size = self.data.grid_dimension[0] * \
-                              self.data.grid_dimension[1] * \
-                              self.data.grid_dimension[2]
+        self.data.grid_size = (
+            self.data.grid_dimension[0]
+            * self.data.grid_dimension[1]
+            * self.data.grid_dimension[2]
+        )
         self.test_data_loader = None
         self.number_of_batches_per_snapshot = 0
         self.target_calculator = data.target_calculator
@@ -63,14 +60,18 @@ class Predictor(Runner):
             Precicted LDOS for these atomic positions.
         """
         self.data.grid_dimension = self.parameters.inference_data_grid
-        self.data.grid_size = self.data.grid_dimension[0] * \
-                              self.data.grid_dimension[1] * \
-                              self.data.grid_dimension[2]
+        self.data.grid_size = (
+            self.data.grid_dimension[0]
+            * self.data.grid_dimension[1]
+            * self.data.grid_dimension[2]
+        )
 
-        self.data.target_calculator.\
-            read_additional_calculation_data(path_to_file, "espresso-out")
-        return self.predict_for_atoms(self.data.target_calculator.atoms,
-                                      gather_ldos=gather_ldos)
+        self.data.target_calculator.read_additional_calculation_data(
+            path_to_file, "espresso-out"
+        )
+        return self.predict_for_atoms(
+            self.data.target_calculator.atoms, gather_ldos=gather_ldos
+        )
 
     def predict_for_atoms(self, atoms, gather_ldos=False, temperature=None):
         """
@@ -110,10 +111,11 @@ class Predictor(Runner):
             new_cell = atoms.get_cell()
 
             # We only need the diagonal elements.
-            factor = np.diag(new_cell)/np.diag(old_cell)
+            factor = np.diag(new_cell) / np.diag(old_cell)
             factor = factor.astype(int)
-            self.data.grid_dimension = \
+            self.data.grid_dimension = (
                 factor * self.data.target_calculator.grid_dimensions
+            )
 
         self.data.grid_size = np.prod(self.data.grid_dimension)
 
@@ -125,13 +127,16 @@ class Predictor(Runner):
         self.data.target_calculator.invalidate_target()
 
         # Calculate descriptors.
-        snap_descriptors, local_size = self.data.descriptor_calculator.\
-            calculate_from_atoms(atoms, self.data.grid_dimension)
+        snap_descriptors, local_size = (
+            self.data.descriptor_calculator.calculate_from_atoms(
+                atoms, self.data.grid_dimension
+            )
+        )
 
         # Provide info from current snapshot to target calculator.
-        self.data.target_calculator.\
-            read_additional_calculation_data([atoms, self.data.grid_dimension],
-                                             "atoms+grid")
+        self.data.target_calculator.read_additional_calculation_data(
+            [atoms, self.data.grid_dimension], "atoms+grid"
+        )
         feature_length = self.data.descriptor_calculator.fingerprint_length
 
         # The actual calculation of the LDOS from the descriptors depends
@@ -140,8 +145,11 @@ class Predictor(Runner):
         # case, everything is forwarded at once.
         if self.parameters._configuration["mpi"]:
             if gather_ldos is True:
-                snap_descriptors = self.data.descriptor_calculator. \
-                    gather_descriptors(snap_descriptors)
+                snap_descriptors = (
+                    self.data.descriptor_calculator.gather_descriptors(
+                        snap_descriptors
+                    )
+                )
 
                 # Just entering the forwarding function to wait for the
                 # main rank further down.
@@ -151,41 +159,44 @@ class Predictor(Runner):
 
             else:
                 if self.data.descriptor_calculator.descriptors_contain_xyz:
-                    self.data.target_calculator.local_grid = \
-                        snap_descriptors[:, 0:3].copy()
-                    self.data.target_calculator.y_planes = \
-                        self.data.descriptor_calculator.parameters.\
-                        use_y_splitting
+                    self.data.target_calculator.local_grid = snap_descriptors[
+                        :, 0:3
+                    ].copy()
+                    self.data.target_calculator.y_planes = (
+                        self.data.descriptor_calculator.parameters.use_y_splitting
+                    )
                     snap_descriptors = snap_descriptors[:, 6:]
                     feature_length -= 3
                 else:
-                    raise Exception("Cannot calculate the local grid without "
-                                    "calculating the xyz positions of the "
-                                    "descriptors. Please revise your "
-                                    "script. The local grid is crucial"
-                                    " for parallel inference")
+                    raise Exception(
+                        "Cannot calculate the local grid without "
+                        "calculating the xyz positions of the "
+                        "descriptors. Please revise your "
+                        "script. The local grid is crucial"
+                        " for parallel inference"
+                    )
 
-                snap_descriptors = \
-                    torch.from_numpy(snap_descriptors).float()
+                snap_descriptors = torch.from_numpy(snap_descriptors).float()
                 self.data.input_data_scaler.transform(snap_descriptors)
-                return self. \
-                    _forward_snap_descriptors(snap_descriptors, local_size)
+                return self._forward_snap_descriptors(
+                    snap_descriptors, local_size
+                )
 
         if get_rank() == 0:
             if self.data.descriptor_calculator.descriptors_contain_xyz:
                 snap_descriptors = snap_descriptors[:, :, :, 3:]
                 feature_length -= 3
 
-            snap_descriptors = \
-                snap_descriptors.reshape(
-                    [self.data.grid_size, feature_length])
-            snap_descriptors = \
-                torch.from_numpy(snap_descriptors).float()
+            snap_descriptors = snap_descriptors.reshape(
+                [self.data.grid_size, feature_length]
+            )
+            snap_descriptors = torch.from_numpy(snap_descriptors).float()
             self.data.input_data_scaler.transform(snap_descriptors)
             return self._forward_snap_descriptors(snap_descriptors)
 
-    def _forward_snap_descriptors(self, snap_descriptors,
-                                  local_data_size=None):
+    def _forward_snap_descriptors(
+        self, snap_descriptors, local_data_size=None
+    ):
         """Forward a scaled tensor of descriptors through the NN."""
         # Ensure the Network is on the correct device.
         # This line is necessary because GPU acceleration may have been
@@ -194,39 +205,49 @@ class Predictor(Runner):
 
         if local_data_size is None:
             local_data_size = self.data.grid_size
-        predicted_outputs = \
-            np.zeros((local_data_size,
-                      self.data.target_calculator.feature_size))
+        predicted_outputs = np.zeros(
+            (local_data_size, self.data.target_calculator.feature_size)
+        )
 
         # Only predict if there is something to predict.
         # Elsewise, we just wait at the barrier down below.
         if local_data_size > 0:
-            optimal_batch_size = self.\
-                _correct_batch_size_for_testing(local_data_size,
-                                                self.parameters.mini_batch_size)
+            optimal_batch_size = self._correct_batch_size_for_testing(
+                local_data_size, self.parameters.mini_batch_size
+            )
             if optimal_batch_size != self.parameters.mini_batch_size:
-                printout("Had to readjust batch size from",
-                         self.parameters.mini_batch_size, "to",
-                         optimal_batch_size, min_verbosity=0)
+                printout(
+                    "Had to readjust batch size from",
+                    self.parameters.mini_batch_size,
+                    "to",
+                    optimal_batch_size,
+                    min_verbosity=0,
+                )
                 self.parameters.mini_batch_size = optimal_batch_size
 
-            self.number_of_batches_per_snapshot = int(local_data_size /
-                                                      self.parameters.
-                                                      mini_batch_size)
+            self.number_of_batches_per_snapshot = int(
+                local_data_size / self.parameters.mini_batch_size
+            )
 
             for i in range(0, self.number_of_batches_per_snapshot):
-                inputs = snap_descriptors[i * self.parameters.mini_batch_size:
-                                          (i+1)*self.parameters.mini_batch_size]
+                inputs = snap_descriptors[
+                    i
+                    * self.parameters.mini_batch_size : (i + 1)
+                    * self.parameters.mini_batch_size
+                ]
                 inputs = inputs.to(self.parameters._configuration["device"])
-                predicted_outputs[i * self.parameters.mini_batch_size:
-                                          (i+1)*self.parameters.mini_batch_size] \
-                    = self.data.output_data_scaler.\
-                    inverse_transform(self.network(inputs).
-                                      to('cpu'), as_numpy=True)
+                predicted_outputs[
+                    i
+                    * self.parameters.mini_batch_size : (i + 1)
+                    * self.parameters.mini_batch_size
+                ] = self.data.output_data_scaler.inverse_transform(
+                    self.network(inputs).to("cpu"), as_numpy=True
+                )
 
             # Restricting the actual quantities to physical meaningful values,
             # i.e. restricting the (L)DOS to positive values.
-            predicted_outputs = self.data.target_calculator.\
-                restrict_data(predicted_outputs)
+            predicted_outputs = self.data.target_calculator.restrict_data(
+                predicted_outputs
+            )
         barrier()
         return predicted_outputs

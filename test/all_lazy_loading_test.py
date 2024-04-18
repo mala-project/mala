@@ -8,6 +8,7 @@ import torch
 import pytest
 
 from mala.datahandling.data_repo import data_repo_path
+
 data_path = os.path.join(data_repo_path, "Be2")
 
 # This test compares the data scaling using the regular scaling procedure and
@@ -52,8 +53,12 @@ class TestLazyLoading:
         dataset_tester = []
         results = []
         training_tester = []
-        for scalingtype in ["standard", "normal", "feature-wise-standard",
-                            "feature-wise-normal"]:
+        for scalingtype in [
+            "standard",
+            "normal",
+            "feature-wise-standard",
+            "feature-wise-normal",
+        ]:
             comparison = [scalingtype]
             for ll_type in [True, False]:
                 this_result = []
@@ -65,95 +70,142 @@ class TestLazyLoading:
                 test_parameters.data.input_rescaling_type = scalingtype
                 test_parameters.data.output_rescaling_type = scalingtype
                 data_handler = DataHandler(test_parameters)
-                data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                                          "Be_snapshot0.out.npy", data_path,
-                                          "tr")
-                data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                          "Be_snapshot1.out.npy", data_path,
-                                          "tr")
-                data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                          "Be_snapshot2.out.npy", data_path,
-                                          "tr")
-                data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                          "Be_snapshot1.out.npy", data_path,
-                                          "va")
-                data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                          "Be_snapshot2.out.npy", data_path,
-                                          "te")
+                data_handler.add_snapshot(
+                    "Be_snapshot0.in.npy",
+                    data_path,
+                    "Be_snapshot0.out.npy",
+                    data_path,
+                    "tr",
+                )
+                data_handler.add_snapshot(
+                    "Be_snapshot1.in.npy",
+                    data_path,
+                    "Be_snapshot1.out.npy",
+                    data_path,
+                    "tr",
+                )
+                data_handler.add_snapshot(
+                    "Be_snapshot2.in.npy",
+                    data_path,
+                    "Be_snapshot2.out.npy",
+                    data_path,
+                    "tr",
+                )
+                data_handler.add_snapshot(
+                    "Be_snapshot1.in.npy",
+                    data_path,
+                    "Be_snapshot1.out.npy",
+                    data_path,
+                    "va",
+                )
+                data_handler.add_snapshot(
+                    "Be_snapshot2.in.npy",
+                    data_path,
+                    "Be_snapshot2.out.npy",
+                    data_path,
+                    "te",
+                )
                 data_handler.prepare_data()
                 if scalingtype == "standard":
                     # The lazy-loading STD equation (and to a smaller amount the
                     # mean equation) is having some small accurcay issue that
                     # I presume to be due to numerical constraints. To make a
                     # meaningful comparison it is wise to scale the value here.
-                    this_result.append(data_handler.input_data_scaler.total_mean /
-                                       data_handler.nr_training_data)
-                    this_result.append(data_handler.input_data_scaler.total_std /
-                                       data_handler.nr_training_data)
-                    this_result.append(data_handler.output_data_scaler.total_mean /
-                                       data_handler.nr_training_data)
-                    this_result.append(data_handler.output_data_scaler.total_std /
-                                       data_handler.nr_training_data)
+                    this_result.append(
+                        data_handler.input_data_scaler.total_mean
+                        / data_handler.nr_training_data
+                    )
+                    this_result.append(
+                        data_handler.input_data_scaler.total_std
+                        / data_handler.nr_training_data
+                    )
+                    this_result.append(
+                        data_handler.output_data_scaler.total_mean
+                        / data_handler.nr_training_data
+                    )
+                    this_result.append(
+                        data_handler.output_data_scaler.total_std
+                        / data_handler.nr_training_data
+                    )
                 elif scalingtype == "normal":
                     torch.manual_seed(2002)
-                    this_result.append(data_handler.input_data_scaler.total_max)
-                    this_result.append(data_handler.input_data_scaler.total_min)
-                    this_result.append(data_handler.output_data_scaler.total_max)
-                    this_result.append(data_handler.output_data_scaler.total_min)
-                    dataset_tester.append((data_handler.training_data_sets[0][3998])
-                                          [0].sum() +
-                                          (data_handler.training_data_sets[0][3999])
-                                          [0].sum() +
-                                          (data_handler.training_data_sets[0][4000])
-                                          [0].sum() +
-                                          (data_handler.training_data_sets[0][4001])
-                                          [0].sum())
-                    test_parameters.network.layer_sizes = \
-                        [data_handler.input_dimension, 100,
-                         data_handler.output_dimension]
+                    this_result.append(
+                        data_handler.input_data_scaler.total_max
+                    )
+                    this_result.append(
+                        data_handler.input_data_scaler.total_min
+                    )
+                    this_result.append(
+                        data_handler.output_data_scaler.total_max
+                    )
+                    this_result.append(
+                        data_handler.output_data_scaler.total_min
+                    )
+                    dataset_tester.append(
+                        (data_handler.training_data_sets[0][3998])[0].sum()
+                        + (data_handler.training_data_sets[0][3999])[0].sum()
+                        + (data_handler.training_data_sets[0][4000])[0].sum()
+                        + (data_handler.training_data_sets[0][4001])[0].sum()
+                    )
+                    test_parameters.network.layer_sizes = [
+                        data_handler.input_dimension,
+                        100,
+                        data_handler.output_dimension,
+                    ]
 
                     # Setup network and trainer.
                     test_network = Network(test_parameters)
-                    test_trainer = Trainer(test_parameters, test_network,
-                                           data_handler)
+                    test_trainer = Trainer(
+                        test_parameters, test_network, data_handler
+                    )
                     test_trainer.train_network()
-                    training_tester.append(test_trainer.final_test_loss -
-                                           test_trainer.initial_test_loss)
+                    training_tester.append(
+                        test_trainer.final_test_loss
+                        - test_trainer.initial_test_loss
+                    )
 
                 elif scalingtype == "feature-wise-standard":
                     # The lazy-loading STD equation (and to a smaller amount the
                     # mean equation) is having some small accurcay issue that
                     # I presume to be due to numerical constraints. To make a
                     # meaningful comparison it is wise to scale the value here.
-                    this_result.append(torch.mean(data_handler.input_data_scaler.
-                                                  means) /
-                                                  data_handler.parameters.
-                                                  snapshot_directories_list[0].
-                                                  grid_size)
-                    this_result.append(torch.mean(data_handler.input_data_scaler.
-                                                  stds) /
-                                                  data_handler.parameters.
-                                                  snapshot_directories_list[0].
-                                                  grid_size)
-                    this_result.append(torch.mean(data_handler.output_data_scaler.
-                                                  means) /
-                                                  data_handler.parameters.
-                                                  snapshot_directories_list[0].
-                                                  grid_size)
-                    this_result.append(torch.mean(data_handler.output_data_scaler.
-                                                  stds) /
-                                                  data_handler.parameters.
-                                                  snapshot_directories_list[0].
-                                                  grid_size)
+                    this_result.append(
+                        torch.mean(data_handler.input_data_scaler.means)
+                        / data_handler.parameters.snapshot_directories_list[
+                            0
+                        ].grid_size
+                    )
+                    this_result.append(
+                        torch.mean(data_handler.input_data_scaler.stds)
+                        / data_handler.parameters.snapshot_directories_list[
+                            0
+                        ].grid_size
+                    )
+                    this_result.append(
+                        torch.mean(data_handler.output_data_scaler.means)
+                        / data_handler.parameters.snapshot_directories_list[
+                            0
+                        ].grid_size
+                    )
+                    this_result.append(
+                        torch.mean(data_handler.output_data_scaler.stds)
+                        / data_handler.parameters.snapshot_directories_list[
+                            0
+                        ].grid_size
+                    )
                 elif scalingtype == "feature-wise-normal":
-                    this_result.append(torch.mean(data_handler.input_data_scaler.
-                                                  maxs))
-                    this_result.append(torch.mean(data_handler.input_data_scaler.
-                                                  mins))
-                    this_result.append(torch.mean(data_handler.output_data_scaler.
-                                                  maxs))
-                    this_result.append(torch.mean(data_handler.output_data_scaler.
-                                                  mins))
+                    this_result.append(
+                        torch.mean(data_handler.input_data_scaler.maxs)
+                    )
+                    this_result.append(
+                        torch.mean(data_handler.input_data_scaler.mins)
+                    )
+                    this_result.append(
+                        torch.mean(data_handler.output_data_scaler.maxs)
+                    )
+                    this_result.append(
+                        torch.mean(data_handler.output_data_scaler.mins)
+                    )
 
                 comparison.append(this_result)
             results.append(comparison)
@@ -164,11 +216,13 @@ class TestLazyLoading:
             assert np.isclose(entry[1][3], entry[2][3], atol=accuracy_coarse)
             assert np.isclose(entry[1][4], entry[2][4], atol=accuracy_coarse)
             assert np.isclose(entry[1][1], entry[2][1], atol=accuracy_coarse)
-            
-        assert np.isclose(dataset_tester[0], dataset_tester[1],
-                          atol=accuracy_coarse)
-        assert np.isclose(training_tester[0], training_tester[1],
-                          atol=accuracy_coarse)
+
+        assert np.isclose(
+            dataset_tester[0], dataset_tester[1], atol=accuracy_coarse
+        )
+        assert np.isclose(
+            training_tester[0], training_tester[1], atol=accuracy_coarse
+        )
 
     def test_prefetching(self):
         # Comparing the results of pre-fetch and without pre-fetch
@@ -196,13 +250,15 @@ class TestLazyLoading:
 
         without_prefetching = self._train_lazy_loading(False)
         with_prefetching = self._train_lazy_loading(True)
-        assert np.isclose(with_prefetching, without_prefetching,
-                          atol=accuracy_coarse)
+        assert np.isclose(
+            with_prefetching, without_prefetching, atol=accuracy_coarse
+        )
         assert with_prefetching < without_prefetching
 
-
-    @pytest.mark.skipif(importlib.util.find_spec("horovod") is None,
-                        reason="Horovod is currently not part of the pipeline")
+    @pytest.mark.skipif(
+        importlib.util.find_spec("horovod") is None,
+        reason="Horovod is currently not part of the pipeline",
+    )
     def test_performance_horovod(self):
 
         ####################
@@ -231,36 +287,59 @@ class TestLazyLoading:
                 test_parameters.data.use_lazy_loading = ll
                 test_parameters.use_horovod = hvduse
                 data_handler = DataHandler(test_parameters)
-                data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                          "Al_debug_2k_nr0.out.npy", data_path,
-                                          add_snapshot_as="tr",
-                                          output_units="1/(Ry*Bohr^3)")
-                data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                          "Al_debug_2k_nr1.out.npy", data_path,
-                                          add_snapshot_as="tr",
-                                          output_units="1/(Ry*Bohr^3)")
-                data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                          "Al_debug_2k_nr2.out.npy", data_path,
-                                          add_snapshot_as="tr",
-                                          output_units="1/(Ry*Bohr^3)")
-                data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                          "Al_debug_2k_nr1.out.npy", data_path,
-                                          add_snapshot_as="va",
-                                          output_units="1/(Ry*Bohr^3)")
-                data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                          "Al_debug_2k_nr2.out.npy", data_path,
-                                          add_snapshot_as="te",
-                                          output_units="1/(Ry*Bohr^3)")
+                data_handler.add_snapshot(
+                    "Al_debug_2k_nr0.in.npy",
+                    data_path,
+                    "Al_debug_2k_nr0.out.npy",
+                    data_path,
+                    add_snapshot_as="tr",
+                    output_units="1/(Ry*Bohr^3)",
+                )
+                data_handler.add_snapshot(
+                    "Al_debug_2k_nr1.in.npy",
+                    data_path,
+                    "Al_debug_2k_nr1.out.npy",
+                    data_path,
+                    add_snapshot_as="tr",
+                    output_units="1/(Ry*Bohr^3)",
+                )
+                data_handler.add_snapshot(
+                    "Al_debug_2k_nr2.in.npy",
+                    data_path,
+                    "Al_debug_2k_nr2.out.npy",
+                    data_path,
+                    add_snapshot_as="tr",
+                    output_units="1/(Ry*Bohr^3)",
+                )
+                data_handler.add_snapshot(
+                    "Al_debug_2k_nr1.in.npy",
+                    data_path,
+                    "Al_debug_2k_nr1.out.npy",
+                    data_path,
+                    add_snapshot_as="va",
+                    output_units="1/(Ry*Bohr^3)",
+                )
+                data_handler.add_snapshot(
+                    "Al_debug_2k_nr2.in.npy",
+                    data_path,
+                    "Al_debug_2k_nr2.out.npy",
+                    data_path,
+                    add_snapshot_as="te",
+                    output_units="1/(Ry*Bohr^3)",
+                )
 
                 data_handler.prepare_data()
-                test_parameters.network.layer_sizes = \
-                    [data_handler.input_dimension, 100,
-                     data_handler.output_dimension]
+                test_parameters.network.layer_sizes = [
+                    data_handler.input_dimension,
+                    100,
+                    data_handler.output_dimension,
+                ]
 
                 # Setup network and trainer.
                 test_network = Network(test_parameters)
-                test_trainer = Trainer(test_parameters, test_network,
-                                       data_handler)
+                test_trainer = Trainer(
+                    test_parameters, test_network, data_handler
+                )
                 test_trainer.train_network()
 
                 hvdstring = "no horovod"
@@ -271,10 +350,15 @@ class TestLazyLoading:
                 if ll:
                     llstring = "using lazy loading"
 
-                results.append([hvdstring, llstring, 
-                                test_trainer.initial_test_loss,
-                                test_trainer.final_test_loss,
-                                time.time() - start_time])
+                results.append(
+                    [
+                        hvdstring,
+                        llstring,
+                        test_trainer.initial_test_loss,
+                        test_trainer.final_test_loss,
+                        time.time() - start_time,
+                    ]
+                )
 
         diff = []
         # For 4 local processes I get:
@@ -301,7 +385,7 @@ class TestLazyLoading:
             printout("Final loss: ", r[3], min_verbosity=0)
             printout("Time: ", r[4], min_verbosity=0)
             diff.append(r[3] - r[2])
-            
+
         diff = np.array(diff)
 
         # The loss improvements should be comparable.
@@ -326,23 +410,44 @@ class TestLazyLoading:
         data_handler = DataHandler(test_parameters)
 
         # Add a snapshot we want to use in to the list.
-        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                                  "Be_snapshot0.out.npy", data_path, "tr")
-        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                  "Be_snapshot1.out.npy", data_path, "tr")
-        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                  "Be_snapshot2.out.npy", data_path, "va")
-        data_handler.add_snapshot("Be_snapshot3.in.npy", data_path,
-                                  "Be_snapshot3.out.npy", data_path, "va")
+        data_handler.add_snapshot(
+            "Be_snapshot0.in.npy",
+            data_path,
+            "Be_snapshot0.out.npy",
+            data_path,
+            "tr",
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot1.in.npy",
+            data_path,
+            "Be_snapshot1.out.npy",
+            data_path,
+            "tr",
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot2.in.npy",
+            data_path,
+            "Be_snapshot2.out.npy",
+            data_path,
+            "va",
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot3.in.npy",
+            data_path,
+            "Be_snapshot3.out.npy",
+            data_path,
+            "va",
+        )
         data_handler.prepare_data()
 
-        test_parameters.network.layer_sizes = [data_handler.input_dimension,
-                                               100,
-                                               data_handler.output_dimension]
+        test_parameters.network.layer_sizes = [
+            data_handler.input_dimension,
+            100,
+            data_handler.output_dimension,
+        ]
 
         # Setup network and trainer.
         test_network = Network(test_parameters)
-        test_trainer = Trainer(test_parameters, test_network,
-                                    data_handler)
+        test_trainer = Trainer(test_parameters, test_network, data_handler)
         test_trainer.train_network()
         return test_trainer.final_validation_loss

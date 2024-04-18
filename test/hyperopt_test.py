@@ -3,9 +3,9 @@ import importlib
 
 import mala
 import numpy as np
-import pytest
 
 from mala.datahandling.data_repo import data_repo_path
+
 data_path = os.path.join(data_repo_path, "Be2")
 
 # Control how much the loss should be better after hyperopt compared to
@@ -47,32 +47,49 @@ class TestHyperparameterOptimization:
 
         # Load data.
         data_handler = mala.DataHandler(test_parameters)
-        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                                  "Be_snapshot0.out.npy", data_path, "tr")
-        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                  "Be_snapshot1.out.npy", data_path, "va")
-        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                  "Be_snapshot2.out.npy", data_path, "te")
+        data_handler.add_snapshot(
+            "Be_snapshot0.in.npy",
+            data_path,
+            "Be_snapshot0.out.npy",
+            data_path,
+            "tr",
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot1.in.npy",
+            data_path,
+            "Be_snapshot1.out.npy",
+            data_path,
+            "va",
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot2.in.npy",
+            data_path,
+            "Be_snapshot2.out.npy",
+            data_path,
+            "te",
+        )
         data_handler.prepare_data()
 
         # Perform the hyperparameter optimization.
-        test_hp_optimizer = mala.HyperOpt(test_parameters,
-                                                   data_handler)
-        test_hp_optimizer.add_hyperparameter("float", "learning_rate",
-                                             0.0000001, 0.01)
-        test_hp_optimizer.add_hyperparameter("int", "ff_neurons_layer_00", 10,
-                                             100)
-        test_hp_optimizer.add_hyperparameter("int", "ff_neurons_layer_01", 10,
-                                             100)
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_00",
-                                             choices=["ReLU", "Sigmoid"])
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_01",
-                                             choices=["ReLU", "Sigmoid"])
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_02",
-                                             choices=["ReLU", "Sigmoid"])
+        test_hp_optimizer = mala.HyperOpt(test_parameters, data_handler)
+        test_hp_optimizer.add_hyperparameter(
+            "float", "learning_rate", 0.0000001, 0.01
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "int", "ff_neurons_layer_00", 10, 100
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "int", "ff_neurons_layer_01", 10, 100
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "categorical", "layer_activation_00", choices=["ReLU", "Sigmoid"]
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "categorical", "layer_activation_01", choices=["ReLU", "Sigmoid"]
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "categorical", "layer_activation_02", choices=["ReLU", "Sigmoid"]
+        )
         test_hp_optimizer.perform_study()
         test_hp_optimizer.set_optimal_parameters()
 
@@ -80,21 +97,23 @@ class TestHyperparameterOptimization:
         # To see if the hyperparameter optimization actually worked,
         # check if the best trial is better then the worst trial
         # by a certain factor.
-        performed_trials_values = test_hp_optimizer.study. \
-                                  trials_dataframe()["value"]
-        assert desired_loss_improvement_factor * \
-               min(performed_trials_values) < \
-               max(performed_trials_values)
+        performed_trials_values = test_hp_optimizer.study.trials_dataframe()[
+            "value"
+        ]
+        assert desired_loss_improvement_factor * min(
+            performed_trials_values
+        ) < max(performed_trials_values)
 
     def test_different_ho_methods(self):
-        results = [self.__optimize_hyperparameters("optuna"),
-                   self.__optimize_hyperparameters("naswot")]
+        results = [
+            self.__optimize_hyperparameters("optuna"),
+            self.__optimize_hyperparameters("naswot"),
+        ]
 
         # Since the OApackage is optional, we should only run
         # it if it is actually there.
         if importlib.util.find_spec("oapackage") is not None:
-            results.append(
-                   self.__optimize_hyperparameters("oat"))
+            results.append(self.__optimize_hyperparameters("oat"))
 
         assert np.std(results) < desired_std_ho
 
@@ -117,45 +136,63 @@ class TestHyperparameterOptimization:
         test_parameters.hyperparameters.n_trials = 20
         test_parameters.hyperparameters.hyper_opt_method = "optuna"
         test_parameters.hyperparameters.study_name = "test_ho"
-        test_parameters.hyperparameters.rdb_storage = 'sqlite:///test_ho.db'
+        test_parameters.hyperparameters.rdb_storage = "sqlite:///test_ho.db"
 
         # Load data
         data_handler = mala.DataHandler(test_parameters)
 
         # Add all the snapshots we want to use in to the list.
-        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                                  "Be_snapshot0.out.npy", data_path, "tr")
-        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                  "Be_snapshot1.out.npy", data_path, "va")
-        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                  "Be_snapshot2.out.npy", data_path, "te")
+        data_handler.add_snapshot(
+            "Be_snapshot0.in.npy",
+            data_path,
+            "Be_snapshot0.out.npy",
+            data_path,
+            "tr",
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot1.in.npy",
+            data_path,
+            "Be_snapshot1.out.npy",
+            data_path,
+            "va",
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot2.in.npy",
+            data_path,
+            "Be_snapshot2.out.npy",
+            data_path,
+            "te",
+        )
         data_handler.prepare_data()
 
         # Create and perform hyperparameter optimization.
-        test_hp_optimizer = mala.HyperOpt(test_parameters,
-                                                   data_handler)
-        test_hp_optimizer.add_hyperparameter("float", "learning_rate",
-                                             0.0000001, 0.01)
-        test_hp_optimizer.add_hyperparameter("int", "ff_neurons_layer_00", 10,
-                                             100)
-        test_hp_optimizer.add_hyperparameter("int", "ff_neurons_layer_01", 10,
-                                             100)
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_00",
-                                             choices=["ReLU", "Sigmoid"])
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_01",
-                                             choices=["ReLU", "Sigmoid"])
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_02",
-                                             choices=["ReLU", "Sigmoid"])
+        test_hp_optimizer = mala.HyperOpt(test_parameters, data_handler)
+        test_hp_optimizer.add_hyperparameter(
+            "float", "learning_rate", 0.0000001, 0.01
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "int", "ff_neurons_layer_00", 10, 100
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "int", "ff_neurons_layer_01", 10, 100
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "categorical", "layer_activation_00", choices=["ReLU", "Sigmoid"]
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "categorical", "layer_activation_01", choices=["ReLU", "Sigmoid"]
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "categorical", "layer_activation_02", choices=["ReLU", "Sigmoid"]
+        )
         test_hp_optimizer.perform_study()
         test_hp_optimizer.set_optimal_parameters()
-        performed_trials_values = test_hp_optimizer.study. \
-                                  trials_dataframe()["value"]
-        assert desired_loss_improvement_factor * \
-               min(performed_trials_values) < \
-               max(performed_trials_values)
+        performed_trials_values = test_hp_optimizer.study.trials_dataframe()[
+            "value"
+        ]
+        assert desired_loss_improvement_factor * min(
+            performed_trials_values
+        ) < max(performed_trials_values)
 
     def test_acsd(self):
         """Test that the ACSD routine is still working."""
@@ -171,16 +208,20 @@ class TestHyperparameterOptimization:
         # hyperoptimizer.add_hyperparameter("bispectrum_twojmax", [6, 8])
         # hyperoptimizer.add_hyperparameter("bispectrum_cutoff", [1.0, 3.0])
 
-        hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path,
-                                                                 "Be_snapshot1.out"),
-                                    "numpy", os.path.join(data_path,
-                                                          "Be_snapshot1.in.npy"),
-                                    target_units="1/(Ry*Bohr^3)")
-        hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path,
-                                                                 "Be_snapshot2.out"),
-                                    "numpy", os.path.join(data_path,
-                                                          "Be_snapshot2.in.npy"),
-                                    target_units="1/(Ry*Bohr^3)")
+        hyperoptimizer.add_snapshot(
+            "espresso-out",
+            os.path.join(data_path, "Be_snapshot1.out"),
+            "numpy",
+            os.path.join(data_path, "Be_snapshot1.in.npy"),
+            target_units="1/(Ry*Bohr^3)",
+        )
+        hyperoptimizer.add_snapshot(
+            "espresso-out",
+            os.path.join(data_path, "Be_snapshot2.out"),
+            "numpy",
+            os.path.join(data_path, "Be_snapshot2.in.npy"),
+            target_units="1/(Ry*Bohr^3)",
+        )
         hyperoptimizer.perform_study()
         hyperoptimizer.set_optimal_parameters()
 
@@ -206,32 +247,55 @@ class TestHyperparameterOptimization:
 
         data_handler = mala.DataHandler(test_parameters)
 
-        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                                  "Be_snapshot0.out.npy", data_path, "tr")
-        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                  "Be_snapshot1.out.npy", data_path, "va")
+        data_handler.add_snapshot(
+            "Be_snapshot0.in.npy",
+            data_path,
+            "Be_snapshot0.out.npy",
+            data_path,
+            "tr",
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot1.in.npy",
+            data_path,
+            "Be_snapshot1.out.npy",
+            data_path,
+            "va",
+        )
         data_handler.prepare_data()
 
         test_hp_optimizer = mala.HyperOptNASWOT(test_parameters, data_handler)
-        test_parameters.network.layer_sizes = [data_handler.input_dimension,
-                                               100, 100,
-                                               data_handler.output_dimension]
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_00",
-                                             choices=["ReLU", "Sigmoid"])
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_01",
-                                             choices=["ReLU", "Sigmoid"])
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_02",
-                                             choices=["ReLU", "Sigmoid"])
+        test_parameters.network.layer_sizes = [
+            data_handler.input_dimension,
+            100,
+            100,
+            data_handler.output_dimension,
+        ]
+        test_hp_optimizer.add_hyperparameter(
+            "categorical", "layer_activation_00", choices=["ReLU", "Sigmoid"]
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "categorical", "layer_activation_01", choices=["ReLU", "Sigmoid"]
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "categorical", "layer_activation_02", choices=["ReLU", "Sigmoid"]
+        )
         test_hp_optimizer.perform_study()
-        correct_trial_list = [10569.71875, 10649.0361328125, 12081.2958984375,
-                              12360.3701171875, 33523.9375, 47565.8203125,
-                              149152.921875, 150312.671875]
+        correct_trial_list = [
+            10569.71875,
+            10649.0361328125,
+            12081.2958984375,
+            12360.3701171875,
+            33523.9375,
+            47565.8203125,
+            149152.921875,
+            150312.671875,
+        ]
         for idx, trial in enumerate(correct_trial_list):
-            assert np.isclose(trial, test_hp_optimizer.trial_losses[idx],
-                              rtol=naswot_accuracy)
+            assert np.isclose(
+                trial,
+                test_hp_optimizer.trial_losses[idx],
+                rtol=naswot_accuracy,
+            )
 
     @staticmethod
     def __optimize_hyperparameters(hyper_optimizer):
@@ -251,36 +315,53 @@ class TestHyperparameterOptimization:
 
         # Load data.
         data_handler = mala.DataHandler(test_parameters)
-        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                                  "Be_snapshot0.out.npy", data_path, "tr")
-        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                  "Be_snapshot1.out.npy", data_path, "va")
-        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                  "Be_snapshot2.out.npy", data_path, "te")
+        data_handler.add_snapshot(
+            "Be_snapshot0.in.npy",
+            data_path,
+            "Be_snapshot0.out.npy",
+            data_path,
+            "tr",
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot1.in.npy",
+            data_path,
+            "Be_snapshot1.out.npy",
+            data_path,
+            "va",
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot2.in.npy",
+            data_path,
+            "Be_snapshot2.out.npy",
+            data_path,
+            "te",
+        )
         data_handler.prepare_data()
 
         # Perform the actual hyperparameter optimization.
-        test_hp_optimizer = mala.HyperOpt(test_parameters,
-                                                   data_handler)
+        test_hp_optimizer = mala.HyperOpt(test_parameters, data_handler)
         test_parameters.network.layer_sizes = [
             data_handler.input_dimension,
-            100, 100,
-            data_handler.output_dimension]
+            100,
+            100,
+            data_handler.output_dimension,
+        ]
 
         # Add hyperparameters we want to have optimized to the list.
         # If we do a NASWOT run currently we can provide an input
         # array of trials.
-        test_hp_optimizer.add_hyperparameter("categorical", "trainingtype",
-                                             choices=["Adam", "SGD"])
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_00",
-                                             choices=["ReLU", "Sigmoid"])
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_01",
-                                             choices=["ReLU", "Sigmoid"])
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_02",
-                                             choices=["ReLU", "Sigmoid"])
+        test_hp_optimizer.add_hyperparameter(
+            "categorical", "trainingtype", choices=["Adam", "SGD"]
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "categorical", "layer_activation_00", choices=["ReLU", "Sigmoid"]
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "categorical", "layer_activation_01", choices=["ReLU", "Sigmoid"]
+        )
+        test_hp_optimizer.add_hyperparameter(
+            "categorical", "layer_activation_02", choices=["ReLU", "Sigmoid"]
+        )
 
         # Perform hyperparameter optimization.
         test_hp_optimizer.perform_study()
@@ -288,8 +369,9 @@ class TestHyperparameterOptimization:
 
         # Train the final network.
         test_network = mala.Network(test_parameters)
-        test_trainer = mala.Trainer(test_parameters, test_network,
-                                    data_handler)
+        test_trainer = mala.Trainer(
+            test_parameters, test_network, data_handler
+        )
         test_trainer.train_network()
         test_parameters.show()
         return test_trainer.final_test_loss

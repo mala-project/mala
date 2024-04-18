@@ -1,4 +1,5 @@
 """Collection of useful functions for working with LAMMPS."""
+
 import ctypes
 
 import numpy as np
@@ -27,12 +28,14 @@ def set_cmdlinevars(cmdargs, argdict):
         cmdargs += ["-var", key, f"{argdict[key]}"]
     return cmdargs
 
+
 # def extract_commands(string):
 #     return [x for x in string.splitlines() if x.strip() != '']
 
 
-def extract_compute_np(lmp, name, compute_type, result_type, array_shape=None,
-                       use_fp64=False):
+def extract_compute_np(
+    lmp, name, compute_type, result_type, array_shape=None, use_fp64=False
+):
     """
     Convert a lammps compute to a numpy array.
 
@@ -70,8 +73,9 @@ def extract_compute_np(lmp, name, compute_type, result_type, array_shape=None,
     if result_type == 2:
         ptr = ptr.contents
         total_size = np.prod(array_shape)
-        buffer_ptr = ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double *
-                                                     total_size))
+        buffer_ptr = ctypes.cast(
+            ptr, ctypes.POINTER(ctypes.c_double * total_size)
+        )
         array_np = np.frombuffer(buffer_ptr.contents, dtype=float)
         array_np.shape = array_shape
         # If I directly return the descriptors, this sometimes leads

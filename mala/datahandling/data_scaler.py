@@ -1,4 +1,5 @@
 """DataScaler class for scaling DFT data."""
+
 import pickle
 
 try:
@@ -53,8 +54,8 @@ class DataScaler:
         self.mins = torch.empty(0)
         self.total_mean = torch.tensor(0)
         self.total_std = torch.tensor(0)
-        self.total_max = torch.tensor(float('-inf'))
-        self.total_min = torch.tensor(float('inf'))
+        self.total_max = torch.tensor(float("-inf"))
+        self.total_min = torch.tensor(float("inf"))
 
         self.total_data_count = 0
 
@@ -117,24 +118,29 @@ class DataScaler:
                         old_std = self.stds
 
                         if list(self.means.size())[0] > 0:
-                            self.means = \
-                                self.total_data_count /\
-                                (self.total_data_count + current_data_count) \
-                                * old_mean + current_data_count / \
-                                (self.total_data_count + current_data_count)\
+                            self.means = (
+                                self.total_data_count
+                                / (self.total_data_count + current_data_count)
+                                * old_mean
+                                + current_data_count
+                                / (self.total_data_count + current_data_count)
                                 * new_mean
+                            )
                         else:
                             self.means = new_mean
                         if list(self.stds.size())[0] > 0:
-                            self.stds = \
-                                self.total_data_count / \
-                                (self.total_data_count + current_data_count) \
-                                * old_std ** 2 + current_data_count / \
-                                (self.total_data_count + current_data_count) *\
-                                new_std ** 2 + \
-                                (self.total_data_count * current_data_count)\
-                                / (self.total_data_count + current_data_count)\
-                                ** 2 * (old_mean - new_mean) ** 2
+                            self.stds = (
+                                self.total_data_count
+                                / (self.total_data_count + current_data_count)
+                                * old_std**2
+                                + current_data_count
+                                / (self.total_data_count + current_data_count)
+                                * new_std**2
+                                + (self.total_data_count * current_data_count)
+                                / (self.total_data_count + current_data_count)
+                                ** 2
+                                * (old_mean - new_mean) ** 2
+                            )
 
                             self.stds = torch.sqrt(self.stds)
                         else:
@@ -165,8 +171,9 @@ class DataScaler:
                     ##########################
 
                     if self.scale_standard:
-                        current_data_count = list(unscaled.size())[0]\
-                                             * list(unscaled.size())[1]
+                        current_data_count = (
+                            list(unscaled.size())[0] * list(unscaled.size())[1]
+                        )
 
                         new_mean = torch.mean(unscaled)
                         new_std = torch.std(unscaled)
@@ -174,28 +181,31 @@ class DataScaler:
                         old_mean = self.total_mean
                         old_std = self.total_std
 
-                        self.total_mean = \
-                            self.total_data_count / \
-                            (self.total_data_count + current_data_count) * \
-                            old_mean + current_data_count / \
-                            (self.total_data_count + current_data_count) *\
-                            new_mean
+                        self.total_mean = (
+                            self.total_data_count
+                            / (self.total_data_count + current_data_count)
+                            * old_mean
+                            + current_data_count
+                            / (self.total_data_count + current_data_count)
+                            * new_mean
+                        )
 
                         # This equation is taken from the Sandia code. It
                         # presumably works, but it gets slighly different
                         # results.
                         # Maybe we should check it at some point .
                         # I think it is merely an issue of numerical accuracy.
-                        self.total_std = \
-                            self.total_data_count / \
-                            (self.total_data_count + current_data_count) * \
-                            old_std ** 2 + \
-                            current_data_count / \
-                            (self.total_data_count + current_data_count) \
-                            * new_std ** 2 + \
-                            (self.total_data_count * current_data_count) / \
-                            (self.total_data_count + current_data_count) \
-                            ** 2 * (old_mean - new_mean) ** 2
+                        self.total_std = (
+                            self.total_data_count
+                            / (self.total_data_count + current_data_count)
+                            * old_std**2
+                            + current_data_count
+                            / (self.total_data_count + current_data_count)
+                            * new_std**2
+                            + (self.total_data_count * current_data_count)
+                            / (self.total_data_count + current_data_count) ** 2
+                            * (old_mean - new_mean) ** 2
+                        )
 
                         self.total_std = torch.sqrt(self.total_std)
                         self.total_data_count += current_data_count
@@ -283,8 +293,10 @@ class DataScaler:
             pass
 
         elif self.cantransform is False:
-            raise Exception("Transformation cannot be done, this DataScaler "
-                            "was never initialized")
+            raise Exception(
+                "Transformation cannot be done, this DataScaler "
+                "was never initialized"
+            )
 
         # Perform the actual scaling, but use no_grad to make sure
         # that the next couple of iterations stay untracked.
@@ -301,7 +313,7 @@ class DataScaler:
 
                 if self.scale_normal:
                     unscaled -= self.mins
-                    unscaled /= (self.maxs - self.mins)
+                    unscaled /= self.maxs - self.mins
 
             else:
 
@@ -315,7 +327,7 @@ class DataScaler:
 
                 if self.scale_normal:
                     unscaled -= self.total_min
-                    unscaled /= (self.total_max - self.total_min)
+                    unscaled /= self.total_max - self.total_min
 
     def inverse_transform(self, scaled, as_numpy=False):
         """
@@ -344,8 +356,10 @@ class DataScaler:
 
         else:
             if self.cantransform is False:
-                raise Exception("Backtransformation cannot be done, this "
-                                "DataScaler was never initialized")
+                raise Exception(
+                    "Backtransformation cannot be done, this "
+                    "DataScaler was never initialized"
+                )
 
             # Perform the actual scaling, but use no_grad to make sure
             # that the next couple of iterations stay untracked.
@@ -360,8 +374,9 @@ class DataScaler:
                         unscaled = (scaled * self.stds) + self.means
 
                     if self.scale_normal:
-                        unscaled = (scaled*(self.maxs
-                                            - self.mins)) + self.mins
+                        unscaled = (
+                            scaled * (self.maxs - self.mins)
+                        ) + self.mins
 
                 else:
 
@@ -373,9 +388,10 @@ class DataScaler:
                         unscaled = (scaled * self.total_std) + self.total_mean
 
                     if self.scale_normal:
-                        unscaled = (scaled*(self.total_max
-                                            - self.total_min)) + self.total_min
-#
+                        unscaled = (
+                            scaled * (self.total_max - self.total_min)
+                        ) + self.total_min
+        #
         if as_numpy:
             return unscaled.detach().numpy().astype(np.float64)
         else:
@@ -398,7 +414,7 @@ class DataScaler:
             if hvd.rank() != 0:
                 return
         if save_format == "pickle":
-            with open(filename, 'wb') as handle:
+            with open(filename, "wb") as handle:
                 pickle.dump(self, handle, protocol=4)
         else:
             raise Exception("Unsupported parameter save format.")
@@ -423,7 +439,7 @@ class DataScaler:
         """
         if save_format == "pickle":
             if isinstance(file, str):
-                loaded_scaler = pickle.load(open(file, 'rb'))
+                loaded_scaler = pickle.load(open(file, "rb"))
             else:
                 loaded_scaler = pickle.load(file)
         else:

@@ -90,6 +90,14 @@ the core development team.
 * If you're adding code that should be tested, add tests
 * If you're adding or modifying examples, make sure to add them to `test_examples.py`
 
+### Formatting code
+
+* MALA uses [`black`](https://github.com/psf/black) for code formatting
+* The `black` configuration is located in `pyproject.toml`
+* Currently, no automatic code reformatting will be done in the CI, thus
+  please ensure that your code is properly formatted before creating a pull 
+  request
+
 ### Adding dependencies
 
 If you add additional dependencies, make sure to add them to `requirements.txt`
@@ -97,7 +105,6 @@ if they are required or to `setup.py` under the appropriate `extras` tag if
 they are not. 
 Further, in order for them to be available during the CI tests, make sure to 
 add _required_ dependencies to the appropriate environment files in folder `install/` and _extra_ requirements directly in the `Dockerfile` for the `conda` environment build.
-
 
 ## Pull Requests
 We actively welcome pull requests.

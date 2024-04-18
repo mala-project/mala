@@ -6,6 +6,7 @@ from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 
 from mala.datahandling.data_repo import data_repo_path
+
 data_path = os.path.join(data_repo_path, "Be2")
 
 # Define the accuracy used in the tests.
@@ -21,11 +22,13 @@ class TestTensorMemory:
     breaks after an update. MALA relies on the following assumptions to
     be true.
     """
+
     def test_tensor_memory(self):
 
         # Load an array as a numpy array
-        loaded_array_raw = np.load(os.path.join(data_path,
-                                                "Be_snapshot0.in.npy"))
+        loaded_array_raw = np.load(
+            os.path.join(data_path, "Be_snapshot0.in.npy")
+        )
 
         # Get dimensions of numpy array.
         dimension = np.shape(loaded_array_raw)
@@ -37,26 +40,27 @@ class TestTensorMemory:
 
         # Check if reshaping allocated new memory.
         loaded_array_raw *= 10
-        assert np.isclose(np.sum(loaded_array), np.sum(loaded_array_raw),
-                          accuracy)
+        assert np.isclose(
+            np.sum(loaded_array), np.sum(loaded_array_raw), accuracy
+        )
 
         # simulate data splitting.
         index1 = int(80 / 100 * np.shape(loaded_array)[0])
         torch_tensor = torch.from_numpy(loaded_array[0:index1]).float()
 
         # Check if tensor and array are still the same.
-        assert np.isclose(torch.sum(torch_tensor),
-                          np.sum(loaded_array[0:index1]),
-                          accuracy)
+        assert np.isclose(
+            torch.sum(torch_tensor), np.sum(loaded_array[0:index1]), accuracy
+        )
 
         # Simulate data operation.
         loaded_array *= 10
 
         # Check if tensor and array are still the same.
-        test1 = torch.abs(torch.sum(torch_tensor-loaded_array[0:index1]))
-        assert np.isclose(torch.sum(torch_tensor),
-                          np.sum(loaded_array[0:index1]),
-                          accuracy)
+        test1 = torch.abs(torch.sum(torch_tensor - loaded_array[0:index1]))
+        assert np.isclose(
+            torch.sum(torch_tensor), np.sum(loaded_array[0:index1]), accuracy
+        )
 
         # Simulate Tensor data handling in pytorch workflow.
         data_set = TensorDataset(torch_tensor, torch_tensor)
@@ -64,8 +68,7 @@ class TestTensorMemory:
 
         # Perform data operation again.
         loaded_array *= 10
-        for (x, y) in data_loader:
-            assert np.isclose(torch.sum(x),
-                              np.sum(loaded_array[0:index1]),
-                              accuracy)
-
+        for x, y in data_loader:
+            assert np.isclose(
+                torch.sum(x), np.sum(loaded_array[0:index1]), accuracy
+            )
