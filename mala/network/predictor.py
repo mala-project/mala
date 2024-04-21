@@ -57,13 +57,6 @@ class Predictor(Runner):
         predicted_ldos : numpy.array
             Precicted LDOS for these atomic positions.
         """
-        self.data.grid_dimension = self.parameters.inference_data_grid
-        self.data.grid_size = (
-            self.data.grid_dimension[0]
-            * self.data.grid_dimension[1]
-            * self.data.grid_dimension[2]
-        )
-
         self.data.target_calculator.read_additional_calculation_data(
             path_to_file, "espresso-out"
         )
