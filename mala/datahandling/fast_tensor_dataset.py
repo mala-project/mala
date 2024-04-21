@@ -1,4 +1,5 @@
 """A special type of tensor data set for improved performance."""
+
 import numpy as np
 import torch
 
@@ -35,7 +36,9 @@ class FastTensorDataset(torch.utils.data.Dataset):
         batch : tuple
             The data tuple for this batch.
         """
-        batch = self.indices[idx*self.batch_size:(idx+1)*self.batch_size]
+        batch = self.indices[
+            idx * self.batch_size : (idx + 1) * self.batch_size
+        ]
         rv = tuple(t[batch, ...] for t in self.tensors)
         return rv
 

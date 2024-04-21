@@ -3,6 +3,7 @@ import os
 import mala
 
 from mala.datahandling.data_repo import data_repo_path
+
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
@@ -54,10 +55,12 @@ parameters.descriptors.bispectrum_cutoff = 4.67637
 
 data_handler = mala.DataHandler(parameters)
 # Add a snapshot we want to use in to the list.
-data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                          "Be_snapshot0.out.npy", data_path, "tr")
-data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                          "Be_snapshot1.out.npy", data_path, "va")
+data_handler.add_snapshot(
+    "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path, "tr"
+)
+data_handler.add_snapshot(
+    "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path, "va"
+)
 data_handler.prepare_data()
 
 ####################
@@ -69,10 +72,12 @@ data_handler.prepare_data()
 # class can be used to correctly define input and output layer of the NN.
 ####################
 
-parameters.network.layer_sizes = [data_handler.input_dimension,
-                                  100,
-                                  data_handler.output_dimension]
-network = mala.Network(parameters)
+parameters.network.layer_sizes = [
+    data_handler.input_dimension,
+    100,
+    data_handler.output_dimension,
+]
+test_network = mala.Network(parameters)
 
 ####################
 # 4. TRAINING THE NETWORK
@@ -84,8 +89,9 @@ network = mala.Network(parameters)
 # side the model. This makes inference easier.
 ####################
 
-trainer = mala.Trainer(parameters, network, data_handler)
-trainer.train_network()
+test_trainer = mala.Trainer(parameters, test_network, data_handler)
+test_trainer.train_network()
 additional_calculation_data = os.path.join(data_path, "Be_snapshot0.out")
-trainer.save_run("be_model",
-                 additional_calculation_data=additional_calculation_data)
+test_trainer.save_run(
+    "be_model", additional_calculation_data=additional_calculation_data
+)

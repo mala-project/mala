@@ -1,10 +1,10 @@
 import os
 
 import mala
-from mala import printout
 from ase.io import read
 
 from mala.datahandling.data_repo import data_repo_path
+
 data_path = os.path.join(data_repo_path, "Be2")
 
 assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
@@ -35,4 +35,3 @@ calculator.mala_parameters.targets.pseudopotential_path = data_path
 atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
 atoms.set_calculator(calculator)
 print(atoms.get_potential_energy())
-

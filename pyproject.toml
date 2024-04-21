@@ -1,0 +1,6 @@
+[tool.black]
+line-length = 79
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

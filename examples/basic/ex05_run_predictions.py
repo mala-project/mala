@@ -6,6 +6,7 @@ import mala
 from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
+
 data_path = os.path.join(data_repo_path, "Be2")
 
 assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
@@ -23,8 +24,9 @@ REQUIRES LAMMPS (and potentially the total energy module).
 # To use the predictor class to test an ML-DFT model, simply load it via the
 # Tester class interface. Afterwards, set the necessary parameters.
 ####################
-parameters, network, data_handler, predictor = mala.Predictor.\
-    load_run("be_model")
+parameters, network, data_handler, predictor = mala.Predictor.load_run(
+    "be_model"
+)
 
 
 ####################

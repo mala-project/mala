@@ -1,4 +1,5 @@
 """Functions for operating MALA in parallel."""
+
 from collections import defaultdict
 import platform
 import warnings
@@ -46,8 +47,10 @@ def set_horovod_status(new_value):
 
     """
     if use_mpi is True and new_value is True:
-        raise Exception("Cannot use horovod and inference-level MPI at "
-                        "the same time yet.")
+        raise Exception(
+            "Cannot use horovod and inference-level MPI at "
+            "the same time yet."
+        )
     global use_horovod
     use_horovod = new_value
 
@@ -66,8 +69,10 @@ def set_mpi_status(new_value):
 
     """
     if use_horovod is True and new_value is True:
-        raise Exception("Cannot use horovod and inference-level MPI at "
-                        "the same time yet.")
+        raise Exception(
+            "Cannot use horovod and inference-level MPI at "
+            "the same time yet."
+        )
     global use_mpi
     use_mpi = new_value
     if use_mpi:
@@ -96,6 +101,7 @@ def set_lammps_instance(new_instance):
 
     """
     import lammps
+
     global lammps_instance
     if isinstance(new_instance, lammps.core.lammps):
         lammps_instance = new_instance
@@ -162,7 +168,7 @@ def get_local_rank():
             ranks_nodes = comm.allgather((comm.Get_rank(), this_node))
             node2rankssofar = defaultdict(int)
             local_rank = None
-            for (rank, node) in ranks_nodes:
+            for rank, node in ranks_nodes:
                 if rank == comm.Get_rank():
                     local_rank = node2rankssofar[node]
                 node2rankssofar[node] += 1
@@ -204,13 +210,13 @@ def get_comm():
 def barrier():
     """General interface for a barrier."""
     if use_horovod:
-        hvd.allreduce(torch.tensor(0), name='barrier')
+        hvd.allreduce(torch.tensor(0), name="barrier")
     if use_mpi:
         comm.Barrier()
     return
 
 
-def printout(*values, sep=' ', min_verbosity=0):
+def printout(*values, sep=" ", min_verbosity=0):
     """
     Interface to built-in "print" for parallel runs. Can be used like print.
 

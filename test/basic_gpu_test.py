@@ -20,6 +20,7 @@ import pytest
 import torch
 
 from mala.datahandling.data_repo import data_repo_path
+
 data_path = os.path.join(data_repo_path, "Be2")
 
 test_checkpoint_name = "test"
@@ -36,8 +37,10 @@ class TestGPUExecution:
 
     Tests whether a GPU is available and then the execution on it.
     """
-    @pytest.mark.skipif(torch.cuda.is_available() is False,
-                        reason="No GPU detected.")
+
+    @pytest.mark.skipif(
+        torch.cuda.is_available() is False, reason="No GPU detected."
+    )
     def test_gpu_performance(self):
         """
         Test whether GPU training brings performance improvements.
@@ -104,12 +107,27 @@ class TestGPUExecution:
 
         # Add a snapshot we want to use in to the list.
         for i in range(0, 6):
-            data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                                      "Be_snapshot0.out.npy", data_path, "tr")
-        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                  "Be_snapshot1.out.npy", data_path, "va")
-        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                  "Be_snapshot2.out.npy", data_path, "te")
+            data_handler.add_snapshot(
+                "Be_snapshot0.in.npy",
+                data_path,
+                "Be_snapshot0.out.npy",
+                data_path,
+                "tr",
+            )
+        data_handler.add_snapshot(
+            "Be_snapshot1.in.npy",
+            data_path,
+            "Be_snapshot1.out.npy",
+            data_path,
+            "va",
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot2.in.npy",
+            data_path,
+            "Be_snapshot2.out.npy",
+            data_path,
+            "te",
+        )
         data_handler.prepare_data()
         printout("Read data: DONE.", min_verbosity=0)
 
@@ -120,16 +138,17 @@ class TestGPUExecution:
         # but it is safer this way.
         ####################
 
-        test_parameters.network.layer_sizes = [data_handler.
-                                               input_dimension,
-                                               100,
-                                               data_handler.
-                                               output_dimension]
+        test_parameters.network.layer_sizes = [
+            data_handler.input_dimension,
+            100,
+            data_handler.output_dimension,
+        ]
 
         # Setup network and trainer.
         test_network = mala.Network(test_parameters)
-        test_trainer = mala.Trainer(test_parameters, test_network,
-                                    data_handler)
+        test_trainer = mala.Trainer(
+            test_parameters, test_network, data_handler
+        )
         starttime = time.time()
         test_trainer.train_network()
 

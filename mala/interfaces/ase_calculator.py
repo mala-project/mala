@@ -3,9 +3,8 @@
 from ase.calculators.calculator import Calculator, all_changes
 import numpy as np
 
-from mala import Parameters, Network, DataHandler, Predictor, LDOS, Density, \
-                 DOS
-from mala.common.parallelizer import get_rank, get_comm, barrier
+from mala import Parameters, Network, DataHandler, Predictor, LDOS
+from mala.common.parallelizer import barrier
 
 
 class MALA(Calculator):
@@ -40,32 +39,40 @@ class MALA(Calculator):
 
     implemented_properties = ['energy']
 
-    def __init__(self, params: Parameters, network: Network,
-                 data: DataHandler, reference_data=None,
-                 predictor=None):
+    def __init__(
+        self,
+        params: Parameters,
+        network: Network,
+        data: DataHandler,
+        reference_data=None,
+        predictor=None,
+    ):
         super(MALA, self).__init__()
 
         # Copy the MALA relevant objects.
         self.mala_parameters: Parameters = params
         if self.mala_parameters.targets.target_type != "LDOS":
-            raise Exception("The MALA calculator currently only works with the"
-                            "LDOS.")
+            raise Exception(
+                "The MALA calculator currently only works with the LDOS."
+            )
 
         self.network: Network = network
         self.data_handler: DataHandler = data
 
         # Prepare for prediction.
         if predictor is None:
-            self.predictor = Predictor(self.mala_parameters, self.network,
-                                       self.data_handler)
+            self.predictor = Predictor(
+                self.mala_parameters, self.network, self.data_handler
+            )
         else:
             self.predictor = predictor
 
         if reference_data is not None:
             # Get critical values from a reference file (cutoff,
             # temperature, etc.)
-            self.data_handler.target_calculator.\
-                read_additional_calculation_data(reference_data)
+            self.data_handler.target_calculator.read_additional_calculation_data(
+                reference_data
+            )
 
         # Needed for e.g. Monte Carlo.
         self.last_energy_contributions = {}
@@ -86,11 +93,15 @@ class MALA(Calculator):
         path : str
             Path where the model is saved.
         """
-        loaded_params, loaded_network, \
-            new_datahandler, loaded_runner = Predictor.\
-            load_run(run_name, path=path)
-        calculator = cls(loaded_params, loaded_network, new_datahandler,
-                         predictor=loaded_runner)
+        loaded_params, loaded_network, new_datahandler, loaded_runner = (
+            Predictor.load_run(run_name, path=path)
+        )
+        calculator = cls(
+            loaded_params,
+            loaded_network,
+            new_datahandler,
+            predictor=loaded_runner,
+        )
         return calculator
 
     def calculate(self, atoms=None, properties=['energy'],
@@ -143,6 +154,7 @@ class MALA(Calculator):
                                                True)
         barrier()
 
+        # Use the LDOS determined DOS and density to get energy and forces.
         self.results["energy"] = energy
         # if "forces" in properties:
         #     self.results["forces"] = forces

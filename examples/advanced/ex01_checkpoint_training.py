@@ -4,6 +4,7 @@ import mala
 from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
+
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
@@ -35,15 +36,27 @@ def initial_setup():
     parameters.running.checkpoint_name = "ex01_checkpoint"
 
     data_handler = mala.DataHandler(parameters)
-    data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                              "Be_snapshot0.out.npy", data_path, "tr")
-    data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                              "Be_snapshot1.out.npy", data_path, "va")
+    data_handler.add_snapshot(
+        "Be_snapshot0.in.npy",
+        data_path,
+        "Be_snapshot0.out.npy",
+        data_path,
+        "tr",
+    )
+    data_handler.add_snapshot(
+        "Be_snapshot1.in.npy",
+        data_path,
+        "Be_snapshot1.out.npy",
+        data_path,
+        "va",
+    )
     data_handler.prepare_data()
 
-    parameters.network.layer_sizes = [data_handler.input_dimension,
-                                      100,
-                                      data_handler.output_dimension]
+    parameters.network.layer_sizes = [
+        data_handler.input_dimension,
+        100,
+        data_handler.output_dimension,
+    ]
 
     network = mala.Network(parameters)
     trainer = mala.Trainer(parameters, network, data_handler)
@@ -52,12 +65,12 @@ def initial_setup():
 
 
 if mala.Trainer.run_exists("ex01_checkpoint"):
-    parameters, network, datahandler, trainer = \
-        mala.Trainer.load_run("ex01_checkpoint")
+    parameters, network, datahandler, trainer = mala.Trainer.load_run(
+        "ex01_checkpoint"
+    )
     printout("Starting resumed training.")
 else:
     parameters, network, datahandler, trainer = initial_setup()
     printout("Starting original training.")
 
 trainer.train_network()
-

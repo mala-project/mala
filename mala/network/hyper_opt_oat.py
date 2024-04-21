@@ -1,10 +1,11 @@
 """Hyperparameter optimizer using orthogonal array tuning."""
+
 from bisect import bisect
 import itertools
-import os
 import pickle
 
 import numpy as np
+
 try:
     import oapackage as oa
 except ModuleNotFoundError:
@@ -34,9 +35,9 @@ class HyperOptOAT(HyperOpt):
     """
 
     def __init__(self, params, data, use_pkl_checkpoints=False):
-        super(HyperOptOAT, self).__init__(params, data,
-                                          use_pkl_checkpoints=
-                                          use_pkl_checkpoints)
+        super(HyperOptOAT, self).__init__(
+            params, data, use_pkl_checkpoints=use_pkl_checkpoints
+        )
         self.objective = None
         self.optimal_params = None
         self.checkpoint_counter = 0
@@ -54,8 +55,9 @@ class HyperOptOAT(HyperOpt):
         self.current_trial = 0
         self.trial_losses = None
 
-    def add_hyperparameter(self, opttype="categorical",
-                           name="", choices=None, **kwargs):
+    def add_hyperparameter(
+        self, opttype="categorical", name="", choices=None, **kwargs
+    ):
         """
         Add hyperparameter.
 
@@ -70,15 +72,17 @@ class HyperOptOAT(HyperOpt):
         """
         if not self.sorted_num_choices:  # if empty
             super(HyperOptOAT, self).add_hyperparameter(
-                opttype=opttype, name=name, choices=choices)
+                opttype=opttype, name=name, choices=choices
+            )
             self.sorted_num_choices.append(len(choices))
 
         else:
             index = bisect(self.sorted_num_choices, len(choices))
             self.sorted_num_choices.insert(index, len(choices))
             self.params.hyperparameters.hlist.insert(
-                index, HyperparameterOAT(opttype=opttype, name=name,
-                                         choices=choices))
+                index,
+                HyperparameterOAT(opttype=opttype, name=name, choices=choices),
+            )
 
     def perform_study(self):
         """
@@ -90,11 +94,15 @@ class HyperOptOAT(HyperOpt):
             self.__OA = self.get_orthogonal_array()
         print(self.__OA)
         if self.trial_losses is None:
-            self.trial_losses = np.zeros(self.__OA.shape[0])+float("inf")
+            self.trial_losses = np.zeros(self.__OA.shape[0]) + float("inf")
 
-        printout("Performing",self.N_runs,
-                 "trials, starting with trial number", self.current_trial,
-                 min_verbosity=0)
+        printout(
+            "Performing",
+            self.N_runs,
+            "trials, starting with trial number",
+            self.current_trial,
+            min_verbosity=0,
+        )
 
         # The parameters could have changed.
         self.objective = ObjectiveBase(self.params, self.data_handler)
@@ -106,10 +114,17 @@ class HyperOptOAT(HyperOpt):
 
             # Output diagnostic information.
             best_trial = self.get_best_trial_results()
-            printout("Trial number", self.current_trial,
-                     "finished with:", self.trial_losses[self.current_trial],
-                     ", best is trial", best_trial[0],
-                     "with", best_trial[1], min_verbosity=0)
+            printout(
+                "Trial number",
+                self.current_trial,
+                "finished with:",
+                self.trial_losses[self.current_trial],
+                ", best is trial",
+                best_trial[0],
+                "with",
+                best_trial[1],
+                min_verbosity=0,
+            )
             self.current_trial += 1
             self.__create_checkpointing(row)
 
@@ -124,22 +139,31 @@ class HyperOptOAT(HyperOpt):
         """
         printout("Performing Range Analysis.", min_verbosity=1)
 
-        def indices(idx, val): return np.where(
-            self.__OA[:, idx] == val)[0]
-        R = [[self.trial_losses[indices(idx, l)].sum() for l in range(levels)]
-             for (idx, levels) in enumerate(self.factor_levels)]
+        def indices(idx, val):
+            return np.where(self.__OA[:, idx] == val)[0]
 
-        A = [[i/len(j) for i in j] for j in R]
+        R = [
+            [self.trial_losses[indices(idx, l)].sum() for l in range(levels)]
+            for (idx, levels) in enumerate(self.factor_levels)
+        ]
+
+        A = [[i / len(j) for i in j] for j in R]
 
         # Taking loss as objective to minimise
         self.optimal_params = np.array([i.index(min(i)) for i in A])
-        self.importance = np.argsort([max(i)-min(i) for i in A])
+        self.importance = np.argsort([max(i) - min(i) for i in A])
 
     def show_order_of_importance(self):
         """Print the order of importance of the hyperparameters."""
         printout("Order of Importance: ", min_verbosity=0)
         printout(
-            *[self.params.hyperparameters.hlist[idx].name for idx in self.importance], sep=" < ", min_verbosity=0)
+            *[
+                self.params.hyperparameters.hlist[idx].name
+                for idx in self.importance
+            ],
+            sep=" < ",
+            min_verbosity=0
+        )
 
     def set_optimal_parameters(self):
         """
@@ -160,8 +184,9 @@ class HyperOptOAT(HyperOpt):
         print("Sorted factor levels:", self.sorted_num_choices)
         self.n_factors = len(self.params.hyperparameters.hlist)
 
-        self.factor_levels = [par.num_choices for par in self.params.
-                              hyperparameters.hlist]
+        self.factor_levels = [
+            par.num_choices for par in self.params.hyperparameters.hlist
+        ]
 
         self.strength = 2
         arraylist = None
@@ -175,12 +200,12 @@ class HyperOptOAT(HyperOpt):
         # holds. x is unknown, but we can be confident that it should be
         # small. So simply trying 3 time should be fine for now.
         for i in range(1, 4):
-            self.N_runs = self.number_of_runs()*i
+            self.N_runs = self.number_of_runs() * i
             print("Trying run size:", self.N_runs)
             print("Generating Suitable Orthogonal Array.")
-            arrayclass = oa.arraydata_t(self.factor_levels, self.N_runs,
-                                        self.strength,
-                                        self.n_factors)
+            arrayclass = oa.arraydata_t(
+                self.factor_levels, self.N_runs, self.strength, self.n_factors
+            )
             arraylist = [arrayclass.create_root()]
 
             # extending the orthogonal array
@@ -188,9 +213,9 @@ class HyperOptOAT(HyperOpt):
             options.setAlgorithmAuto(arrayclass)
 
             for _ in range(self.strength + 1, self.n_factors + 1):
-                arraylist_extensions = oa.extend_arraylist(arraylist,
-                                                           arrayclass,
-                                                           options)
+                arraylist_extensions = oa.extend_arraylist(
+                    arraylist, arrayclass, options
+                )
                 dd = np.array([a.Defficiency() for a in arraylist_extensions])
                 idxs = np.argsort(dd)
                 arraylist = [arraylist_extensions[ii] for ii in idxs]
@@ -198,9 +223,11 @@ class HyperOptOAT(HyperOpt):
                 break
 
         if not arraylist:
-            raise Exception("No orthogonal array exists with such a "
-                            "parameter combination.")
-            
+            raise Exception(
+                "No orthogonal array exists with such a "
+                "parameter combination."
+            )
+
         else:
             return np.unique(np.array(arraylist[0]), axis=0)
 
@@ -212,8 +239,10 @@ class HyperOptOAT(HyperOpt):
         See also here:
         https://oapackage.readthedocs.io/en/latest/examples/example_minimal_number_of_runs_oa.html
         """
-        runs = [np.prod(tt) for tt in itertools.combinations(
-            self.factor_levels, self.strength)]
+        runs = [
+            np.prod(tt)
+            for tt in itertools.combinations(self.factor_levels, self.strength)
+        ]
 
         N = np.lcm.reduce(runs)
         return int(N)
@@ -225,8 +254,9 @@ class HyperOptOAT(HyperOpt):
         elif self.params.hyperparameters.direction == "maximize":
             return [np.argmax(self.trial_losses), np.max(self.trial_losses)]
         else:
-            raise Exception("Invalid direction for hyperparameter optimization"
-                            "selected.")
+            raise Exception(
+                "Invalid direction for hyperparameter optimization selected."
+            )
 
     def __check_factor_levels(self):
         """Check that the factors are in a decreasing order."""
@@ -239,12 +269,15 @@ class HyperOptOAT(HyperOpt):
             # Factors are in decreasing order, we don't have to do anything.
             pass
         else:
-            raise Exception("Please use hyperparameters in increasing or "
-                            "decreasing order of number of choices")
+            raise Exception(
+                "Please use hyperparameters in increasing or "
+                "decreasing order of number of choices"
+            )
 
     @classmethod
-    def resume_checkpoint(cls, checkpoint_name, no_data=False,
-                          use_pkl_checkpoints=False):
+    def resume_checkpoint(
+        cls, checkpoint_name, no_data=False, use_pkl_checkpoints=False
+    ):
         """
         Prepare resumption of hyperparameter optimization from a checkpoint.
 
@@ -275,12 +308,16 @@ class HyperOptOAT(HyperOpt):
         new_hyperopt : HyperOptOAT
             The hyperparameter optimizer reconstructed from the checkpoint.
         """
-        loaded_params, new_datahandler, optimizer_name = \
-            cls._resume_checkpoint(checkpoint_name, no_data=no_data,
-                                   use_pkl_checkpoints=use_pkl_checkpoints)
-        new_hyperopt = HyperOptOAT.load_from_file(loaded_params,
-                                                  optimizer_name,
-                                                  new_datahandler)
+        loaded_params, new_datahandler, optimizer_name = (
+            cls._resume_checkpoint(
+                checkpoint_name,
+                no_data=no_data,
+                use_pkl_checkpoints=use_pkl_checkpoints,
+            )
+        )
+        new_hyperopt = HyperOptOAT.load_from_file(
+            loaded_params, optimizer_name, new_datahandler
+        )
 
         return loaded_params, new_datahandler, new_hyperopt
 
@@ -308,19 +345,21 @@ class HyperOptOAT(HyperOpt):
             The hyperparameter optimizer that was loaded from the file.
         """
         # First, load the checkpoint.
-        with open(file_path, 'rb') as handle:
+        with open(file_path, "rb") as handle:
             loaded_tracking_data = pickle.load(handle)
             loaded_hyperopt = HyperOptOAT(params, data)
-            loaded_hyperopt.sorted_num_choices = \
-                loaded_tracking_data["sorted_num_choices"]
-            loaded_hyperopt.current_trial = \
-                loaded_tracking_data["current_trial"]
-            loaded_hyperopt.trial_losses = \
-                loaded_tracking_data["trial_losses"]
+            loaded_hyperopt.sorted_num_choices = loaded_tracking_data[
+                "sorted_num_choices"
+            ]
+            loaded_hyperopt.current_trial = loaded_tracking_data[
+                "current_trial"
+            ]
+            loaded_hyperopt.trial_losses = loaded_tracking_data["trial_losses"]
             loaded_hyperopt.importance = loaded_tracking_data["importance"]
             loaded_hyperopt.n_factors = loaded_tracking_data["n_factors"]
-            loaded_hyperopt.factor_levels = \
-                loaded_tracking_data["factor_levels"]
+            loaded_hyperopt.factor_levels = loaded_tracking_data[
+                "factor_levels"
+            ]
             loaded_hyperopt.strength = loaded_tracking_data["strength"]
             loaded_hyperopt.N_runs = loaded_tracking_data["N_runs"]
             loaded_hyperopt.__OA = loaded_tracking_data["OA"]
@@ -332,19 +371,31 @@ class HyperOptOAT(HyperOpt):
         self.checkpoint_counter += 1
         need_to_checkpoint = False
 
-        if self.checkpoint_counter >= self.params.hyperparameters.\
-                checkpoints_each_trial and self.params.hyperparameters.\
-                checkpoints_each_trial > 0:
+        if (
+            self.checkpoint_counter
+            >= self.params.hyperparameters.checkpoints_each_trial
+            and self.params.hyperparameters.checkpoints_each_trial > 0
+        ):
             need_to_checkpoint = True
-            printout(str(self.params.hyperparameters.
-                     checkpoints_each_trial)+" trials have passed, creating a "
-                                             "checkpoint for hyperparameter "
-                                             "optimization.", min_verbosity=1)
-        if self.params.hyperparameters.checkpoints_each_trial < 0 and \
-                np.argmin(self.trial_losses) == self.current_trial-1:
+            printout(
+                str(self.params.hyperparameters.checkpoints_each_trial)
+                + " trials have passed, creating a "
+                "checkpoint for hyperparameter "
+                "optimization.",
+                min_verbosity=1,
+            )
+        if (
+            self.params.hyperparameters.checkpoints_each_trial < 0
+            and np.argmin(self.trial_losses) == self.current_trial - 1
+        ):
             need_to_checkpoint = True
-            printout("Best trial is "+str(self.current_trial-1)+", creating a "
-                     "checkpoint for it.", min_verbosity=1)
+            printout(
+                "Best trial is "
+                + str(self.current_trial - 1)
+                + ", creating a "
+                "checkpoint for it.",
+                min_verbosity=1,
+            )
 
         if need_to_checkpoint is True:
             # We need to create a checkpoint!
@@ -360,17 +411,21 @@ class HyperOptOAT(HyperOpt):
             #         return
             # The study only has to be saved if the no RDB storage is used.
             if self.params.hyperparameters.rdb_storage is None:
-                hyperopt_name = self.params.hyperparameters.checkpoint_name \
-                            + "_hyperopt.pth"
+                hyperopt_name = (
+                    self.params.hyperparameters.checkpoint_name
+                    + "_hyperopt.pth"
+                )
 
-                study = {"sorted_num_choices": self.sorted_num_choices,
-                         "current_trial": self.current_trial,
-                         "trial_losses": self.trial_losses,
-                         "importance": self.importance,
-                         "n_factors": self.n_factors,
-                         "factor_levels": self.factor_levels,
-                         "strength": self.strength,
-                         "N_runs": self.N_runs,
-                         "OA": self.__OA}
-                with open(hyperopt_name, 'wb') as handle:
+                study = {
+                    "sorted_num_choices": self.sorted_num_choices,
+                    "current_trial": self.current_trial,
+                    "trial_losses": self.trial_losses,
+                    "importance": self.importance,
+                    "n_factors": self.n_factors,
+                    "factor_levels": self.factor_levels,
+                    "strength": self.strength,
+                    "N_runs": self.N_runs,
+                    "OA": self.__OA,
+                }
+                with open(hyperopt_name, "wb") as handle:
                     pickle.dump(study, handle, protocol=4)

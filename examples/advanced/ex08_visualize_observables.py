@@ -1,14 +1,15 @@
 import os
 
-from ase.io import read
 import mala
-import numpy as np
 
 from mala.datahandling.data_repo import data_repo_path
-atoms_path = os.path.join(os.path.join(data_repo_path, "Be2"),
-                          "Be_snapshot1.out")
-ldos_path = os.path.join(os.path.join(data_repo_path, "Be2"),
-                         "Be_snapshot1.out.npy")
+
+atoms_path = os.path.join(
+    os.path.join(data_repo_path, "Be2"), "Be_snapshot1.out"
+)
+ldos_path = os.path.join(
+    os.path.join(data_repo_path, "Be2"), "Be_snapshot1.out.npy"
+)
 """
 Shows how MALA can be used to visualize observables of interest. 
 """
@@ -46,11 +47,11 @@ density_calculator = mala.Density.from_ldos_calculator(ldos_calculator)
 density_calculator.write_to_cube("Be_density.cube")
 
 # The radial distribution function can be visualized on discretized radii.
-rdf, radii = ldos_calculator.\
-    radial_distribution_function_from_atoms(ldos_calculator.atoms,
-                                            number_of_bins=500)
+rdf, radii = ldos_calculator.radial_distribution_function_from_atoms(
+    ldos_calculator.atoms, number_of_bins=500
+)
 
 # The static structure factor can be visualized on a discretized k-grid.
-static_structure, kpoints = ldos_calculator.\
-    static_structure_factor_from_atoms(ldos_calculator.atoms,
-                                       number_of_bins=500, kMax=12)
+static_structure, kpoints = ldos_calculator.static_structure_factor_from_atoms(
+    ldos_calculator.atoms, number_of_bins=500, kMax=12
+)
