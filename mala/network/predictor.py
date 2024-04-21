@@ -1,5 +1,3 @@
-"""Tester class for testing a network."""
-
 import numpy as np
 import torch
 
