@@ -189,6 +189,10 @@ class Predictor(Runner):
         self, snap_descriptors, local_data_size=None
     ):
         """Forward a scaled tensor of descriptors through the NN."""
+        assert isinstance(
+            snap_descriptors, torch.Tensor
+        ), "snap_descriptors is not a Tensor"
+
         # Ensure the Network is on the correct device.
         # This line is necessary because GPU acceleration may have been
         # activated AFTER loading a model.
