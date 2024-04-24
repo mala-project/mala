@@ -840,7 +840,9 @@ class ACSDAnalyzer(HyperOpt):
             descriptor_vectors_contain_xyz=descriptor_vectors_contain_xyz,
         )
         data_size = np.shape(similarity_data)[0]
-        distances = similarity_data[:, 1] - similarity_data[:, 0]
+
+        # Subtracting LDOS similarities from bispectrum similiarities.
+        distances = similarity_data[:, 0] - similarity_data[:, 1]
         distances = distances.clip(min=0)
         return np.mean(distances)
 
