@@ -93,10 +93,19 @@ the core development team.
 ### Formatting code
 
 * MALA uses [`black`](https://github.com/psf/black) for code formatting
-* The `black` configuration is located in `pyproject.toml`
+* The `black` configuration is located in `pyproject.toml`, the `black` version
+  is specified in `.pre-commit-config.yaml`
 * Currently, no automatic code reformatting will be done in the CI, thus
-  please ensure that your code is properly formatted before creating a pull 
-  request
+  please ensure that your code is properly formatted before creating a pull
+  request. We suggest to use [`pre-commit`](https://pre-commit.com/). You can
+
+  * manually run `pre-commit run -a` at any given time
+  * configure it to run before each commit by executing `pre-commit install`
+    once locally
+
+  Without `pre-commit`, please install the `black` version named in
+  `.pre-commit-config.yaml` and run `find -name "*.py" | xargs black` or just
+  `black my_modified_file.py`.
 
 ### Adding dependencies
 
