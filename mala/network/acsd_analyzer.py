@@ -834,8 +834,8 @@ class ACSDAnalyzer(HyperOpt):
 
         """
 
-        def distance_between_points(x1, y1, x2, y2):
-            return np.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
+        def distance_between_points(y1, y2):
+            return np.abs(y1 - y2)
 
         similarity_data = ACSDAnalyzer._calculate_cosine_similarities(
             descriptor_data,
@@ -848,9 +848,7 @@ class ACSDAnalyzer(HyperOpt):
         for i in range(0, data_size):
             distances.append(
                 distance_between_points(
-                    similarity_data[i, 0],
                     similarity_data[i, 1],
-                    similarity_data[i, 0],
                     similarity_data[i, 0],
                 )
             )
