@@ -1,4 +1,4 @@
-name: mala-gpu-ddp
+name: mala-gpu
 channels:
   - conda-forge
   - defaults
