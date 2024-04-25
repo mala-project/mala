@@ -1,4 +1,5 @@
 """DOS calculation class."""
+
 from functools import cached_property
 
 import ase.io
@@ -10,8 +11,13 @@ from scipy.optimize import toms748
 from mala.common.parameters import printout
 from mala.common.parallelizer import get_rank, barrier, get_comm
 from mala.targets.target import Target
-from mala.targets.calculation_helpers import fermi_function, gaussians, \
-    analytical_integration, get_beta, entropy_multiplicator
+from mala.targets.calculation_helpers import (
+    fermi_function,
+    gaussians,
+    analytical_integration,
+    get_beta,
+    entropy_multiplicator,
+)
 
 
 class DOS(Target):
@@ -54,18 +60,22 @@ class DOS(Target):
         return_dos_object.fermi_energy_dft = ldos_object.fermi_energy_dft
         return_dos_object.temperature = ldos_object.temperature
         return_dos_object.voxel = ldos_object.voxel
-        return_dos_object.number_of_electrons_exact = \
+        return_dos_object.number_of_electrons_exact = (
             ldos_object.number_of_electrons_exact
-        return_dos_object.band_energy_dft_calculation = \
+        )
+        return_dos_object.band_energy_dft_calculation = (
             ldos_object.band_energy_dft_calculation
+        )
         return_dos_object.atoms = ldos_object.atoms
         return_dos_object.qe_input_data = ldos_object.qe_input_data
         return_dos_object.qe_pseudopotentials = ldos_object.qe_pseudopotentials
-        return_dos_object.total_energy_dft_calculation = \
+        return_dos_object.total_energy_dft_calculation = (
             ldos_object.total_energy_dft_calculation
+        )
         return_dos_object.kpoints = ldos_object.kpoints
-        return_dos_object.number_of_electrons_from_eigenvals = \
+        return_dos_object.number_of_electrons_from_eigenvals = (
             ldos_object.number_of_electrons_from_eigenvals
+        )
         return_dos_object.local_grid = ldos_object.local_grid
         return_dos_object._parameters_full = ldos_object._parameters_full
 
@@ -214,8 +224,11 @@ class DOS(Target):
         """Dictionary containing the SI unit dimensions in OpenPMD format."""
         import openpmd_api as io
 
-        return {io.Unit_Dimension.M: -1, io.Unit_Dimension.L: -2,
-                io.Unit_Dimension.T: 2}
+        return {
+            io.Unit_Dimension.M: -1,
+            io.Unit_Dimension.L: -2,
+            io.Unit_Dimension.T: 2,
+        }
 
     @property
     def density_of_states(self):
@@ -258,8 +271,9 @@ class DOS(Target):
         if self.density_of_states is not None:
             return self.get_band_energy()
         else:
-            raise Exception("No cached DOS available to calculate this "
-                            "property.")
+            raise Exception(
+                "No cached DOS available to calculate this property."
+            )
 
     @cached_property
     def number_of_electrons(self):
@@ -272,8 +286,9 @@ class DOS(Target):
         if self.density_of_states is not None:
             return self.get_number_of_electrons()
         else:
-            raise Exception("No cached DOS available to calculate this "
-                            "property.")
+            raise Exception(
+                "No cached DOS available to calculate this property."
+            )
 
     @cached_property
     def fermi_energy(self):
@@ -286,8 +301,7 @@ class DOS(Target):
         from how this quantity is calculated. Calculated via cached DOS.
         """
         if self.density_of_states is not None:
-            fermi_energy = self. \
-                get_self_consistent_fermi_energy()
+            fermi_energy = self.get_self_consistent_fermi_energy()
 
             # Now that we have a new Fermi energy, we should uncache the
             # old number of electrons.
@@ -308,8 +322,9 @@ class DOS(Target):
         if self.density_of_states is not None:
             return self.get_entropy_contribution()
         else:
-            raise Exception("No cached DOS available to calculate this "
-                            "property.")
+            raise Exception(
+                "No cached DOS available to calculate this property."
+            )
 
     def uncache_properties(self):
         """Uncache all cached properties of this calculator."""
@@ -355,7 +370,7 @@ class DOS(Target):
         if in_units == "1/eV" or in_units is None:
             return array
         elif in_units == "1/Ry":
-            return array * (1/Rydberg)
+            return array * (1 / Rydberg)
         else:
             raise Exception("Unsupported unit for LDOS.")
 
@@ -410,7 +425,7 @@ class DOS(Target):
         return_dos_values = []
 
         # Open the file, then iterate through its contents.
-        with open(path, 'r') as infile:
+        with open(path, "r") as infile:
             lines = infile.readlines()
             i = 0
 
@@ -419,8 +434,10 @@ class DOS(Target):
                 if "#" not in dos_line and i < self.parameters.ldos_gridsize:
                     e_val = float(dos_line.split()[0])
                     dosval = float(dos_line.split()[1])
-                    if np.abs(e_val-energy_grid[i]) < self.parameters.\
-                            ldos_gridspacing_ev*0.98:
+                    if (
+                        np.abs(e_val - energy_grid[i])
+                        < self.parameters.ldos_gridspacing_ev * 0.98
+                    ):
                         return_dos_values.append(dosval)
                         i += 1
 
@@ -457,17 +474,19 @@ class DOS(Target):
             atoms_object = ase.io.read(path, format="espresso-out")
         kweights = atoms_object.get_calculator().get_k_point_weights()
         if kweights is None:
-            raise Exception("QE output file does not contain band information."
-                            "Rerun calculation with verbosity set to 'high'.")
+            raise Exception(
+                "QE output file does not contain band information."
+                "Rerun calculation with verbosity set to 'high'."
+            )
 
         # Get the gaussians for all energy values and calculate the DOS per
         # band.
-        dos_per_band = gaussians(self.energy_grid,
-                                 atoms_object.get_calculator().
-                                 band_structure().energies[0, :, :],
-                                 smearing_factor*self.parameters.
-                                 ldos_gridspacing_ev)
-        dos_per_band = kweights[:, np.newaxis, np.newaxis]*dos_per_band
+        dos_per_band = gaussians(
+            self.energy_grid,
+            atoms_object.get_calculator().band_structure().energies[0, :, :],
+            smearing_factor * self.parameters.ldos_gridspacing_ev,
+        )
+        dos_per_band = kweights[:, np.newaxis, np.newaxis] * dos_per_band
 
         # QE gives the band energies in eV, so no conversion necessary here.
         dos_data = np.sum(dos_per_band, axis=(0, 1))
@@ -504,16 +523,23 @@ class DOS(Target):
         """
         emin = self.parameters.ldos_gridoffset_ev
 
-        emax = self.parameters.ldos_gridoffset_ev + \
-            self.parameters.ldos_gridsize * \
-            self.parameters.ldos_gridspacing_ev
+        emax = (
+            self.parameters.ldos_gridoffset_ev
+            + self.parameters.ldos_gridsize
+            * self.parameters.ldos_gridspacing_ev
+        )
         grid_size = self.parameters.ldos_gridsize
-        linspace_array = (np.linspace(emin, emax, grid_size, endpoint=False))
+        linspace_array = np.linspace(emin, emax, grid_size, endpoint=False)
         return linspace_array
 
-    def get_band_energy(self, dos_data=None, fermi_energy=None,
-                        temperature=None, integration_method="analytical",
-                        broadcast_band_energy=True):
+    def get_band_energy(
+        self,
+        dos_data=None,
+        fermi_energy=None,
+        temperature=None,
+        integration_method="analytical",
+        broadcast_band_energy=True,
+    ):
         """
         Calculate the band energy from given DOS data.
 
@@ -548,17 +574,21 @@ class DOS(Target):
         # Parse the parameters.
         # Parse the parameters.
         if dos_data is None and self.density_of_states is None:
-            raise Exception("No DOS data provided, cannot calculate"
-                            " this quantity.")
+            raise Exception(
+                "No DOS data provided, cannot calculate this quantity."
+            )
 
         # Here we check whether we will use our internal, cached
         # DOS, or calculate everything from scratch.
         if dos_data is not None:
             if fermi_energy is None:
-                printout("Warning: No fermi energy was provided or could be "
-                         "calculated from electronic structure data. "
-                         "Using the DFT fermi energy, this may "
-                         "yield unexpected results", min_verbosity=1)
+                printout(
+                    "Warning: No fermi energy was provided or could be "
+                    "calculated from electronic structure data. "
+                    "Using the DFT fermi energy, this may "
+                    "yield unexpected results",
+                    min_verbosity=1,
+                )
                 fermi_energy = self.fermi_energy_dft
         else:
             dos_data = self.density_of_states
@@ -569,11 +599,13 @@ class DOS(Target):
         if self.parameters._configuration["mpi"] and broadcast_band_energy:
             if get_rank() == 0:
                 energy_grid = self.energy_grid
-                band_energy = self.__band_energy_from_dos(dos_data,
-                                                          energy_grid,
-                                                          fermi_energy,
-                                                          temperature,
-                                                          integration_method)
+                band_energy = self.__band_energy_from_dos(
+                    dos_data,
+                    energy_grid,
+                    fermi_energy,
+                    temperature,
+                    integration_method,
+                )
             else:
                 band_energy = None
 
@@ -582,17 +614,29 @@ class DOS(Target):
             return band_energy
         else:
             energy_grid = self.energy_grid
-            return self.__band_energy_from_dos(dos_data, energy_grid,
-                                               fermi_energy, temperature,
-                                               integration_method)
+            return self.__band_energy_from_dos(
+                dos_data,
+                energy_grid,
+                fermi_energy,
+                temperature,
+                integration_method,
+            )
 
+        return self.__band_energy_from_dos(
+            dos_data,
+            energy_grid,
+            fermi_energy,
+            temperature,
+            integration_method,
+        )
 
-        return self.__band_energy_from_dos(dos_data, energy_grid, fermi_energy,
-                                           temperature, integration_method)
-
-    def get_number_of_electrons(self, dos_data=None, fermi_energy=None,
-                                temperature=None,
-                                integration_method="analytical"):
+    def get_number_of_electrons(
+        self,
+        dos_data=None,
+        fermi_energy=None,
+        temperature=None,
+        integration_method="analytical",
+    ):
         """
         Calculate the number of electrons from given DOS data.
 
@@ -622,17 +666,21 @@ class DOS(Target):
         """
         # Parse the parameters.
         if dos_data is None and self.density_of_states is None:
-            raise Exception("No DOS data provided, cannot calculate"
-                            " this quantity.")
+            raise Exception(
+                "No DOS data provided, cannot calculate this quantity."
+            )
 
         # Here we check whether we will use our internal, cached
         # DOS, or calculate everything from scratch.
         if dos_data is not None:
             if fermi_energy is None:
-                printout("Warning: No fermi energy was provided or could be "
-                         "calculated from electronic structure data. "
-                         "Using the DFT fermi energy, this may "
-                         "yield unexpected results", min_verbosity=1)
+                printout(
+                    "Warning: No fermi energy was provided or could be "
+                    "calculated from electronic structure data. "
+                    "Using the DFT fermi energy, this may "
+                    "yield unexpected results",
+                    min_verbosity=1,
+                )
                 fermi_energy = self.fermi_energy_dft
         else:
             dos_data = self.density_of_states
@@ -641,14 +689,22 @@ class DOS(Target):
         if temperature is None:
             temperature = self.temperature
         energy_grid = self.energy_grid
-        return self.__number_of_electrons_from_dos(dos_data, energy_grid,
-                                                   fermi_energy, temperature,
-                                                   integration_method)
+        return self.__number_of_electrons_from_dos(
+            dos_data,
+            energy_grid,
+            fermi_energy,
+            temperature,
+            integration_method,
+        )
 
-    def get_entropy_contribution(self, dos_data=None, fermi_energy=None,
-                                 temperature=None,
-                                 integration_method="analytical",
-                                 broadcast_entropy=True):
+    def get_entropy_contribution(
+        self,
+        dos_data=None,
+        fermi_energy=None,
+        temperature=None,
+        integration_method="analytical",
+        broadcast_entropy=True,
+    ):
         """
         Calculate the entropy contribution to the total energy.
 
@@ -682,17 +738,21 @@ class DOS(Target):
         """
         # Parse the parameters.
         if dos_data is None and self.density_of_states is None:
-            raise Exception("No DOS data provided, cannot calculate"
-                            " this quantity.")
+            raise Exception(
+                "No DOS data provided, cannot calculate this quantity."
+            )
 
         # Here we check whether we will use our internal, cached
         # DOS, or calculate everything from scratch.
         if dos_data is not None:
             if fermi_energy is None:
-                printout("Warning: No fermi energy was provided or could be "
-                         "calculated from electronic structure data. "
-                         "Using the DFT fermi energy, this may "
-                         "yield unexpected results", min_verbosity=1)
+                printout(
+                    "Warning: No fermi energy was provided or could be "
+                    "calculated from electronic structure data. "
+                    "Using the DFT fermi energy, this may "
+                    "yield unexpected results",
+                    min_verbosity=1,
+                )
                 fermi_energy = self.fermi_energy_dft
         else:
             dos_data = self.density_of_states
@@ -703,10 +763,13 @@ class DOS(Target):
         if self.parameters._configuration["mpi"] and broadcast_entropy:
             if get_rank() == 0:
                 energy_grid = self.energy_grid
-                entropy = self. \
-                    __entropy_contribution_from_dos(dos_data, energy_grid,
-                                                    fermi_energy, temperature,
-                                                    integration_method)
+                entropy = self.__entropy_contribution_from_dos(
+                    dos_data,
+                    energy_grid,
+                    fermi_energy,
+                    temperature,
+                    integration_method,
+                )
             else:
                 entropy = None
 
@@ -715,14 +778,21 @@ class DOS(Target):
             return entropy
         else:
             energy_grid = self.energy_grid
-            return self. \
-                __entropy_contribution_from_dos(dos_data, energy_grid,
-                                                fermi_energy, temperature,
-                                                integration_method)
+            return self.__entropy_contribution_from_dos(
+                dos_data,
+                energy_grid,
+                fermi_energy,
+                temperature,
+                integration_method,
+            )
 
-    def get_self_consistent_fermi_energy(self, dos_data=None, temperature=None,
-                                         integration_method="analytical",
-                                         broadcast_fermi_energy=True):
+    def get_self_consistent_fermi_energy(
+        self,
+        dos_data=None,
+        temperature=None,
+        integration_method="analytical",
+        broadcast_fermi_energy=True,
+    ):
         r"""
         Calculate the self-consistent Fermi energy.
 
@@ -759,8 +829,9 @@ class DOS(Target):
         if dos_data is None:
             dos_data = self.density_of_states
             if dos_data is None:
-                raise Exception("No DOS data provided, cannot calculate"
-                                " this quantity.")
+                raise Exception(
+                    "No DOS data provided, cannot calculate this quantity."
+                )
 
         if temperature is None:
             temperature = self.temperature
@@ -768,15 +839,20 @@ class DOS(Target):
         if self.parameters._configuration["mpi"] and broadcast_fermi_energy:
             if get_rank() == 0:
                 energy_grid = self.energy_grid
-                fermi_energy_sc = toms748(lambda fermi_sc:
-                                          (self.
-                                           __number_of_electrons_from_dos
-                                           (dos_data, energy_grid,
-                                            fermi_sc, temperature,
-                                            integration_method)
-                                           - self.number_of_electrons_exact),
-                                          a=energy_grid[0],
-                                          b=energy_grid[-1])
+                fermi_energy_sc = toms748(
+                    lambda fermi_sc: (
+                        self.__number_of_electrons_from_dos(
+                            dos_data,
+                            energy_grid,
+                            fermi_sc,
+                            temperature,
+                            integration_method,
+                        )
+                        - self.number_of_electrons_exact
+                    ),
+                    a=energy_grid[0],
+                    b=energy_grid[-1],
+                )
             else:
                 fermi_energy_sc = None
 
@@ -785,15 +861,20 @@ class DOS(Target):
             return fermi_energy_sc
         else:
             energy_grid = self.energy_grid
-            fermi_energy_sc = toms748(lambda fermi_sc:
-                                      (self.
-                                       __number_of_electrons_from_dos
-                                       (dos_data, energy_grid,
-                                        fermi_sc, temperature,
-                                        integration_method)
-                                       - self.number_of_electrons_exact),
-                                      a=energy_grid[0],
-                                      b=energy_grid[-1])
+            fermi_energy_sc = toms748(
+                lambda fermi_sc: (
+                    self.__number_of_electrons_from_dos(
+                        dos_data,
+                        energy_grid,
+                        fermi_sc,
+                        temperature,
+                        integration_method,
+                    )
+                    - self.number_of_electrons_exact
+                ),
+                a=energy_grid[0],
+                b=energy_grid[-1],
+            )
             return fermi_energy_sc
 
     def get_density_of_states(self, dos_data=None):
@@ -822,82 +903,96 @@ class DOS(Target):
         self.parameters.ldos_gridsize = np.shape(array)[-1]
 
     @staticmethod
-    def __number_of_electrons_from_dos(dos_data, energy_grid, fermi_energy,
-                                       temperature, integration_method):
+    def __number_of_electrons_from_dos(
+        dos_data, energy_grid, fermi_energy, temperature, integration_method
+    ):
         """Calculate the number of electrons from DOS data."""
         # Calculate the energy levels and the Fermi function.
 
-        fermi_vals = fermi_function(energy_grid, fermi_energy, temperature,
-                                    suppress_overflow=True)
+        fermi_vals = fermi_function(
+            energy_grid, fermi_energy, temperature, suppress_overflow=True
+        )
         # Calculate the number of electrons.
         if integration_method == "trapz":
-            number_of_electrons = integrate.trapz(dos_data * fermi_vals,
-                                                  energy_grid, axis=-1)
+            number_of_electrons = integrate.trapz(
+                dos_data * fermi_vals, energy_grid, axis=-1
+            )
         elif integration_method == "simps":
-            number_of_electrons = integrate.simps(dos_data * fermi_vals,
-                                                  energy_grid, axis=-1)
+            number_of_electrons = integrate.simps(
+                dos_data * fermi_vals, energy_grid, axis=-1
+            )
         elif integration_method == "quad":
             dos_pointer = interpolate.interp1d(energy_grid, dos_data)
             number_of_electrons, abserr = integrate.quad(
-                lambda e: dos_pointer(e) * fermi_function(e, fermi_energy,
-                                                          temperature,
-                                                          suppress_overflow=True),
-                energy_grid[0], energy_grid[-1], limit=500,
-                points=fermi_energy)
+                lambda e: dos_pointer(e)
+                * fermi_function(
+                    e, fermi_energy, temperature, suppress_overflow=True
+                ),
+                energy_grid[0],
+                energy_grid[-1],
+                limit=500,
+                points=fermi_energy,
+            )
         elif integration_method == "analytical":
-            number_of_electrons = analytical_integration(dos_data, "F0", "F1",
-                                                         fermi_energy,
-                                                         energy_grid,
-                                                         temperature)
+            number_of_electrons = analytical_integration(
+                dos_data, "F0", "F1", fermi_energy, energy_grid, temperature
+            )
         else:
             raise Exception("Unknown integration method.")
 
         return number_of_electrons
 
     @staticmethod
-    def __band_energy_from_dos(dos_data, energy_grid, fermi_energy,
-                               temperature, integration_method):
+    def __band_energy_from_dos(
+        dos_data, energy_grid, fermi_energy, temperature, integration_method
+    ):
         """Calculate the band energy from DOS data."""
         # Calculate the energy levels and the Fermi function.
-        fermi_vals = fermi_function(energy_grid, fermi_energy, temperature,
-                                    suppress_overflow=True)
+        fermi_vals = fermi_function(
+            energy_grid, fermi_energy, temperature, suppress_overflow=True
+        )
 
         # Calculate the band energy.
         if integration_method == "trapz":
-            band_energy = integrate.trapz(dos_data * (energy_grid *
-                                                      fermi_vals),
-                                          energy_grid, axis=-1)
+            band_energy = integrate.trapz(
+                dos_data * (energy_grid * fermi_vals), energy_grid, axis=-1
+            )
         elif integration_method == "simps":
-            band_energy = integrate.simps(dos_data * (energy_grid *
-                                                      fermi_vals),
-                                          energy_grid, axis=-1)
+            band_energy = integrate.simps(
+                dos_data * (energy_grid * fermi_vals), energy_grid, axis=-1
+            )
         elif integration_method == "quad":
             dos_pointer = interpolate.interp1d(energy_grid, dos_data)
             band_energy, abserr = integrate.quad(
-                lambda e: dos_pointer(e) * e * fermi_function(e, fermi_energy,
-                                                              temperature,
-                                                              suppress_overflow=True),
-                energy_grid[0], energy_grid[-1], limit=500,
-                points=fermi_energy)
+                lambda e: dos_pointer(e)
+                * e
+                * fermi_function(
+                    e, fermi_energy, temperature, suppress_overflow=True
+                ),
+                energy_grid[0],
+                energy_grid[-1],
+                limit=500,
+                points=fermi_energy,
+            )
         elif integration_method == "analytical":
-            number_of_electrons = analytical_integration(dos_data, "F0", "F1",
-                                                         fermi_energy,
-                                                         energy_grid,
-                                                         temperature)
-            band_energy_minus_uN = analytical_integration(dos_data, "F1", "F2",
-                                                          fermi_energy,
-                                                          energy_grid,
-                                                          temperature)
-            band_energy = band_energy_minus_uN + fermi_energy * \
-                          number_of_electrons
+            number_of_electrons = analytical_integration(
+                dos_data, "F0", "F1", fermi_energy, energy_grid, temperature
+            )
+            band_energy_minus_uN = analytical_integration(
+                dos_data, "F1", "F2", fermi_energy, energy_grid, temperature
+            )
+            band_energy = (
+                band_energy_minus_uN + fermi_energy * number_of_electrons
+            )
         else:
             raise Exception("Unknown integration method.")
 
         return band_energy
 
     @staticmethod
-    def __entropy_contribution_from_dos(dos_data, energy_grid, fermi_energy,
-                                        temperature, integration_method):
+    def __entropy_contribution_from_dos(
+        dos_data, energy_grid, fermi_energy, temperature, integration_method
+    ):
         r"""
         Calculate the entropy contribution to the total energy from DOS data.
 
@@ -905,31 +1000,36 @@ class DOS(Target):
         """
         # Calculate the entropy contribution to the energy.
         if integration_method == "trapz":
-            multiplicator = entropy_multiplicator(energy_grid, fermi_energy,
-                                                  temperature)
-            entropy_contribution = integrate.trapz(dos_data * multiplicator,
-                                                   energy_grid, axis=-1)
+            multiplicator = entropy_multiplicator(
+                energy_grid, fermi_energy, temperature
+            )
+            entropy_contribution = integrate.trapz(
+                dos_data * multiplicator, energy_grid, axis=-1
+            )
             entropy_contribution /= get_beta(temperature)
         elif integration_method == "simps":
-            multiplicator = entropy_multiplicator(energy_grid, fermi_energy,
-                                                  temperature)
-            entropy_contribution = integrate.simps(dos_data * multiplicator,
-                                                   energy_grid, axis=-1)
+            multiplicator = entropy_multiplicator(
+                energy_grid, fermi_energy, temperature
+            )
+            entropy_contribution = integrate.simps(
+                dos_data * multiplicator, energy_grid, axis=-1
+            )
             entropy_contribution /= get_beta(temperature)
         elif integration_method == "quad":
             dos_pointer = interpolate.interp1d(energy_grid, dos_data)
             entropy_contribution, abserr = integrate.quad(
-                lambda e: dos_pointer(e) *
-                          entropy_multiplicator(e, fermi_energy,
-                                                temperature),
-                energy_grid[0], energy_grid[-1], limit=500,
-                points=fermi_energy)
+                lambda e: dos_pointer(e)
+                * entropy_multiplicator(e, fermi_energy, temperature),
+                energy_grid[0],
+                energy_grid[-1],
+                limit=500,
+                points=fermi_energy,
+            )
             entropy_contribution /= get_beta(temperature)
         elif integration_method == "analytical":
-            entropy_contribution = analytical_integration(dos_data, "S0", "S1",
-                                                          fermi_energy,
-                                                          energy_grid,
-                                                          temperature)
+            entropy_contribution = analytical_integration(
+                dos_data, "S0", "S1", fermi_energy, energy_grid, temperature
+            )
         else:
             raise Exception("Unknown integration method.")
 

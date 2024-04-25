@@ -1,4 +1,5 @@
 """Electronic density calculation class."""
+
 from ase.units import Rydberg, Bohr
 
 from .target import Target
@@ -55,6 +56,6 @@ class AtomicForce(Target):
         if in_units == "eV/Ang":
             return array
         elif in_units == "Ry/Bohr":
-            return array * (Rydberg/Bohr)
+            return array * (Rydberg / Bohr)
         else:
             raise Exception("Unsupported unit for atomic forces.")

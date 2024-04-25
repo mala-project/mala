@@ -67,10 +67,19 @@ range, please cite the respective transferability studies:
 
 
             @article{MALA_temperaturetransfer,
-                title={Machine learning the electronic structure of matter across temperatures},
-                author={Fiedler, Lenz and Modine, Normand A and Miller, Kyle D and Cangi, Attila},
-                journal={arXiv preprint arXiv:2306.06032},
-                year={2023}
+                title = {Machine learning the electronic structure of matter across temperatures},
+                author = {Fiedler, Lenz and Modine, Normand A. and Miller, Kyle D. and Cangi, Attila},
+                journal = {Phys. Rev. B},
+                volume = {108},
+                issue = {12},
+                pages = {125146},
+                numpages = {16},
+                year = {2023},
+                month = {Sep},
+                publisher = {American Physical Society},
+                doi = {10.1103/PhysRevB.108.125146},
+                url = {https://link.aps.org/doi/10.1103/PhysRevB.108.125146}
             }
+
 
 

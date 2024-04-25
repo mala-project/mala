@@ -4,7 +4,7 @@ Data generation and conversion
 MALA operates on volumetric data. Volumetric data is stored in binary files.
 By default - and discussed here, in the introductory guide - this
 means ``numpy`` files (``.npy`` files). Advanced data storing techniques
-are :ref:`also available <openpmd data>`
+are :ref:`also available <openpmd data>`.
 
 Data generation
 ###############

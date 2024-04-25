@@ -1,4 +1,5 @@
 """Test whether the examples are still working."""
+
 import importlib
 import runpy
 
@@ -38,17 +39,23 @@ class TestExamples:
         runpy.run_path("../examples/advanced/ex04_acsd.py")
 
     def test_advanced_ex05(self):
-        runpy.run_path("../examples/advanced/ex05_checkpoint_hyperparameter_optimization.py")
+        runpy.run_path(
+            "../examples/advanced/ex05_checkpoint_hyperparameter_optimization.py"
+        )
 
     def test_advanced_ex06(self):
-        runpy.run_path("../examples/advanced/ex06_distributed_hyperparameter_optimization.py")
+        runpy.run_path(
+            "../examples/advanced/ex06_distributed_hyperparameter_optimization.py"
+        )
 
-    @pytest.mark.skipif(importlib.util.find_spec("oapackage") is None,
-                        reason="No OAT found on this machine, skipping this "
-                               "test.")
+    @pytest.mark.skipif(
+        importlib.util.find_spec("oapackage") is None,
+        reason="No OAT found on this machine, skipping this " "test.",
+    )
     def test_advanced_ex07(self):
-        runpy.run_path("../examples/advanced/ex07_advanced_hyperparameter_optimization.py")
+        runpy.run_path(
+            "../examples/advanced/ex07_advanced_hyperparameter_optimization.py"
+        )
 
     def test_advanced_ex08(self):
         runpy.run_path("../examples/advanced/ex08_visualize_observables.py")
-

@@ -4,6 +4,7 @@ import mala
 from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
+
 data_path = os.path.join(data_repo_path, "Be2")
 
 
@@ -29,17 +30,24 @@ parameters.running.visualisation_dir = "mala_vis"
 
 
 data_handler = mala.DataHandler(parameters)
-data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                          "Be_snapshot0.out.npy", data_path, "tr")
-data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                          "Be_snapshot1.out.npy", data_path, "va")
+data_handler.add_snapshot(
+    "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path, "tr"
+)
+data_handler.add_snapshot(
+    "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path, "va"
+)
 data_handler.prepare_data()
-parameters.network.layer_sizes = [data_handler.input_dimension,
-                                  100,
-                                  data_handler.output_dimension]
+parameters.network.layer_sizes = [
+    data_handler.input_dimension,
+    100,
+    data_handler.output_dimension,
+]
 
 network = mala.Network(parameters)
 trainer = mala.Trainer(parameters, network, data_handler)
 trainer.train_network()
-printout("Run finished, launch tensorboard with \"tensorboard --logdir " +
-         trainer.full_visualization_path + "\"")
+printout(
+    'Run finished, launch tensorboard with "tensorboard --logdir '
+    + trainer.full_visualization_path
+    + '"'
+)
