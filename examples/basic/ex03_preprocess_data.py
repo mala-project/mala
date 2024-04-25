@@ -3,6 +3,7 @@ import os
 import mala
 
 from mala.datahandling.data_repo import data_repo_path
+
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
@@ -61,13 +62,15 @@ data_converter = mala.DataConverter(parameters)
 outfile = os.path.join(data_path, "Be_snapshot0.out")
 ldosfile = os.path.join(data_path, "cubes/tmp.pp*Be_ldos.cube")
 
-data_converter.add_snapshot(descriptor_input_type="espresso-out",
-                            descriptor_input_path=outfile,
-                            target_input_type=".cube",
-                            target_input_path=ldosfile,
-                            additional_info_input_type="espresso-out",
-                            additional_info_input_path=outfile,
-                            target_units="1/(Ry*Bohr^3)")
+data_converter.add_snapshot(
+    descriptor_input_type="espresso-out",
+    descriptor_input_path=outfile,
+    target_input_type=".cube",
+    target_input_path=ldosfile,
+    additional_info_input_type="espresso-out",
+    additional_info_input_path=outfile,
+    target_units="1/(Ry*Bohr^3)",
+)
 
 ####################
 # 3. Converting the data
@@ -80,12 +83,13 @@ data_converter.add_snapshot(descriptor_input_type="espresso-out",
 # complete_save_path keyword may be used.
 ####################
 
-data_converter.convert_snapshots(descriptor_save_path="./",
-                                 target_save_path="./",
-                                 additional_info_save_path="./",
-                                 naming_scheme="Be_snapshot*.npy",
-                                 descriptor_calculation_kwargs=
-                                 {"working_directory": data_path})
+data_converter.convert_snapshots(
+    descriptor_save_path="./",
+    target_save_path="./",
+    additional_info_save_path="./",
+    naming_scheme="Be_snapshot*.npy",
+    descriptor_calculation_kwargs={"working_directory": data_path},
+)
 # data_converter.convert_snapshots(complete_save_path="./",
 #                                  naming_scheme="Be_snapshot*.npy",
 #                                  descriptor_calculation_kwargs=

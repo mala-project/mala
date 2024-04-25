@@ -1,4 +1,5 @@
 """Objective functions for hyperparameter optimizations without training."""
+
 import numpy as np
 import torch
 from torch import Tensor
@@ -37,10 +38,14 @@ class ObjectiveNASWOT(ObjectiveBase):
         applications it might make sense to specify something different.
     """
 
-    def __init__(self, search_parameters: Parameters, data_handler:
-                 DataHandler, trial_type, batch_size=None):
-        super(ObjectiveNASWOT, self).__init__(search_parameters,
-                                              data_handler)
+    def __init__(
+        self,
+        search_parameters: Parameters,
+        data_handler: DataHandler,
+        trial_type,
+        batch_size=None,
+    ):
+        super(ObjectiveNASWOT, self).__init__(search_parameters, data_handler)
         self.trial_type = trial_type
         self.batch_size = batch_size
         if self.batch_size is None:
@@ -61,29 +66,35 @@ class ObjectiveNASWOT(ObjectiveBase):
 
         # Build the network.
         surrogate_losses = []
-        for i in range(0, self.params.hyperparameters.
-                       number_training_per_trial):
+        for i in range(
+            0, self.params.hyperparameters.number_training_per_trial
+        ):
             net = Network(self.params)
             device = self.params.device
 
             # Load the batchesand get the jacobian.
             do_shuffle = self.params.running.use_shuffling_for_samplers
-            if self.data_handler.parameters.use_lazy_loading or \
-                    self.params.use_horovod:
+            if (
+                self.data_handler.parameters.use_lazy_loading
+                or self.params.use_horovod
+            ):
                 do_shuffle = False
             if self.params.running.use_shuffling_for_samplers:
                 self.data_handler.mix_datasets()
-            loader = DataLoader(self.data_handler.training_data_sets[0],
-                                batch_size=self.batch_size,
-                                shuffle=do_shuffle)
+            loader = DataLoader(
+                self.data_handler.training_data_sets[0],
+                batch_size=self.batch_size,
+                shuffle=do_shuffle,
+            )
             jac = ObjectiveNASWOT.__get_batch_jacobian(net, loader, device)
 
             # Loss = - score!
-            surrogate_loss = float('inf')
+            surrogate_loss = float("inf")
             try:
-                surrogate_loss = - ObjectiveNASWOT.__calc_score(jac)
-                surrogate_loss = surrogate_loss.cpu().detach().numpy().astype(
-                    np.float64)
+                surrogate_loss = -ObjectiveNASWOT.__calc_score(jac)
+                surrogate_loss = (
+                    surrogate_loss.cpu().detach().numpy().astype(np.float64)
+                )
             except RuntimeError:
                 print("Got a NaN, ignoring sample.")
             surrogate_losses.append(surrogate_loss)
@@ -95,23 +106,26 @@ class ObjectiveNASWOT(ObjectiveBase):
         if self.params.hyperparameters.trial_ensemble_evaluation == "mean":
             return np.mean(surrogate_losses)
 
-        elif self.params.hyperparameters.trial_ensemble_evaluation == \
-                "mean_std":
+        elif (
+            self.params.hyperparameters.trial_ensemble_evaluation == "mean_std"
+        ):
             mean = np.mean(surrogate_losses)
 
             # Cannot calculate the standar deviation of a bunch of infinities.
             if np.isinf(mean):
                 return mean
             else:
-                return np.mean(surrogate_losses) + \
-                       np.std(surrogate_losses)
+                return np.mean(surrogate_losses) + np.std(surrogate_losses)
         else:
-            raise Exception("No way to estimate the trial metric from ensemble"
-                            " training provided.")
+            raise Exception(
+                "No way to estimate the trial metric from ensemble"
+                " training provided."
+            )
 
     @staticmethod
-    def __get_batch_jacobian(net: Network, loader: DataLoader, device) \
-            -> Tensor:
+    def __get_batch_jacobian(
+        net: Network, loader: DataLoader, device
+    ) -> Tensor:
         """Calculate the jacobian of the batch."""
         x: Tensor
         (x, _) = next(iter(loader))
@@ -160,5 +174,5 @@ class ObjectiveNASWOT(ObjectiveBase):
         # seems to have bigger rounding errors than numpy, resulting in
         # slightly larger negative Eigenvalues
         k = 1e-4
-        v = -torch.sum(torch.log(eigen_values + k) + 1. / (eigen_values+k))
+        v = -torch.sum(torch.log(eigen_values + k) + 1.0 / (eigen_values + k))
         return v

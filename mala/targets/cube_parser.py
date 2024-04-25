@@ -56,9 +56,10 @@ SOFTWARE.
 
 ------------------------------------------------------------------------------
 """
+
 import numpy as np
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     DEBUGMODE = True
 else:
     DEBUGMODE = False
@@ -66,6 +67,8 @@ else:
 
 def _debug(*args):
     global DEBUGMODE
+
+
 #    if DEBUGMODE:
 #        print " ".join(map(str, args))
 
@@ -76,7 +79,7 @@ class CubeFile(object):
 
     Done by returning output in the correct format, matching the
     metadata of the source cube file and replacing volumetric
-    data with static data provided as arg to the constructor. 
+    data with static data provided as arg to the constructor.
     Doesn't copy atoms metadata, retains number of atoms, but
     returns dummy atoms
     Mimics file object's readline method.
@@ -98,20 +101,24 @@ class CubeFile(object):
         src.readline()
         src.readline()
         _debug(srcname)
-        self.lines = [" Cubefile created by cubetools.py\n", 
-                      "  source: {0}\n".format(srcname)]
+        self.lines = [
+            " Cubefile created by cubetools.py\n",
+            "  source: {0}\n".format(srcname),
+        ]
         self.lines.append(src.readline())  # read natm and origin
         self.natm = int(self.lines[-1].strip().split()[0])
         # read cube dim and vectors along 3 axes
         self.lines.extend(src.readline() for i in range(3))
         self.src.close()
-        self.nx, self.ny, self.nz = [int(line.strip().split()[0])
-                                     for line in self.lines[3:6]]
+        self.nx, self.ny, self.nz = [
+            int(line.strip().split()[0]) for line in self.lines[3:6]
+        ]
         self.remvals = self.nz
-        self.remrows = self.nx*self.ny
+        self.remrows = self.nx * self.ny
         for i in range(self.natm):
-            self.lines.append("{0:^ 8d}".format(1) + "{0:< 12.6f}".format(0)*4
-                              + '\n')
+            self.lines.append(
+                "{0:^ 8d}".format(1) + "{0:< 12.6f}".format(0) * 4 + "\n"
+            )
 
     def __del__(self):
         """Close Cube file."""
@@ -136,11 +143,11 @@ class CubeFile(object):
             if self.remvals <= 6:
                 nval = min(6, self.remvals)
                 self.remrows -= 1
-                self.remvals = self.nz 
+                self.remvals = self.nz
             else:
                 nval = 6
                 self.remvals -= nval
-            return " {0: .5E}".format(self.const)*nval + "\n"
+            return " {0: .5E}".format(self.const) * nval + "\n"
         else:
             self.cursor += 1
             return retval
@@ -151,7 +158,7 @@ def _getline(cube):
     Read a line from cube file.
 
     First field is an int and the remaining fields are floats.
-    
+
     Parameters
     ----------
     cube : TextIO
@@ -190,7 +197,7 @@ def _putline(*args):
 def read_cube(fname):
     """
     Read cube file into numpy array.
-    
+
     Parameters
     ----------
     fname : string
@@ -202,19 +209,19 @@ def read_cube(fname):
         Data from cube file.
 
     meta : dict
-        Meta data from cube file.
+        Metadata from cube file.
     """
     meta = {}
-    with open(fname, 'r') as cube:
+    with open(fname, "r") as cube:
         # ignore comments
         cube.readline()
         cube.readline()
-        natm, meta['org'] = _getline(cube)
-        nx, meta['xvec'] = _getline(cube)
-        ny, meta['yvec'] = _getline(cube)
-        nz, meta['zvec'] = _getline(cube)
-        meta['atoms'] = [_getline(cube) for i in range(natm)]
-        data = np.zeros((nx*ny*nz))
+        natm, meta["org"] = _getline(cube)
+        nx, meta["xvec"] = _getline(cube)
+        ny, meta["yvec"] = _getline(cube)
+        nz, meta["zvec"] = _getline(cube)
+        meta["atoms"] = [_getline(cube) for i in range(natm)]
+        data = np.zeros((nx * ny * nz))
         idx = 0
         for line in cube:
             for val in line.strip().split():
@@ -230,7 +237,7 @@ def read_imcube(rfname, ifname=""):
 
     One contains the real part and the other contains the
     imag part. If only one filename given, other filename is inferred.
-    
+
     params:
 
     returns: np.array (real part + j*imag part)
@@ -251,14 +258,14 @@ def read_imcube(rfname, ifname=""):
     meta : dict
         Meta data from cube file.
     """
-    ifname = ifname or rfname.replace('real', 'imag')
+    ifname = ifname or rfname.replace("real", "imag")
     _debug("reading from files", rfname, "and", ifname)
     re, im = read_cube(rfname), read_cube(ifname)
-    fin = np.zeros(re[0].shape, dtype='complex128')
+    fin = np.zeros(re[0].shape, dtype="complex128")
     if re[1] != im[1]:
         _debug("warning: meta data mismatch, real part metadata retained")
-    fin += re[0] 
-    fin += 1j*im[0]
+    fin += re[0]
+    fin += 1j * im[0]
     return fin, re[1]
 
 
@@ -284,14 +291,14 @@ def write_cube(data, meta, fname):
     with open(fname, "w") as cube:
         # first two lines are comments
         cube.write(" Cubefile created by cubetools.py\n  source: none\n")
-        natm = len(meta['atoms'])
+        natm = len(meta["atoms"])
         nx, ny, nz = data.shape
-        cube.write(_putline(natm, *meta['org']))  # 3rd line #atoms and origin
-        cube.write(_putline(nx, *meta['xvec']))
-        cube.write(_putline(ny, *meta['yvec']))
-        cube.write(_putline(nz, *meta['zvec']))
-        for atom_mass, atom_pos in meta['atoms']:
-            cube.write(_putline(atom_mass, *atom_pos))    # skip the newline
+        cube.write(_putline(natm, *meta["org"]))  # 3rd line #atoms and origin
+        cube.write(_putline(nx, *meta["xvec"]))
+        cube.write(_putline(ny, *meta["yvec"]))
+        cube.write(_putline(nz, *meta["zvec"]))
+        for atom_mass, atom_pos in meta["atoms"]:
+            cube.write(_putline(atom_mass, *atom_pos))  # skip the newline
         for i in range(nx):
             for j in range(ny):
                 for k in range(nz):
@@ -326,7 +333,7 @@ def write_imcube(data, meta, rfname, ifname=""):
     ifname: string
         optional, filename of cube file containing imag part
     """
-    ifname = ifname or rfname.replace('real', 'imag')
+    ifname = ifname or rfname.replace("real", "imag")
     _debug("writing data to files", rfname, "and", ifname)
     write_cube(data.real, meta, rfname)
     write_cube(data.imag, meta, ifname)

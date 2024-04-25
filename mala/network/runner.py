@@ -1,4 +1,5 @@
 """Runner class for running networks."""
+
 import os
 from zipfile import ZipFile, ZIP_STORED
 
@@ -42,8 +43,14 @@ class Runner:
         self.data = data
         self.__prepare_to_run()
 
-    def save_run(self, run_name, save_path="./", zip_run=True,
-                 save_runner=False, additional_calculation_data=None):
+    def save_run(
+        self,
+        run_name,
+        save_path="./",
+        zip_run=True,
+        save_runner=False,
+        additional_calculation_data=None,
+    ):
         """
         Save the current run.
 
@@ -78,46 +85,63 @@ class Runner:
         oscaler_file = run_name + ".oscaler.pkl"
         params_file = run_name + ".params.json"
         if save_runner:
-            optimizer_file = run_name+".optimizer.pth"
+            optimizer_file = run_name + ".optimizer.pth"
 
         self.parameters_full.save(os.path.join(save_path, params_file))
-        if hasattr(self.network, "save_network"):
-            self.network.save_network(os.path.join(save_path, model_file))
+        if hasattr(self.network, "module"):
+            self.network.module.save_network(
+                os.path.join(save_path, model_file)
+            )
         else:
-            self.network.module.save_network(os.path.join(save_path, model_file))
+            self.network.save_network(os.path.join(save_path, model_file))
         self.data.input_data_scaler.save(os.path.join(save_path, iscaler_file))
-        self.data.output_data_scaler.save(os.path.join(save_path,
-                                                       oscaler_file))
+        self.data.output_data_scaler.save(
+            os.path.join(save_path, oscaler_file)
+        )
 
         files = [model_file, iscaler_file, oscaler_file, params_file]
         if save_runner:
             files += [optimizer_file]
         if zip_run:
             if additional_calculation_data is not None:
-                additional_calculation_file = run_name+".info.json"
+                additional_calculation_file = run_name + ".info.json"
                 if isinstance(additional_calculation_data, str):
-                    self.data.target_calculator.\
-                        read_additional_calculation_data(additional_calculation_data)
-                    self.data.target_calculator.\
-                        write_additional_calculation_data(os.path.join(save_path,
-                                                          additional_calculation_file))
+                    self.data.target_calculator.read_additional_calculation_data(
+                        additional_calculation_data
+                    )
+                    self.data.target_calculator.write_additional_calculation_data(
+                        os.path.join(save_path, additional_calculation_file)
+                    )
                 elif isinstance(additional_calculation_data, bool):
                     if additional_calculation_data:
-                        self.data.target_calculator. \
-                            write_additional_calculation_data(os.path.join(save_path,
-                                                              additional_calculation_file))
+                        self.data.target_calculator.write_additional_calculation_data(
+                            os.path.join(
+                                save_path, additional_calculation_file
+                            )
+                        )
 
                 files.append(additional_calculation_file)
-            with ZipFile(os.path.join(save_path, run_name+".zip"), 'w',
-                         compression=ZIP_STORED) as zip_obj:
+            with ZipFile(
+                os.path.join(save_path, run_name + ".zip"),
+                "w",
+                compression=ZIP_STORED,
+            ) as zip_obj:
                 for file in files:
                     zip_obj.write(os.path.join(save_path, file), file)
                     os.remove(os.path.join(save_path, file))
 
     @classmethod
-    def load_run(cls, run_name, path="./", zip_run=True,
-                 params_format="json", load_runner=True,
-                 prepare_data=False):
+    def load_run(
+        cls,
+        run_name,
+        path="./",
+        zip_run=True,
+        params_format="json",
+        load_runner=True,
+        prepare_data=False,
+        load_with_mpi=None,
+        load_with_gpu=None,
+    ):
         """
         Load a run.
 
@@ -144,6 +168,23 @@ class Runner:
             If True, the data will be loaded into memory. This is needed when
             continuing a model training.
 
+        load_with_mpi : bool
+            Can be used to actively enable/disable MPI during loading.
+            Default is None, so that the MPI parameters set during
+            training/saving of the model are not overwritten.
+            If MPI is to be used in concert with GPU during training,
+            MPI already has to be activated here, if it was not activated
+            during training!
+
+        load_with_gpu : bool
+            Can be used to actively enable/disable GPU during loading.
+            Default is None, so that the GPU parameters set during
+            training/saving of the model are not overwritten.
+            If MPI is to be used in concert with GPU during training,
+            it is advised that GPU usage is activated here, if it was not
+            activated during training. Can also be used to activate a CPU
+            based inference, by setting it to False.
+
         Return
         ------
         loaded_params : mala.common.parameters.Parameters
@@ -164,11 +205,11 @@ class Runner:
             loaded_network = run_name + ".network.pth"
             loaded_iscaler = run_name + ".iscaler.pkl"
             loaded_oscaler = run_name + ".oscaler.pkl"
-            loaded_params = run_name + ".params."+params_format
+            loaded_params = run_name + ".params." + params_format
             loaded_info = run_name + ".info.json"
 
             zip_path = os.path.join(path, run_name + ".zip")
-            with ZipFile(zip_path, 'r') as zip_obj:
+            with ZipFile(zip_path, "r") as zip_obj:
                 loaded_params = zip_obj.open(loaded_params)
                 loaded_network = zip_obj.open(loaded_network)
                 loaded_iscaler = zip_obj.open(loaded_iscaler)
@@ -182,40 +223,56 @@ class Runner:
             loaded_network = os.path.join(path, run_name + ".network.pth")
             loaded_iscaler = os.path.join(path, run_name + ".iscaler.pkl")
             loaded_oscaler = os.path.join(path, run_name + ".oscaler.pkl")
-            loaded_params = os.path.join(path, run_name +
-                                         ".params."+params_format)
+            loaded_params = os.path.join(
+                path, run_name + ".params." + params_format
+            )
 
         loaded_params = Parameters.load_from_json(loaded_params)
-        loaded_network = Network.load_from_file(loaded_params,
-                                                loaded_network)
+
+        # MPI has to be specified upon loading, in contrast to GPU.
+        if load_with_mpi is not None:
+            loaded_params.use_mpi = load_with_mpi
+        if load_with_gpu is not None:
+            loaded_params.use_gpu = load_with_gpu
+
+        loaded_network = Network.load_from_file(loaded_params, loaded_network)
         loaded_iscaler = DataScaler.load_from_file(loaded_iscaler)
         loaded_oscaler = DataScaler.load_from_file(loaded_oscaler)
-        new_datahandler = DataHandler(loaded_params,
-                                      input_data_scaler=loaded_iscaler,
-                                      output_data_scaler=loaded_oscaler,
-                                      clear_data=(not prepare_data))
+        new_datahandler = DataHandler(
+            loaded_params,
+            input_data_scaler=loaded_iscaler,
+            output_data_scaler=loaded_oscaler,
+            clear_data=(not prepare_data),
+        )
         if loaded_info is not None:
-            new_datahandler.target_calculator.\
-                read_additional_calculation_data(loaded_info,
-                                                 data_type="json")
+            new_datahandler.target_calculator.read_additional_calculation_data(
+                loaded_info, data_type="json"
+            )
 
         if prepare_data:
             new_datahandler.prepare_data(reparametrize_scaler=False)
 
         if load_runner:
             if zip_run is True:
-                with ZipFile(zip_path, 'r') as zip_obj:
+                with ZipFile(zip_path, "r") as zip_obj:
                     loaded_runner = run_name + ".optimizer.pth"
                     if loaded_runner in zip_obj.namelist():
                         loaded_runner = zip_obj.open(loaded_runner)
             else:
                 loaded_runner = os.path.join(run_name + ".optimizer.pth")
 
-            loaded_runner = cls._load_from_run(loaded_params, loaded_network,
-                                               new_datahandler,
-                                               file=loaded_runner)
-            return loaded_params, loaded_network, new_datahandler, \
-                   loaded_runner
+            loaded_runner = cls._load_from_run(
+                loaded_params,
+                loaded_network,
+                new_datahandler,
+                file=loaded_runner,
+            )
+            return (
+                loaded_params,
+                loaded_network,
+                new_datahandler,
+                loaded_runner,
+            )
         else:
             return loaded_params, loaded_network, new_datahandler
 
@@ -243,14 +300,18 @@ class Runner:
             If True, the model exists.
         """
         if zip_run is True:
-            return os.path.isfile(run_name+".zip")
+            return os.path.isfile(run_name + ".zip")
         else:
             network_name = run_name + ".network.pth"
             iscaler_name = run_name + ".iscaler.pkl"
             oscaler_name = run_name + ".oscaler.pkl"
-            param_name = run_name + ".params."+params_format
-            return all(map(os.path.isfile, [iscaler_name, oscaler_name, param_name,
-                                            network_name]))
+            param_name = run_name + ".params." + params_format
+            return all(
+                map(
+                    os.path.isfile,
+                    [iscaler_name, oscaler_name, param_name, network_name],
+                )
+            )
 
     @classmethod
     def _load_from_run(cls, params, network, data, file=None):
@@ -259,10 +320,14 @@ class Runner:
         loaded_runner = cls(params, network, data)
         return loaded_runner
 
-    def _forward_entire_snapshot(self, snapshot_number, data_set,
-                                 data_set_type,
-                                 number_of_batches_per_snapshot=0,
-                                 batch_size=0):
+    def _forward_entire_snapshot(
+        self,
+        snapshot_number,
+        data_set,
+        data_set_type,
+        number_of_batches_per_snapshot=0,
+        batch_size=0,
+    ):
         """
         Forward a snapshot through the network, get actual/predicted output.
 
@@ -286,49 +351,54 @@ class Runner:
         predicted_outputs : numpy.ndarray
             Precicted outputs for snapshot.
         """
+        # Ensure the Network is on the correct device.
+        # This line is necessary because GPU acceleration may have been
+        # activated AFTER loading a model.
+        self.network.to(self.network.params._configuration["device"])
+
         # Determine where the snapshot begins and ends.
         from_index = 0
         to_index = None
 
-        for idx, snapshot in enumerate(self.data.parameters.
-                                               snapshot_directories_list):
+        for idx, snapshot in enumerate(
+            self.data.parameters.snapshot_directories_list
+        ):
             if snapshot.snapshot_function == data_set_type:
                 if idx == snapshot_number:
                     to_index = from_index + snapshot.grid_size
                     break
                 else:
                     from_index += snapshot.grid_size
-        grid_size = to_index-from_index
+        grid_size = to_index - from_index
 
         if self.data.parameters.use_lazy_loading:
             data_set.return_outputs_directly = True
-            actual_outputs = \
-                (data_set
-                 [from_index:to_index])[1]
+            actual_outputs = (data_set[from_index:to_index])[1]
         else:
-            actual_outputs = \
-                self.data.output_data_scaler.\
-                inverse_transform(
-                    (data_set[from_index:to_index])[1],
-                    as_numpy=True)
+            actual_outputs = self.data.output_data_scaler.inverse_transform(
+                (data_set[from_index:to_index])[1], as_numpy=True
+            )
 
-        predicted_outputs = np.zeros((grid_size,
-                                      self.data.output_dimension))
+        predicted_outputs = np.zeros((grid_size, self.data.output_dimension))
 
         for i in range(0, number_of_batches_per_snapshot):
-            inputs, outputs = \
-                data_set[from_index+(i * batch_size):from_index+((i + 1)
-                                                                 * batch_size)]
+            inputs, outputs = data_set[
+                from_index
+                + (i * batch_size) : from_index
+                + ((i + 1) * batch_size)
+            ]
             inputs = inputs.to(self.parameters._configuration["device"])
-            predicted_outputs[i * batch_size:(i + 1) * batch_size, :] = \
-                self.data.output_data_scaler.\
-                inverse_transform(self.network(inputs).
-                                  to('cpu'), as_numpy=True)
+            predicted_outputs[i * batch_size : (i + 1) * batch_size, :] = (
+                self.data.output_data_scaler.inverse_transform(
+                    self.network(inputs).to("cpu"), as_numpy=True
+                )
+            )
 
         # Restricting the actual quantities to physical meaningful values,
         # i.e. restricting the (L)DOS to positive values.
-        predicted_outputs = self.data.target_calculator.\
-            restrict_data(predicted_outputs)
+        predicted_outputs = self.data.target_calculator.restrict_data(
+            predicted_outputs
+        )
 
         # It could be that other operations will be happening with the data
         # set, so it's best to reset it.
@@ -360,12 +430,19 @@ class Runner:
         """
         # See if we want to use horovod.
         if self.parameters_full.use_horovod:
-            if self.parameters_full.use_gpu:
+            if self.parameters_full.use_gpu > 0:
                 # We cannot use "printout" here because this is supposed
                 # to happen on every rank.
                 if self.parameters_full.verbosity >= 2:
-                    print("size=", hvd.size(), "global_rank=", hvd.rank(),
-                          "local_rank=", hvd.local_rank(), "device=",
-                          torch.cuda.get_device_name(hvd.local_rank()))
+                    print(
+                        "size=",
+                        hvd.size(),
+                        "global_rank=",
+                        hvd.rank(),
+                        "local_rank=",
+                        hvd.local_rank(),
+                        "device=",
+                        torch.cuda.get_device_name(hvd.local_rank()),
+                    )
                 # pin GPU to local rank
                 torch.cuda.set_device(hvd.local_rank())
