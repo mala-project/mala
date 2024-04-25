@@ -753,6 +753,7 @@ class Descriptor(PhysicalData):
                     )
 
         else:
+            size = 1
             lammps_dict["ngridx"] = nx
             lammps_dict["ngridy"] = ny
             lammps_dict["ngridz"] = nz
@@ -762,7 +763,7 @@ class Descriptor(PhysicalData):
             lmp_cmdargs.append("-k")
             lmp_cmdargs.append("on")
             lmp_cmdargs.append("g")
-            lmp_cmdargs.append("1")
+            lmp_cmdargs.append(str(size))
 
             # Tell LAMMPS to use Kokkos versions of those commands for
             # which a Kokkos version exists.
