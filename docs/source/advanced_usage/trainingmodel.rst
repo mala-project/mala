@@ -22,7 +22,9 @@ GPU usage via
             parameters.use_gpu = True
 
 Afterwards, the entire training will be performed on the GPU - given that
-a GPU is available.
+a GPU is available. You can also set ``parameters.use_gpu`` to a specific number,
+e.g., ``parameters.use_gpu = 4`` to use all available GPUs per compute node,
+if multiple GPUs are attached (in this case, 4 GPUs are assumed).
 
 In cooperation with `Nvidia <https://www.nvidia.com/de-de/deep-learning-ai/solutions/machine-learning/>`_,
 advanced GPU performance optimizations have been implemented into MALA.

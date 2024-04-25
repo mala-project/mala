@@ -1275,7 +1275,18 @@ class Parameters:
 
     @property
     def use_gpu(self):
-        """Control whether or not a GPU is used (provided there is one)."""
+        """
+        Control whether a GPU is used (provided there is one).
+
+        Can either be False/True or an integer. If set to False or 0,
+        no GPU will be used. For numbers higher than 0, the behavior differs
+        between training and inference. For training, the number of GPUs
+        set here will be used, i.e., if use_gpu=4, MALA will attempt to use
+        4 GPUs for training. For inference, only one GPU will be used per
+        MPI rank, such that the total number of GPUs used is determined by
+        the number of MPI ranks. Therefore, each number higher than 0 will be
+        treated the same in inference.
+        """
         return self._use_gpu
 
     @use_gpu.setter
