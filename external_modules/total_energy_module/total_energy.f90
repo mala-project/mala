@@ -9,21 +9,22 @@ SUBROUTINE initialize(y_planes_in, calculate_eigts_in)
   !
   USE environment,       ONLY : environment_start
   USE mp_global,         ONLY : mp_startup
-  USE mp_world,          ONLY : world_comm
-  USE mp_pools,          ONLY : intra_pool_comm
-  USE mp_bands,          ONLY : intra_bgrp_comm, inter_bgrp_comm
-  USE mp_diag,           ONLY : mp_start_diag
-  USE mp_exx,            ONLY : negrp
   USE mp,                ONLY : mp_size
   USE read_input,        ONLY : read_input_file
   USE command_line_options, ONLY: input_file_, command_line, ndiag_, nyfft_
   !
   IMPLICIT NONE
+  CHARACTER(len=256) :: srvaddress
+  !! Get the address of the server
+  CHARACTER(len=256) :: get_server_address
+  !! Get the address of the server
   INTEGER :: exit_status
   !! Status at exit
-  LOGICAL :: do_diag_in_band_group = .true.
+  LOGICAL :: use_images
   !! true if running "manypw.x"
-
+  LOGICAL, EXTERNAL :: matches
+  !! checks if first string is contained in the second
+  !
   ! Optional arguments and defaults.
   LOGICAL, INTENT(IN), OPTIONAL :: calculate_eigts_in
   LOGICAL :: calculate_eigts = .false.
@@ -40,22 +41,7 @@ SUBROUTINE initialize(y_planes_in, calculate_eigts_in)
 
   !! checks if first string is contained in the second
   !
-  CALL mp_startup ( start_images=.true.)
-  !
-  IF( negrp > 1 .OR. do_diag_in_band_group ) THEN
-     ! used to be the default : one diag group per bgrp
-     ! with strict hierarchy: POOL > BAND > DIAG
-     ! if using exx groups from mp_exx still use this diag method
-     CALL mp_start_diag ( ndiag_, world_comm, intra_bgrp_comm, &
-          do_distr_diag_inside_bgrp_ = .true. )
-  ELSE
-     ! new default: one diag group per pool ( individual k-point level )
-     ! with band group and diag group both being children of POOL comm
-     CALL mp_start_diag ( ndiag_, world_comm, intra_pool_comm, &
-          do_distr_diag_inside_bgrp_ = .false. )
-  END IF
-  CALL set_mpi_comm_4_solvers( intra_pool_comm, intra_bgrp_comm, &
-       inter_bgrp_comm )
+  CALL mp_startup ( start_images=.true., images_only=.true.)
   !
   CALL environment_start ( 'PWSCF' )
   !
@@ -77,12 +63,14 @@ SUBROUTINE run_pwscf_setup ( exit_status, calculate_eigts)
   !
   !
   USE io_global,        ONLY : stdout, ionode, ionode_id
-  USE parameters,       ONLY : ntypx, npk, lmaxx
+  USE parameters,       ONLY : ntypx, npk
+  USE upf_params,       ONLY : lmaxx
   USE cell_base,        ONLY : fix_volume, fix_area
   USE control_flags,    ONLY : conv_elec, gamma_only, ethr, lscf
-  USE control_flags,    ONLY : conv_ions, istep, nstep, restart, lmd, lbfgs
+  USE control_flags,    ONLY : conv_ions, istep, nstep, restart, lmd, lbfgs, &
+                               lforce => tprnfor
   USE command_line_options, ONLY : command_line
-  USE force_mod,        ONLY : lforce, lstres, sigma, force
+  USE force_mod,        ONLY : sigma, force
   USE check_stop,       ONLY : check_stop_init, check_stop_now
   USE mp_images,        ONLY : intra_image_comm
   USE extrapolation,    ONLY : update_file, update_pot
@@ -92,7 +80,7 @@ SUBROUTINE run_pwscf_setup ( exit_status, calculate_eigts)
   USE qmmm,             ONLY : qmmm_initialization, qmmm_shutdown, &
                                qmmm_update_positions, qmmm_update_forces
   USE qexsd_module,     ONLY : qexsd_set_status
-  USE funct,            ONLY : dft_is_hybrid, stop_exx
+  USE xc_lib,           ONLY : xclib_dft_is, stop_exx
   !
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: exit_status
@@ -199,12 +187,9 @@ SUBROUTINE init_run_setup(calculate_eigts)
   USE dynamics_module,    ONLY : allocate_dyn_vars
   USE paw_variables,      ONLY : okpaw
   USE paw_init,           ONLY : paw_init_onecenter, allocate_paw_internals
-#if defined(__MPI)
-  USE paw_init,           ONLY : paw_post_init
-#endif
   USE bp,                 ONLY : allocate_bp_efield, bp_global_map
   USE fft_base,           ONLY : dfftp, dffts
-  USE funct,              ONLY : dft_is_hybrid
+  USE xc_lib,             ONLY : xclib_dft_is_libxc, xclib_init_libxc, xclib_dft_is
   USE recvec_subs,        ONLY : ggen, ggens
   USE wannier_new,        ONLY : use_wannier    
   USE dfunct,             ONLY : newd

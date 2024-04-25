@@ -1,36 +1,66 @@
 # YAML 1.2
-cff-version: 1.1.0
+cff-version: 1.2.1
 message: "If you use this software, please cite it using these metadata."
 authors:
   - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Cangi
     given-names: Attila
     orcid: https://orcid.org/0000-0001-9162-262X
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Rajamanickam
+    given-names: Sivasankaran
+    orcid: https://orcid.org/0000-0002-5854-409X
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Brzoza
+    given-names: Bartosz
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Callow
+    given-names: Timothy J.
   - affiliation: "Oak Ridge National Laboratory (ORNL)"
     family-names: Ellis
     given-names: J. Austin
     orcid: https://orcid.org/0000-0002-9901-102X
   - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Faruk
+    given-names: Omar
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Fiedler
     given-names: Lenz
     orcid: https://orcid.org/0000-0002-8311-0613
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Fox
+    given-names: James S.
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Hoffmann
+    given-names: Nils
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Miller
+    given-names: Kyle D.
   - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Kotik
     given-names: Daniel
     orcid: https://orcid.org/0000-0001-8735-3199
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Kulkarni
+    given-names: Somashekar
   - affiliation: "Sandia National Laboratories (SNL)"
     family-names: Modine
     given-names: Normand A.
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Mohammed
+    given-names: Parvez
   - affiliation: "Oak Ridge National Laboratory (ORNL)"
     family-names: Oles
     given-names: Vladyslav
   - affiliation: "Sandia National Laboratories (SNL)"
     family-names: Popoola
     given-names: Gabriel A.
-  - affiliation: "Sandia National Laboratories (SNL)"
-    family-names: Rajamanickam
-    given-names: Siva
-    orcid: https://orcid.org/0000-0002-5854-409X
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Pöschel
+    given-names: Franz
+  - affiliation: "Nvidia Corporation"
+    family-names: Romero
+    given-names: Josh
   - affiliation: "Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Schmerler
     given-names: Steve
@@ -38,13 +68,22 @@ authors:
   - affiliation: "Sandia National Laboratories (SNL)"
     family-names: Stephens
     given-names: J. Adam
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Tahmasbi
+    given-names: Hossein
   - affiliation: "Sandia National Laboratories (SNL)"
     family-names: Thompson
     given-names: Aidan P.
     orcid: https://orcid.org/0000-0002-0324-9114
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Verma
+    given-names: Sneha
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Vogel
+    given-names: D. Jon
 
 
-date-released: 2022-10-18
+date-released: 2024-02-01
 keywords:
   - "machine-learning"
   - "dft"
@@ -52,4 +91,4 @@ license: "BSD-3-Clause"
 repository-code: "https://github.com/mala-project/mala"
 title: MALA
 doi: 10.5281/zenodo.5557254 # This DOI represents all versions, and will always resolve to the latest one.
-version: 1.1.0
+version: 1.2.1

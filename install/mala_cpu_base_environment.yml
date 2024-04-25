@@ -13,3 +13,4 @@ dependencies:
   - pytorch-cpu
   - mpmath
   - tensorboard
+  - scikit-spatial

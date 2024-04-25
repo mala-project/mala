@@ -1,4 +1,5 @@
 """Functions for operating MALA in parallel."""
+
 from collections import defaultdict
 import platform
 import os
@@ -54,13 +55,13 @@ def set_mpi_status(new_value):
     """
     Set the MPI status.
 
-    By setting the ddp status via this function it can be ensured that
+    By setting the MPI status via this function it can be ensured that
     printing works in parallel. The Parameters class does that for the user.
 
     Parameters
     ----------
     new_value : bool
-        Value the ddp status has.
+        Value the MPI status has.
 
     """
     if use_ddp is True and new_value is True:
@@ -94,6 +95,7 @@ def set_lammps_instance(new_instance):
 
     """
     import lammps
+
     global lammps_instance
     if isinstance(new_instance, lammps.core.lammps):
         lammps_instance = new_instance
@@ -160,7 +162,7 @@ def get_local_rank():
             ranks_nodes = comm.allgather((comm.Get_rank(), this_node))
             node2rankssofar = defaultdict(int)
             local_rank = None
-            for (rank, node) in ranks_nodes:
+            for rank, node in ranks_nodes:
                 if rank == comm.Get_rank():
                     local_rank = node2rankssofar[node]
                 node2rankssofar[node] += 1
@@ -208,7 +210,7 @@ def barrier():
     return
 
 
-def printout(*values, sep=' ', min_verbosity=0):
+def printout(*values, sep=" ", min_verbosity=0):
     """
     Interface to built-in "print" for parallel runs. Can be used like print.
 

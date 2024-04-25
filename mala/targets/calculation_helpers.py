@@ -1,9 +1,10 @@
 """Helper functions for several calculation tasks (such as integration)."""
+
 from ase.units import kB
 import mpmath as mp
 import numpy as np
 from scipy import integrate
-import sys
+
 
 def integrate_values_on_spacing(values, spacing, method, axis=0):
     """
@@ -38,8 +39,7 @@ def integrate_values_on_spacing(values, spacing, method, axis=0):
         raise Exception("Unknown integration method.")
 
 
-def fermi_function(energy, fermi_energy, temperature,
-                   suppress_overflow=False):
+def fermi_function(energy, fermi_energy, temperature, suppress_overflow=False):
     r"""
     Calculate the Fermi function.
 
@@ -122,8 +122,9 @@ def entropy_multiplicator(energy, fermi_energy, temperature):
         dim = np.shape(energy)[0]
         multiplicator = np.zeros(dim, dtype=np.float64)
         for i in range(0, np.shape(energy)[0]):
-            fermi_val = fermi_function(energy[i], fermi_energy, temperature,
-                                       suppress_overflow=True)
+            fermi_val = fermi_function(
+                energy[i], fermi_energy, temperature, suppress_overflow=True
+            )
             if fermi_val == 1.0:
                 secondterm = 0.0
             else:
@@ -134,8 +135,9 @@ def entropy_multiplicator(energy, fermi_energy, temperature):
                 firsterm = fermi_val * np.log(fermi_val)
             multiplicator[i] = firsterm + secondterm
     else:
-        fermi_val = fermi_function(energy, fermi_energy, temperature,
-                                   suppress_overflow=True)
+        fermi_val = fermi_function(
+            energy, fermi_energy, temperature, suppress_overflow=True
+        )
         if fermi_val == 1.0:
             secondterm = 0.0
         else:
@@ -183,7 +185,7 @@ def get_f0_value(x, beta):
     function_value : float
         F0 value.
     """
-    results = (x+mp.polylog(1, -1.0*mp.exp(x)))/beta
+    results = (x + mp.polylog(1, -1.0 * mp.exp(x))) / beta
     return results
 
 
@@ -204,8 +206,11 @@ def get_f1_value(x, beta):
     function_value : float
         F1 value.
     """
-    results = ((x*x)/2+x*mp.polylog(1, -1.0*mp.exp(x))
-               - mp.polylog(2, -1.0*mp.exp(x))) / (beta*beta)
+    results = (
+        (x * x) / 2
+        + x * mp.polylog(1, -1.0 * mp.exp(x))
+        - mp.polylog(2, -1.0 * mp.exp(x))
+    ) / (beta * beta)
     return results
 
 
@@ -226,9 +231,12 @@ def get_f2_value(x, beta):
     function_value : float
         F2 value.
     """
-    results = ((x*x*x)/3+x*x*mp.polylog(1, -1.0*mp.exp(x)) -
-               2*x*mp.polylog(2, -1.0*mp.exp(x)) +
-               2*mp.polylog(3, -1.0*mp.exp(x))) / (beta*beta*beta)
+    results = (
+        (x * x * x) / 3
+        + x * x * mp.polylog(1, -1.0 * mp.exp(x))
+        - 2 * x * mp.polylog(2, -1.0 * mp.exp(x))
+        + 2 * mp.polylog(3, -1.0 * mp.exp(x))
+    ) / (beta * beta * beta)
     return results
 
 
@@ -249,8 +257,10 @@ def get_s0_value(x, beta):
     function_value : float
         S0 value.
     """
-    results = (-1.0*x*mp.polylog(1, -1.0*mp.exp(x)) +
-               2.0*mp.polylog(2, -1.0*mp.exp(x))) / (beta*beta)
+    results = (
+        -1.0 * x * mp.polylog(1, -1.0 * mp.exp(x))
+        + 2.0 * mp.polylog(2, -1.0 * mp.exp(x))
+    ) / (beta * beta)
     return results
 
 
@@ -271,9 +281,11 @@ def get_s1_value(x, beta):
     function_value : float
         S1 value.
     """
-    results = (-1.0*x*x*mp.polylog(1, -1.0*mp.exp(x)) +
-               3*x*mp.polylog(2, -1.0*mp.exp(x)) -
-               3*mp.polylog(3, -1.0*mp.exp(x))) / (beta*beta*beta)
+    results = (
+        -1.0 * x * x * mp.polylog(1, -1.0 * mp.exp(x))
+        + 3 * x * mp.polylog(2, -1.0 * mp.exp(x))
+        - 3 * mp.polylog(3, -1.0 * mp.exp(x))
+    ) / (beta * beta * beta)
     return results
 
 
@@ -333,17 +345,20 @@ def analytical_integration(D, I0, I1, fermi_energy, energy_grid, temperature):
     }
 
     # Check if everything makes sense.
-    if I0 not in list(function_mappings.keys()) or I1 not in\
-            list(function_mappings.keys()):
-        raise Exception("Could not calculate analytical intergal, "
-                        "wrong choice of auxiliary functions.")
+    if I0 not in list(function_mappings.keys()) or I1 not in list(
+        function_mappings.keys()
+    ):
+        raise Exception(
+            "Could not calculate analytical intergal, "
+            "wrong choice of auxiliary functions."
+        )
 
     # Construct the weight vector.
     weights_vector = np.zeros(energy_grid.shape, dtype=np.float64)
     gridsize = energy_grid.shape[0]
-    energy_grid_edges = np.zeros(energy_grid.shape[0]+2, dtype=np.float64)
+    energy_grid_edges = np.zeros(energy_grid.shape[0] + 2, dtype=np.float64)
     energy_grid_edges[1:-1] = energy_grid
-    spacing = (energy_grid[1]-energy_grid[0])
+    spacing = energy_grid[1] - energy_grid[0]
     energy_grid_edges[0] = energy_grid[0] - spacing
     energy_grid_edges[-1] = energy_grid[-1] + spacing
 
@@ -354,14 +369,14 @@ def analytical_integration(D, I0, I1, fermi_energy, energy_grid, temperature):
     beta = 1 / (kB * temperature)
     for i in range(0, gridsize):
         # Some aliases for readibility
-        ei = energy_grid_edges[i+1]
-        ei_plus = energy_grid_edges[i+2]
+        ei = energy_grid_edges[i + 1]
+        ei_plus = energy_grid_edges[i + 2]
         ei_minus = energy_grid_edges[i]
 
         # Calculate x
-        x = beta*(ei - fermi_energy)
-        x_plus = beta*(ei_plus - fermi_energy)
-        x_minus = beta*(ei_minus - fermi_energy)
+        x = beta * (ei - fermi_energy)
+        x_plus = beta * (ei_plus - fermi_energy)
+        x_minus = beta * (ei_minus - fermi_energy)
 
         # Calculate the I0 value
         i0 = function_mappings[I0](x, beta)
@@ -373,11 +388,12 @@ def analytical_integration(D, I0, I1, fermi_energy, energy_grid, temperature):
         i1_plus = function_mappings[I1](x_plus, beta)
         i1_minus = function_mappings[I1](x_minus, beta)
 
-        weights_vector[i] = (i0_plus-i0) * (1 +
-                                            ((ei - fermi_energy) / (ei_plus - ei))) \
-                            + (i0-i0_minus) * (1 - ((ei - fermi_energy) / (ei - ei_minus))) - \
-                            ((i1_plus-i1) / (ei_plus-ei)) + ((i1 - i1_minus)
-                                                             / (ei - ei_minus))
+        weights_vector[i] = (
+            (i0_plus - i0) * (1 + ((ei - fermi_energy) / (ei_plus - ei)))
+            + (i0 - i0_minus) * (1 - ((ei - fermi_energy) / (ei - ei_minus)))
+            - ((i1_plus - i1) / (ei_plus - ei))
+            + ((i1 - i1_minus) / (ei - ei_minus))
+        )
 
     integral_value = np.dot(D, weights_vector)
     return integral_value
@@ -410,7 +426,12 @@ def gaussians(grid, centers, sigma):
 
 
     """
-    multiple_gaussians = 1.0/np.sqrt(np.pi*sigma**2) * \
-        np.exp(-1.0*((grid[np.newaxis] - centers[..., np.newaxis])/sigma)**2)
+    multiple_gaussians = (
+        1.0
+        / np.sqrt(np.pi * sigma**2)
+        * np.exp(
+            -1.0 * ((grid[np.newaxis] - centers[..., np.newaxis]) / sigma) ** 2
+        )
+    )
 
     return multiple_gaussians

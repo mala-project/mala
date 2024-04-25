@@ -46,6 +46,7 @@ class TestMALAIntegration:
 
     Tests different integrations that would normally be performed by code.
     """
+
     def test_analytical_integration(self):
         """
         Test whether the analytical integration works in principle.
@@ -75,15 +76,21 @@ class TestMALAIntegration:
         # Calculate the numerically approximated values.
         qint_0, abserr = sp.integrate.quad(
             lambda e: fermi_function(e, e_fermi, temp, suppress_overflow=True),
-            energies[0], energies[-1])
+            energies[0],
+            energies[-1],
+        )
         qint_1, abserr = sp.integrate.quad(
-            lambda e: (e - e_fermi) * fermi_function(e, e_fermi, temp,
-                                                     suppress_overflow=True),
-            energies[0], energies[-1])
+            lambda e: (e - e_fermi)
+            * fermi_function(e, e_fermi, temp, suppress_overflow=True),
+            energies[0],
+            energies[-1],
+        )
         qint_2, abserr = sp.integrate.quad(
-            lambda e: (e - e_fermi) ** 2 * fermi_function(e, e_fermi, temp,
-                                                          suppress_overflow=True),
-            energies[0], energies[-1])
+            lambda e: (e - e_fermi) ** 2
+            * fermi_function(e, e_fermi, temp, suppress_overflow=True),
+            energies[0],
+            energies[-1],
+        )
 
         # Calculate the errors.
         error0 = np.abs(aint_0 - qint_0)
@@ -104,8 +111,9 @@ class TestMALAIntegration:
         """
         # Create a calculator.
         dens_calculator = Density(test_parameters)
-        dens_calculator.read_additional_calculation_data(path_to_out,
-                                                         "espresso-out")
+        dens_calculator.read_additional_calculation_data(
+            path_to_out, "espresso-out"
+        )
 
         # Read the input data.
         density_dft = np.load(path_to_dens_npy)
@@ -115,15 +123,18 @@ class TestMALAIntegration:
         nr_dft = dens_calculator.number_of_electrons_exact
 
         # Calculate relative error.
-        rel_error = np.abs(nr_mala-nr_dft) / nr_dft
-        printout("Relative error number of electrons: ", rel_error,
-                 min_verbosity=0)
+        rel_error = np.abs(nr_mala - nr_dft) / nr_dft
+        printout(
+            "Relative error number of electrons: ", rel_error, min_verbosity=0
+        )
 
         # Check against the constraints we put upon ourselves.
         assert np.isclose(rel_error, 0, atol=accuracy)
 
-    @pytest.mark.skipif(os.path.isfile(path_to_ldos_npy) is False,
-                        reason="No LDOS file in data repo found.")
+    @pytest.mark.skipif(
+        os.path.isfile(path_to_ldos_npy) is False,
+        reason="No LDOS file in data repo found.",
+    )
     def test_qe_ldos_to_density(self):
         """
         Test integration of local density of states on energy grid.
@@ -132,7 +143,9 @@ class TestMALAIntegration:
         """
         # Create a calculator.abs()
         ldos_calculator = LDOS(test_parameters)
-        ldos_calculator.read_additional_calculation_data(path_to_out, "espresso-out")
+        ldos_calculator.read_additional_calculation_data(
+            path_to_out, "espresso-out"
+        )
         dens_calculator = Density.from_ldos_calculator(ldos_calculator)
 
         # Read the input data.
@@ -140,23 +153,30 @@ class TestMALAIntegration:
         ldos_dft = np.load(path_to_ldos_npy)
 
         # Calculate the quantities we want to compare.
-        self_consistent_fermi_energy = ldos_calculator. \
-            get_self_consistent_fermi_energy(ldos_dft)
-        density_mala = ldos_calculator. \
-            get_density(ldos_dft, fermi_energy=self_consistent_fermi_energy)
+        self_consistent_fermi_energy = (
+            ldos_calculator.get_self_consistent_fermi_energy(ldos_dft)
+        )
+        density_mala = ldos_calculator.get_density(
+            ldos_dft, fermi_energy=self_consistent_fermi_energy
+        )
         density_mala_sum = density_mala.sum()
         density_dft_sum = density_dft.sum()
 
         # Calculate relative error.
-        rel_error = np.abs(density_mala_sum-density_dft_sum) / density_dft_sum
-        printout("Relative error for sum of density: ", rel_error,
-                 min_verbosity=0)
+        rel_error = (
+            np.abs(density_mala_sum - density_dft_sum) / density_dft_sum
+        )
+        printout(
+            "Relative error for sum of density: ", rel_error, min_verbosity=0
+        )
 
         # Check against the constraints we put upon ourselves.
         assert np.isclose(rel_error, 0, atol=accuracy)
 
-    @pytest.mark.skipif(os.path.isfile(path_to_ldos_npy) is False,
-                        reason="No LDOS file in data repo found.")
+    @pytest.mark.skipif(
+        os.path.isfile(path_to_ldos_npy) is False,
+        reason="No LDOS file in data repo found.",
+    )
     def test_qe_ldos_to_dos(self):
         """
         Test integration of local density of states on real space grid.
@@ -164,9 +184,13 @@ class TestMALAIntegration:
         The integral of the LDOS over real space grid should yield the DOS.
         """
         ldos_calculator = LDOS(test_parameters)
-        ldos_calculator.read_additional_calculation_data(path_to_out, "espresso-out")
+        ldos_calculator.read_additional_calculation_data(
+            path_to_out, "espresso-out"
+        )
         dos_calculator = DOS(test_parameters)
-        dos_calculator.read_additional_calculation_data(path_to_out, "espresso-out")
+        dos_calculator.read_additional_calculation_data(
+            path_to_out, "espresso-out"
+        )
 
         # Read the input data.
         ldos_dft = np.load(path_to_ldos_npy)
@@ -176,9 +200,8 @@ class TestMALAIntegration:
         dos_mala = ldos_calculator.get_density_of_states(ldos_dft)
         dos_mala_sum = dos_mala.sum()
         dos_dft_sum = dos_dft.sum()
-        rel_error = np.abs(dos_mala_sum-dos_dft_sum) / dos_dft_sum
-        printout("Relative error for sum of DOS: ", rel_error,
-                 min_verbosity=0)
+        rel_error = np.abs(dos_mala_sum - dos_dft_sum) / dos_dft_sum
+        printout("Relative error for sum of DOS: ", rel_error, min_verbosity=0)
 
         # Check against the constraints we put upon ourselves.
         assert np.isclose(rel_error, 0, atol=accuracy_ldos)
@@ -186,8 +209,9 @@ class TestMALAIntegration:
     def test_pwevaldos_vs_ppdos(self):
         """Check pp.x DOS vs. pw.x DOS (from eigenvalues in outfile)."""
         dos_calculator = DOS(test_parameters)
-        dos_calculator.read_additional_calculation_data(path_to_out,
-                                                        "espresso-out")
+        dos_calculator.read_additional_calculation_data(
+            path_to_out, "espresso-out"
+        )
 
         dos_from_pp = np.load(path_to_dos_npy)
 
@@ -196,6 +220,6 @@ class TestMALAIntegration:
         dos_from_dft = dos_calculator.density_of_states
         dos_pp_sum = dos_from_pp.sum()
         dos_dft_sum = dos_from_dft.sum()
-        rel_error = np.abs(dos_dft_sum-dos_pp_sum) / dos_pp_sum
+        rel_error = np.abs(dos_dft_sum - dos_pp_sum) / dos_pp_sum
 
         assert np.isclose(rel_error, 0, atol=accuracy_dos)
