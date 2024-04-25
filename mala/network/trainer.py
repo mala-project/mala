@@ -268,7 +268,7 @@ class Trainer(Runner):
                 vloss, "average_loss", self.parameters._configuration["device"]
             )
             self.initial_validation_loss = vloss
-            if self.data.test_data_sets is not None:
+            if self.data.test_data_sets:
                 tloss = self.__average_validation(
                     tloss,
                     "average_loss",
@@ -655,7 +655,7 @@ class Trainer(Runner):
             if self.parameters_full.use_distributed_sampler_train:
                 self.train_sampler = (
                     torch.utils.data.distributed.DistributedSampler(
-                        self.data.training_data_sets,
+                        self.data.training_data_sets[0],
                         num_replicas=dist.get_world_size(),
                         rank=dist.get_rank(),
                         shuffle=do_shuffle,
@@ -664,7 +664,7 @@ class Trainer(Runner):
             if self.parameters_full.use_distributed_sampler_val:
                 self.validation_sampler = (
                     torch.utils.data.distributed.DistributedSampler(
-                        self.data.validation_data_sets,
+                        self.data.validation_data_sets[0],
                         num_replicas=dist.get_world_size(),
                         rank=dist.get_rank(),
                         shuffle=False,
@@ -675,7 +675,7 @@ class Trainer(Runner):
                 if self.data.test_data_sets is not None:
                     self.test_sampler = (
                         torch.utils.data.distributed.DistributedSampler(
-                            self.data.test_data_sets,
+                            self.data.test_data_sets[0],
                             num_replicas=dist.get_world_size(),
                             rank=dist.get_rank(),
                             shuffle=False,
