@@ -308,7 +308,7 @@ class Trainer(Runner):
             if isinstance(self.data.training_data_sets[0], FastTensorDataset):
                 self.data.training_data_sets[0].shuffle()
 
-            if self.parameters._configuration["gpu"]:
+            if self.parameters._configuration["gpu"] > 0:
                 torch.cuda.synchronize(
                     self.parameters._configuration["device"]
                 )
@@ -445,7 +445,7 @@ class Trainer(Runner):
                 # to disk
                 self.tensor_board.close()
 
-            if self.parameters._configuration["gpu"]:
+            if self.parameters._configuration["gpu"] > 0:
                 torch.cuda.synchronize(
                     self.parameters._configuration["device"]
                 )
@@ -454,7 +454,7 @@ class Trainer(Runner):
             # in the lazy loading case).
             if self.parameters.use_shuffling_for_samplers:
                 self.data.mix_datasets()
-            if self.parameters._configuration["gpu"]:
+            if self.parameters._configuration["gpu"] > 0:
                 torch.cuda.synchronize(
                     self.parameters._configuration["device"]
                 )
@@ -559,7 +559,7 @@ class Trainer(Runner):
             "num_workers": self.parameters.num_workers,
             "pin_memory": False,
         }
-        if self.parameters_full.use_gpu:
+        if self.parameters_full.use_gpu > 0:
             kwargs["pin_memory"] = True
 
         # Read last epoch
@@ -776,17 +776,20 @@ class Trainer(Runner):
                     )
                 )
 
-
-        if self.parameters_full.use_gpu and self.parameters_full.running.num_gpus > 1:
+        if self.parameters_full.use_gpu > 1:
             if self.parameters_full.network.nn_type != "feed-forward":
-                raise Exception("Only feed-forward networks are supported "
-                                "with multiple GPUs.")
-            self.network = torch.nn.DataParallel(self.network,
-                device_ids=list(range(self.parameters_full.running.num_gpus)))
+                raise Exception(
+                    "Only feed-forward networks are supported "
+                    "with multiple GPUs."
+                )
+            self.network = torch.nn.DataParallel(
+                self.network,
+                device_ids=list(range(self.parameters_full.use_gpu)),
+            )
 
     def __process_mini_batch(self, network, input_data, target_data):
         """Process a mini batch."""
-        if self.parameters._configuration["gpu"]:
+        if self.parameters._configuration["gpu"] > 0:
             if self.parameters.use_graphs and self.train_graph is None:
                 printout("Capturing CUDA graph for training.", min_verbosity=2)
                 s = torch.cuda.Stream(self.parameters._configuration["device"])
@@ -808,9 +811,13 @@ class Trainer(Runner):
                                 prediction, target_data
                             )
                             if hasattr(network, "calculate_loss"):
-                                loss = network.calculate_loss(prediction, target_data)
+                                loss = network.calculate_loss(
+                                    prediction, target_data
+                                )
                             else:
-                                loss = network.module.calculate_loss(prediction, target_data)
+                                loss = network.module.calculate_loss(
+                                    prediction, target_data
+                                )
 
                         if self.gradscaler:
                             self.gradscaler.scale(loss).backward()
@@ -840,9 +847,13 @@ class Trainer(Runner):
                         )
 
                         if hasattr(network, "calculate_loss"):
-                            self.static_loss = network.calculate_loss(self.static_prediction, self.static_target_data)
+                            self.static_loss = network.calculate_loss(
+                                self.static_prediction, self.static_target_data
+                            )
                         else:
-                            self.static_loss = network.module.calculate_loss(self.static_prediction, self.static_target_data)
+                            self.static_loss = network.module.calculate_loss(
+                                self.static_prediction, self.static_target_data
+                            )
 
                     if self.gradscaler:
                         self.gradscaler.scale(self.static_loss).backward()
@@ -871,7 +882,9 @@ class Trainer(Runner):
                     if hasattr(network, "calculate_loss"):
                         loss = network.calculate_loss(prediction, target_data)
                     else:
-                        loss = network.module.calculate_loss(prediction, target_data)
+                        loss = network.module.calculate_loss(
+                            prediction, target_data
+                        )
                     # loss
                     torch.cuda.nvtx.range_pop()
 
@@ -930,7 +943,7 @@ class Trainer(Runner):
                 1, device=self.parameters._configuration["device"]
             )
             with torch.no_grad():
-                if self.parameters._configuration["gpu"]:
+                if self.parameters._configuration["gpu"] > 0:
                     report_freq = self.parameters.training_report_frequency
                     torch.cuda.synchronize(
                         self.parameters._configuration["device"]
@@ -973,10 +986,16 @@ class Trainer(Runner):
                                             enabled=self.parameters.use_mixed_precision
                                         ):
                                             prediction = network(x)
-                                            if hasattr(network, "calculate_loss"):
-                                                loss = network.calculate_loss(prediction, y)
+                                            if hasattr(
+                                                network, "calculate_loss"
+                                            ):
+                                                loss = network.calculate_loss(
+                                                    prediction, y
+                                                )
                                             else:
-                                                loss = network.module.calculate_loss(prediction, y)
+                                                loss = network.module.calculate_loss(
+                                                    prediction, y
+                                                )
                                 torch.cuda.current_stream(
                                     self.parameters._configuration["device"]
                                 ).wait_stream(s)
@@ -992,13 +1011,28 @@ class Trainer(Runner):
                                 # Capture graph
                                 self.validation_graph = torch.cuda.CUDAGraph()
                                 with torch.cuda.graph(self.validation_graph):
-                                    with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
-                                        self.static_prediction_validation = network(self.static_input_validation)
-                                        self.static_loss_validation = network.calculate_loss(self.static_prediction_validation, self.static_target_validation)
+                                    with torch.cuda.amp.autocast(
+                                        enabled=self.parameters.use_mixed_precision
+                                    ):
+                                        self.static_prediction_validation = (
+                                            network(
+                                                self.static_input_validation
+                                            )
+                                        )
+                                        self.static_loss_validation = network.calculate_loss(
+                                            self.static_prediction_validation,
+                                            self.static_target_validation,
+                                        )
                                         if hasattr(network, "calculate_loss"):
-                                            self.static_loss_validation = network.calculate_loss(self.static_prediction_validation, self.static_target_validation)
+                                            self.static_loss_validation = network.calculate_loss(
+                                                self.static_prediction_validation,
+                                                self.static_target_validation,
+                                            )
                                         else:
-                                            self.static_loss_validation = network.module.calculate_loss(self.static_prediction_validation, self.static_target_validation)
+                                            self.static_loss_validation = network.module.calculate_loss(
+                                                self.static_prediction_validation,
+                                                self.static_target_validation,
+                                            )
                                     with torch.cuda.amp.autocast(
                                         enabled=self.parameters.use_mixed_precision
                                     ):
@@ -1025,9 +1059,13 @@ class Trainer(Runner):
                                 ):
                                     prediction = network(x)
                                     if hasattr(network, "calculate_loss"):
-                                        loss = network.calculate_loss(prediction, y)
+                                        loss = network.calculate_loss(
+                                            prediction, y
+                                        )
                                     else:
-                                        loss = network.module.calculate_loss(prediction, y)
+                                        loss = network.module.calculate_loss(
+                                            prediction, y
+                                        )
                                     validation_loss_sum += loss
                             if (
                                 batchid != 0
@@ -1063,7 +1101,9 @@ class Trainer(Runner):
                             if hasattr(network, "calculate_loss"):
                                 loss = network.calculate_loss(prediction, y)
                             else:
-                                loss = network.module.calculate_loss(prediction, y)
+                                loss = network.module.calculate_loss(
+                                    prediction, y
+                                )
 
                             validation_loss_sum += loss.item()
                             batchid += 1

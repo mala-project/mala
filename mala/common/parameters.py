@@ -39,7 +39,7 @@ class ParametersBase(JSONSerializable):
     ):
         super(ParametersBase, self).__init__()
         self._configuration = {
-            "gpu": False,
+            "gpu": 0,
             "horovod": False,
             "mpi": False,
             "device": "cpu",
@@ -744,7 +744,6 @@ class ParametersRunning(ParametersBase):
         self.max_number_epochs = 100
         self.verbosity = True
         self.mini_batch_size = 10
-        self.num_gpus = 1
         self.weight_decay = 0
         self.early_stopping_epochs = 0
         self.early_stopping_threshold = 0
@@ -845,10 +844,7 @@ class ParametersRunning(ParametersBase):
     @use_graphs.setter
     def use_graphs(self, value):
         if value is True:
-            if (
-                self._configuration["gpu"] is False
-                or torch.version.cuda is None
-            ):
+            if self._configuration["gpu"] == 0 or torch.version.cuda is None:
                 parallel_warn("No CUDA or GPU found, cannot use CUDA graphs.")
                 value = False
             else:
@@ -1284,11 +1280,14 @@ class Parameters:
 
     @use_gpu.setter
     def use_gpu(self, value):
-        if value is False:
-            self._use_gpu = False
+        if value is False or value == 0:
+            self._use_gpu = 0
         else:
             if torch.cuda.is_available():
-                self._use_gpu = True
+                if value is True:
+                    self._use_gpu = 1
+                else:
+                    self._use_gpu = value
             else:
                 parallel_warn(
                     "GPU requested, but no GPU found. MALA will "
@@ -1536,7 +1535,7 @@ class Parameters:
         """
         # We first "trick" the parameters object to assume MPI and GPUs
         # are used. That way we get the right device.
-        self.use_gpu = True
+        self.use_gpu = 1
         self.use_mpi = True
         device_temp = self.device
         sleep(get_rank() * wait_time)

@@ -91,7 +91,9 @@ class Runner:
         if hasattr(self.network, "save_network"):
             self.network.save_network(os.path.join(save_path, model_file))
         else:
-            self.network.module.save_network(os.path.join(save_path, model_file))
+            self.network.module.save_network(
+                os.path.join(save_path, model_file)
+            )
         self.data.input_data_scaler.save(os.path.join(save_path, iscaler_file))
         self.data.output_data_scaler.save(
             os.path.join(save_path, oscaler_file)
@@ -428,7 +430,7 @@ class Runner:
         """
         # See if we want to use horovod.
         if self.parameters_full.use_horovod:
-            if self.parameters_full.use_gpu:
+            if self.parameters_full.use_gpu > 0:
                 # We cannot use "printout" here because this is supposed
                 # to happen on every rank.
                 if self.parameters_full.verbosity >= 2:

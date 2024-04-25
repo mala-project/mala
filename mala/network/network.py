@@ -30,7 +30,7 @@ class Network(nn.Module):
         Parameters used to create this neural network.
     """
 
-    def __new__(cls, params: Parameters=None):
+    def __new__(cls, params: Parameters = None):
         """
         Create a neural network instance.
 
@@ -454,7 +454,7 @@ class GRU(LSTM):
             self.params.layer_activations[0]
         ]()
 
-        if params.use_gpu:
+        if params.use_gpu > 0:
             self.to("cuda")
 
     def forward(self, x):
