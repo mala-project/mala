@@ -833,18 +833,18 @@
             <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;ngridy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ny</span>
             <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;ngridz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nz</span>
             <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;switch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_switchflag</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]:</span>
-                <span class="c1"># Tell Kokkos to use one GPU.</span>
-                <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-k&quot;</span><span class="p">)</span>
-                <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;on&quot;</span><span class="p">)</span>
-                <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;g&quot;</span><span class="p">)</span>
-                <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]:</span>
+            <span class="c1"># Tell Kokkos to use one GPU.</span>
+            <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-k&quot;</span><span class="p">)</span>
+            <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;on&quot;</span><span class="p">)</span>
+            <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;g&quot;</span><span class="p">)</span>
+            <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">)</span>
 
-                <span class="c1"># Tell LAMMPS to use Kokkos versions of those commands for</span>
-                <span class="c1"># which a Kokkos version exists.</span>
-                <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-sf&quot;</span><span class="p">)</span>
-                <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;kk&quot;</span><span class="p">)</span>
-                <span class="k">pass</span>
+            <span class="c1"># Tell LAMMPS to use Kokkos versions of those commands for</span>
+            <span class="c1"># which a Kokkos version exists.</span>
+            <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-sf&quot;</span><span class="p">)</span>
+            <span class="n">lmp_cmdargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;kk&quot;</span><span class="p">)</span>
+            <span class="k">pass</span>
 
         <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="n">set_cmdlinevars</span><span class="p">(</span><span class="n">lmp_cmdargs</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">)</span>
 
