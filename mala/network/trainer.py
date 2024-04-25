@@ -810,12 +810,12 @@ class Trainer(Runner):
                             loss = network.calculate_loss(
                                 prediction, target_data
                             )
-                            if hasattr(network, "calculate_loss"):
-                                loss = network.calculate_loss(
+                            if hasattr(network, "module"):
+                                loss = network.module.calculate_loss(
                                     prediction, target_data
                                 )
                             else:
-                                loss = network.module.calculate_loss(
+                                loss = network.calculate_loss(
                                     prediction, target_data
                                 )
 
@@ -846,12 +846,12 @@ class Trainer(Runner):
                             self.static_prediction, self.static_target_data
                         )
 
-                        if hasattr(network, "calculate_loss"):
-                            self.static_loss = network.calculate_loss(
+                        if hasattr(network, "module"):
+                            self.static_loss = network.module.calculate_loss(
                                 self.static_prediction, self.static_target_data
                             )
                         else:
-                            self.static_loss = network.module.calculate_loss(
+                            self.static_loss = network.calculate_loss(
                                 self.static_prediction, self.static_target_data
                             )
 
@@ -879,12 +879,12 @@ class Trainer(Runner):
                     torch.cuda.nvtx.range_pop()
 
                     torch.cuda.nvtx.range_push("loss")
-                    if hasattr(network, "calculate_loss"):
-                        loss = network.calculate_loss(prediction, target_data)
-                    else:
+                    if hasattr(network, "module"):
                         loss = network.module.calculate_loss(
                             prediction, target_data
                         )
+                    else:
+                        loss = network.calculate_loss(prediction, target_data)
                     # loss
                     torch.cuda.nvtx.range_pop()
 
@@ -907,10 +907,10 @@ class Trainer(Runner):
                 return loss
         else:
             prediction = network(input_data)
-            if hasattr(network, "calculate_loss"):
-                loss = network.calculate_loss(prediction, target_data)
-            else:
+            if hasattr(network, "module"):
                 loss = network.module.calculate_loss(prediction, target_data)
+            else:
+                loss = network.calculate_loss(prediction, target_data)
             loss.backward()
             self.optimizer.step()
             self.optimizer.zero_grad()
@@ -987,13 +987,13 @@ class Trainer(Runner):
                                         ):
                                             prediction = network(x)
                                             if hasattr(
-                                                network, "calculate_loss"
+                                                network, "module"
                                             ):
-                                                loss = network.calculate_loss(
+                                                loss = network.module.calculate_loss(
                                                     prediction, y
                                                 )
                                             else:
-                                                loss = network.module.calculate_loss(
+                                                loss = network.calculate_loss(
                                                     prediction, y
                                                 )
                                 torch.cuda.current_stream(
@@ -1023,13 +1023,13 @@ class Trainer(Runner):
                                             self.static_prediction_validation,
                                             self.static_target_validation,
                                         )
-                                        if hasattr(network, "calculate_loss"):
-                                            self.static_loss_validation = network.calculate_loss(
+                                        if hasattr(network, "module"):
+                                            self.static_loss_validation = network.module.calculate_loss(
                                                 self.static_prediction_validation,
                                                 self.static_target_validation,
                                             )
                                         else:
-                                            self.static_loss_validation = network.module.calculate_loss(
+                                            self.static_loss_validation = network.calculate_loss(
                                                 self.static_prediction_validation,
                                                 self.static_target_validation,
                                             )
@@ -1058,12 +1058,12 @@ class Trainer(Runner):
                                     enabled=self.parameters.use_mixed_precision
                                 ):
                                     prediction = network(x)
-                                    if hasattr(network, "calculate_loss"):
-                                        loss = network.calculate_loss(
+                                    if hasattr(network, "module"):
+                                        loss = network.module.calculate_loss(
                                             prediction, y
                                         )
                                     else:
-                                        loss = network.module.calculate_loss(
+                                        loss = network.calculate_loss(
                                             prediction, y
                                         )
                                     validation_loss_sum += loss
@@ -1098,12 +1098,12 @@ class Trainer(Runner):
                             y = y.to(self.parameters._configuration["device"])
                             prediction = network(x)
 
-                            if hasattr(network, "calculate_loss"):
-                                loss = network.calculate_loss(prediction, y)
-                            else:
+                            if hasattr(network, "module"):
                                 loss = network.module.calculate_loss(
                                     prediction, y
                                 )
+                            else:
+                                loss = network.calculate_loss(prediction, y)
 
                             validation_loss_sum += loss.item()
                             batchid += 1
