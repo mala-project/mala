@@ -806,7 +806,7 @@ class ParametersRunning(ParametersBase):
             if self._configuration["ddp"]:
                 raise Exception(
                     "Currently, MALA can only operate with the "
-                    "\"ldos\" metric for ddp runs."
+                    '"ldos" metric for ddp runs.'
                 )
         self._after_before_training_metric = value
 
@@ -816,7 +816,7 @@ class ParametersRunning(ParametersBase):
             if self._configuration["ddp"]:
                 raise Exception(
                     "Currently, MALA can only operate with the "
-                    "\"ldos\" metric for ddp runs."
+                    '"ldos" metric for ddp runs.'
                 )
         self._during_training_metric = value
 
@@ -1312,8 +1312,8 @@ class Parameters:
 
     @property
     def use_distributed_sampler_val(self):
-         """Control whether or not distributed sampler is used to distribute validation data."""
-         return self._use_distributed_sampler_val
+        """Control whether or not distributed sampler is used to distribute validation data."""
+        return self._use_distributed_sampler_val
 
     @use_distributed_sampler_val.setter
     def use_distributed_sampler_val(self, value):

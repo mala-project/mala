@@ -85,7 +85,9 @@ class Runner:
 
         self.parameters_full.save(os.path.join(save_path, params_file))
         if self.parameters_full.use_ddp:
-            self.network.module.save_network(os.path.join(save_path, model_file))
+            self.network.module.save_network(
+                os.path.join(save_path, model_file)
+            )
         else:
             self.network.save_network(os.path.join(save_path, model_file))
         self.data.input_data_scaler.save(os.path.join(save_path, iscaler_file))
@@ -431,8 +433,15 @@ class Runner:
                 rank = dist.get_rank()
                 local_rank = int(os.environ.get("LOCAL_RANK"))
                 if self.parameters_full.verbosity >= 2:
-                    print("size=", size, "global_rank=", rank,
-                          "local_rank=", local_rank, "device=",
-                          torch.cuda.get_device_name(local_rank))
+                    print(
+                        "size=",
+                        size,
+                        "global_rank=",
+                        rank,
+                        "local_rank=",
+                        local_rank,
+                        "device=",
+                        torch.cuda.get_device_name(local_rank),
+                    )
                 # pin GPU to local rank
                 torch.cuda.set_device(local_rank)

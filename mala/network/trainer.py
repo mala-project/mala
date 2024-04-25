@@ -45,13 +45,13 @@ class Trainer(Runner):
         super(Trainer, self).__init__(params, network, data)
 
         if self.parameters_full.use_ddp:
-                print("wrapping model in ddp..")
-                # JOSHR: using streams here to maintain compatibility with
-                # graph capture
-                s = torch.cuda.Stream()
-                with torch.cuda.stream(s):
-                    self.network = DDP(self.network)
-                torch.cuda.current_stream().wait_stream(s)
+            print("wrapping model in ddp..")
+            # JOSHR: using streams here to maintain compatibility with
+            # graph capture
+            s = torch.cuda.Stream()
+            with torch.cuda.stream(s):
+                self.network = DDP(self.network)
+            torch.cuda.current_stream().wait_stream(s)
 
         self.final_test_loss = float("inf")
         self.initial_test_loss = float("inf")
@@ -264,12 +264,16 @@ class Trainer(Runner):
 
         # Collect and average all the losses from all the devices
         if self.parameters_full.use_ddp:
-            vloss = self.__average_validation(vloss, 'average_loss',
-                                              self.parameters._configuration["device"])
+            vloss = self.__average_validation(
+                vloss, "average_loss", self.parameters._configuration["device"]
+            )
             self.initial_validation_loss = vloss
             if self.data.test_data_sets is not None:
-                tloss = self.__average_validation(tloss, 'average_loss',
-                                                  self.parameters._configuration["device"])
+                tloss = self.__average_validation(
+                    tloss,
+                    "average_loss",
+                    self.parameters._configuration["device"],
+                )
                 self.initial_test_loss = tloss
 
         printout(
@@ -416,8 +420,11 @@ class Trainer(Runner):
             )
 
             if self.parameters_full.use_ddp:
-                vloss = self.__average_validation(vloss, 'average_loss',
-                                                  self.parameters._configuration["device"])
+                vloss = self.__average_validation(
+                    vloss,
+                    "average_loss",
+                    self.parameters._configuration["device"],
+                )
             if self.parameters_full.verbosity > 1:
                 printout(
                     "Epoch {0}: validation data loss: {1}, "
@@ -527,15 +534,21 @@ class Trainer(Runner):
         # CALCULATE FINAL METRICS
         ############################
 
-        if self.parameters.after_before_training_metric != \
-                self.parameters.during_training_metric:
-            vloss = self.__validate_network(self.network,
-                                            "validation",
-                                            self.parameters.
-                                            after_before_training_metric)
+        if (
+            self.parameters.after_before_training_metric
+            != self.parameters.during_training_metric
+        ):
+            vloss = self.__validate_network(
+                self.network,
+                "validation",
+                self.parameters.after_before_training_metric,
+            )
             if self.parameters_full.use_ddp:
-                vloss = self.__average_validation(vloss, 'average_loss',
-                                                  self.parameters._configuration["device"])
+                vloss = self.__average_validation(
+                    vloss,
+                    "average_loss",
+                    self.parameters._configuration["device"],
+                )
 
         # Calculate final loss.
         self.final_validation_loss = vloss
@@ -543,13 +556,17 @@ class Trainer(Runner):
 
         tloss = float("inf")
         if len(self.data.test_data_sets) > 0:
-            tloss = self.__validate_network(self.network,
-                                            "test",
-                                            self.parameters.
-                                            after_before_training_metric)
+            tloss = self.__validate_network(
+                self.network,
+                "test",
+                self.parameters.after_before_training_metric,
+            )
             if self.parameters_full.use_ddp:
-                tloss = self.__average_validation(tloss, 'average_loss',
-                                                  self.parameters._configuration["device"])
+                tloss = self.__average_validation(
+                    tloss,
+                    "average_loss",
+                    self.parameters._configuration["device"],
+                )
             printout("Final test data loss: ", tloss, min_verbosity=0)
         self.final_test_loss = tloss
 
@@ -577,10 +594,14 @@ class Trainer(Runner):
         # Scale the learning rate according to ddp.
         if self.parameters_full.use_ddp:
             if dist.get_world_size() > 1 and self.last_epoch == 0:
-                printout("Rescaling learning rate because multiple workers are"
-                         " used for training.", min_verbosity=1)
-                self.parameters.learning_rate = self.parameters.learning_rate \
-                    * dist.get_world_size()
+                printout(
+                    "Rescaling learning rate because multiple workers are"
+                    " used for training.",
+                    min_verbosity=1,
+                )
+                self.parameters.learning_rate = (
+                    self.parameters.learning_rate * dist.get_world_size()
+                )
 
         # Choose an optimizer to use.
         if self.parameters.trainingtype == "SGD":
@@ -632,25 +653,34 @@ class Trainer(Runner):
                 do_shuffle = False
 
             if self.parameters_full.use_distributed_sampler_train:
-                self.train_sampler = torch.utils.data.\
-                    distributed.DistributedSampler(self.data.training_data_sets,
-                                                   num_replicas=dist.get_world_size(),
-                                                   rank=dist.get_rank(),
-                                                   shuffle=do_shuffle)
+                self.train_sampler = (
+                    torch.utils.data.distributed.DistributedSampler(
+                        self.data.training_data_sets,
+                        num_replicas=dist.get_world_size(),
+                        rank=dist.get_rank(),
+                        shuffle=do_shuffle,
+                    )
+                )
             if self.parameters_full.use_distributed_sampler_val:
-                self.validation_sampler = torch.utils.data.\
-                    distributed.DistributedSampler(self.data.validation_data_sets,
-                                                   num_replicas=dist.get_world_size(),
-                                                   rank=dist.get_rank(),
-                                                   shuffle=False)
+                self.validation_sampler = (
+                    torch.utils.data.distributed.DistributedSampler(
+                        self.data.validation_data_sets,
+                        num_replicas=dist.get_world_size(),
+                        rank=dist.get_rank(),
+                        shuffle=False,
+                    )
+                )
 
             if self.parameters_full.use_distributed_sampler_test:
                 if self.data.test_data_sets is not None:
-                    self.test_sampler = torch.utils.data.\
-                        distributed.DistributedSampler(self.data.test_data_sets,
-                                                       num_replicas=dist.get_world_size(),
-                                                       rank=dist.get_rank(),
-                                                       shuffle=False)
+                    self.test_sampler = (
+                        torch.utils.data.distributed.DistributedSampler(
+                            self.data.test_data_sets,
+                            num_replicas=dist.get_world_size(),
+                            rank=dist.get_rank(),
+                            shuffle=False,
+                        )
+                    )
 
         # Instantiate the learning rate scheduler, if necessary.
         if self.parameters.learning_rate_scheduler == "ReduceLROnPlateau":
@@ -676,8 +706,10 @@ class Trainer(Runner):
         # epoch.
         # This shuffling is done in the dataset themselves.
         do_shuffle = self.parameters.use_shuffling_for_samplers
-        if self.data.parameters.use_lazy_loading or self.parameters_full.\
-                use_ddp:
+        if (
+            self.data.parameters.use_lazy_loading
+            or self.parameters_full.use_ddp
+        ):
             do_shuffle = False
 
         # Prepare data loaders.(look into mini-batch size)
@@ -774,9 +806,13 @@ class Trainer(Runner):
                             prediction = network(input_data)
                             if self.parameters_full.use_ddp:
                                 # JOSHR: We have to use "module" here to access custom method of DDP wrapped model
-                                loss = network.module.calculate_loss(prediction, target_data)
+                                loss = network.module.calculate_loss(
+                                    prediction, target_data
+                                )
                             else:
-                                loss = network.calculate_loss(prediction, target_data)
+                                loss = network.calculate_loss(
+                                    prediction, target_data
+                                )
 
                         if self.gradscaler:
                             self.gradscaler.scale(loss).backward()
@@ -802,9 +838,13 @@ class Trainer(Runner):
                         )
 
                         if self.parameters_full.use_ddp:
-                            self.static_loss = network.module.calculate_loss(self.static_prediction, self.static_target_data)
+                            self.static_loss = network.module.calculate_loss(
+                                self.static_prediction, self.static_target_data
+                            )
                         else:
-                            self.static_loss = network.calculate_loss(self.static_prediction, self.static_target_data)
+                            self.static_loss = network.calculate_loss(
+                                self.static_prediction, self.static_target_data
+                            )
 
                     if self.gradscaler:
                         self.gradscaler.scale(self.static_loss).backward()
@@ -831,7 +871,9 @@ class Trainer(Runner):
 
                     torch.cuda.nvtx.range_push("loss")
                     if self.parameters_full.use_ddp:
-                        loss = network.module.calculate_loss(prediction, target_data)
+                        loss = network.module.calculate_loss(
+                            prediction, target_data
+                        )
                     else:
                         loss = network.calculate_loss(prediction, target_data)
                     # loss
@@ -936,9 +978,13 @@ class Trainer(Runner):
                                         ):
                                             prediction = network(x)
                                             if self.parameters_full.use_ddp:
-                                                loss = network.module.calculate_loss(prediction, y)
+                                                loss = network.module.calculate_loss(
+                                                    prediction, y
+                                                )
                                             else:
-                                                loss = network.calculate_loss(prediction, y)
+                                                loss = network.calculate_loss(
+                                                    prediction, y
+                                                )
                                 torch.cuda.current_stream(
                                     self.parameters._configuration["device"]
                                 ).wait_stream(s)
@@ -954,12 +1000,24 @@ class Trainer(Runner):
                                 # Capture graph
                                 self.validation_graph = torch.cuda.CUDAGraph()
                                 with torch.cuda.graph(self.validation_graph):
-                                    with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
-                                        self.static_prediction_validation = network(self.static_input_validation)
+                                    with torch.cuda.amp.autocast(
+                                        enabled=self.parameters.use_mixed_precision
+                                    ):
+                                        self.static_prediction_validation = (
+                                            network(
+                                                self.static_input_validation
+                                            )
+                                        )
                                         if self.parameters_full.use_ddp:
-                                            self.static_loss_validation = network.module.calculate_loss(self.static_prediction_validation, self.static_target_validation)
+                                            self.static_loss_validation = network.module.calculate_loss(
+                                                self.static_prediction_validation,
+                                                self.static_target_validation,
+                                            )
                                         else:
-                                            self.static_loss_validation = network.calculate_loss(self.static_prediction_validation, self.static_target_validation)
+                                            self.static_loss_validation = network.calculate_loss(
+                                                self.static_prediction_validation,
+                                                self.static_target_validation,
+                                            )
 
                             if self.validation_graph:
                                 self.static_input_validation.copy_(x)
@@ -974,9 +1032,13 @@ class Trainer(Runner):
                                 ):
                                     prediction = network(x)
                                     if self.parameters_full.use_ddp:
-                                        loss = network.module.calculate_loss(prediction, y)
+                                        loss = network.module.calculate_loss(
+                                            prediction, y
+                                        )
                                     else:
-                                        loss = network.calculate_loss(prediction, y)
+                                        loss = network.calculate_loss(
+                                            prediction, y
+                                        )
                                     validation_loss_sum += loss
                             if (
                                 batchid != 0
@@ -1009,11 +1071,15 @@ class Trainer(Runner):
                             y = y.to(self.parameters._configuration["device"])
                             prediction = network(x)
                             if self.parameters_full.use_ddp:
-                                validation_loss_sum += \
-                                    network.module.calculate_loss(prediction, y).item()
+                                validation_loss_sum += (
+                                    network.module.calculate_loss(
+                                        prediction, y
+                                    ).item()
+                                )
                             else:
-                                validation_loss_sum += \
-                                    network.calculate_loss(prediction, y).item()
+                                validation_loss_sum += network.calculate_loss(
+                                    prediction, y
+                                ).item()
                             batchid += 1
 
             validation_loss = validation_loss_sum.item() / batchid

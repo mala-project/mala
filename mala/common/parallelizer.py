@@ -45,8 +45,9 @@ def set_ddp_status(new_value):
 
     """
     if use_mpi is True and new_value is True:
-        raise Exception("Cannot use ddp and inference-level MPI at "
-                        "the same time yet.")
+        raise Exception(
+            "Cannot use ddp and inference-level MPI at " "the same time yet."
+        )
     global use_ddp
     use_ddp = new_value
 
@@ -65,8 +66,9 @@ def set_mpi_status(new_value):
 
     """
     if use_ddp is True and new_value is True:
-        raise Exception("Cannot use ddp and inference-level MPI at "
-                        "the same time yet.")
+        raise Exception(
+            "Cannot use ddp and inference-level MPI at " "the same time yet."
+        )
     global use_mpi
     use_mpi = new_value
     if use_mpi:
