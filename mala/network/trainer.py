@@ -672,7 +672,7 @@ class Trainer(Runner):
                 )
 
             if self.parameters_full.use_distributed_sampler_test:
-                if self.data.test_data_sets is not None:
+                if self.data.test_data_sets:
                     self.test_sampler = (
                         torch.utils.data.distributed.DistributedSampler(
                             self.data.test_data_sets[0],
