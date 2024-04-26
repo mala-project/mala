@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import torch.distributed as dist
 
+from mala.common.parallelizer import get_rank
 from mala.common.parameters import ParametersRunning
 from mala.network.network import Network
 from mala.datahandling.data_scaler import DataScaler
@@ -76,55 +77,62 @@ class Runner:
             data is already present in the DataHandler object, it can be saved
             by setting.
         """
-        model_file = run_name + ".network.pth"
-        iscaler_file = run_name + ".iscaler.pkl"
-        oscaler_file = run_name + ".oscaler.pkl"
-        params_file = run_name + ".params.json"
-        if save_runner:
-            optimizer_file = run_name + ".optimizer.pth"
+        # If a model is trained via DDP, we need to make sure saving is only
+        # performed on rank 0.
+        if get_rank() == 0:
+            model_file = run_name + ".network.pth"
+            iscaler_file = run_name + ".iscaler.pkl"
+            oscaler_file = run_name + ".oscaler.pkl"
+            params_file = run_name + ".params.json"
+            if save_runner:
+                optimizer_file = run_name + ".optimizer.pth"
 
-        self.parameters_full.save(os.path.join(save_path, params_file))
-        if self.parameters_full.use_ddp:
-            self.network.module.save_network(
-                os.path.join(save_path, model_file)
+            self.parameters_full.save(os.path.join(save_path, params_file))
+            if self.parameters_full.use_ddp:
+                self.network.module.save_network(
+                    os.path.join(save_path, model_file)
+                )
+            else:
+                self.network.save_network(os.path.join(save_path, model_file))
+            self.data.input_data_scaler.save(
+                os.path.join(save_path, iscaler_file)
             )
-        else:
-            self.network.save_network(os.path.join(save_path, model_file))
-        self.data.input_data_scaler.save(os.path.join(save_path, iscaler_file))
-        self.data.output_data_scaler.save(
-            os.path.join(save_path, oscaler_file)
-        )
+            self.data.output_data_scaler.save(
+                os.path.join(save_path, oscaler_file)
+            )
 
-        files = [model_file, iscaler_file, oscaler_file, params_file]
-        if save_runner:
-            files += [optimizer_file]
-        if zip_run:
-            if additional_calculation_data is not None:
-                additional_calculation_file = run_name + ".info.json"
-                if isinstance(additional_calculation_data, str):
-                    self.data.target_calculator.read_additional_calculation_data(
-                        additional_calculation_data
-                    )
-                    self.data.target_calculator.write_additional_calculation_data(
-                        os.path.join(save_path, additional_calculation_file)
-                    )
-                elif isinstance(additional_calculation_data, bool):
-                    if additional_calculation_data:
+            files = [model_file, iscaler_file, oscaler_file, params_file]
+            if save_runner:
+                files += [optimizer_file]
+            if zip_run:
+                if additional_calculation_data is not None:
+                    additional_calculation_file = run_name + ".info.json"
+                    if isinstance(additional_calculation_data, str):
+                        self.data.target_calculator.read_additional_calculation_data(
+                            additional_calculation_data
+                        )
                         self.data.target_calculator.write_additional_calculation_data(
                             os.path.join(
                                 save_path, additional_calculation_file
                             )
                         )
+                    elif isinstance(additional_calculation_data, bool):
+                        if additional_calculation_data:
+                            self.data.target_calculator.write_additional_calculation_data(
+                                os.path.join(
+                                    save_path, additional_calculation_file
+                                )
+                            )
 
-                files.append(additional_calculation_file)
-            with ZipFile(
-                os.path.join(save_path, run_name + ".zip"),
-                "w",
-                compression=ZIP_STORED,
-            ) as zip_obj:
-                for file in files:
-                    zip_obj.write(os.path.join(save_path, file), file)
-                    os.remove(os.path.join(save_path, file))
+                    files.append(additional_calculation_file)
+                with ZipFile(
+                    os.path.join(save_path, run_name + ".zip"),
+                    "w",
+                    compression=ZIP_STORED,
+                ) as zip_obj:
+                    for file in files:
+                        zip_obj.write(os.path.join(save_path, file), file)
+                        os.remove(os.path.join(save_path, file))
 
     @classmethod
     def load_run(
