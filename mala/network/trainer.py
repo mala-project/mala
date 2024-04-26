@@ -45,7 +45,7 @@ class Trainer(Runner):
         super(Trainer, self).__init__(params, network, data)
 
         if self.parameters_full.use_ddp:
-            print("wrapping model in ddp..")
+            printout("DDP activated, wrapping model in DDP.", min_verbosity=1)
             # JOSHR: using streams here to maintain compatibility with
             # graph capture
             s = torch.cuda.Stream()
