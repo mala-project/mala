@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import torch.distributed as dist
 
+import mala
 from mala.common.parallelizer import get_rank
 from mala.common.parameters import ParametersRunning
 from mala.network.network import Network
@@ -145,6 +146,7 @@ class Runner:
         prepare_data=False,
         load_with_mpi=None,
         load_with_gpu=None,
+        load_with_ddp=None,
     ):
         """
         Load a run.
@@ -231,7 +233,13 @@ class Runner:
                 path, run_name + ".params." + params_format
             )
 
-        loaded_params = Parameters.load_from_json(loaded_params)
+        # Neither Predictor nor Runner classes can work with DDP.
+        if cls is mala.Trainer:
+            loaded_params = Parameters.load_from_json(loaded_params)
+        else:
+            loaded_params = Parameters.load_from_json(
+                loaded_params, force_no_ddp=True
+            )
 
         # MPI has to be specified upon loading, in contrast to GPU.
         if load_with_mpi is not None:

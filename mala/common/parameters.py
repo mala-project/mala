@@ -1543,7 +1543,9 @@ class Parameters:
         self.hyperparameters._update_device(device_temp)
 
     @classmethod
-    def load_from_file(cls, file, save_format="json", no_snapshots=False):
+    def load_from_file(
+        cls, file, save_format="json", no_snapshots=False, force_no_ddp=False
+    ):
         """
         Load a Parameters object from a file.
 
@@ -1598,7 +1600,10 @@ class Parameters:
                     not isinstance(json_dict[key], dict)
                     or key == "openpmd_configuration"
                 ):
-                    setattr(loaded_parameters, key, json_dict[key])
+                    if key == "use_ddp" and force_no_ddp is True:
+                        setattr(loaded_parameters, key, False)
+                    else:
+                        setattr(loaded_parameters, key, json_dict[key])
             if no_snapshots is True:
                 loaded_parameters.data.snapshot_directories_list = []
         else:
@@ -1631,7 +1636,7 @@ class Parameters:
         )
 
     @classmethod
-    def load_from_json(cls, file, no_snapshots=False):
+    def load_from_json(cls, file, no_snapshots=False, force_no_ddp=False):
         """
         Load a Parameters object from a json file.
 
@@ -1651,5 +1656,8 @@ class Parameters:
 
         """
         return Parameters.load_from_file(
-            file, save_format="json", no_snapshots=no_snapshots
+            file,
+            save_format="json",
+            no_snapshots=no_snapshots,
+            force_no_ddp=force_no_ddp,
         )
