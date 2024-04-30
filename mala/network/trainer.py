@@ -652,35 +652,32 @@ class Trainer(Runner):
             if self.data.parameters.use_lazy_loading:
                 do_shuffle = False
 
-            if self.parameters_full.use_distributed_sampler_train:
-                self.train_sampler = (
-                    torch.utils.data.distributed.DistributedSampler(
-                        self.data.training_data_sets[0],
-                        num_replicas=dist.get_world_size(),
-                        rank=dist.get_rank(),
-                        shuffle=do_shuffle,
-                    )
+            self.train_sampler = (
+                torch.utils.data.distributed.DistributedSampler(
+                    self.data.training_data_sets[0],
+                    num_replicas=dist.get_world_size(),
+                    rank=dist.get_rank(),
+                    shuffle=do_shuffle,
                 )
-            if self.parameters_full.use_distributed_sampler_val:
-                self.validation_sampler = (
+            )
+            self.validation_sampler = (
+                torch.utils.data.distributed.DistributedSampler(
+                    self.data.validation_data_sets[0],
+                    num_replicas=dist.get_world_size(),
+                    rank=dist.get_rank(),
+                    shuffle=False,
+                )
+            )
+
+            if self.data.test_data_sets:
+                self.test_sampler = (
                     torch.utils.data.distributed.DistributedSampler(
-                        self.data.validation_data_sets[0],
+                        self.data.test_data_sets[0],
                         num_replicas=dist.get_world_size(),
                         rank=dist.get_rank(),
                         shuffle=False,
                     )
                 )
-
-            if self.parameters_full.use_distributed_sampler_test:
-                if self.data.test_data_sets:
-                    self.test_sampler = (
-                        torch.utils.data.distributed.DistributedSampler(
-                            self.data.test_data_sets[0],
-                            num_replicas=dist.get_world_size(),
-                            rank=dist.get_rank(),
-                            shuffle=False,
-                        )
-                    )
 
         # Instantiate the learning rate scheduler, if necessary.
         if self.parameters.learning_rate_scheduler == "ReduceLROnPlateau":

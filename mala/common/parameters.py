@@ -1208,9 +1208,6 @@ class Parameters:
         # Properties
         self.use_gpu = False
         self.use_ddp = False
-        self.use_distributed_sampler_train = True
-        self.use_distributed_sampler_val = True
-        self.use_distributed_sampler_test = True
         self.use_mpi = False
         self.verbosity = 1
         self.device = "cpu"
@@ -1299,36 +1296,6 @@ class Parameters:
     def use_ddp(self):
         """Control whether or not dd is used for parallel training."""
         return self._use_ddp
-
-    @property
-    def use_distributed_sampler_train(self):
-        """Control wether or not distributed sampler is used to distribute training data."""
-        return self._use_distributed_sampler_train
-
-    @use_distributed_sampler_train.setter
-    def use_distributed_sampler_train(self, value):
-        """Control whether or not distributed sampler is used to distribute training data."""
-        self._use_distributed_sampler_train = value
-
-    @property
-    def use_distributed_sampler_val(self):
-        """Control whether or not distributed sampler is used to distribute validation data."""
-        return self._use_distributed_sampler_val
-
-    @use_distributed_sampler_val.setter
-    def use_distributed_sampler_val(self, value):
-        """Control whether or not distributed sampler is used to distribute validation data."""
-        self._use_distributed_sampler_val = value
-
-    @property
-    def use_distributed_sampler_test(self):
-        """Control whether or not distributed sampler is used to distribute test data."""
-        return self._use_distributed_sampler_test
-
-    @use_distributed_sampler_test.setter
-    def use_distributed_sampler_test(self, value):
-        """Control whether or not distributed sampler is used to distribute test data."""
-        self._use_distributed_sampler_test = value
 
     @use_ddp.setter
     def use_ddp(self, value):
