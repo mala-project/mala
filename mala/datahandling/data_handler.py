@@ -666,7 +666,7 @@ class DataHandler(DataHandlerBase):
                         self.descriptor_calculator,
                         self.target_calculator,
                         self.use_ddp,
-                        self.parameters._configuration["device"]
+                        self.parameters._configuration["device"],
                         input_requires_grad=True,
                     )
                 )
