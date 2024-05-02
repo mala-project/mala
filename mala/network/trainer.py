@@ -14,6 +14,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from mala.common.parameters import printout
+from mala.common.parallelizer import get_local_rank
 from mala.datahandling.fast_tensor_dataset import FastTensorDataset
 from mala.network.runner import Runner
 from mala.datahandling.lazy_load_dataset_single import LazyLoadDatasetSingle
@@ -238,7 +239,9 @@ class Trainer(Runner):
             The trainer that was loaded from the file.
         """
         # First, load the checkpoint.
-        checkpoint = torch.load(file)
+        if params.use_ddp:
+            map_location = {"cuda:%d" % 0: "cuda:%d" % get_local_rank()}
+        checkpoint = torch.load(file, map_location=map_location)
 
         # Now, create the Trainer class with it.
         loaded_trainer = Trainer(
