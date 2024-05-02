@@ -157,7 +157,6 @@ class Trainer(Runner):
         params_format="json",
         load_runner=True,
         prepare_data=True,
-        load_with_ddp=None,
     ):
         """
         Load a run.
@@ -209,7 +208,7 @@ class Trainer(Runner):
             prepare_data=prepare_data,
             load_with_gpu=None,
             load_with_mpi=None,
-            load_with_ddp=load_with_ddp,
+            load_with_ddp=None,
         )
 
     @classmethod

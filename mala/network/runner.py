@@ -174,7 +174,7 @@ class Runner:
             If True, the data will be loaded into memory. This is needed when
             continuing a model training.
 
-        load_with_mpi : bool
+        load_with_mpi : bool or None
             Can be used to actively enable/disable MPI during loading.
             Default is None, so that the MPI parameters set during
             training/saving of the model are not overwritten.
@@ -182,7 +182,7 @@ class Runner:
             MPI already has to be activated here, if it was not activated
             during training!
 
-        load_with_gpu : bool
+        load_with_gpu : bool or None
             Can be used to actively enable/disable GPU during loading.
             Default is None, so that the GPU parameters set during
             training/saving of the model are not overwritten.
@@ -190,6 +190,14 @@ class Runner:
             it is advised that GPU usage is activated here, if it was not
             activated during training. Can also be used to activate a CPU
             based inference, by setting it to False.
+
+        load_with_ddp : bool or None
+            Can be used to actively disable DDP (pytorch distributed
+            data parallel used for parallel training) during loading.
+            Default is None, which for loading a Trainer object will not
+            interfere with DDP settings. For Predictor and Tester class,
+            this command will automatically disable DDP during loading,
+            as inference is using MPI rather than DDP for parallelization.
 
         Return
         ------
