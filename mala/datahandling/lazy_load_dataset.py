@@ -59,6 +59,7 @@ class LazyLoadDataset(Dataset):
         descriptor_calculator,
         target_calculator,
         use_ddp,
+        device,
         input_requires_grad=False,
     ):
         self.snapshot_list = []
@@ -79,6 +80,7 @@ class LazyLoadDataset(Dataset):
         self.use_ddp = use_ddp
         self.return_outputs_directly = False
         self.input_requires_grad = input_requires_grad
+        self.device = device
 
     @property
     def return_outputs_directly(self):
@@ -119,8 +121,13 @@ class LazyLoadDataset(Dataset):
         used_perm = torch.randperm(self.number_of_snapshots)
         barrier()
         if self.use_ddp:
+            used_perm.to(device=self.device)
             used_perm = dist.broadcast(used_perm, 0)
-        self.snapshot_list = [self.snapshot_list[i] for i in used_perm]
+            self.snapshot_list = [
+                self.snapshot_list[i] for i in used_perm.to("cpu")
+            ]
+        else:
+            self.snapshot_list = [self.snapshot_list[i] for i in used_perm]
         self.get_new_data(0)
 
     def get_new_data(self, file_index):
