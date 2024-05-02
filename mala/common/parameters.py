@@ -1300,7 +1300,8 @@ class Parameters:
     @use_ddp.setter
     def use_ddp(self, value):
         if value:
-            print("initializing torch.distributed.")
+            if self.verbosity > 1:
+                print("Initializing torch.distributed.")
             # JOSHR:
             # We start up torch distributed here. As is fairly standard
             # convention, we get the rank and world size arguments via
