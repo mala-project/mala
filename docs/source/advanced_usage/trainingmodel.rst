@@ -262,7 +262,8 @@ following setup was confirmed to work on an HPC cluster using the
         ...
 
         # This port can be arbitrarily chosen.
-        export MASTER_PORT=12342
+        # Given here is the torchrun default
+        export MASTER_PORT=29500
 
         # Find out the host node.
         echo "NODELIST="${SLURM_NODELIST}
@@ -270,10 +271,17 @@ following setup was confirmed to work on an HPC cluster using the
         export MASTER_ADDR=$master_addr
         echo "MASTER_ADDR="$MASTER_ADDR
 
-        # Run using torchrun.
-        torchrun --nnodes NUMBER_OF_NODES --nproc_per_node NUMBER_OF_TASKS_PER_NODE --rdzv_id "$SLURM_JOB_ID" training.py
+        # Run using srun.
+        srun -u bash -c '
+        # Export additional per process variables
+        export RANK=$SLURM_PROCID
+        export LOCAL_RANK=$SLURM_LOCALID
+        export WORLD_SIZE=$SLURM_NTASKS
 
-This script follows `this tutorial <https://gist.github.com/TengdaHan/1dd10d335c7ca6f13810fff41e809904>`_.
-A tutorial on DDP itself can be found `here <https://pytorch.org/tutorials/beginner/ddp_series_theory.html>`_.
+        python3 -u  training.py
+        '
+
+An overview of environment variables to be set can be found `in the official documentation <https://pytorch.org/docs/stable/distributed.html#environment-variable-initialization>`_.
+A general tutorial on DDP itself can be found `here <https://pytorch.org/tutorials/beginner/ddp_series_theory.html>`_.
 
 
