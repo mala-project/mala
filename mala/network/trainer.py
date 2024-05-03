@@ -240,7 +240,9 @@ class Trainer(Runner):
         # First, load the checkpoint.
         if params.use_ddp:
             map_location = {"cuda:%d" % 0: "cuda:%d" % get_local_rank()}
-        checkpoint = torch.load(file, map_location=map_location)
+            checkpoint = torch.load(file, map_location=map_location)
+        else:
+            checkpoint = torch.load(file)
 
         # Now, create the Trainer class with it.
         loaded_trainer = Trainer(
