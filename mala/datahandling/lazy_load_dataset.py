@@ -122,7 +122,7 @@ class LazyLoadDataset(Dataset):
         barrier()
         if self.use_ddp:
             used_perm = used_perm.to(device=self.device)
-            used_perm = dist.broadcast(used_perm, 0)
+            dist.broadcast(used_perm, 0)
             self.snapshot_list = [
                 self.snapshot_list[i] for i in used_perm.to("cpu")
             ]
