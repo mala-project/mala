@@ -115,8 +115,8 @@
 <span class="sd">    target_calculator : mala.targets.target.Target or derivative</span>
 <span class="sd">        Used to do unit conversion on output data.</span>
 
-<span class="sd">    use_horovod : bool</span>
-<span class="sd">        If true, it is assumed that horovod is used.</span>
+<span class="sd">    use_ddp : bool</span>
+<span class="sd">        If true, it is assumed that ddp is used.</span>
 
 <span class="sd">    input_requires_grad : bool</span>
 <span class="sd">        If True, then the gradient is stored for the inputs.</span>
@@ -132,7 +132,7 @@
         <span class="n">output_data_scaler</span><span class="p">,</span>
         <span class="n">descriptor_calculator</span><span class="p">,</span>
         <span class="n">target_calculator</span><span class="p">,</span>
-        <span class="n">use_horovod</span><span class="p">,</span>
+        <span class="n">use_ddp</span><span class="p">,</span>
         <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span> <span class="o">=</span> <span class="n">snapshot</span>
@@ -150,7 +150,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span> <span class="o">=</span> <span class="n">use_horovod</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span> <span class="o">=</span> <span class="n">use_ddp</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">return_outputs_directly</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_requires_grad</span> <span class="o">=</span> <span class="n">input_requires_grad</span>
 

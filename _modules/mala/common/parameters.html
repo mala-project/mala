@@ -83,19 +83,13 @@
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
 
-<span class="n">horovod_available</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
-
-    <span class="n">horovod_available</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-    <span class="k">pass</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.distributed</span> <span class="k">as</span> <span class="nn">dist</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">printout</span><span class="p">,</span>
-    <span class="n">set_horovod_status</span><span class="p">,</span>
+    <span class="n">set_ddp_status</span><span class="p">,</span>
     <span class="n">set_mpi_status</span><span class="p">,</span>
     <span class="n">get_rank</span><span class="p">,</span>
     <span class="n">get_local_rank</span><span class="p">,</span>
@@ -116,7 +110,7 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;gpu&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;horovod&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;ddp&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;mpi&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
             <span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">:</span> <span class="p">{},</span>
@@ -152,8 +146,8 @@
     <span class="k">def</span> <span class="nf">_update_gpu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_gpu</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_gpu</span>
 
-    <span class="k">def</span> <span class="nf">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_horovod</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;horovod&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_horovod</span>
+    <span class="k">def</span> <span class="nf">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ddp</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;ddp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_ddp</span>
 
     <span class="k">def</span> <span class="nf">_update_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_mpi</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_mpi</span>
@@ -762,10 +756,6 @@
 <span class="sd">        validation loss has to plateau before the schedule takes effect).</span>
 <span class="sd">        Default: 0.</span>
 
-<span class="sd">    use_compression : bool</span>
-<span class="sd">        If True and horovod is used, horovod compression will be used for</span>
-<span class="sd">        allreduce communication. This can improve performance.</span>
-
 <span class="sd">    num_workers : int</span>
 <span class="sd">        Number of workers to be used for data loading.</span>
 
@@ -826,7 +816,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_scheduler</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_decay</span> <span class="o">=</span> <span class="mf">0.1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_patience</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_compression</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_shuffling_for_samplers</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoints_each_epoch</span> <span class="o">=</span> <span class="mi">0</span>
@@ -842,8 +831,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">training_report_frequency</span> <span class="o">=</span> <span class="mi">1000</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">profiler_range</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># [1000, 2000]</span>
 
-    <span class="k">def</span> <span class="nf">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_horovod</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ParametersRunning</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="n">new_horovod</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ddp</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ParametersRunning</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_update_ddp</span><span class="p">(</span><span class="n">new_ddp</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">during_training_metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">during_training_metric</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">after_before_training_metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">after_before_training_metric</span>
 
@@ -865,10 +854,10 @@
     <span class="nd">@during_training_metric</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">during_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;ldos&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;horovod&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;ddp&quot;</span><span class="p">]:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                     <span class="s2">&quot;Currently, MALA can only operate with the &quot;</span>
-                    <span class="s1">&#39;&quot;ldos&quot; metric for horovod runs.&#39;</span>
+                    <span class="s1">&#39;&quot;ldos&quot; metric for ddp runs.&#39;</span>
                 <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_during_training_metric</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -890,20 +879,20 @@
     <span class="nd">@after_before_training_metric</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">after_before_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;ldos&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;horovod&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;ddp&quot;</span><span class="p">]:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                     <span class="s2">&quot;Currently, MALA can only operate with the &quot;</span>
-                    <span class="s1">&#39;&quot;ldos&quot; metric for horovod runs.&#39;</span>
+                    <span class="s1">&#39;&quot;ldos&quot; metric for ddp runs.&#39;</span>
                 <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_after_before_training_metric</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@during_training_metric</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">during_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;ldos&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;horovod&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;ddp&quot;</span><span class="p">]:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                     <span class="s2">&quot;Currently, MALA can only operate with the &quot;</span>
-                    <span class="s1">&#39;&quot;ldos&quot; metric for horovod runs.&#39;</span>
+                    <span class="s1">&#39;&quot;ldos&quot; metric for ddp runs.&#39;</span>
                 <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_during_training_metric</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -1294,7 +1283,7 @@
 
         <span class="c1"># Properties</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_gpu</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span>
@@ -1380,32 +1369,36 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_gpu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_gpu</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">use_horovod</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether or not horovod is used for parallel training.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_horovod</span>
+    <span class="k">def</span> <span class="nf">use_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether or not dd is used for parallel training.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_ddp</span>
 
-    <span class="nd">@use_horovod</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">use_horovod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_use_horovod</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">horovod_available</span><span class="p">:</span>
-                <span class="n">hvd</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
-                <span class="c1"># Invalidate, will be updated in setter.</span>
-                <span class="n">set_horovod_status</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_use_horovod</span> <span class="o">=</span> <span class="n">value</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_horovod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">parallel_warn</span><span class="p">(</span>
-                    <span class="s2">&quot;Horovod requested, but not installed found. &quot;</span>
-                    <span class="s2">&quot;MALA will operate without horovod only.&quot;</span>
-                <span class="p">)</span>
+    <span class="nd">@use_ddp</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">use_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Initializing torch.distributed.&quot;</span><span class="p">)</span>
+            <span class="c1"># JOSHR:</span>
+            <span class="c1"># We start up torch distributed here. As is fairly standard</span>
+            <span class="c1"># convention, we get the rank and world size arguments via</span>
+            <span class="c1"># environment variables (RANK, WORLD_SIZE). In addition to</span>
+            <span class="c1"># those variables, LOCAL_RANK, MASTER_ADDR and MASTER_PORT</span>
+            <span class="c1"># should be set.</span>
+            <span class="n">rank</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;RANK&quot;</span><span class="p">))</span>
+            <span class="n">world_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;WORLD_SIZE&quot;</span><span class="p">))</span>
+
+            <span class="n">dist</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span><span class="s2">&quot;nccl&quot;</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span> <span class="n">world_size</span><span class="o">=</span><span class="n">world_size</span><span class="p">)</span>
+
+        <span class="n">set_ddp_status</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="c1"># Invalidate, will be updated in setter.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_ddp</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1428,7 +1421,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether or not horovod is used for parallel training.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether or not MPI is used for paralle inference.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_mpi</span>
 
     <span class="nd">@use_mpi</span><span class="o">.</span><span class="n">setter</span>
@@ -1627,7 +1620,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_device</span><span class="p">(</span><span class="n">device_temp</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Parameters.load_from_file"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_no_ddp</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a Parameters object from a file.</span>
 
@@ -1682,7 +1677,10 @@
                     <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span>
                     <span class="ow">or</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;openpmd_configuration&quot;</span>
                 <span class="p">):</span>
-                    <span class="nb">setattr</span><span class="p">(</span><span class="n">loaded_parameters</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;use_ddp&quot;</span> <span class="ow">and</span> <span class="n">force_no_ddp</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="n">loaded_parameters</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="n">loaded_parameters</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">no_snapshots</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="n">loaded_parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">snapshot_directories_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1715,7 +1713,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Parameters.load_from_json"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_json">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">load_from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">load_from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_no_ddp</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a Parameters object from a json file.</span>
 
@@ -1735,7 +1733,10 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">load_from_file</span><span class="p">(</span>
-            <span class="n">file</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="n">no_snapshots</span>
+            <span class="n">file</span><span class="p">,</span>
+            <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
+            <span class="n">no_snapshots</span><span class="o">=</span><span class="n">no_snapshots</span><span class="p">,</span>
+            <span class="n">force_no_ddp</span><span class="o">=</span><span class="n">force_no_ddp</span><span class="p">,</span>
         <span class="p">)</span></div></div>
 </pre></div>
 

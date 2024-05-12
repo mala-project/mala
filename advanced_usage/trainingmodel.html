@@ -52,6 +52,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#checkpointing-a-training-run">Checkpointing a training run</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#using-lazy-loading">Using lazy loading</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#using-tensorboard">Using tensorboard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#training-in-parallel">Training in parallel</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="openpmd.html">Storing data with OpenPMD</a></li>
@@ -296,6 +297,66 @@ via</p>
 </div></blockquote>
 <p>The full path for <code class="docutils literal notranslate"><span class="pre">path_to_visualization</span></code> can be accessed via
 <code class="docutils literal notranslate"><span class="pre">trainer.full_visualization_path</span></code>.</p>
+</div>
+<div class="section" id="training-in-parallel">
+<h2>Training in parallel<a class="headerlink" href="#training-in-parallel" title="Permalink to this headline"></a></h2>
+<p>If large models or large data sets are employed, training may be slow even
+if a GPU is used. In this case, multiple GPUs can be employed with MALA
+using the <code class="docutils literal notranslate"><span class="pre">DistributedDataParallel</span></code> (DDP) formalism of the <code class="docutils literal notranslate"><span class="pre">torch</span></code> library.
+To use DDP, make sure you have <a class="reference external" href="https://developer.nvidia.com/nccl">NCCL</a>
+installed on your system.</p>
+<p>To activate and use DDP in MALA, almost no modification of your training script
+is necessary. Simply activate DDP in your <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> object. Make sure to
+also enable GPU, since parallel training is currently only supported on GPUs.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Parameters</span><span class="p">()</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">use_gpu</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">use_ddp</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>MALA is now set up for parallel training. DDP works across multiple compute
+nodes on HPC infrastructure as well as on a single machine hosting multiple
+GPUs. While essentially no modification of the python script is necessary, some
+modifications for calling the python script may be necessary, to ensure
+that DDP has all the information it needs for inter/intra-node communication.
+This setup <em>may</em> differ across machines/clusters. During testing, the
+following setup was confirmed to work on an HPC cluster using the
+<code class="docutils literal notranslate"><span class="pre">slurm</span></code> scheduler.</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#SBATCH --nodes=NUMBER_OF_NODES</span>
+<span class="c1">#SBATCH --ntasks-per-node=NUMBER_OF_TASKS_PER_NODE</span>
+<span class="c1">#SBATCH --gres=gpu:NUMBER_OF_TASKS_PER_NODE</span>
+<span class="c1"># Add more arguments as needed</span>
+...
+
+<span class="c1"># Load more modules as needed</span>
+...
+
+<span class="c1"># This port can be arbitrarily chosen.</span>
+<span class="c1"># Given here is the torchrun default</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">MASTER_PORT</span><span class="o">=</span><span class="m">29500</span>
+
+<span class="c1"># Find out the host node.</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;NODELIST=&quot;</span><span class="si">${</span><span class="nv">SLURM_NODELIST</span><span class="si">}</span>
+<span class="nv">master_addr</span><span class="o">=</span><span class="k">$(</span>scontrol<span class="w"> </span>show<span class="w"> </span>hostnames<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$SLURM_JOB_NODELIST</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="k">)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">MASTER_ADDR</span><span class="o">=</span><span class="nv">$master_addr</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;MASTER_ADDR=&quot;</span><span class="nv">$MASTER_ADDR</span>
+
+<span class="c1"># Run using srun.</span>
+srun<span class="w"> </span>-u<span class="w"> </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;</span>
+<span class="s1"># Export additional per process variables</span>
+<span class="s1">export RANK=$SLURM_PROCID</span>
+<span class="s1">export LOCAL_RANK=$SLURM_LOCALID</span>
+<span class="s1">export WORLD_SIZE=$SLURM_NTASKS</span>
+
+<span class="s1">python3 -u  training.py</span>
+<span class="s1">&#39;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>An overview of environment variables to be set can be found <a class="reference external" href="https://pytorch.org/docs/stable/distributed.html#environment-variable-initialization">in the official documentation</a>.
+A general tutorial on DDP itself can be found <a class="reference external" href="https://pytorch.org/tutorials/beginner/ddp_series_theory.html">here</a>.</p>
 </div>
 </div>
 

@@ -78,15 +78,13 @@
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
-<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-    <span class="k">pass</span>
 <span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.distributed</span> <span class="k">as</span> <span class="nn">dist</span>
 
-<span class="n">use_horovod</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">use_ddp</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="n">comm</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="n">local_mpi_rank</span> <span class="o">=</span> <span class="kc">None</span>
@@ -109,45 +107,43 @@
     <span class="n">current_verbosity</span> <span class="o">=</span> <span class="n">new_value</span></div>
 
 
-<div class="viewcode-block" id="set_horovod_status"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_horovod_status">[docs]</a><span class="k">def</span> <span class="nf">set_horovod_status</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
+<div class="viewcode-block" id="set_ddp_status"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_ddp_status">[docs]</a><span class="k">def</span> <span class="nf">set_ddp_status</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Set the horovod status.</span>
+<span class="sd">    Set the ddp status.</span>
 
-<span class="sd">    By setting the horovod status via this function it can be ensured that</span>
+<span class="sd">    By setting the ddp status via this function it can be ensured that</span>
 <span class="sd">    printing works in parallel. The Parameters class does that for the user.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    new_value : bool</span>
-<span class="sd">        Value the horovod status has.</span>
+<span class="sd">        Value the ddp status has.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">use_mpi</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">new_value</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-            <span class="s2">&quot;Cannot use horovod and inference-level MPI at &quot;</span>
-            <span class="s2">&quot;the same time yet.&quot;</span>
+            <span class="s2">&quot;Cannot use ddp and inference-level MPI at &quot;</span> <span class="s2">&quot;the same time yet.&quot;</span>
         <span class="p">)</span>
-    <span class="k">global</span> <span class="n">use_horovod</span>
-    <span class="n">use_horovod</span> <span class="o">=</span> <span class="n">new_value</span></div>
+    <span class="k">global</span> <span class="n">use_ddp</span>
+    <span class="n">use_ddp</span> <span class="o">=</span> <span class="n">new_value</span></div>
 
 
 <div class="viewcode-block" id="set_mpi_status"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_mpi_status">[docs]</a><span class="k">def</span> <span class="nf">set_mpi_status</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the MPI status.</span>
 
-<span class="sd">    By setting the horovod status via this function it can be ensured that</span>
+<span class="sd">    By setting the MPI status via this function it can be ensured that</span>
 <span class="sd">    printing works in parallel. The Parameters class does that for the user.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    new_value : bool</span>
-<span class="sd">        Value the horovod status has.</span>
+<span class="sd">        Value the MPI status has.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">use_horovod</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">new_value</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">use_ddp</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">new_value</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-            <span class="s2">&quot;Cannot use horovod and inference-level MPI at &quot;</span>
-            <span class="s2">&quot;the same time yet.&quot;</span>
+            <span class="s2">&quot;Cannot use ddp and inference-level MPI at &quot;</span> <span class="s2">&quot;the same time yet.&quot;</span>
         <span class="p">)</span>
     <span class="k">global</span> <span class="n">use_mpi</span>
     <span class="n">use_mpi</span> <span class="o">=</span> <span class="n">new_value</span>
@@ -195,8 +191,8 @@
 <span class="sd">        The rank of the current thread.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">use_horovod</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">hvd</span><span class="o">.</span><span class="n">rank</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">use_ddp</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">use_mpi</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span>
     <span class="k">return</span> <span class="mi">0</span></div>
@@ -235,8 +231,8 @@
 <span class="sd">    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER</span>
 <span class="sd">    DEALINGS IN THE SOFTWARE.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">use_horovod</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">hvd</span><span class="o">.</span><span class="n">local_rank</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">use_ddp</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;LOCAL_RANK&quot;</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">use_mpi</span><span class="p">:</span>
         <span class="k">global</span> <span class="n">local_mpi_rank</span>
         <span class="k">if</span> <span class="n">local_mpi_rank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -263,8 +259,8 @@
 <span class="sd">    size : int</span>
 <span class="sd">        The number of ranks.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">use_horovod</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">hvd</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">use_ddp</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">use_mpi</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_size</span><span class="p">()</span></div>
 
@@ -285,8 +281,8 @@
 
 <div class="viewcode-block" id="barrier"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.barrier">[docs]</a><span class="k">def</span> <span class="nf">barrier</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;General interface for a barrier.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">use_horovod</span><span class="p">:</span>
-        <span class="n">hvd</span><span class="o">.</span><span class="n">allreduce</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;barrier&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">use_ddp</span><span class="p">:</span>
+        <span class="n">dist</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">use_mpi</span><span class="p">:</span>
         <span class="n">comm</span><span class="o">.</span><span class="n">Barrier</span><span class="p">()</span>
     <span class="k">return</span></div>

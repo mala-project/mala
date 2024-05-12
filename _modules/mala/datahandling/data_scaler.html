@@ -77,14 +77,9 @@
 <span></span><span class="sd">&quot;&quot;&quot;DataScaler class for scaling DFT data.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">pickle</span>
-
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
-<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-    <span class="c1"># Warning is thrown by parameters class</span>
-    <span class="k">pass</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.distributed</span> <span class="k">as</span> <span class="nn">dist</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">printout</span>
 
@@ -110,13 +105,13 @@
 <span class="sd">        - &quot;feature-wise-normal&quot;: Row Min-Max scaling (Scale to be in range</span>
 <span class="sd">          0...1)</span>
 
-<span class="sd">    use_horovod : bool</span>
-<span class="sd">        If True, the DataScaler will use horovod to check that data is</span>
+<span class="sd">    use_ddp : bool</span>
+<span class="sd">        If True, the DataScaler will use ddp to check that data is</span>
 <span class="sd">        only saved on the root process in parallel execution.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">typestring</span><span class="p">,</span> <span class="n">use_horovod</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span> <span class="o">=</span> <span class="n">use_horovod</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">typestring</span><span class="p">,</span> <span class="n">use_ddp</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span> <span class="o">=</span> <span class="n">use_ddp</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">typestring</span> <span class="o">=</span> <span class="n">typestring</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span> <span class="o">=</span> <span class="kc">False</span>
@@ -485,9 +480,9 @@
 <span class="sd">        save_format :</span>
 <span class="sd">            File format which will be used for saving.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># If we use horovod, only save the network on root.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">hvd</span><span class="o">.</span><span class="n">rank</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># If we use ddp, only save the network on root.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span>
         <span class="k">if</span> <span class="n">save_format</span> <span class="o">==</span> <span class="s2">&quot;pickle&quot;</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>

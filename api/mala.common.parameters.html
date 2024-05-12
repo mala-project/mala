@@ -209,7 +209,7 @@ Can be used to make experiments comparable. Default: None.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.common.parameters.Parameters.load_from_file">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_file" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_no_ddp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_file" title="Permalink to this definition"></a></dt>
 <dd><p>Load a Parameters object from a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -232,7 +232,7 @@ performing inference/testing after training a network.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.common.parameters.Parameters.load_from_json">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.load_from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_json" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_no_ddp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.load_from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_json" title="Permalink to this definition"></a></dt>
 <dd><p>Load a Parameters object from a json file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -364,15 +364,15 @@ automatically be set to the feature dimension upon loading.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="mala.common.parameters.Parameters.use_gpu">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_gpu</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.use_gpu" title="Permalink to this definition"></a></dt>
-<dd><p>Control whether or not a GPU is used (provided there is one).</p>
+<dt class="sig sig-object py" id="mala.common.parameters.Parameters.use_ddp">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_ddp</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.use_ddp" title="Permalink to this definition"></a></dt>
+<dd><p>Control whether or not dd is used for parallel training.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="mala.common.parameters.Parameters.use_horovod">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_horovod</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.use_horovod" title="Permalink to this definition"></a></dt>
-<dd><p>Control whether or not horovod is used for parallel training.</p>
+<dt class="sig sig-object py" id="mala.common.parameters.Parameters.use_gpu">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_gpu</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.use_gpu" title="Permalink to this definition"></a></dt>
+<dd><p>Control whether or not a GPU is used (provided there is one).</p>
 </dd></dl>
 
 <dl class="py property">
@@ -384,7 +384,7 @@ automatically be set to the feature dimension upon loading.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.common.parameters.Parameters.use_mpi">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_mpi</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.use_mpi" title="Permalink to this definition"></a></dt>
-<dd><p>Control whether or not horovod is used for parallel training.</p>
+<dd><p>Control whether or not MPI is used for paralle inference.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1257,18 +1257,6 @@ Default: 0.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.use_compression">
-<span class="sig-name descname"><span class="pre">use_compression</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.use_compression" title="Permalink to this definition"></a></dt>
-<dd><p>If True and horovod is used, horovod compression will be used for
-allreduce communication. This can improve performance.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>

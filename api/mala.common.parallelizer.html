@@ -231,14 +231,14 @@ treated as high level messages and will be printed.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="mala.common.parallelizer.set_horovod_status">
-<span class="sig-name descname"><span class="pre">set_horovod_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#set_horovod_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.set_horovod_status" title="Permalink to this definition"></a></dt>
-<dd><p>Set the horovod status.</p>
-<p>By setting the horovod status via this function it can be ensured that
+<dt class="sig sig-object py" id="mala.common.parallelizer.set_ddp_status">
+<span class="sig-name descname"><span class="pre">set_ddp_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#set_ddp_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.set_ddp_status" title="Permalink to this definition"></a></dt>
+<dd><p>Set the ddp status.</p>
+<p>By setting the ddp status via this function it can be ensured that
 printing works in parallel. The Parameters class does that for the user.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>new_value</strong> (<em>bool</em>) – Value the horovod status has.</p>
+<dd class="field-odd"><p><strong>new_value</strong> (<em>bool</em>) – Value the ddp status has.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -261,11 +261,11 @@ end of the script.</p>
 <dt class="sig sig-object py" id="mala.common.parallelizer.set_mpi_status">
 <span class="sig-name descname"><span class="pre">set_mpi_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#set_mpi_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.set_mpi_status" title="Permalink to this definition"></a></dt>
 <dd><p>Set the MPI status.</p>
-<p>By setting the horovod status via this function it can be ensured that
+<p>By setting the MPI status via this function it can be ensured that
 printing works in parallel. The Parameters class does that for the user.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>new_value</strong> (<em>bool</em>) – Value the horovod status has.</p>
+<dd class="field-odd"><p><strong>new_value</strong> (<em>bool</em>) – Value the MPI status has.</p>
 </dd>
 </dl>
 </dd></dl>

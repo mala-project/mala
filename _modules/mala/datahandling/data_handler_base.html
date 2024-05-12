@@ -113,7 +113,7 @@
         <span class="n">descriptor_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span> <span class="n">ParametersData</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">use_horovod</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">use_ddp</span>
 
         <span class="c1"># Calculators used to parse data from compatible files.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">target_calculator</span>

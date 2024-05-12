@@ -109,7 +109,7 @@
 <p>DataScaler class for scaling DFT data.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataScaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typestring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_horovod</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataScaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typestring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_ddp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Scales input and output data.</p>
 <p>Sort of emulates the functionality of the scikit-learn library, but by
@@ -130,7 +130,7 @@ standard deviation 1)</p></li>
 0…1)</p></li>
 </ul>
 </p></li>
-<li><p><strong>use_horovod</strong> (<em>bool</em>) – If True, the DataScaler will use horovod to check that data is
+<li><p><strong>use_ddp</strong> (<em>bool</em>) – If True, the DataScaler will use ddp to check that data is
 only saved on the root process in parallel execution.</p></li>
 </ul>
 </dd>

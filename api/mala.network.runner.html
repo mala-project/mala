@@ -132,7 +132,7 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.runner.Runner.load_run">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_runner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepare_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_with_mpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_with_gpu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/runner.html#Runner.load_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.runner.Runner.load_run" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_runner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepare_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_with_mpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_with_gpu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_with_ddp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/runner.html#Runner.load_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.runner.Runner.load_run" title="Permalink to this definition"></a></dt>
 <dd><p>Load a run.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -146,19 +146,25 @@ Default is “json”.</p></li>
 <li><p><strong>load_runner</strong> (<em>bool</em>) – If True, a Runner object will be created/loaded for further use.</p></li>
 <li><p><strong>prepare_data</strong> (<em>bool</em>) – If True, the data will be loaded into memory. This is needed when
 continuing a model training.</p></li>
-<li><p><strong>load_with_mpi</strong> (<em>bool</em>) – Can be used to actively enable/disable MPI during loading.
+<li><p><strong>load_with_mpi</strong> (<em>bool</em><em> or </em><em>None</em>) – Can be used to actively enable/disable MPI during loading.
 Default is None, so that the MPI parameters set during
 training/saving of the model are not overwritten.
 If MPI is to be used in concert with GPU during training,
 MPI already has to be activated here, if it was not activated
 during training!</p></li>
-<li><p><strong>load_with_gpu</strong> (<em>bool</em>) – Can be used to actively enable/disable GPU during loading.
+<li><p><strong>load_with_gpu</strong> (<em>bool</em><em> or </em><em>None</em>) – Can be used to actively enable/disable GPU during loading.
 Default is None, so that the GPU parameters set during
 training/saving of the model are not overwritten.
 If MPI is to be used in concert with GPU during training,
 it is advised that GPU usage is activated here, if it was not
 activated during training. Can also be used to activate a CPU
 based inference, by setting it to False.</p></li>
+<li><p><strong>load_with_ddp</strong> (<em>bool</em><em> or </em><em>None</em>) – Can be used to actively disable DDP (pytorch distributed
+data parallel used for parallel training) during loading.
+Default is None, which for loading a Trainer object will not
+interfere with DDP settings. For Predictor and Tester class,
+this command will automatically disable DDP during loading,
+as inference is using MPI rather than DDP for parallelization.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

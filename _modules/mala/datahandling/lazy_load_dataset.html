@@ -78,13 +78,9 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
-<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-    <span class="c1"># Warning is thrown by Parameters class.</span>
-    <span class="k">pass</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.distributed</span> <span class="k">as</span> <span class="nn">dist</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">barrier</span>
@@ -123,8 +119,8 @@
 <span class="sd">    target_calculator : mala.targets.target.Target or derivative</span>
 <span class="sd">        Used to do unit conversion on output data.</span>
 
-<span class="sd">    use_horovod : bool</span>
-<span class="sd">        If true, it is assumed that horovod is used.</span>
+<span class="sd">    use_ddp : bool</span>
+<span class="sd">        If true, it is assumed that ddp is used.</span>
 
 <span class="sd">    input_requires_grad : bool</span>
 <span class="sd">        If True, then the gradient is stored for the inputs.</span>
@@ -138,7 +134,8 @@
         <span class="n">output_data_scaler</span><span class="p">,</span>
         <span class="n">descriptor_calculator</span><span class="p">,</span>
         <span class="n">target_calculator</span><span class="p">,</span>
-        <span class="n">use_horovod</span><span class="p">,</span>
+        <span class="n">use_ddp</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">,</span>
         <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -156,9 +153,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span> <span class="o">=</span> <span class="n">use_horovod</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span> <span class="o">=</span> <span class="n">use_ddp</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">return_outputs_directly</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_requires_grad</span> <span class="o">=</span> <span class="n">input_requires_grad</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">return_outputs_directly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -198,9 +196,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">used_perm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span><span class="p">)</span>
         <span class="n">barrier</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
-            <span class="n">used_perm</span> <span class="o">=</span> <span class="n">hvd</span><span class="o">.</span><span class="n">broadcast</span><span class="p">(</span><span class="n">used_perm</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">used_perm</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+            <span class="n">used_perm</span> <span class="o">=</span> <span class="n">used_perm</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">dist</span><span class="o">.</span><span class="n">broadcast</span><span class="p">(</span><span class="n">used_perm</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">used_perm</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">used_perm</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_new_data</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="LazyLoadDataset.get_new_data"><a class="viewcode-back" href="../../../api/mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_new_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_index</span><span class="p">):</span>

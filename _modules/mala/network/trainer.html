@@ -81,18 +81,16 @@
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
-<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-    <span class="c1"># Warning is thrown by Parameters class</span>
-    <span class="k">pass</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.distributed</span> <span class="k">as</span> <span class="nn">dist</span>
+<span class="kn">from</span> <span class="nn">torch.nn.parallel</span> <span class="kn">import</span> <span class="n">DistributedDataParallel</span> <span class="k">as</span> <span class="n">DDP</span>
 <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">optim</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">torch.utils.tensorboard</span> <span class="kn">import</span> <span class="n">SummaryWriter</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">printout</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_local_rank</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.fast_tensor_dataset</span> <span class="kn">import</span> <span class="n">FastTensorDataset</span>
 <span class="kn">from</span> <span class="nn">mala.network.runner</span> <span class="kn">import</span> <span class="n">Runner</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.lazy_load_dataset_single</span> <span class="kn">import</span> <span class="n">LazyLoadDatasetSingle</span>
@@ -122,6 +120,16 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">optimizer_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># copy the parameters into the class.</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Trainer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;DDP activated, wrapping model in DDP.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># JOSHR: using streams here to maintain compatibility with</span>
+            <span class="c1"># graph capture</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
+            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">stream</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">DDP</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">)</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_stream</span><span class="p">()</span><span class="o">.</span><span class="n">wait_stream</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">final_test_loss</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_test_loss</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">final_validation_loss</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
@@ -135,7 +143,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loaders</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loaders</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="c1"># Samplers for the horovod case.</span>
+        <span class="c1"># Samplers for the ddp case.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">test_sampler</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">validation_sampler</span> <span class="o">=</span> <span class="kc">None</span>
@@ -274,6 +282,9 @@
             <span class="n">params_format</span><span class="o">=</span><span class="n">params_format</span><span class="p">,</span>
             <span class="n">load_runner</span><span class="o">=</span><span class="n">load_runner</span><span class="p">,</span>
             <span class="n">prepare_data</span><span class="o">=</span><span class="n">prepare_data</span><span class="p">,</span>
+            <span class="n">load_with_gpu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">load_with_mpi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">load_with_ddp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span></div>
 
     <span class="nd">@classmethod</span>
@@ -303,7 +314,11 @@
 <span class="sd">            The trainer that was loaded from the file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># First, load the checkpoint.</span>
-        <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+            <span class="n">map_location</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cuda:</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;cuda:</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">get_local_rank</span><span class="p">()}</span>
+            <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">map_location</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 
         <span class="c1"># Now, create the Trainer class with it.</span>
         <span class="n">loaded_trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span>
@@ -332,11 +347,17 @@
             <span class="p">)</span>
 
         <span class="c1"># Collect and average all the losses from all the devices</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
-            <span class="n">vloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span><span class="n">vloss</span><span class="p">,</span> <span class="s2">&quot;average_loss&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+            <span class="n">vloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span>
+                <span class="n">vloss</span><span class="p">,</span> <span class="s2">&quot;average_loss&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">initial_validation_loss</span> <span class="o">=</span> <span class="n">vloss</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">tloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span><span class="n">tloss</span><span class="p">,</span> <span class="s2">&quot;average_loss&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">:</span>
+                <span class="n">tloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span>
+                    <span class="n">tloss</span><span class="p">,</span>
+                    <span class="s2">&quot;average_loss&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">initial_test_loss</span> <span class="o">=</span> <span class="n">tloss</span>
 
         <span class="n">printout</span><span class="p">(</span>
@@ -377,7 +398,7 @@
             <span class="p">)</span>
 
             <span class="c1"># train sampler</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span><span class="o">.</span><span class="n">set_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
 
             <span class="c1"># shuffle dataset if necessary</span>
@@ -482,8 +503,12 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">during_training_metric</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
-                <span class="n">vloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span><span class="n">vloss</span><span class="p">,</span> <span class="s2">&quot;average_loss&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+                <span class="n">vloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span>
+                    <span class="n">vloss</span><span class="p">,</span>
+                    <span class="s2">&quot;average_loss&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">printout</span><span class="p">(</span>
                     <span class="s2">&quot;Epoch </span><span class="si">{0}</span><span class="s2">: validation data loss: </span><span class="si">{1}</span><span class="s2">, &quot;</span>
@@ -602,8 +627,12 @@
                 <span class="s2">&quot;validation&quot;</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">after_before_training_metric</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
-                <span class="n">vloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span><span class="n">vloss</span><span class="p">,</span> <span class="s2">&quot;average_loss&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+                <span class="n">vloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span>
+                    <span class="n">vloss</span><span class="p">,</span>
+                    <span class="s2">&quot;average_loss&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
 
         <span class="c1"># Calculate final loss.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">final_validation_loss</span> <span class="o">=</span> <span class="n">vloss</span>
@@ -616,8 +645,12 @@
                 <span class="s2">&quot;test&quot;</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">after_before_training_metric</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
-                <span class="n">tloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span><span class="n">tloss</span><span class="p">,</span> <span class="s2">&quot;average_loss&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+                <span class="n">tloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span>
+                    <span class="n">tloss</span><span class="p">,</span>
+                    <span class="s2">&quot;average_loss&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
             <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Final test data loss: &quot;</span><span class="p">,</span> <span class="n">tloss</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">final_test_loss</span> <span class="o">=</span> <span class="n">tloss</span>
 
@@ -642,16 +675,16 @@
         <span class="k">if</span> <span class="n">optimizer_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">=</span> <span class="n">optimizer_dict</span><span class="p">[</span><span class="s2">&quot;epoch&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
 
-        <span class="c1"># Scale the learning rate according to horovod.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">hvd</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># Scale the learning rate according to ddp.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">printout</span><span class="p">(</span>
                     <span class="s2">&quot;Rescaling learning rate because multiple workers are&quot;</span>
                     <span class="s2">&quot; used for training.&quot;</span><span class="p">,</span>
                     <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">*</span> <span class="n">hvd</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">*</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span>
                 <span class="p">)</span>
 
         <span class="c1"># Choose an optimizer to use.</span>
@@ -690,15 +723,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">patience_counter</span> <span class="o">=</span> <span class="n">optimizer_dict</span><span class="p">[</span><span class="s2">&quot;early_stopping_counter&quot;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">last_loss</span> <span class="o">=</span> <span class="n">optimizer_dict</span><span class="p">[</span><span class="s2">&quot;early_stopping_last_loss&quot;</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
             <span class="c1"># scaling the batch size for multiGPU per node</span>
             <span class="c1"># self.batch_size= self.batch_size*hvd.local_size()</span>
-
-            <span class="n">compression</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">hvd</span><span class="o">.</span><span class="n">Compression</span><span class="o">.</span><span class="n">fp16</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">use_compression</span>
-                <span class="k">else</span> <span class="n">hvd</span><span class="o">.</span><span class="n">Compression</span><span class="o">.</span><span class="n">none</span>
-            <span class="p">)</span>
 
             <span class="c1"># If lazy loading is used we do not shuffle the data points on</span>
             <span class="c1"># their own, but rather shuffle them</span>
@@ -712,17 +739,16 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">DistributedSampler</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                    <span class="n">num_replicas</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span>
-                    <span class="n">rank</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">rank</span><span class="p">(),</span>
+                    <span class="n">num_replicas</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">(),</span>
+                    <span class="n">rank</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">(),</span>
                     <span class="n">shuffle</span><span class="o">=</span><span class="n">do_shuffle</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-
             <span class="bp">self</span><span class="o">.</span><span class="n">validation_sampler</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">DistributedSampler</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                    <span class="n">num_replicas</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span>
-                    <span class="n">rank</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">rank</span><span class="p">(),</span>
+                    <span class="n">num_replicas</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">(),</span>
+                    <span class="n">rank</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">(),</span>
                     <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -731,24 +757,11 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">test_sampler</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">DistributedSampler</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                        <span class="n">num_replicas</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span>
-                        <span class="n">rank</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">rank</span><span class="p">(),</span>
+                        <span class="n">num_replicas</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">(),</span>
+                        <span class="n">rank</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">(),</span>
                         <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
-
-            <span class="c1"># broadcaste parameters and optimizer state from root device to</span>
-            <span class="c1"># other devices</span>
-            <span class="n">hvd</span><span class="o">.</span><span class="n">broadcast_parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">root_rank</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-            <span class="n">hvd</span><span class="o">.</span><span class="n">broadcast_optimizer_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">root_rank</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-            <span class="c1"># Wraps the opimizer for multiGPU operation</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">hvd</span><span class="o">.</span><span class="n">DistributedOptimizer</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span>
-                <span class="n">named_parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">named_parameters</span><span class="p">(),</span>
-                <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
-                <span class="n">op</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">Average</span><span class="p">,</span>
-            <span class="p">)</span>
 
         <span class="c1"># Instantiate the learning rate scheduler, if necessary.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">learning_rate_scheduler</span> <span class="o">==</span> <span class="s2">&quot;ReduceLROnPlateau&quot;</span><span class="p">:</span>
@@ -776,7 +789,7 @@
         <span class="n">do_shuffle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_shuffling_for_samplers</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span>
-            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span>
         <span class="p">):</span>
             <span class="n">do_shuffle</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -872,9 +885,15 @@
                             <span class="n">enabled</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mixed_precision</span>
                         <span class="p">):</span>
                             <span class="n">prediction</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
-                            <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
-                                <span class="n">prediction</span><span class="p">,</span> <span class="n">target_data</span>
-                            <span class="p">)</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+                                <span class="c1"># JOSHR: We have to use &quot;module&quot; here to access custom method of DDP wrapped model</span>
+                                <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                                    <span class="n">prediction</span><span class="p">,</span> <span class="n">target_data</span>
+                                <span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                                    <span class="n">prediction</span><span class="p">,</span> <span class="n">target_data</span>
+                                <span class="p">)</span>
 
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
@@ -890,7 +909,7 @@
 
                 <span class="c1"># Capture graph</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">train_graph</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">CUDAGraph</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">(</span><span class="n">set_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">network</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">(</span><span class="n">set_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_graph</span><span class="p">):</span>
                     <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">amp</span><span class="o">.</span><span class="n">autocast</span><span class="p">(</span>
                         <span class="n">enabled</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mixed_precision</span>
@@ -899,9 +918,14 @@
                             <span class="bp">self</span><span class="o">.</span><span class="n">static_input_data</span>
                         <span class="p">)</span>
 
-                        <span class="bp">self</span><span class="o">.</span><span class="n">static_loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">static_prediction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_target_data</span>
-                        <span class="p">)</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">static_loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">static_prediction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_target_data</span>
+                            <span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">static_loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">static_prediction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_target_data</span>
+                            <span class="p">)</span>
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_loss</span><span class="p">)</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
@@ -927,7 +951,12 @@
                     <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
 
                     <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;loss&quot;</span><span class="p">)</span>
-                    <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target_data</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+                        <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                            <span class="n">prediction</span><span class="p">,</span> <span class="n">target_data</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target_data</span><span class="p">)</span>
                     <span class="c1"># loss</span>
                     <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
 
@@ -950,7 +979,10 @@
                 <span class="k">return</span> <span class="n">loss</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">prediction</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
-            <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target_data</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target_data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target_data</span><span class="p">)</span>
             <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
@@ -1026,9 +1058,14 @@
                                             <span class="n">enabled</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mixed_precision</span>
                                         <span class="p">):</span>
                                             <span class="n">prediction</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-                                            <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
-                                                <span class="n">prediction</span><span class="p">,</span> <span class="n">y</span>
-                                            <span class="p">)</span>
+                                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+                                                <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                                                    <span class="n">prediction</span><span class="p">,</span> <span class="n">y</span>
+                                                <span class="p">)</span>
+                                            <span class="k">else</span><span class="p">:</span>
+                                                <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                                                    <span class="n">prediction</span><span class="p">,</span> <span class="n">y</span>
+                                                <span class="p">)</span>
                                 <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_stream</span><span class="p">(</span>
                                     <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
                                 <span class="p">)</span><span class="o">.</span><span class="n">wait_stream</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
@@ -1052,10 +1089,16 @@
                                                 <span class="bp">self</span><span class="o">.</span><span class="n">static_input_validation</span>
                                             <span class="p">)</span>
                                         <span class="p">)</span>
-                                        <span class="bp">self</span><span class="o">.</span><span class="n">static_loss_validation</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
-                                            <span class="bp">self</span><span class="o">.</span><span class="n">static_prediction_validation</span><span class="p">,</span>
-                                            <span class="bp">self</span><span class="o">.</span><span class="n">static_target_validation</span><span class="p">,</span>
-                                        <span class="p">)</span>
+                                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">static_loss_validation</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">static_prediction_validation</span><span class="p">,</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">static_target_validation</span><span class="p">,</span>
+                                            <span class="p">)</span>
+                                        <span class="k">else</span><span class="p">:</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">static_loss_validation</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">static_prediction_validation</span><span class="p">,</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">static_target_validation</span><span class="p">,</span>
+                                            <span class="p">)</span>
 
                             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_graph</span><span class="p">:</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">static_input_validation</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -1069,9 +1112,14 @@
                                     <span class="n">enabled</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mixed_precision</span>
                                 <span class="p">):</span>
                                     <span class="n">prediction</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-                                    <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
-                                        <span class="n">prediction</span><span class="p">,</span> <span class="n">y</span>
-                                    <span class="p">)</span>
+                                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+                                        <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                                            <span class="n">prediction</span><span class="p">,</span> <span class="n">y</span>
+                                        <span class="p">)</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                                            <span class="n">prediction</span><span class="p">,</span> <span class="n">y</span>
+                                        <span class="p">)</span>
                                     <span class="n">validation_loss_sum</span> <span class="o">+=</span> <span class="n">loss</span>
                             <span class="k">if</span> <span class="p">(</span>
                                 <span class="n">batchid</span> <span class="o">!=</span> <span class="mi">0</span>
@@ -1103,9 +1151,16 @@
                             <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
                             <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
                             <span class="n">prediction</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-                            <span class="n">validation_loss_sum</span> <span class="o">+=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
-                                <span class="n">prediction</span><span class="p">,</span> <span class="n">y</span>
-                            <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+                                <span class="n">validation_loss_sum</span> <span class="o">+=</span> <span class="p">(</span>
+                                    <span class="n">network</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                                        <span class="n">prediction</span><span class="p">,</span> <span class="n">y</span>
+                                    <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                                <span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">validation_loss_sum</span> <span class="o">+=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                                    <span class="n">prediction</span><span class="p">,</span> <span class="n">y</span>
+                                <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
                             <span class="n">batchid</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="n">validation_loss</span> <span class="o">=</span> <span class="n">validation_loss_sum</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> <span class="n">batchid</span>
@@ -1265,8 +1320,8 @@
 
         <span class="c1"># Next, we save all the other objects.</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">hvd</span><span class="o">.</span><span class="n">rank</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">save_dict</span> <span class="o">=</span> <span class="p">{</span>
@@ -1290,10 +1345,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">save_run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">save_runner</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__average_validation</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__average_validation</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Average validation over multiple parallel processes.&quot;&quot;&quot;</span>
-        <span class="n">tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-        <span class="n">avg_loss</span> <span class="o">=</span> <span class="n">hvd</span><span class="o">.</span><span class="n">allreduce</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">Average</span><span class="p">)</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">dist</span><span class="o">.</span><span class="n">all_reduce</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+        <span class="n">avg_loss</span> <span class="o">=</span> <span class="n">tensor</span> <span class="o">/</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">avg_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span></div>
 </pre></div>
 
