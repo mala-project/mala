@@ -1,14 +1,9 @@
 """DataScaler class for scaling DFT data."""
 
 import pickle
-
-try:
-    import horovod.torch as hvd
-except ModuleNotFoundError:
-    # Warning is thrown by parameters class
-    pass
 import numpy as np
 import torch
+import torch.distributed as dist
 
 from mala.common.parameters import printout
 
@@ -34,13 +29,13 @@ class DataScaler:
         - "feature-wise-normal": Row Min-Max scaling (Scale to be in range
           0...1)
 
-    use_horovod : bool
-        If True, the DataScaler will use horovod to check that data is
+    use_ddp : bool
+        If True, the DataScaler will use ddp to check that data is
         only saved on the root process in parallel execution.
     """
 
-    def __init__(self, typestring, use_horovod=False):
-        self.use_horovod = use_horovod
+    def __init__(self, typestring, use_ddp=False):
+        self.use_ddp = use_ddp
         self.typestring = typestring
         self.scale_standard = False
         self.scale_normal = False
@@ -409,9 +404,9 @@ class DataScaler:
         save_format :
             File format which will be used for saving.
         """
-        # If we use horovod, only save the network on root.
-        if self.use_horovod:
-            if hvd.rank() != 0:
+        # If we use ddp, only save the network on root.
+        if self.use_ddp:
+            if dist.get_rank() != 0:
                 return
         if save_format == "pickle":
             with open(filename, "wb") as handle:

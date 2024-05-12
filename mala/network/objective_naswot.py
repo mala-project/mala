@@ -76,7 +76,7 @@ class ObjectiveNASWOT(ObjectiveBase):
             do_shuffle = self.params.running.use_shuffling_for_samplers
             if (
                 self.data_handler.parameters.use_lazy_loading
-                or self.params.use_horovod
+                or self.params.use_ddp
             ):
                 do_shuffle = False
             if self.params.running.use_shuffling_for_samplers:
