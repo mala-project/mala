@@ -272,7 +272,7 @@ following setup was confirmed to work on an HPC cluster using the
         echo "MASTER_ADDR="$MASTER_ADDR
 
         # Run using srun.
-        srun -u bash -c '
+        srun -N NUMBER_OF_NODES -u bash -c '
         # Export additional per process variables
         export RANK=$SLURM_PROCID
         export LOCAL_RANK=$SLURM_LOCALID

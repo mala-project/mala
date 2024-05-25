@@ -344,7 +344,7 @@ following setup was confirmed to work on an HPC cluster using the
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;MASTER_ADDR=&quot;</span><span class="nv">$MASTER_ADDR</span>
 
 <span class="c1"># Run using srun.</span>
-srun<span class="w"> </span>-u<span class="w"> </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;</span>
+srun<span class="w"> </span>-N<span class="w"> </span>NUMBER_OF_NODES<span class="w"> </span>-u<span class="w"> </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;</span>
 <span class="s1"># Export additional per process variables</span>
 <span class="s1">export RANK=$SLURM_PROCID</span>
 <span class="s1">export LOCAL_RANK=$SLURM_LOCALID</span>
