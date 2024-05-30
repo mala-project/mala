@@ -10,6 +10,6 @@ jobs:
       - name: mala_conda_cpu
         uses: actions/delete-package-versions@v5
         with:
-          package_name: 'mala_conda_cpu'
-          package_type: 'container'
+          package-name: 'mala_conda_cpu'
+          package-type: 'container'
           delete-only-untagged-versions: 'true'
