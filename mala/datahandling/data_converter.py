@@ -10,8 +10,8 @@ from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
 from mala.version import __version__ as mala_version
 
-descriptor_input_types = ["espresso-out"]
-target_input_types = [".cube", ".xsf"]
+descriptor_input_types = ["espresso-out", "openpmd"]
+target_input_types = [".cube", ".xsf", "openpmd"]
 additional_info_input_types = ["espresso-out"]
 
 
@@ -546,6 +546,16 @@ class DataConverter:
                     snapshot["input"], **descriptor_calculation_kwargs
                 )
             )
+            print(tmp_input)
+            print(tmp_input.shape)
+            print(local_size)
+
+        elif description["input"] == "openpmd":
+            tmp_input = self.descriptor_calculator.read_from_openpmd_file(
+                snapshot["input"]
+            )
+            print(tmp_input)
+            print(tmp_input.shape)
 
         elif description["input"] is None:
             # In this case, only the output is processed.
@@ -616,6 +626,9 @@ class DataConverter:
                     tmp_output = self.target_calculator.read_from_xsf(
                         snapshot["output"], **target_calculator_kwargs
                     )
+
+                elif description["output"] == "openpmd":
+                    raise RuntimeError("unimplemented!")
 
                 elif description["output"] is None:
                     # In this case, only the input is processed.
