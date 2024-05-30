@@ -134,9 +134,12 @@ class AtomicDensity(Descriptor):
 
         use_fp64 = kwargs.get("use_fp64", False)
         return_directly = kwargs.get("return_directly", False)
+        keep_logs = kwargs.get("keep_logs", False)
 
         lammps_format = "lammps-data"
-        ase_out_path = os.path.join(outdir, "lammps_input.tmp")
+        ase_out_path = os.path.join(
+            outdir, "lammps_input_" + self.calculation_timestamp + ".tmp"
+        )
         ase.io.write(ase_out_path, self.atoms, format=lammps_format)
 
         nx = self.grid_dimensions[0]
@@ -155,14 +158,11 @@ class AtomicDensity(Descriptor):
         lammps_dict["sigma"] = self.parameters.atomic_density_sigma
         lammps_dict["rcutfac"] = self.parameters.atomic_density_cutoff
         lammps_dict["atom_config_fname"] = ase_out_path
-        lmp = self._setup_lammps(
-            nx,
-            ny,
-            nz,
+        log_path = os.path.join(
             outdir,
-            lammps_dict,
-            log_file_name="lammps_ggrid_log.tmp",
+            "lammps_ggrid_log_" + self.calculation_timestamp + ".tmp",
         )
+        lmp = self._setup_lammps(nx, ny, nz, lammps_dict, log_path)
 
         # For now the file is chosen automatically, because this is used
         # mostly under the hood anyway.
@@ -175,6 +175,10 @@ class AtomicDensity(Descriptor):
         else:
             runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
         lmp.file(runfile)
+
+        if not keep_logs:
+            os.remove(ase_out_path)
+            os.remove(log_path)
 
         # Extract the data.
         nrows_ggrid = extract_compute_np(

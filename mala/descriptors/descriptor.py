@@ -1,6 +1,8 @@
 """Base class for all descriptor calculators."""
 
 from abc import abstractmethod
+from datetime import datetime
+from functools import cached_property
 import os
 
 import ase
@@ -155,6 +157,17 @@ class Descriptor(PhysicalData):
     def descriptors_contain_xyz(self, value):
         self.parameters.descriptors_contain_xyz = value
 
+    @cached_property
+    def calculation_timestamp(self):
+        """
+        Timestamp of calculation start.
+
+        Used to distinguish multiple LAMMPS runs performed in the same
+        directory. Since the interface is file based, this timestamp prevents
+        problems with slightly
+        """
+        return datetime.utcnow().strftime("%F-%H-%M-%S-%f")[:-3]
+
     ##############################
     # Methods
     ##############################
@@ -273,6 +286,17 @@ class Descriptor(PhysicalData):
             Usually the local directory should suffice, given that there
             are no multiple instances running in the same directory.
 
+        kwargs : dict
+            A collection of keyword arguments, that are mainly used for
+            debugging and development. Different types of descriptors
+            may support different keyword arguments. Commonly supported
+            are
+
+            - "use_fp64": To use enforce floating point 64 precision for
+              descriptors.
+            - "keep_logs": To not delete temporary files created during
+              LAMMPS calculation of descriptors.
+
         Returns
         -------
         descriptors : numpy.array
@@ -333,6 +357,17 @@ class Descriptor(PhysicalData):
             A directory in which to write the output of the LAMMPS calculation.
             Usually the local directory should suffice, given that there
             are no multiple instances running in the same directory.
+
+        kwargs : dict
+            A collection of keyword arguments, that are mainly used for
+            debugging and development. Different types of descriptors
+            may support different keyword arguments. Commonly supported
+            are
+
+            - "use_fp64": To use enforce floating point 64 precision for
+              descriptors.
+            - "keep_logs": To not delete temporary files created during
+              LAMMPS calculation of descriptors.
 
         Returns
         -------
@@ -542,9 +577,7 @@ class Descriptor(PhysicalData):
         else:
             return 0
 
-    def _setup_lammps(
-        self, nx, ny, nz, outdir, lammps_dict, log_file_name="lammps_log.tmp"
-    ):
+    def _setup_lammps(self, nx, ny, nz, lammps_dict, log_file):
         """
         Set up the lammps processor grid.
 
@@ -564,7 +597,7 @@ class Descriptor(PhysicalData):
             "-screen",
             "none",
             "-log",
-            os.path.join(outdir, log_file_name),
+            log_file,
         ]
 
         if self.parameters._configuration["mpi"]:

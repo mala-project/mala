@@ -138,9 +138,12 @@ class Bispectrum(Descriptor):
         from lammps import constants as lammps_constants
 
         use_fp64 = kwargs.get("use_fp64", False)
+        keep_logs = kwargs.get("keep_logs", False)
 
         lammps_format = "lammps-data"
-        ase_out_path = os.path.join(outdir, "lammps_input.tmp")
+        ase_out_path = os.path.join(
+            outdir, "lammps_input_" + self.calculation_timestamp + ".tmp"
+        )
         ase.io.write(ase_out_path, self.atoms, format=lammps_format)
 
         nx = self.grid_dimensions[0]
@@ -153,14 +156,12 @@ class Bispectrum(Descriptor):
             "rcutfac": self.parameters.bispectrum_cutoff,
             "atom_config_fname": ase_out_path,
         }
-        lmp = self._setup_lammps(
-            nx,
-            ny,
-            nz,
+
+        log_path = os.path.join(
             outdir,
-            lammps_dict,
-            log_file_name="lammps_bgrid_log.tmp",
+            "lammps_bgrid_log_" + self.calculation_timestamp + ".tmp",
         )
+        lmp = self._setup_lammps(nx, ny, nz, lammps_dict, log_path)
 
         # An empty string means that the user wants to use the standard input.
         # What that is differs depending on serial/parallel execution.
@@ -182,6 +183,10 @@ class Bispectrum(Descriptor):
 
         # Do the LAMMPS calculation.
         lmp.file(self.parameters.lammps_compute_file)
+
+        if not keep_logs:
+            os.remove(ase_out_path)
+            os.remove(log_path)
 
         # Set things not accessible from LAMMPS
         # First 3 cols are x, y, z, coords
