@@ -419,7 +419,7 @@ class PhysicalData(ABC):
 
         if isinstance(path, str):
             directory, file_name = os.path.split(path)
-            path = os.path.join(directory, file_name.replace("*", "%T"))
+            path = os.path.join(directory, file_name.replace("*", "%06T"))
             file_ending = file_name.split(".")[-1]
             if file_name == file_ending:
                 path += ".h5"

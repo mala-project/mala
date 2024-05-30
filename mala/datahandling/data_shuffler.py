@@ -132,9 +132,9 @@ class DataShuffler(DataHandlerBase):
 
         # Do the actual shuffling.
         target_name_openpmd = os.path.join(target_save_path,
-                                       save_name.replace("*", "%T"))
+                                       save_name.replace("*", "%06T"))
         descriptor_name_openpmd = os.path.join(descriptor_save_path,
-                                        save_name.replace("*", "%T"))
+                                        save_name.replace("*", "%06T"))
         for i in range(0, number_of_new_snapshots):
             new_descriptors = np.zeros(
                 (int(np.prod(shuffle_dimensions)), self.input_dimension),
@@ -364,7 +364,7 @@ class DataShuffler(DataHandlerBase):
 
         # Do the actual shuffling.
         name_prefix = os.path.join(
-            dot.save_path, save_name.replace("*", "%T")
+            dot.save_path, save_name.replace("*", "%06T")
         )
         for i in range(my_items_start, my_items_end):
             # We check above that in the non-numpy case, OpenPMD will work.
