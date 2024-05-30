@@ -171,11 +171,17 @@ class AtomicDensity(Descriptor):
         filepath = __file__.split("atomic_density")[0]
         if self.parameters._configuration["mpi"]:
             if self.parameters.use_z_splitting:
-                runfile = os.path.join(filepath, "in.ggrid.python")
+                self.parameters.lammps_compute_file = os.path.join(
+                    filepath, "in.ggrid.python"
+                )
             else:
-                runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
+                self.parameters.lammps_compute_file = os.path.join(
+                    filepath, "in.ggrid_defaultproc.python"
+                )
         else:
-            runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
+            self.parameters.lammps_compute_file = os.path.join(
+                filepath, "in.ggrid_defaultproc.python"
+            )
 
         # Do the LAMMPS calculation and clean up.
         lmp.file(self.parameters.lammps_compute_file)

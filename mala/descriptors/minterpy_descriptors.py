@@ -193,7 +193,9 @@ class MinterpyDescriptors(Descriptor):
                 # else:
                 #     runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
             else:
-                runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
+                self.parameters.lammps_compute_file = os.path.join(
+                    filepath, "in.ggrid_defaultproc.python"
+                )
 
             # Do the LAMMPS calculation and clean up.
             lmp.file(self.parameters.lammps_compute_file)
