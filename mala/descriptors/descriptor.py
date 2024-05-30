@@ -124,6 +124,12 @@ class Descriptor(PhysicalData):
         self.atoms = None
         self.voxel = None
 
+        # If we ever have NON LAMMPS descriptors, these parameters have no
+        # meaning anymore and should probably be moved to an intermediate
+        # DescriptorsLAMMPS class, from which the LAMMPS descriptors inherit.
+        self.lammps_temporary_input = None
+        self.lammps_temporary_log = None
+
     ##############################
     # Properties
     ##############################
@@ -577,7 +583,7 @@ class Descriptor(PhysicalData):
         else:
             return 0
 
-    def _setup_lammps(self, nx, ny, nz, lammps_dict, log_file):
+    def _setup_lammps(self, nx, ny, nz, lammps_dict):
         """
         Set up the lammps processor grid.
 
@@ -597,8 +603,9 @@ class Descriptor(PhysicalData):
             "-screen",
             "none",
             "-log",
-            log_file,
+            self.lammps_temporary_log,
         ]
+        lammps_dict["atom_config_fname"] = self.lammps_temporary_input
 
         if self.parameters._configuration["mpi"]:
             size = get_size()
@@ -810,6 +817,15 @@ class Descriptor(PhysicalData):
         set_lammps_instance(lmp)
 
         return lmp
+
+    def _clean_calculation(self, keep_logs):
+        if not keep_logs:
+            os.remove(self.lammps_temporary_log)
+            os.remove(self.lammps_temporary_input)
+
+        # Reset timestamp for potential next calculation using same LAMMPS
+        # object.
+        del self.calculation_timestamp
 
     def _setup_atom_list(self):
         """

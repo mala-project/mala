@@ -163,19 +163,20 @@ class MinterpyDescriptors(Descriptor):
 
             # The rest is the stanfard LAMMPS atomic density stuff.
             lammps_format = "lammps-data"
-            ase_out_path = os.path.join(
+            self.lammps_temporary_input = os.path.join(
                 outdir, "lammps_input_" + self.calculation_timestamp + ".tmp"
             )
-            ase.io.write(ase_out_path, atoms_copied, format=lammps_format)
+            ase.io.write(
+                self.lammps_temporary_input, self.atoms, format=lammps_format
+            )
 
             # Create LAMMPS instance.
             lammps_dict = {}
             lammps_dict["sigma"] = self.parameters.atomic_density_sigma
             lammps_dict["rcutfac"] = self.parameters.atomic_density_cutoff
-            lammps_dict["atom_config_fname"] = ase_out_path
-            log_path = os.path.join(
+            self.lammps_temporary_log = os.path.join(
                 outdir,
-                "lammps_mgrid_log_" + self.calculation_timestamp + ".tmp",
+                "lammps_bgrid_log_" + self.calculation_timestamp + ".tmp",
             )
             lmp = self._setup_lammps(nx, ny, nz, lammps_dict, log_path)
 
@@ -193,11 +194,10 @@ class MinterpyDescriptors(Descriptor):
                 #     runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
             else:
                 runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
-            lmp.file(runfile)
 
-            if not keep_logs:
-                os.remove(ase_out_path)
-                os.remove(log_path)
+            # Do the LAMMPS calculation and clean up.
+            lmp.file(self.parameters.lammps_compute_file)
+            self._clean_calculation(keep_logs)
 
             # Extract the data.
             nrows_ggrid = extract_compute_np(

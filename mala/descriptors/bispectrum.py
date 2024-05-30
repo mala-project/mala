@@ -141,10 +141,12 @@ class Bispectrum(Descriptor):
         keep_logs = kwargs.get("keep_logs", False)
 
         lammps_format = "lammps-data"
-        ase_out_path = os.path.join(
+        self.lammps_temporary_input = os.path.join(
             outdir, "lammps_input_" + self.calculation_timestamp + ".tmp"
         )
-        ase.io.write(ase_out_path, self.atoms, format=lammps_format)
+        ase.io.write(
+            self.lammps_temporary_input, self.atoms, format=lammps_format
+        )
 
         nx = self.grid_dimensions[0]
         ny = self.grid_dimensions[1]
@@ -154,14 +156,13 @@ class Bispectrum(Descriptor):
         lammps_dict = {
             "twojmax": self.parameters.bispectrum_twojmax,
             "rcutfac": self.parameters.bispectrum_cutoff,
-            "atom_config_fname": ase_out_path,
         }
 
-        log_path = os.path.join(
+        self.lammps_temporary_log = os.path.join(
             outdir,
             "lammps_bgrid_log_" + self.calculation_timestamp + ".tmp",
         )
-        lmp = self._setup_lammps(nx, ny, nz, lammps_dict, log_path)
+        lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # An empty string means that the user wants to use the standard input.
         # What that is differs depending on serial/parallel execution.
@@ -181,12 +182,9 @@ class Bispectrum(Descriptor):
                     filepath, "in.bgrid.python"
                 )
 
-        # Do the LAMMPS calculation.
+        # Do the LAMMPS calculation and clean up.
         lmp.file(self.parameters.lammps_compute_file)
-
-        if not keep_logs:
-            os.remove(ase_out_path)
-            os.remove(log_path)
+        self._clean_calculation(keep_logs)
 
         # Set things not accessible from LAMMPS
         # First 3 cols are x, y, z, coords
