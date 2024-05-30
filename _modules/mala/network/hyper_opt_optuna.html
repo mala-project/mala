@@ -252,9 +252,18 @@
         <span class="n">cleaned_trials</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">trial</span> <span class="ow">in</span> <span class="n">trials</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">trial</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">TrialState</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">:</span>
-                <span class="n">study_to_clean</span><span class="o">.</span><span class="n">_storage</span><span class="o">.</span><span class="n">set_trial_state</span><span class="p">(</span>
-                    <span class="n">trial</span><span class="o">.</span><span class="n">_trial_id</span><span class="p">,</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">TrialState</span><span class="o">.</span><span class="n">WAITING</span>
+                <span class="n">kwds</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">trial_id</span><span class="o">=</span><span class="n">trial</span><span class="o">.</span><span class="n">_trial_id</span><span class="p">,</span>
+                    <span class="n">state</span><span class="o">=</span><span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">TrialState</span><span class="o">.</span><span class="n">WAITING</span><span class="p">,</span>
                 <span class="p">)</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">study_to_clean</span><span class="o">.</span><span class="n">_storage</span><span class="p">,</span> <span class="s2">&quot;set_trial_state&quot;</span><span class="p">):</span>
+                    <span class="c1"># Optuna 2.x</span>
+                    <span class="n">study_to_clean</span><span class="o">.</span><span class="n">_storage</span><span class="o">.</span><span class="n">set_trial_state</span><span class="p">(</span><span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Optuna 3.x</span>
+                    <span class="n">study_to_clean</span><span class="o">.</span><span class="n">_storage</span><span class="o">.</span><span class="n">set_trial_state_values</span><span class="p">(</span>
+                        <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span>
+                    <span class="p">)</span>
                 <span class="n">cleaned_trials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">number</span><span class="p">)</span>
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Cleaned trials: &quot;</span><span class="p">,</span> <span class="n">cleaned_trials</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
