@@ -2,7 +2,10 @@ name: CPU tests
 
 on:
   pull_request:
-    # Trigger on pull requests to master or develop
+    # Trigger on pull requests to master or develop that are
+    # marked as "ready for review" (non-draft PRs)
+    types:
+      - ready_for_review
     branches:
       - master
       - develop
