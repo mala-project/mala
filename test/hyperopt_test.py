@@ -462,10 +462,10 @@ class TestHyperparameterOptimization:
         )
 
         # This is basically the same code as in requeue_zombie_trials() but it
-        # doesn't work. The trials here are FrozenTrial objects (in
-        # requeue_zombie_trials() as well!) and we get
+        # doesn't work. We get
         #   RuntimeError: Trial#0 has already finished and can not be updated.
-        # However this code below in requeue_zombie_trials() *does* work. Why?
+        # This only works if state != COMPLETE, but this is what we have here.
+        # So we need to hack the db directly.
         #
         ##study = load_study()
         ####study = test_hp_optimizer.study
@@ -474,7 +474,6 @@ class TestHyperparameterOptimization:
         ##        trial_id=trial._trial_id, state=optuna.trial.TrialState.RUNNING
         ##    )
 
-        # Hack the db directly.
         con = sqlite3.connect(db_filename)
         cur = con.cursor()
         cur.execute("update trials set state='RUNNING'")
