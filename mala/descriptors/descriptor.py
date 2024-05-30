@@ -172,7 +172,16 @@ class Descriptor(PhysicalData):
         directory. Since the interface is file based, this timestamp prevents
         problems with slightly
         """
-        return datetime.utcnow().strftime("%F-%H-%M-%S-%f")[:-3]
+        if get_rank() == 0:
+            timestamp = datetime.timestamp(datetime.utcnow())
+        else:
+            timestamp = None
+
+        if self.parameters._configuration["mpi"]:
+            timestamp = get_comm().bcast(timestamp, root=0)
+        return datetime.fromtimestamp(timestamp).strftime("%F-%H-%M-%S-%f")[
+            :-3
+        ]
 
     ##############################
     # Methods
@@ -591,13 +600,6 @@ class Descriptor(PhysicalData):
         """
         from lammps import lammps
 
-        parallel_warn(
-            "Using LAMMPS for descriptor calculation. "
-            "Do not initialize more than one pre-processing "
-            "calculation in the same directory at the same time. "
-            "Data may be over-written."
-        )
-
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = [
             "-screen",
@@ -820,8 +822,9 @@ class Descriptor(PhysicalData):
 
     def _clean_calculation(self, keep_logs):
         if not keep_logs:
-            os.remove(self.lammps_temporary_log)
-            os.remove(self.lammps_temporary_input)
+            if get_rank() == 0:
+                os.remove(self.lammps_temporary_log)
+                os.remove(self.lammps_temporary_input)
 
         # Reset timestamp for potential next calculation using same LAMMPS
         # object.
