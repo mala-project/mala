@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: mala_conda_cpu
-      - uses: actions/delete-package-versions@v5
+        uses: actions/delete-package-versions@v5
         with:
           package_name: 'mala_conda_cpu'
           package_type: 'container'
