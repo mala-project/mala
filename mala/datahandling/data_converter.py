@@ -546,13 +546,14 @@ class DataConverter:
                     snapshot["input"], **descriptor_calculation_kwargs
                 )
             )
-            print(tmp_input)
-            print(tmp_input.shape)
-            print(local_size)
 
         elif description["input"] == "openpmd":
             tmp_input = self.descriptor_calculator.read_from_openpmd_file(
-                snapshot["input"]
+                snapshot["input"], units=original_units["input"]
+            )
+        elif description["input"] == "numpy":
+            tmp_input = self.descriptor_calculator.read_from_numpy_file(
+                snapshot["input"], units=original_units["input"]
             )
 
         elif description["input"] is None:
@@ -629,6 +630,12 @@ class DataConverter:
                     tmp_output = self.target_calculator.read_from_openpmd_file(
                         snapshot["output"], units=original_units["output"]
                     )
+                elif description["output"] == "numpy":
+                    tmp_output = (
+                        self.target_calculator.read_dimensions_from_numpy_file(
+                            snapshot["output"], units=original_units["output"]
+                        )
+                    )
 
                 elif description["output"] is None:
                     # In this case, only the input is processed.
@@ -673,6 +680,12 @@ class DataConverter:
                 elif description["output"] == "openpmd":
                     tmp_output = self.target_calculator.read_from_openpmd_file(
                         snapshot["output"], units=original_units["output"]
+                    )
+                elif description["output"] == "numpy":
+                    tmp_output = (
+                        self.target_calculator.read_dimensions_from_numpy_file(
+                            snapshot["output"], units=original_units["output"]
+                        )
                     )
 
                 elif description["output"] is None:

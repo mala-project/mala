@@ -29,3 +29,30 @@ data_converter.convert_snapshots(
     naming_scheme="Be_snapshot*.npy",
     descriptor_calculation_kwargs={"working_directory": "./"},
 )
+
+data_converter = mala.DataConverter(parameters)
+
+for snapshot in range(2):
+    data_converter.add_snapshot(
+        descriptor_input_path="Be_snapshot{}.in.npy".format(snapshot),
+        target_input_path="Be_snapshot{}.out.npy".format(snapshot),
+        additional_info_input_type=None,
+        additional_info_input_path=None,
+        target_units=None,
+    )
+
+data_converter.convert_snapshots(
+    descriptor_save_path="./",
+    target_save_path="./",
+    additional_info_save_path="./",
+    naming_scheme="Be_snapshot*.bp4",
+    descriptor_calculation_kwargs={"working_directory": "./"},
+)
+
+data_converter.convert_snapshots(
+    descriptor_save_path="./",
+    target_save_path="./",
+    additional_info_save_path="./",
+    naming_scheme="Be_snapshot*.npy",
+    descriptor_calculation_kwargs={"working_directory": "./"},
+)
