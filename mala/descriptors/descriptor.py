@@ -83,6 +83,13 @@ class Descriptor(PhysicalData):
                     AtomicDensity
                 )
 
+            if params.descriptors.descriptor_type == "ACE":
+                from mala.descriptors.ace import ACE
+
+                descriptors = super(Descriptor, AtomicDensity).__new__(
+                    ACE
+                )
+
             if params.descriptors.descriptor_type == "MinterpyDescriptors":
                 from mala.descriptors.minterpy_descriptors import (
                     MinterpyDescriptors,
