@@ -77,6 +77,8 @@
 <span></span><span class="sd">&quot;&quot;&quot;Base class for all descriptor calculators.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">ase</span>
@@ -198,6 +200,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="c1"># If we ever have NON LAMMPS descriptors, these parameters have no</span>
+        <span class="c1"># meaning anymore and should probably be moved to an intermediate</span>
+        <span class="c1"># DescriptorsLAMMPS class, from which the LAMMPS descriptors inherit.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_log</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="c1">##############################</span>
     <span class="c1"># Properties</span>
     <span class="c1">##############################</span>
@@ -230,6 +238,26 @@
     <span class="nd">@descriptors_contain_xyz</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">descriptors_contain_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">calculation_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Timestamp of calculation start.</span>
+
+<span class="sd">        Used to distinguish multiple LAMMPS runs performed in the same</span>
+<span class="sd">        directory. Since the interface is file based, this timestamp prevents</span>
+<span class="sd">        problems with slightly</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%F</span><span class="s2">-%H-%M-%S-</span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">)[</span>
+            <span class="p">:</span><span class="o">-</span><span class="mi">3</span>
+        <span class="p">]</span>
 
     <span class="c1">##############################</span>
     <span class="c1"># Methods</span>
@@ -349,6 +377,17 @@
 <span class="sd">            Usually the local directory should suffice, given that there</span>
 <span class="sd">            are no multiple instances running in the same directory.</span>
 
+<span class="sd">        kwargs : dict</span>
+<span class="sd">            A collection of keyword arguments, that are mainly used for</span>
+<span class="sd">            debugging and development. Different types of descriptors</span>
+<span class="sd">            may support different keyword arguments. Commonly supported</span>
+<span class="sd">            are</span>
+
+<span class="sd">            - &quot;use_fp64&quot;: To use enforce floating point 64 precision for</span>
+<span class="sd">              descriptors.</span>
+<span class="sd">            - &quot;keep_logs&quot;: To not delete temporary files created during</span>
+<span class="sd">              LAMMPS calculation of descriptors.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        descriptors : numpy.array</span>
@@ -409,6 +448,17 @@
 <span class="sd">            A directory in which to write the output of the LAMMPS calculation.</span>
 <span class="sd">            Usually the local directory should suffice, given that there</span>
 <span class="sd">            are no multiple instances running in the same directory.</span>
+
+<span class="sd">        kwargs : dict</span>
+<span class="sd">            A collection of keyword arguments, that are mainly used for</span>
+<span class="sd">            debugging and development. Different types of descriptors</span>
+<span class="sd">            may support different keyword arguments. Commonly supported</span>
+<span class="sd">            are</span>
+
+<span class="sd">            - &quot;use_fp64&quot;: To use enforce floating point 64 precision for</span>
+<span class="sd">              descriptors.</span>
+<span class="sd">            - &quot;keep_logs&quot;: To not delete temporary files created during</span>
+<span class="sd">              LAMMPS calculation of descriptors.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -618,9 +668,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="nf">_setup_lammps</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">,</span> <span class="n">log_file_name</span><span class="o">=</span><span class="s2">&quot;lammps_log.tmp&quot;</span>
-    <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setup_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set up the lammps processor grid.</span>
 
@@ -628,20 +676,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">lammps</span>
 
-        <span class="n">parallel_warn</span><span class="p">(</span>
-            <span class="s2">&quot;Using LAMMPS for descriptor calculation. &quot;</span>
-            <span class="s2">&quot;Do not initialize more than one pre-processing &quot;</span>
-            <span class="s2">&quot;calculation in the same directory at the same time. &quot;</span>
-            <span class="s2">&quot;Data may be over-written.&quot;</span>
-        <span class="p">)</span>
-
         <span class="c1"># Build LAMMPS arguments from the data we read.</span>
         <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">&quot;-screen&quot;</span><span class="p">,</span>
             <span class="s2">&quot;none&quot;</span><span class="p">,</span>
             <span class="s2">&quot;-log&quot;</span><span class="p">,</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="n">log_file_name</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_log</span><span class="p">,</span>
         <span class="p">]</span>
+        <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;atom_config_fname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
             <span class="n">size</span> <span class="o">=</span> <span class="n">get_size</span><span class="p">()</span>
@@ -853,6 +895,17 @@
         <span class="n">set_lammps_instance</span><span class="p">(</span><span class="n">lmp</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">lmp</span>
+
+    <span class="k">def</span> <span class="nf">_clean_calculation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lmp</span><span class="p">,</span> <span class="n">keep_logs</span><span class="p">):</span>
+        <span class="n">lmp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_logs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_log</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span><span class="p">)</span>
+
+        <span class="c1"># Reset timestamp for potential next calculation using same LAMMPS</span>
+        <span class="c1"># object.</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_timestamp</span>
 
     <span class="k">def</span> <span class="nf">_setup_atom_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
