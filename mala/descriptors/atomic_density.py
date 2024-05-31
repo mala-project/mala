@@ -185,7 +185,6 @@ class AtomicDensity(Descriptor):
 
         # Do the LAMMPS calculation and clean up.
         lmp.file(self.parameters.lammps_compute_file)
-        self._clean_calculation(keep_logs)
 
         # Extract the data.
         nrows_ggrid = extract_compute_np(
@@ -209,7 +208,7 @@ class AtomicDensity(Descriptor):
             array_shape=(nrows_ggrid, ncols_ggrid),
             use_fp64=use_fp64,
         )
-        lmp.close()
+        self._clean_calculation(lmp, keep_logs)
 
         # In comparison to SNAP, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments

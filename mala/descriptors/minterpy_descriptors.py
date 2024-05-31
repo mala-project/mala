@@ -171,14 +171,15 @@ class MinterpyDescriptors(Descriptor):
             )
 
             # Create LAMMPS instance.
-            lammps_dict = {}
-            lammps_dict["sigma"] = self.parameters.atomic_density_sigma
-            lammps_dict["rcutfac"] = self.parameters.atomic_density_cutoff
+            lammps_dict = {
+                "sigma": self.parameters.atomic_density_sigma,
+                "rcutfac": self.parameters.atomic_density_cutoff,
+            }
             self.lammps_temporary_log = os.path.join(
                 outdir,
                 "lammps_bgrid_log_" + self.calculation_timestamp + ".tmp",
             )
-            lmp = self._setup_lammps(nx, ny, nz, lammps_dict, log_path)
+            lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
             # For now the file is chosen automatically, because this is used
             # mostly under the hood anyway.
@@ -199,7 +200,6 @@ class MinterpyDescriptors(Descriptor):
 
             # Do the LAMMPS calculation and clean up.
             lmp.file(self.parameters.lammps_compute_file)
-            self._clean_calculation(keep_logs)
 
             # Extract the data.
             nrows_ggrid = extract_compute_np(
@@ -223,7 +223,7 @@ class MinterpyDescriptors(Descriptor):
                 array_shape=(nrows_ggrid, ncols_ggrid),
             )
 
-            lmp.close()
+            self._clean_calculation(lmp, keep_logs)
 
             gaussian_descriptors_np = gaussian_descriptors_np.reshape(
                 (

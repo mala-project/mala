@@ -820,7 +820,8 @@ class Descriptor(PhysicalData):
 
         return lmp
 
-    def _clean_calculation(self, keep_logs):
+    def _clean_calculation(self, lmp, keep_logs):
+        lmp.close()
         if not keep_logs:
             if get_rank() == 0:
                 os.remove(self.lammps_temporary_log)

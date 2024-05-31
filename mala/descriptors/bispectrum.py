@@ -184,7 +184,6 @@ class Bispectrum(Descriptor):
 
         # Do the LAMMPS calculation and clean up.
         lmp.file(self.parameters.lammps_compute_file)
-        self._clean_calculation(keep_logs)
 
         # Set things not accessible from LAMMPS
         # First 3 cols are x, y, z, coords
@@ -228,7 +227,7 @@ class Bispectrum(Descriptor):
                 array_shape=(nrows_local, ncols_local),
                 use_fp64=use_fp64,
             )
-            lmp.close()
+            self._clean_calculation(lmp, keep_logs)
 
             # Copy the grid dimensions only at the end.
             self.grid_dimensions = [nx, ny, nz]
@@ -244,7 +243,7 @@ class Bispectrum(Descriptor):
                 (nz, ny, nx, self.fingerprint_length),
                 use_fp64=use_fp64,
             )
-            lmp.close()
+            self._clean_calculation(lmp, keep_logs)
 
             # switch from x-fastest to z-fastest order (swaps 0th and 2nd
             # dimension)
