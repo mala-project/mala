@@ -9,8 +9,6 @@ read_data ${atom_config_fname}
 
 mass 1 26.981539
 
-run_style verlet
-
 # define atom compute and grid compute
 
 group 		acegroup type 1
@@ -29,7 +27,6 @@ pair_coeff * *
 
 # define atom and grid computes
 
-compute 	mygrid all pace/grid grid ${ngridx} ${ngridy} ${ngridz}  ${ace_options} ugridtype 0
 compute 	mygridlocal all pace/grid/local  grid ${ngridx} ${ngridy} ${ngridz} ${ace_options} ugridtype 
 
 thermo_modify norm yes
