@@ -15,10 +15,6 @@ mass 1 26.981539
 # define atom compute and grid compute
 
 group 		acegroup type 1
-variable 	rcutfac equal 4.67637
-
-#variable 	ace_options string "coupling_coefficients.yace"
-		
 
 # build zero potential to satisfy compute sna/atom
 
@@ -30,7 +26,7 @@ pair_coeff * *
 
 # define atom and grid computes
 
-compute 	mygridlocal all pace/grid/local  grid ${ngridx} ${ngridy} ${ngridz} ${ace_options} ugridtype 
+compute 	mygridlocal all pace/grid/local  grid ${ngridx} ${ngridy} ${ngridz} ${ace_coeff_file} ugridtype 
 
 thermo_modify norm yes
 

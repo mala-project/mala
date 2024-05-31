@@ -14,7 +14,6 @@ run_style verlet
 # define atom compute and grid compute
 
 group 		acegroup type 1
-variable 	rcutfac equal 4.67637
 
 #variable 	ace_options string "coupling_coefficients.yace"
 		
@@ -30,7 +29,7 @@ pair_coeff * *
 # define atom and grid computes
 
 compute 	mygrid all pace/grid grid ${ngridx} ${ngridy} ${ngridz}  ${ace_options} ugridtype 0
-compute 	mygridlocal all pace/grid/local  grid ${ngridx} ${ngridy} ${ngridz} ${ace_options} ugridtype 
+compute 	mygridlocal all pace/grid/local  grid ${ngridx} ${ngridy} ${ngridz} ${ace_coeff_file} ugridtype 
 
 thermo_modify norm yes
 
