@@ -10,8 +10,8 @@ from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
 from mala.version import __version__ as mala_version
 
-descriptor_input_types = ["espresso-out", "openpmd"]
-target_input_types = [".cube", ".xsf", "openpmd"]
+descriptor_input_types = ["espresso-out", "openpmd", "numpy"]
+target_input_types = [".cube", ".xsf", "openpmd", "numpy"]
 additional_info_input_types = ["espresso-out"]
 
 
@@ -632,7 +632,7 @@ class DataConverter:
                     )
                 elif description["output"] == "numpy":
                     tmp_output = (
-                        self.target_calculator.read_dimensions_from_numpy_file(
+                        self.target_calculator.read_from_numpy_file(
                             snapshot["output"], units=original_units["output"]
                         )
                     )
@@ -683,8 +683,8 @@ class DataConverter:
                     )
                 elif description["output"] == "numpy":
                     tmp_output = (
-                        self.target_calculator.read_dimensions_from_numpy_file(
-                            snapshot["output"], units=original_units["output"]
+                        self.target_calculator.read_from_numpy_file(
+                            snapshot["output"]
                         )
                     )
 
