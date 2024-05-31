@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>calculation_helpers &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -32,12 +36,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -88,11 +96,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="modules.html">API reference</a> &raquo;</li>
-          <li><a href="mala.html">mala</a> &raquo;</li>
-          <li><a href="mala.targets.html">targets</a> &raquo;</li>
-      <li>calculation_helpers</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="mala.html">mala</a></li>
+          <li class="breadcrumb-item"><a href="mala.targets.html">targets</a></li>
+      <li class="breadcrumb-item active">calculation_helpers</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.targets.calculation_helpers.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -102,17 +110,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="module-mala.targets.calculation_helpers">
-<span id="calculation-helpers"></span><h1>calculation_helpers<a class="headerlink" href="#module-mala.targets.calculation_helpers" title="Permalink to this headline"></a></h1>
+  <section id="module-mala.targets.calculation_helpers">
+<span id="calculation-helpers"></span><h1>calculation_helpers<a class="headerlink" href="#module-mala.targets.calculation_helpers" title="Link to this heading"></a></h1>
 <p>Helper functions for several calculation tasks (such as integration).</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.analytical_integration">
-<span class="sig-name descname"><span class="pre">analytical_integration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#analytical_integration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.analytical_integration" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">analytical_integration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#analytical_integration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.analytical_integration" title="Link to this definition"></a></dt>
 <dd><p>Perform analytical integration following the outline given by [1].</p>
 <p>More specifically, this function solves Eq. 32, by constructing the
 weights itself.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>D</strong> (<em>numpy.array</em><em> or </em><em>float</em>) – Either LDOS or DOS data.</p></li>
 <li><p><strong>I0</strong> (<em>string</em>) – <p>I_0 from Eq. 33. The user only needs to provide which function should
@@ -144,10 +152,10 @@ be used. Arguments are:</p>
 <li><p><strong>temperature</strong> (<em>float</em>) – Temperature in K.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>integration_value</strong> – Value of the integral.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpy.array or float</p>
 </dd>
 </dl>
@@ -155,13 +163,13 @@ be used. Arguments are:</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.entropy_multiplicator">
-<span class="sig-name descname"><span class="pre">entropy_multiplicator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#entropy_multiplicator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.entropy_multiplicator" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">entropy_multiplicator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#entropy_multiplicator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.entropy_multiplicator" title="Link to this definition"></a></dt>
 <dd><p>Calculate the multiplicator function for the entropy integral.</p>
 <p>The Entropy integral is</p>
 <div class="math notranslate nohighlight">
 \[f(\epsilon)\log(f(\epsilon))+(1-f(\epsilon)\log(1-f(\epsilon))\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>energy</strong> (<em>float</em><em> or </em><em>numpy.array</em>) – Energy for which the Fermi function is supposed to be calculated in
 energy_units.</p></li>
@@ -169,10 +177,10 @@ energy_units.</p></li>
 <li><p><strong>temperature</strong> (<em>float</em>) – Temperature in K.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>multiplicator_val</strong> – Value of the multiplicator function.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -180,13 +188,13 @@ energy_units.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.fermi_function">
-<span class="sig-name descname"><span class="pre">fermi_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress_overflow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#fermi_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.fermi_function" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fermi_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress_overflow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#fermi_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.fermi_function" title="Link to this definition"></a></dt>
 <dd><p>Calculate the Fermi function.</p>
 <p>The Fermi function reads</p>
 <div class="math notranslate nohighlight">
 \[f(\epsilon) = 1/(1 + e^{\frac{\epsilon-\epsilon_F}{k_\mathrm{B} T}})\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>energy</strong> (<em>float</em><em> or </em><em>numpy.array</em>) – Energy for which the Fermi function is supposed to be calculated in
 energy_units.</p></li>
@@ -197,10 +205,10 @@ the Fermi function is suppressed. This is mathematically justifiable,
 but</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>fermi_val</strong> – Value of the Fermi function.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -208,23 +216,23 @@ but</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.gaussians">
-<span class="sig-name descname"><span class="pre">gaussians</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#gaussians"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.gaussians" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">gaussians</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#gaussians"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.gaussians" title="Link to this definition"></a></dt>
 <dd><p>Calculate multiple gaussians on the same grid, but with different centers.</p>
 <p>Gaussian functions are used as approximations to the delta in the
 Brillouin zone integration. Note that this defines Gaussians without the
 factor of <span class="math notranslate nohighlight">\(1/\sqrt{2}\)</span>. All the Gaussians will have the same sigmas.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>grid</strong> (<em>np.array</em>) – Grid on which this Gaussian is defined.</p></li>
 <li><p><strong>centers</strong> (<em>np.array</em>) – Array of centers for the Gaussians</p></li>
 <li><p><strong>sigma</strong> (<em>float</em>) – Sigma value for the Gaussian.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>multiple_gaussians</strong> – multiple gaussians on the same grid, but with different centers.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np.array</p>
 </dd>
 </dl>
@@ -232,16 +240,16 @@ factor of <span class="math notranslate nohighlight">\(1/\sqrt{2}\)</span>. All 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.get_beta">
-<span class="sig-name descname"><span class="pre">get_beta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#get_beta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.get_beta" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_beta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#get_beta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.get_beta" title="Link to this definition"></a></dt>
 <dd><p>Calculate <span class="math notranslate nohighlight">\(\beta = {(k_\mathrm{B}T)}^{-1}\)</span>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>temperature</strong> (<em>float</em>) – Temperature in K</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>beta</strong> – Thermodynamic beta.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -249,19 +257,19 @@ factor of <span class="math notranslate nohighlight">\(1/\sqrt{2}\)</span>. All 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.get_f0_value">
-<span class="sig-name descname"><span class="pre">get_f0_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#get_f0_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.get_f0_value" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_f0_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#get_f0_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.get_f0_value" title="Link to this definition"></a></dt>
 <dd><p>Get the F0 value for the analytic integration formula.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>float</em>) – x value for function.</p></li>
 <li><p><strong>beta</strong> (<em>float</em>) – Thermodynamic beta.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>function_value</strong> – F0 value.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -269,19 +277,19 @@ factor of <span class="math notranslate nohighlight">\(1/\sqrt{2}\)</span>. All 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.get_f1_value">
-<span class="sig-name descname"><span class="pre">get_f1_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#get_f1_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.get_f1_value" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_f1_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#get_f1_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.get_f1_value" title="Link to this definition"></a></dt>
 <dd><p>Get the F1 value for the analytic integration formula.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>float</em>) – x value for function.</p></li>
 <li><p><strong>beta</strong> (<em>float</em>) – Thermodynamic beta.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>function_value</strong> – F1 value.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -289,19 +297,19 @@ factor of <span class="math notranslate nohighlight">\(1/\sqrt{2}\)</span>. All 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.get_f2_value">
-<span class="sig-name descname"><span class="pre">get_f2_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#get_f2_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.get_f2_value" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_f2_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#get_f2_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.get_f2_value" title="Link to this definition"></a></dt>
 <dd><p>Get the F2 value for the analytic integration formula.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>float</em>) – x value for function.</p></li>
 <li><p><strong>beta</strong> (<em>float</em>) – Thermodynamic beta.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>function_value</strong> – F2 value.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -309,19 +317,19 @@ factor of <span class="math notranslate nohighlight">\(1/\sqrt{2}\)</span>. All 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.get_s0_value">
-<span class="sig-name descname"><span class="pre">get_s0_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#get_s0_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.get_s0_value" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_s0_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#get_s0_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.get_s0_value" title="Link to this definition"></a></dt>
 <dd><p>Get the S0 value for the analytic integration formula.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>float</em>) – x value for function.</p></li>
 <li><p><strong>beta</strong> (<em>float</em>) – Thermodynamic beta.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>function_value</strong> – S0 value.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -329,19 +337,19 @@ factor of <span class="math notranslate nohighlight">\(1/\sqrt{2}\)</span>. All 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.get_s1_value">
-<span class="sig-name descname"><span class="pre">get_s1_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#get_s1_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.get_s1_value" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_s1_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#get_s1_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.get_s1_value" title="Link to this definition"></a></dt>
 <dd><p>Get the S1 value for the analytic integration formula.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>float</em>) – x value for function.</p></li>
 <li><p><strong>beta</strong> (<em>float</em>) – Thermodynamic beta.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>function_value</strong> – S1 value.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -349,11 +357,11 @@ factor of <span class="math notranslate nohighlight">\(1/\sqrt{2}\)</span>. All 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.integrate_values_on_spacing">
-<span class="sig-name descname"><span class="pre">integrate_values_on_spacing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#integrate_values_on_spacing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.integrate_values_on_spacing" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">integrate_values_on_spacing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#integrate_values_on_spacing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.integrate_values_on_spacing" title="Link to this definition"></a></dt>
 <dd><p>Integrate values assuming a uniform grid with a provided spacing.</p>
 <p>Different integration methods are available.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>values</strong> (<em>numpy.array</em>) – Values to be integrated.</p></li>
 <li><p><strong>spacing</strong> (<em>int</em>) – Spacing of the grid on which the integration is performed.</p></li>
@@ -368,16 +376,16 @@ factor of <span class="math notranslate nohighlight">\(1/\sqrt{2}\)</span>. All 
 <li><p><strong>axis</strong> (<em>int</em>) – Axis along which the integration is performed.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>integral_values</strong> – The value of the integral.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>

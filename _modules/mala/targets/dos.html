@@ -1,24 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.targets.dos &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/clipboard.min.js"></script>
-        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -29,12 +32,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html">
-            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -62,9 +69,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>mala.targets.dos</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mala.targets.dos</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -96,7 +103,9 @@
 <span class="p">)</span>
 
 
-<div class="viewcode-block" id="DOS"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS">[docs]</a><span class="k">class</span> <span class="nc">DOS</span><span class="p">(</span><span class="n">Target</span><span class="p">):</span>
+<div class="viewcode-block" id="DOS">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS">[docs]</a>
+<span class="k">class</span> <span class="nc">DOS</span><span class="p">(</span><span class="n">Target</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Postprocessing / parsing functions for the density of states (DOS).</span>
 
@@ -114,7 +123,9 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">DOS</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="DOS.from_ldos_calculator"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_ldos_calculator">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="DOS.from_ldos_calculator">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_ldos_calculator">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_ldos_calculator</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ldos_object</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a DOS object from an LDOS object.</span>
@@ -162,7 +173,10 @@
 
         <span class="k">return</span> <span class="n">return_dos_object</span></div>
 
-<div class="viewcode-block" id="DOS.from_numpy_file"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_numpy_file">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="DOS.from_numpy_file">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_numpy_file">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_numpy_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an DOS calculator from a numpy array saved in a file.</span>
@@ -187,7 +201,10 @@
         <span class="n">return_dos</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">return_dos</span></div>
 
-<div class="viewcode-block" id="DOS.from_numpy_array"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_numpy_array">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="DOS.from_numpy_array">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_numpy_array">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_numpy_array</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an DOS calculator from a numpy array in memory.</span>
@@ -215,7 +232,10 @@
         <span class="n">return_dos</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">return_dos</span></div>
 
-<div class="viewcode-block" id="DOS.from_qe_dos_txt"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_qe_dos_txt">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="DOS.from_qe_dos_txt">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_qe_dos_txt">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_qe_dos_txt</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a DOS calculator from a Quantum Espresso generated file.</span>
@@ -240,7 +260,10 @@
         <span class="n">return_dos</span><span class="o">.</span><span class="n">read_from_qe_dos_txt</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">return_dos</span></div>
 
-<div class="viewcode-block" id="DOS.from_qe_out"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_qe_out">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="DOS.from_qe_out">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_qe_out">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_qe_out</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a DOS calculator from a Quantum Espresso output file.</span>
@@ -271,6 +294,7 @@
         <span class="c1"># This method will use the ASE atoms object read above automatically.</span>
         <span class="n">return_dos</span><span class="o">.</span><span class="n">read_from_qe_out</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">return_dos</span></div>
+
 
     <span class="c1">##############################</span>
     <span class="c1"># Properties</span>
@@ -318,7 +342,9 @@
         <span class="c1"># properties.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">uncache_properties</span><span class="p">()</span>
 
-<div class="viewcode-block" id="DOS.get_target"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_target">[docs]</a>    <span class="k">def</span> <span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="DOS.get_target">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_target">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the target quantity.</span>
 
@@ -327,7 +353,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span></div>
 
-<div class="viewcode-block" id="DOS.invalidate_target"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.invalidate_target">[docs]</a>    <span class="k">def</span> <span class="nf">invalidate_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DOS.invalidate_target">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.invalidate_target">[docs]</a>
+    <span class="k">def</span> <span class="nf">invalidate_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Invalidates the saved target wuantity.</span>
 
@@ -335,6 +364,7 @@
 <span class="sd">        It should work for all implemented targets.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="kc">None</span></div>
+
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -402,7 +432,9 @@
                 <span class="s2">&quot;No cached DOS available to calculate this property.&quot;</span>
             <span class="p">)</span>
 
-<div class="viewcode-block" id="DOS.uncache_properties"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.uncache_properties">[docs]</a>    <span class="k">def</span> <span class="nf">uncache_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="DOS.uncache_properties">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.uncache_properties">[docs]</a>
+    <span class="k">def</span> <span class="nf">uncache_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Uncache all cached properties of this calculator.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;number_of_electrons&quot;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons</span>
@@ -413,6 +445,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;fermi_energy&quot;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy</span></div>
 
+
     <span class="c1">##############################</span>
     <span class="c1"># Methods</span>
     <span class="c1">##############################</span>
@@ -420,7 +453,9 @@
     <span class="c1"># File I/O</span>
     <span class="c1">##########</span>
 
-<div class="viewcode-block" id="DOS.convert_units"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="DOS.convert_units">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.convert_units">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array into the MALA units.</span>
@@ -450,7 +485,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for LDOS.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DOS.backconvert_units"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+
+<div class="viewcode-block" id="DOS.backconvert_units">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.backconvert_units">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array from MALA units into desired units.</span>
@@ -477,7 +515,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for LDOS.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DOS.read_from_qe_dos_txt"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_qe_dos_txt">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_qe_dos_txt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DOS.read_from_qe_dos_txt">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_qe_dos_txt">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_from_qe_dos_txt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the DOS from a Quantum Espresso generated file.</span>
 
@@ -521,7 +562,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="n">array</span>
         <span class="k">return</span> <span class="n">array</span></div>
 
-<div class="viewcode-block" id="DOS.read_from_qe_out"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_qe_out">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">smearing_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DOS.read_from_qe_out">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_qe_out">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">smearing_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the DOS from a Quantum Espresso DFT output file.</span>
 
@@ -569,7 +613,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="n">dos_data</span>
         <span class="k">return</span> <span class="n">dos_data</span></div>
 
-<div class="viewcode-block" id="DOS.read_from_array"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_array">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DOS.read_from_array">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_array">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the density data from a numpy array.</span>
 
@@ -585,10 +632,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="n">array</span>
         <span class="k">return</span> <span class="n">array</span></div>
 
+
     <span class="c1"># Calculations</span>
     <span class="c1">##############</span>
 
-<div class="viewcode-block" id="DOS.get_energy_grid"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_energy_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="DOS.get_energy_grid">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_energy_grid">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get energy grid.</span>
 
@@ -608,7 +658,10 @@
         <span class="n">linspace_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">linspace_array</span></div>
 
-<div class="viewcode-block" id="DOS.get_band_energy"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_band_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span>
+
+<div class="viewcode-block" id="DOS.get_band_energy">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_band_energy">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -706,7 +759,10 @@
             <span class="n">integration_method</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="DOS.get_number_of_electrons"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_number_of_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span>
+
+<div class="viewcode-block" id="DOS.get_number_of_electrons">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_number_of_electrons">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -773,7 +829,10 @@
             <span class="n">integration_method</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="DOS.get_entropy_contribution"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_entropy_contribution">[docs]</a>    <span class="k">def</span> <span class="nf">get_entropy_contribution</span><span class="p">(</span>
+
+<div class="viewcode-block" id="DOS.get_entropy_contribution">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_entropy_contribution">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_entropy_contribution</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -862,7 +921,10 @@
                 <span class="n">integration_method</span><span class="p">,</span>
             <span class="p">)</span></div>
 
-<div class="viewcode-block" id="DOS.get_self_consistent_fermi_energy"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_self_consistent_fermi_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_self_consistent_fermi_energy</span><span class="p">(</span>
+
+<div class="viewcode-block" id="DOS.get_self_consistent_fermi_energy">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_self_consistent_fermi_energy">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_self_consistent_fermi_energy</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -953,7 +1015,10 @@
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">fermi_energy_sc</span></div>
 
-<div class="viewcode-block" id="DOS.get_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DOS.get_density_of_states">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_density_of_states">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the density of states.</span>
 
@@ -966,6 +1031,7 @@
             <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span>
 
         <span class="k">return</span> <span class="n">dos_data</span></div>
+
 
     <span class="c1"># Private methods</span>
     <span class="c1">#################</span>
@@ -1110,6 +1176,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">entropy_contribution</span></div>
+
 </pre></div>
 
            </div>

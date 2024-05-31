@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>trajectory_analyzer &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -31,12 +35,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -81,11 +89,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="modules.html">API reference</a> &raquo;</li>
-          <li><a href="mala.html">mala</a> &raquo;</li>
-          <li><a href="mala.datageneration.html">datageneration</a> &raquo;</li>
-      <li>trajectory_analyzer</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="mala.html">mala</a></li>
+          <li class="breadcrumb-item"><a href="mala.datageneration.html">datageneration</a></li>
+      <li class="breadcrumb-item active">trajectory_analyzer</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.datageneration.trajectory_analyzer.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -95,16 +103,16 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="module-mala.datageneration.trajectory_analyzer">
-<span id="trajectory-analyzer"></span><h1>trajectory_analyzer<a class="headerlink" href="#module-mala.datageneration.trajectory_analyzer" title="Permalink to this headline"></a></h1>
+  <section id="module-mala.datageneration.trajectory_analyzer">
+<span id="trajectory-analyzer"></span><h1>trajectory_analyzer<a class="headerlink" href="#module-mala.datageneration.trajectory_analyzer" title="Link to this heading"></a></h1>
 <p>Tools for analyzing a trajectory.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TrajectoryAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperatures</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">malada_compatability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TrajectoryAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperatures</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">malada_compatability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Provides useful functions to analyze a trajectory.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parameters</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters object used to create this instance.</p></li>
 <li><p><strong>trajectory</strong> (<em>ase.io.Trajectory</em><em> or </em><em>string</em>) – Trajectory or path to trajectory to be analyzed.</p></li>
@@ -115,14 +123,14 @@ one will be generated ad-hoc (recommended).</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_first_snapshot">
-<span class="sig-name descname"><span class="pre">get_first_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equilibrated_snapshot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer.get_first_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_first_snapshot" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_first_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equilibrated_snapshot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer.get_first_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_first_snapshot" title="Link to this definition"></a></dt>
 <dd><p>Calculate distance metrics/first equilibrated timestep on a trajectory.</p>
 <p>For this step, the RDF+Cosine distance will be used as a distance
 metric. Only the first snapshot is return, all the other quantities
 can be accessed as member variables of the object calling this
 function.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>equilibrated_snapshot</strong> (<em>ase.Atoms</em>) – An equilibrated snapshot. Will usually be read from the trajectory
 itself, but may be provided by the user if desired.</p></li>
@@ -131,10 +139,10 @@ the end of the trajectory, but may be provided by user if
 e.g. multiple trajectories are to be compared.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>first_snapshot</strong> – First snapshot for which the trajectory is equilibrated.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
 </dd>
 </dl>
@@ -142,7 +150,7 @@ e.g. multiple trajectories are to be compared.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_snapshot_correlation_cutoff">
-<span class="sig-name descname"><span class="pre">get_snapshot_correlation_cutoff</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer.get_snapshot_correlation_cutoff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_snapshot_correlation_cutoff" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_snapshot_correlation_cutoff</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer.get_snapshot_correlation_cutoff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_snapshot_correlation_cutoff" title="Link to this definition"></a></dt>
 <dd><p>Determine the cutoff for the distance metric.</p>
 <p>If a cutoff is set by the user via the Parameters object, this
 function simply returns this value. Elsewise, the value
@@ -153,11 +161,11 @@ Any distance above this cutoff can be attributed to the oscillations
 in the trajectory. Any cutoff below is the consquence of temporal
 neighborhood of these snapshots.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cutoff</strong> – Cutoff below which two snapshots can be assumed to be similar
 to each other to a degree that suggests temporal neighborhood.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>float</p>
 </dd>
 </dl>
@@ -165,14 +173,14 @@ to each other to a degree that suggests temporal neighborhood.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_uncorrelated_snapshots">
-<span class="sig-name descname"><span class="pre">get_uncorrelated_snapshots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_uncorrelated_snapshots</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer.get_uncorrelated_snapshots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_uncorrelated_snapshots" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_uncorrelated_snapshots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_uncorrelated_snapshots</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer.get_uncorrelated_snapshots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_uncorrelated_snapshots" title="Link to this definition"></a></dt>
 <dd><p>Calculate a set of uncorrelated configurations from a trajectory.</p>
 <p>If not priorly determined with the object calling this function, the
 first equilibrated configuration will be determined automatically.
 This function will create two files, one archiving the MD step number
 of all snapshots sampled, and one with the actual snapshots themselves.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>filename_uncorrelated_snapshots</strong> (<em>string</em>) – Name of the file in which to save the uncorrelated snapshots.</p>
 </dd>
 </dl>
@@ -180,31 +188,31 @@ of all snapshots sampled, and one with the actual snapshots themselves.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.uncache_properties">
-<span class="sig-name descname"><span class="pre">uncache_properties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer.uncache_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.uncache_properties" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">uncache_properties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer.uncache_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.uncache_properties" title="Link to this definition"></a></dt>
 <dd><p>Uncache all cached properties of this calculator.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.first_snapshot">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">first_snapshot</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.first_snapshot" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">first_snapshot</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.first_snapshot" title="Link to this definition"></a></dt>
 <dd><p>First equilibrated snapshot.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.snapshot_correlation_cutoff">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">snapshot_correlation_cutoff</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.snapshot_correlation_cutoff" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">snapshot_correlation_cutoff</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.snapshot_correlation_cutoff" title="Link to this definition"></a></dt>
 <dd><p>Cutoff for the snapshot correlation analysis.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.trajectory">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trajectory</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.trajectory" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trajectory</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.trajectory" title="Link to this definition"></a></dt>
 <dd><p>Trajectory to be analyzed.</p>
 </dd></dl>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>

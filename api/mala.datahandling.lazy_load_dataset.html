@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>lazy_load_dataset &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -31,12 +35,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -90,11 +98,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="modules.html">API reference</a> &raquo;</li>
-          <li><a href="mala.html">mala</a> &raquo;</li>
-          <li><a href="mala.datahandling.html">datahandling</a> &raquo;</li>
-      <li>lazy_load_dataset</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="mala.html">mala</a></li>
+          <li class="breadcrumb-item"><a href="mala.datahandling.html">datahandling</a></li>
+      <li class="breadcrumb-item active">lazy_load_dataset</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.datahandling.lazy_load_dataset.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -104,13 +112,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="module-mala.datahandling.lazy_load_dataset">
-<span id="lazy-load-dataset"></span><h1>lazy_load_dataset<a class="headerlink" href="#module-mala.datahandling.lazy_load_dataset" title="Permalink to this headline"></a></h1>
+  <section id="module-mala.datahandling.lazy_load_dataset">
+<span id="lazy-load-dataset"></span><h1>lazy_load_dataset<a class="headerlink" href="#module-mala.datahandling.lazy_load_dataset" title="Link to this heading"></a></h1>
 <p>DataSet for lazy-loading.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset.LazyLoadDataset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LazyLoadDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.Dataset</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LazyLoadDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></p>
 <p>DataSet class for lazy loading.</p>
 <p>Only loads snapshots in the memory that are currently being processed.
 Uses a “caching” approach of keeping the last used snapshot in memory,
@@ -119,7 +127,7 @@ until values from a new ones are used. Therefore, shuffling at DataSampler
 Instead, we mix the snapshot load order here ot have some sort of mixing
 at all.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input_dimension</strong> (<em>int</em>) – Dimension of an input vector.</p></li>
 <li><p><strong>output_dimension</strong> (<em>int</em>) – Dimension of an output vector.</p></li>
@@ -134,11 +142,11 @@ at all.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset">
-<span class="sig-name descname"><span class="pre">add_snapshot_to_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot" title="mala.datahandling.snapshot.Snapshot"><span class="pre">mala.datahandling.snapshot.Snapshot</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset.add_snapshot_to_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_snapshot_to_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot" title="mala.datahandling.snapshot.Snapshot"><span class="pre">Snapshot</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset.add_snapshot_to_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset" title="Link to this definition"></a></dt>
 <dd><p>Add a snapshot to a DataSet.</p>
 <p>Afterwards, the DataSet can and will load this snapshot as needed.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>snapshot</strong> (<a class="reference internal" href="mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot" title="mala.datahandling.snapshot.Snapshot"><em>mala.datahandling.snapshot.Snapshot</em></a>) – Snapshot that is to be added to this DataSet.</p>
 </dd>
 </dl>
@@ -146,10 +154,10 @@ at all.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data">
-<span class="sig-name descname"><span class="pre">get_new_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset.get_new_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_new_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset.get_new_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data" title="Link to this definition"></a></dt>
 <dd><p>Read a new snapshot into RAM.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>file_index</strong> (<em>i</em>) – File to be read.</p>
 </dd>
 </dl>
@@ -157,14 +165,14 @@ at all.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets">
-<span class="sig-name descname"><span class="pre">mix_datasets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset.mix_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">mix_datasets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset.mix_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets" title="Link to this definition"></a></dt>
 <dd><p>Mix the order of the snapshots.</p>
 <p>With this, there can be some variance between runs.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset.LazyLoadDataset.return_outputs_directly">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">return_outputs_directly</span></span><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.return_outputs_directly" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">return_outputs_directly</span></span><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.return_outputs_directly" title="Link to this definition"></a></dt>
 <dd><p>Control whether outputs are actually transformed.</p>
 <p>Has to be False for training. In the testing case,
 Numerical errors are smaller if set to True.</p>
@@ -172,7 +180,7 @@ Numerical errors are smaller if set to True.</p>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>

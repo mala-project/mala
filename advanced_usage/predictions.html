@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Using MALA in production &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -31,12 +35,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -76,9 +84,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../advanced_usage.html">Advanced options</a> &raquo;</li>
-      <li>Using MALA in production</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../advanced_usage.html">Advanced options</a></li>
+      <li class="breadcrumb-item active">Using MALA in production</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/advanced_usage/predictions.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -88,8 +96,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="using-mala-in-production">
-<span id="production"></span><h1>Using MALA in production<a class="headerlink" href="#using-mala-in-production" title="Permalink to this headline"></a></h1>
+  <section id="using-mala-in-production">
+<span id="production"></span><h1>Using MALA in production<a class="headerlink" href="#using-mala-in-production" title="Link to this heading"></a></h1>
 <p>MALA is aimed at providing ML-DFT models for large scale investigations.
 Predictions at scale in principle work just like the predictions shown
 in the basic guide. One has to set a few additional parameters to make
@@ -123,8 +131,8 @@ reflected by the grid.</p>
 </pre></div>
 </div>
 </div></blockquote>
-<div class="section" id="predictions-on-gpu">
-<h2>Predictions on GPU<a class="headerlink" href="#predictions-on-gpu" title="Permalink to this headline"></a></h2>
+<section id="predictions-on-gpu">
+<h2>Predictions on GPU<a class="headerlink" href="#predictions-on-gpu" title="Link to this heading"></a></h2>
 <p>MALA predictions can be run entirely on a GPU. For the NN part of the workflow,
 this seems like a trivial statement, but the GPU acceleration extends to
 descriptor calculation and total energy evaluation. By enabling GPU support
@@ -144,9 +152,9 @@ which can be simulated, depending on the hardware you have access to.
 Usual numbers observed by MALA team put this limit at a few thousand atoms, for
 which the electronic structure can be predicted in 1-2 minutes. Currently,
 multi-GPU inference is being implemented.</p>
-</div>
-<div class="section" id="parallel-predictions-on-cpus">
-<h2>Parallel predictions on CPUs<a class="headerlink" href="#parallel-predictions-on-cpus" title="Permalink to this headline"></a></h2>
+</section>
+<section id="parallel-predictions-on-cpus">
+<h2>Parallel predictions on CPUs<a class="headerlink" href="#parallel-predictions-on-cpus" title="Link to this heading"></a></h2>
 <p>Since GPU usage is currently limited to one GPU at a time, predictions
 for ten- to hundreds of thousands of atoms rely on the usage of a large number
 of CPUs. Just like with GPU acceleration, nothing about the general inference
@@ -176,9 +184,9 @@ each z-plane will be divided <code class="docutils literal notranslate"><span cl
 If you, e.g., have an inference grid of <code class="docutils literal notranslate"><span class="pre">[200,200,200]</span></code>, you could use
 400 CPUs and <code class="docutils literal notranslate"><span class="pre">ysplit</span></code> of 2. Then, the grid will be sliced into 200 z-planes,
 and each z-plane will be sliced twice, allowing even faster inference.</p>
-</div>
-<div class="section" id="visualizing-observables">
-<h2>Visualizing observables<a class="headerlink" href="#visualizing-observables" title="Permalink to this headline"></a></h2>
+</section>
+<section id="visualizing-observables">
+<h2>Visualizing observables<a class="headerlink" href="#visualizing-observables" title="Link to this heading"></a></h2>
 <p>MALA also provides useful functions to visualize observables, as shown in
 the file <code class="docutils literal notranslate"><span class="pre">advanced/ex08_visualize_observables</span></code>. To calculate observables
 for analysis and visualization, you need an LDOS calculator object.
@@ -213,8 +221,8 @@ of interest for visualization via</p>
 format for visualization with regular electronic structure visualization
 software, all of these observables can be plotted with Python based
 visualization libraries such as <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

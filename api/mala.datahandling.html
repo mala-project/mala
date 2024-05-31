@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>datahandling &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -31,12 +35,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -90,10 +98,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="modules.html">API reference</a> &raquo;</li>
-          <li><a href="mala.html">mala</a> &raquo;</li>
-      <li>datahandling</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="mala.html">mala</a></li>
+      <li class="breadcrumb-item active">datahandling</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.datahandling.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -103,25 +111,113 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <span class="target" id="module-mala.datahandling"></span><p>All functions for handling data.</p>
-<div class="section" id="datahandling">
-<h1>datahandling<a class="headerlink" href="#datahandling" title="Permalink to this headline"></a></h1>
+  <p id="module-mala.datahandling">All functions for handling data.</p>
+<section id="datahandling">
+<h1>datahandling<a class="headerlink" href="#datahandling" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_converter.html">data_converter</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_handler.html">data_handler</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_handler_base.html">data_handler_base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_converter.html">data_converter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter"><code class="docutils literal notranslate"><span class="pre">DataConverter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.descriptor_calculator"><code class="docutils literal notranslate"><span class="pre">DataConverter.descriptor_calculator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.target_calculator"><code class="docutils literal notranslate"><span class="pre">DataConverter.target_calculator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.add_snapshot"><code class="docutils literal notranslate"><span class="pre">DataConverter.add_snapshot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.convert_snapshots"><code class="docutils literal notranslate"><span class="pre">DataConverter.convert_snapshots()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_handler.html">data_handler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler"><code class="docutils literal notranslate"><span class="pre">DataHandler</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.clear_data"><code class="docutils literal notranslate"><span class="pre">DataHandler.clear_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output"><code class="docutils literal notranslate"><span class="pre">DataHandler.get_snapshot_calculation_output()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.get_test_input_gradient"><code class="docutils literal notranslate"><span class="pre">DataHandler.get_test_input_gradient()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.mix_datasets"><code class="docutils literal notranslate"><span class="pre">DataHandler.mix_datasets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.prepare_data"><code class="docutils literal notranslate"><span class="pre">DataHandler.prepare_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.prepare_for_testing"><code class="docutils literal notranslate"><span class="pre">DataHandler.prepare_for_testing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.raw_numpy_to_converted_scaled_tensor"><code class="docutils literal notranslate"><span class="pre">DataHandler.raw_numpy_to_converted_scaled_tensor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.resize_snapshots_for_debugging"><code class="docutils literal notranslate"><span class="pre">DataHandler.resize_snapshots_for_debugging()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_handler_base.html">data_handler_base</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_handler_base.html#mala.datahandling.data_handler_base.DataHandlerBase"><code class="docutils literal notranslate"><span class="pre">DataHandlerBase</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_handler_base.html#mala.datahandling.data_handler_base.DataHandlerBase.add_snapshot"><code class="docutils literal notranslate"><span class="pre">DataHandlerBase.add_snapshot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_handler_base.html#mala.datahandling.data_handler_base.DataHandlerBase.clear_data"><code class="docutils literal notranslate"><span class="pre">DataHandlerBase.clear_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_handler_base.html#mala.datahandling.data_handler_base.DataHandlerBase.input_dimension"><code class="docutils literal notranslate"><span class="pre">DataHandlerBase.input_dimension</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_handler_base.html#mala.datahandling.data_handler_base.DataHandlerBase.output_dimension"><code class="docutils literal notranslate"><span class="pre">DataHandlerBase.output_dimension</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_repo.html">data_repo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_scaler.html">data_scaler</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_shuffler.html">data_shuffler</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.fast_tensor_dataset.html">fast_tensor_dataset</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html">lazy_load_dataset</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html">lazy_load_dataset_single</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.multi_lazy_load_data_loader.html">multi_lazy_load_data_loader</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.snapshot.html">snapshot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_scaler.html">data_scaler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler"><code class="docutils literal notranslate"><span class="pre">DataScaler</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting"><code class="docutils literal notranslate"><span class="pre">DataScaler.finish_incremental_fitting()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.fit"><code class="docutils literal notranslate"><span class="pre">DataScaler.fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.incremental_fit"><code class="docutils literal notranslate"><span class="pre">DataScaler.incremental_fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.inverse_transform"><code class="docutils literal notranslate"><span class="pre">DataScaler.inverse_transform()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.load_from_file"><code class="docutils literal notranslate"><span class="pre">DataScaler.load_from_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.save"><code class="docutils literal notranslate"><span class="pre">DataScaler.save()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.start_incremental_fitting"><code class="docutils literal notranslate"><span class="pre">DataScaler.start_incremental_fitting()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.transform"><code class="docutils literal notranslate"><span class="pre">DataScaler.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_shuffler.html">data_shuffler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler"><code class="docutils literal notranslate"><span class="pre">DataShuffler</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler.add_snapshot"><code class="docutils literal notranslate"><span class="pre">DataShuffler.add_snapshot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler.shuffle_snapshots"><code class="docutils literal notranslate"><span class="pre">DataShuffler.shuffle_snapshots()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.fast_tensor_dataset.html">fast_tensor_dataset</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.fast_tensor_dataset.html#mala.datahandling.fast_tensor_dataset.FastTensorDataset"><code class="docutils literal notranslate"><span class="pre">FastTensorDataset</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.fast_tensor_dataset.html#mala.datahandling.fast_tensor_dataset.FastTensorDataset.shuffle"><code class="docutils literal notranslate"><span class="pre">FastTensorDataset.shuffle()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html">lazy_load_dataset</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset"><code class="docutils literal notranslate"><span class="pre">LazyLoadDataset</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset"><code class="docutils literal notranslate"><span class="pre">LazyLoadDataset.add_snapshot_to_dataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data"><code class="docutils literal notranslate"><span class="pre">LazyLoadDataset.get_new_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets"><code class="docutils literal notranslate"><span class="pre">LazyLoadDataset.mix_datasets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.return_outputs_directly"><code class="docutils literal notranslate"><span class="pre">LazyLoadDataset.return_outputs_directly</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html">lazy_load_dataset_single</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle"><code class="docutils literal notranslate"><span class="pre">LazyLoadDatasetSingle</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.allocate_shared_mem"><code class="docutils literal notranslate"><span class="pre">LazyLoadDatasetSingle.allocate_shared_mem()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.deallocate_shared_mem"><code class="docutils literal notranslate"><span class="pre">LazyLoadDatasetSingle.deallocate_shared_mem()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.delete_data"><code class="docutils literal notranslate"><span class="pre">LazyLoadDatasetSingle.delete_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.mix_datasets"><code class="docutils literal notranslate"><span class="pre">LazyLoadDatasetSingle.mix_datasets()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.multi_lazy_load_data_loader.html">multi_lazy_load_data_loader</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.multi_lazy_load_data_loader.html#mala.datahandling.multi_lazy_load_data_loader.MultiLazyLoadDataLoader"><code class="docutils literal notranslate"><span class="pre">MultiLazyLoadDataLoader</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.multi_lazy_load_data_loader.html#mala.datahandling.multi_lazy_load_data_loader.MultiLazyLoadDataLoader.cleanup"><code class="docutils literal notranslate"><span class="pre">MultiLazyLoadDataLoader.cleanup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.multi_lazy_load_data_loader.html#mala.datahandling.multi_lazy_load_data_loader.MultiLazyLoadDataLoader.load_snapshot_to_shm"><code class="docutils literal notranslate"><span class="pre">MultiLazyLoadDataLoader.load_snapshot_to_shm()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.snapshot.html">snapshot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot"><code class="docutils literal notranslate"><span class="pre">Snapshot</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot.from_json"><code class="docutils literal notranslate"><span class="pre">Snapshot.from_json()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
-</div>
+</section>
 
 
            </div>

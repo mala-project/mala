@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>acsd_analyzer &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -31,12 +35,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -98,11 +106,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="modules.html">API reference</a> &raquo;</li>
-          <li><a href="mala.html">mala</a> &raquo;</li>
-          <li><a href="mala.network.html">network</a> &raquo;</li>
-      <li>acsd_analyzer</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="mala.html">mala</a></li>
+          <li class="breadcrumb-item"><a href="mala.network.html">network</a></li>
+      <li class="breadcrumb-item active">acsd_analyzer</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.network.acsd_analyzer.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -112,17 +120,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="module-mala.network.acsd_analyzer">
-<span id="acsd-analyzer"></span><h1>acsd_analyzer<a class="headerlink" href="#module-mala.network.acsd_analyzer" title="Permalink to this headline"></a></h1>
+  <section id="module-mala.network.acsd_analyzer">
+<span id="acsd-analyzer"></span><h1>acsd_analyzer<a class="headerlink" href="#module-mala.network.acsd_analyzer" title="Link to this heading"></a></h1>
 <p>Class for performing a full ACSD analysis.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mala.network.acsd_analyzer.ACSDAnalyzer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ACSDAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt" title="mala.network.hyper_opt.HyperOpt"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.hyper_opt.HyperOpt</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ACSDAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt" title="mala.network.hyper_opt.HyperOpt"><code class="xref py py-class docutils literal notranslate"><span class="pre">HyperOpt</span></code></a></p>
 <p>Analyzer based on the ACSD analysis.</p>
 <p>Mathematical details see here: doi.org/10.1088/2632-2153/ac9956</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>params</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this hyperparameter optimizer.</p></li>
 <li><p><strong>descriptor_calculator</strong> (<a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor" title="mala.descriptors.descriptor.Descriptor"><em>mala.descriptors.descriptor.Descriptor</em></a>) – The descriptor calculator used for parsing/converting fingerprint
@@ -136,10 +144,10 @@ parameters provided. Default: None</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.acsd_analyzer.ACSDAnalyzer.add_hyperparameter">
-<span class="sig-name descname"><span class="pre">add_hyperparameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer.add_hyperparameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer.add_hyperparameter" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_hyperparameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer.add_hyperparameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer.add_hyperparameter" title="Link to this definition"></a></dt>
 <dd><p>Add a hyperparameter to the current investigation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>string</em>) – Name of the hyperparameter. Please note that these names always
 have to be the same as the parameter names in
@@ -152,10 +160,10 @@ ParametersDescriptors.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.acsd_analyzer.ACSDAnalyzer.add_snapshot">
-<span class="sig-name descname"><span class="pre">add_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descriptor_input_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_input_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer.add_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer.add_snapshot" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descriptor_input_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_input_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer.add_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer.add_snapshot" title="Link to this definition"></a></dt>
 <dd><p>Add a snapshot to be processed.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>descriptor_input_type</strong> (<em>string</em>) – Type of descriptor data to be processed.
 See mala.datahandling.data_converter.descriptor_input_types
@@ -174,7 +182,7 @@ for options.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.acsd_analyzer.ACSDAnalyzer.perform_study">
-<span class="sig-name descname"><span class="pre">perform_study</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_based_communication</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_plotting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer.perform_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer.perform_study" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">perform_study</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_based_communication</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_plotting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer.perform_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer.perform_study" title="Link to this definition"></a></dt>
 <dd><p>Perform the study, i.e. the optimization.</p>
 <p>This is done by sampling different descriptors, calculated with
 different hyperparameters and then calculating the ACSD.</p>
@@ -182,7 +190,7 @@ different hyperparameters and then calculating the ACSD.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.acsd_analyzer.ACSDAnalyzer.set_optimal_parameters">
-<span class="sig-name descname"><span class="pre">set_optimal_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer.set_optimal_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer.set_optimal_parameters" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_optimal_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer.set_optimal_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer.set_optimal_parameters" title="Link to this definition"></a></dt>
 <dd><p>Set the optimal parameters found in the present study.</p>
 <p>The parameters will be written to the parameter object with which the
 hyperparameter optimizer was created.</p>
@@ -190,7 +198,7 @@ hyperparameter optimizer was created.</p>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>

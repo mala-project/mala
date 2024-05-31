@@ -1,24 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.network.hyper_opt_oat &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/clipboard.min.js"></script>
-        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -29,12 +32,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html">
-            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -62,9 +69,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>mala.network.hyper_opt_oat</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mala.network.hyper_opt_oat</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -93,7 +100,9 @@
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
 
 
-<div class="viewcode-block" id="HyperOptOAT"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT">[docs]</a><span class="k">class</span> <span class="nc">HyperOptOAT</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperOptOAT">
+<a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT">[docs]</a>
+<span class="k">class</span> <span class="nc">HyperOptOAT</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Hyperparameter optimizer using Orthogonal Array Tuning.</span>
 
 <span class="sd">    Based on https://link.springer.com/chapter/10.1007/978-3-030-36808-1_31.</span>
@@ -131,7 +140,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">current_trial</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="HyperOptOAT.add_hyperparameter"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.add_hyperparameter">[docs]</a>    <span class="k">def</span> <span class="nf">add_hyperparameter</span><span class="p">(</span>
+<div class="viewcode-block" id="HyperOptOAT.add_hyperparameter">
+<a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.add_hyperparameter">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_hyperparameter</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -160,7 +171,10 @@
                 <span class="n">HyperparameterOAT</span><span class="p">(</span><span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">),</span>
             <span class="p">)</span></div>
 
-<div class="viewcode-block" id="HyperOptOAT.perform_study"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.perform_study">[docs]</a>    <span class="k">def</span> <span class="nf">perform_study</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HyperOptOAT.perform_study">
+<a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.perform_study">[docs]</a>
+    <span class="k">def</span> <span class="nf">perform_study</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform the study, i.e. the optimization.</span>
 
@@ -207,7 +221,10 @@
         <span class="c1"># Perform Range Analysis</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_optimal_parameters</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="HyperOptOAT.get_optimal_parameters"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.get_optimal_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">get_optimal_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HyperOptOAT.get_optimal_parameters">
+<a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.get_optimal_parameters">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_optimal_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find the optimal set of hyperparameters by doing range analysis.</span>
 
@@ -229,7 +246,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">optimal_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">A</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">importance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">([</span><span class="nb">max</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">A</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="HyperOptOAT.show_order_of_importance"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.show_order_of_importance">[docs]</a>    <span class="k">def</span> <span class="nf">show_order_of_importance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HyperOptOAT.show_order_of_importance">
+<a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.show_order_of_importance">[docs]</a>
+    <span class="k">def</span> <span class="nf">show_order_of_importance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Print the order of importance of the hyperparameters.&quot;&quot;&quot;</span>
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Order of Importance: &quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">printout</span><span class="p">(</span>
@@ -241,7 +261,10 @@
             <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="HyperOptOAT.set_optimal_parameters"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.set_optimal_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_optimal_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HyperOptOAT.set_optimal_parameters">
+<a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.set_optimal_parameters">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_optimal_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the optimal parameters found in the present study.</span>
 
@@ -250,7 +273,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="o">.</span><span class="n">parse_trial_oat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">optimal_params</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HyperOptOAT.get_orthogonal_array"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.get_orthogonal_array">[docs]</a>    <span class="k">def</span> <span class="nf">get_orthogonal_array</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HyperOptOAT.get_orthogonal_array">
+<a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.get_orthogonal_array">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_orthogonal_array</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the best OA used for optimal hyperparameter sampling.</span>
 
@@ -307,7 +333,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arraylist</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HyperOptOAT.number_of_runs"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.number_of_runs">[docs]</a>    <span class="k">def</span> <span class="nf">number_of_runs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HyperOptOAT.number_of_runs">
+<a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.number_of_runs">[docs]</a>
+    <span class="k">def</span> <span class="nf">number_of_runs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the minimum number of runs required for an Orthogonal array.</span>
 
@@ -323,7 +352,10 @@
         <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">lcm</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HyperOptOAT.get_best_trial_results"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.get_best_trial_results">[docs]</a>    <span class="k">def</span> <span class="nf">get_best_trial_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HyperOptOAT.get_best_trial_results">
+<a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.get_best_trial_results">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_best_trial_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the best trial out of the list, including the value.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s2">&quot;minimize&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="p">)]</span>
@@ -333,6 +365,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                 <span class="s2">&quot;Invalid direction for hyperparameter optimization selected.&quot;</span>
             <span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">__check_factor_levels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check that the factors are in a decreasing order.&quot;&quot;&quot;</span>
@@ -350,7 +383,9 @@
                 <span class="s2">&quot;decreasing order of number of choices&quot;</span>
             <span class="p">)</span>
 
-<div class="viewcode-block" id="HyperOptOAT.resume_checkpoint"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.resume_checkpoint">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="HyperOptOAT.resume_checkpoint">
+<a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.resume_checkpoint">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">resume_checkpoint</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">no_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
@@ -397,7 +432,10 @@
 
         <span class="k">return</span> <span class="n">loaded_params</span><span class="p">,</span> <span class="n">new_datahandler</span><span class="p">,</span> <span class="n">new_hyperopt</span></div>
 
-<div class="viewcode-block" id="HyperOptOAT.load_from_file"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="HyperOptOAT.load_from_file">
+<a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.load_from_file">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a hyperparameter optimizer from a file.</span>
@@ -441,6 +479,7 @@
             <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">__OA</span> <span class="o">=</span> <span class="n">loaded_tracking_data</span><span class="p">[</span><span class="s2">&quot;OA&quot;</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">loaded_hyperopt</span></div>
+
 
     <span class="k">def</span> <span class="nf">__create_checkpointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a checkpoint of optuna study, if necessary.&quot;&quot;&quot;</span>
@@ -505,6 +544,7 @@
                 <span class="p">}</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">hyperopt_name</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
                     <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">study</span><span class="p">,</span> <span class="n">handle</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>

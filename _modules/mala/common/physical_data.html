@@ -1,24 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.common.physical_data &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/clipboard.min.js"></script>
-        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -29,12 +32,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html">
-            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -62,9 +69,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>mala.common.physical_data</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mala.common.physical_data</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -86,7 +93,9 @@
 <span class="kn">from</span> <span class="nn">mala.version</span> <span class="kn">import</span> <span class="n">__version__</span> <span class="k">as</span> <span class="n">mala_version</span>
 
 
-<div class="viewcode-block" id="PhysicalData"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData">[docs]</a><span class="k">class</span> <span class="nc">PhysicalData</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="PhysicalData">
+<a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData">[docs]</a>
+<span class="k">class</span> <span class="nc">PhysicalData</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for physical data.</span>
 
@@ -144,7 +153,9 @@
     <span class="c1">#   because there is no need to.</span>
     <span class="c1">##############################</span>
 
-<div class="viewcode-block" id="PhysicalData.read_from_numpy_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_from_numpy_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_numpy_file</span><span class="p">(</span>
+<div class="viewcode-block" id="PhysicalData.read_from_numpy_file">
+<a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_from_numpy_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_from_numpy_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reshape</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -186,7 +197,10 @@
                 <span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_array</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PhysicalData.read_from_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_from_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PhysicalData.read_from_openpmd_file">
+<a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_from_openpmd_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_from_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the data from a numpy file.</span>
 
@@ -328,7 +342,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_array</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PhysicalData.read_dimensions_from_numpy_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_dimensions_from_numpy_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_dimensions_from_numpy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">read_dtype</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PhysicalData.read_dimensions_from_numpy_file">
+<a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_dimensions_from_numpy_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_dimensions_from_numpy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">read_dtype</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read only the dimensions from a numpy file.</span>
 
@@ -349,7 +366,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_dimensions</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">loaded_array</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="PhysicalData.read_dimensions_from_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_dimensions_from_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_dimensions_from_openpmd_file</span><span class="p">(</span>
+
+<div class="viewcode-block" id="PhysicalData.read_dimensions_from_openpmd_file">
+<a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_dimensions_from_openpmd_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_dimensions_from_openpmd_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">read_dtype</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -420,7 +440,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_dimensions</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">tuple_from_file</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="PhysicalData.write_to_numpy_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_numpy_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_numpy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PhysicalData.write_to_numpy_file">
+<a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_numpy_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_to_numpy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write data to a numpy file.</span>
 
@@ -434,7 +457,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PhysicalData.SkipArrayWriting"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.SkipArrayWriting">[docs]</a>    <span class="k">class</span> <span class="nc">SkipArrayWriting</span><span class="p">:</span>
+
+<div class="viewcode-block" id="PhysicalData.SkipArrayWriting">
+<a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.SkipArrayWriting">[docs]</a>
+    <span class="k">class</span> <span class="nc">SkipArrayWriting</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Optional/alternative parameter for `write_to_openpmd_file` function.</span>
 
@@ -463,7 +489,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">=</span> <span class="n">feature_size</span></div>
 
-<div class="viewcode-block" id="PhysicalData.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span>
+
+<div class="viewcode-block" id="PhysicalData.write_to_openpmd_file">
+<a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">path</span><span class="p">,</span>
         <span class="n">array</span><span class="p">,</span>
@@ -540,7 +569,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">write_to_openpmd_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">series</span></div>
 
-<div class="viewcode-block" id="PhysicalData.write_to_openpmd_iteration"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_iteration</span><span class="p">(</span>
+
+<div class="viewcode-block" id="PhysicalData.write_to_openpmd_iteration">
+<a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_iteration">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_to_openpmd_iteration</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">iteration</span><span class="p">,</span>
         <span class="n">array</span><span class="p">,</span>
@@ -722,6 +754,7 @@
 
         <span class="n">iteration</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
+
     <span class="c1">##############################</span>
     <span class="c1"># Class-specific reshaping, processing, etc. of data.</span>
     <span class="c1">#    Has to be implemented by the classes themselves. E.g. descriptors may</span>
@@ -783,6 +816,7 @@
             <span class="k">return</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">default_value</span></div>
+
 </pre></div>
 
            </div>

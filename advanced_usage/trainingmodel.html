@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Improved training performance &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -31,12 +35,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -79,9 +87,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../advanced_usage.html">Advanced options</a> &raquo;</li>
-      <li>Improved training performance</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../advanced_usage.html">Advanced options</a></li>
+      <li class="breadcrumb-item active">Improved training performance</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/advanced_usage/trainingmodel.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -91,14 +99,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="improved-training-performance">
-<span id="advanced-training"></span><h1>Improved training performance<a class="headerlink" href="#improved-training-performance" title="Permalink to this headline"></a></h1>
+  <section id="improved-training-performance">
+<span id="advanced-training"></span><h1>Improved training performance<a class="headerlink" href="#improved-training-performance" title="Link to this heading"></a></h1>
 <p>MALA offers a options to make training available at large scales in reasonable
 amounts of time. The general training workflow is the same as outlined in the
 basic section; the advanced features can be activated by setting
 the appropriate parameters in the <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> object.</p>
-<div class="section" id="using-a-gpu">
-<h2>Using a GPU<a class="headerlink" href="#using-a-gpu" title="Permalink to this headline"></a></h2>
+<section id="using-a-gpu">
+<h2>Using a GPU<a class="headerlink" href="#using-a-gpu" title="Link to this heading"></a></h2>
 <p>The simplest way to accelerate any NN training is to use a GPU for training.
 Training NNs on GPUs is a well established industry practice and yields
 huge speedups. MALA supports GPU training. You have to activate
@@ -148,9 +156,9 @@ been shown to speed-up training by up to a factor of 5 if used together,
 while maintaining the same prediction accuracy.</p>
 <p>Currently, these options are disabled by default as they are still being tested
 extensively by the MALA team in production. <strong>Yet, activating them is highly recommended!</strong></p>
-</div>
-<div class="section" id="advanced-training-metrics">
-<h2>Advanced training metrics<a class="headerlink" href="#advanced-training-metrics" title="Permalink to this headline"></a></h2>
+</section>
+<section id="advanced-training-metrics">
+<h2>Advanced training metrics<a class="headerlink" href="#advanced-training-metrics" title="Link to this heading"></a></h2>
 <p>When monitoring an NN training, one often checks the validation loss, which
 is directly outputted by MALA. By default, this validation loss gives the
 mean squared error between LDOS prediction and actual value. From a purely
@@ -179,9 +187,9 @@ via</p>
 </pre></div>
 </div>
 </div></blockquote>
-</div>
-<div class="section" id="checkpointing-a-training-run">
-<h2>Checkpointing a training run<a class="headerlink" href="#checkpointing-a-training-run" title="Permalink to this headline"></a></h2>
+</section>
+<section id="checkpointing-a-training-run">
+<h2>Checkpointing a training run<a class="headerlink" href="#checkpointing-a-training-run" title="Link to this heading"></a></h2>
 <p>NN training can take a long time, and on HPC systems, where they are usually
 performed, there exist time limitations for calculations. Thus, it is often
 necessary to checkpoint a training run and resume it at a later point.
@@ -206,9 +214,9 @@ from a checkpoint can trivially be implemented via</p>
 </div>
 </div></blockquote>
 <p>Where <code class="docutils literal notranslate"><span class="pre">initial_setup()</span></code> encapsulates the training run setup.</p>
-</div>
-<div class="section" id="using-lazy-loading">
-<h2>Using lazy loading<a class="headerlink" href="#using-lazy-loading" title="Permalink to this headline"></a></h2>
+</section>
+<section id="using-lazy-loading">
+<h2>Using lazy loading<a class="headerlink" href="#using-lazy-loading" title="Link to this heading"></a></h2>
 <p>Lazy loading was already briefly mentioned during the testing of a network.
 To recap, the idea of lazy loading is to incrementally load data into
 memory so as to save on RAM usage in cases where large amounts of data are
@@ -271,9 +279,9 @@ the <code class="docutils literal notranslate"><span class="pre">DataConverter</
 keyword, you can fine-tune the number of new snapshots being created.
 By default, the same number of snapshots as had been provided will be created
 (if possible).</p>
-</div>
-<div class="section" id="using-tensorboard">
-<h2>Using tensorboard<a class="headerlink" href="#using-tensorboard" title="Permalink to this headline"></a></h2>
+</section>
+<section id="using-tensorboard">
+<h2>Using tensorboard<a class="headerlink" href="#using-tensorboard" title="Link to this heading"></a></h2>
 <p>Training routines in MALA can be visualized via tensorboard, as also shown
 in the file <code class="docutils literal notranslate"><span class="pre">advanced/ex03_tensor_board</span></code>. Simply enable tensorboard
 visualization prior to training via</p>
@@ -297,9 +305,9 @@ via</p>
 </div></blockquote>
 <p>The full path for <code class="docutils literal notranslate"><span class="pre">path_to_visualization</span></code> can be accessed via
 <code class="docutils literal notranslate"><span class="pre">trainer.full_visualization_path</span></code>.</p>
-</div>
-<div class="section" id="training-in-parallel">
-<h2>Training in parallel<a class="headerlink" href="#training-in-parallel" title="Permalink to this headline"></a></h2>
+</section>
+<section id="training-in-parallel">
+<h2>Training in parallel<a class="headerlink" href="#training-in-parallel" title="Link to this heading"></a></h2>
 <p>If large models or large data sets are employed, training may be slow even
 if a GPU is used. In this case, multiple GPUs can be employed with MALA
 using the <code class="docutils literal notranslate"><span class="pre">DistributedDataParallel</span></code> (DDP) formalism of the <code class="docutils literal notranslate"><span class="pre">torch</span></code> library.
@@ -357,8 +365,8 @@ srun<span class="w"> </span>-N<span class="w"> </span>NUMBER_OF_NODES<span class
 </div></blockquote>
 <p>An overview of environment variables to be set can be found <a class="reference external" href="https://pytorch.org/docs/stable/distributed.html#environment-variable-initialization">in the official documentation</a>.
 A general tutorial on DDP itself can be found <a class="reference external" href="https://pytorch.org/tutorials/beginner/ddp_series_theory.html">here</a>.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

@@ -1,24 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.common.parallelizer &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/clipboard.min.js"></script>
-        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -29,12 +32,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html">
-            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -62,9 +69,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>mala.common.parallelizer</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mala.common.parallelizer</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -92,7 +99,9 @@
 <span class="n">lammps_instance</span> <span class="o">=</span> <span class="kc">None</span>
 
 
-<div class="viewcode-block" id="set_current_verbosity"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_current_verbosity">[docs]</a><span class="k">def</span> <span class="nf">set_current_verbosity</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
+<div class="viewcode-block" id="set_current_verbosity">
+<a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_current_verbosity">[docs]</a>
+<span class="k">def</span> <span class="nf">set_current_verbosity</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the verbosity used for the printout statements.</span>
 
@@ -107,7 +116,10 @@
     <span class="n">current_verbosity</span> <span class="o">=</span> <span class="n">new_value</span></div>
 
 
-<div class="viewcode-block" id="set_ddp_status"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_ddp_status">[docs]</a><span class="k">def</span> <span class="nf">set_ddp_status</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
+
+<div class="viewcode-block" id="set_ddp_status">
+<a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_ddp_status">[docs]</a>
+<span class="k">def</span> <span class="nf">set_ddp_status</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the ddp status.</span>
 
@@ -128,7 +140,10 @@
     <span class="n">use_ddp</span> <span class="o">=</span> <span class="n">new_value</span></div>
 
 
-<div class="viewcode-block" id="set_mpi_status"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_mpi_status">[docs]</a><span class="k">def</span> <span class="nf">set_mpi_status</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
+
+<div class="viewcode-block" id="set_mpi_status">
+<a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_mpi_status">[docs]</a>
+<span class="k">def</span> <span class="nf">set_mpi_status</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the MPI status.</span>
 
@@ -153,12 +168,15 @@
         <span class="k">global</span> <span class="n">comm</span>
         <span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span></div>
 
+
     <span class="c1"># else:</span>
     <span class="c1">#     global comm</span>
     <span class="c1">#     comm = MockCommunicator()</span>
 
 
-<div class="viewcode-block" id="set_lammps_instance"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_lammps_instance">[docs]</a><span class="k">def</span> <span class="nf">set_lammps_instance</span><span class="p">(</span><span class="n">new_instance</span><span class="p">):</span>
+<div class="viewcode-block" id="set_lammps_instance">
+<a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_lammps_instance">[docs]</a>
+<span class="k">def</span> <span class="nf">set_lammps_instance</span><span class="p">(</span><span class="n">new_instance</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set a new LAMMPS instance to be targeted during the finalize call.</span>
 
@@ -179,7 +197,10 @@
         <span class="n">lammps_instance</span> <span class="o">=</span> <span class="n">new_instance</span></div>
 
 
-<div class="viewcode-block" id="get_rank"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.get_rank">[docs]</a><span class="k">def</span> <span class="nf">get_rank</span><span class="p">():</span>
+
+<div class="viewcode-block" id="get_rank">
+<a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.get_rank">[docs]</a>
+<span class="k">def</span> <span class="nf">get_rank</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the rank of the current thread.</span>
 
@@ -198,7 +219,10 @@
     <span class="k">return</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="get_local_rank"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.get_local_rank">[docs]</a><span class="k">def</span> <span class="nf">get_local_rank</span><span class="p">():</span>
+
+<div class="viewcode-block" id="get_local_rank">
+<a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.get_local_rank">[docs]</a>
+<span class="k">def</span> <span class="nf">get_local_rank</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the local rank of the process.</span>
 
@@ -250,7 +274,10 @@
     <span class="k">return</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="get_size"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.get_size">[docs]</a><span class="k">def</span> <span class="nf">get_size</span><span class="p">():</span>
+
+<div class="viewcode-block" id="get_size">
+<a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.get_size">[docs]</a>
+<span class="k">def</span> <span class="nf">get_size</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the number of ranks.</span>
 
@@ -265,8 +292,11 @@
         <span class="k">return</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_size</span><span class="p">()</span></div>
 
 
+
 <span class="c1"># TODO: This is hacky, improve it.</span>
-<div class="viewcode-block" id="get_comm"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.get_comm">[docs]</a><span class="k">def</span> <span class="nf">get_comm</span><span class="p">():</span>
+<div class="viewcode-block" id="get_comm">
+<a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.get_comm">[docs]</a>
+<span class="k">def</span> <span class="nf">get_comm</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the MPI communicator, if MPI is being used.</span>
 
@@ -279,7 +309,10 @@
     <span class="k">return</span> <span class="n">comm</span></div>
 
 
-<div class="viewcode-block" id="barrier"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.barrier">[docs]</a><span class="k">def</span> <span class="nf">barrier</span><span class="p">():</span>
+
+<div class="viewcode-block" id="barrier">
+<a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.barrier">[docs]</a>
+<span class="k">def</span> <span class="nf">barrier</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;General interface for a barrier.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">use_ddp</span><span class="p">:</span>
         <span class="n">dist</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
@@ -288,7 +321,10 @@
     <span class="k">return</span></div>
 
 
-<div class="viewcode-block" id="printout"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.printout">[docs]</a><span class="k">def</span> <span class="nf">printout</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+<div class="viewcode-block" id="printout">
+<a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.printout">[docs]</a>
+<span class="k">def</span> <span class="nf">printout</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interface to built-in &quot;print&quot; for parallel runs. Can be used like print.</span>
 
@@ -312,7 +348,10 @@
             <span class="nb">print</span><span class="p">(</span><span class="n">outstring</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="parallel_warn"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.parallel_warn">[docs]</a><span class="k">def</span> <span class="nf">parallel_warn</span><span class="p">(</span><span class="n">warning</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">):</span>
+
+<div class="viewcode-block" id="parallel_warn">
+<a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.parallel_warn">[docs]</a>
+<span class="k">def</span> <span class="nf">parallel_warn</span><span class="p">(</span><span class="n">warning</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interface for warnings in parallel runs. Can be used like warnings.warn.</span>
 
@@ -334,10 +373,14 @@
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">warning</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="finalize"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.finalize">[docs]</a><span class="k">def</span> <span class="nf">finalize</span><span class="p">():</span>
+
+<div class="viewcode-block" id="finalize">
+<a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.finalize">[docs]</a>
+<span class="k">def</span> <span class="nf">finalize</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Properly shut down lingering Kokkos/GPU instances.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">lammps_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">lammps_instance</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span></div>
+
 </pre></div>
 
            </div>

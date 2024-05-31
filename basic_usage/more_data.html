@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Data generation and conversion &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -31,12 +35,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -74,9 +82,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../basic_usage.html">Getting started with MALA</a> &raquo;</li>
-      <li>Data generation and conversion</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../basic_usage.html">Getting started with MALA</a></li>
+      <li class="breadcrumb-item active">Data generation and conversion</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/basic_usage/more_data.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -86,14 +94,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="data-generation-and-conversion">
-<h1>Data generation and conversion<a class="headerlink" href="#data-generation-and-conversion" title="Permalink to this headline"></a></h1>
+  <section id="data-generation-and-conversion">
+<h1>Data generation and conversion<a class="headerlink" href="#data-generation-and-conversion" title="Link to this heading"></a></h1>
 <p>MALA operates on volumetric data. Volumetric data is stored in binary files.
 By default - and discussed here, in the introductory guide - this
 means <code class="docutils literal notranslate"><span class="pre">numpy</span></code> files (<code class="docutils literal notranslate"><span class="pre">.npy</span></code> files). Advanced data storing techniques
 are <a class="reference internal" href="../advanced_usage/openpmd.html#openpmd-data"><span class="std std-ref">also available</span></a>.</p>
-<div class="section" id="data-generation">
-<h2>Data generation<a class="headerlink" href="#data-generation" title="Permalink to this headline"></a></h2>
+<section id="data-generation">
+<h2>Data generation<a class="headerlink" href="#data-generation" title="Link to this heading"></a></h2>
 <p>Data generation for MALA is done by electronic structure calculations using
 appropriate simulation software. The raw outputs of such calculations
 are atomic positions and the LDOS, the latter usually as multiple individual
@@ -111,9 +119,9 @@ energy grid when calculating the LDOS. See the <a class="reference external" hre
 for more information on this topic. Lastly, when calculating
 the LDOS with <code class="docutils literal notranslate"><span class="pre">pp.x</span></code>, make sure to set <code class="docutils literal notranslate"><span class="pre">use_gauss_ldos=.true.</span></code> in the
 <code class="docutils literal notranslate"><span class="pre">inputpp</span></code> section.</p>
-</div>
-<div class="section" id="data-conversion">
-<h2>Data conversion<a class="headerlink" href="#data-conversion" title="Permalink to this headline"></a></h2>
+</section>
+<section id="data-conversion">
+<h2>Data conversion<a class="headerlink" href="#data-conversion" title="Link to this heading"></a></h2>
 <p>Once you have performed the necessary simulations, you will have to calculate
 the volumetric descriptor field from the atomic positions and transform
 the LDOS into a format useable by MALA.</p>
@@ -206,8 +214,8 @@ of data or give one complete path, <code class="docutils literal notranslate"><s
 personal preference. Fine-granular access
 to the calculators is enabled via the <code class="docutils literal notranslate"><span class="pre">descriptor_calculation_kwargs</span></code> and
 <code class="docutils literal notranslate"><span class="pre">target_calculation_kwargs</span></code> arguments, but usually not needed.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

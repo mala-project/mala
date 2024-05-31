@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Installing MALA &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -31,12 +35,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -75,9 +83,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../installation.html">Installation</a> &raquo;</li>
-      <li>Installing MALA</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../installation.html">Installation</a></li>
+      <li class="breadcrumb-item active">Installing MALA</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/install/installing_mala.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -87,10 +95,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="installing-mala">
-<h1>Installing MALA<a class="headerlink" href="#installing-mala" title="Permalink to this headline"></a></h1>
-<div class="section" id="prerequisites">
-<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline"></a></h2>
+  <section id="installing-mala">
+<h1>Installing MALA<a class="headerlink" href="#installing-mala" title="Link to this heading"></a></h1>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
 <p>MALA does not depend on a specific Python version. The most recent Python
 version it has been tested with successfully is Python <code class="docutils literal notranslate"><span class="pre">3.10.4</span></code>.</p>
 <p>MALA requires <code class="docutils literal notranslate"><span class="pre">torch</span></code> in order to function. As the installation of torch
@@ -98,9 +106,9 @@ depends highly on the architecture you are using, <code class="docutils literal 
 automatically be installed alongside MALA. Please obtain a suitable version
 of <code class="docutils literal notranslate"><span class="pre">torch</span></code> from the <a class="reference external" href="https://pytorch.org/">official website</a> before
 continuing.</p>
-</div>
-<div class="section" id="installing-the-python-library">
-<h2>Installing the Python library<a class="headerlink" href="#installing-the-python-library" title="Permalink to this headline"></a></h2>
+</section>
+<section id="installing-the-python-library">
+<h2>Installing the Python library<a class="headerlink" href="#installing-the-python-library" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Download the MALA repository, e.g., with <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">git&#64;github.com:mala-project/mala.git</span></code></p></li>
 <li><p>Change into the directory you cloned the repository to</p></li>
@@ -115,9 +123,9 @@ method may be used for large scale hyperparameter optimization (advanced users)<
 <li><p><code class="docutils literal notranslate"><span class="pre">test</span></code>: Installs <code class="docutils literal notranslate"><span class="pre">pytest</span></code> which allows users to test the code (developers)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">doc</span></code>: Installs all dependencies for building the documentary locally (developers)</p></li>
 </ul>
-</div>
-<div class="section" id="downloading-and-adding-example-data-recommended">
-<h2>Downloading and adding example data (Recommended)<a class="headerlink" href="#downloading-and-adding-example-data-recommended" title="Permalink to this headline"></a></h2>
+</section>
+<section id="downloading-and-adding-example-data-recommended">
+<h2>Downloading and adding example data (Recommended)<a class="headerlink" href="#downloading-and-adding-example-data-recommended" title="Link to this heading"></a></h2>
 <p>The examples and tests need additional data to run. The MALA team provides a
 <a class="reference external" href="https://github.com/mala-project/test-data">data repository</a>. Please be sure
 to check out the correct tag for the data repository, since the data repository
@@ -137,9 +145,9 @@ git<span class="w"> </span>checkout<span class="w"> </span>v1.7.0
 <li><p>Export the path to that repo by <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">MALA_DATA_REPO=~/path/to/data/repo</span></code></p></li>
 </ul>
 <p>This will be used by tests and examples.</p>
-</div>
-<div class="section" id="build-documentation-locally-optional">
-<h2>Build documentation locally (Optional)<a class="headerlink" href="#build-documentation-locally-optional" title="Permalink to this headline"></a></h2>
+</section>
+<section id="build-documentation-locally-optional">
+<h2>Build documentation locally (Optional)<a class="headerlink" href="#build-documentation-locally-optional" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Install the prerequisites (if you haven’t already during the MALA setup) via <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">docs/requirements.txt</span></code></p></li>
 <li><p>Change into <code class="docutils literal notranslate"><span class="pre">docs/</span></code> folder.</p></li>
@@ -148,8 +156,8 @@ git<span class="w"> </span>checkout<span class="w"> </span>v1.7.0
 <li><p>Open <code class="docutils literal notranslate"><span class="pre">docs/_build/html/index.html</span></code>.</p></li>
 <li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code> on Linux/macOS or <code class="docutils literal notranslate"><span class="pre">.\make.bat</span> <span class="pre">clean</span></code> on Windows. if required (e.g. after fixing erros) and building again</p></li>
 </ul>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

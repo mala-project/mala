@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Using ML-DFT models for predictions &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -31,12 +35,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -73,9 +81,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../basic_usage.html">Getting started with MALA</a> &raquo;</li>
-      <li>Using ML-DFT models for predictions</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../basic_usage.html">Getting started with MALA</a></li>
+      <li class="breadcrumb-item active">Using ML-DFT models for predictions</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/basic_usage/predictions.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -85,8 +93,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="using-ml-dft-models-for-predictions">
-<h1>Using ML-DFT models for predictions<a class="headerlink" href="#using-ml-dft-models-for-predictions" title="Permalink to this headline"></a></h1>
+  <section id="using-ml-dft-models-for-predictions">
+<h1>Using ML-DFT models for predictions<a class="headerlink" href="#using-ml-dft-models-for-predictions" title="Link to this heading"></a></h1>
 <p>Having trained and saved a model, this model can now be used for predictions.
 This guide follows the examples <code class="docutils literal notranslate"><span class="pre">ex05_run_predictions.py</span></code> and
 <code class="docutils literal notranslate"><span class="pre">ex06_ase_calculator.py</span></code>. In the <a class="reference internal" href="../advanced_usage/predictions.html#production"><span class="std std-ref">advanced section</span></a> on
@@ -134,8 +142,8 @@ the predictor class to access various observables of interest, such as</p>
 <p>Please note that in order to calculate the total energy, you have to
 provide a pseudopotential (specifically the pseudopotential used during
 data generation) via <code class="docutils literal notranslate"><span class="pre">parameters.targets.pseudopotential_path</span> <span class="pre">=</span> <span class="pre">...</span></code>.</p>
-<div class="section" id="using-the-mala-ase-calculator">
-<h2>Using the MALA ASE calculator<a class="headerlink" href="#using-the-mala-ase-calculator" title="Permalink to this headline"></a></h2>
+<section id="using-the-mala-ase-calculator">
+<h2>Using the MALA ASE calculator<a class="headerlink" href="#using-the-mala-ase-calculator" title="Link to this heading"></a></h2>
 <p>For even easier integration into materials modelling workflows, MALA
 provides an ASE calculator interface, called <code class="docutils literal notranslate"><span class="pre">mala.MALA</span></code>
 . An ASE calculator is an interface
@@ -168,8 +176,8 @@ as a calculator and use the ASE interface to perform the calculation.</p>
 </div></blockquote>
 <p>For more information on ASE calculators, also see the official
 <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/ase/calculators/calculators.html">ASE documentation</a>.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

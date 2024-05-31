@@ -1,24 +1,29 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -31,12 +36,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -77,9 +86,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="modules.html">API reference</a> &raquo;</li>
-      <li>mala</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API reference</a></li>
+      <li class="breadcrumb-item active">mala</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -89,83 +98,752 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <span class="target" id="module-mala"></span><p>Framework for electronic structure learning.</p>
+  <p id="module-mala">Framework for electronic structure learning.</p>
 <p>Can be used to preprocess DFT data (positions / LDOS), train networks,
 predict LDOS and postprocess LDOS into energies (and forces, soon).</p>
-<div class="section" id="mala">
-<h1>mala<a class="headerlink" href="#mala" title="Permalink to this headline"></a></h1>
+<section id="mala">
+<h1>mala<a class="headerlink" href="#mala" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="mala.common.html">common</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mala.common.check_modules.html">check_modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.common.json_serializable.html">json_serializable</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.common.parallelizer.html">parallelizer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.common.parameters.html">parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.common.physical_data.html">physical_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mala.common.check_modules.html">check_modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.check_modules.html#mala.common.check_modules.check_modules"><code class="docutils literal notranslate"><span class="pre">check_modules()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.common.json_serializable.html">json_serializable</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.json_serializable.html#mala.common.json_serializable.JSONSerializable"><code class="docutils literal notranslate"><span class="pre">JSONSerializable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.json_serializable.html#mala.common.json_serializable.JSONSerializable.from_json"><code class="docutils literal notranslate"><span class="pre">JSONSerializable.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.json_serializable.html#mala.common.json_serializable.JSONSerializable.to_json"><code class="docutils literal notranslate"><span class="pre">JSONSerializable.to_json()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.common.parallelizer.html">parallelizer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parallelizer.html#mala.common.parallelizer.barrier"><code class="docutils literal notranslate"><span class="pre">barrier()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parallelizer.html#mala.common.parallelizer.finalize"><code class="docutils literal notranslate"><span class="pre">finalize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parallelizer.html#mala.common.parallelizer.get_comm"><code class="docutils literal notranslate"><span class="pre">get_comm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parallelizer.html#mala.common.parallelizer.get_local_rank"><code class="docutils literal notranslate"><span class="pre">get_local_rank()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parallelizer.html#mala.common.parallelizer.get_rank"><code class="docutils literal notranslate"><span class="pre">get_rank()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parallelizer.html#mala.common.parallelizer.get_size"><code class="docutils literal notranslate"><span class="pre">get_size()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parallelizer.html#mala.common.parallelizer.parallel_warn"><code class="docutils literal notranslate"><span class="pre">parallel_warn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parallelizer.html#mala.common.parallelizer.printout"><code class="docutils literal notranslate"><span class="pre">printout()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parallelizer.html#mala.common.parallelizer.set_current_verbosity"><code class="docutils literal notranslate"><span class="pre">set_current_verbosity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parallelizer.html#mala.common.parallelizer.set_ddp_status"><code class="docutils literal notranslate"><span class="pre">set_ddp_status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parallelizer.html#mala.common.parallelizer.set_lammps_instance"><code class="docutils literal notranslate"><span class="pre">set_lammps_instance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parallelizer.html#mala.common.parallelizer.set_mpi_status"><code class="docutils literal notranslate"><span class="pre">set_mpi_status()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.common.parameters.html">parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters"><code class="docutils literal notranslate"><span class="pre">Parameters</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.comment"><code class="docutils literal notranslate"><span class="pre">Parameters.comment</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.network"><code class="docutils literal notranslate"><span class="pre">Parameters.network</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.descriptors"><code class="docutils literal notranslate"><span class="pre">Parameters.descriptors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.targets"><code class="docutils literal notranslate"><span class="pre">Parameters.targets</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.data"><code class="docutils literal notranslate"><span class="pre">Parameters.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.running"><code class="docutils literal notranslate"><span class="pre">Parameters.running</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.hyperparameters"><code class="docutils literal notranslate"><span class="pre">Parameters.hyperparameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.debug"><code class="docutils literal notranslate"><span class="pre">Parameters.debug</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.manual_seed"><code class="docutils literal notranslate"><span class="pre">Parameters.manual_seed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.load_from_file"><code class="docutils literal notranslate"><span class="pre">Parameters.load_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.load_from_json"><code class="docutils literal notranslate"><span class="pre">Parameters.load_from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.load_from_pickle"><code class="docutils literal notranslate"><span class="pre">Parameters.load_from_pickle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.optuna_singlenode_setup"><code class="docutils literal notranslate"><span class="pre">Parameters.optuna_singlenode_setup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.save"><code class="docutils literal notranslate"><span class="pre">Parameters.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.save_as_json"><code class="docutils literal notranslate"><span class="pre">Parameters.save_as_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.save_as_pickle"><code class="docutils literal notranslate"><span class="pre">Parameters.save_as_pickle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.show"><code class="docutils literal notranslate"><span class="pre">Parameters.show()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.device"><code class="docutils literal notranslate"><span class="pre">Parameters.device</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.openpmd_configuration"><code class="docutils literal notranslate"><span class="pre">Parameters.openpmd_configuration</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.openpmd_granularity"><code class="docutils literal notranslate"><span class="pre">Parameters.openpmd_granularity</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.use_ddp"><code class="docutils literal notranslate"><span class="pre">Parameters.use_ddp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.use_gpu"><code class="docutils literal notranslate"><span class="pre">Parameters.use_gpu</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.use_lammps"><code class="docutils literal notranslate"><span class="pre">Parameters.use_lammps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.use_mpi"><code class="docutils literal notranslate"><span class="pre">Parameters.use_mpi</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.verbosity"><code class="docutils literal notranslate"><span class="pre">Parameters.verbosity</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersBase"><code class="docutils literal notranslate"><span class="pre">ParametersBase</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersBase.from_json"><code class="docutils literal notranslate"><span class="pre">ParametersBase.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersBase.show"><code class="docutils literal notranslate"><span class="pre">ParametersBase.show()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersBase.to_json"><code class="docutils literal notranslate"><span class="pre">ParametersBase.to_json()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersData"><code class="docutils literal notranslate"><span class="pre">ParametersData</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersData.descriptors_contain_xyz"><code class="docutils literal notranslate"><span class="pre">ParametersData.descriptors_contain_xyz</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersData.snapshot_directories_list"><code class="docutils literal notranslate"><span class="pre">ParametersData.snapshot_directories_list</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersData.data_splitting_type"><code class="docutils literal notranslate"><span class="pre">ParametersData.data_splitting_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersData.input_rescaling_type"><code class="docutils literal notranslate"><span class="pre">ParametersData.input_rescaling_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersData.output_rescaling_type"><code class="docutils literal notranslate"><span class="pre">ParametersData.output_rescaling_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersData.use_lazy_loading"><code class="docutils literal notranslate"><span class="pre">ParametersData.use_lazy_loading</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersData.use_lazy_loading_prefetch"><code class="docutils literal notranslate"><span class="pre">ParametersData.use_lazy_loading_prefetch</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersData.use_fast_tensor_data_set"><code class="docutils literal notranslate"><span class="pre">ParametersData.use_fast_tensor_data_set</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersData.shuffling_seed"><code class="docutils literal notranslate"><span class="pre">ParametersData.shuffling_seed</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration"><code class="docutils literal notranslate"><span class="pre">ParametersDataGeneration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_denoising_width"><code class="docutils literal notranslate"><span class="pre">ParametersDataGeneration.trajectory_analysis_denoising_width</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_below_average_counter"><code class="docutils literal notranslate"><span class="pre">ParametersDataGeneration.trajectory_analysis_below_average_counter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_estimated_equilibrium"><code class="docutils literal notranslate"><span class="pre">ParametersDataGeneration.trajectory_analysis_estimated_equilibrium</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_correlation_metric_cutoff"><code class="docutils literal notranslate"><span class="pre">ParametersDataGeneration.trajectory_analysis_correlation_metric_cutoff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_temperature_tolerance_percent"><code class="docutils literal notranslate"><span class="pre">ParametersDataGeneration.trajectory_analysis_temperature_tolerance_percent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.local_psp_path"><code class="docutils literal notranslate"><span class="pre">ParametersDataGeneration.local_psp_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.local_psp_name"><code class="docutils literal notranslate"><span class="pre">ParametersDataGeneration.local_psp_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.ofdft_timestep"><code class="docutils literal notranslate"><span class="pre">ParametersDataGeneration.ofdft_timestep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.ofdft_number_of_timesteps"><code class="docutils literal notranslate"><span class="pre">ParametersDataGeneration.ofdft_number_of_timesteps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.ofdft_temperature"><code class="docutils literal notranslate"><span class="pre">ParametersDataGeneration.ofdft_temperature</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.ofdft_kedf"><code class="docutils literal notranslate"><span class="pre">ParametersDataGeneration.ofdft_kedf</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.ofdft_friction"><code class="docutils literal notranslate"><span class="pre">ParametersDataGeneration.ofdft_friction</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDescriptors"><code class="docutils literal notranslate"><span class="pre">ParametersDescriptors</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.descriptor_type"><code class="docutils literal notranslate"><span class="pre">ParametersDescriptors.descriptor_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.bispectrum_twojmax"><code class="docutils literal notranslate"><span class="pre">ParametersDescriptors.bispectrum_twojmax</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.lammps_compute_file"><code class="docutils literal notranslate"><span class="pre">ParametersDescriptors.lammps_compute_file</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.descriptors_contain_xyz"><code class="docutils literal notranslate"><span class="pre">ParametersDescriptors.descriptors_contain_xyz</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.atomic_density_sigma"><code class="docutils literal notranslate"><span class="pre">ParametersDescriptors.atomic_density_sigma</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.bispectrum_cutoff"><code class="docutils literal notranslate"><span class="pre">ParametersDescriptors.bispectrum_cutoff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.bispectrum_switchflag"><code class="docutils literal notranslate"><span class="pre">ParametersDescriptors.bispectrum_switchflag</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.use_y_splitting"><code class="docutils literal notranslate"><span class="pre">ParametersDescriptors.use_y_splitting</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.use_z_splitting"><code class="docutils literal notranslate"><span class="pre">ParametersDescriptors.use_z_splitting</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization"><code class="docutils literal notranslate"><span class="pre">ParametersHyperparameterOptimization</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization.direction"><code class="docutils literal notranslate"><span class="pre">ParametersHyperparameterOptimization.direction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization.n_trials"><code class="docutils literal notranslate"><span class="pre">ParametersHyperparameterOptimization.n_trials</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization.hlist"><code class="docutils literal notranslate"><span class="pre">ParametersHyperparameterOptimization.hlist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization.show"><code class="docutils literal notranslate"><span class="pre">ParametersHyperparameterOptimization.show()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization.number_training_per_trial"><code class="docutils literal notranslate"><span class="pre">ParametersHyperparameterOptimization.number_training_per_trial</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization.rdb_storage_heartbeat"><code class="docutils literal notranslate"><span class="pre">ParametersHyperparameterOptimization.rdb_storage_heartbeat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization.trial_ensemble_evaluation"><code class="docutils literal notranslate"><span class="pre">ParametersHyperparameterOptimization.trial_ensemble_evaluation</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersNetwork"><code class="docutils literal notranslate"><span class="pre">ParametersNetwork</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersNetwork.nn_type"><code class="docutils literal notranslate"><span class="pre">ParametersNetwork.nn_type</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning"><code class="docutils literal notranslate"><span class="pre">ParametersRunning</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.trainingtype"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.trainingtype</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.learning_rate"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.learning_rate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.max_number_epochs"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.max_number_epochs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.mini_batch_size"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.mini_batch_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.weight_decay"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.weight_decay</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.early_stopping_epochs"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.early_stopping_epochs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.early_stopping_threshold"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.early_stopping_threshold</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.learning_rate_scheduler"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.learning_rate_scheduler</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.learning_rate_decay"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.learning_rate_decay</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.learning_rate_patience"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.learning_rate_patience</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.num_workers"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.num_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.use_shuffling_for_samplers"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.use_shuffling_for_samplers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.checkpoints_each_epoch"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.checkpoints_each_epoch</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.checkpoint_name"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.checkpoint_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.visualisation"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.visualisation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.visualisation_dir"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.visualisation_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.visualisation_dir_append_date"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.visualisation_dir_append_date</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.inference_data_grid"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.inference_data_grid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.use_mixed_precision"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.use_mixed_precision</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.training_report_frequency"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.training_report_frequency</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.profiler_range"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.profiler_range</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.after_before_training_metric"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.after_before_training_metric</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.during_training_metric"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.during_training_metric</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersRunning.use_graphs"><code class="docutils literal notranslate"><span class="pre">ParametersRunning.use_graphs</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersTargets"><code class="docutils literal notranslate"><span class="pre">ParametersTargets</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersTargets.target_type"><code class="docutils literal notranslate"><span class="pre">ParametersTargets.target_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersTargets.ldos_gridsize"><code class="docutils literal notranslate"><span class="pre">ParametersTargets.ldos_gridsize</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersTargets.ldos_gridspacing_ev"><code class="docutils literal notranslate"><span class="pre">ParametersTargets.ldos_gridspacing_ev</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersTargets.ldos_gridoffset_ev"><code class="docutils literal notranslate"><span class="pre">ParametersTargets.ldos_gridoffset_ev</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersTargets.pseudopotential_path"><code class="docutils literal notranslate"><span class="pre">ParametersTargets.pseudopotential_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersTargets.rdf_parameters"><code class="docutils literal notranslate"><span class="pre">ParametersTargets.rdf_parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersTargets.tpcf_parameters"><code class="docutils literal notranslate"><span class="pre">ParametersTargets.tpcf_parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersTargets.ssf_parameters"><code class="docutils literal notranslate"><span class="pre">ParametersTargets.ssf_parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersTargets.restrict_targets"><code class="docutils literal notranslate"><span class="pre">ParametersTargets.restrict_targets</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.common.physical_data.html">physical_data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData"><code class="docutils literal notranslate"><span class="pre">PhysicalData</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData.SkipArrayWriting"><code class="docutils literal notranslate"><span class="pre">PhysicalData.SkipArrayWriting</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_dimensions_from_numpy_file"><code class="docutils literal notranslate"><span class="pre">PhysicalData.read_dimensions_from_numpy_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_dimensions_from_openpmd_file"><code class="docutils literal notranslate"><span class="pre">PhysicalData.read_dimensions_from_openpmd_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_from_numpy_file"><code class="docutils literal notranslate"><span class="pre">PhysicalData.read_from_numpy_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_from_openpmd_file"><code class="docutils literal notranslate"><span class="pre">PhysicalData.read_from_openpmd_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_numpy_file"><code class="docutils literal notranslate"><span class="pre">PhysicalData.write_to_numpy_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_file"><code class="docutils literal notranslate"><span class="pre">PhysicalData.write_to_openpmd_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_iteration"><code class="docutils literal notranslate"><span class="pre">PhysicalData.write_to_openpmd_iteration()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData.data_name"><code class="docutils literal notranslate"><span class="pre">PhysicalData.data_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData.feature_size"><code class="docutils literal notranslate"><span class="pre">PhysicalData.feature_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData.si_dimension"><code class="docutils literal notranslate"><span class="pre">PhysicalData.si_dimension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData.si_unit_conversion"><code class="docutils literal notranslate"><span class="pre">PhysicalData.si_unit_conversion</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mala.datageneration.html">datageneration</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mala.datageneration.ofdft_initializer.html">ofdft_initializer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.datageneration.trajectory_analyzer.html">trajectory_analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mala.datageneration.ofdft_initializer.html">ofdft_initializer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datageneration.ofdft_initializer.html#mala.datageneration.ofdft_initializer.OFDFTInitializer"><code class="docutils literal notranslate"><span class="pre">OFDFTInitializer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.datageneration.ofdft_initializer.html#mala.datageneration.ofdft_initializer.OFDFTInitializer.get_equilibrated_configuration"><code class="docutils literal notranslate"><span class="pre">OFDFTInitializer.get_equilibrated_configuration()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.datageneration.trajectory_analyzer.html">trajectory_analyzer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer"><code class="docutils literal notranslate"><span class="pre">TrajectoryAnalyzer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_first_snapshot"><code class="docutils literal notranslate"><span class="pre">TrajectoryAnalyzer.get_first_snapshot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_snapshot_correlation_cutoff"><code class="docutils literal notranslate"><span class="pre">TrajectoryAnalyzer.get_snapshot_correlation_cutoff()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_uncorrelated_snapshots"><code class="docutils literal notranslate"><span class="pre">TrajectoryAnalyzer.get_uncorrelated_snapshots()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.uncache_properties"><code class="docutils literal notranslate"><span class="pre">TrajectoryAnalyzer.uncache_properties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.first_snapshot"><code class="docutils literal notranslate"><span class="pre">TrajectoryAnalyzer.first_snapshot</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.snapshot_correlation_cutoff"><code class="docutils literal notranslate"><span class="pre">TrajectoryAnalyzer.snapshot_correlation_cutoff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.trajectory"><code class="docutils literal notranslate"><span class="pre">TrajectoryAnalyzer.trajectory</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mala.datahandling.html">datahandling</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_converter.html">data_converter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_handler.html">data_handler</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_handler_base.html">data_handler_base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_converter.html">data_converter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter"><code class="docutils literal notranslate"><span class="pre">DataConverter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.descriptor_calculator"><code class="docutils literal notranslate"><span class="pre">DataConverter.descriptor_calculator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.target_calculator"><code class="docutils literal notranslate"><span class="pre">DataConverter.target_calculator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.add_snapshot"><code class="docutils literal notranslate"><span class="pre">DataConverter.add_snapshot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.convert_snapshots"><code class="docutils literal notranslate"><span class="pre">DataConverter.convert_snapshots()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_handler.html">data_handler</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler"><code class="docutils literal notranslate"><span class="pre">DataHandler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.clear_data"><code class="docutils literal notranslate"><span class="pre">DataHandler.clear_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output"><code class="docutils literal notranslate"><span class="pre">DataHandler.get_snapshot_calculation_output()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.get_test_input_gradient"><code class="docutils literal notranslate"><span class="pre">DataHandler.get_test_input_gradient()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.mix_datasets"><code class="docutils literal notranslate"><span class="pre">DataHandler.mix_datasets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.prepare_data"><code class="docutils literal notranslate"><span class="pre">DataHandler.prepare_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.prepare_for_testing"><code class="docutils literal notranslate"><span class="pre">DataHandler.prepare_for_testing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.raw_numpy_to_converted_scaled_tensor"><code class="docutils literal notranslate"><span class="pre">DataHandler.raw_numpy_to_converted_scaled_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.resize_snapshots_for_debugging"><code class="docutils literal notranslate"><span class="pre">DataHandler.resize_snapshots_for_debugging()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_handler_base.html">data_handler_base</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_handler_base.html#mala.datahandling.data_handler_base.DataHandlerBase"><code class="docutils literal notranslate"><span class="pre">DataHandlerBase</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler_base.html#mala.datahandling.data_handler_base.DataHandlerBase.add_snapshot"><code class="docutils literal notranslate"><span class="pre">DataHandlerBase.add_snapshot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler_base.html#mala.datahandling.data_handler_base.DataHandlerBase.clear_data"><code class="docutils literal notranslate"><span class="pre">DataHandlerBase.clear_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler_base.html#mala.datahandling.data_handler_base.DataHandlerBase.input_dimension"><code class="docutils literal notranslate"><span class="pre">DataHandlerBase.input_dimension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler_base.html#mala.datahandling.data_handler_base.DataHandlerBase.output_dimension"><code class="docutils literal notranslate"><span class="pre">DataHandlerBase.output_dimension</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_repo.html">data_repo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_scaler.html">data_scaler</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_shuffler.html">data_shuffler</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.fast_tensor_dataset.html">fast_tensor_dataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html">lazy_load_dataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html">lazy_load_dataset_single</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.multi_lazy_load_data_loader.html">multi_lazy_load_data_loader</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.snapshot.html">snapshot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_scaler.html">data_scaler</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler"><code class="docutils literal notranslate"><span class="pre">DataScaler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting"><code class="docutils literal notranslate"><span class="pre">DataScaler.finish_incremental_fitting()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.fit"><code class="docutils literal notranslate"><span class="pre">DataScaler.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.incremental_fit"><code class="docutils literal notranslate"><span class="pre">DataScaler.incremental_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.inverse_transform"><code class="docutils literal notranslate"><span class="pre">DataScaler.inverse_transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.load_from_file"><code class="docutils literal notranslate"><span class="pre">DataScaler.load_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.save"><code class="docutils literal notranslate"><span class="pre">DataScaler.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.start_incremental_fitting"><code class="docutils literal notranslate"><span class="pre">DataScaler.start_incremental_fitting()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.transform"><code class="docutils literal notranslate"><span class="pre">DataScaler.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.data_shuffler.html">data_shuffler</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler"><code class="docutils literal notranslate"><span class="pre">DataShuffler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler.add_snapshot"><code class="docutils literal notranslate"><span class="pre">DataShuffler.add_snapshot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler.shuffle_snapshots"><code class="docutils literal notranslate"><span class="pre">DataShuffler.shuffle_snapshots()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.fast_tensor_dataset.html">fast_tensor_dataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.fast_tensor_dataset.html#mala.datahandling.fast_tensor_dataset.FastTensorDataset"><code class="docutils literal notranslate"><span class="pre">FastTensorDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.fast_tensor_dataset.html#mala.datahandling.fast_tensor_dataset.FastTensorDataset.shuffle"><code class="docutils literal notranslate"><span class="pre">FastTensorDataset.shuffle()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html">lazy_load_dataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset"><code class="docutils literal notranslate"><span class="pre">LazyLoadDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset"><code class="docutils literal notranslate"><span class="pre">LazyLoadDataset.add_snapshot_to_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data"><code class="docutils literal notranslate"><span class="pre">LazyLoadDataset.get_new_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets"><code class="docutils literal notranslate"><span class="pre">LazyLoadDataset.mix_datasets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.return_outputs_directly"><code class="docutils literal notranslate"><span class="pre">LazyLoadDataset.return_outputs_directly</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html">lazy_load_dataset_single</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle"><code class="docutils literal notranslate"><span class="pre">LazyLoadDatasetSingle</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.allocate_shared_mem"><code class="docutils literal notranslate"><span class="pre">LazyLoadDatasetSingle.allocate_shared_mem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.deallocate_shared_mem"><code class="docutils literal notranslate"><span class="pre">LazyLoadDatasetSingle.deallocate_shared_mem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.delete_data"><code class="docutils literal notranslate"><span class="pre">LazyLoadDatasetSingle.delete_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_single.html#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.mix_datasets"><code class="docutils literal notranslate"><span class="pre">LazyLoadDatasetSingle.mix_datasets()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.multi_lazy_load_data_loader.html">multi_lazy_load_data_loader</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.multi_lazy_load_data_loader.html#mala.datahandling.multi_lazy_load_data_loader.MultiLazyLoadDataLoader"><code class="docutils literal notranslate"><span class="pre">MultiLazyLoadDataLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.multi_lazy_load_data_loader.html#mala.datahandling.multi_lazy_load_data_loader.MultiLazyLoadDataLoader.cleanup"><code class="docutils literal notranslate"><span class="pre">MultiLazyLoadDataLoader.cleanup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.multi_lazy_load_data_loader.html#mala.datahandling.multi_lazy_load_data_loader.MultiLazyLoadDataLoader.load_snapshot_to_shm"><code class="docutils literal notranslate"><span class="pre">MultiLazyLoadDataLoader.load_snapshot_to_shm()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.datahandling.snapshot.html">snapshot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot"><code class="docutils literal notranslate"><span class="pre">Snapshot</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot.from_json"><code class="docutils literal notranslate"><span class="pre">Snapshot.from_json()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mala.descriptors.html">descriptors</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mala.descriptors.atomic_density.html">atomic_density</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.descriptors.bispectrum.html">bispectrum</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.descriptors.descriptor.html">descriptor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.descriptors.lammps_utils.html">lammps_utils</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.descriptors.minterpy_descriptors.html">minterpy_descriptors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mala.descriptors.atomic_density.html">atomic_density</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity"><code class="docutils literal notranslate"><span class="pre">AtomicDensity</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity.backconvert_units"><code class="docutils literal notranslate"><span class="pre">AtomicDensity.backconvert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity.convert_units"><code class="docutils literal notranslate"><span class="pre">AtomicDensity.convert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity.get_optimal_sigma"><code class="docutils literal notranslate"><span class="pre">AtomicDensity.get_optimal_sigma()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity.data_name"><code class="docutils literal notranslate"><span class="pre">AtomicDensity.data_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity.feature_size"><code class="docutils literal notranslate"><span class="pre">AtomicDensity.feature_size</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.descriptors.bispectrum.html">bispectrum</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum"><code class="docutils literal notranslate"><span class="pre">Bispectrum</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum.backconvert_units"><code class="docutils literal notranslate"><span class="pre">Bispectrum.backconvert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum.convert_units"><code class="docutils literal notranslate"><span class="pre">Bispectrum.convert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum.data_name"><code class="docutils literal notranslate"><span class="pre">Bispectrum.data_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum.feature_size"><code class="docutils literal notranslate"><span class="pre">Bispectrum.feature_size</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.descriptors.descriptor.html">descriptor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor"><code class="docutils literal notranslate"><span class="pre">Descriptor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.backconvert_units"><code class="docutils literal notranslate"><span class="pre">Descriptor.backconvert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.calculate_from_atoms"><code class="docutils literal notranslate"><span class="pre">Descriptor.calculate_from_atoms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.calculate_from_qe_out"><code class="docutils literal notranslate"><span class="pre">Descriptor.calculate_from_qe_out()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.convert_local_to_3d"><code class="docutils literal notranslate"><span class="pre">Descriptor.convert_local_to_3d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.convert_units"><code class="docutils literal notranslate"><span class="pre">Descriptor.convert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.enforce_pbc"><code class="docutils literal notranslate"><span class="pre">Descriptor.enforce_pbc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.gather_descriptors"><code class="docutils literal notranslate"><span class="pre">Descriptor.gather_descriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.calculation_timestamp"><code class="docutils literal notranslate"><span class="pre">Descriptor.calculation_timestamp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.descriptors_contain_xyz"><code class="docutils literal notranslate"><span class="pre">Descriptor.descriptors_contain_xyz</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.si_dimension"><code class="docutils literal notranslate"><span class="pre">Descriptor.si_dimension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.si_unit_conversion"><code class="docutils literal notranslate"><span class="pre">Descriptor.si_unit_conversion</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.descriptors.lammps_utils.html">lammps_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.descriptors.lammps_utils.html#mala.descriptors.lammps_utils.extract_compute_np"><code class="docutils literal notranslate"><span class="pre">extract_compute_np()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.descriptors.lammps_utils.html#mala.descriptors.lammps_utils.set_cmdlinevars"><code class="docutils literal notranslate"><span class="pre">set_cmdlinevars()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.descriptors.minterpy_descriptors.html">minterpy_descriptors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.descriptors.minterpy_descriptors.html#mala.descriptors.minterpy_descriptors.MinterpyDescriptors"><code class="docutils literal notranslate"><span class="pre">MinterpyDescriptors</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.minterpy_descriptors.html#mala.descriptors.minterpy_descriptors.MinterpyDescriptors.backconvert_units"><code class="docutils literal notranslate"><span class="pre">MinterpyDescriptors.backconvert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.minterpy_descriptors.html#mala.descriptors.minterpy_descriptors.MinterpyDescriptors.convert_units"><code class="docutils literal notranslate"><span class="pre">MinterpyDescriptors.convert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.minterpy_descriptors.html#mala.descriptors.minterpy_descriptors.MinterpyDescriptors.data_name"><code class="docutils literal notranslate"><span class="pre">MinterpyDescriptors.data_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.minterpy_descriptors.html#mala.descriptors.minterpy_descriptors.MinterpyDescriptors.feature_size"><code class="docutils literal notranslate"><span class="pre">MinterpyDescriptors.feature_size</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mala.interfaces.html">interfaces</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mala.interfaces.ase_calculator.html">ase_calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mala.interfaces.ase_calculator.html">ase_calculator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA"><code class="docutils literal notranslate"><span class="pre">MALA</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.calculate"><code class="docutils literal notranslate"><span class="pre">MALA.calculate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.calculate_properties"><code class="docutils literal notranslate"><span class="pre">MALA.calculate_properties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.load_model"><code class="docutils literal notranslate"><span class="pre">MALA.load_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.save_calculator"><code class="docutils literal notranslate"><span class="pre">MALA.save_calculator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.implemented_properties"><code class="docutils literal notranslate"><span class="pre">MALA.implemented_properties</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mala.network.html">network</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.acsd_analyzer.html">acsd_analyzer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.hyper_opt.html">hyper_opt</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.hyper_opt_naswot.html">hyper_opt_naswot</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.hyper_opt_oat.html">hyper_opt_oat</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.hyper_opt_optuna.html">hyper_opt_optuna</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.hyperparameter.html">hyperparameter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.hyperparameter_acsd.html">hyperparameter_acsd</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.hyperparameter_naswot.html">hyperparameter_naswot</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.hyperparameter_oat.html">hyperparameter_oat</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.hyperparameter_optuna.html">hyperparameter_optuna</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.multi_training_pruner.html">multi_training_pruner</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.naswot_pruner.html">naswot_pruner</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.network.html">network</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.objective_base.html">objective_base</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.objective_naswot.html">objective_naswot</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.predictor.html">predictor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.runner.html">runner</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.tester.html">tester</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.network.trainer.html">trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.acsd_analyzer.html">acsd_analyzer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.acsd_analyzer.html#mala.network.acsd_analyzer.ACSDAnalyzer"><code class="docutils literal notranslate"><span class="pre">ACSDAnalyzer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.acsd_analyzer.html#mala.network.acsd_analyzer.ACSDAnalyzer.add_hyperparameter"><code class="docutils literal notranslate"><span class="pre">ACSDAnalyzer.add_hyperparameter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.acsd_analyzer.html#mala.network.acsd_analyzer.ACSDAnalyzer.add_snapshot"><code class="docutils literal notranslate"><span class="pre">ACSDAnalyzer.add_snapshot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.acsd_analyzer.html#mala.network.acsd_analyzer.ACSDAnalyzer.perform_study"><code class="docutils literal notranslate"><span class="pre">ACSDAnalyzer.perform_study()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.acsd_analyzer.html#mala.network.acsd_analyzer.ACSDAnalyzer.set_optimal_parameters"><code class="docutils literal notranslate"><span class="pre">ACSDAnalyzer.set_optimal_parameters()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.hyper_opt.html">hyper_opt</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt"><code class="docutils literal notranslate"><span class="pre">HyperOpt</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt.add_hyperparameter"><code class="docutils literal notranslate"><span class="pre">HyperOpt.add_hyperparameter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt.checkpoint_exists"><code class="docutils literal notranslate"><span class="pre">HyperOpt.checkpoint_exists()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt.clear_hyperparameters"><code class="docutils literal notranslate"><span class="pre">HyperOpt.clear_hyperparameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt.perform_study"><code class="docutils literal notranslate"><span class="pre">HyperOpt.perform_study()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt.set_optimal_parameters"><code class="docutils literal notranslate"><span class="pre">HyperOpt.set_optimal_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt.set_parameters"><code class="docutils literal notranslate"><span class="pre">HyperOpt.set_parameters()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.hyper_opt_naswot.html">hyper_opt_naswot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.hyper_opt_naswot.html#mala.network.hyper_opt_naswot.HyperOptNASWOT"><code class="docutils literal notranslate"><span class="pre">HyperOptNASWOT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_naswot.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.get_best_trial_results"><code class="docutils literal notranslate"><span class="pre">HyperOptNASWOT.get_best_trial_results()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_naswot.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.perform_study"><code class="docutils literal notranslate"><span class="pre">HyperOptNASWOT.perform_study()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_naswot.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.set_optimal_parameters"><code class="docutils literal notranslate"><span class="pre">HyperOptNASWOT.set_optimal_parameters()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.hyper_opt_oat.html">hyper_opt_oat</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT"><code class="docutils literal notranslate"><span class="pre">HyperOptOAT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.add_hyperparameter"><code class="docutils literal notranslate"><span class="pre">HyperOptOAT.add_hyperparameter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.get_best_trial_results"><code class="docutils literal notranslate"><span class="pre">HyperOptOAT.get_best_trial_results()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.get_optimal_parameters"><code class="docutils literal notranslate"><span class="pre">HyperOptOAT.get_optimal_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.get_orthogonal_array"><code class="docutils literal notranslate"><span class="pre">HyperOptOAT.get_orthogonal_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.load_from_file"><code class="docutils literal notranslate"><span class="pre">HyperOptOAT.load_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.number_of_runs"><code class="docutils literal notranslate"><span class="pre">HyperOptOAT.number_of_runs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.perform_study"><code class="docutils literal notranslate"><span class="pre">HyperOptOAT.perform_study()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.resume_checkpoint"><code class="docutils literal notranslate"><span class="pre">HyperOptOAT.resume_checkpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.set_optimal_parameters"><code class="docutils literal notranslate"><span class="pre">HyperOptOAT.set_optimal_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.show_order_of_importance"><code class="docutils literal notranslate"><span class="pre">HyperOptOAT.show_order_of_importance()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.hyper_opt_optuna.html">hyper_opt_optuna</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna"><code class="docutils literal notranslate"><span class="pre">HyperOptOptuna</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study"><code class="docutils literal notranslate"><span class="pre">HyperOptOptuna.get_trials_from_study()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.load_from_file"><code class="docutils literal notranslate"><span class="pre">HyperOptOptuna.load_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.perform_study"><code class="docutils literal notranslate"><span class="pre">HyperOptOptuna.perform_study()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.requeue_zombie_trials"><code class="docutils literal notranslate"><span class="pre">HyperOptOptuna.requeue_zombie_trials()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint"><code class="docutils literal notranslate"><span class="pre">HyperOptOptuna.resume_checkpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.set_optimal_parameters"><code class="docutils literal notranslate"><span class="pre">HyperOptOptuna.set_optimal_parameters()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.hyperparameter.html">hyperparameter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.hyperparameter.html#mala.network.hyperparameter.Hyperparameter"><code class="docutils literal notranslate"><span class="pre">Hyperparameter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.hyperparameter_acsd.html">hyperparameter_acsd</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.hyperparameter_acsd.html#mala.network.hyperparameter_acsd.HyperparameterACSD"><code class="docutils literal notranslate"><span class="pre">HyperparameterACSD</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.hyperparameter_naswot.html">hyperparameter_naswot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.hyperparameter_naswot.html#mala.network.hyperparameter_naswot.HyperparameterNASWOT"><code class="docutils literal notranslate"><span class="pre">HyperparameterNASWOT</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.hyperparameter_oat.html">hyperparameter_oat</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.hyperparameter_oat.html#mala.network.hyperparameter_oat.HyperparameterOAT"><code class="docutils literal notranslate"><span class="pre">HyperparameterOAT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_oat.html#mala.network.hyperparameter_oat.HyperparameterOAT.get_categorical"><code class="docutils literal notranslate"><span class="pre">HyperparameterOAT.get_categorical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_oat.html#mala.network.hyperparameter_oat.HyperparameterOAT.get_parameter"><code class="docutils literal notranslate"><span class="pre">HyperparameterOAT.get_parameter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_oat.html#mala.network.hyperparameter_oat.HyperparameterOAT.num_choices"><code class="docutils literal notranslate"><span class="pre">HyperparameterOAT.num_choices</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.hyperparameter_optuna.html">hyperparameter_optuna</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna"><code class="docutils literal notranslate"><span class="pre">HyperparameterOptuna</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_categorical"><code class="docutils literal notranslate"><span class="pre">HyperparameterOptuna.get_categorical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_float"><code class="docutils literal notranslate"><span class="pre">HyperparameterOptuna.get_float()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_int"><code class="docutils literal notranslate"><span class="pre">HyperparameterOptuna.get_int()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_parameter"><code class="docutils literal notranslate"><span class="pre">HyperparameterOptuna.get_parameter()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.multi_training_pruner.html">multi_training_pruner</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.multi_training_pruner.html#mala.network.multi_training_pruner.MultiTrainingPruner"><code class="docutils literal notranslate"><span class="pre">MultiTrainingPruner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.multi_training_pruner.html#mala.network.multi_training_pruner.MultiTrainingPruner.prune"><code class="docutils literal notranslate"><span class="pre">MultiTrainingPruner.prune()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.naswot_pruner.html">naswot_pruner</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.naswot_pruner.html#mala.network.naswot_pruner.NASWOTPruner"><code class="docutils literal notranslate"><span class="pre">NASWOTPruner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.naswot_pruner.html#mala.network.naswot_pruner.NASWOTPruner.prune"><code class="docutils literal notranslate"><span class="pre">NASWOTPruner.prune()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.network.html">network</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.network.html#mala.network.network.FeedForwardNet"><code class="docutils literal notranslate"><span class="pre">FeedForwardNet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.FeedForwardNet.forward"><code class="docutils literal notranslate"><span class="pre">FeedForwardNet.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.network.html#mala.network.network.GRU"><code class="docutils literal notranslate"><span class="pre">GRU</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.GRU.forward"><code class="docutils literal notranslate"><span class="pre">GRU.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.GRU.init_hidden"><code class="docutils literal notranslate"><span class="pre">GRU.init_hidden()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.network.html#mala.network.network.LSTM"><code class="docutils literal notranslate"><span class="pre">LSTM</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.LSTM.forward"><code class="docutils literal notranslate"><span class="pre">LSTM.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.LSTM.init_hidden"><code class="docutils literal notranslate"><span class="pre">LSTM.init_hidden()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.network.html#mala.network.network.Network"><code class="docutils literal notranslate"><span class="pre">Network</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.Network.calculate_loss"><code class="docutils literal notranslate"><span class="pre">Network.calculate_loss()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.Network.do_prediction"><code class="docutils literal notranslate"><span class="pre">Network.do_prediction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.Network.forward"><code class="docutils literal notranslate"><span class="pre">Network.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.Network.load_from_file"><code class="docutils literal notranslate"><span class="pre">Network.load_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.Network.save_network"><code class="docutils literal notranslate"><span class="pre">Network.save_network()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.network.html#mala.network.network.PositionalEncoding"><code class="docutils literal notranslate"><span class="pre">PositionalEncoding</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.PositionalEncoding.forward"><code class="docutils literal notranslate"><span class="pre">PositionalEncoding.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.network.html#mala.network.network.TransformerNet"><code class="docutils literal notranslate"><span class="pre">TransformerNet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.TransformerNet.forward"><code class="docutils literal notranslate"><span class="pre">TransformerNet.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.TransformerNet.generate_square_subsequent_mask"><code class="docutils literal notranslate"><span class="pre">TransformerNet.generate_square_subsequent_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.TransformerNet.init_weights"><code class="docutils literal notranslate"><span class="pre">TransformerNet.init_weights()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.objective_base.html">objective_base</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.objective_base.html#mala.network.objective_base.ObjectiveBase"><code class="docutils literal notranslate"><span class="pre">ObjectiveBase</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.objective_base.html#mala.network.objective_base.ObjectiveBase.parse_trial"><code class="docutils literal notranslate"><span class="pre">ObjectiveBase.parse_trial()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.objective_base.html#mala.network.objective_base.ObjectiveBase.parse_trial_oat"><code class="docutils literal notranslate"><span class="pre">ObjectiveBase.parse_trial_oat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.objective_base.html#mala.network.objective_base.ObjectiveBase.parse_trial_optuna"><code class="docutils literal notranslate"><span class="pre">ObjectiveBase.parse_trial_optuna()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.objective_naswot.html">objective_naswot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.objective_naswot.html#mala.network.objective_naswot.ObjectiveNASWOT"><code class="docutils literal notranslate"><span class="pre">ObjectiveNASWOT</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.predictor.html">predictor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.predictor.html#mala.network.predictor.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.predictor.html#mala.network.predictor.Predictor.predict_for_atoms"><code class="docutils literal notranslate"><span class="pre">Predictor.predict_for_atoms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.predictor.html#mala.network.predictor.Predictor.predict_from_qeout"><code class="docutils literal notranslate"><span class="pre">Predictor.predict_from_qeout()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.runner.html">runner</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.runner.html#mala.network.runner.Runner"><code class="docutils literal notranslate"><span class="pre">Runner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.runner.html#mala.network.runner.Runner.load_run"><code class="docutils literal notranslate"><span class="pre">Runner.load_run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.runner.html#mala.network.runner.Runner.run_exists"><code class="docutils literal notranslate"><span class="pre">Runner.run_exists()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.runner.html#mala.network.runner.Runner.save_run"><code class="docutils literal notranslate"><span class="pre">Runner.save_run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.tester.html">tester</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.tester.html#mala.network.tester.Tester"><code class="docutils literal notranslate"><span class="pre">Tester</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.tester.html#mala.network.tester.Tester.predict_targets"><code class="docutils literal notranslate"><span class="pre">Tester.predict_targets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.tester.html#mala.network.tester.Tester.test_all_snapshots"><code class="docutils literal notranslate"><span class="pre">Tester.test_all_snapshots()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.tester.html#mala.network.tester.Tester.test_snapshot"><code class="docutils literal notranslate"><span class="pre">Tester.test_snapshot()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.network.trainer.html">trainer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.trainer.html#mala.network.trainer.Trainer"><code class="docutils literal notranslate"><span class="pre">Trainer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.trainer.html#mala.network.trainer.Trainer.load_run"><code class="docutils literal notranslate"><span class="pre">Trainer.load_run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.trainer.html#mala.network.trainer.Trainer.run_exists"><code class="docutils literal notranslate"><span class="pre">Trainer.run_exists()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.trainer.html#mala.network.trainer.Trainer.train_network"><code class="docutils literal notranslate"><span class="pre">Trainer.train_network()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mala.targets.html">targets</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mala.targets.atomic_force.html">atomic_force</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.targets.calculation_helpers.html">calculation_helpers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.targets.cube_parser.html">cube_parser</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.targets.density.html">density</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.targets.dos.html">dos</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.targets.ldos.html">ldos</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.targets.target.html">target</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mala.targets.xsf_parser.html">xsf_parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mala.targets.atomic_force.html">atomic_force</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.atomic_force.html#mala.targets.atomic_force.AtomicForce"><code class="docutils literal notranslate"><span class="pre">AtomicForce</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.atomic_force.html#mala.targets.atomic_force.AtomicForce.convert_units"><code class="docutils literal notranslate"><span class="pre">AtomicForce.convert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.atomic_force.html#mala.targets.atomic_force.AtomicForce.get_feature_size"><code class="docutils literal notranslate"><span class="pre">AtomicForce.get_feature_size()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.targets.calculation_helpers.html">calculation_helpers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.analytical_integration"><code class="docutils literal notranslate"><span class="pre">analytical_integration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.entropy_multiplicator"><code class="docutils literal notranslate"><span class="pre">entropy_multiplicator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.fermi_function"><code class="docutils literal notranslate"><span class="pre">fermi_function()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.gaussians"><code class="docutils literal notranslate"><span class="pre">gaussians()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.get_beta"><code class="docutils literal notranslate"><span class="pre">get_beta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.get_f0_value"><code class="docutils literal notranslate"><span class="pre">get_f0_value()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.get_f1_value"><code class="docutils literal notranslate"><span class="pre">get_f1_value()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.get_f2_value"><code class="docutils literal notranslate"><span class="pre">get_f2_value()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.get_s0_value"><code class="docutils literal notranslate"><span class="pre">get_s0_value()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.get_s1_value"><code class="docutils literal notranslate"><span class="pre">get_s1_value()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.integrate_values_on_spacing"><code class="docutils literal notranslate"><span class="pre">integrate_values_on_spacing()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.targets.cube_parser.html">cube_parser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.cube_parser.html#mala.targets.cube_parser.CubeFile"><code class="docutils literal notranslate"><span class="pre">CubeFile</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.cube_parser.html#mala.targets.cube_parser.CubeFile.readline"><code class="docutils literal notranslate"><span class="pre">CubeFile.readline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.cube_parser.html#mala.targets.cube_parser.read_cube"><code class="docutils literal notranslate"><span class="pre">read_cube()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.cube_parser.html#mala.targets.cube_parser.read_imcube"><code class="docutils literal notranslate"><span class="pre">read_imcube()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.cube_parser.html#mala.targets.cube_parser.write_cube"><code class="docutils literal notranslate"><span class="pre">write_cube()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.cube_parser.html#mala.targets.cube_parser.write_imcube"><code class="docutils literal notranslate"><span class="pre">write_imcube()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.targets.density.html">density</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density"><code class="docutils literal notranslate"><span class="pre">Density</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.backconvert_units"><code class="docutils literal notranslate"><span class="pre">Density.backconvert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.convert_units"><code class="docutils literal notranslate"><span class="pre">Density.convert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.from_cube_file"><code class="docutils literal notranslate"><span class="pre">Density.from_cube_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.from_ldos_calculator"><code class="docutils literal notranslate"><span class="pre">Density.from_ldos_calculator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.from_numpy_array"><code class="docutils literal notranslate"><span class="pre">Density.from_numpy_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.from_numpy_file"><code class="docutils literal notranslate"><span class="pre">Density.from_numpy_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.from_openpmd_file"><code class="docutils literal notranslate"><span class="pre">Density.from_openpmd_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.from_xsf_file"><code class="docutils literal notranslate"><span class="pre">Density.from_xsf_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.get_atomic_forces"><code class="docutils literal notranslate"><span class="pre">Density.get_atomic_forces()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.get_density"><code class="docutils literal notranslate"><span class="pre">Density.get_density()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.get_energy_contributions"><code class="docutils literal notranslate"><span class="pre">Density.get_energy_contributions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.get_number_of_electrons"><code class="docutils literal notranslate"><span class="pre">Density.get_number_of_electrons()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.get_scaled_positions_for_qe"><code class="docutils literal notranslate"><span class="pre">Density.get_scaled_positions_for_qe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.get_target"><code class="docutils literal notranslate"><span class="pre">Density.get_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.invalidate_target"><code class="docutils literal notranslate"><span class="pre">Density.invalidate_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.read_from_array"><code class="docutils literal notranslate"><span class="pre">Density.read_from_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.read_from_cube"><code class="docutils literal notranslate"><span class="pre">Density.read_from_cube()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.read_from_xsf"><code class="docutils literal notranslate"><span class="pre">Density.read_from_xsf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.uncache_properties"><code class="docutils literal notranslate"><span class="pre">Density.uncache_properties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.write_to_cube"><code class="docutils literal notranslate"><span class="pre">Density.write_to_cube()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.write_to_openpmd_file"><code class="docutils literal notranslate"><span class="pre">Density.write_to_openpmd_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.data_name"><code class="docutils literal notranslate"><span class="pre">Density.data_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.density"><code class="docutils literal notranslate"><span class="pre">Density.density</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.feature_size"><code class="docutils literal notranslate"><span class="pre">Density.feature_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.number_of_electrons"><code class="docutils literal notranslate"><span class="pre">Density.number_of_electrons</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.si_dimension"><code class="docutils literal notranslate"><span class="pre">Density.si_dimension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.si_unit_conversion"><code class="docutils literal notranslate"><span class="pre">Density.si_unit_conversion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.te_mutex"><code class="docutils literal notranslate"><span class="pre">Density.te_mutex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html#mala.targets.density.Density.total_energy_contributions"><code class="docutils literal notranslate"><span class="pre">Density.total_energy_contributions</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.targets.dos.html">dos</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS"><code class="docutils literal notranslate"><span class="pre">DOS</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.backconvert_units"><code class="docutils literal notranslate"><span class="pre">DOS.backconvert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.convert_units"><code class="docutils literal notranslate"><span class="pre">DOS.convert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.from_ldos_calculator"><code class="docutils literal notranslate"><span class="pre">DOS.from_ldos_calculator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.from_numpy_array"><code class="docutils literal notranslate"><span class="pre">DOS.from_numpy_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.from_numpy_file"><code class="docutils literal notranslate"><span class="pre">DOS.from_numpy_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.from_qe_dos_txt"><code class="docutils literal notranslate"><span class="pre">DOS.from_qe_dos_txt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.from_qe_out"><code class="docutils literal notranslate"><span class="pre">DOS.from_qe_out()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.get_band_energy"><code class="docutils literal notranslate"><span class="pre">DOS.get_band_energy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.get_density_of_states"><code class="docutils literal notranslate"><span class="pre">DOS.get_density_of_states()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.get_energy_grid"><code class="docutils literal notranslate"><span class="pre">DOS.get_energy_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.get_entropy_contribution"><code class="docutils literal notranslate"><span class="pre">DOS.get_entropy_contribution()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.get_number_of_electrons"><code class="docutils literal notranslate"><span class="pre">DOS.get_number_of_electrons()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.get_self_consistent_fermi_energy"><code class="docutils literal notranslate"><span class="pre">DOS.get_self_consistent_fermi_energy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.get_target"><code class="docutils literal notranslate"><span class="pre">DOS.get_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.invalidate_target"><code class="docutils literal notranslate"><span class="pre">DOS.invalidate_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.read_from_array"><code class="docutils literal notranslate"><span class="pre">DOS.read_from_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.read_from_qe_dos_txt"><code class="docutils literal notranslate"><span class="pre">DOS.read_from_qe_dos_txt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.read_from_qe_out"><code class="docutils literal notranslate"><span class="pre">DOS.read_from_qe_out()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.uncache_properties"><code class="docutils literal notranslate"><span class="pre">DOS.uncache_properties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.band_energy"><code class="docutils literal notranslate"><span class="pre">DOS.band_energy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.data_name"><code class="docutils literal notranslate"><span class="pre">DOS.data_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.density_of_states"><code class="docutils literal notranslate"><span class="pre">DOS.density_of_states</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.energy_grid"><code class="docutils literal notranslate"><span class="pre">DOS.energy_grid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.entropy_contribution"><code class="docutils literal notranslate"><span class="pre">DOS.entropy_contribution</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.feature_size"><code class="docutils literal notranslate"><span class="pre">DOS.feature_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.fermi_energy"><code class="docutils literal notranslate"><span class="pre">DOS.fermi_energy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.number_of_electrons"><code class="docutils literal notranslate"><span class="pre">DOS.number_of_electrons</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.si_dimension"><code class="docutils literal notranslate"><span class="pre">DOS.si_dimension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html#mala.targets.dos.DOS.si_unit_conversion"><code class="docutils literal notranslate"><span class="pre">DOS.si_unit_conversion</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.targets.ldos.html">ldos</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS"><code class="docutils literal notranslate"><span class="pre">LDOS</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.backconvert_units"><code class="docutils literal notranslate"><span class="pre">LDOS.backconvert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.convert_units"><code class="docutils literal notranslate"><span class="pre">LDOS.convert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.from_cube_file"><code class="docutils literal notranslate"><span class="pre">LDOS.from_cube_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.from_numpy_array"><code class="docutils literal notranslate"><span class="pre">LDOS.from_numpy_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.from_numpy_file"><code class="docutils literal notranslate"><span class="pre">LDOS.from_numpy_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.from_openpmd_file"><code class="docutils literal notranslate"><span class="pre">LDOS.from_openpmd_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.from_xsf_file"><code class="docutils literal notranslate"><span class="pre">LDOS.from_xsf_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.get_atomic_forces"><code class="docutils literal notranslate"><span class="pre">LDOS.get_atomic_forces()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.get_band_energy"><code class="docutils literal notranslate"><span class="pre">LDOS.get_band_energy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density"><code class="docutils literal notranslate"><span class="pre">LDOS.get_density()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density_of_states"><code class="docutils literal notranslate"><span class="pre">LDOS.get_density_of_states()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.get_energy_grid"><code class="docutils literal notranslate"><span class="pre">LDOS.get_energy_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.get_entropy_contribution"><code class="docutils literal notranslate"><span class="pre">LDOS.get_entropy_contribution()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.get_number_of_electrons"><code class="docutils literal notranslate"><span class="pre">LDOS.get_number_of_electrons()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.get_self_consistent_fermi_energy"><code class="docutils literal notranslate"><span class="pre">LDOS.get_self_consistent_fermi_energy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.get_target"><code class="docutils literal notranslate"><span class="pre">LDOS.get_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.get_total_energy"><code class="docutils literal notranslate"><span class="pre">LDOS.get_total_energy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.invalidate_target"><code class="docutils literal notranslate"><span class="pre">LDOS.invalidate_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_array"><code class="docutils literal notranslate"><span class="pre">LDOS.read_from_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_cube"><code class="docutils literal notranslate"><span class="pre">LDOS.read_from_cube()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_xsf"><code class="docutils literal notranslate"><span class="pre">LDOS.read_from_xsf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.uncache_properties"><code class="docutils literal notranslate"><span class="pre">LDOS.uncache_properties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.band_energy"><code class="docutils literal notranslate"><span class="pre">LDOS.band_energy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.data_name"><code class="docutils literal notranslate"><span class="pre">LDOS.data_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.density"><code class="docutils literal notranslate"><span class="pre">LDOS.density</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.density_of_states"><code class="docutils literal notranslate"><span class="pre">LDOS.density_of_states</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.energy_grid"><code class="docutils literal notranslate"><span class="pre">LDOS.energy_grid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.entropy_contribution"><code class="docutils literal notranslate"><span class="pre">LDOS.entropy_contribution</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.feature_size"><code class="docutils literal notranslate"><span class="pre">LDOS.feature_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.fermi_energy"><code class="docutils literal notranslate"><span class="pre">LDOS.fermi_energy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.local_density_of_states"><code class="docutils literal notranslate"><span class="pre">LDOS.local_density_of_states</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.number_of_electrons"><code class="docutils literal notranslate"><span class="pre">LDOS.number_of_electrons</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.si_dimension"><code class="docutils literal notranslate"><span class="pre">LDOS.si_dimension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.si_unit_conversion"><code class="docutils literal notranslate"><span class="pre">LDOS.si_unit_conversion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS.total_energy"><code class="docutils literal notranslate"><span class="pre">LDOS.total_energy</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.targets.target.html">target</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target"><code class="docutils literal notranslate"><span class="pre">Target</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.backconvert_units"><code class="docutils literal notranslate"><span class="pre">Target.backconvert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.convert_units"><code class="docutils literal notranslate"><span class="pre">Target.convert_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.get_energy_grid"><code class="docutils literal notranslate"><span class="pre">Target.get_energy_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.get_radial_distribution_function"><code class="docutils literal notranslate"><span class="pre">Target.get_radial_distribution_function()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.get_real_space_grid"><code class="docutils literal notranslate"><span class="pre">Target.get_real_space_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.get_static_structure_factor"><code class="docutils literal notranslate"><span class="pre">Target.get_static_structure_factor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.get_target"><code class="docutils literal notranslate"><span class="pre">Target.get_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.get_three_particle_correlation_function"><code class="docutils literal notranslate"><span class="pre">Target.get_three_particle_correlation_function()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.invalidate_target"><code class="docutils literal notranslate"><span class="pre">Target.invalidate_target()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.radial_distribution_function_from_atoms"><code class="docutils literal notranslate"><span class="pre">Target.radial_distribution_function_from_atoms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.read_additional_calculation_data"><code class="docutils literal notranslate"><span class="pre">Target.read_additional_calculation_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.restrict_data"><code class="docutils literal notranslate"><span class="pre">Target.restrict_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.static_structure_factor_from_atoms"><code class="docutils literal notranslate"><span class="pre">Target.static_structure_factor_from_atoms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.three_particle_correlation_function_from_atoms"><code class="docutils literal notranslate"><span class="pre">Target.three_particle_correlation_function_from_atoms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.write_additional_calculation_data"><code class="docutils literal notranslate"><span class="pre">Target.write_additional_calculation_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.write_tem_input_file"><code class="docutils literal notranslate"><span class="pre">Target.write_tem_input_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.write_to_numpy_file"><code class="docutils literal notranslate"><span class="pre">Target.write_to_numpy_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.write_to_openpmd_file"><code class="docutils literal notranslate"><span class="pre">Target.write_to_openpmd_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.feature_size"><code class="docutils literal notranslate"><span class="pre">Target.feature_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.qe_input_data"><code class="docutils literal notranslate"><span class="pre">Target.qe_input_data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.si_dimension"><code class="docutils literal notranslate"><span class="pre">Target.si_dimension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target.si_unit_conversion"><code class="docutils literal notranslate"><span class="pre">Target.si_unit_conversion</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mala.targets.xsf_parser.html">xsf_parser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.xsf_parser.html#mala.targets.xsf_parser.read_xsf"><code class="docutils literal notranslate"><span class="pre">read_xsf()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -175,7 +853,7 @@ predict LDOS and postprocess LDOS into energies (and forces, soon).</p>
 <li class="toctree-l1"><a class="reference internal" href="mala.version.html">version</a></li>
 </ul>
 </div>
-</div>
+</section>
 
 
            </div>

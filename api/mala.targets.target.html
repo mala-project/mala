@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>target &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -31,12 +35,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -87,11 +95,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="modules.html">API reference</a> &raquo;</li>
-          <li><a href="mala.html">mala</a> &raquo;</li>
-          <li><a href="mala.targets.html">targets</a> &raquo;</li>
-      <li>target</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="mala.html">mala</a></li>
+          <li class="breadcrumb-item"><a href="mala.targets.html">targets</a></li>
+      <li class="breadcrumb-item active">target</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.targets.target.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -101,40 +109,40 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="module-mala.targets.target">
-<span id="target"></span><h1>target<a class="headerlink" href="#module-mala.targets.target" title="Permalink to this headline"></a></h1>
+  <section id="module-mala.targets.target">
+<span id="target"></span><h1>target<a class="headerlink" href="#module-mala.targets.target" title="Link to this heading"></a></h1>
 <p>Base class for all target calculators.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mala.targets.target.Target">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData" title="mala.common.physical_data.PhysicalData"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.physical_data.PhysicalData</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">Parameters</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData" title="mala.common.physical_data.PhysicalData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalData</span></code></a></p>
 <p>Base class for all target quantity parser.</p>
 <p>Target parsers read the target quantity
 (i.e. the quantity the NN will learn to predict) from a specified file
 format and performs postprocessing calculations on the quantity.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>params</strong> (<em>mala.common.parameters.Parameters or</em>) – </p></li>
+<li><p><strong>params</strong> (<em>mala.common.parameters.Parameters or</em>)</p></li>
 <li><p><strong>mala.common.parameters.ParametersTargets</strong> – Parameters used to create this Target object.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.backconvert_units">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backconvert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.backconvert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.backconvert_units" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backconvert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.backconvert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.backconvert_units" title="Link to this definition"></a></dt>
 <dd><p>Convert the units of an array from MALA units into desired units.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> (<em>numpy.array</em>) – Data in MALA units.</p></li>
 <li><p><strong>out_units</strong> (<em>string</em>) – Desired units of output array.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>converted_array</strong> – Data in out_units.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpy.array</p>
 </dd>
 </dl>
@@ -142,19 +150,19 @@ format and performs postprocessing calculations on the quantity.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.convert_units">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.convert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.convert_units" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.convert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.convert_units" title="Link to this definition"></a></dt>
 <dd><p>Convert the units of an array into the MALA units.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> (<em>numpy.array</em>) – Data for which the units should be converted.</p></li>
 <li><p><strong>in_units</strong> (<em>string</em>) – Units of array.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>converted_array</strong> – Data in MALA units.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpy.array</p>
 </dd>
 </dl>
@@ -162,17 +170,17 @@ format and performs postprocessing calculations on the quantity.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.get_energy_grid">
-<span class="sig-name descname"><span class="pre">get_energy_grid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_energy_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_energy_grid" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_energy_grid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_energy_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_energy_grid" title="Link to this definition"></a></dt>
 <dd><p>Get energy grid.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.get_radial_distribution_function">
-<span class="sig-name descname"><span class="pre">get_radial_distribution_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mala'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_radial_distribution_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_radial_distribution_function" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_radial_distribution_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mala'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_radial_distribution_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_radial_distribution_function" title="Link to this definition"></a></dt>
 <dd><p>Calculate the radial distribution function (RDF).</p>
 <p>Uses the values as given in the parameters object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p></li>
 <li><p><strong>method</strong> (<em>string</em>) – If “mala” the more flexible, yet less performant python based
@@ -180,7 +188,7 @@ RDF will be calculated. If “asap3”, asap3’s C++ implementation
 will be used.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>rdf</strong> (<em>numpy.ndarray</em>) – The RDF as [rMax] array.</p></li>
 <li><p><strong>radii</strong> (<em>numpy.ndarray</em>) – The radii  at which the RDF was calculated (for plotting),
@@ -197,20 +205,20 @@ automatically calculated.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.get_real_space_grid">
-<span class="sig-name descname"><span class="pre">get_real_space_grid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_real_space_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_real_space_grid" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_real_space_grid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_real_space_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_real_space_grid" title="Link to this definition"></a></dt>
 <dd><p>Get the real space grid.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.get_static_structure_factor">
-<span class="sig-name descname"><span class="pre">get_static_structure_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_static_structure_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_static_structure_factor" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_static_structure_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_static_structure_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_static_structure_factor" title="Link to this definition"></a></dt>
 <dd><p>Calculate the static structure factor (SSF).</p>
 <p>Uses the values as given in the parameters object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>ssf</strong> (<em>numpy.ndarray</em>) – The SSF as [kMax] array.</p></li>
 <li><p><strong>kpoints</strong> (<em>numpy.ndarray</em>) – The k-points  at which the SSF was calculated (for plotting),
@@ -223,7 +231,7 @@ as [kMax] array.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.get_target">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_target</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_target" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_target</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_target" title="Link to this definition"></a></dt>
 <dd><p>Get the target quantity.</p>
 <p>This is the generic interface for cached target quantities.
 It should work for all implemented targets.</p>
@@ -231,14 +239,14 @@ It should work for all implemented targets.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.get_three_particle_correlation_function">
-<span class="sig-name descname"><span class="pre">get_three_particle_correlation_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_three_particle_correlation_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_three_particle_correlation_function" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_three_particle_correlation_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_three_particle_correlation_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_three_particle_correlation_function" title="Link to this definition"></a></dt>
 <dd><p>Calculate the three particle correlation function (TPCF).</p>
 <p>Uses the values as given in the parameters object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>tpcf</strong> (<em>numpy.ndarray</em>) – The TPCF as [rMax, rMax, rMax] array.</p></li>
 <li><p><strong>radii</strong> (<em>numpy.ndarray</em>) – The radii at which the TPCF was calculated (for plotting),
@@ -251,7 +259,7 @@ It should work for all implemented targets.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.invalidate_target">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">invalidate_target</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.invalidate_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.invalidate_target" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">invalidate_target</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.invalidate_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.invalidate_target" title="Link to this definition"></a></dt>
 <dd><p>Invalidates the saved target quantity.</p>
 <p>This is the generic interface for cached target quantities.
 It should work for all implemented targets.</p>
@@ -259,7 +267,7 @@ It should work for all implemented targets.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.radial_distribution_function_from_atoms">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">radial_distribution_function_from_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mala'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.radial_distribution_function_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.radial_distribution_function_from_atoms" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">radial_distribution_function_from_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mala'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.radial_distribution_function_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.radial_distribution_function_from_atoms" title="Link to this definition"></a></dt>
 <dd><p>Calculate the radial distribution function (RDF).</p>
 <p>In comparison with other python implementation, this function
 can handle arbitrary radii by incorporating a neighbor list.
@@ -268,7 +276,7 @@ Loosely based on the implementation in the ASAP3 code
 <a class="reference external" href="https://gitlab.com/asap/asap/-/blob/master/Tools/RawRadialDistribution.cpp">https://gitlab.com/asap/asap/-/blob/master/Tools/RawRadialDistribution.cpp</a>),
 but without the restriction for the radii.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p></li>
 <li><p><strong>number_of_bins</strong> (<em>int</em>) – Number of bins used to create the histogram.</p></li>
@@ -293,7 +301,7 @@ will be used. In the latter case, rMax values larger then
 “2mic” will be ignored.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>rdf</strong> (<em>numpy.ndarray</em>) – The RDF as [rMax] array.</p></li>
 <li><p><strong>radii</strong> (<em>numpy.ndarray</em>) – The radii  at which the RDF was calculated (for plotting),
@@ -306,14 +314,14 @@ as [rMax] array.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.read_additional_calculation_data">
-<span class="sig-name descname"><span class="pre">read_additional_calculation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.read_additional_calculation_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.read_additional_calculation_data" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">read_additional_calculation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.read_additional_calculation_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.read_additional_calculation_data" title="Link to this definition"></a></dt>
 <dd><p>Read in additional input about a calculation.</p>
 <p>This is e.g. necessary when we operate with preprocessed
 data for the training itself but want to take into account other
 physical quantities (such as the fermi energy or the electronic
 temperature) for post processing.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<em>string</em><em> or </em><em>List</em>) – Data from which additional calculation data is inputted.</p></li>
 <li><p><strong>data_type</strong> (<em>string</em>) – <p>Type of data or file that is used. If not provided, MALA will
@@ -337,18 +345,18 @@ values have to be adjusted BEFORE.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.restrict_data">
-<span class="sig-name descname"><span class="pre">restrict_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.restrict_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.restrict_data" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">restrict_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.restrict_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.restrict_data" title="Link to this definition"></a></dt>
 <dd><p>Restrict target data to only contain physically meaningful values.</p>
 <p>For the LDOS this e.g. implies non-negative values. The type
 of data restriction is specified by the parameters.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>array</strong> (<em>numpy.array</em>) – Numpy array, for which the restrictions are to be applied.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>array</strong> – The same array, with restrictions enforced.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpy.array</p>
 </dd>
 </dl>
@@ -356,7 +364,7 @@ of data restriction is specified by the parameters.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.static_structure_factor_from_atoms">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">static_structure_factor_from_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kMax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radial_distribution_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculation_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'direct'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.static_structure_factor_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.static_structure_factor_from_atoms" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">static_structure_factor_from_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kMax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radial_distribution_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculation_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'direct'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.static_structure_factor_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.static_structure_factor_from_atoms" title="Link to this definition"></a></dt>
 <dd><p>Calculate the static structure factor (SSF).</p>
 <p>Implemented according to <a class="reference external" href="https://arxiv.org/abs/1606.03610">https://arxiv.org/abs/1606.03610</a>:</p>
 <blockquote>
@@ -371,18 +379,18 @@ In either case, the SSF will be given as S(k), even though
 technically, the direct method calculates S(<strong>k</strong>); during binning,
 this function averages over all <strong>k</strong> with the same k.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p></li>
 <li><p><strong>number_of_bins</strong> (<em>int</em>) – Number of bins used to create the histogram.</p></li>
 <li><p><strong>kMax</strong> (<em>float</em>) – Maximum wave vector up to which to calculate the SSF.</p></li>
-<li><p><strong>radial_distribution_function</strong> (<em>List of numpy.ndarray</em>) – If not None, and calculation_type=”fourier_transform”, this RDf
+<li><p><strong>radial_distribution_function</strong> (<em>List</em><em> of </em><em>numpy.ndarray</em>) – If not None, and calculation_type=”fourier_transform”, this RDf
 will be used for the Fourier transformation.</p></li>
 <li><p><strong>calculation_type</strong> (<em>string</em>) – Either “direct” or “fourier_transform”. Controls how the SSF is
 calculated.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>ssf</strong> (<em>numpy.ndarray</em>) – The SSF as [kMax] array.</p></li>
 <li><p><strong>kpoints</strong> (<em>numpy.ndarray</em>) – The k-points  at which the SSF was calculated (for plotting),
@@ -395,14 +403,14 @@ as [kMax] array.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.three_particle_correlation_function_from_atoms">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">three_particle_correlation_function_from_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mic'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.three_particle_correlation_function_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.three_particle_correlation_function_from_atoms" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">three_particle_correlation_function_from_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mic'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.three_particle_correlation_function_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.three_particle_correlation_function_from_atoms" title="Link to this definition"></a></dt>
 <dd><p>Calculate the three particle correlation function (TPCF).</p>
 <p>The implementation was done as given by doi.org/10.1063/5.0048450,
 equation 17, with only small modifications. Pleas be aware that,
 while optimized, this function tends to be compuational heavy for
 large radii or number of bins.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p></li>
 <li><p><strong>number_of_bins</strong> (<em>int</em>) – Number of bins used to create the histogram.</p></li>
@@ -423,7 +431,7 @@ to reproduce some earlier trajectory results</p></li>
 </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>tpcf</strong> (<em>numpy.ndarray</em>) – The TPCF as [rMax, rMax, rMax] array.</p></li>
 <li><p><strong>radii</strong> (<em>numpy.ndarray</em>) – The radii at which the TPCF was calculated (for plotting),
@@ -436,12 +444,12 @@ to reproduce some earlier trajectory results</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.write_additional_calculation_data">
-<span class="sig-name descname"><span class="pre">write_additional_calculation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_additional_calculation_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_additional_calculation_data" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write_additional_calculation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_additional_calculation_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_additional_calculation_data" title="Link to this definition"></a></dt>
 <dd><p>Write additional information about a calculation to a .json file.</p>
 <p>This way important information about a calculation can be saved more
 accessibly.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filepath</strong> (<em>string</em>) – Path at which to save the calculation data.</p></li>
 <li><p><strong>return_string</strong> (<em>bool</em>) – If True, no file will be written, and instead a json dict will
@@ -453,13 +461,13 @@ be returned.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.write_tem_input_file">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">write_tem_input_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpoints</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_tem_input_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_tem_input_file" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">write_tem_input_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpoints</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_tem_input_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_tem_input_file" title="Link to this definition"></a></dt>
 <dd><p>Write a QE-style input file for the total energy module.</p>
 <p>Usually, the used parameters should correspond to the properties of
 the object calling this function, but they don’t necessarily have
 to.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>atoms_Angstrom</strong> (<em>ase.Atoms</em>) – ASE atoms object for the current system. If None, MALA will
 create one.</p></li>
@@ -476,10 +484,10 @@ interface. If None (recommended), MALA will create one.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.write_to_numpy_file">
-<span class="sig-name descname"><span class="pre">write_to_numpy_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_to_numpy_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_to_numpy_file" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write_to_numpy_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_to_numpy_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_to_numpy_file" title="Link to this definition"></a></dt>
 <dd><p>Write data to a numpy file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>string</em>) – File to save into.</p></li>
 <li><p><strong>target_data</strong> (<em>numpy.ndarray</em>) – Target data to save. If None, the data stored in the calculator
@@ -491,10 +499,10 @@ will be used.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.write_to_openpmd_file">
-<span class="sig-name descname"><span class="pre">write_to_openpmd_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">internal_iteration_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_to_openpmd_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_to_openpmd_file" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write_to_openpmd_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">internal_iteration_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_to_openpmd_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_to_openpmd_file" title="Link to this definition"></a></dt>
 <dd><p>Write data to a numpy file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>string</em>) – File to save into. If no file ending is given, .h5 is assumed.</p></li>
 <li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Target data to save. If None, the data stored in the calculator
@@ -510,33 +518,33 @@ of a larger data set.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.targets.target.Target.feature_size">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">feature_size</span></span><a class="headerlink" href="#mala.targets.target.Target.feature_size" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">feature_size</span></span><a class="headerlink" href="#mala.targets.target.Target.feature_size" title="Link to this definition"></a></dt>
 <dd><p>Get dimension of this target if used as feature in ML.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.targets.target.Target.qe_input_data">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qe_input_data</span></span><a class="headerlink" href="#mala.targets.target.Target.qe_input_data" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qe_input_data</span></span><a class="headerlink" href="#mala.targets.target.Target.qe_input_data" title="Link to this definition"></a></dt>
 <dd><p>Input data for QE TEM calls.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.targets.target.Target.si_dimension">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">si_dimension</span></span><a class="headerlink" href="#mala.targets.target.Target.si_dimension" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">si_dimension</span></span><a class="headerlink" href="#mala.targets.target.Target.si_dimension" title="Link to this definition"></a></dt>
 <dd><p>Dictionary containing the SI unit dimensions in OpenPMD format.</p>
 <p>Needed for OpenPMD interface.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.targets.target.Target.si_unit_conversion">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">si_unit_conversion</span></span><a class="headerlink" href="#mala.targets.target.Target.si_unit_conversion" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">si_unit_conversion</span></span><a class="headerlink" href="#mala.targets.target.Target.si_unit_conversion" title="Link to this definition"></a></dt>
 <dd><p>Numeric value of the conversion from MALA (ASE) units to SI.</p>
 <p>Needed for OpenPMD interface.</p>
 </dd></dl>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
