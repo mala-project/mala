@@ -365,6 +365,12 @@ class ParametersDescriptors(ParametersBase):
         self.minterpy_polynomial_degree = 4
         self.minterpy_lp_norm = 2
 
+        # ace descriptors
+        self.ace_ranks = [1, 2, 3]
+        self.nmax = [6, 2, 2]
+        self.lmax = [0, 2, 2]
+        self.lmin = [0, 0, 0]
+
     @property
     def use_z_splitting(self):
         """
