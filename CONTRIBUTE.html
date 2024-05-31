@@ -227,9 +227,16 @@ add <em>required</em> dependencies to the appropriate environment files in folde
 <ol class="arabic simple">
 <li><p>Fork the repo and create your branch from <code class="docutils literal notranslate"><span class="pre">develop</span></code></p></li>
 <li><p>During development, make sure that you follow the guidelines for <a class="reference internal" href="#developing-code">developing code</a></p></li>
-<li><p>Rebase your branch onto <code class="docutils literal notranslate"><span class="pre">develop</span></code> before submitting a merge request</p></li>
+<li><p>Rebase your branch onto <code class="docutils literal notranslate"><span class="pre">develop</span></code> before submitting a pull request</p></li>
 <li><p>Ensure the test suite passes before submitting a pull request</p></li>
 </ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The test suite workflows are not triggered for draft pull requests in order to avoid expensive multiple runs.
+As soon as a pull request is marked as <em>ready to review</em>, the test suite is run through.
+If the pipeline fails, one should return to a draft pull request, fix the problems, mark it as ready again
+and repeat the steps if necessary.</p>
+</div>
 </section>
 <section id="issues">
 <h2>Issues<a class="headerlink" href="#issues" title="Link to this heading"></a></h2>
