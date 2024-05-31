@@ -2,14 +2,12 @@ import os
 
 import mala
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 """
 Shows how data can be shuffled amongst multiple
-snapshots, which is very useful in the lazy loading case, where this cannot be 
-easily done in memory. 
+snapshots, which is very useful in the lazy loading case, where this cannot be
+easily done in memory.
 """
 
 

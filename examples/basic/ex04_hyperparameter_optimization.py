@@ -2,14 +2,12 @@ import os
 
 import mala
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 """
 Shows how a hyperparameter optimization can be done using this framework. There
 are multiple hyperparameter optimizers available in this framework. This example
-focusses on the most universal one - optuna.  
+focusses on the most universal one - optuna.
 """
 
 

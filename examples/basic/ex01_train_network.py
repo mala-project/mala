@@ -2,16 +2,13 @@ import os
 
 import mala
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 """
 This example shows how a neural network can be trained on material
 data using this framework. It uses preprocessed data, that is read in
 from *.npy files.
 """
-
 
 ####################
 # 1. PARAMETERS
@@ -93,5 +90,5 @@ test_trainer = mala.Trainer(parameters, test_network, data_handler)
 test_trainer.train_network()
 additional_calculation_data = os.path.join(data_path, "Be_snapshot0.out")
 test_trainer.save_run(
-    "be_model", additional_calculation_data=additional_calculation_data
+    "Be_model", additional_calculation_data=additional_calculation_data
 )
