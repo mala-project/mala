@@ -1,6 +1,6 @@
 name: Cleanup caches
 on:
-  pull_request:
+  pull_request_target:
     types:
       - closed
 
@@ -20,6 +20,7 @@ jobs:
           echo "Deleting caches..."
           for cacheKey in $cacheKeysForPR
           do
+              echo $cacheKey
               gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
           done
           echo "Done"
