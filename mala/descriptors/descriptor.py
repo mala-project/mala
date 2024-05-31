@@ -86,7 +86,7 @@ class Descriptor(PhysicalData):
             if params.descriptors.descriptor_type == "ACE":
                 from mala.descriptors.ace import ACE
 
-                descriptors = super(Descriptor, AtomicDensity).__new__(
+                descriptors = super(Descriptor, ACE).__new__(
                     ACE
                 )
 
