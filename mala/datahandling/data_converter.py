@@ -554,8 +554,6 @@ class DataConverter:
             tmp_input = self.descriptor_calculator.read_from_openpmd_file(
                 snapshot["input"]
             )
-            print(tmp_input)
-            print(tmp_input.shape)
 
         elif description["input"] is None:
             # In this case, only the output is processed.
@@ -628,7 +626,9 @@ class DataConverter:
                     )
 
                 elif description["output"] == "openpmd":
-                    raise RuntimeError("unimplemented!")
+                    tmp_output = self.target_calculator.read_from_openpmd_file(
+                        snapshot["output"], units=original_units["output"]
+                    )
 
                 elif description["output"] is None:
                     # In this case, only the input is processed.
@@ -668,6 +668,11 @@ class DataConverter:
                     # If no units are provided we just assume standard units.
                     tmp_output = self.target_calculator.read_from_xsf(
                         snapshot["output"], **target_calculator_kwargs
+                    )
+
+                elif description["output"] == "openpmd":
+                    tmp_output = self.target_calculator.read_from_openpmd_file(
+                        snapshot["output"], units=original_units["output"]
                     )
 
                 elif description["output"] is None:
