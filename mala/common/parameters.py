@@ -366,10 +366,17 @@ class ParametersDescriptors(ParametersBase):
         self.minterpy_lp_norm = 2
 
         # ace descriptors
+        self.ace_elements = ["Al", "G"]
         self.ace_ranks = [1, 2, 3]
         self.ace_nmax = [6, 2, 2]
         self.ace_lmax = [0, 2, 2]
         self.ace_lmin = [0, 0, 0]
+
+        self.ace_nshell = 2.0
+        self.ace_apply_shift = False
+        self.ace_metal_max = True
+        self.ace_use_vdw = False
+
 
     @property
     def use_z_splitting(self):
