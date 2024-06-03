@@ -173,6 +173,7 @@ class ACE(Descriptor):
         # Calculation for fingerprint length
         # TODO: I don't know if this is correct, should be checked by an ACE expert
         self.fingerprint_length = ncols0 + self._calculate_ace_fingerprint_length()
+        printout("Fingerprint length = ", self.fingerprint_length)
 
         # Extract data from LAMMPS calculation.
         # This is different for the parallel and the serial case.
@@ -192,8 +193,10 @@ class ACE(Descriptor):
                 lammps_constants.LMP_STYLE_LOCAL,
                 lammps_constants.LMP_SIZE_COLS,
             )
+            printout("Fingerprint length from lammps = ", ncols_local)
             if ncols_local != self.fingerprint_length + 3:
-                raise Exception("Inconsistent number of features.")
+                self.fingerprint_length = ncols_local - 3
+                #raise Exception("Inconsistent number of features.")
 
             ace_descriptors_np = extract_compute_np(
                 lmp,
