@@ -367,9 +367,9 @@ class ParametersDescriptors(ParametersBase):
 
         # ace descriptors
         self.ace_ranks = [1, 2, 3]
-        self.nmax = [6, 2, 2]
-        self.lmax = [0, 2, 2]
-        self.lmin = [0, 0, 0]
+        self.ace_nmax = [6, 2, 2]
+        self.ace_lmax = [0, 2, 2]
+        self.ace_lmin = [0, 0, 0]
 
     @property
     def use_z_splitting(self):
