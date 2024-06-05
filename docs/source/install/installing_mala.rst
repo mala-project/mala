@@ -43,7 +43,7 @@ itself is subject to ongoing development as well.
 
     git clone https://github.com/mala-project/test-data ~/path/to/data/repo
     cd ~/path/to/data/repo
-    git checkout v1.7.8
+    git checkout v1.8.0
 
 * Export the path to that repo by ``export MALA_DATA_REPO=~/path/to/data/repo``
 
