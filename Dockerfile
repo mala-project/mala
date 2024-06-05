@@ -7,7 +7,8 @@ RUN apt-get --allow-releaseinfo-change update && apt-get upgrade -y && \
     build-essential \
     libz-dev \
     swig \
-    git-lfs \
+    unzip \
+    wget \
     cmake && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
