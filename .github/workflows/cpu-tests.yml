@@ -183,7 +183,7 @@ jobs:
           # folder in the zip file has to be updated for data repository
           # updates as well - the string at the end is the hash of the data 
           # repository commit. 
-          unzip test-data-v1.7.8.zip
+          unzip -q test-data-v1.7.8.zip
           mv mala-project-test-data-46a6992   mala_data
 
       - name: Test mala
