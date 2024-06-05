@@ -176,7 +176,7 @@ jobs:
         run: |
           # Download test data repository from RODARE. If the version changes
           # this URL has to be adapted (the number after /record/ and the 
-          version have to be incremented)
+          # version have to be incremented)
           wget "https://rodare.hzdr.de/record/2997/files/mala-project/test-data-v1.7.8.zip"
           
           # Once downloaded, we have to unzip the file. The name of the root
