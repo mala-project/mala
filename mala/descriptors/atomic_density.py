@@ -134,10 +134,15 @@ class AtomicDensity(Descriptor):
 
         use_fp64 = kwargs.get("use_fp64", False)
         return_directly = kwargs.get("return_directly", False)
+        keep_logs = kwargs.get("keep_logs", False)
 
         lammps_format = "lammps-data"
-        ase_out_path = os.path.join(outdir, "lammps_input.tmp")
-        ase.io.write(ase_out_path, self.atoms, format=lammps_format)
+        self.lammps_temporary_input = os.path.join(
+            outdir, "lammps_input_" + self.calculation_timestamp + ".tmp"
+        )
+        ase.io.write(
+            self.lammps_temporary_input, self.atoms, format=lammps_format
+        )
 
         nx = self.grid_dimensions[0]
         ny = self.grid_dimensions[1]
@@ -151,30 +156,35 @@ class AtomicDensity(Descriptor):
             )
 
         # Create LAMMPS instance.
-        lammps_dict = {}
-        lammps_dict["sigma"] = self.parameters.atomic_density_sigma
-        lammps_dict["rcutfac"] = self.parameters.atomic_density_cutoff
-        lammps_dict["atom_config_fname"] = ase_out_path
-        lmp = self._setup_lammps(
-            nx,
-            ny,
-            nz,
+        lammps_dict = {
+            "sigma": self.parameters.atomic_density_sigma,
+            "rcutfac": self.parameters.atomic_density_cutoff,
+        }
+        self.lammps_temporary_log = os.path.join(
             outdir,
-            lammps_dict,
-            log_file_name="lammps_ggrid_log.tmp",
+            "lammps_ggrid_log_" + self.calculation_timestamp + ".tmp",
         )
+        lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # For now the file is chosen automatically, because this is used
         # mostly under the hood anyway.
         filepath = __file__.split("atomic_density")[0]
         if self.parameters._configuration["mpi"]:
             if self.parameters.use_z_splitting:
-                runfile = os.path.join(filepath, "in.ggrid.python")
+                self.parameters.lammps_compute_file = os.path.join(
+                    filepath, "in.ggrid.python"
+                )
             else:
-                runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
+                self.parameters.lammps_compute_file = os.path.join(
+                    filepath, "in.ggrid_defaultproc.python"
+                )
         else:
-            runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
-        lmp.file(runfile)
+            self.parameters.lammps_compute_file = os.path.join(
+                filepath, "in.ggrid_defaultproc.python"
+            )
+
+        # Do the LAMMPS calculation and clean up.
+        lmp.file(self.parameters.lammps_compute_file)
 
         # Extract the data.
         nrows_ggrid = extract_compute_np(
@@ -198,7 +208,7 @@ class AtomicDensity(Descriptor):
             array_shape=(nrows_ggrid, ncols_ggrid),
             use_fp64=use_fp64,
         )
-        lmp.close()
+        self._clean_calculation(lmp, keep_logs)
 
         # In comparison to SNAP, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments

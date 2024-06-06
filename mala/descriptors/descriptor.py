@@ -1,6 +1,8 @@
 """Base class for all descriptor calculators."""
 
 from abc import abstractmethod
+from datetime import datetime
+from functools import cached_property
 import os
 
 import ase
@@ -122,6 +124,12 @@ class Descriptor(PhysicalData):
         self.atoms = None
         self.voxel = None
 
+        # If we ever have NON LAMMPS descriptors, these parameters have no
+        # meaning anymore and should probably be moved to an intermediate
+        # DescriptorsLAMMPS class, from which the LAMMPS descriptors inherit.
+        self.lammps_temporary_input = None
+        self.lammps_temporary_log = None
+
     ##############################
     # Properties
     ##############################
@@ -154,6 +162,26 @@ class Descriptor(PhysicalData):
     @descriptors_contain_xyz.setter
     def descriptors_contain_xyz(self, value):
         self.parameters.descriptors_contain_xyz = value
+
+    @cached_property
+    def calculation_timestamp(self):
+        """
+        Timestamp of calculation start.
+
+        Used to distinguish multiple LAMMPS runs performed in the same
+        directory. Since the interface is file based, this timestamp prevents
+        problems with slightly
+        """
+        if get_rank() == 0:
+            timestamp = datetime.timestamp(datetime.utcnow())
+        else:
+            timestamp = None
+
+        if self.parameters._configuration["mpi"]:
+            timestamp = get_comm().bcast(timestamp, root=0)
+        return datetime.fromtimestamp(timestamp).strftime("%F-%H-%M-%S-%f")[
+            :-3
+        ]
 
     ##############################
     # Methods
@@ -273,6 +301,17 @@ class Descriptor(PhysicalData):
             Usually the local directory should suffice, given that there
             are no multiple instances running in the same directory.
 
+        kwargs : dict
+            A collection of keyword arguments, that are mainly used for
+            debugging and development. Different types of descriptors
+            may support different keyword arguments. Commonly supported
+            are
+
+            - "use_fp64": To use enforce floating point 64 precision for
+              descriptors.
+            - "keep_logs": To not delete temporary files created during
+              LAMMPS calculation of descriptors.
+
         Returns
         -------
         descriptors : numpy.array
@@ -333,6 +372,17 @@ class Descriptor(PhysicalData):
             A directory in which to write the output of the LAMMPS calculation.
             Usually the local directory should suffice, given that there
             are no multiple instances running in the same directory.
+
+        kwargs : dict
+            A collection of keyword arguments, that are mainly used for
+            debugging and development. Different types of descriptors
+            may support different keyword arguments. Commonly supported
+            are
+
+            - "use_fp64": To use enforce floating point 64 precision for
+              descriptors.
+            - "keep_logs": To not delete temporary files created during
+              LAMMPS calculation of descriptors.
 
         Returns
         -------
@@ -542,9 +592,7 @@ class Descriptor(PhysicalData):
         else:
             return 0
 
-    def _setup_lammps(
-        self, nx, ny, nz, outdir, lammps_dict, log_file_name="lammps_log.tmp"
-    ):
+    def _setup_lammps(self, nx, ny, nz, lammps_dict):
         """
         Set up the lammps processor grid.
 
@@ -552,20 +600,14 @@ class Descriptor(PhysicalData):
         """
         from lammps import lammps
 
-        parallel_warn(
-            "Using LAMMPS for descriptor calculation. "
-            "Do not initialize more than one pre-processing "
-            "calculation in the same directory at the same time. "
-            "Data may be over-written."
-        )
-
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = [
             "-screen",
             "none",
             "-log",
-            os.path.join(outdir, log_file_name),
+            self.lammps_temporary_log,
         ]
+        lammps_dict["atom_config_fname"] = self.lammps_temporary_input
 
         if self.parameters._configuration["mpi"]:
             size = get_size()
@@ -777,6 +819,17 @@ class Descriptor(PhysicalData):
         set_lammps_instance(lmp)
 
         return lmp
+
+    def _clean_calculation(self, lmp, keep_logs):
+        lmp.close()
+        if not keep_logs:
+            if get_rank() == 0:
+                os.remove(self.lammps_temporary_log)
+                os.remove(self.lammps_temporary_input)
+
+        # Reset timestamp for potential next calculation using same LAMMPS
+        # object.
+        del self.calculation_timestamp
 
     def _setup_atom_list(self):
         """
