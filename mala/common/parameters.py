@@ -377,6 +377,13 @@ class ParametersDescriptors(ParametersBase):
         self.ace_metal_max = True
         self.ace_use_vdw = False
 
+        self.ace_L_R = 0
+        self.ace_M_R = 0
+
+        self.ace_coupling_type = "wig"
+
+        self.ace_lmax_traditional = 12
+
 
     @property
     def use_z_splitting(self):
