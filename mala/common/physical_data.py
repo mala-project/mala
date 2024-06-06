@@ -642,6 +642,11 @@ match the array dimensions (extent {} in the feature dimension)""".format(
 
         # Third loop: Extra flushes to harmonize ranks
         for _ in range(extra_flushes):
+            # This following line is a workaround for issue
+            # https://github.com/openPMD/openPMD-api/issues/1616
+            # Fixed in openPMD-api 0.16 by
+            # https://github.com/openPMD/openPMD-api/pull/1619
+            iteration.dt = iteration.dt
             iteration.series_flush()
 
         iteration.close(flush=True)
