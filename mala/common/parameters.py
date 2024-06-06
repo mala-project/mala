@@ -380,7 +380,7 @@ class ParametersDescriptors(ParametersBase):
         self.ace_L_R = 0
         self.ace_M_R = 0
 
-        self.ace_coupling_type = "wig"
+        self.ace_coupling_type = "cg"
 
         self.ace_lmax_traditional = 12
 
