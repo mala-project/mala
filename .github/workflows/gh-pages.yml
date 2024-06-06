@@ -3,6 +3,9 @@ name: Documenation
 on:
   pull_request:
     types:
+      - opened
+      - synchronize
+      - reopened
       - ready_for_review
     branches:
       - master
@@ -13,6 +16,8 @@ on:
 
 jobs:
   test-docstrings:
+    # do not trigger on draft PRs
+    if: ${{ ! github.event.pull_request.draft }}
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
