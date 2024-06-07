@@ -371,7 +371,9 @@ class ParametersDescriptors(ParametersBase):
         self.ace_ranks = [1, 2, 3]
         self.ace_nmax = [6, 2, 2]
         self.ace_lmax = [0, 2, 2]
+        self.ace_nradbase = max(self.ace_nmax)
         self.ace_lmin = [0, 0, 0]
+        self.ace_reference_ens = [0.0, 0.0]
 
         self.ace_nshell = 2.0
         self.ace_apply_shift = False

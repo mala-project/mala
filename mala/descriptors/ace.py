@@ -15,6 +15,7 @@ from scipy import special
 from mala.common.parallelizer import printout
 from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
+from mala.descriptors.ace_potential import AcePot
 import mala.descriptors.ace_coupling_utils as acu
 import mala.descriptors.wigner_coupling as wigner_coupling
 import mala.descriptors.cg_coupling as cg_coupling
@@ -521,6 +522,26 @@ class ACE(Descriptor):
             )
 
         limit_nus = self.calc_limit_nus()
+
+        # permutation symmetry adapted ACE labels
+        Apot = AcePot(
+            self.parameters.ace_elements,
+            self.parameters.ace_reference_ens,
+            self.parameters.ace_ranks,
+            self.parameters.ace_nmax,
+            self.parameters.ace_lmax,
+            self.parameters.ace_nradbase,
+            rcutfac,
+            lmbda,
+            rcinner,
+            drcinner,
+            lmin=self.parameters.ace_lmin,
+            **{"input_nus": limit_nus, "ccs": ccs[self.parameters.ace_M_R]}
+        )
+        Apot.write_pot("coupling_coefficients_fullbasis")
+
+        Apot.set_funcs(nulst=limit_nus, muflg=True, print_0s=True)
+        Apot.write_pot("coupling_coefficients")
 
     def calc_limit_nus(self):
         ranked_chem_nus = []
