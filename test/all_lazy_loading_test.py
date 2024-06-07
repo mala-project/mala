@@ -7,9 +7,7 @@ import numpy as np
 import torch
 import pytest
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 # This test compares the data scaling using the regular scaling procedure and
 # the lazy-loading one (incremental fitting).

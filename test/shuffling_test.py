@@ -3,9 +3,7 @@ import os
 import mala
 import numpy as np
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 # Accuracy for the shuffling test.
 accuracy = np.finfo(float).eps

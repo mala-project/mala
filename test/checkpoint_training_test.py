@@ -4,9 +4,8 @@ import mala
 from mala import printout
 import numpy as np
 
-from mala.datahandling.data_repo import data_repo_path
+from mala.datahandling.data_repo import data_path
 
-data_path = os.path.join(data_repo_path, "Be2")
 test_checkpoint_name = "test"
 
 # Define the accuracy used in the tests.

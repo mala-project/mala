@@ -6,7 +6,7 @@ import numpy as np
 import scipy as sp
 import pytest
 
-from mala.datahandling.data_repo import data_repo_path
+from mala.datahandling.data_repo import data_path
 
 # In order to test the integration capabilities of MALA we need a
 # QuantumEspresso
@@ -18,7 +18,6 @@ from mala.datahandling.data_repo import data_repo_path
 # Scripts to reproduce the data files used in this test script can be found
 # in the data repo.
 
-data_path = os.path.join(data_repo_path, "Be2")
 path_to_out = os.path.join(data_path, "Be_snapshot0.out")
 path_to_ldos_npy = os.path.join(data_path, "Be_snapshot0.out.npy")
 path_to_dos_npy = os.path.join(data_path, "Be_snapshot0.dos.npy")

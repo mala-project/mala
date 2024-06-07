@@ -4,9 +4,7 @@ import mala
 from mala import printout
 import numpy as np
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 checkpoint_name = "test_ho"
 
