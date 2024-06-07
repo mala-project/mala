@@ -520,6 +520,9 @@ class ACE(Descriptor):
                 + " not recongised"
             )
 
+        limit_nus = self.calc_limit_nus()
+
+    def calc_limit_nus(self):
         ranked_chem_nus = []
         for ind, rank in enumerate(self.parameters.ace_ranks):
             rank = int(rank)
@@ -531,6 +534,66 @@ class ACE(Descriptor):
                 lmin=int(self.parameters.ace_lmin[ind]),
             )
             ranked_chem_nus.append(PA_lammps)
+
+        nus_unsort = [item for sublist in ranked_chem_nus for item in sublist]
+        nus = nus_unsort.copy()
+        mu0s = []
+        mus = []
+        ns = []
+        ls = []
+        for nu in nus_unsort:
+            mu0ii, muii, nii, lii = acu.get_mu_n_l(nu)
+            mu0s.append(mu0ii)
+            mus.append(tuple(muii))
+            ns.append(tuple(nii))
+            ls.append(tuple(lii))
+        nus.sort(key=lambda x: mus[nus_unsort.index(x)], reverse=False)
+        nus.sort(key=lambda x: ns[nus_unsort.index(x)], reverse=False)
+        nus.sort(key=lambda x: ls[nus_unsort.index(x)], reverse=False)
+        nus.sort(key=lambda x: mu0s[nus_unsort.index(x)], reverse=False)
+        nus.sort(key=lambda x: len(x), reverse=False)
+        nus.sort(key=lambda x: mu0s[nus_unsort.index(x)], reverse=False)
+        musins = range(len(self.parameters.ace_elements) - 1)
+        all_funcs = {}
+        if self.parameters.ace_types_like_snap:
+            byattyp, byattypfiltered = self.srt_by_attyp(nus, 1)
+            if self.parameters.ace_grid_filter:
+                assert (
+                    self.parameters.ace_padfunc
+                ), "must pad with at least 1 other basis function for other element types to work in LAMMPS - set padfunc=True"
+                limit_nus = byattypfiltered["%d" % 0]
+                if self.parameters.ace_padfunc:
+                    for muii in musins:
+                        limit_nus.append(byattypfiltered["%d" % muii][0])
+            elif not grid_filter:
+                limit_nus = byattyp["%d" % 0]
+
+        else:
+            byattyp, byattypfiltered = self.srt_by_attyp(
+                nus, len(self.parameters.ace_elements)
+            )
+            if self.parameters.ace_grid_filter:
+                limit_nus = byattypfiltered[
+                    "%d" % (len(self.parameters.ace_elements) - 1)
+                ]
+                assert (
+                    self.parameters.ace_padfunc
+                ), "must pad with at least 1 other basis function for other element types to work in LAMMPS - set padfunc=True"
+                if self.parameters.ace_padfunc:
+                    for muii in musins:
+                        limit_nus.append(byattypfiltered["%d" % muii][0])
+            elif not grid_filter:
+                limit_nus = byattyp[
+                    "%d" % (len(self.parameters.ace_elements) - 1)
+                ]
+                if self.parameters.ace_padfunc:
+                    for muii in musins:
+                        limit_nus.append(byattyp["%d" % muii][0])
+        printout(
+            "all basis functions", len(nus), "grid subset", len(limit_nus)
+        )
+
+        return limit_nus
 
     def get_default_settings(self):
         rc_range = {bp: None for bp in self.bonds}
@@ -653,7 +716,7 @@ class ACE(Descriptor):
         for nu in nulst:
             mu0 = nu.split("_")[0]
             byattyp[mu0].append(nu)
-            mu0ii, muii, nii, lii = get_mu_n_l(nu)
+            mu0ii, muii, nii, lii = acu.get_mu_n_l(nu)
             if mumax not in muii:
                 byattypfiltered[mu0].append(nu)
         return byattyp, byattypfiltered

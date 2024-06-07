@@ -543,3 +543,50 @@ def ind_vec(lrng, size):
             if pstr not in uniques:
                 uniques.append(pstr)
     return uniques
+
+
+def get_mu_n_l(nu_in, return_L=False, **kwargs):
+    rank = get_mu_nu_rank(nu_in)
+    if len(nu_in.split("_")) > 1:
+        if len(nu_in.split("_")) == 2:
+            nu = nu_in.split("_")[-1]
+            Lstr = ""
+        else:
+            nu = nu_in.split("_")[1]
+            Lstr = nu_in.split("_")[-1]
+        mu0 = int(nu_in.split("_")[0])
+        nusplt = [int(k) for k in nu.split(",")]
+        mu = nusplt[:rank]
+        n = nusplt[rank : 2 * rank]
+        l = nusplt[2 * rank :]
+        if len(Lstr) >= 1:
+            L = tuple([int(k) for k in Lstr.split("-")])
+        else:
+            L = None
+        if return_L:
+            return mu0, mu, n, l, L
+        else:
+            return mu0, mu, n, l
+    # provide option to get n,l for depricated descriptor labels
+    else:
+        nu = nu_in
+        mu0 = 0
+        mu = [0] * rank
+        nusplt = [int(k) for k in nu.split(",")]
+        n = nusplt[:rank]
+        l = nusplt[rank : 2 * rank]
+        return mu0, mu, n, l
+
+
+def get_mu_nu_rank(nu_in):
+    if len(nu_in.split("_")) > 1:
+        assert (
+            len(nu_in.split("_")) <= 3
+        ), "make sure your descriptor label is in proper format: mu0_mu1,mu2,mu3,n1,n2,n3,l1,l2,l3_L1"
+        nu = nu_in.split("_")[1]
+        nu_splt = nu.split(",")
+        return int(len(nu_splt) / 3)
+    else:
+        nu = nu_in
+        nu_splt = nu.split(",")
+        return int(len(nu_splt) / 2)

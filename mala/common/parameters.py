@@ -382,8 +382,14 @@ class ParametersDescriptors(ParametersBase):
         self.ace_M_R = 0
 
         self.ace_coupling_type = "cg"
-
         self.ace_lmax_traditional = 12
+        
+        # TODO: add consistency check for these
+        # if grid_filter, types_like_snap must be False
+        # if grid_filter, padfunc must be True
+        self.ace_grid_filter = True
+        self.ace_types_like_snap = False
+        self.ace_padfunc = True
 
 
     @property
