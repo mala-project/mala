@@ -367,6 +367,7 @@ class ParametersDescriptors(ParametersBase):
 
         # ace descriptors
         self.ace_elements = ["Al", "G"]
+        self.ace_mumax = len(self.ace_elements)
         self.ace_ranks = [1, 2, 3]
         self.ace_nmax = [6, 2, 2]
         self.ace_lmax = [0, 2, 2]

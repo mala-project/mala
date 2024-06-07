@@ -19,6 +19,7 @@ import mala.descriptors.ace_coupling_utils as acu
 import mala.descriptors.wigner_coupling as wigner_coupling
 import mala.descriptors.cg_coupling as cg_coupling
 
+
 class ACE(Descriptor):
     """Class for calculation and parsing of bispectrum descriptors.
 
@@ -503,10 +504,14 @@ class ACE(Descriptor):
         # load or generate generalized coupling coefficients
 
         if self.parameters.ace_coupling_type == "wig":
-            ccs = wigner_coupling.get_coupling(self.Wigner_3j, ldict, L_R=self.parameters.ace_L_R)
+            ccs = wigner_coupling.get_coupling(
+                self.Wigner_3j, ldict, L_R=self.parameters.ace_L_R
+            )
 
         elif self.parameters.ace_coupling_type == "cg":
-            ccs = cg_coupling.get_coupling(self.Clebsch_Gordan, ldict, L_R=self.parameters.ace_L_R)
+            ccs = cg_coupling.get_coupling(
+                self.Clebsch_Gordan, ldict, L_R=self.parameters.ace_L_R
+            )
 
         else:
             sys.exit(
@@ -514,6 +519,18 @@ class ACE(Descriptor):
                 + str(self.parameters.ace_coupling_type)
                 + " not recongised"
             )
+
+        ranked_chem_nus = []
+        for ind, rank in enumerate(self.parameters.ace_ranks):
+            rank = int(rank)
+            PA_lammps, not_compat = acu.pa_labels_raw(
+                rank,
+                int(self.parameters.ace_nmax[ind]),
+                int(self.parameters.ace_lmax[ind]),
+                int(self.parameters.ace_mumax),
+                lmin=int(self.parameters.ace_lmin[ind]),
+            )
+            ranked_chem_nus.append(PA_lammps)
 
     def get_default_settings(self):
         rc_range = {bp: None for bp in self.bonds}
