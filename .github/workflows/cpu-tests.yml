@@ -2,7 +2,13 @@ name: CPU tests
 
 on:
   pull_request:
-    # Trigger on pull requests to master or develop
+    # Trigger on pull requests to master or develop that are
+    # marked as "ready for review" (non-draft PRs)
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
     branches:
       - master
       - develop
@@ -21,6 +27,8 @@ env:
 
 jobs:
   build-docker-image-cpu:
+    # do not trigger on draft PRs
+    if: ${{ ! github.event.pull_request.draft }}
     # Build and push temporary Docker image to GitHub's container registry
     runs-on: ubuntu-22.04
     steps:
@@ -167,13 +175,20 @@ jobs:
           # `requirements.txt` and/or extra dependencies are missing in the Docker Conda environment
           diff env_1.yml env_2.yml
 
-      - name: Check out repository (data)
-        uses: actions/checkout@v3
-        with:
-          repository: mala-project/test-data
-          path: mala_data
-          ref: v1.7.0
-          lfs: true
+      - name: Download test data repository
+        shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
+        run: |
+          # Download test data repository from RODARE. If the version changes
+          # this URL has to be adapted (the number after /record/ and the
+          # version have to be incremented)
+          wget "https://rodare.hzdr.de/record/2999/files/mala-project/test-data-1.8.0.zip"
+
+          # Once downloaded, we have to unzip the file. The name of the root
+          # folder in the zip file has to be updated for data repository
+          # updates as well - the string at the end is the hash of the data
+          # repository commit.
+          unzip -q test-data-1.8.0.zip
+          mv mala-project-test-data-d5694c7  mala_data
 
       - name: Test mala
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
@@ -237,4 +252,3 @@ jobs:
 
       - name: Push Docker image
         run: docker push $IMAGE_REPO/$IMAGE_NAME --all-tags
-

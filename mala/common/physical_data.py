@@ -418,7 +418,8 @@ class PhysicalData(ABC):
         import openpmd_api as io
 
         if isinstance(path, str):
-            file_name = os.path.basename(path)
+            directory, file_name = os.path.split(path)
+            path = os.path.join(directory, file_name.replace("*", "%T"))
             file_ending = file_name.split(".")[-1]
             if file_name == file_ending:
                 path += ".h5"
