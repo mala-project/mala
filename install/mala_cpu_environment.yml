@@ -95,7 +95,7 @@ dependencies:
   - numpy=1.24.0
   - oauthlib=3.2.2
   - openjpeg=2.5.0
-  - openpmd-api=0.15.2=nompi_py38h766a7de_102
+  - openpmd-api=0.15.2
   - openssl=3.3.1
   - optuna=3.0.5
   - packaging=22.0
