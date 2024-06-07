@@ -6,6 +6,9 @@ on:
     # Trigger on pull requests to master or develop that are
     # marked as "ready for review" (non-draft PRs)
     types:
+      - opened
+      - synchronize
+      - reopened
       - ready_for_review
     branches:
       - master
@@ -25,6 +28,8 @@ env:
 
 jobs:
   build-docker-image-cpu:
+    # do not trigger on draft PRs
+    if: ${{ ! github.event.pull_request.draft }}
     # Build and push temporary Docker image to GitHub's container registry
     runs-on: ubuntu-22.04
     steps:
@@ -248,4 +253,3 @@ jobs:
 
       - name: Push Docker image
         run: docker push $IMAGE_REPO/$IMAGE_NAME --all-tags
-
