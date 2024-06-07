@@ -750,6 +750,11 @@
 
         <span class="c1"># Third loop: Extra flushes to harmonize ranks</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">extra_flushes</span><span class="p">):</span>
+            <span class="c1"># This following line is a workaround for issue</span>
+            <span class="c1"># https://github.com/openPMD/openPMD-api/issues/1616</span>
+            <span class="c1"># Fixed in openPMD-api 0.16 by</span>
+            <span class="c1"># https://github.com/openPMD/openPMD-api/pull/1619</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">dt</span>
             <span class="n">iteration</span><span class="o">.</span><span class="n">series_flush</span><span class="p">()</span>
 
         <span class="n">iteration</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
