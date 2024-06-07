@@ -2,16 +2,14 @@ import os
 
 import mala
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 """
-Shows how a hyperparameter optimization run can 
+Shows how a hyperparameter optimization run can
 be paused and resumed. Delete all ex04_*.pkl and ex04_*.pth prior to execution.
-Afterwards, execute this script twice to see how MALA progresses from a 
+Afterwards, execute this script twice to see how MALA progresses from a
 checkpoint. As the number of trials cannot be divided by the number
-of epochs after which a checkpoint is created without residual, this will 
+of epochs after which a checkpoint is created without residual, this will
 lead to MALA performing the missing trials again.
 """
 

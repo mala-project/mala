@@ -4,18 +4,18 @@ from ase.io import read
 import mala
 from mala import printout
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
-
-assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
+from mala.datahandling.data_repo import data_path
 
 """
-Show how a prediction can be made using MALA, based on only a
-trained network and atomic configurations.
+Show how a prediction can be made using MALA, based on only a trained network and atomic
+configurations. Either execute ex01 before executing this one or download the
+appropriate model from the provided test data repo.
 
 REQUIRES LAMMPS (and potentiall the total energy module).
 """
+
+model_name = "Be_model"
+model_path = "./" if os.path.exists("Be_model.zip") else data_path
 
 
 ####################
@@ -24,7 +24,7 @@ REQUIRES LAMMPS (and potentiall the total energy module).
 # Tester class interface. Afterwards, set the necessary parameters.
 ####################
 parameters, network, data_handler, predictor = mala.Predictor.load_run(
-    "be_model"
+    run_name=model_name, path=model_path
 )
 
 

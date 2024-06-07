@@ -5,9 +5,7 @@ import torch
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 # Define the accuracy used in the tests.
 accuracy = 1e-5

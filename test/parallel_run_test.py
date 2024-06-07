@@ -6,9 +6,7 @@ import numpy as np
 from ase.io import read
 import pytest
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 # Control the various accuracies..
 accuracy_snaps = 1e-4
