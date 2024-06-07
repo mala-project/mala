@@ -548,10 +548,12 @@ class DataConverter:
             )
 
         elif description["input"] == "openpmd":
+            self.descriptor_calculator._feature_mask = lambda: 0
             tmp_input = self.descriptor_calculator.read_from_openpmd_file(
                 snapshot["input"], units=original_units["input"]
             )
         elif description["input"] == "numpy":
+            self.descriptor_calculator._feature_mask = lambda: 0
             tmp_input = self.descriptor_calculator.read_from_numpy_file(
                 snapshot["input"], units=original_units["input"]
             )
