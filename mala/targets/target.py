@@ -125,6 +125,7 @@ class Target(PhysicalData):
             "xc_contribution": None,
             "ewald_contribution": None,
         }
+        self.atomic_forces_dft = None
         self.atoms = None
         self.electrons_per_atom = None
         self.qe_input_data = {
@@ -331,6 +332,7 @@ class Target(PhysicalData):
                 "xc_contribution": None,
                 "ewald_contribution": None,
             }
+            self.atomic_forces_dft = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms = None
 
@@ -340,6 +342,14 @@ class Target(PhysicalData):
             self.fermi_energy_dft = (
                 self.atoms.get_calculator().get_fermi_level()
             )
+            # The forces may not have been computed. If they are indeed
+            # not computed, ASE will by default throw an PropertyNotImplementedError
+            # error
+            try:
+                self.atomic_forces_dft = self.atoms.get_forces()
+            except ase.calculators.calculator.PropertyNotImplementedError:
+                print("CAUGHT AN ERROR!")
+                pass
 
             # Parse the file for energy values.
             total_energy = None
@@ -516,6 +526,7 @@ class Target(PhysicalData):
                 "xc_contribution": None,
                 "ewald_contribution": None,
             }
+            self.atomic_forces_dft = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms: ase.Atoms = data[0]
 
@@ -566,6 +577,7 @@ class Target(PhysicalData):
                 "xc_contribution": None,
                 "ewald_contribution": None,
             }
+            self.atomic_forces_dft = None
             self.entropy_contribution_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms = None
@@ -581,9 +593,6 @@ class Target(PhysicalData):
             self.qe_input_data["degauss"] = json_dict["degauss"]
             self.qe_pseudopotentials = json_dict["pseudopotentials"]
 
-            # These attributes are only needed for debugging purposes.
-            # The interace should not break if they are not present in the
-            # json file.
             energy_contribution_ids = [
                 "one_electron_contribution",
                 "hartree_contribution",
@@ -595,6 +604,12 @@ class Target(PhysicalData):
                     self.total_energy_contributions_dft_calculation[key] = (
                         json_dict[key]
                     )
+
+            # Not always read from DFT files.
+            if "atomic_forces_dft" in json_dict:
+                self.atomic_forces_dft = np.array(
+                    json_dict["atomic_forces_dft"]
+                )
 
         else:
             raise Exception("Unsupported auxiliary file type.")
@@ -664,6 +679,11 @@ class Target(PhysicalData):
             additional_calculation_data["atoms"]["pbc"] = (
                 additional_calculation_data["atoms"]["pbc"].tolist()
             )
+        if self.atomic_forces_dft is not None:
+            additional_calculation_data["atomic_forces_dft"] = (
+                self.atomic_forces_dft.tolist()
+            )
+
         if return_string is False:
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(
