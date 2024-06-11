@@ -3,6 +3,13 @@ on:
   pull_request_target:
     types:
       - closed
+  push:
+    # Trigger on pushes to master or develop and for git tag pushes
+    branches:
+      - master
+      - develop
+    tags:
+      - v*
 
 jobs:
   cleanup:
