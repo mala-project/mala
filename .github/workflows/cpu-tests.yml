@@ -174,7 +174,7 @@ jobs:
 
           # if comparison fails, `install/mala_cpu_[base]_environment.yml` needs to be aligned with
           # `requirements.txt` and/or extra dependencies are missing in the Docker Conda environment
-          diff env_1.yml env_2.yml
+          diff --side-by-side --color=always env_1.yml env_2.yml
 
       - name: Download test data repository from RODARE
         shell: 'bash -c "docker exec -i mala-cpu python < {0}"'
