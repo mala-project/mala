@@ -379,10 +379,13 @@ class ACE(Descriptor):
 
         # Calculation for fingerprint length
         # TODO: I don't know if this is correct, should be checked by an ACE expert
-        self.fingerprint_length = (
-            ncols0 + self._calculate_ace_fingerprint_length()
-        )
-        printout("Fingerprint length = ", self.fingerprint_length)
+        # NOTE: we now handle this later while setting the coupling_coefficients
+        #       (the coupling coefficients specify wich fingerprints are evaluated 
+        #        in lammps directly)
+        #self.fingerprint_length = (
+        #    ncols0 + self._calculate_ace_fingerprint_length()
+        #)
+        #printout("Fingerprint length = ", self.fingerprint_length)
 
         # Extract data from LAMMPS calculation.
         # This is different for the parallel and the serial case.
@@ -521,27 +524,53 @@ class ACE(Descriptor):
                 + " not recongised"
             )
 
-        limit_nus = self.calc_limit_nus()
+        nus,limit_nus = self.calc_limit_nus()
 
-        # permutation symmetry adapted ACE labels
-        Apot = AcePot(
-            self.parameters.ace_elements,
-            self.parameters.ace_reference_ens,
-            self.parameters.ace_ranks,
-            self.parameters.ace_nmax,
-            self.parameters.ace_lmax,
-            self.parameters.ace_nradbase,
-            rcutfac,
-            lmbda,
-            rcinner,
-            drcinner,
-            lmin=self.parameters.ace_lmin,
-            **{"input_nus": limit_nus, "ccs": ccs[self.parameters.ace_M_R]}
-        )
-        Apot.write_pot("coupling_coefficients_fullbasis")
+        if self.parameters.ace_types_like_snap:
+            self.fingerprint_length = ncols0 + len(limit_nus)
+            # permutation symmetry adapted ACE labels
+            Apot = AcePot(
+                self.parameters.ace_elements,
+                self.parameters.ace_reference_ens,
+                self.parameters.ace_ranks,
+                self.parameters.ace_nmax,
+                self.parameters.ace_lmax,
+                self.parameters.ace_nradbase,
+                rcutfac,
+                lmbda,
+                rcinner,
+                drcinner,
+                lmin=self.parameters.ace_lmin,
+                **{"input_nus": limit_nus, "ccs": ccs[self.parameters.ace_M_R]}
+            )
+            #Apot.write_pot("coupling_coefficients_fullbasis")
 
-        Apot.set_funcs(nulst=limit_nus, muflg=True, print_0s=True)
-        Apot.write_pot("coupling_coefficients")
+            Apot.set_funcs(nulst=limit_nus, muflg=True, print_0s=True)
+            Apot.write_pot("coupling_coefficients")
+
+        # add case for full basis separately
+        elif not self.parameters.ace_types_like_snap:
+            self.fingerprint_length = ncols0 + len(nus)
+            # permutation symmetry adapted ACE labels
+            Apot = AcePot(
+                self.parameters.ace_elements,
+                self.parameters.ace_reference_ens,
+                self.parameters.ace_ranks,
+                self.parameters.ace_nmax,
+                self.parameters.ace_lmax,
+                self.parameters.ace_nradbase,
+                rcutfac,
+                lmbda,
+                rcinner,
+                drcinner,
+                lmin=self.parameters.ace_lmin,
+                **{"input_nus": nus, "ccs": ccs[self.parameters.ace_M_R]}
+            )
+            Apot.write_pot("coupling_coefficients")
+
+            #Apot.set_funcs(nulst=limit_nus, muflg=True, print_0s=True)
+            #Apot.write_pot("coupling_coefficients")
+        
 
     def calc_limit_nus(self):
         ranked_chem_nus = []
@@ -614,7 +643,7 @@ class ACE(Descriptor):
             "all basis functions", len(nus), "grid subset", len(limit_nus)
         )
 
-        return limit_nus
+        return nus, limit_nus
 
     def get_default_settings(self):
         rc_range = {bp: None for bp in self.bonds}
