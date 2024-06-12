@@ -160,8 +160,8 @@ jobs:
         # Exec all commands inside the mala-cpu container
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
         run: |
-          # epxort Docker image Conda environment for a later comparison
-          conda env export -n mala-cpu > env_1.yml
+          # export Docker image Conda environment for a later comparison
+          conda env export -n mala-cpu > env_before.yml
 
           # install mala package
           pip --no-cache-dir install -e .[opt,test] --no-build-isolation
@@ -170,11 +170,11 @@ jobs:
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
         run: |
           # export Conda environment _with_ mala package installed in it (and extra dependencies)
-          conda env export -n mala-cpu > env_2.yml
+          conda env export -n mala-cpu > env_after.yml
 
           # if comparison fails, `install/mala_cpu_[base]_environment.yml` needs to be aligned with
           # `requirements.txt` and/or extra dependencies are missing in the Docker Conda environment
-          diff --side-by-side --color=always env_1.yml env_2.yml
+          diff --side-by-side --color=always env_before.yml env_after.yml
 
       - name: Download test data repository from RODARE
         shell: 'bash -c "docker exec -i mala-cpu python < {0}"'
