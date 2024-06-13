@@ -74,7 +74,7 @@ jobs:
             CACHE=$IMAGE_REPO/$IMAGE_NAME:latest
           fi
 
-          docker build . --file Dockerfile --tag $IMAGE_NAME:local --cache-from=$CACHE --build-arg DEVICE=cpu
+          DOCKER_BUILDKIT=0 docker build . --file Dockerfile --tag $IMAGE_NAME:local --cache-from=$CACHE --build-arg DEVICE=cpu
 
           # Show images
           docker images --filter=reference=$IMAGE_NAME --filter=reference=$IMAGE_REPO/$IMAGE_NAME
