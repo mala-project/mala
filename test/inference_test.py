@@ -3,10 +3,8 @@ import os
 import numpy as np
 from mala import Tester, Runner
 
-from mala.datahandling.data_repo import data_repo_path
+from mala.datahandling.data_repo import data_path
 
-data_path = os.path.join(data_repo_path, "Be2")
-param_path = os.path.join(data_repo_path, "workflow_test/")
 accuracy_strict = 1e-16
 accuracy_coarse = 5e-7
 accuracy_very_coarse = 3
@@ -18,7 +16,7 @@ class TestInference:
     def test_unit_conversion(self):
         """Test that RAM inexpensive unit conversion works."""
         parameters, network, data_handler = Runner.load_run(
-            "workflow_test", load_runner=False, path=param_path
+            "Be_model", load_runner=False, path=data_path
         )
         parameters.data.use_lazy_loading = False
         parameters.running.mini_batch_size = 50
@@ -99,7 +97,7 @@ class TestInference:
     def __run(use_lazy_loading=False, batchsize=46):
         # First we load Parameters and network.
         parameters, network, data_handler, tester = Tester.load_run(
-            "workflow_test", path=param_path
+            "Be_model", path=data_path
         )
         parameters.data.use_lazy_loading = use_lazy_loading
         parameters.running.mini_batch_size = batchsize

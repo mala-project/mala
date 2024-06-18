@@ -1,13 +1,11 @@
 import os
 
 import mala
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 """
 Shows how MALA can be used to optimize descriptor
-parameters based on the ACSD analysis (see hyperparameter paper in the 
+parameters based on the ACSD analysis (see hyperparameter paper in the
 documentation for mathematical details).
 """
 

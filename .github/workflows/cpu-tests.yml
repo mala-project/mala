@@ -1,6 +1,7 @@
 name: CPU tests
 
 on:
+  workflow_dispatch:
   pull_request:
     # Trigger on pull requests to master or develop that are
     # marked as "ready for review" (non-draft PRs)
@@ -33,7 +34,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set environment variables
         run: |
@@ -45,7 +46,7 @@ jobs:
           echo "IMAGE_REPO=$IMAGE_REPO"
 
       - name: Restore cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-docker
         with:
           path: ${{ env.DOCKER_CACHE_PATH }}
@@ -73,7 +74,7 @@ jobs:
             CACHE=$IMAGE_REPO/$IMAGE_NAME:latest
           fi
 
-          docker build . --file Dockerfile --tag $IMAGE_NAME:local --cache-from=$CACHE --build-arg DEVICE=cpu
+          DOCKER_BUILDKIT=0 docker build . --file Dockerfile --tag $IMAGE_NAME:local --cache-from=$CACHE --build-arg DEVICE=cpu
 
           # Show images
           docker images --filter=reference=$IMAGE_NAME --filter=reference=$IMAGE_REPO/$IMAGE_NAME
@@ -122,7 +123,7 @@ jobs:
     steps:
       - name: "Prepare environment: Restore cache"
         if: env.DOCKER_TAG != 'latest'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-docker
         with:
           path: ${{ env.DOCKER_CACHE_PATH }}
@@ -153,14 +154,14 @@ jobs:
           [[ $(docker inspect --format '{{json .State.Running}}' mala-cpu) == 'true' ]]
 
       - name: Check out repository (mala)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install mala package
         # Exec all commands inside the mala-cpu container
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
         run: |
-          # epxort Docker image Conda environment for a later comparison
-          conda env export -n mala-cpu > env_1.yml
+          # export Docker image Conda environment for a later comparison
+          conda env export -n mala-cpu > env_before.yml
 
           # install mala package
           pip --no-cache-dir install -e .[opt,test] --no-build-isolation
@@ -169,26 +170,46 @@ jobs:
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
         run: |
           # export Conda environment _with_ mala package installed in it (and extra dependencies)
-          conda env export -n mala-cpu > env_2.yml
+          conda env export -n mala-cpu > env_after.yml
 
           # if comparison fails, `install/mala_cpu_[base]_environment.yml` needs to be aligned with
           # `requirements.txt` and/or extra dependencies are missing in the Docker Conda environment
-          diff env_1.yml env_2.yml
+          diff --side-by-side --color=always env_before.yml env_after.yml
 
-      - name: Download test data repository
-        shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
+      - name: Download test data repository from RODARE
+        shell: 'bash -c "docker exec -i mala-cpu python < {0}"'
         run: |
-          # Download test data repository from RODARE. If the version changes
-          # this URL has to be adapted (the number after /record/ and the
-          # version have to be incremented)
-          wget "https://rodare.hzdr.de/record/2999/files/mala-project/test-data-1.8.0.zip"
+          import requests, shutil, zipfile
 
-          # Once downloaded, we have to unzip the file. The name of the root
-          # folder in the zip file has to be updated for data repository
-          # updates as well - the string at the end is the hash of the data
-          # repository commit.
-          unzip -q test-data-1.8.0.zip
-          mv mala-project-test-data-d5694c7  mala_data
+          # This DOI represents all versions, and will always resolve to the latest one
+          DOI = "https://doi.org/10.14278/rodare.2900"
+
+          # Resolve DOI and get record ID and the associated API URL
+          response = requests.get(DOI)
+          *_, record_id = response.url.split("/")
+          api_url = f"https://rodare.hzdr.de/api/records/{record_id}"
+
+          # Download record from API and get the first file
+          response = requests.get(api_url)
+          record = response.json()
+          size = record["files"][0]["size"]
+          download_link = record["files"][0]["links"]["self"]
+
+          print(size, "bytes", "--", download_link)
+
+          # TODO: implement some sort of auto retry for failed HTTP requests
+          response = requests.get(download_link)
+
+          # Saving downloaded content to a file
+          with open("test-data.zip", mode="wb") as file:
+            file.write(response.content)
+
+          # Get top level directory name
+          dir_name = zipfile.ZipFile("test-data.zip").namelist()[0]
+          shutil.unpack_archive("test-data.zip", ".")
+
+          print(f"Rename {dir_name} to mala_data")
+          shutil.move(dir_name, "mala_data")
 
       - name: Test mala
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
@@ -209,11 +230,11 @@ jobs:
       || startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: "Prepare environment: Restore cache"
         if: env.DOCKER_TAG != 'latest'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-docker
         with:
           path: ${{ env.DOCKER_CACHE_PATH }}

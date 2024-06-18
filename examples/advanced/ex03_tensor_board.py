@@ -3,13 +3,10 @@ import os
 import mala
 from mala import printout
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
-
+from mala.datahandling.data_repo import data_path
 
 """
-Shows how a NN training by MALA can be visualized using 
+Shows how a NN training by MALA can be visualized using
 tensorboard. The training is a basic MALA network training.
 """
 
