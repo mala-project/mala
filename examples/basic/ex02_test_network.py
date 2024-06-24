@@ -21,15 +21,15 @@ model_path = "./" if os.path.exists("Be_model.zip") else data_path
 # It is recommended to enable the "lazy-loading" feature, so that
 # data is loaded into memory one snapshot at a time during testing - this
 # helps keep RAM requirement down. Furthermore, you have to decide which
-# observables to test (usual choices are "band_energy", "total_energy" and
-# "number_of_electrons") and whether you want the results per snapshot
+# observables to test (usual choices are "band_energy", "total_energy")
+# and whether you want the results per snapshot
 # (output_format="list") or as an averaged value (output_format="mae")
 ####################
 
 parameters, network, data_handler, tester = mala.Tester.load_run(
     run_name=model_name, path=model_path
 )
-tester.observables_to_test = ["band_energy", "number_of_electrons"]
+tester.observables_to_test = ["band_energy", "density"]
 tester.output_format = "list"
 parameters.data.use_lazy_loading = True
 

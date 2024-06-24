@@ -131,10 +131,12 @@ class DataShuffler(DataHandlerBase):
             )
 
         # Do the actual shuffling.
-        target_name_openpmd = os.path.join(target_save_path,
-                                       save_name.replace("*", "%T"))
-        descriptor_name_openpmd = os.path.join(descriptor_save_path,
-                                        save_name.replace("*", "%T"))
+        target_name_openpmd = os.path.join(
+            target_save_path, save_name.replace("*", "%T")
+        )
+        descriptor_name_openpmd = os.path.join(
+            descriptor_save_path, save_name.replace("*", "%T")
+        )
         for i in range(0, number_of_new_snapshots):
             new_descriptors = np.zeros(
                 (int(np.prod(shuffle_dimensions)), self.input_dimension),
@@ -363,9 +365,7 @@ class DataShuffler(DataHandlerBase):
         import json
 
         # Do the actual shuffling.
-        name_prefix = os.path.join(
-            dot.save_path, save_name.replace("*", "%T")
-        )
+        name_prefix = os.path.join(dot.save_path, save_name.replace("*", "%T"))
         for i in range(my_items_start, my_items_end):
             # We check above that in the non-numpy case, OpenPMD will work.
             dot.calculator.grid_dimensions = list(shuffle_dimensions)
