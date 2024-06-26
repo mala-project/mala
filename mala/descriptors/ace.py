@@ -535,7 +535,7 @@ class ACE(Descriptor):
 
         nus,limit_nus = self.calc_limit_nus()
 
-        if self.parameters.ace_types_like_snap:
+        if not self.parameters.ace_types_like_snap:
             self.fingerprint_length = ncols0 + len(limit_nus)
             # permutation symmetry adapted ACE labels
             Apot = AcePot(
@@ -558,7 +558,7 @@ class ACE(Descriptor):
             Apot.write_pot("coupling_coefficients")
 
         # add case for full basis separately
-        elif not self.parameters.ace_types_like_snap:
+        elif self.parameters.ace_types_like_snap:
             self.fingerprint_length = ncols0 + len(nus)
             # permutation symmetry adapted ACE labels
             Apot = AcePot(
