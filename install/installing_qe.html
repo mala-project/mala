@@ -98,22 +98,23 @@
 <h1>Installing Quantum ESPRESSO (total energy module)<a class="headerlink" href="#installing-quantum-espresso-total-energy-module" title="Link to this heading"></a></h1>
 <section id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
-<p>To run the total energy module, you need a full Quantum ESPRESSO installation,
-for which to install the Python bindings. This module has been tested with
-version <code class="docutils literal notranslate"><span class="pre">7.2.</span></code>, the most recent version at the time of this release of MALA.
-Newer versions may work (untested), but installation instructions may vary.</p>
+<p>To build and run the total energy module, you need a full Quantum ESPRESSO
+installation, for which to install the Python bindings. This module has been
+tested with version <code class="docutils literal notranslate"><span class="pre">7.2.</span></code>, the most recent version at the time of this
+release of MALA. Newer versions may work (untested), but installation
+instructions may vary.</p>
 <p>Make sure you have an (MPI-aware) F90 compiler such as <code class="docutils literal notranslate"><span class="pre">mpif90</span></code> (e.g.
 Debian-ish machine: <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">install</span> <span class="pre">openmpi-bin</span></code>, on an HPC cluster something
 like <code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">openmpi</span> <span class="pre">gcc</span></code>). Make sure to use the same compiler
 for QE and the extension. This should be the default case, but if problems
 arise you can manually select the compiler via
-<code class="docutils literal notranslate"><span class="pre">--f90exec=</span></code> in <code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module.sh</span></code></p>
+<code class="docutils literal notranslate"><span class="pre">--f90exec=</span></code> in <code class="docutils literal notranslate"><span class="pre">build_total_energy_module.sh</span></code></p>
 <p>We assume that QE’s <code class="docutils literal notranslate"><span class="pre">configure</span></code> script will find your system libs, e.g. use
 <code class="docutils literal notranslate"><span class="pre">-lblas</span></code>, <code class="docutils literal notranslate"><span class="pre">-llapack</span></code> and <code class="docutils literal notranslate"><span class="pre">-lfftw3</span></code>. We use those by default in
-<code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module.sh</span></code>. If you have, say, the MKL library,
+<code class="docutils literal notranslate"><span class="pre">build_total_energy_module.sh</span></code>. If you have, say, the MKL library,
 you may see <code class="docutils literal notranslate"><span class="pre">configure</span></code> use something like <code class="docutils literal notranslate"><span class="pre">-lmkl_intel_lp64</span> <span class="pre">-lmkl_sequential</span> <span class="pre">-lmkl_core</span></code>
 when building QE. In this case you have to modify
-<code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module.sh</span></code> to use the same libraries!</p>
+<code class="docutils literal notranslate"><span class="pre">build_total_energy_module.sh</span></code> to use the same libraries!</p>
 </section>
 <section id="build-quantum-espresso">
 <h2>Build Quantum ESPRESSO<a class="headerlink" href="#build-quantum-espresso" title="Link to this heading"></a></h2>
@@ -127,11 +128,17 @@ compilation process).</p></li>
 <li><p>Change to the  <code class="docutils literal notranslate"><span class="pre">external_modules/total_energy_module</span></code> directory of the
 MALA repository</p></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>At the moment, building QE using <code class="docutils literal notranslate"><span class="pre">cmake</span></code> <a class="reference external" href="https://github.com/mala-project/mala/issues/468">doesn’t work together with the
+build_total_energy_module.sh script</a>. Please use the
+<code class="docutils literal notranslate"><span class="pre">configure</span></code> + <code class="docutils literal notranslate"><span class="pre">make</span></code> build workflow.</p>
+</div>
 </section>
 <section id="installing-the-python-extension">
 <h2>Installing the Python extension<a class="headerlink" href="#installing-the-python-extension" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>Run <code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module.sh</span> <span class="pre">/path/to/your/q-e</span></code>.</p>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">build_total_energy_module.sh</span> <span class="pre">/path/to/your/q-e</span></code>.</p>
 <ul>
 <li><p>If the build is successful, a file named something like
 <code class="docutils literal notranslate"><span class="pre">total_energy.cpython-39m-x86_64-linux-gnu.so</span></code> will be generated. This is

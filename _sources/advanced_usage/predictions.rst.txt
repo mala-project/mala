@@ -40,6 +40,8 @@ Likewise, you can adjust the inference temperature via
             calculator.data_handler.target_calculator.temperature = ...
 
 
+.. _production_gpu:
+
 Predictions on GPU
 *******************
 
@@ -137,4 +139,3 @@ With the exception of the electronic density, which is saved into the ``.cube``
 format for visualization with regular electronic structure visualization
 software, all of these observables can be plotted with Python based
 visualization libraries such as ``matplotlib``.
-

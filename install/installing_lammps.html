@@ -135,14 +135,21 @@ Kokkos (recommended for production settings!), you will have to set further opti
 shipped with the LAMMPS code, should be at <code class="docutils literal notranslate"><span class="pre">/your/path/to/lammps/lib/kokkos/bin/nvcc_wrapper</span></code></p></li>
 </ul>
 </div></blockquote>
-</li>
-</ul>
-</li>
-<li><p>For example, this configures the LAMMPS cmake build with Kokkos support
+<p>For example, this configures the LAMMPS cmake build with Kokkos support
 for an Intel Haswell CPU and an Nvidia Volta GPU, with MPI support:</p>
 <blockquote>
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>../cmake<span class="w"> </span>-D<span class="w"> </span><span class="nv">PKG_KOKKOS</span><span class="o">=</span>yes<span class="w"> </span>-D<span class="w"> </span><span class="nv">BUILD_MPI</span><span class="o">=</span>yes<span class="w"> </span>-D<span class="w"> </span>PKG_ML-SNAP<span class="o">=</span>yes<span class="w"> </span>-D<span class="w"> </span><span class="nv">Kokkos_ENABLE_CUDA</span><span class="o">=</span>yes<span class="w"> </span>-D<span class="w"> </span><span class="nv">Kokkos_ARCH_HSW</span><span class="o">=</span>yes<span class="w"> </span>-D<span class="w"> </span><span class="nv">Kokkos_ARCH_VOLTA70</span><span class="o">=</span>yes<span class="w"> </span>-D<span class="w"> </span><span class="nv">CMAKE_CXX_COMPILER</span><span class="o">=</span>/path/to/lammps/lib/kokkos/bin/nvcc_wrapper<span class="w"> </span>-D<span class="w"> </span><span class="nv">BUILD_SHARED_LIBS</span><span class="o">=</span>yes
 </pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+<blockquote>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When using a GPU by setting <code class="docutils literal notranslate"><span class="pre">parameters.use_gpu</span> <span class="pre">=</span> <span class="pre">True</span></code>, you <em>need</em> to
+have a GPU version of <code class="docutils literal notranslate"><span class="pre">LAMMPS</span></code> installed. See <a class="reference internal" href="../advanced_usage/predictions.html#production-gpu"><span class="std std-ref">Predictions on GPU</span></a> for
+details.</p>
 </div>
 </div></blockquote>
 </li>
