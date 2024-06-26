@@ -332,10 +332,18 @@ class ACE(Descriptor):
         # saving function will go here
 
         # Create LAMMPS instance.
-        lammps_dict = {
-            "ace_coeff_file": "coupling_coefficients.yace",
-            "rcutfac": self.parameters.bispectrum_cutoff,
-        }
+        if self.parameters.bispectrum_cutoff > self.maxrc:
+            lammps_dict = {
+                "ace_coeff_file": "coupling_coefficients.yace",
+                "rcutfac": self.parameters.bispectrum_cutoff,
+            }
+        else:
+            print('one or more automatically generated ACE rcutfacs is larger than the input rcutfac- updating rcutfac accordingly')
+            lammps_dict = {
+                "ace_coeff_file": "coupling_coefficients.yace",
+                "rcutfac": self.maxrc,
+            }
+        
 
         self.lammps_temporary_log = os.path.join(
             outdir,
@@ -485,6 +493,7 @@ class ACE(Descriptor):
         ) = self.get_default_settings()
 
         rcutfac = [float(k) for k in rc_default.split()[2:]]
+        self.maxrc = np.max(rcutfac) # set radial cutoff based on automatically generated ACE cutoffs
         lmbda = [float(k) for k in lmb_default.split()[2:]]
         assert len(self.bonds) == len(rcutfac) and len(self.bonds) == len(
             lmbda
