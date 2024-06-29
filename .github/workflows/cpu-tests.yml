@@ -35,6 +35,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: '1'
 
       - name: Set environment variables
         run: |
@@ -155,6 +157,8 @@ jobs:
 
       - name: Check out repository (mala)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: '1'
 
       - name: Install mala package
         # Exec all commands inside the mala-cpu container
@@ -231,6 +235,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: '1'
 
       - name: "Prepare environment: Restore cache"
         if: env.DOCKER_TAG != 'latest'
