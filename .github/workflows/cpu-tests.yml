@@ -253,12 +253,9 @@ jobs:
         run: |
           # Execute on change of Docker image
           if [[ "$DOCKER_TAG" != 'latest' ]]; then
-            GITHUB_SHORT_SHA=${GITHUB_SHA:0:7}
-            GIT_SHA=${GITHUB_REF_NAME}-${GITHUB_SHORT_SHA}
-            echo "GIT_SHA=$GIT_SHA"
 
             docker tag $IMAGE_NAME:$GITHUB_RUN_ID $IMAGE_REPO/$IMAGE_NAME:latest
-            docker tag $IMAGE_NAME:$GITHUB_RUN_ID $IMAGE_REPO/$IMAGE_NAME:$GIT_SHA
+            docker tag $IMAGE_NAME:$GITHUB_RUN_ID $IMAGE_REPO/$IMAGE_NAME:${GITHUB_REF_NAME}-${GITHUB_SHA:0:7}
           fi
 
           # Execute on push of git tag
