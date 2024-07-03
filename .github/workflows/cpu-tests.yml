@@ -274,4 +274,4 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push Docker image
-        run: docker push $IMAGE_REPO/$IMAGE_NAME --all-tags
+        run: docker push $IMAGE_REPO/$IMAGE_NAME --all-tags | grep -v -E 'Waiting|Layer already|Preparing|Pushed'
