@@ -64,7 +64,7 @@ jobs:
           fi
 
       - name: Pull latest image from container registry
-        run: docker pull $IMAGE_REPO/$IMAGE_NAME || true
+        run: docker pull $IMAGE_REPO/$IMAGE_NAME --quiet || true
 
       - name: Build temporary Docker image
         run: |
@@ -133,12 +133,12 @@ jobs:
 
       - name: "Prepare environment: Load Docker image from cache"
         if: env.DOCKER_TAG != 'latest'
-        run: docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz
+        run: docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz --quiet
 
       - name: "Prepare environment: Pull latest image from container registry"
         if: env.DOCKER_TAG == 'latest'
         run: |
-          docker pull $IMAGE_REPO/$IMAGE_NAME:latest
+          docker pull $IMAGE_REPO/$IMAGE_NAME:latest --quiet
           docker image tag $IMAGE_REPO/$IMAGE_NAME:latest $IMAGE_NAME:latest
 
       - name: "Prepare environment: Run Docker container"
@@ -243,11 +243,11 @@ jobs:
 
       - name: "Prepare environment: Load Docker image from cache"
         if: env.DOCKER_TAG != 'latest'
-        run: docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz
+        run: docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz --quiet
 
       - name: "Prepare environment: Pull latest image from container registry"
         if: env.DOCKER_TAG == 'latest'
-        run: docker pull $IMAGE_REPO/$IMAGE_NAME:latest
+        run: docker pull $IMAGE_REPO/$IMAGE_NAME:latest --quiet
 
       - name: Tag Docker image
         run: |
