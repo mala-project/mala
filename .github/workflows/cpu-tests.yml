@@ -35,6 +35,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: '1'
 
       - name: Set environment variables
         run: |
@@ -62,7 +64,7 @@ jobs:
           fi
 
       - name: Pull latest image from container registry
-        run: docker pull $IMAGE_REPO/$IMAGE_NAME || true
+        run: docker pull $IMAGE_REPO/$IMAGE_NAME --quiet || true
 
       - name: Build temporary Docker image
         run: |
@@ -131,12 +133,12 @@ jobs:
 
       - name: "Prepare environment: Load Docker image from cache"
         if: env.DOCKER_TAG != 'latest'
-        run: docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz
+        run: docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz --quiet
 
       - name: "Prepare environment: Pull latest image from container registry"
         if: env.DOCKER_TAG == 'latest'
         run: |
-          docker pull $IMAGE_REPO/$IMAGE_NAME:latest
+          docker pull $IMAGE_REPO/$IMAGE_NAME:latest --quiet
           docker image tag $IMAGE_REPO/$IMAGE_NAME:latest $IMAGE_NAME:latest
 
       - name: "Prepare environment: Run Docker container"
@@ -155,6 +157,8 @@ jobs:
 
       - name: Check out repository (mala)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: '1'
 
       - name: Install mala package
         # Exec all commands inside the mala-cpu container
@@ -229,9 +233,6 @@ jobs:
       ((contains(github.ref_name, 'develop') || contains(github.ref_name, 'master')) && needs.build-docker-image-cpu.outputs.docker-tag != 'latest')
       || startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
       - name: "Prepare environment: Restore cache"
         if: env.DOCKER_TAG != 'latest'
         uses: actions/cache@v4
@@ -242,21 +243,19 @@ jobs:
 
       - name: "Prepare environment: Load Docker image from cache"
         if: env.DOCKER_TAG != 'latest'
-        run: docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz
+        run: docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz --quiet
 
       - name: "Prepare environment: Pull latest image from container registry"
         if: env.DOCKER_TAG == 'latest'
-        run: docker pull $IMAGE_REPO/$IMAGE_NAME:latest
+        run: docker pull $IMAGE_REPO/$IMAGE_NAME:latest --quiet
 
       - name: Tag Docker image
         run: |
           # Execute on change of Docker image
           if [[ "$DOCKER_TAG" != 'latest' ]]; then
-            GIT_SHA=${GITHUB_REF_NAME}-$(git rev-parse --short "$GITHUB_SHA")
-            echo "GIT_SHA=$GIT_SHA"
 
             docker tag $IMAGE_NAME:$GITHUB_RUN_ID $IMAGE_REPO/$IMAGE_NAME:latest
-            docker tag $IMAGE_NAME:$GITHUB_RUN_ID $IMAGE_REPO/$IMAGE_NAME:$GIT_SHA
+            docker tag $IMAGE_NAME:$GITHUB_RUN_ID $IMAGE_REPO/$IMAGE_NAME:${GITHUB_REF_NAME}-${GITHUB_SHA:0:7}
           fi
 
           # Execute on push of git tag
@@ -272,4 +271,4 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push Docker image
-        run: docker push $IMAGE_REPO/$IMAGE_NAME --all-tags
+        run: docker push $IMAGE_REPO/$IMAGE_NAME --all-tags | grep -v -E 'Waiting|Layer already|Preparing|Pushed'
