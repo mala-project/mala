@@ -833,10 +833,6 @@ class ACSDAnalyzer(HyperOpt):
             The average cosine similarity distance.
 
         """
-
-        def distance_between_points(x1, y1, x2, y2):
-            return np.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
-
         similarity_data = ACSDAnalyzer._calculate_cosine_similarities(
             descriptor_data,
             ldos_data,
@@ -844,16 +840,10 @@ class ACSDAnalyzer(HyperOpt):
             descriptor_vectors_contain_xyz=descriptor_vectors_contain_xyz,
         )
         data_size = np.shape(similarity_data)[0]
-        distances = []
-        for i in range(0, data_size):
-            distances.append(
-                distance_between_points(
-                    similarity_data[i, 0],
-                    similarity_data[i, 1],
-                    similarity_data[i, 0],
-                    similarity_data[i, 0],
-                )
-            )
+
+        # Subtracting LDOS similarities from bispectrum similiarities.
+        distances = similarity_data[:, 0] - similarity_data[:, 1]
+        distances = distances.clip(min=0)
         return np.mean(distances)
 
     @staticmethod
