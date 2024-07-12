@@ -228,6 +228,14 @@ class ACE(Descriptor):
             self.parameters.ace_lmax_traditional
         )
 
+        self.ncols0 = 3
+
+        if self.parameters.ace_types_like_snap and "G" in self.parameters.ace_elements:
+            raise Exception("for types_like_snap = True, you must remove the separate element type for grid points")
+
+        if len(self.parameters.ace_elements) != len(self.parameters.ace_reference_ens):
+            raise Exception("Reference ensemble must match length of element list!")
+
     @property
     def data_name(self):
         """Get a string that describes the target (for e.g. metadata)."""
@@ -338,12 +346,13 @@ class ACE(Descriptor):
                 "rcutfac": self.parameters.bispectrum_cutoff,
             }
         else:
-            print('one or more automatically generated ACE rcutfacs is larger than the input rcutfac- updating rcutfac accordingly')
+            printout(
+                "one or more automatically generated ACE rcutfacs is larger than the input rcutfac- updating rcutfac accordingly"
+            )
             lammps_dict = {
                 "ace_coeff_file": "coupling_coefficients.yace",
                 "rcutfac": self.maxrc,
             }
-        
 
         self.lammps_temporary_log = os.path.join(
             outdir,
@@ -373,8 +382,6 @@ class ACE(Descriptor):
         lmp.file(self.parameters.lammps_compute_file)
 
         # Set things not accessible from LAMMPS
-        # First 3 cols are x, y, z, coords
-        ncols0 = 3
 
         # Analytical relation for fingerprint length
         # ncoeff = (
@@ -388,12 +395,12 @@ class ACE(Descriptor):
         # Calculation for fingerprint length
         # TODO: I don't know if this is correct, should be checked by an ACE expert
         # NOTE: we now handle this later while setting the coupling_coefficients
-        #       (the coupling coefficients specify wich fingerprints are evaluated 
+        #       (the coupling coefficients specify wich fingerprints are evaluated
         #        in lammps directly)
-        #self.fingerprint_length = (
+        # self.fingerprint_length = (
         #    ncols0 + self._calculate_ace_fingerprint_length()
-        #)
-        #printout("Fingerprint length = ", self.fingerprint_length)
+        # )
+        # printout("Fingerprint length = ", self.fingerprint_length)
 
         # Extract data from LAMMPS calculation.
         # This is different for the parallel and the serial case.
@@ -413,10 +420,14 @@ class ACE(Descriptor):
                 lammps_constants.LMP_STYLE_LOCAL,
                 lammps_constants.LMP_SIZE_COLS,
             )
-            printout("Fingerprint length from lammps = ", ncols_local)
+            # printout("Fingerprint length from lammps = ", ncols_local)
+            printout("LAMMPS fingerprint length = ", ncols_local - 3)
+            printout("MALA fingerprint length = ", self.fingerprint_length)
             if ncols_local != self.fingerprint_length + 3:
+                #printout("LAMMPS fingerprint length = ", ncols_local - 3)
+                #printout("MALA fingerprint length = ", self.fingerprint_length)
                 self.fingerprint_length = ncols_local - 3
-                # raise Exception("Inconsistent number of features.")
+                #raise Exception("Inconsistent number of features.")
 
             ace_descriptors_np = extract_compute_np(
                 lmp,
@@ -493,7 +504,9 @@ class ACE(Descriptor):
         ) = self.get_default_settings()
 
         rcutfac = [float(k) for k in rc_default.split()[2:]]
-        self.maxrc = np.max(rcutfac) # set radial cutoff based on automatically generated ACE cutoffs
+        self.maxrc = np.max(
+            rcutfac
+        )  # set radial cutoff based on automatically generated ACE cutoffs
         lmbda = [float(k) for k in lmb_default.split()[2:]]
         assert len(self.bonds) == len(rcutfac) and len(self.bonds) == len(
             lmbda
@@ -533,10 +546,10 @@ class ACE(Descriptor):
                 + " not recongised"
             )
 
-        nus,limit_nus = self.calc_limit_nus()
+        nus, limit_nus = self.calc_limit_nus()
 
         if not self.parameters.ace_types_like_snap:
-            self.fingerprint_length = ncols0 + len(limit_nus)
+            self.fingerprint_length = self.ncols0 + len(limit_nus)
             # permutation symmetry adapted ACE labels
             Apot = AcePot(
                 self.parameters.ace_elements,
@@ -552,14 +565,14 @@ class ACE(Descriptor):
                 lmin=self.parameters.ace_lmin,
                 **{"input_nus": limit_nus, "ccs": ccs[self.parameters.ace_M_R]}
             )
-            #Apot.write_pot("coupling_coefficients_fullbasis")
+            # Apot.write_pot("coupling_coefficients_fullbasis")
 
             Apot.set_funcs(nulst=limit_nus, muflg=True, print_0s=True)
             Apot.write_pot("coupling_coefficients")
 
         # add case for full basis separately
         elif self.parameters.ace_types_like_snap:
-            self.fingerprint_length = ncols0 + len(nus)
+            self.fingerprint_length = self.ncols0 + len(nus)
             # permutation symmetry adapted ACE labels
             Apot = AcePot(
                 self.parameters.ace_elements,
@@ -577,9 +590,8 @@ class ACE(Descriptor):
             )
             Apot.write_pot("coupling_coefficients")
 
-            #Apot.set_funcs(nulst=limit_nus, muflg=True, print_0s=True)
-            #Apot.write_pot("coupling_coefficients")
-        
+            # Apot.set_funcs(nulst=limit_nus, muflg=True, print_0s=True)
+            # Apot.write_pot("coupling_coefficients")
 
     def calc_limit_nus(self):
         ranked_chem_nus = []
@@ -624,7 +636,7 @@ class ACE(Descriptor):
                 if self.parameters.ace_padfunc:
                     for muii in musins:
                         limit_nus.append(byattypfiltered["%d" % muii][0])
-            elif not grid_filter:
+            elif not self.parameters.ace_grid_filter:
                 limit_nus = byattyp["%d" % 0]
 
         else:
@@ -641,7 +653,7 @@ class ACE(Descriptor):
                 if self.parameters.ace_padfunc:
                     for muii in musins:
                         limit_nus.append(byattypfiltered["%d" % muii][0])
-            elif not grid_filter:
+            elif not self.parameters.ace_grid_filter:
                 limit_nus = byattyp[
                     "%d" % (len(self.parameters.ace_elements) - 1)
                 ]
@@ -717,7 +729,7 @@ class ACE(Descriptor):
         vdwr1 = ase.data.vdw_radii[atnum1]
         ionr1 = self.ionic_radii[elm1]
         if np.isnan(vdwr1):
-            print(
+            printout(
                 "NOTE: using dummy VDW radius of 2* covalent radius for %s"
                 % elm1
             )
@@ -730,7 +742,7 @@ class ACE(Descriptor):
         vdwr2 = ase.data.vdw_radii[atnum2]
         ionr2 = self.ionic_radii[elm2]
         if np.isnan(vdwr2):
-            print(
+            printout(
                 "NOTE: using dummy VDW radius of 2* covalent radius for %s"
                 % elm2
             )

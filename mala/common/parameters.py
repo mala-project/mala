@@ -395,8 +395,6 @@ class ParametersDescriptors(ParametersBase):
         self.ace_types_like_snap = False
         self.ace_padfunc = True
 
-        if self.ace_types_like_snap:
-            assert 'G' not in self.ace_elements, "for types_like_snap = True, you must remove the separate element type forgrid points"
         
 
     @property
