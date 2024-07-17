@@ -348,7 +348,6 @@ class Target(PhysicalData):
             try:
                 self.atomic_forces_dft = self.atoms.get_forces()
             except ase.calculators.calculator.PropertyNotImplementedError:
-                print("CAUGHT AN ERROR!")
                 pass
 
             # Parse the file for energy values.
