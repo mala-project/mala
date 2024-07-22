@@ -646,12 +646,16 @@ class Trainer(Runner):
                         )
 
                         last_start += length
-                    errors[data_set_type] = self._calculate_errors(
+                    calculated_errors = self._calculate_errors(
                         actual_outputs,
                         predicted_outputs,
                         metrics,
                         loader_id + offset_snapshots,
                     )
+                    for metric in metrics:
+                        errors[data_set_type][metric].append(
+                            calculated_errors[metric]
+                        )
                     loader_id += 1
             else:
                 with torch.no_grad():
@@ -686,12 +690,16 @@ class Trainer(Runner):
                                 optimal_batch_size,
                             )
                         )
-                        errors[data_set_type] = self._calculate_errors(
+                        calculated_errors = self._calculate_errors(
                             actual_outputs,
                             predicted_outputs,
                             metrics,
-                            snapshot_number,
+                            loader_id + offset_snapshots,
                         )
+                        for metric in metrics:
+                            errors[data_set_type][metric].append(
+                                calculated_errors[metric]
+                            )
         return errors
 
     def __prepare_to_train(self, optimizer_dict):
