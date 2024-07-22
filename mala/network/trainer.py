@@ -694,7 +694,7 @@ class Trainer(Runner):
                             actual_outputs,
                             predicted_outputs,
                             metrics,
-                            loader_id + offset_snapshots,
+                            snapshot_number,
                         )
                         for metric in metrics:
                             errors[data_set_type][metric].append(
