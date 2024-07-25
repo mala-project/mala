@@ -945,12 +945,18 @@ class Density(Target):
             if self.parameters.assume_two_dimensional:
                 qe_input_data["assume_isolated"] = "2D"
 
+                # In the 2D case, the Gamma point approximation introduces
+                # errors in the Ewald and Hartree energy for some reason.
+                kpoints = [1, 1, 1]
+            else:
+                kpoints = self.kpoints
+
             self.write_tem_input_file(
                 atoms_Angstrom,
                 qe_input_data,
                 qe_pseudopotentials,
                 self.grid_dimensions,
-                self.kpoints,
+                kpoints,
             )
 
         # initialize the total energy module.
