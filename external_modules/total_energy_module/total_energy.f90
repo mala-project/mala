@@ -250,11 +250,14 @@ SUBROUTINE init_run_setup(calculate_eigts)
      CALL ggen( dfftp, gamma_only, at, bg, gcutm, ngm_g, ngm, &
        g, gg, mill, ig_l2g, gstart )
   END IF
+
+
+  IF (do_cutoff_2D) CALL cutoff_fact()
+
   !
   !  This seems to be needed by set_rhoc()
   !
   CALL gshells ( lmovecell )
-
   !
   ! ... allocate memory for structure factors
   !

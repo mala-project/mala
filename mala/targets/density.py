@@ -942,6 +942,9 @@ class Density(Target):
             if qe_pseudopotentials is None:
                 qe_pseudopotentials = self.qe_pseudopotentials
 
+            if self.parameters.assume_two_dimensional:
+                qe_input_data["assume_isolated"] = "2D"
+
             self.write_tem_input_file(
                 atoms_Angstrom,
                 qe_input_data,
