@@ -43,7 +43,7 @@ The MALA team recommends to build LAMMPS with ``cmake``. To do so
         shipped with the LAMMPS code, should be at ``/your/path/to/lammps/lib/kokkos/bin/nvcc_wrapper``
 
     For example, this configures the LAMMPS cmake build with Kokkos support
-  for an Intel Haswell CPU and an Nvidia Volta GPU, with MPI support:
+    for an Intel Haswell CPU and an Nvidia Volta GPU, with MPI support:
 
       .. code-block:: bash
 
