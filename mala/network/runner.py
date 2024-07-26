@@ -74,7 +74,6 @@ class Runner:
         errors : dict
             Dictionary containing the errors.
         """
-
         energy_metrics = [metric for metric in metrics if "energy" in metric]
         non_energy_metrics = [
             metric for metric in metrics if "energy" not in metric
