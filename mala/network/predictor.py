@@ -1,5 +1,7 @@
 """Tester class for testing a network."""
 
+from time import perf_counter
+
 import numpy as np
 import torch
 
@@ -127,10 +129,17 @@ class Predictor(Runner):
         self.data.target_calculator.invalidate_target()
 
         # Calculate descriptors.
+        time_before = perf_counter()
         snap_descriptors, local_size = (
             self.data.descriptor_calculator.calculate_from_atoms(
                 atoms, self.data.grid_dimension
             )
+        )
+        printout(
+            "Time for descriptor calculation: {:.8f}s".format(
+                perf_counter() - time_before
+            ),
+            min_verbosity=2,
         )
 
         # Provide info from current snapshot to target calculator.
@@ -201,6 +210,7 @@ class Predictor(Runner):
         # Ensure the Network is on the correct device.
         # This line is necessary because GPU acceleration may have been
         # activated AFTER loading a model.
+        time_before = perf_counter()
         self.network.to(self.network.params._configuration["device"])
 
         if local_data_size is None:
@@ -250,4 +260,10 @@ class Predictor(Runner):
                 predicted_outputs
             )
         barrier()
+        printout(
+            "Time for network pass: {:.8f}s".format(
+                perf_counter() - time_before
+            ),
+            min_verbosity=2,
+        )
         return predicted_outputs
