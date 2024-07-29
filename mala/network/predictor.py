@@ -1,3 +1,5 @@
+"""Predictor class."""
+
 import numpy as np
 import torch
 
