@@ -1,6 +1,11 @@
 [tool.black]
 line-length = 79
 
+[tool.ruff]
+lint.ignore = [
+    "E731", # Do not assign a lambda expression, use a def
+]
+
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
