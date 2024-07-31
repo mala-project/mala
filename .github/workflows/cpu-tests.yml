@@ -1,8 +1,15 @@
 name: CPU tests
 
 on:
+  workflow_dispatch:
   pull_request:
-    # Trigger on pull requests to master or develop
+    # Trigger on pull requests to master or develop that are
+    # marked as "ready for review" (non-draft PRs)
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
     branches:
       - master
       - develop
@@ -21,11 +28,15 @@ env:
 
 jobs:
   build-docker-image-cpu:
+    # do not trigger on draft PRs
+    if: ${{ ! github.event.pull_request.draft }}
     # Build and push temporary Docker image to GitHub's container registry
     runs-on: ubuntu-22.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '1'
 
       - name: Set environment variables
         run: |
@@ -37,7 +48,7 @@ jobs:
           echo "IMAGE_REPO=$IMAGE_REPO"
 
       - name: Restore cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-docker
         with:
           path: ${{ env.DOCKER_CACHE_PATH }}
@@ -53,7 +64,7 @@ jobs:
           fi
 
       - name: Pull latest image from container registry
-        run: docker pull $IMAGE_REPO/$IMAGE_NAME || true
+        run: docker pull $IMAGE_REPO/$IMAGE_NAME --quiet || true
 
       - name: Build temporary Docker image
         run: |
@@ -65,7 +76,7 @@ jobs:
             CACHE=$IMAGE_REPO/$IMAGE_NAME:latest
           fi
 
-          docker build . --file Dockerfile --tag $IMAGE_NAME:local --cache-from=$CACHE --build-arg DEVICE=cpu
+          DOCKER_BUILDKIT=0 docker build . --file Dockerfile --tag $IMAGE_NAME:local --cache-from=$CACHE --build-arg DEVICE=cpu
 
           # Show images
           docker images --filter=reference=$IMAGE_NAME --filter=reference=$IMAGE_REPO/$IMAGE_NAME
@@ -114,7 +125,7 @@ jobs:
     steps:
       - name: "Prepare environment: Restore cache"
         if: env.DOCKER_TAG != 'latest'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-docker
         with:
           path: ${{ env.DOCKER_CACHE_PATH }}
@@ -122,12 +133,12 @@ jobs:
 
       - name: "Prepare environment: Load Docker image from cache"
         if: env.DOCKER_TAG != 'latest'
-        run: docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz
+        run: docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz --quiet
 
       - name: "Prepare environment: Pull latest image from container registry"
         if: env.DOCKER_TAG == 'latest'
         run: |
-          docker pull $IMAGE_REPO/$IMAGE_NAME:latest
+          docker pull $IMAGE_REPO/$IMAGE_NAME:latest --quiet
           docker image tag $IMAGE_REPO/$IMAGE_NAME:latest $IMAGE_NAME:latest
 
       - name: "Prepare environment: Run Docker container"
@@ -145,14 +156,16 @@ jobs:
           [[ $(docker inspect --format '{{json .State.Running}}' mala-cpu) == 'true' ]]
 
       - name: Check out repository (mala)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '1'
 
       - name: Install mala package
         # Exec all commands inside the mala-cpu container
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
         run: |
-          # epxort Docker image Conda environment for a later comparison
-          conda env export -n mala-cpu > env_1.yml
+          # export Docker image Conda environment for a later comparison
+          conda env export -n mala-cpu > env_before.yml
 
           # install mala package
           pip --no-cache-dir install -e .[opt,test] --no-build-isolation
@@ -161,19 +174,52 @@ jobs:
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
         run: |
           # export Conda environment _with_ mala package installed in it (and extra dependencies)
-          conda env export -n mala-cpu > env_2.yml
+          conda env export -n mala-cpu > env_after.yml
 
           # if comparison fails, `install/mala_cpu_[base]_environment.yml` needs to be aligned with
           # `requirements.txt` and/or extra dependencies are missing in the Docker Conda environment
-          diff env_1.yml env_2.yml
 
-      - name: Check out repository (data)
-        uses: actions/checkout@v3
-        with:
-          repository: mala-project/test-data
-          path: mala_data
-          ref: v1.7.0
-          lfs: true
+          if diff --brief env_before.yml env_after.yml
+          then
+            echo "Files env_before.yml and env_after.yml do not differ."
+          else
+            diff --side-by-side --color-always env_before.yml env_after.yml
+          fi
+
+      - name: Download test data repository from RODARE
+        shell: 'bash -c "docker exec -i mala-cpu python < {0}"'
+        run: |
+          import requests, shutil, zipfile
+
+          # This DOI represents all versions, and will always resolve to the latest one
+          DOI = "https://doi.org/10.14278/rodare.2900"
+
+          # Resolve DOI and get record ID and the associated API URL
+          response = requests.get(DOI)
+          *_, record_id = response.url.split("/")
+          api_url = f"https://rodare.hzdr.de/api/records/{record_id}"
+
+          # Download record from API and get the first file
+          response = requests.get(api_url)
+          record = response.json()
+          size = record["files"][0]["size"]
+          download_link = record["files"][0]["links"]["self"]
+
+          print(size, "bytes", "--", download_link)
+
+          # TODO: implement some sort of auto retry for failed HTTP requests
+          response = requests.get(download_link)
+
+          # Saving downloaded content to a file
+          with open("test-data.zip", mode="wb") as file:
+            file.write(response.content)
+
+          # Get top level directory name
+          dir_name = zipfile.ZipFile("test-data.zip").namelist()[0]
+          shutil.unpack_archive("test-data.zip", ".")
+
+          print(f"Rename {dir_name} to mala_data")
+          shutil.move(dir_name, "mala_data")
 
       - name: Test mala
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
@@ -193,12 +239,9 @@ jobs:
       ((contains(github.ref_name, 'develop') || contains(github.ref_name, 'master')) && needs.build-docker-image-cpu.outputs.docker-tag != 'latest')
       || startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-
       - name: "Prepare environment: Restore cache"
         if: env.DOCKER_TAG != 'latest'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-docker
         with:
           path: ${{ env.DOCKER_CACHE_PATH }}
@@ -206,21 +249,19 @@ jobs:
 
       - name: "Prepare environment: Load Docker image from cache"
         if: env.DOCKER_TAG != 'latest'
-        run: docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz
+        run: docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz --quiet
 
       - name: "Prepare environment: Pull latest image from container registry"
         if: env.DOCKER_TAG == 'latest'
-        run: docker pull $IMAGE_REPO/$IMAGE_NAME:latest
+        run: docker pull $IMAGE_REPO/$IMAGE_NAME:latest --quiet
 
       - name: Tag Docker image
         run: |
           # Execute on change of Docker image
           if [[ "$DOCKER_TAG" != 'latest' ]]; then
-            GIT_SHA=${GITHUB_REF_NAME}-$(git rev-parse --short "$GITHUB_SHA")
-            echo "GIT_SHA=$GIT_SHA"
 
             docker tag $IMAGE_NAME:$GITHUB_RUN_ID $IMAGE_REPO/$IMAGE_NAME:latest
-            docker tag $IMAGE_NAME:$GITHUB_RUN_ID $IMAGE_REPO/$IMAGE_NAME:$GIT_SHA
+            docker tag $IMAGE_NAME:$GITHUB_RUN_ID $IMAGE_REPO/$IMAGE_NAME:${GITHUB_REF_NAME}-${GITHUB_SHA:0:7}
           fi
 
           # Execute on push of git tag
@@ -236,5 +277,4 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push Docker image
-        run: docker push $IMAGE_REPO/$IMAGE_NAME --all-tags
-
+        run: docker push $IMAGE_REPO/$IMAGE_NAME --all-tags | grep -v -E 'Waiting|Layer already|Preparing|Pushed'

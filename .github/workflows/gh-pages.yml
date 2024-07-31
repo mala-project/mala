@@ -1,7 +1,12 @@
-name: docs
+name: Documenation
 
 on:
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
     branches:
       - master
       - develop
@@ -11,15 +16,17 @@ on:
 
 jobs:
   test-docstrings:
-    runs-on: ubuntu-22.04
+    # do not trigger on draft PRs
+    if: ${{ ! github.event.pull_request.draft }}
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
 
       - name: Upgrade pip
         run: python3 -m pip install --upgrade pip
@@ -33,17 +40,17 @@ jobs:
 
   build-and-deploy-pages:
     needs: test-docstrings
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0  # 0 fetches complete history and tags
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
 
       - name: Upgrade pip
         run: python3 -m pip install --upgrade pip

@@ -649,7 +649,7 @@ class Target(PhysicalData):
     @abstractmethod
     def invalidate_target(self):
         """
-        Invalidates the saved target wuantity.
+        Invalidates the saved target quantity.
 
         This is the generic interface for cached target quantities.
         It should work for all implemented targets.

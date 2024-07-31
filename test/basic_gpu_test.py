@@ -6,9 +6,9 @@ This is a very basic test of the GPU functionalities of MALA (i.e. pytorch,
 which MALA relies on). Two things are tested:
 
 1. Whether or not your system has GPU support.
-2. Whether or not the GPU does what it is supposed to. For this, 
+2. Whether or not the GPU does what it is supposed to. For this,
 a training is performed. It is measured whether or not the utilization
-of the GPU results in a speed up. 
+of the GPU results in a speed up.
 """
 import os
 import time
@@ -19,9 +19,7 @@ import numpy as np
 import pytest
 import torch
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 test_checkpoint_name = "test"
 

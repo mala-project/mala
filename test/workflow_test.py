@@ -5,9 +5,8 @@ import mala
 import numpy as np
 import pytest
 
-from mala.datahandling.data_repo import data_repo_path
+from mala.datahandling.data_repo import data_path
 
-data_path = os.path.join(data_repo_path, "Be2")
 # Control how much the loss should be better after training compared to
 # before. This value is fairly high, but we're training on absolutely
 # minimal amounts of data.
@@ -382,7 +381,7 @@ class TestFullWorkflow:
         """
         # Load parameters, network and data scalers.
         parameters, network, data_handler, tester = mala.Tester.load_run(
-            "workflow_test", path=os.path.join(data_repo_path, "workflow_test")
+            "Be_model", path=data_path
         )
 
         parameters.targets.target_type = "LDOS"
@@ -431,7 +430,7 @@ class TestFullWorkflow:
         ####################
 
         parameters, network, data_handler, tester = mala.Tester.load_run(
-            "workflow_test", path=os.path.join(data_repo_path, "workflow_test")
+            "Be_model", path=data_path
         )
         parameters.targets.target_type = "LDOS"
         parameters.targets.ldos_gridsize = 11
@@ -518,7 +517,7 @@ class TestFullWorkflow:
         ####################
 
         parameters, network, data_handler, predictor = mala.Predictor.load_run(
-            "workflow_test", path=os.path.join(data_repo_path, "workflow_test")
+            "Be_model", path=data_path
         )
         parameters.targets.target_type = "LDOS"
         parameters.targets.ldos_gridsize = 11
