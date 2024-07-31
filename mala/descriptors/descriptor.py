@@ -820,16 +820,10 @@ class Descriptor(PhysicalData):
 
         return lmp
 
-    def _clean_calculation(self, lmp, keep_logs):
+    def _clean_calculation(self, lmp):
         lmp.close()
-        if not keep_logs:
-            if get_rank() == 0:
-                os.remove(self.lammps_temporary_log)
-                os.remove(self.lammps_temporary_input)
-
-        # Reset timestamp for potential next calculation using same LAMMPS
-        # object.
-        del self.calculation_timestamp
+        self.lammps_tmp_input_file.close()
+        self.lammps_tmp_log_file.close()
 
     def _setup_atom_list(self):
         """
