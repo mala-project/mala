@@ -4,6 +4,7 @@ from mala.datahandling.data_repo import data_path
 import os
 
 parameters = mala.Parameters()
+parameters.descriptors.descriptors_contain_xyz = False
 
 # First, convert from Numpy files to openPMD.
 
