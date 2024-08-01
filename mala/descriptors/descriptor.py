@@ -1,7 +1,6 @@
 """Base class for all descriptor calculators."""
 
 from abc import abstractmethod
-from datetime import datetime
 from functools import cached_property
 import os
 import tempfile
@@ -164,26 +163,6 @@ class Descriptor(PhysicalData):
     def descriptors_contain_xyz(self, value):
         self.parameters.descriptors_contain_xyz = value
 
-    @cached_property
-    def calculation_timestamp(self):
-        """
-        Timestamp of calculation start.
-
-        Used to distinguish multiple LAMMPS runs performed in the same
-        directory. Since the interface is file based, this timestamp prevents
-        problems with slightly
-        """
-        if get_rank() == 0:
-            timestamp = datetime.timestamp(datetime.utcnow())
-        else:
-            timestamp = None
-
-        if self.parameters._configuration["mpi"]:
-            timestamp = get_comm().bcast(timestamp, root=0)
-        return datetime.fromtimestamp(timestamp).strftime("%F-%H-%M-%S-%f")[
-            :-3
-        ]
-
     ##############################
     # Methods
     ##############################
@@ -242,18 +221,29 @@ class Descriptor(PhysicalData):
     def setup_lammps_tmp_files(self, lammps_type, outdir):
         """
         Create the temporary lammps input and log files.
+
+        Parameters
+        ----------
+        lammps_type: str
+            Type of descriptor calculation (e.g. bgrid for bispectrum)
+        outdir: str
+            Directory where lammps files are kept
+        
+        Returns
+        -------
+        None
         """
         if get_rank() == 0:
             prefix_inp_str = "lammps_" + lammps_type + "_input"
             prefix_log_str = "lammps_" + lammps_type + "_log"
             lammps_tmp_input_file=tempfile.NamedTemporaryFile(
-                delete=False, prefix=prefix_inp_str, dir=outdir
+                delete=False, prefix=prefix_inp_str, suffix="_.tmp", dir=outdir
             )
             self.lammps_temporary_input = lammps_tmp_input_file.name
             lammps_tmp_input_file.close()
 
             lammps_tmp_log_file=tempfile.NamedTemporaryFile(
-                delete=False, prefix=prefix_log_str, dir=outdir
+                delete=False, prefix=prefix_log_str, suffix="_.tmp", dir=outdir
             )
             self.lammps_temporary_log = lammps_tmp_log_file.name
             lammps_tmp_log_file.close()

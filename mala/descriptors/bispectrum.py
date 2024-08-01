@@ -223,7 +223,6 @@ class Bispectrum(Descriptor):
                 use_fp64=use_fp64,
             )
 
-            printout("Cleaning calculation")
             self._clean_calculation(lmp, keep_logs)
 
             # Copy the grid dimensions only at the end.
@@ -241,7 +240,6 @@ class Bispectrum(Descriptor):
                 use_fp64=use_fp64,
             )
 
-            printout("Cleaning calculation")
             self._clean_calculation(lmp, keep_logs)
 
             # switch from x-fastest to z-fastest order (swaps 0th and 2nd

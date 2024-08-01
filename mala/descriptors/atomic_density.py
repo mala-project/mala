@@ -137,9 +137,8 @@ class AtomicDensity(Descriptor):
         keep_logs = kwargs.get("keep_logs", False)
 
         lammps_format = "lammps-data"
-        self.lammps_temporary_input = os.path.join(
-            outdir, "lammps_input_" + self.calculation_timestamp + ".tmp"
-        )
+        self.setup_lammps_tmp_files("ggrid", outdir)
+
         ase.io.write(
             self.lammps_temporary_input, self.atoms, format=lammps_format
         )
@@ -160,10 +159,6 @@ class AtomicDensity(Descriptor):
             "sigma": self.parameters.atomic_density_sigma,
             "rcutfac": self.parameters.atomic_density_cutoff,
         }
-        self.lammps_temporary_log = os.path.join(
-            outdir,
-            "lammps_ggrid_log_" + self.calculation_timestamp + ".tmp",
-        )
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # For now the file is chosen automatically, because this is used
