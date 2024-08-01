@@ -555,6 +555,11 @@ class PhysicalData(ABC):
                 atoms_openpmd["position"][str(atom)].unit_SI = 1.0e-10
                 atoms_openpmd["positionOffset"][str(atom)].unit_SI = 1.0e-10
 
+        if any(i == 0 for i in self.grid_dimensions) and not isinstance(
+            array, self.SkipArrayWriting
+        ):
+            self.grid_dimensions = array.shape[0:-1]
+
         dataset = (
             array.dataset
             if isinstance(array, self.SkipArrayWriting)
@@ -564,8 +569,12 @@ class PhysicalData(ABC):
         # Global feature sizes:
         feature_global_from = 0
         feature_global_to = self.feature_size
-        if feature_global_to == 0 and isinstance(array, self.SkipArrayWriting):
-            feature_global_to = array.feature_size
+        if feature_global_to == 0:
+            feature_global_to = (
+                array.feature_size
+                if isinstance(array, self.SkipArrayWriting)
+                else array.shape[-1]
+            )
 
         # First loop: Only metadata, write metadata equivalently across ranks
         for current_feature in range(feature_global_from, feature_global_to):
