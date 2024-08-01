@@ -142,11 +142,8 @@ class Bispectrum(Descriptor):
         keep_logs = kwargs.get("keep_logs", False)
 
         lammps_format = "lammps-data"
-        self.lammps_tmp_input_file = tempfile.NamedTemporaryFile(
-            delete=1 - keep_logs, prefix="lammps_tmp_input_", dir=outdir
-        )
-        self.lammps_temporary_input = self.lammps_tmp_input_file.name
-        printout(self.lammps_temporary_input)
+        self.setup_lammps_tmp_files("bgrid", outdir)
+
         ase.io.write(
             self.lammps_temporary_input, self.atoms, format=lammps_format
         )
@@ -160,11 +157,6 @@ class Bispectrum(Descriptor):
             "twojmax": self.parameters.bispectrum_twojmax,
             "rcutfac": self.parameters.bispectrum_cutoff,
         }
-        self.lammps_tmp_log_file = tempfile.NamedTemporaryFile(
-            delete=1 - keep_logs, prefix="lammps_tmp_bgrid_log_", dir=outdir
-        )
-        self.lammps_temporary_log = self.lammps_tmp_log_file.name
-        printout(self.lammps_temporary_log)
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # An empty string means that the user wants to use the standard input.
@@ -232,7 +224,7 @@ class Bispectrum(Descriptor):
             )
 
             printout("Cleaning calculation")
-            self._clean_calculation(lmp)
+            self._clean_calculation(lmp, keep_logs)
 
             # Copy the grid dimensions only at the end.
             self.grid_dimensions = [nx, ny, nz]
@@ -250,7 +242,7 @@ class Bispectrum(Descriptor):
             )
 
             printout("Cleaning calculation")
-            self._clean_calculation(lmp)
+            self._clean_calculation(lmp, keep_logs)
 
             # switch from x-fastest to z-fastest order (swaps 0th and 2nd
             # dimension)
