@@ -235,21 +235,22 @@ class FeedForwardNet(Network):
                     )
                 )
             )
-            try:
-                if use_only_one_activation_type:
-                    self.layers.append(
-                        self.activation_mappings[
-                            self.params.layer_activations[0]
-                        ]()
-                    )
-                else:
-                    self.layers.append(
-                        self.activation_mappings[
-                            self.params.layer_activations[i]
-                        ]()
-                    )
-            except KeyError:
-                raise Exception("Invalid activation type seleceted.")
+            if i < self.number_of_layers - 1:
+                try:
+                    if use_only_one_activation_type:
+                        self.layers.append(
+                            self.activation_mappings[
+                                self.params.layer_activations[0]
+                            ]()
+                        )
+                    else:
+                        self.layers.append(
+                            self.activation_mappings[
+                                self.params.layer_activations[i]
+                            ]()
+                        )
+                except KeyError:
+                    raise Exception("Invalid activation type seleceted.")
 
         # Once everything is done, we can move the Network on the target
         # device.
