@@ -6,6 +6,13 @@ lint.ignore = [
     "E731", # Do not assign a lambda expression, use a def
 ]
 
+[tool.mypy]
+ignore_missing_imports = true
+implicit_optional = true
+follow_imports = "skip"
+allow_untyped_calls = true
+allow_untyped_defs = true
+
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
