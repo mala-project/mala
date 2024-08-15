@@ -1,0 +1,199 @@
+"Aligns LDOS vectors" ""
+
+import os
+
+import numpy as np
+
+from mala.common.parameters import (
+    Parameters,
+    DEFAULT_NP_DATA_DTYPE,
+)
+from mala.common.parallelizer import printout
+from mala.common.physical_data import PhysicalData
+from mala.datahandling.data_handler_base import DataHandlerBase
+from mala.common.parallelizer import get_comm
+
+
+class LDOSAlign(DataHandlerBase):
+    """
+    Mixes data between snapshots for improved lazy-loading training.
+
+    This is a DISK operation - new, shuffled snapshots will be created on disk.
+
+    Parameters
+    ----------
+    parameters : mala.common.parameters.Parameters
+        Parameters used to create the data handling object.
+
+    descriptor_calculator : mala.descriptors.descriptor.Descriptor
+        Used to do unit conversion on input data. If None, then one will
+        be created by this class.
+
+    target_calculator : mala.targets.target.Target
+        Used to do unit conversion on output data. If None, then one will
+        be created by this class.
+    """
+
+    def __init__(
+        self,
+        parameters: Parameters,
+        target_calculator=None,
+        descriptor_calculator=None,
+    ):
+        super(LDOSAlign, self).__init__(
+            parameters,
+            target_calculator=target_calculator,
+            descriptor_calculator=descriptor_calculator,
+        )
+
+    def add_snapshot(
+        self,
+        output_file,
+        output_directory,
+        snapshot_type="numpy",
+    ):
+        """
+        Add a snapshot to the data pipeline.
+
+        Parameters
+        ----------
+        output_file : string
+            File with saved numpy output array.
+
+        output_directory : string
+            Directory containing output_npy_file.
+
+        snapshot_type : string
+            Either "numpy" or "openpmd" based on what kind of files you
+            want to operate on.
+        """
+        super(LDOSAlign, self).add_snapshot(
+            "",
+            "",
+            output_file,
+            output_directory,
+            add_snapshot_as="te",
+            output_units="None",
+            input_units="None",
+            calculation_output_file="",
+            snapshot_type=snapshot_type,
+        )
+
+    def align_ldos_to_ref(
+        self,
+        save_path=None,
+        save_name=None,
+        save_path_ext="aligned/",
+        reference_index=0,
+        zero_tol=1e-4,
+        left_truncate=False,
+        right_truncate_value=None,
+        egrid_spacing_ev=0.1,
+        egrid_offset_ev=-10,
+    ):
+        # load in the reference snapshot
+        snapshot_ref = self.parameters.snapshot_directories_list[
+            reference_index
+        ]
+        ldos_ref = np.load(
+            os.path.join(
+                snapshot_ref.output_npy_directory, snapshot_ref.output_npy_file
+            ),
+            mmap_mode="r",
+        )
+
+        # get the mean
+        n_target = ldos_ref.shape[-1]
+        ldos_ref = ldos_ref.reshape(-1, n_target)
+        ldos_mean_ref = np.mean(ldos_ref, axis=0)
+
+        # get the first non-zero value
+        left_index_ref = np.where(ldos_mean_ref > zero_tol)[0][0]
+
+        # get the energy grid
+        emax = egrid_offset_ev + n_target * egrid_spacing_ev
+        e_grid = np.linspace(
+            egrid_offset_ev,
+            emax,
+            n_target,
+            endpoint=False,
+        )
+
+        N_snapshots = len(self.parameters.snapshot_directories_list)
+
+        for idx, snapshot in enumerate(
+            self.parameters.snapshot_directories_list
+        ):
+            printout(f"Aligning snapshot {idx+1} of {N_snapshots}")
+            ldos = np.load(
+                os.path.join(
+                    snapshot.output_npy_directory,
+                    snapshot.output_npy_file,
+                ),
+                mmap_mode="r",
+            )
+
+            # get the mean
+            ngrid = ldos.shape[0]
+            ldos = ldos.reshape(-1, n_target)
+            ldos_shifted = np.zeros_like(ldos)
+            ldos_mean = np.mean(ldos, axis=0)
+
+            grad_mean = np.gradient(ldos_mean)
+            
+
+            # get the first non-zero value
+            left_index = np.where(ldos_mean > zero_tol)[0][0]
+
+            # shift the ldos
+            shift = left_index - left_index_ref
+            e_shift = shift * egrid_spacing_ev
+            if shift != 0:
+                ldos_shifted[:, :-shift] = ldos[:, shift:]
+            else:
+                ldos_shifted = ldos
+            del ldos
+
+            # truncate ldos before sudden drop
+            if right_truncate_value is not None:
+                e_index_cut = np.where(e_grid > right_truncate_value)[0][0]
+                ldos_shifted = ldos_shifted[:, :e_index_cut]
+                new_upper_egrid_lim = right_truncate_value + e_shift
+
+            # remove zero values at start of ldos
+            if left_truncate:
+                ldos_shifted = ldos_shifted[:, left_index:]
+                new_egrid_offset = (
+                    egrid_offset_ev + left_index * egrid_spacing_ev
+                )
+            else:
+                new_egrid_offset = egrid_offset_ev
+
+            # reshape
+            ldos_shifted = ldos_shifted.reshape(ngrid, ngrid, ngrid, -1)
+
+            ldos_shift_info = {
+                "ldos_shift_ev": e_shift,
+                "ldos_new_gridoffset_ev": new_egrid_offset,
+                "ldos_new_max_ev": new_upper_egrid_lim,
+            }
+
+            printout(ldos_shift_info)
+
+            if save_path is None:
+                save_path = os.path.join(
+                    snapshot.output_npy_directory, save_path_ext
+                )
+            if save_name is None:
+                save_name = snapshot.output_npy_file
+
+            os.makedirs(save_path, exist_ok=True)
+
+            if "*" in save_name:
+                save_name = save_name.replace("*", str(idx))
+
+            target_name = os.path.join(save_path, save_name)
+
+            self.target_calculator.write_to_numpy_file(
+                target_name, ldos_shifted
+            )
