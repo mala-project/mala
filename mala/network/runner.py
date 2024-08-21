@@ -236,7 +236,6 @@ class Runner:
         target_calculator.read_additional_calculation_data(output_file)
 
         errors = {}
-        fe_dft = target_calculator.fermi_energy_dft
         fe_actual = None
         fe_predicted = None
         try:
