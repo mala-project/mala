@@ -139,17 +139,22 @@ class LDOSAlign(DataHandlerBase):
             ldos_shifted = np.zeros_like(ldos)
             ldos_mean = np.mean(ldos, axis=0)
 
-            grad_mean = np.gradient(ldos_mean)
-            
-
             # get the first non-zero value
             left_index = np.where(ldos_mean > zero_tol)[0][0]
 
             # shift the ldos
-            shift = left_index - left_index_ref
-            e_shift = shift * egrid_spacing_ev
-            if shift != 0:
-                ldos_shifted[:, :-shift] = ldos[:, shift:]
+            optimal_shift = self.calc_optimal_ldos_shift(
+                e_grid,
+                ldos_mean,
+                ldos_mean_ref,
+                right_truncate_value,
+                left_index,
+                left_index_ref,
+            )
+
+            e_shift = optimal_shift * egrid_spacing_ev
+            if optimal_shift != 0:
+                ldos_shifted[:, :-optimal_shift] = ldos[:, optimal_shift:]
             else:
                 ldos_shifted = ldos
             del ldos
@@ -162,15 +167,19 @@ class LDOSAlign(DataHandlerBase):
 
             # remove zero values at start of ldos
             if left_truncate:
+                # get the first non-zero value
+                ldos_mean_shifted = np.mean(ldos_shifted, axis=0)
+                left_index = np.where(ldos_mean_shifted > zero_tol)[0][0]
                 ldos_shifted = ldos_shifted[:, left_index:]
                 new_egrid_offset = (
-                    egrid_offset_ev + left_index * egrid_spacing_ev
+                    egrid_offset_ev + (left_index + optimal_shift * egrid_spacing_ev)
                 )
             else:
                 new_egrid_offset = egrid_offset_ev
 
             # reshape
             ldos_shifted = ldos_shifted.reshape(ngrid, ngrid, ngrid, -1)
+            egrid_new = np.arange(
 
             ldos_shift_info = {
                 "ldos_shift_ev": e_shift,
@@ -180,12 +189,10 @@ class LDOSAlign(DataHandlerBase):
 
             printout(ldos_shift_info)
 
-            if save_path is None:
-                save_path = os.path.join(
-                    snapshot.output_npy_directory, save_path_ext
-                )
-            if save_name is None:
-                save_name = snapshot.output_npy_file
+            save_path = os.path.join(
+                snapshot.output_npy_directory, save_path_ext
+            )
+            save_name = snapshot.output_npy_file
 
             os.makedirs(save_path, exist_ok=True)
 
@@ -197,3 +204,38 @@ class LDOSAlign(DataHandlerBase):
             self.target_calculator.write_to_numpy_file(
                 target_name, ldos_shifted
             )
+    
+    def calc_optimal_ldos_shift(
+        self,
+        e_grid,
+        ldos_mean,
+        ldos_mean_ref,
+        right_truncate_value,
+        left_index,
+        left_index_ref,
+    ):
+        # if no right truncate value provided, shifting by MSE is not appropriate
+        if right_truncate_value is None:
+            return left_index - left_index_ref
+
+        shift_guess = 0
+        ldos_diff = np.inf
+        shift_guess = max(left_index - left_index_ref, 0)
+        for i in range(5):
+            shift = shift_guess + i
+            ldos_mean_shifted = np.zeros_like(ldos_mean)
+            if shift != 0:
+                ldos_mean_shifted[:-shift] = ldos_mean[shift:]
+            else:
+                ldos_mean_shifted = ldos_mean
+
+            e_index_cut = np.where(e_grid > right_truncate_value)[0][0]
+            ldos_mean_shifted = ldos_mean_shifted[:e_index_cut]
+            ldos_mean_ref = ldos_mean_ref[:e_index_cut]
+
+            mse = np.sum((ldos_mean_shifted - ldos_mean_ref)**2)
+            if mse < ldos_diff:
+                optimal_shift = shift
+                ldos_diff = mse
+
+        return optimal_shift
