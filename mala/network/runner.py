@@ -99,7 +99,7 @@ class Runner:
                         target_calculator, LDOS
                     ) and not isinstance(target_calculator, Density):
                         raise Exception(
-                            "Cannot calculate the total energy from this "
+                            "Cannot calculate density from this "
                             "observable."
                         )
                     target_calculator.read_additional_calculation_data(
@@ -294,31 +294,6 @@ class Runner:
                     errors[energy_type] = be_error
                 except ValueError:
                     errors[energy_type] = float("inf")
-            elif energy_type == "band_energy_dft_fe":
-                try:
-                    target_calculator.read_from_array(predicted_outputs)
-                    be_predicted_dft_fe = target_calculator.get_band_energy(
-                        fermi_energy=fe_dft
-                    )
-                    be_error_dft_fe = (be_predicted_dft_fe - be_actual) * (
-                        1000 / len(target_calculator.atoms)
-                    )
-                    errors[energy_type] = be_error_dft_fe
-                except ValueError:
-                    errors[energy_type] = float("inf")
-            elif energy_type == "band_energy_actual_fe":
-                try:
-                    target_calculator.read_from_array(predicted_outputs)
-                    be_predicted_actual_fe = target_calculator.get_band_energy(
-                        fermi_energy=fe_actual
-                    )
-                    be_error_actual_fe = (
-                        be_predicted_actual_fe - be_actual
-                    ) * (1000 / len(target_calculator.atoms))
-                    errors[energy_type] = be_error_actual_fe
-                except ValueError:
-                    errors[energy_type] = float("inf")
-
             elif energy_type == "total_energy":
                 if not isinstance(target_calculator, LDOS):
                     raise Exception(
@@ -343,18 +318,6 @@ class Runner:
                         1000 / len(target_calculator.atoms)
                     )
                     errors[energy_type] = te_error
-                except ValueError:
-                    errors[energy_type] = float("inf")
-            elif energy_type == "total_energy_dft_fe":
-                try:
-                    target_calculator.read_from_array(predicted_outputs)
-                    te_predicted_dft_fe = target_calculator.get_total_energy(
-                        fermi_energy=fe_dft
-                    )
-                    te_error_dft_fe = (te_predicted_dft_fe - te_actual) * (
-                        1000 / len(target_calculator.atoms)
-                    )
-                    errors[energy_type] = te_error_dft_fe
                 except ValueError:
                     errors[energy_type] = float("inf")
             elif energy_type == "total_energy_actual_fe":
