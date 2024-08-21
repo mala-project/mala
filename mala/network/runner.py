@@ -121,7 +121,7 @@ class Runner:
                         target_calculator, LDOS
                     ) and not isinstance(target_calculator, Density):
                         raise Exception(
-                            "Cannot calculate the total energy from this "
+                            "Cannot calculate the density from this "
                             "observable."
                         )
                     target_calculator.read_additional_calculation_data(
@@ -145,7 +145,7 @@ class Runner:
                         target_calculator, LDOS
                     ) and not isinstance(target_calculator, DOS):
                         raise Exception(
-                            "Cannot calculate the total energy from this "
+                            "Cannot calculate the DOS from this "
                             "observable."
                         )
                     target_calculator.read_additional_calculation_data(
@@ -168,7 +168,7 @@ class Runner:
                         target_calculator, LDOS
                     ) and not isinstance(target_calculator, DOS):
                         raise Exception(
-                            "Cannot calculate the total energy from this "
+                            "Cannot calculate the relative DOS from this "
                             "observable."
                         )
                     target_calculator.read_additional_calculation_data(
@@ -269,9 +269,6 @@ class Runner:
             if energy_type == "fermi_energy":
                 fe_error = fe_predicted - fe_actual
                 errors[energy_type] = fe_error
-            elif energy_type == "fermi_energy_dft":
-                fe_error_dft = fe_predicted - fe_dft
-                errors[energy_type] = fe_error_dft
             elif energy_type == "band_energy":
                 if not isinstance(target_calculator, LDOS) and not isinstance(
                     target_calculator, DOS
@@ -292,6 +289,26 @@ class Runner:
                         1000 / len(target_calculator.atoms)
                     )
                     errors[energy_type] = be_error
+                except ValueError:
+                    errors[energy_type] = float("inf")
+            elif energy_type == "band_energy_actual_fe":
+                if not isinstance(target_calculator, LDOS) and not isinstance(
+                    target_calculator, DOS
+                ):
+                    raise Exception(
+                        "Cannot calculate the band energy from this observable."
+                    )
+                try:
+                    target_calculator.read_from_array(predicted_outputs)
+                    be_predicted_actual_fe = (
+                        target_calculator.get_band_energy(
+                            fermi_energy=fe_actual
+                        )
+                    )
+                    be_error_actual_fe = (
+                        be_predicted_actual_fe - be_actual
+                    ) * (1000 / len(target_calculator.atoms))
+                    errors[energy_type] = be_error_actual_fe
                 except ValueError:
                     errors[energy_type] = float("inf")
             elif energy_type == "total_energy":
@@ -321,6 +338,11 @@ class Runner:
                 except ValueError:
                     errors[energy_type] = float("inf")
             elif energy_type == "total_energy_actual_fe":
+                if not isinstance(target_calculator, LDOS):
+                    raise Exception(
+                        "Cannot calculate the total energy from this "
+                        "observable."
+                    )
                 try:
                     target_calculator.read_from_array(predicted_outputs)
                     te_predicted_actual_fe = (
