@@ -124,10 +124,40 @@ class Tester(Runner):
             snapshot_number,
         )
         return results
+    
+    def get_energy_targets_and_predictions(self, snapshot_number, data_type="te"):
+        """
+        Get the energy targets and predictions for a single snapshot.
+
+        Parameters
+        ----------
+        snapshot_number : int
+            Snapshot which to test.
+
+        data_type : str
+            'tr', 'va', or 'te' indicating the partition to be tested
+
+        Returns
+        -------
+        results : dict
+            A dictionary containing the errors for the selected observables.
+        """
+        actual_outputs, predicted_outputs = self.predict_targets(
+            snapshot_number, data_type=data_type
+        )
+        
+        energy_metrics = [metric for metric in self.observables_to_test if "energy" in metric]
+        targets, predictions = self._calculate_energy_targets_and_predictions(
+            actual_outputs,
+            predicted_outputs,
+            energy_metrics,
+            snapshot_number,
+        )
+        return targets, predictions
 
     def predict_targets(self, snapshot_number, data_type="te"):
         """
-        Get actual and predicted output for a snapshot.
+        Get actual and predicted energy outputs for a snapshot.
 
         Parameters
         ----------
