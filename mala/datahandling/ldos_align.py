@@ -1,6 +1,7 @@
 "Aligns LDOS vectors" ""
 
 import os
+import json
 
 import numpy as np
 
@@ -90,6 +91,7 @@ class LDOSAlign(DataHandlerBase):
         right_truncate_value=None,
         egrid_spacing_ev=0.1,
         egrid_offset_ev=-10,
+        number_of_electrons=None,
     ):
         # load in the reference snapshot
         snapshot_ref = self.parameters.snapshot_directories_list[
@@ -168,43 +170,58 @@ class LDOSAlign(DataHandlerBase):
             # remove zero values at start of ldos
             if left_truncate:
                 # get the first non-zero value
-                ldos_mean_shifted = np.mean(ldos_shifted, axis=0)
-                left_index = np.where(ldos_mean_shifted > zero_tol)[0][0]
-                ldos_shifted = ldos_shifted[:, left_index:]
+                ldos_shifted = ldos_shifted[:, left_index_ref:]
                 new_egrid_offset = (
-                    egrid_offset_ev + (left_index + optimal_shift * egrid_spacing_ev)
+                    egrid_offset_ev
+                    + (left_index_ref + optimal_shift) * egrid_spacing_ev
                 )
             else:
                 new_egrid_offset = egrid_offset_ev
 
             # reshape
             ldos_shifted = ldos_shifted.reshape(ngrid, ngrid, ngrid, -1)
-            egrid_new = np.arange(
 
             ldos_shift_info = {
-                "ldos_shift_ev": e_shift,
-                "ldos_new_gridoffset_ev": new_egrid_offset,
-                "ldos_new_max_ev": new_upper_egrid_lim,
+                "ldos_shift_ev": round(e_shift, 4),
+                "aligned_ldos_gridoffset_ev": round(new_egrid_offset, 4),
+                "aligned_ldos_gridsize": np.shape(ldos_shifted)[-1],
+                "aligned_ldos_gridspacing": round(egrid_spacing_ev, 4),
             }
 
-            printout(ldos_shift_info)
+            if number_of_electrons is not None:
+                ldos_shift_info["energy_shift_from_qe_ev"] = round(
+                    number_of_electrons * e_shift, 4
+                )
 
             save_path = os.path.join(
                 snapshot.output_npy_directory, save_path_ext
             )
             save_name = snapshot.output_npy_file
 
+            stripped_output_file_name = snapshot.output_npy_file.replace(
+                ".out", ""
+            )
+            ldos_shift_info_save_name = stripped_output_file_name.replace(
+                ".npy", ".ldos_shift.info.json"
+            )
+
             os.makedirs(save_path, exist_ok=True)
 
             if "*" in save_name:
                 save_name = save_name.replace("*", str(idx))
+                ldos_shift_info_save_name.replace("*", str(idx))
 
             target_name = os.path.join(save_path, save_name)
 
             self.target_calculator.write_to_numpy_file(
                 target_name, ldos_shifted
             )
-    
+
+            with open(
+                os.path.join(save_path, ldos_shift_info_save_name), "w"
+            ) as f:
+                json.dump(ldos_shift_info, f)
+
     def calc_optimal_ldos_shift(
         self,
         e_grid,
@@ -233,7 +250,7 @@ class LDOSAlign(DataHandlerBase):
             ldos_mean_shifted = ldos_mean_shifted[:e_index_cut]
             ldos_mean_ref = ldos_mean_ref[:e_index_cut]
 
-            mse = np.sum((ldos_mean_shifted - ldos_mean_ref)**2)
+            mse = np.sum((ldos_mean_shifted - ldos_mean_ref) ** 2)
             if mse < ldos_diff:
                 optimal_shift = shift
                 ldos_diff = mse
