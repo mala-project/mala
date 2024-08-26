@@ -86,12 +86,13 @@ class LDOSAlign(DataHandlerBase):
         save_name=None,
         save_path_ext="aligned/",
         reference_index=0,
-        zero_tol=1e-4,
+        zero_tol=1e-5,
         left_truncate=False,
         right_truncate_value=None,
         egrid_spacing_ev=0.1,
         egrid_offset_ev=-10,
         number_of_electrons=None,
+        n_shift_mse=None,
     ):
         # load in the reference snapshot
         snapshot_ref = self.parameters.snapshot_directories_list[
@@ -108,6 +109,10 @@ class LDOSAlign(DataHandlerBase):
         n_target = ldos_ref.shape[-1]
         ldos_ref = ldos_ref.reshape(-1, n_target)
         ldos_mean_ref = np.mean(ldos_ref, axis=0)
+        zero_tol = zero_tol / np.linalg.norm(ldos_mean_ref)
+
+        if n_shift_mse is None:
+            n_shift_mse = n_target // 10
 
         # get the first non-zero value
         left_index_ref = np.where(ldos_mean_ref > zero_tol)[0][0]
@@ -149,9 +154,9 @@ class LDOSAlign(DataHandlerBase):
                 e_grid,
                 ldos_mean,
                 ldos_mean_ref,
-                right_truncate_value,
                 left_index,
                 left_index_ref,
+                n_shift_mse,
             )
 
             e_shift = optimal_shift * egrid_spacing_ev
@@ -193,6 +198,8 @@ class LDOSAlign(DataHandlerBase):
                     number_of_electrons * e_shift, 4
                 )
 
+            print(ldos_shift_info)
+
             save_path = os.path.join(
                 snapshot.output_npy_directory, save_path_ext
             )
@@ -227,17 +234,13 @@ class LDOSAlign(DataHandlerBase):
         e_grid,
         ldos_mean,
         ldos_mean_ref,
-        right_truncate_value,
         left_index,
         left_index_ref,
+        n_shift_mse,
     ):
-        # if no right truncate value provided, shifting by MSE is not appropriate
-        if right_truncate_value is None:
-            return left_index - left_index_ref
-
         shift_guess = 0
         ldos_diff = np.inf
-        shift_guess = max(left_index - left_index_ref, 0)
+        shift_guess = max(left_index - left_index_ref - 2, 0)
         for i in range(5):
             shift = shift_guess + i
             ldos_mean_shifted = np.zeros_like(ldos_mean)
@@ -246,7 +249,7 @@ class LDOSAlign(DataHandlerBase):
             else:
                 ldos_mean_shifted = ldos_mean
 
-            e_index_cut = np.where(e_grid > right_truncate_value)[0][0]
+            e_index_cut = max(left_index, left_index_ref) + n_shift_mse
             ldos_mean_shifted = ldos_mean_shifted[:e_index_cut]
             ldos_mean_ref = ldos_mean_ref[:e_index_cut]
 
