@@ -1,4 +1,4 @@
-"Aligns LDOS vectors" ""
+"""Align LDOS vectors to a reference."""
 
 import os
 import json
@@ -17,9 +17,9 @@ from mala.common.parallelizer import get_comm
 
 class LDOSAlign(DataHandlerBase):
     """
-    Mixes data between snapshots for improved lazy-loading training.
+    Align LDOS vectors based on when they first become non-zero.
 
-    This is a DISK operation - new, shuffled snapshots will be created on disk.
+    Optionally truncates from the left and right-side to remove redundant data.
 
     Parameters
     ----------
@@ -65,8 +65,7 @@ class LDOSAlign(DataHandlerBase):
             Directory containing output_npy_file.
 
         snapshot_type : string
-            Either "numpy" or "openpmd" based on what kind of files you
-            want to operate on.
+            Must be numpy, openPMD is not yet available for LDOS alignment.
         """
         super(LDOSAlign, self).add_snapshot(
             "",
@@ -79,6 +78,9 @@ class LDOSAlign(DataHandlerBase):
             calculation_output_file="",
             snapshot_type=snapshot_type,
         )
+
+        if snapshot_type is not "numpy":
+            raise Exception("Snapshot type must be numpy for LDOS alignment")
 
     def align_ldos_to_ref(
         self,
@@ -94,6 +96,41 @@ class LDOSAlign(DataHandlerBase):
         number_of_electrons=None,
         n_shift_mse=None,
     ):
+        """
+        Add a snapshot to the data pipeline.
+
+        Parameters
+        ----------
+        save_path : string
+            path to save the aligned LDOS vectors
+        save_name : string
+            naming convention for the aligned LDOS vectors
+        save_path_ext : string
+            additional path for the LDOS vectors (useful if
+            save_path is left as default None)
+        reference_index : int
+            the snapshot number (in the snapshot directory list)
+            to which all other LDOS vectors are aligned
+        zero_tol : float
+            the "zero" value for alignment / left side truncation
+            always scaled by norm of reference LDOS mean
+        left_truncate : bool
+            whether to truncate the zero values on the LHS
+        right_truncate_value : float
+            right-hand energy value (based on reference LDOS vector)
+            to which truncate LDOS vectors
+            if None, no right-side truncation
+        egrid_spacing_ev : float
+            spacing of energy grid
+        egrid_offset_ev : float
+           original offset of energy grid
+        number_of_electrons : float / int
+            if not None, computes the energy shift relative to QE energies
+        n_shift_mse : int
+            how many energy grid points to consider when aligning LDOS
+            vectors based on mean-squared error
+            computed automatically if None
+        """
         # load in the reference snapshot
         snapshot_ref = self.parameters.snapshot_directories_list[
             reference_index
@@ -238,6 +275,34 @@ class LDOSAlign(DataHandlerBase):
         left_index_ref,
         n_shift_mse,
     ):
+        """
+        Calculate the optimal amount by which to align the LDOS with reference.
+
+        'Optimized' is currently based on minimizing the mean-square error with
+        the reference, up to a cut-off (typically 10% of the full LDOS length).
+
+        Parameters
+        ----------
+        e_grid : array_like
+            energy grid
+        ldos_mean : array_like
+            mean of LDOS vector for shifting
+        ldos_mean_ref : array_like
+            mean of LDOS reference vector
+        left_index : int
+            index at which LDOS for shifting becomes non-zero
+        left_index_ref : int
+            index at which reference LDOS becomes non-zero
+        n_shift_mse : int
+            number of points to account for in MSE calculation
+            for optimal LDOS shift
+
+        Returns
+        -------
+        optimal_shift : int
+            the optimized number of egrid points to shift the LDOS
+            vector by, based on minimization of MSE with reference
+        """
         shift_guess = 0
         ldos_diff = np.inf
         shift_guess = max(left_index - left_index_ref - 2, 0)
