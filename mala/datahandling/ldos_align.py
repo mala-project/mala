@@ -9,7 +9,7 @@ from mala.common.parameters import (
     Parameters,
     DEFAULT_NP_DATA_DTYPE,
 )
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, barrier
 from mala.common.physical_data import PhysicalData
 from mala.datahandling.data_handler_base import DataHandlerBase
 from mala.common.parallelizer import get_comm
@@ -79,7 +79,7 @@ class LDOSAlign(DataHandlerBase):
             snapshot_type=snapshot_type,
         )
 
-        if snapshot_type is not "numpy":
+        if snapshot_type != "numpy":
             raise Exception("Snapshot type must be numpy for LDOS alignment")
 
     def align_ldos_to_ref(
@@ -131,44 +131,76 @@ class LDOSAlign(DataHandlerBase):
             vectors based on mean-squared error
             computed automatically if None
         """
-        # load in the reference snapshot
-        snapshot_ref = self.parameters.snapshot_directories_list[
-            reference_index
-        ]
-        ldos_ref = np.load(
-            os.path.join(
-                snapshot_ref.output_npy_directory, snapshot_ref.output_npy_file
-            ),
-            mmap_mode="r",
-        )
 
-        # get the mean
-        n_target = ldos_ref.shape[-1]
-        ldos_ref = ldos_ref.reshape(-1, n_target)
-        ldos_mean_ref = np.mean(ldos_ref, axis=0)
-        zero_tol = zero_tol / np.linalg.norm(ldos_mean_ref)
+        if self.parameters._configuration["mpi"]:
+            comm = get_comm()
+            rank = comm.rank
+            size = comm.size
+        else:
+            comm = None
+            rank = 0
+            size = 1
+            
+        if rank == 0:
+            # load in the reference snapshot
+            snapshot_ref = self.parameters.snapshot_directories_list[
+                reference_index
+            ]
+            ldos_ref = np.load(
+                os.path.join(
+                    snapshot_ref.output_npy_directory, snapshot_ref.output_npy_file
+                ),
+                mmap_mode="r",
+            )
 
-        if n_shift_mse is None:
-            n_shift_mse = n_target // 10
+            # get the mean
+            n_target = ldos_ref.shape[-1]
+            ldos_ref = ldos_ref.reshape(-1, n_target)
+            ldos_mean_ref = np.mean(ldos_ref, axis=0)
+            zero_tol = zero_tol / np.linalg.norm(ldos_mean_ref)
 
-        # get the first non-zero value
-        left_index_ref = np.where(ldos_mean_ref > zero_tol)[0][0]
+            if n_shift_mse is None:
+                n_shift_mse = n_target // 10
 
-        # get the energy grid
-        emax = egrid_offset_ev + n_target * egrid_spacing_ev
-        e_grid = np.linspace(
-            egrid_offset_ev,
-            emax,
-            n_target,
-            endpoint=False,
-        )
+            # get the first non-zero value
+            left_index_ref = np.where(ldos_mean_ref > zero_tol)[0][0]
 
-        N_snapshots = len(self.parameters.snapshot_directories_list)
+            # get the energy grid
+            emax = egrid_offset_ev + n_target * egrid_spacing_ev
+            e_grid = np.linspace(
+                egrid_offset_ev,
+                emax,
+                n_target,
+                endpoint=False,
+            )
 
-        for idx, snapshot in enumerate(
-            self.parameters.snapshot_directories_list
-        ):
-            printout(f"Aligning snapshot {idx+1} of {N_snapshots}")
+            N_snapshots = len(self.parameters.snapshot_directories_list)
+
+        else:
+            ldos_mean_ref = None
+            e_grid = None
+            left_index_ref = None
+            n_shift_mse = None
+            N_snapshots = None
+            n_target = None
+
+        if self.parameters._configuration["mpi"]:
+            # Broadcast necessary data to all processes
+            ldos_mean_ref = comm.bcast(ldos_mean_ref, root=0)
+            e_grid = comm.bcast(e_grid, root=0)
+            left_index_ref = comm.bcast(left_index_ref, root=0)
+            n_shift_mse = comm.bcast(n_shift_mse, root=0)
+            N_snapshots = comm.bcast(N_snapshots, root=0)
+            n_target = comm.bcast(n_target, root=0)
+            
+            local_snapshots = [i for i in range(rank, N_snapshots, size)]
+
+        else:
+            local_snapshots = range(N_snapshots)
+            
+        for idx in local_snapshots:
+            snapshot = self.parameters.snapshot_directories_list[idx]
+            print(f"Aligning snapshot {idx+1} of {N_snapshots}")
             ldos = np.load(
                 os.path.join(
                     snapshot.output_npy_directory,
@@ -235,8 +267,6 @@ class LDOSAlign(DataHandlerBase):
                     number_of_electrons * e_shift, 4
                 )
 
-            print(ldos_shift_info)
-
             save_path = os.path.join(
                 snapshot.output_npy_directory, save_path_ext
             )
@@ -265,6 +295,8 @@ class LDOSAlign(DataHandlerBase):
                 os.path.join(save_path, ldos_shift_info_save_name), "w"
             ) as f:
                 json.dump(ldos_shift_info, f)
+
+        barrier()
 
     def calc_optimal_ldos_shift(
         self,
