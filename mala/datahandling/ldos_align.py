@@ -212,7 +212,9 @@ class LDOSAlign(DataHandlerBase):
             )
 
             # get the mean
-            ngrid = ldos.shape[0]
+            nx = ldos.shape[0]
+            ny = ldos.shape[1]
+            nz = ldos.shape[2]
             ldos = ldos.reshape(-1, n_target)
             ldos_shifted = np.zeros_like(ldos)
             ldos_mean = np.mean(ldos, axis=0)
@@ -256,7 +258,7 @@ class LDOSAlign(DataHandlerBase):
                 new_egrid_offset = self.ldos_parameters.ldos_gridoffset_ev
 
             # reshape
-            ldos_shifted = ldos_shifted.reshape(ngrid, ngrid, ngrid, -1)
+            ldos_shifted = ldos_shifted.reshape(nx, ny, nz, -1)
 
             ldos_shift_info = {
                 "ldos_shift_ev": round(e_shift, 4),
@@ -299,12 +301,12 @@ class LDOSAlign(DataHandlerBase):
             with open(
                 os.path.join(save_path, ldos_shift_info_save_name), "w"
             ) as f:
-                json.dump(ldos_shift_info, f)
+                json.dump(ldos_shift_info, f, indent=2)
 
         barrier()
-
+    
+    @staticmethod
     def calc_optimal_ldos_shift(
-        self,
         e_grid,
         ldos_mean,
         ldos_mean_ref,
