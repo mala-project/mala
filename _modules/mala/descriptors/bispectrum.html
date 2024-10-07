@@ -84,6 +84,7 @@
 <span></span><span class="sd">&quot;&quot;&quot;Bispectrum descriptor class.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
 
 <span class="kn">import</span> <span class="nn">ase</span>
 <span class="kn">import</span> <span class="nn">ase.io</span>
@@ -232,9 +233,8 @@
         <span class="n">keep_logs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;keep_logs&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="n">lammps_format</span> <span class="o">=</span> <span class="s2">&quot;lammps-data&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;lammps_input_&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_timestamp</span> <span class="o">+</span> <span class="s2">&quot;.tmp&quot;</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_lammps_tmp_files</span><span class="p">(</span><span class="s2">&quot;bgrid&quot;</span><span class="p">,</span> <span class="n">outdir</span><span class="p">)</span>
+
         <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">lammps_format</span>
         <span class="p">)</span>
@@ -248,11 +248,6 @@
             <span class="s2">&quot;twojmax&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span>
             <span class="s2">&quot;rcutfac&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span><span class="p">,</span>
         <span class="p">}</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_log</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">outdir</span><span class="p">,</span>
-            <span class="s2">&quot;lammps_bgrid_log_&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_timestamp</span> <span class="o">+</span> <span class="s2">&quot;.tmp&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
         <span class="n">lmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_lammps</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">)</span>
 
         <span class="c1"># An empty string means that the user wants to use the standard input.</span>
@@ -318,6 +313,7 @@
                 <span class="n">array_shape</span><span class="o">=</span><span class="p">(</span><span class="n">nrows_local</span><span class="p">,</span> <span class="n">ncols_local</span><span class="p">),</span>
                 <span class="n">use_fp64</span><span class="o">=</span><span class="n">use_fp64</span><span class="p">,</span>
             <span class="p">)</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">_clean_calculation</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="n">keep_logs</span><span class="p">)</span>
 
             <span class="c1"># Copy the grid dimensions only at the end.</span>
@@ -334,6 +330,7 @@
                 <span class="p">(</span><span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span><span class="p">),</span>
                 <span class="n">use_fp64</span><span class="o">=</span><span class="n">use_fp64</span><span class="p">,</span>
             <span class="p">)</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">_clean_calculation</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="n">keep_logs</span><span class="p">)</span>
 
             <span class="c1"># switch from x-fastest to z-fastest order (swaps 0th and 2nd</span>
@@ -602,7 +599,6 @@
     <span class="c1">########</span>
 
     <span class="k">class</span> <span class="nc">_ZIndices</span><span class="p">:</span>
-
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">j2</span> <span class="o">=</span> <span class="mi">0</span>
@@ -616,7 +612,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">jju</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">class</span> <span class="nc">_BIndices</span><span class="p">:</span>
-
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">j2</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1059,21 +1054,21 @@
                     <span class="p">)</span>
                     <span class="n">jju1</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="n">jju_outer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">:</span>
-                    <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span>
-                    <span class="p">)</span>
-                    <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="o">-</span><span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span>
-                    <span class="p">)</span>
+                    <span class="n">ulist_r_ij</span><span class="p">[</span>
+                        <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span>
+                    <span class="n">ulist_i_ij</span><span class="p">[</span>
+                        <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span>
                     <span class="n">jju2</span> <span class="o">+=</span> <span class="mi">1</span>
 
                 <span class="k">if</span> <span class="n">jju_outer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">:</span>
-                    <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="o">-</span><span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span>
-                    <span class="p">)</span>
-                    <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span>
-                    <span class="p">)</span>
+                    <span class="n">ulist_r_ij</span><span class="p">[</span>
+                        <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span>
+                    <span class="n">ulist_i_ij</span><span class="p">[</span>
+                        <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span>
                     <span class="n">jju3</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="c1"># This emulates add_uarraytot.</span>

@@ -296,13 +296,21 @@ the Recv/Sendv route as default.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="mala.descriptors.descriptor.Descriptor.calculation_timestamp">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculation_timestamp</span></span><a class="headerlink" href="#mala.descriptors.descriptor.Descriptor.calculation_timestamp" title="Link to this definition"></a></dt>
-<dd><p>Timestamp of calculation start.</p>
-<p>Used to distinguish multiple LAMMPS runs performed in the same
-directory. Since the interface is file based, this timestamp prevents
-problems with slightly</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.descriptor.Descriptor.setup_lammps_tmp_files">
+<span class="sig-name descname"><span class="pre">setup_lammps_tmp_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lammps_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor.html#Descriptor.setup_lammps_tmp_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor.Descriptor.setup_lammps_tmp_files" title="Link to this definition"></a></dt>
+<dd><p>Create the temporary lammps input and log files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lammps_type</strong> (<em>str</em>) – Type of descriptor calculation (e.g. bgrid for bispectrum)</p></li>
+<li><p><strong>outdir</strong> (<em>str</em>) – Directory where lammps files are kept</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">

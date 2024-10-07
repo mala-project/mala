@@ -231,9 +231,8 @@
         <span class="n">keep_logs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;keep_logs&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="n">lammps_format</span> <span class="o">=</span> <span class="s2">&quot;lammps-data&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;lammps_input_&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_timestamp</span> <span class="o">+</span> <span class="s2">&quot;.tmp&quot;</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_lammps_tmp_files</span><span class="p">(</span><span class="s2">&quot;ggrid&quot;</span><span class="p">,</span> <span class="n">outdir</span><span class="p">)</span>
+
         <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">lammps_format</span>
         <span class="p">)</span>
@@ -254,10 +253,6 @@
             <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">atomic_density_sigma</span><span class="p">,</span>
             <span class="s2">&quot;rcutfac&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">atomic_density_cutoff</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_log</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">outdir</span><span class="p">,</span>
-            <span class="s2">&quot;lammps_ggrid_log_&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_timestamp</span> <span class="o">+</span> <span class="s2">&quot;.tmp&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
         <span class="n">lmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_lammps</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">)</span>
 
         <span class="c1"># For now the file is chosen automatically, because this is used</span>
