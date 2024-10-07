@@ -184,8 +184,7 @@
                         <span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span>
                     <span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">Density</span><span class="p">):</span>
                         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                            <span class="s2">&quot;Cannot calculate density from this &quot;</span>
-                            <span class="s2">&quot;observable.&quot;</span>
+                            <span class="s2">&quot;Cannot calculate density from this &quot;</span> <span class="s2">&quot;observable.&quot;</span>
                         <span class="p">)</span>
                     <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span>
@@ -230,8 +229,7 @@
                         <span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span>
                     <span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">DOS</span><span class="p">):</span>
                         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                            <span class="s2">&quot;Cannot calculate the DOS from this &quot;</span>
-                            <span class="s2">&quot;observable.&quot;</span>
+                            <span class="s2">&quot;Cannot calculate the DOS from this &quot;</span> <span class="s2">&quot;observable.&quot;</span>
                         <span class="p">)</span>
                     <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span>
@@ -384,10 +382,8 @@
                     <span class="p">)</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
-                    <span class="n">be_predicted_actual_fe</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span>
-                            <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span>
-                        <span class="p">)</span>
+                    <span class="n">be_predicted_actual_fe</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span>
+                        <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span>
                     <span class="p">)</span>
                     <span class="n">be_error_actual_fe</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">be_predicted_actual_fe</span> <span class="o">-</span> <span class="n">be_actual</span>
@@ -471,9 +467,7 @@
             <span class="n">snapshot_number</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">output_file</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                <span class="s2">&quot;Output file needed for energy calculations.&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Output file needed for energy calculations.&quot;</span><span class="p">)</span>
         <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
 
         <span class="n">targets</span> <span class="o">=</span> <span class="p">{}</span>
@@ -485,12 +479,8 @@
                 <span class="n">actual_outputs</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">targets</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">energy_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span>
-            <span class="p">}</span>
-            <span class="n">predictions</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">energy_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span>
-            <span class="p">}</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="p">{</span><span class="n">energy_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span><span class="p">}</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="p">{</span><span class="n">energy_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span><span class="p">}</span>
             <span class="n">printout</span><span class="p">(</span>
                 <span class="s2">&quot;CAUTION! LDOS ground truth is so wrong that the &quot;</span>
                 <span class="s2">&quot;estimation of the self consistent Fermi energy fails.&quot;</span>
@@ -501,12 +491,8 @@
                 <span class="n">predicted_outputs</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">targets</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">energy_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span>
-            <span class="p">}</span>
-            <span class="n">predictions</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">energy_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span>
-            <span class="p">}</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="p">{</span><span class="n">energy_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span><span class="p">}</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="p">{</span><span class="n">energy_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span><span class="p">}</span>
             <span class="n">printout</span><span class="p">(</span>
                 <span class="s2">&quot;CAUTION! LDOS prediction is so wrong that the &quot;</span>
                 <span class="s2">&quot;estimation of the self consistent Fermi energy fails.&quot;</span>
@@ -532,8 +518,12 @@
                     <span class="n">be_predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span>
                         <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_predicted</span>
                     <span class="p">)</span>
-                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">be_actual</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
-                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">be_predicted</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">be_actual</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">be_predicted</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                     <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
                     <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
@@ -546,13 +536,17 @@
                     <span class="p">)</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
-                    <span class="n">be_predicted_actual_fe</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span>
-                            <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span>
-                        <span class="p">)</span>
+                    <span class="n">be_predicted_actual_fe</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span>
+                        <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span>
                     <span class="p">)</span>
-                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">be_actual</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
-                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">be_predicted_actual_fe</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">be_actual</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">be_predicted_actual_fe</span>
+                        <span class="o">*</span> <span class="mi">1000</span>
+                        <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                     <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
                     <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
@@ -576,8 +570,12 @@
                     <span class="n">te_predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_total_energy</span><span class="p">(</span>
                         <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_predicted</span>
                     <span class="p">)</span>
-                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">te_actual</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
-                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">te_predicted</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">te_actual</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">te_predicted</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                     <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
                     <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
@@ -594,9 +592,15 @@
                             <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
-                    
-                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">te_actual</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
-                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">te_predicted_actual_fe</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+
+                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">te_actual</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">te_predicted_actual_fe</span>
+                        <span class="o">*</span> <span class="mi">1000</span>
+                        <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                     <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
                     <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
@@ -611,7 +615,7 @@
     <span class="k">def</span> <span class="nf">save_run</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">run_name</span><span class="p">,</span>
-        <span class="n">save_path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
+        <span class="n">path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
         <span class="n">zip_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">save_runner</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">additional_calculation_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -624,7 +628,7 @@
 <span class="sd">        run_name : str</span>
 <span class="sd">            Name under which the run should be saved.</span>
 
-<span class="sd">        save_path : str</span>
+<span class="sd">        path : str</span>
 <span class="sd">            Path where to which the run.</span>
 
 <span class="sd">        zip_run : bool</span>
@@ -654,20 +658,16 @@
             <span class="n">params_file</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.params.json&quot;</span>
             <span class="k">if</span> <span class="n">save_runner</span><span class="p">:</span>
                 <span class="n">optimizer_file</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.optimizer.pth&quot;</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">params_file</span><span class="p">))</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">params_file</span><span class="p">))</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">save_network</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">model_file</span><span class="p">)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">model_file</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">save_network</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">model_file</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">iscaler_file</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">oscaler_file</span><span class="p">)</span>
-            <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">save_network</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">model_file</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">iscaler_file</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">oscaler_file</span><span class="p">))</span>
 
             <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_file</span><span class="p">,</span> <span class="n">iscaler_file</span><span class="p">,</span> <span class="n">oscaler_file</span><span class="p">,</span> <span class="n">params_file</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">save_runner</span><span class="p">:</span>
@@ -680,27 +680,23 @@
                             <span class="n">additional_calculation_data</span>
                         <span class="p">)</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">write_additional_calculation_data</span><span class="p">(</span>
-                            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                                <span class="n">save_path</span><span class="p">,</span> <span class="n">additional_calculation_file</span>
-                            <span class="p">)</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">additional_calculation_file</span><span class="p">)</span>
                         <span class="p">)</span>
                     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">additional_calculation_data</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
                         <span class="k">if</span> <span class="n">additional_calculation_data</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">write_additional_calculation_data</span><span class="p">(</span>
-                                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                                    <span class="n">save_path</span><span class="p">,</span> <span class="n">additional_calculation_file</span>
-                                <span class="p">)</span>
+                                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">additional_calculation_file</span><span class="p">)</span>
                             <span class="p">)</span>
 
                     <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">additional_calculation_file</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">ZipFile</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.zip&quot;</span><span class="p">),</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.zip&quot;</span><span class="p">),</span>
                     <span class="s2">&quot;w&quot;</span><span class="p">,</span>
                     <span class="n">compression</span><span class="o">=</span><span class="n">ZIP_STORED</span><span class="p">,</span>
                 <span class="p">)</span> <span class="k">as</span> <span class="n">zip_obj</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-                        <span class="n">zip_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span> <span class="n">file</span><span class="p">)</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span></div>
+                        <span class="n">zip_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span> <span class="n">file</span><span class="p">)</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="Runner.load_run">

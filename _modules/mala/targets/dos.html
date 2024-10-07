@@ -687,8 +687,8 @@
 <span class="sd">        integration_method : string</span>
 <span class="sd">            Integration method to be used. Currently supported:</span>
 
-<span class="sd">                - &quot;trapz&quot; for trapezoid method</span>
-<span class="sd">                - &quot;simps&quot; for Simpson method.</span>
+<span class="sd">                - &quot;trapezoid&quot; for trapezoid method</span>
+<span class="sd">                - &quot;simpson&quot; for Simpson method.</span>
 <span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
 
 <span class="sd">        broadcast_band_energy : bool</span>
@@ -787,8 +787,8 @@
 <span class="sd">        integration_method : string</span>
 <span class="sd">            Integration method to be used. Currently supported:</span>
 
-<span class="sd">                - &quot;trapz&quot; for trapezoid method</span>
-<span class="sd">                - &quot;simps&quot; for Simpson method.</span>
+<span class="sd">                - &quot;trapezoid&quot; for trapezoid method</span>
+<span class="sd">                - &quot;simpson&quot; for Simpson method.</span>
 <span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
 
 <span class="sd">        Returns</span>
@@ -858,8 +858,8 @@
 <span class="sd">        integration_method : string</span>
 <span class="sd">            Integration method to be used. Currently supported:</span>
 
-<span class="sd">                - &quot;trapz&quot; for trapezoid method</span>
-<span class="sd">                - &quot;simps&quot; for Simpson method.</span>
+<span class="sd">                - &quot;trapezoid&quot; for trapezoid method</span>
+<span class="sd">                - &quot;simpson&quot; for Simpson method.</span>
 <span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
 
 <span class="sd">        broadcast_entropy : bool</span>
@@ -951,8 +951,8 @@
 <span class="sd">        integration_method : string</span>
 <span class="sd">            Integration method to be used. Currently supported:</span>
 
-<span class="sd">                - &quot;trapz&quot; for trapezoid method</span>
-<span class="sd">                - &quot;simps&quot; for Simpson method.</span>
+<span class="sd">                - &quot;trapezoid&quot; for trapezoid method</span>
+<span class="sd">                - &quot;simpson&quot; for Simpson method.</span>
 <span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
 
 <span class="sd">        broadcast_fermi_energy : bool</span>
@@ -1055,12 +1055,12 @@
             <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
         <span class="c1"># Calculate the number of electrons.</span>
-        <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
-            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
+        <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapezoid&quot;</span><span class="p">:</span>
+            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span>
                 <span class="n">dos_data</span> <span class="o">*</span> <span class="n">fermi_vals</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;simps&quot;</span><span class="p">:</span>
-            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span>
+        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;simpson&quot;</span><span class="p">:</span>
+            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span>
                 <span class="n">dos_data</span> <span class="o">*</span> <span class="n">fermi_vals</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
@@ -1096,11 +1096,11 @@
 
         <span class="c1"># Calculate the band energy.</span>
         <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
-            <span class="n">band_energy</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
+            <span class="n">band_energy</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span>
                 <span class="n">dos_data</span> <span class="o">*</span> <span class="p">(</span><span class="n">energy_grid</span> <span class="o">*</span> <span class="n">fermi_vals</span><span class="p">),</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;simps&quot;</span><span class="p">:</span>
-            <span class="n">band_energy</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span>
+        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;simpson&quot;</span><span class="p">:</span>
+            <span class="n">band_energy</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span>
                 <span class="n">dos_data</span> <span class="o">*</span> <span class="p">(</span><span class="n">energy_grid</span> <span class="o">*</span> <span class="n">fermi_vals</span><span class="p">),</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
@@ -1141,19 +1141,19 @@
 <span class="sd">        More specifically, this gives -\beta^-1*S_S</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Calculate the entropy contribution to the energy.</span>
-        <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapezoid&quot;</span><span class="p">:</span>
             <span class="n">multiplicator</span> <span class="o">=</span> <span class="n">entropy_multiplicator</span><span class="p">(</span>
                 <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span>
             <span class="p">)</span>
-            <span class="n">entropy_contribution</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
+            <span class="n">entropy_contribution</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span>
                 <span class="n">dos_data</span> <span class="o">*</span> <span class="n">multiplicator</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
             <span class="p">)</span>
             <span class="n">entropy_contribution</span> <span class="o">/=</span> <span class="n">get_beta</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;simps&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;simpson&quot;</span><span class="p">:</span>
             <span class="n">multiplicator</span> <span class="o">=</span> <span class="n">entropy_multiplicator</span><span class="p">(</span>
                 <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span>
             <span class="p">)</span>
-            <span class="n">entropy_contribution</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span>
+            <span class="n">entropy_contribution</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span>
                 <span class="n">dos_data</span> <span class="o">*</span> <span class="n">multiplicator</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
             <span class="p">)</span>
             <span class="n">entropy_contribution</span> <span class="o">/=</span> <span class="n">get_beta</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span>

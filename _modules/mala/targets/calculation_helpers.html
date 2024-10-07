@@ -106,8 +106,8 @@
 <span class="sd">    method : string</span>
 <span class="sd">        Integration method to be used. Currently supported:</span>
 
-<span class="sd">            - &quot;trapz&quot; for trapezoid method</span>
-<span class="sd">            - &quot;simps&quot; for Simpson method.</span>
+<span class="sd">            - &quot;trapezoid&quot; for trapezoid method</span>
+<span class="sd">            - &quot;simpson&quot; for Simpson method.</span>
 <span class="sd">    axis : int</span>
 <span class="sd">        Axis along which the integration is performed.</span>
 
@@ -116,10 +116,10 @@
 <span class="sd">    integral_values : float</span>
 <span class="sd">        The value of the integral.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">spacing</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;simps&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">spacing</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;trapezoid&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">spacing</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;simpson&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">spacing</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span></div>
 
