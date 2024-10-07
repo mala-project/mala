@@ -780,6 +780,8 @@ class ParametersRunning(ParametersBase):
                     "Currently, MALA can only operate with the "
                     '"ldos" metric for ddp runs.'
                 )
+            if value not in self.validation_metrics:
+                self.validation_metrics.append(value)
         self._during_training_metric = value
 
     @property
@@ -806,16 +808,6 @@ class ParametersRunning(ParametersBase):
                     '"ldos" metric for ddp runs.'
                 )
         self._after_training_metric = value
-
-    @during_training_metric.setter
-    def during_training_metric(self, value):
-        if value != "ldos":
-            if self._configuration["ddp"]:
-                raise Exception(
-                    "Currently, MALA can only operate with the "
-                    '"ldos" metric for ddp runs.'
-                )
-        self._during_training_metric = value
 
     @property
     def use_graphs(self):
