@@ -199,7 +199,7 @@ class MALA(Calculator):
                 "e_ewald"
             ]
 
-    def save_calculator(self, filename, save_path="./"):
+    def save_calculator(self, filename, path="./"):
         """
         Save parameters used for this calculator.
 
@@ -210,10 +210,10 @@ class MALA(Calculator):
         filename : string
             Name of the file in which to store the calculator.
 
-        save_path : string
+        path : string
             Path where the calculator should be saved.
 
         """
         self.predictor.save_run(
-            filename, save_path=save_path, additional_calculation_data=True
+            filename, path=save_path, additional_calculation_data=True
         )

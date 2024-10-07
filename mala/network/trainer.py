@@ -1046,7 +1046,7 @@ class Trainer(Runner):
             self.save_run(
                 self.parameters.checkpoint_name,
                 save_runner=True,
-                save_path=self.parameters.run_name,
+                path=self.parameters.run_name,
             )
         else:
             self.save_run(self.parameters.checkpoint_name, save_runner=True)

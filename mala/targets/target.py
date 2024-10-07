@@ -11,7 +11,7 @@ from ase.cell import Cell
 import ase.io
 import numpy as np
 from scipy.spatial import distance
-from scipy.integrate import simps
+from scipy.integrate import simpson
 
 from mala.common.parameters import Parameters, ParametersTargets
 from mala.common.parallelizer import printout, parallel_warn
@@ -1032,7 +1032,7 @@ class Target(PhysicalData):
                 kr = np.array(radii) * kpoints[-1]
                 integrand = (rdf - 1) * radii * np.sin(kr) / kpoints[-1]
                 structure_factor[i] = 1 + (
-                    4 * np.pi * rho * simps(integrand, radii)
+                    4 * np.pi * rho * simpson(integrand, radii)
                 )
 
             return structure_factor[1:], np.array(kpoints)[1:]
