@@ -61,7 +61,7 @@ class Tester(Runner):
         self.number_of_batches_per_snapshot = 0
         self.observables_to_test = observables_to_test
         self.output_format = output_format
-        if self.output_format != "list" and self.output_format == "mae":
+        if self.output_format != "list" and self.output_format != "mae":
             raise Exception("Wrong output format for testing selected.")
         self.target_calculator = data.target_calculator
 
@@ -117,27 +117,47 @@ class Tester(Runner):
             snapshot_number, data_type=data_type
         )
 
-        results = {}
-        for observable in self.observables_to_test:
-            try:
-                results[observable] = self.__calculate_observable_error(
-                    snapshot_number,
-                    observable,
-                    predicted_outputs,
-                    actual_outputs,
-                )
-            except ValueError as e:
-                printout(
-                    f"Error calculating observable: {observable} for snapshot {snapshot_number}",
-                    min_verbosity=0,
-                )
-                printout(e, min_verbosity=2)
-                results[observable] = np.inf
+        results = self._calculate_errors(
+            actual_outputs,
+            predicted_outputs,
+            self.observables_to_test,
+            snapshot_number,
+        )
         return results
+    
+    def get_energy_targets_and_predictions(self, snapshot_number, data_type="te"):
+        """
+        Get the energy targets and predictions for a single snapshot.
+
+        Parameters
+        ----------
+        snapshot_number : int
+            Snapshot which to test.
+
+        data_type : str
+            'tr', 'va', or 'te' indicating the partition to be tested
+
+        Returns
+        -------
+        results : dict
+            A dictionary containing the errors for the selected observables.
+        """
+        actual_outputs, predicted_outputs = self.predict_targets(
+            snapshot_number, data_type=data_type
+        )
+        
+        energy_metrics = [metric for metric in self.observables_to_test if "energy" in metric]
+        targets, predictions = self._calculate_energy_targets_and_predictions(
+            actual_outputs,
+            predicted_outputs,
+            energy_metrics,
+            snapshot_number,
+        )
+        return targets, predictions
 
     def predict_targets(self, snapshot_number, data_type="te"):
         """
-        Get actual and predicted output for a snapshot.
+        Get actual and predicted energy outputs for a snapshot.
 
         Parameters
         ----------
@@ -184,166 +204,6 @@ class Tester(Runner):
             self.number_of_batches_per_snapshot,
             self.parameters.mini_batch_size,
         )
-
-    def __calculate_observable_error(
-        self, snapshot_number, observable, predicted_target, actual_target
-    ):
-        if observable == "ldos":
-            return np.mean((predicted_target - actual_target) ** 2)
-
-        elif observable == "band_energy":
-            target_calculator = self.data.target_calculator
-            if not isinstance(target_calculator, LDOS) and not isinstance(
-                target_calculator, DOS
-            ):
-                raise Exception(
-                    "Cannot calculate the band energy from this observable."
-                )
-            target_calculator.read_additional_calculation_data(
-                self.data.get_snapshot_calculation_output(snapshot_number)
-            )
-
-            target_calculator.read_from_array(actual_target)
-            actual = target_calculator.band_energy
-
-            target_calculator.read_from_array(predicted_target)
-            predicted = target_calculator.band_energy
-            return actual - predicted
-
-        elif observable == "band_energy_full":
-            target_calculator = self.data.target_calculator
-            if not isinstance(target_calculator, LDOS) and not isinstance(
-                target_calculator, DOS
-            ):
-                raise Exception(
-                    "Cannot calculate the band energy from this observable."
-                )
-            target_calculator.read_additional_calculation_data(
-                self.data.get_snapshot_calculation_output(snapshot_number)
-            )
-
-            target_calculator.read_from_array(actual_target)
-            actual = target_calculator.band_energy
-
-            target_calculator.read_from_array(predicted_target)
-            predicted = target_calculator.band_energy
-            return [
-                actual,
-                predicted,
-                target_calculator.band_energy_dft_calculation,
-            ]
-
-        elif observable == "number_of_electrons":
-            target_calculator = self.data.target_calculator
-            if (
-                not isinstance(target_calculator, LDOS)
-                and not isinstance(target_calculator, DOS)
-                and not isinstance(target_calculator, Density)
-            ):
-                raise Exception(
-                    "Cannot calculate the band energy from this observable."
-                )
-            target_calculator.read_additional_calculation_data(
-                self.data.get_snapshot_calculation_output(snapshot_number)
-            )
-
-            actual = target_calculator.get_number_of_electrons(actual_target)
-
-            predicted = target_calculator.get_number_of_electrons(
-                predicted_target
-            )
-            return actual - predicted
-
-        elif observable == "total_energy":
-            target_calculator = self.data.target_calculator
-            if not isinstance(target_calculator, LDOS):
-                raise Exception(
-                    "Cannot calculate the total energy from this "
-                    "observable."
-                )
-            target_calculator.read_additional_calculation_data(
-                self.data.get_snapshot_calculation_output(snapshot_number)
-            )
-
-            target_calculator.read_from_array(actual_target)
-            actual = target_calculator.total_energy
-
-            target_calculator.read_from_array(predicted_target)
-            predicted = target_calculator.total_energy
-            return actual - predicted
-
-        elif observable == "total_energy_full":
-            target_calculator = self.data.target_calculator
-            if not isinstance(target_calculator, LDOS):
-                raise Exception(
-                    "Cannot calculate the total energy from this "
-                    "observable."
-                )
-            target_calculator.read_additional_calculation_data(
-                self.data.get_snapshot_calculation_output(snapshot_number)
-            )
-
-            target_calculator.read_from_array(actual_target)
-            actual = target_calculator.total_energy
-
-            target_calculator.read_from_array(predicted_target)
-            predicted = target_calculator.total_energy
-            return [
-                actual,
-                predicted,
-                target_calculator.total_energy_dft_calculation,
-            ]
-
-        elif observable == "density":
-            target_calculator = self.data.target_calculator
-            if not isinstance(target_calculator, LDOS) and not isinstance(
-                target_calculator, Density
-            ):
-                raise Exception(
-                    "Cannot calculate the total energy from this "
-                    "observable."
-                )
-            target_calculator.read_additional_calculation_data(
-                self.data.get_snapshot_calculation_output(snapshot_number)
-            )
-
-            target_calculator.read_from_array(actual_target)
-            actual = target_calculator.density
-
-            target_calculator.read_from_array(predicted_target)
-            predicted = target_calculator.density
-            return np.mean(np.abs((actual - predicted) / actual)) * 100
-
-        elif observable == "dos":
-            target_calculator = self.data.target_calculator
-            if not isinstance(target_calculator, LDOS) and not isinstance(
-                target_calculator, DOS
-            ):
-                raise Exception(
-                    "Cannot calculate the total energy from this "
-                    "observable."
-                )
-            target_calculator.read_additional_calculation_data(
-                self.data.get_snapshot_calculation_output(snapshot_number)
-            )
-
-            # We shift both the actual and predicted DOS by 1.0 to overcome
-            # numerical issues with the DOS having values equal to zero.
-            target_calculator.read_from_array(actual_target)
-            actual = target_calculator.density_of_states + 1.0
-
-            target_calculator.read_from_array(predicted_target)
-            predicted = target_calculator.density_of_states + 1.0
-
-            return (
-                np.ma.masked_invalid(
-                    np.abs(
-                        (actual - predicted)
-                        / (np.abs(actual) + np.abs(predicted))
-                    )
-                ).mean()
-                * 100
-            )
 
     def __prepare_to_test(self, snapshot_number):
         """Prepare the tester class to for test run."""

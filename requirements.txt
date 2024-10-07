@@ -10,3 +10,4 @@ pandas
 tensorboard
 openpmd-api
 scikit-spatial
+tqdm

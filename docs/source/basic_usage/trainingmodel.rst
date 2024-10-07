@@ -35,7 +35,7 @@ options to train a simple network with example data, namely
             parameters.running.max_number_epochs = 100
             parameters.running.mini_batch_size = 40
             parameters.running.learning_rate = 0.00001
-            parameters.running.trainingtype = "Adam"
+            parameters.running.optimizer = "Adam"
             parameters.verbosity = 1 # level of output; 1 is standard, 0 is low, 2 is debug.
 
 Here, we can see that the ``Parameters`` object contains multiple

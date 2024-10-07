@@ -26,7 +26,7 @@ def initial_setup():
     parameters.running.max_number_epochs = 9
     parameters.running.mini_batch_size = 8
     parameters.running.learning_rate = 0.00001
-    parameters.running.trainingtype = "Adam"
+    parameters.running.optimizer = "Adam"
 
     # We checkpoint the training every 5 epochs and save the results
     # as "ex07".

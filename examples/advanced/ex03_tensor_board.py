@@ -18,7 +18,7 @@ parameters.network.layer_activations = ["ReLU"]
 parameters.running.max_number_epochs = 100
 parameters.running.mini_batch_size = 40
 parameters.running.learning_rate = 0.001
-parameters.running.trainingtype = "Adam"
+parameters.running.optimizer = "Adam"
 
 # Turn the visualization on and select a folder to save the visualization
 # files into.
@@ -45,6 +45,6 @@ trainer = mala.Trainer(parameters, network, data_handler)
 trainer.train_network()
 printout(
     'Run finished, launch tensorboard with "tensorboard --logdir '
-    + trainer.full_visualization_path
+    + trainer.full_logging_path
     + '"'
 )

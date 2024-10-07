@@ -91,7 +91,7 @@ class TestGPUExecution:
         test_parameters.running.max_number_epochs = 100
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.manual_seed = 1002
         test_parameters.running.use_shuffling_for_samplers = False
         test_parameters.use_gpu = use_gpu
@@ -150,4 +150,4 @@ class TestGPUExecution:
         starttime = time.time()
         test_trainer.train_network()
 
-        return test_trainer.final_test_loss, time.time() - starttime
+        return test_trainer.final_validation_loss, time.time() - starttime

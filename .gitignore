@@ -158,6 +158,13 @@ cython_debug/
 # JupyterNotebooks
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
+*.ipynb
+
+# Lightning
+lightning_logs/
+
+# wandb
+wandb/
 
 # SQLite
 *.db

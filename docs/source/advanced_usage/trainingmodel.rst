@@ -77,7 +77,7 @@ Specifically, when setting
 
       .. code-block:: python
 
-            parameters.running.after_before_training_metric = "band_energy"
+            parameters.running.after_training_metric = "band_energy"
 
 the error in the band energy between actual and predicted LDOS will be
 calculated and printed before and after network training (in meV/atom).
@@ -205,21 +205,21 @@ visualization prior to training via
 
             # 0: No visualizatuon, 1: loss and learning rate, 2: like 1,
             # but additionally weights and biases are saved
-            parameters.running.visualisation = 1
-            parameters.running.visualisation_dir = "mala_vis"
+            parameters.running.logging = 1
+            parameters.running.logging_dir = "mala_vis"
 
-where ``visualisation_dir`` specifies some directory in which to save the
-MALA visualization data. Afterwards, you can run the training without any
+where ``logging_dir`` specifies some directory in which to save the
+MALA logging data. Afterwards, you can run the training without any
 other modifications. Once training is finished (or during training, in case
 you want to use tensorboard to monitor progress), you can launch tensorboard
 via
 
       .. code-block:: bash
 
-            tensorboard --logdir path_to_visualization
+            tensorboard --logdir path_to_log_directory
 
-The full path for ``path_to_visualization`` can be accessed via
-``trainer.full_visualization_path``.
+The full path for ``path_to_log_directory`` can be accessed via
+``trainer.full_logging_path``.
 
 
 Training in parallel
