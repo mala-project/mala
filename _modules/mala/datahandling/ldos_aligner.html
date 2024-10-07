@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.datahandling.ldos_aligner &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mala.datahandling.ldos_aligner</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.datahandling.ldos_aligner</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Align LDOS vectors to a reference.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Parameters</span><span class="p">,</span>
+    <span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">barrier</span>
+<span class="kn">from</span> <span class="nn">mala.common.physical_data</span> <span class="kn">import</span> <span class="n">PhysicalData</span>
+<span class="kn">from</span> <span class="nn">mala.datahandling.data_handler_base</span> <span class="kn">import</span> <span class="n">DataHandlerBase</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span>
+
+
+<div class="viewcode-block" id="LDOSAligner">
+<a class="viewcode-back" href="../../../api/mala.datahandling.ldos_aligner.html#mala.datahandling.ldos_aligner.LDOSAligner">[docs]</a>
+<span class="k">class</span> <span class="nc">LDOSAligner</span><span class="p">(</span><span class="n">DataHandlerBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Align LDOS vectors based on when they first become non-zero.</span>
+
+<span class="sd">    Optionally truncates from the left and right-side to remove redundant data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : mala.common.parameters.Parameters</span>
+<span class="sd">        Parameters used to create the data handling object.</span>
+
+<span class="sd">    descriptor_calculator : mala.descriptors.descriptor.Descriptor</span>
+<span class="sd">        Used to do unit conversion on input data. If None, then one will</span>
+<span class="sd">        be created by this class.</span>
+
+<span class="sd">    target_calculator : mala.targets.target.Target</span>
+<span class="sd">        Used to do unit conversion on output data. If None, then one will</span>
+<span class="sd">        be created by this class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span>
+        <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">descriptor_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ldos_parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">targets</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LDOSAligner</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">parameters</span><span class="p">,</span>
+            <span class="n">target_calculator</span><span class="o">=</span><span class="n">target_calculator</span><span class="p">,</span>
+            <span class="n">descriptor_calculator</span><span class="o">=</span><span class="n">descriptor_calculator</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="LDOSAligner.add_snapshot">
+<a class="viewcode-back" href="../../../api/mala.datahandling.ldos_aligner.html#mala.datahandling.ldos_aligner.LDOSAligner.add_snapshot">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_snapshot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">output_file</span><span class="p">,</span>
+        <span class="n">output_directory</span><span class="p">,</span>
+        <span class="n">snapshot_type</span><span class="o">=</span><span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a snapshot to the data pipeline.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        output_file : string</span>
+<span class="sd">            File with saved numpy output array.</span>
+
+<span class="sd">        output_directory : string</span>
+<span class="sd">            Directory containing output_npy_file.</span>
+
+<span class="sd">        snapshot_type : string</span>
+<span class="sd">            Must be numpy, openPMD is not yet available for LDOS alignment.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LDOSAligner</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span>
+            <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">output_file</span><span class="p">,</span>
+            <span class="n">output_directory</span><span class="p">,</span>
+            <span class="n">add_snapshot_as</span><span class="o">=</span><span class="s2">&quot;te&quot;</span><span class="p">,</span>
+            <span class="n">output_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+            <span class="n">input_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+            <span class="n">calculation_output_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">snapshot_type</span><span class="o">=</span><span class="n">snapshot_type</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">snapshot_type</span> <span class="o">!=</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Snapshot type must be numpy for LDOS alignment&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LDOSAligner.align_ldos_to_ref">
+<a class="viewcode-back" href="../../../api/mala.datahandling.ldos_aligner.html#mala.datahandling.ldos_aligner.LDOSAligner.align_ldos_to_ref">[docs]</a>
+    <span class="k">def</span> <span class="nf">align_ldos_to_ref</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">save_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">save_path_ext</span><span class="o">=</span><span class="s2">&quot;aligned/&quot;</span><span class="p">,</span>
+        <span class="n">reference_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">zero_tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
+        <span class="n">left_truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">right_truncate_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">number_of_electrons</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_shift_mse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a snapshot to the data pipeline.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        save_path : string</span>
+<span class="sd">            path to save the aligned LDOS vectors</span>
+<span class="sd">        save_name : string</span>
+<span class="sd">            naming convention for the aligned LDOS vectors</span>
+<span class="sd">        save_path_ext : string</span>
+<span class="sd">            additional path for the LDOS vectors (useful if</span>
+<span class="sd">            save_path is left as default None)</span>
+<span class="sd">        reference_index : int</span>
+<span class="sd">            the snapshot number (in the snapshot directory list)</span>
+<span class="sd">            to which all other LDOS vectors are aligned</span>
+<span class="sd">        zero_tol : float</span>
+<span class="sd">            the &quot;zero&quot; value for alignment / left side truncation</span>
+<span class="sd">            always scaled by norm of reference LDOS mean</span>
+<span class="sd">        left_truncate : bool</span>
+<span class="sd">            whether to truncate the zero values on the LHS</span>
+<span class="sd">        right_truncate_value : float</span>
+<span class="sd">            right-hand energy value (based on reference LDOS vector)</span>
+<span class="sd">            to which truncate LDOS vectors</span>
+<span class="sd">            if None, no right-side truncation</span>
+<span class="sd">        egrid_spacing_ev : float</span>
+<span class="sd">            spacing of energy grid</span>
+<span class="sd">        egrid_offset_ev : float</span>
+<span class="sd">           original offset of energy grid</span>
+<span class="sd">        number_of_electrons : float / int</span>
+<span class="sd">            if not None, computes the energy shift relative to QE energies</span>
+<span class="sd">        n_shift_mse : int</span>
+<span class="sd">            how many energy grid points to consider when aligning LDOS</span>
+<span class="sd">            vectors based on mean-squared error</span>
+<span class="sd">            computed automatically if None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+            <span class="n">comm</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span>
+            <span class="n">rank</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">comm</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">rank</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># load in the reference snapshot</span>
+            <span class="n">snapshot_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">[</span>
+                <span class="n">reference_index</span>
+            <span class="p">]</span>
+            <span class="n">ldos_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="n">snapshot_ref</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                    <span class="n">snapshot_ref</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">mmap_mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># get the mean</span>
+            <span class="n">n_target</span> <span class="o">=</span> <span class="n">ldos_ref</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">ldos_ref</span> <span class="o">=</span> <span class="n">ldos_ref</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_target</span><span class="p">)</span>
+            <span class="n">ldos_mean_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ldos_ref</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">zero_tol</span> <span class="o">=</span> <span class="n">zero_tol</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ldos_mean_ref</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">n_shift_mse</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">n_shift_mse</span> <span class="o">=</span> <span class="n">n_target</span> <span class="o">//</span> <span class="mi">10</span>
+
+            <span class="c1"># get the first non-zero value</span>
+            <span class="n">left_index_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ldos_mean_ref</span> <span class="o">&gt;</span> <span class="n">zero_tol</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># get the energy grid</span>
+            <span class="n">emax</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ldos_parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
+                <span class="o">+</span> <span class="n">n_target</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ldos_parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
+            <span class="p">)</span>
+            <span class="n">e_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ldos_parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span><span class="p">,</span>
+                <span class="n">emax</span><span class="p">,</span>
+                <span class="n">n_target</span><span class="p">,</span>
+                <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">N_snapshots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ldos_mean_ref</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">e_grid</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">left_index_ref</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">n_shift_mse</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">N_snapshots</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">n_target</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+            <span class="c1"># Broadcast necessary data to all processes</span>
+            <span class="n">ldos_mean_ref</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">ldos_mean_ref</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">e_grid</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">e_grid</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">left_index_ref</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">left_index_ref</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">n_shift_mse</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">n_shift_mse</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">N_snapshots</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">N_snapshots</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">n_target</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">n_target</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">local_snapshots</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="n">N_snapshots</span><span class="p">,</span> <span class="n">size</span><span class="p">)]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">local_snapshots</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_snapshots</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">local_snapshots</span><span class="p">:</span>
+            <span class="n">snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Aligning snapshot </span><span class="si">{</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">N_snapshots</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">ldos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                    <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">mmap_mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># get the mean</span>
+            <span class="n">nx</span> <span class="o">=</span> <span class="n">ldos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ny</span> <span class="o">=</span> <span class="n">ldos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">nz</span> <span class="o">=</span> <span class="n">ldos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">ldos</span> <span class="o">=</span> <span class="n">ldos</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_target</span><span class="p">)</span>
+            <span class="n">ldos_shifted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">ldos</span><span class="p">)</span>
+            <span class="n">ldos_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ldos</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="c1"># get the first non-zero value</span>
+            <span class="n">left_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ldos_mean</span> <span class="o">&gt;</span> <span class="n">zero_tol</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># shift the ldos</span>
+            <span class="n">optimal_shift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_optimal_ldos_shift</span><span class="p">(</span>
+                <span class="n">e_grid</span><span class="p">,</span>
+                <span class="n">ldos_mean</span><span class="p">,</span>
+                <span class="n">ldos_mean_ref</span><span class="p">,</span>
+                <span class="n">left_index</span><span class="p">,</span>
+                <span class="n">left_index_ref</span><span class="p">,</span>
+                <span class="n">n_shift_mse</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">e_shift</span> <span class="o">=</span> <span class="n">optimal_shift</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ldos_parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
+            <span class="k">if</span> <span class="n">optimal_shift</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ldos_shifted</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="n">optimal_shift</span><span class="p">]</span> <span class="o">=</span> <span class="n">ldos</span><span class="p">[:,</span> <span class="n">optimal_shift</span><span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ldos_shifted</span> <span class="o">=</span> <span class="n">ldos</span>
+            <span class="k">del</span> <span class="n">ldos</span>
+
+            <span class="c1"># truncate ldos before sudden drop</span>
+            <span class="k">if</span> <span class="n">right_truncate_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">e_index_cut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">e_grid</span> <span class="o">&gt;</span> <span class="n">right_truncate_value</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">ldos_shifted</span> <span class="o">=</span> <span class="n">ldos_shifted</span><span class="p">[:,</span> <span class="p">:</span><span class="n">e_index_cut</span><span class="p">]</span>
+                <span class="n">new_upper_egrid_lim</span> <span class="o">=</span> <span class="n">right_truncate_value</span> <span class="o">+</span> <span class="n">e_shift</span>
+
+            <span class="c1"># remove zero values at start of ldos</span>
+            <span class="k">if</span> <span class="n">left_truncate</span><span class="p">:</span>
+                <span class="c1"># get the first non-zero value</span>
+                <span class="n">ldos_shifted</span> <span class="o">=</span> <span class="n">ldos_shifted</span><span class="p">[:,</span> <span class="n">left_index_ref</span><span class="p">:]</span>
+                <span class="n">new_egrid_offset</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ldos_parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
+                    <span class="o">+</span> <span class="p">(</span><span class="n">left_index_ref</span> <span class="o">+</span> <span class="n">optimal_shift</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ldos_parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_egrid_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ldos_parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
+
+            <span class="c1"># reshape</span>
+            <span class="n">ldos_shifted</span> <span class="o">=</span> <span class="n">ldos_shifted</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">ldos_shift_info</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;ldos_shift_ev&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">e_shift</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                <span class="s2">&quot;aligned_ldos_gridoffset_ev&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">new_egrid_offset</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                <span class="s2">&quot;aligned_ldos_gridsize&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">ldos_shifted</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="s2">&quot;aligned_ldos_gridspacing&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ldos_parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span><span class="p">,</span> <span class="mi">4</span>
+                <span class="p">),</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="n">number_of_electrons</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ldos_shift_info</span><span class="p">[</span><span class="s2">&quot;energy_shift_from_qe_ev&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span>
+                    <span class="n">number_of_electrons</span> <span class="o">*</span> <span class="n">e_shift</span><span class="p">,</span> <span class="mi">4</span>
+                <span class="p">)</span>
+
+            <span class="n">save_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span> <span class="n">save_path_ext</span>
+            <span class="p">)</span>
+            <span class="n">save_name</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span>
+
+            <span class="n">stripped_output_file_name</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="s2">&quot;.out&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span>
+            <span class="p">)</span>
+            <span class="n">ldos_shift_info_save_name</span> <span class="o">=</span> <span class="n">stripped_output_file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="s2">&quot;.npy&quot;</span><span class="p">,</span> <span class="s2">&quot;.ldos_shift.info.json&quot;</span>
+            <span class="p">)</span>
+
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s2">&quot;*&quot;</span> <span class="ow">in</span> <span class="n">save_name</span><span class="p">:</span>
+                <span class="n">save_name</span> <span class="o">=</span> <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
+                <span class="n">ldos_shift_info_save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
+
+            <span class="n">target_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">save_name</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">write_to_numpy_file</span><span class="p">(</span>
+                <span class="n">target_name</span><span class="p">,</span> <span class="n">ldos_shifted</span>
+            <span class="p">)</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">ldos_shift_info_save_name</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">ldos_shift_info</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">barrier</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="LDOSAligner.calc_optimal_ldos_shift">
+<a class="viewcode-back" href="../../../api/mala.datahandling.ldos_aligner.html#mala.datahandling.ldos_aligner.LDOSAligner.calc_optimal_ldos_shift">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">calc_optimal_ldos_shift</span><span class="p">(</span>
+        <span class="n">e_grid</span><span class="p">,</span>
+        <span class="n">ldos_mean</span><span class="p">,</span>
+        <span class="n">ldos_mean_ref</span><span class="p">,</span>
+        <span class="n">left_index</span><span class="p">,</span>
+        <span class="n">left_index_ref</span><span class="p">,</span>
+        <span class="n">n_shift_mse</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the optimal amount by which to align the LDOS with reference.</span>
+
+<span class="sd">        &#39;Optimized&#39; is currently based on minimizing the mean-square error with</span>
+<span class="sd">        the reference, up to a cut-off (typically 10% of the full LDOS length).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        e_grid : array_like</span>
+<span class="sd">            energy grid</span>
+<span class="sd">        ldos_mean : array_like</span>
+<span class="sd">            mean of LDOS vector for shifting</span>
+<span class="sd">        ldos_mean_ref : array_like</span>
+<span class="sd">            mean of LDOS reference vector</span>
+<span class="sd">        left_index : int</span>
+<span class="sd">            index at which LDOS for shifting becomes non-zero</span>
+<span class="sd">        left_index_ref : int</span>
+<span class="sd">            index at which reference LDOS becomes non-zero</span>
+<span class="sd">        n_shift_mse : int</span>
+<span class="sd">            number of points to account for in MSE calculation</span>
+<span class="sd">            for optimal LDOS shift</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        optimal_shift : int</span>
+<span class="sd">            the optimized number of egrid points to shift the LDOS</span>
+<span class="sd">            vector by, based on minimization of MSE with reference</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shift_guess</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ldos_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="n">shift_guess</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">left_index</span> <span class="o">-</span> <span class="n">left_index_ref</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+            <span class="n">shift</span> <span class="o">=</span> <span class="n">shift_guess</span> <span class="o">+</span> <span class="n">i</span>
+            <span class="n">ldos_mean_shifted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">ldos_mean</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">shift</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ldos_mean_shifted</span><span class="p">[:</span><span class="o">-</span><span class="n">shift</span><span class="p">]</span> <span class="o">=</span> <span class="n">ldos_mean</span><span class="p">[</span><span class="n">shift</span><span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ldos_mean_shifted</span> <span class="o">=</span> <span class="n">ldos_mean</span>
+
+            <span class="n">e_index_cut</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">left_index</span><span class="p">,</span> <span class="n">left_index_ref</span><span class="p">)</span> <span class="o">+</span> <span class="n">n_shift_mse</span>
+            <span class="n">ldos_mean_shifted</span> <span class="o">=</span> <span class="n">ldos_mean_shifted</span><span class="p">[:</span><span class="n">e_index_cut</span><span class="p">]</span>
+            <span class="n">ldos_mean_ref</span> <span class="o">=</span> <span class="n">ldos_mean_ref</span><span class="p">[:</span><span class="n">e_index_cut</span><span class="p">]</span>
+
+            <span class="n">mse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">ldos_mean_shifted</span> <span class="o">-</span> <span class="n">ldos_mean_ref</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">mse</span> <span class="o">&lt;</span> <span class="n">ldos_diff</span><span class="p">:</span>
+                <span class="n">optimal_shift</span> <span class="o">=</span> <span class="n">shift</span>
+                <span class="n">ldos_diff</span> <span class="o">=</span> <span class="n">mse</span>
+
+        <span class="k">return</span> <span class="n">optimal_shift</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

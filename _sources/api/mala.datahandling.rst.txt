@@ -25,6 +25,7 @@ datahandling
    mala.datahandling.fast_tensor_dataset
    mala.datahandling.lazy_load_dataset
    mala.datahandling.lazy_load_dataset_single
+   mala.datahandling.ldos_aligner
    mala.datahandling.multi_lazy_load_data_loader
    mala.datahandling.snapshot
 
