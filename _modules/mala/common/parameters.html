@@ -889,6 +889,8 @@
                     <span class="s2">&quot;Currently, MALA can only operate with the &quot;</span>
                     <span class="s1">&#39;&quot;ldos&quot; metric for ddp runs.&#39;</span>
                 <span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_metrics</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">validation_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_during_training_metric</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
@@ -915,16 +917,6 @@
                     <span class="s1">&#39;&quot;ldos&quot; metric for ddp runs.&#39;</span>
                 <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_after_training_metric</span> <span class="o">=</span> <span class="n">value</span>
-
-    <span class="nd">@during_training_metric</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">during_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;ldos&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;ddp&quot;</span><span class="p">]:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                    <span class="s2">&quot;Currently, MALA can only operate with the &quot;</span>
-                    <span class="s1">&#39;&quot;ldos&quot; metric for ddp runs.&#39;</span>
-                <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_during_training_metric</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_graphs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
