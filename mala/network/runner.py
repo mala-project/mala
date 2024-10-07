@@ -99,8 +99,7 @@ class Runner:
                         target_calculator, LDOS
                     ) and not isinstance(target_calculator, Density):
                         raise Exception(
-                            "Cannot calculate density from this "
-                            "observable."
+                            "Cannot calculate density from this " "observable."
                         )
                     target_calculator.read_additional_calculation_data(
                         self.data.get_snapshot_calculation_output(
@@ -145,8 +144,7 @@ class Runner:
                         target_calculator, LDOS
                     ) and not isinstance(target_calculator, DOS):
                         raise Exception(
-                            "Cannot calculate the DOS from this "
-                            "observable."
+                            "Cannot calculate the DOS from this " "observable."
                         )
                     target_calculator.read_additional_calculation_data(
                         self.data.get_snapshot_calculation_output(
@@ -299,10 +297,8 @@ class Runner:
                     )
                 try:
                     target_calculator.read_from_array(predicted_outputs)
-                    be_predicted_actual_fe = (
-                        target_calculator.get_band_energy(
-                            fermi_energy=fe_actual
-                        )
+                    be_predicted_actual_fe = target_calculator.get_band_energy(
+                        fermi_energy=fe_actual
                     )
                     be_error_actual_fe = (
                         be_predicted_actual_fe - be_actual
@@ -386,9 +382,7 @@ class Runner:
             snapshot_number
         )
         if not output_file:
-            raise Exception(
-                "Output file needed for energy calculations."
-            )
+            raise Exception("Output file needed for energy calculations.")
         target_calculator.read_additional_calculation_data(output_file)
 
         targets = {}
@@ -400,12 +394,8 @@ class Runner:
                 actual_outputs
             )
         except ValueError:
-            targets = {
-                energy_type: np.nan for energy_type in energy_types
-            }
-            predictions = {
-                energy_type: np.nan for energy_type in energy_types
-            }
+            targets = {energy_type: np.nan for energy_type in energy_types}
+            predictions = {energy_type: np.nan for energy_type in energy_types}
             printout(
                 "CAUTION! LDOS ground truth is so wrong that the "
                 "estimation of the self consistent Fermi energy fails."
@@ -416,12 +406,8 @@ class Runner:
                 predicted_outputs
             )
         except ValueError:
-            targets = {
-                energy_type: np.nan for energy_type in energy_types
-            }
-            predictions = {
-                energy_type: np.nan for energy_type in energy_types
-            }
+            targets = {energy_type: np.nan for energy_type in energy_types}
+            predictions = {energy_type: np.nan for energy_type in energy_types}
             printout(
                 "CAUTION! LDOS prediction is so wrong that the "
                 "estimation of the self consistent Fermi energy fails."
@@ -447,8 +433,12 @@ class Runner:
                     be_predicted = target_calculator.get_band_energy(
                         fermi_energy=fe_predicted
                     )
-                    targets[energy_type] = be_actual * 1000 / len(target_calculator.atoms)
-                    predictions[energy_type] = be_predicted * 1000 / len(target_calculator.atoms)
+                    targets[energy_type] = (
+                        be_actual * 1000 / len(target_calculator.atoms)
+                    )
+                    predictions[energy_type] = (
+                        be_predicted * 1000 / len(target_calculator.atoms)
+                    )
                 except ValueError:
                     targets[energy_type] = np.nan
                     predictions[energy_type] = np.nan
@@ -461,13 +451,17 @@ class Runner:
                     )
                 try:
                     target_calculator.read_from_array(predicted_outputs)
-                    be_predicted_actual_fe = (
-                        target_calculator.get_band_energy(
-                            fermi_energy=fe_actual
-                        )
+                    be_predicted_actual_fe = target_calculator.get_band_energy(
+                        fermi_energy=fe_actual
                     )
-                    targets[energy_type] = be_actual * 1000 / len(target_calculator.atoms)
-                    predictions[energy_type] = be_predicted_actual_fe * 1000 / len(target_calculator.atoms)
+                    targets[energy_type] = (
+                        be_actual * 1000 / len(target_calculator.atoms)
+                    )
+                    predictions[energy_type] = (
+                        be_predicted_actual_fe
+                        * 1000
+                        / len(target_calculator.atoms)
+                    )
                 except ValueError:
                     targets[energy_type] = np.nan
                     predictions[energy_type] = np.nan
@@ -491,8 +485,12 @@ class Runner:
                     te_predicted = target_calculator.get_total_energy(
                         fermi_energy=fe_predicted
                     )
-                    targets[energy_type] = te_actual * 1000 / len(target_calculator.atoms)
-                    predictions[energy_type] = te_predicted * 1000 / len(target_calculator.atoms)
+                    targets[energy_type] = (
+                        te_actual * 1000 / len(target_calculator.atoms)
+                    )
+                    predictions[energy_type] = (
+                        te_predicted * 1000 / len(target_calculator.atoms)
+                    )
                 except ValueError:
                     targets[energy_type] = np.nan
                     predictions[energy_type] = np.nan
@@ -509,9 +507,15 @@ class Runner:
                             fermi_energy=fe_actual
                         )
                     )
-                    
-                    targets[energy_type] = te_actual * 1000 / len(target_calculator.atoms)
-                    predictions[energy_type] = te_predicted_actual_fe * 1000 / len(target_calculator.atoms)
+
+                    targets[energy_type] = (
+                        te_actual * 1000 / len(target_calculator.atoms)
+                    )
+                    predictions[energy_type] = (
+                        te_predicted_actual_fe
+                        * 1000
+                        / len(target_calculator.atoms)
+                    )
                 except ValueError:
                     targets[energy_type] = np.nan
                     predictions[energy_type] = np.nan
@@ -524,7 +528,7 @@ class Runner:
     def save_run(
         self,
         run_name,
-        save_path="./",
+        path="./",
         zip_run=True,
         save_runner=False,
         additional_calculation_data=None,
@@ -537,7 +541,7 @@ class Runner:
         run_name : str
             Name under which the run should be saved.
 
-        save_path : str
+        path : str
             Path where to which the run.
 
         zip_run : bool
@@ -593,27 +597,23 @@ class Runner:
                             additional_calculation_data
                         )
                         self.data.target_calculator.write_additional_calculation_data(
-                            os.path.join(
-                                save_path, additional_calculation_file
-                            )
+                            os.path.join(path, additional_calculation_file)
                         )
                     elif isinstance(additional_calculation_data, bool):
                         if additional_calculation_data:
                             self.data.target_calculator.write_additional_calculation_data(
-                                os.path.join(
-                                    save_path, additional_calculation_file
-                                )
+                                os.path.join(path, additional_calculation_file)
                             )
 
                     files.append(additional_calculation_file)
                 with ZipFile(
-                    os.path.join(save_path, run_name + ".zip"),
+                    os.path.join(path, run_name + ".zip"),
                     "w",
                     compression=ZIP_STORED,
                 ) as zip_obj:
                     for file in files:
-                        zip_obj.write(os.path.join(save_path, file), file)
-                        os.remove(os.path.join(save_path, file))
+                        zip_obj.write(os.path.join(path, file), file)
+                        os.remove(os.path.join(path, file))
 
     @classmethod
     def load_run(
