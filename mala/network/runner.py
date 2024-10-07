@@ -571,19 +571,19 @@ class Runner:
             params_file = run_name + ".params.json"
             if save_runner:
                 optimizer_file = run_name + ".optimizer.pth"
-            os.makedirs(save_path, exist_ok=True)
-            self.parameters_full.save(os.path.join(save_path, params_file))
+            os.makedirs(path, exist_ok=True)
+            self.parameters_full.save(os.path.join(path, params_file))
             if self.parameters_full.use_ddp:
                 self.network.module.save_network(
-                    os.path.join(save_path, model_file)
+                    os.path.join(path, model_file)
                 )
             else:
-                self.network.save_network(os.path.join(save_path, model_file))
+                self.network.save_network(os.path.join(path, model_file))
             self.data.input_data_scaler.save(
-                os.path.join(save_path, iscaler_file)
+                os.path.join(path, iscaler_file)
             )
             self.data.output_data_scaler.save(
-                os.path.join(save_path, oscaler_file)
+                os.path.join(path, oscaler_file)
             )
 
             files = [model_file, iscaler_file, oscaler_file, params_file]
