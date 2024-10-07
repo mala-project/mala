@@ -218,6 +218,29 @@
                 <span class="p">)</span>
             <span class="p">)</span>
 
+            <span class="c1"># if the number of new snapshots is not a divisor of the grid size</span>
+            <span class="c1"># then we have to trim the original snapshots to size</span>
+            <span class="c1"># the indicies to be removed are selected at random</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">)</span>
+                <span class="n">ngrid</span> <span class="o">=</span> <span class="n">descriptor_data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">n_descriptor</span> <span class="o">=</span> <span class="n">descriptor_data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">n_target</span> <span class="o">=</span> <span class="n">target_data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="n">current_target</span> <span class="o">=</span> <span class="n">target_data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_target</span><span class="p">)</span>
+                <span class="n">current_descriptor</span> <span class="o">=</span> <span class="n">descriptor_data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                    <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_descriptor</span>
+                <span class="p">)</span>
+
+                <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+                    <span class="n">ngrid</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span>
+                    <span class="n">size</span><span class="o">=</span><span class="n">ngrid</span><span class="o">**</span><span class="mi">3</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+                <span class="p">)</span>
+
+                <span class="n">descriptor_data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_descriptor</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+                <span class="n">target_data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_target</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+
         <span class="c1"># Do the actual shuffling.</span>
         <span class="n">target_name_openpmd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="n">target_save_path</span><span class="p">,</span> <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;%T&quot;</span><span class="p">)</span>
@@ -253,16 +276,12 @@
                 <span class="p">)</span>
                 <span class="n">new_descriptors</span><span class="p">[</span>
                     <span class="n">last_start</span> <span class="p">:</span> <span class="n">current_chunk</span> <span class="o">+</span> <span class="n">last_start</span>
-                <span class="p">]</span> <span class="o">=</span> <span class="n">descriptor_data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
-                    <span class="n">current_grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span>
-                <span class="p">)[</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">descriptor_data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">)[</span>
                     <span class="n">i</span> <span class="o">*</span> <span class="n">current_chunk</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">current_chunk</span><span class="p">,</span> <span class="p">:</span>
                 <span class="p">]</span>
                 <span class="n">new_targets</span><span class="p">[</span>
                     <span class="n">last_start</span> <span class="p">:</span> <span class="n">current_chunk</span> <span class="o">+</span> <span class="n">last_start</span>
-                <span class="p">]</span> <span class="o">=</span> <span class="n">target_data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
-                    <span class="n">current_grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span>
-                <span class="p">)[</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">target_data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">)[</span>
                     <span class="n">i</span> <span class="o">*</span> <span class="n">current_chunk</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">current_chunk</span><span class="p">,</span> <span class="p">:</span>
                 <span class="p">]</span>
 
@@ -328,7 +347,6 @@
     <span class="c1"># It will be executed one after another for both of them.</span>
     <span class="c1"># Use this class to parameterize which of both should be shuffled.</span>
     <span class="k">class</span> <span class="nc">__DescriptorOrTarget</span><span class="p">:</span>
-
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">save_path</span><span class="p">,</span>
@@ -346,7 +364,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">dimension</span>
 
     <span class="k">class</span> <span class="nc">__MockedMPIComm</span><span class="p">:</span>
-
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="mi">1</span>
@@ -611,6 +628,8 @@
         <span class="p">]</span>
         <span class="n">number_of_data_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">snapshot_size_list</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">if</span> <span class="n">number_of_shuffled_snapshots</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># If the user does not tell us how many snapshots to use,</span>
             <span class="c1"># we have to check if the number of snapshots is straightforward.</span>
@@ -674,10 +693,40 @@
                 <span class="k">del</span> <span class="n">specified_number_of_new_snapshots</span>
 
             <span class="k">if</span> <span class="n">number_of_data_points</span> <span class="o">%</span> <span class="n">number_of_new_snapshots</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                    <span class="s2">&quot;Cannot create this number of snapshots &quot;</span>
-                    <span class="s2">&quot;from data provided.&quot;</span>
-                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_snapshots</span><span class="p">):</span>
+                        <span class="n">gridsize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">[</span>
+                            <span class="n">i</span>
+                        <span class="p">]</span><span class="o">.</span><span class="n">grid_size</span>
+                        <span class="n">shuffled_gridsize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                            <span class="n">gridsize</span> <span class="o">/</span> <span class="n">number_of_new_snapshots</span>
+                        <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">gridsize</span>
+                            <span class="o">-</span> <span class="n">shuffled_gridsize</span> <span class="o">*</span> <span class="n">number_of_new_snapshots</span>
+                        <span class="p">)</span>
+                    <span class="n">tot_points_missing</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span><span class="p">)</span>
+
+                    <span class="n">printout</span><span class="p">(</span>
+                        <span class="s2">&quot;Warning: number of requested snapshots is not a divisor of&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;the original grid sizes.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tot_points_missing</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">number_of_data_points</span><span class="si">}</span><span class="s2"> data points&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;will be left out of the shuffled snapshots.&quot;</span>
+                    <span class="p">)</span>
+
+                    <span class="n">shuffle_dimensions</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">int</span><span class="p">(</span><span class="n">number_of_data_points</span> <span class="o">/</span> <span class="n">number_of_new_snapshots</span><span class="p">),</span>
+                        <span class="mi">1</span><span class="p">,</span>
+                        <span class="mi">1</span><span class="p">,</span>
+                    <span class="p">]</span>
+
+                <span class="k">elif</span> <span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span><span class="p">:</span>
+                    <span class="c1"># TODO implement arbitrary grid sizes for openpmd</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Cannot create this number of snapshots &quot;</span>
+                        <span class="s2">&quot;from data provided.&quot;</span>
+                    <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">shuffle_dimensions</span> <span class="o">=</span> <span class="p">[</span>
                     <span class="nb">int</span><span class="p">(</span><span class="n">number_of_data_points</span> <span class="o">/</span> <span class="n">number_of_new_snapshots</span><span class="p">),</span>
@@ -696,7 +745,6 @@
         <span class="n">permutations</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">seeds</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_new_snapshots</span><span class="p">):</span>
-
             <span class="c1"># This makes the shuffling deterministic, if specified by the user.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">)</span>
