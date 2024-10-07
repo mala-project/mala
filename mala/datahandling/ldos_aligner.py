@@ -15,7 +15,7 @@ from mala.datahandling.data_handler_base import DataHandlerBase
 from mala.common.parallelizer import get_comm
 
 
-class LDOSAlign(DataHandlerBase):
+class LDOSAligner(DataHandlerBase):
     """
     Align LDOS vectors based on when they first become non-zero.
 
@@ -42,7 +42,7 @@ class LDOSAlign(DataHandlerBase):
         descriptor_calculator=None,
     ):
         self.ldos_parameters = parameters.targets
-        super(LDOSAlign, self).__init__(
+        super(LDOSAligner, self).__init__(
             parameters,
             target_calculator=target_calculator,
             descriptor_calculator=descriptor_calculator,
@@ -68,7 +68,7 @@ class LDOSAlign(DataHandlerBase):
         snapshot_type : string
             Must be numpy, openPMD is not yet available for LDOS alignment.
         """
-        super(LDOSAlign, self).add_snapshot(
+        super(LDOSAligner, self).add_snapshot(
             "",
             "",
             output_file,

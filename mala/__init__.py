@@ -26,7 +26,7 @@ from .datahandling import (
     DataConverter,
     Snapshot,
     DataShuffler,
-    LDOSAlign,
+    LDOSAligner,
 )
 from .network import (
     Network,

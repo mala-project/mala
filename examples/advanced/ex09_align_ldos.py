@@ -20,7 +20,7 @@ parameters.targets.ldos_gridsize = 11
 parameters.targets.ldos_gridspacing_ev = 2.5
 
 # initialize and add snapshots to workflow
-ldos_aligner = mala.LDOSAlign(parameters)
+ldos_aligner = mala.LDOSAligner(parameters)
 ldos_aligner.clear_data()
 ldos_aligner.add_snapshot("Be_snapshot0.out.npy", data_path)
 ldos_aligner.add_snapshot("Be_snapshot1.out.npy", data_path)
