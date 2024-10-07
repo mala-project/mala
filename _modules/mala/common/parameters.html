@@ -362,11 +362,6 @@
 <span class="sd">        Number of hidden layers to be used in lstm or gru or transformer nets</span>
 <span class="sd">        Default: None</span>
 
-<span class="sd">    dropout: float</span>
-<span class="sd">        Dropout rate for transformer net</span>
-<span class="sd">        0.0 ≤ dropout ≤ 1.0</span>
-<span class="sd">        Default: 0.0</span>
-
 <span class="sd">    num_heads: int</span>
 <span class="sd">        Number of heads to be used in Multi head attention network</span>
 <span class="sd">        This should be a divisor of input dimension</span>
@@ -555,7 +550,7 @@
 <span class="sd">        Number of points in the energy grid that is used to calculate the</span>
 <span class="sd">        (L)DOS.</span>
 
-<span class="sd">    ldos_gridsize : float</span>
+<span class="sd">    ldos_gridsize : int</span>
 <span class="sd">        Gridsize of the LDOS.</span>
 
 <span class="sd">    ldos_gridspacing_ev: float</span>
@@ -734,9 +729,8 @@
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trainingtype : string</span>
-<span class="sd">        Training type to be used. Supported options at the moment:</span>
-
+<span class="sd">    optimizer : string</span>
+<span class="sd">        Optimizer to be used. Supported options at the moment:</span>
 <span class="sd">            - SGD: Stochastic gradient descent.</span>
 <span class="sd">            - Adam: Adam Optimization Algorithm</span>
 
@@ -748,10 +742,6 @@
 
 <span class="sd">    mini_batch_size : int</span>
 <span class="sd">        Size of the mini batch for the optimization algorihm. Default: 10.</span>
-
-<span class="sd">    weight_decay : float</span>
-<span class="sd">        Weight decay for regularization. Always refers to L2 regularization.</span>
-<span class="sd">        Default: 0.</span>
 
 <span class="sd">    early_stopping_epochs : int</span>
 <span class="sd">        Number of epochs the validation accuracy is allowed to not improve by</span>
@@ -805,19 +795,13 @@
 <span class="sd">        Name used for the checkpoints. Using this, multiple runs</span>
 <span class="sd">        can be performed in the same directory.</span>
 
-<span class="sd">    visualisation : int</span>
-<span class="sd">        If True then Tensorboard is activated for visualisation</span>
-<span class="sd">        case 0: No tensorboard activated</span>
-<span class="sd">        case 1: tensorboard activated with Loss and learning rate</span>
-<span class="sd">        case 2; additonally weights and biases and gradient</span>
+<span class="sd">    logging_dir : string</span>
+<span class="sd">        Name of the folder that logging files will be saved to.</span>
 
-<span class="sd">    visualisation_dir : string</span>
-<span class="sd">        Name of the folder that visualization files will be saved to.</span>
-
-<span class="sd">    visualisation_dir_append_date : bool</span>
-<span class="sd">        If True, then upon creating visualization files, these will be saved</span>
-<span class="sd">        in a subfolder of visualisation_dir labelled with the starting date</span>
-<span class="sd">        of the visualization, to avoid having to change input scripts often.</span>
+<span class="sd">    logging_dir_append_date : bool</span>
+<span class="sd">        If True, then upon creating logging files, these will be saved</span>
+<span class="sd">        in a subfolder of logging_dir labelled with the starting date</span>
+<span class="sd">        of the logging, to avoid having to change input scripts often.</span>
 
 <span class="sd">    inference_data_grid : list</span>
 <span class="sd">        List holding the grid to be used for inference in the form of</span>
@@ -826,7 +810,7 @@
 <span class="sd">    use_mixed_precision : bool</span>
 <span class="sd">        If True, mixed precision computation (via AMP) will be used.</span>
 
-<span class="sd">    training_report_frequency : int</span>
+<span class="sd">    training_log_interval : int</span>
 <span class="sd">        Determines how often detailed performance info is printed during</span>
 <span class="sd">        training (only has an effect if the verbosity is high enough).</span>
 
@@ -838,36 +822,49 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersRunning</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">trainingtype</span> <span class="o">=</span> <span class="s2">&quot;SGD&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="s2">&quot;Adam&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_embedding</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_number_epochs</span> <span class="o">=</span> <span class="mi">100</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="o">=</span> <span class="mi">10</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">weight_decay</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshots_per_epoch</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">l1_regularization</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">l2_regularization</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_norm</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_noise</span> <span class="o">=</span> <span class="mf">0.0</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_epochs</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_threshold</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_scheduler</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_decay</span> <span class="o">=</span> <span class="mf">0.1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_patience</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_during_training_metric</span> <span class="o">=</span> <span class="s2">&quot;ldos&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_after_training_metric</span> <span class="o">=</span> <span class="s2">&quot;ldos&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_compression</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_shuffling_for_samplers</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoints_each_epoch</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_best_so_far</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_name</span> <span class="o">=</span> <span class="s2">&quot;checkpoint_mala&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">visualisation</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">visualisation_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;mala_logging&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">visualisation_dir_append_date</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">during_training_metric</span> <span class="o">=</span> <span class="s2">&quot;ldos&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">after_before_training_metric</span> <span class="o">=</span> <span class="s2">&quot;ldos&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging_dir</span> <span class="o">=</span> <span class="s2">&quot;./mala_logging&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging_dir_append_date</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="s2">&quot;tensorboard&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validation_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ldos&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate_on_training_data</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inference_data_grid</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_mixed_precision</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_graphs</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">training_report_frequency</span> <span class="o">=</span> <span class="mi">1000</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">profiler_range</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># [1000, 2000]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_log_interval</span> <span class="o">=</span> <span class="mi">1000</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">profiler_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ddp</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersRunning</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_update_ddp</span><span class="p">(</span><span class="n">new_ddp</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">during_training_metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">during_training_metric</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">after_before_training_metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">after_before_training_metric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">after_training_metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">after_training_metric</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">during_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -895,7 +892,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_during_training_metric</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">after_before_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">after_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the metric used during training.</span>
 
@@ -907,17 +904,17 @@
 <span class="sd">        DFT results. Of these, the mean average error in eV/atom will be</span>
 <span class="sd">        calculated.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_after_before_training_metric</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_after_training_metric</span>
 
-    <span class="nd">@after_before_training_metric</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">after_before_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="nd">@after_training_metric</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">after_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;ldos&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;ddp&quot;</span><span class="p">]:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                     <span class="s2">&quot;Currently, MALA can only operate with the &quot;</span>
                     <span class="s1">&#39;&quot;ldos&quot; metric for ddp runs.&#39;</span>
                 <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_after_before_training_metric</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_after_training_metric</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@during_training_metric</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">during_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
@@ -1600,7 +1597,7 @@
                 <span class="k">if</span> <span class="n">member</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">member</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ParametersBase</span><span class="p">):</span>
                         <span class="c1"># All the subclasses have to provide this function.</span>
-                        <span class="n">member</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">ParametersBase</span>
+                        <span class="n">member</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">ParametersBase</span>  <span class="c1"># type: ignore</span>
                         <span class="n">json_dict</span><span class="p">[</span><span class="n">member</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">member</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>

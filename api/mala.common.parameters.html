@@ -1110,10 +1110,6 @@ Default: False</p>
 <dt>num_hidden_layers: int</dt><dd><p>Number of hidden layers to be used in lstm or gru or transformer nets
 Default: None</p>
 </dd>
-<dt>dropout: float</dt><dd><p>Dropout rate for transformer net
-0.0 ≤ dropout ≤ 1.0
-Default: 0.0</p>
-</dd>
 <dt>num_heads: int</dt><dd><p>Number of heads to be used in Multi head attention network
 This should be a divisor of input dimension
 Default: None</p>
@@ -1129,15 +1125,15 @@ Default: None</p>
 <p>Some of these parameters only apply to either the train or test or
 inference case.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.trainingtype">
-<span class="sig-name descname"><span class="pre">trainingtype</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.trainingtype" title="Link to this definition"></a></dt>
-<dd><p>Training type to be used. Supported options at the moment:</p>
-<blockquote>
-<div><ul class="simple">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.optimizer">
+<span class="sig-name descname"><span class="pre">optimizer</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.optimizer" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Optimizer to be used. Supported options at the moment:</dt><dd><ul class="simple">
 <li><p>SGD: Stochastic gradient descent.</p></li>
 <li><p>Adam: Adam Optimization Algorithm</p></li>
 </ul>
-</div></blockquote>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>string</p>
@@ -1174,18 +1170,6 @@ inference case.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.weight_decay">
-<span class="sig-name descname"><span class="pre">weight_decay</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.weight_decay" title="Link to this definition"></a></dt>
-<dd><p>Weight decay for regularization. Always refers to L2 regularization.
-Default: 0.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1313,23 +1297,9 @@ can be performed in the same directory.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.visualisation">
-<span class="sig-name descname"><span class="pre">visualisation</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.visualisation" title="Link to this definition"></a></dt>
-<dd><p>If True then Tensorboard is activated for visualisation
-case 0: No tensorboard activated
-case 1: tensorboard activated with Loss and learning rate
-case 2; additonally weights and biases and gradient</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.visualisation_dir">
-<span class="sig-name descname"><span class="pre">visualisation_dir</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.visualisation_dir" title="Link to this definition"></a></dt>
-<dd><p>Name of the folder that visualization files will be saved to.</p>
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.logging_dir">
+<span class="sig-name descname"><span class="pre">logging_dir</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.logging_dir" title="Link to this definition"></a></dt>
+<dd><p>Name of the folder that logging files will be saved to.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>string</p>
@@ -1338,11 +1308,11 @@ case 2; additonally weights and biases and gradient</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.visualisation_dir_append_date">
-<span class="sig-name descname"><span class="pre">visualisation_dir_append_date</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.visualisation_dir_append_date" title="Link to this definition"></a></dt>
-<dd><p>If True, then upon creating visualization files, these will be saved
-in a subfolder of visualisation_dir labelled with the starting date
-of the visualization, to avoid having to change input scripts often.</p>
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.logging_dir_append_date">
+<span class="sig-name descname"><span class="pre">logging_dir_append_date</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.logging_dir_append_date" title="Link to this definition"></a></dt>
+<dd><p>If True, then upon creating logging files, these will be saved
+in a subfolder of logging_dir labelled with the starting date
+of the logging, to avoid having to change input scripts often.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
@@ -1374,8 +1344,8 @@ of the visualization, to avoid having to change input scripts often.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.training_report_frequency">
-<span class="sig-name descname"><span class="pre">training_report_frequency</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.training_report_frequency" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.training_log_interval">
+<span class="sig-name descname"><span class="pre">training_log_interval</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.training_log_interval" title="Link to this definition"></a></dt>
 <dd><p>Determines how often detailed performance info is printed during
 training (only has an effect if the verbosity is high enough).</p>
 <dl class="field-list simple">
@@ -1401,8 +1371,8 @@ this option only holds significance if the nsys profiler is used.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.after_before_training_metric">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">after_before_training_metric</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.after_before_training_metric" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.after_training_metric">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">after_training_metric</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.after_training_metric" title="Link to this definition"></a></dt>
 <dd><p>Get the metric used during training.</p>
 <p>Metric for evaluated on the validation and test set before and after
 training. Default is “LDOS”, meaning that the regular loss on the LDOS
@@ -1459,7 +1429,7 @@ from CUDA 11.0 upwards.</p>
 <dd><p>Gridsize of the LDOS.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>

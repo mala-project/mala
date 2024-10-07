@@ -167,7 +167,7 @@ does not hold much physical virtue. Thus, MALA implements physical validation
 metrics to be accessed before and after the training routine.</p>
 <p>Specifically, when setting</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">after_before_training_metric</span> <span class="o">=</span> <span class="s2">&quot;band_energy&quot;</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">after_training_metric</span> <span class="o">=</span> <span class="s2">&quot;band_energy&quot;</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -288,23 +288,23 @@ visualization prior to training via</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 0: No visualizatuon, 1: loss and learning rate, 2: like 1,</span>
 <span class="c1"># but additionally weights and biases are saved</span>
-<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">visualisation</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">visualisation_dir</span> <span class="o">=</span> <span class="s2">&quot;mala_vis&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">logging</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">logging_dir</span> <span class="o">=</span> <span class="s2">&quot;mala_vis&quot;</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>where <code class="docutils literal notranslate"><span class="pre">visualisation_dir</span></code> specifies some directory in which to save the
-MALA visualization data. Afterwards, you can run the training without any
+<p>where <code class="docutils literal notranslate"><span class="pre">logging_dir</span></code> specifies some directory in which to save the
+MALA logging data. Afterwards, you can run the training without any
 other modifications. Once training is finished (or during training, in case
 you want to use tensorboard to monitor progress), you can launch tensorboard
 via</p>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tensorboard<span class="w"> </span>--logdir<span class="w"> </span>path_to_visualization
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tensorboard<span class="w"> </span>--logdir<span class="w"> </span>path_to_log_directory
 </pre></div>
 </div>
 </div></blockquote>
-<p>The full path for <code class="docutils literal notranslate"><span class="pre">path_to_visualization</span></code> can be accessed via
-<code class="docutils literal notranslate"><span class="pre">trainer.full_visualization_path</span></code>.</p>
+<p>The full path for <code class="docutils literal notranslate"><span class="pre">path_to_log_directory</span></code> can be accessed via
+<code class="docutils literal notranslate"><span class="pre">trainer.full_logging_path</span></code>.</p>
 </section>
 <section id="training-in-parallel">
 <h2>Training in parallel<a class="headerlink" href="#training-in-parallel" title="Link to this heading"></a></h2>

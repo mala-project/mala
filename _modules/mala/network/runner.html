@@ -86,6 +86,8 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">zipfile</span> <span class="kn">import</span> <span class="n">ZipFile</span><span class="p">,</span> <span class="n">ZIP_STORED</span>
 
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torch.distributed</span> <span class="k">as</span> <span class="nn">dist</span>
@@ -93,10 +95,16 @@
 <span class="kn">import</span> <span class="nn">mala</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_rank</span>
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">ParametersRunning</span>
+<span class="kn">from</span> <span class="nn">mala.datahandling.fast_tensor_dataset</span> <span class="kn">import</span> <span class="n">FastTensorDataset</span>
 <span class="kn">from</span> <span class="nn">mala.network.network</span> <span class="kn">import</span> <span class="n">Network</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.data_scaler</span> <span class="kn">import</span> <span class="n">DataScaler</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.data_handler</span> <span class="kn">import</span> <span class="n">DataHandler</span>
 <span class="kn">from</span> <span class="nn">mala</span> <span class="kn">import</span> <span class="n">Parameters</span>
+<span class="kn">from</span> <span class="nn">mala.targets.ldos</span> <span class="kn">import</span> <span class="n">LDOS</span>
+<span class="kn">from</span> <span class="nn">mala.targets.dos</span> <span class="kn">import</span> <span class="n">DOS</span>
+<span class="kn">from</span> <span class="nn">mala.targets.density</span> <span class="kn">import</span> <span class="n">Density</span>
+
+<span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span><span class="p">,</span> <span class="n">trange</span>
 
 
 <div class="viewcode-block" id="Runner">
@@ -125,6 +133,478 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__prepare_to_run</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_calculate_errors</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">actual_outputs</span><span class="p">,</span> <span class="n">predicted_outputs</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">snapshot_number</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the errors between the actual and predicted outputs.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        actual_outputs : numpy.ndarray</span>
+<span class="sd">            Actual outputs.</span>
+
+<span class="sd">        predicted_outputs : numpy.ndarray</span>
+<span class="sd">            Predicted outputs.</span>
+
+<span class="sd">        metrics : list</span>
+<span class="sd">            List of metrics to calculate.</span>
+
+<span class="sd">        snapshot_number : int</span>
+<span class="sd">            Snapshot number for which the errors are calculated.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        errors : dict</span>
+<span class="sd">            Dictionary containing the errors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">energy_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric</span> <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span> <span class="k">if</span> <span class="s2">&quot;energy&quot;</span> <span class="ow">in</span> <span class="n">metric</span><span class="p">]</span>
+        <span class="n">non_energy_metrics</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">metric</span> <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span> <span class="k">if</span> <span class="s2">&quot;energy&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metric</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">energy_metrics</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">errors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_energy_errors</span><span class="p">(</span>
+                <span class="n">actual_outputs</span><span class="p">,</span>
+                <span class="n">predicted_outputs</span><span class="p">,</span>
+                <span class="n">energy_metrics</span><span class="p">,</span>
+                <span class="n">snapshot_number</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">errors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">non_energy_metrics</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;ldos&quot;</span><span class="p">:</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">predicted_outputs</span> <span class="o">-</span> <span class="n">actual_outputs</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="n">errors</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">error</span>
+
+                <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;density&quot;</span><span class="p">:</span>
+                    <span class="n">target_calculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                        <span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span>
+                    <span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">Density</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                            <span class="s2">&quot;Cannot calculate density from this &quot;</span>
+                            <span class="s2">&quot;observable.&quot;</span>
+                        <span class="p">)</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span>
+                            <span class="n">snapshot_number</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
+                    <span class="n">actual</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density</span>
+
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+                    <span class="n">predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density</span>
+                    <span class="n">errors</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">actual</span> <span class="o">-</span> <span class="n">predicted</span><span class="p">))</span>
+
+                <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;density_relative&quot;</span><span class="p">:</span>
+                    <span class="n">target_calculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                        <span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span>
+                    <span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">Density</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                            <span class="s2">&quot;Cannot calculate the density from this &quot;</span>
+                            <span class="s2">&quot;observable.&quot;</span>
+                        <span class="p">)</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span>
+                            <span class="n">snapshot_number</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
+                    <span class="n">actual</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density</span>
+
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+                    <span class="n">predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density</span>
+                    <span class="n">errors</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">actual</span> <span class="o">-</span> <span class="n">predicted</span><span class="p">)</span> <span class="o">/</span> <span class="n">actual</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span>
+                    <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;dos&quot;</span><span class="p">:</span>
+                    <span class="n">target_calculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                        <span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span>
+                    <span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">DOS</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                            <span class="s2">&quot;Cannot calculate the DOS from this &quot;</span>
+                            <span class="s2">&quot;observable.&quot;</span>
+                        <span class="p">)</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span>
+                            <span class="n">snapshot_number</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
+                    <span class="n">actual</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density_of_states</span>
+
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+                    <span class="n">predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density_of_states</span>
+
+                    <span class="n">errors</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">actual</span> <span class="o">-</span> <span class="n">predicted</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+                <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;dos_relative&quot;</span><span class="p">:</span>
+                    <span class="n">target_calculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                        <span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span>
+                    <span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">DOS</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                            <span class="s2">&quot;Cannot calculate the relative DOS from this &quot;</span>
+                            <span class="s2">&quot;observable.&quot;</span>
+                        <span class="p">)</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span>
+                            <span class="n">snapshot_number</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+                    <span class="c1"># We shift both the actual and predicted DOS by 1.0 to overcome</span>
+                    <span class="c1"># numerical issues with the DOS having values equal to zero.</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
+                    <span class="n">actual</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">+</span> <span class="mf">1.0</span>
+
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+                    <span class="n">predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">+</span> <span class="mf">1.0</span>
+
+                    <span class="n">errors</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_invalid</span><span class="p">(</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+                                <span class="p">(</span><span class="n">actual</span> <span class="o">-</span> <span class="n">predicted</span><span class="p">)</span>
+                                <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">predicted</span><span class="p">))</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                        <span class="o">*</span> <span class="mi">100</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid metric (</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">) requested.&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">printout</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Error calculating observable: </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2"> for snapshot </span><span class="si">{</span><span class="n">snapshot_number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">printout</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">errors</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">errors</span>
+
+    <span class="k">def</span> <span class="nf">_calculate_energy_errors</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">actual_outputs</span><span class="p">,</span> <span class="n">predicted_outputs</span><span class="p">,</span> <span class="n">energy_types</span><span class="p">,</span> <span class="n">snapshot_number</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the errors between the actual and predicted outputs.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        actual_outputs : numpy.ndarray</span>
+<span class="sd">            Actual outputs.</span>
+
+<span class="sd">        predicted_outputs : numpy.ndarray</span>
+<span class="sd">            Predicted outputs.</span>
+
+<span class="sd">        energy_types : list</span>
+<span class="sd">            List of energy types to calculate errors.</span>
+
+<span class="sd">        snapshot_number : int</span>
+<span class="sd">            Snapshot number for which the errors are calculated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">target_calculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
+        <span class="n">output_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span>
+            <span class="n">snapshot_number</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">output_file</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Output file needed for energy error calculations.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
+
+        <span class="n">errors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">fe_actual</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">fe_predicted</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fe_actual</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span>
+                <span class="n">actual_outputs</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">errors</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">energy_type</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span>
+            <span class="p">}</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;CAUTION! LDOS ground truth is so wrong that the &quot;</span>
+                <span class="s2">&quot;estimation of the self consistent Fermi energy fails.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">errors</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fe_predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span>
+                <span class="n">predicted_outputs</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">errors</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">energy_type</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span>
+            <span class="p">}</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;CAUTION! LDOS prediction is so wrong that the &quot;</span>
+                <span class="s2">&quot;estimation of the self consistent Fermi energy fails.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">errors</span>
+        <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">energy_type</span> <span class="o">==</span> <span class="s2">&quot;fermi_energy&quot;</span><span class="p">:</span>
+                <span class="n">fe_error</span> <span class="o">=</span> <span class="n">fe_predicted</span> <span class="o">-</span> <span class="n">fe_actual</span>
+                <span class="n">errors</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">fe_error</span>
+            <span class="k">elif</span> <span class="n">energy_type</span> <span class="o">==</span> <span class="s2">&quot;band_energy&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">target_calculator</span><span class="p">,</span> <span class="n">DOS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Cannot calculate the band energy from this observable.&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
+                    <span class="n">be_actual</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span>
+                        <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span>
+                    <span class="p">)</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+                    <span class="n">be_predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span>
+                        <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_predicted</span>
+                    <span class="p">)</span>
+                    <span class="n">be_error</span> <span class="o">=</span> <span class="p">(</span><span class="n">be_predicted</span> <span class="o">-</span> <span class="n">be_actual</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+                        <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">errors</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">be_error</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">errors</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">energy_type</span> <span class="o">==</span> <span class="s2">&quot;band_energy_actual_fe&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">target_calculator</span><span class="p">,</span> <span class="n">DOS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Cannot calculate the band energy from this observable.&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+                    <span class="n">be_predicted_actual_fe</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span>
+                            <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">be_error_actual_fe</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">be_predicted_actual_fe</span> <span class="o">-</span> <span class="n">be_actual</span>
+                    <span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">))</span>
+                    <span class="n">errors</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">be_error_actual_fe</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">errors</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">energy_type</span> <span class="o">==</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Cannot calculate the total energy from this &quot;</span>
+                        <span class="s2">&quot;observable.&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span>
+                            <span class="n">snapshot_number</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
+                    <span class="n">te_actual</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_total_energy</span><span class="p">(</span>
+                        <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span>
+                    <span class="p">)</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+                    <span class="n">te_predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_total_energy</span><span class="p">(</span>
+                        <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_predicted</span>
+                    <span class="p">)</span>
+                    <span class="n">te_error</span> <span class="o">=</span> <span class="p">(</span><span class="n">te_predicted</span> <span class="o">-</span> <span class="n">te_actual</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+                        <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">errors</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">te_error</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">errors</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">energy_type</span> <span class="o">==</span> <span class="s2">&quot;total_energy_actual_fe&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Cannot calculate the total energy from this &quot;</span>
+                        <span class="s2">&quot;observable.&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+                    <span class="n">te_predicted_actual_fe</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_total_energy</span><span class="p">(</span>
+                            <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">te_error_actual_fe</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">te_predicted_actual_fe</span> <span class="o">-</span> <span class="n">te_actual</span>
+                    <span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">))</span>
+                    <span class="n">errors</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">te_error_actual_fe</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">errors</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Invalid energy type (</span><span class="si">{</span><span class="n">energy_type</span><span class="si">}</span><span class="s2">) requested.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">errors</span>
+
+    <span class="k">def</span> <span class="nf">_calculate_energy_targets_and_predictions</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">actual_outputs</span><span class="p">,</span> <span class="n">predicted_outputs</span><span class="p">,</span> <span class="n">energy_types</span><span class="p">,</span> <span class="n">snapshot_number</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the energies corresponding to actual and predicted outputs.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        actual_outputs : numpy.ndarray</span>
+<span class="sd">            Actual outputs.</span>
+
+<span class="sd">        predicted_outputs : numpy.ndarray</span>
+<span class="sd">            Predicted outputs.</span>
+
+<span class="sd">        energy_types : list</span>
+<span class="sd">            List of energy types to calculate.</span>
+
+<span class="sd">        snapshot_number : int</span>
+<span class="sd">            Snapshot number for which the energies are calculated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">target_calculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
+        <span class="n">output_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span>
+            <span class="n">snapshot_number</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">output_file</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Output file needed for energy calculations.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
+
+        <span class="n">targets</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">fe_actual</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">fe_predicted</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fe_actual</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span>
+                <span class="n">actual_outputs</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">energy_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span>
+            <span class="p">}</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">energy_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span>
+            <span class="p">}</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;CAUTION! LDOS ground truth is so wrong that the &quot;</span>
+                <span class="s2">&quot;estimation of the self consistent Fermi energy fails.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">targets</span><span class="p">,</span> <span class="n">predictions</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fe_predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span>
+                <span class="n">predicted_outputs</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">energy_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span>
+            <span class="p">}</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">energy_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span>
+            <span class="p">}</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;CAUTION! LDOS prediction is so wrong that the &quot;</span>
+                <span class="s2">&quot;estimation of the self consistent Fermi energy fails.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">targets</span><span class="p">,</span> <span class="n">predictions</span>
+        <span class="k">for</span> <span class="n">energy_type</span> <span class="ow">in</span> <span class="n">energy_types</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">energy_type</span> <span class="o">==</span> <span class="s2">&quot;fermi_energy&quot;</span><span class="p">:</span>
+                <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">fe_actual</span>
+                <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">fe_predicted</span>
+            <span class="k">elif</span> <span class="n">energy_type</span> <span class="o">==</span> <span class="s2">&quot;band_energy&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">target_calculator</span><span class="p">,</span> <span class="n">DOS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Cannot calculate the band energy from this observable.&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
+                    <span class="n">be_actual</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span>
+                        <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span>
+                    <span class="p">)</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+                    <span class="n">be_predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span>
+                        <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_predicted</span>
+                    <span class="p">)</span>
+                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">be_actual</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">be_predicted</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="k">elif</span> <span class="n">energy_type</span> <span class="o">==</span> <span class="s2">&quot;band_energy_actual_fe&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">target_calculator</span><span class="p">,</span> <span class="n">DOS</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Cannot calculate the band energy from this observable.&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+                    <span class="n">be_predicted_actual_fe</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span>
+                            <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">be_actual</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">be_predicted_actual_fe</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="k">elif</span> <span class="n">energy_type</span> <span class="o">==</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Cannot calculate the total energy from this &quot;</span>
+                        <span class="s2">&quot;observable.&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span>
+                            <span class="n">snapshot_number</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
+                    <span class="n">te_actual</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_total_energy</span><span class="p">(</span>
+                        <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span>
+                    <span class="p">)</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+                    <span class="n">te_predicted</span> <span class="o">=</span> <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_total_energy</span><span class="p">(</span>
+                        <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_predicted</span>
+                    <span class="p">)</span>
+                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">te_actual</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">te_predicted</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="k">elif</span> <span class="n">energy_type</span> <span class="o">==</span> <span class="s2">&quot;total_energy_actual_fe&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_calculator</span><span class="p">,</span> <span class="n">LDOS</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Cannot calculate the total energy from this &quot;</span>
+                        <span class="s2">&quot;observable.&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
+                    <span class="n">te_predicted_actual_fe</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_total_energy</span><span class="p">(</span>
+                            <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    
+                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">te_actual</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">te_predicted_actual_fe</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">targets</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                    <span class="n">predictions</span><span class="p">[</span><span class="n">energy_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Invalid energy type (</span><span class="si">{</span><span class="n">energy_type</span><span class="si">}</span><span class="s2">) requested.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">targets</span><span class="p">,</span> <span class="n">predictions</span>
 
 <div class="viewcode-block" id="Runner.save_run">
 <a class="viewcode-back" href="../../../api/mala.network.runner.html#mala.network.runner.Runner.save_run">[docs]</a>
@@ -174,7 +654,7 @@
             <span class="n">params_file</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.params.json&quot;</span>
             <span class="k">if</span> <span class="n">save_runner</span><span class="p">:</span>
                 <span class="n">optimizer_file</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.optimizer.pth&quot;</span>
-
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">params_file</span><span class="p">))</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">save_network</span><span class="p">(</span>
@@ -485,28 +965,51 @@
                     <span class="n">from_index</span> <span class="o">+=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span>
         <span class="n">grid_size</span> <span class="o">=</span> <span class="n">to_index</span> <span class="o">-</span> <span class="n">from_index</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span><span class="p">:</span>
-            <span class="n">data_set</span><span class="o">.</span><span class="n">return_outputs_directly</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">actual_outputs</span> <span class="o">=</span> <span class="p">(</span><span class="n">data_set</span><span class="p">[</span><span class="n">from_index</span><span class="p">:</span><span class="n">to_index</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">actual_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">data_set</span><span class="p">[</span><span class="n">from_index</span><span class="p">:</span><span class="n">to_index</span><span class="p">])[</span><span class="mi">1</span><span class="p">],</span> <span class="n">as_numpy</span><span class="o">=</span><span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_set</span><span class="p">,</span> <span class="n">FastTensorDataset</span><span class="p">):</span>
+            <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">)</span>
             <span class="p">)</span>
+            <span class="n">actual_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">))</span>
 
-        <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">))</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_batches_per_snapshot</span><span class="p">):</span>
-            <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">data_set</span><span class="p">[</span>
-                <span class="n">from_index</span>
-                <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">)</span> <span class="p">:</span> <span class="n">from_index</span>
-                <span class="o">+</span> <span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">)</span>
-            <span class="p">]</span>
-            <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
-            <span class="n">predicted_outputs</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">batch_size</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_set</span><span class="p">)):</span>
+                <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">data_set</span><span class="p">[</span><span class="n">from_index</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span>
+                <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
+                <span class="n">predicted_outputs</span><span class="p">[</span>
+                    <span class="n">i</span> <span class="o">*</span> <span class="n">data_set</span><span class="o">.</span><span class="n">batch_size</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">data_set</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="p">:</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">),</span> <span class="n">as_numpy</span><span class="o">=</span><span class="kc">True</span>
                 <span class="p">)</span>
+                <span class="n">actual_outputs</span><span class="p">[</span>
+                    <span class="n">i</span> <span class="o">*</span> <span class="n">data_set</span><span class="o">.</span><span class="n">batch_size</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">data_set</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="p">:</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">outputs</span><span class="p">),</span> <span class="n">as_numpy</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span><span class="p">:</span>
+                <span class="n">data_set</span><span class="o">.</span><span class="n">return_outputs_directly</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">actual_outputs</span> <span class="o">=</span> <span class="p">(</span><span class="n">data_set</span><span class="p">[</span><span class="n">from_index</span><span class="p">:</span><span class="n">to_index</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">actual_outputs</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">data_set</span><span class="p">[</span><span class="n">from_index</span><span class="p">:</span><span class="n">to_index</span><span class="p">])[</span><span class="mi">1</span><span class="p">],</span> <span class="n">as_numpy</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">)</span>
             <span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_batches_per_snapshot</span><span class="p">):</span>
+                <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">data_set</span><span class="p">[</span>
+                    <span class="n">from_index</span>
+                    <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">)</span> <span class="p">:</span> <span class="n">from_index</span>
+                    <span class="o">+</span> <span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">)</span>
+                <span class="p">]</span>
+                <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
+                <span class="n">predicted_outputs</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">batch_size</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">),</span> <span class="n">as_numpy</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
 
         <span class="c1"># Restricting the actual quantities to physical meaningful values,</span>
         <span class="c1"># i.e. restricting the (L)DOS to positive values.</span>

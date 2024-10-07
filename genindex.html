@@ -135,7 +135,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset">add_snapshot_to_dataset() (LazyLoadDataset method)</a>
 </li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.after_before_training_metric">after_before_training_metric (ParametersRunning property)</a>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.after_training_metric">after_training_metric (ParametersRunning property)</a>
 </li>
       <li><a href="api/mala.datahandling.lazy_load_dataset_single.html#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.allocate_shared_mem">allocate_shared_mem() (LazyLoadDatasetSingle method)</a>
 </li>
@@ -541,6 +541,8 @@
         <li><a href="api/mala.targets.target.html#mala.targets.target.Target.get_energy_grid">(Target method)</a>
 </li>
       </ul></li>
+      <li><a href="api/mala.network.tester.html#mala.network.tester.Tester.get_energy_targets_and_predictions">get_energy_targets_and_predictions() (Tester method)</a>
+</li>
       <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.get_entropy_contribution">get_entropy_contribution() (DOS method)</a>
 
       <ul>
@@ -776,6 +778,10 @@
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.local_psp_name">local_psp_name (ParametersDataGeneration attribute)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.local_psp_path">local_psp_path (ParametersDataGeneration attribute)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.logging_dir">logging_dir (ParametersRunning attribute)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.logging_dir_append_date">logging_dir_append_date (ParametersRunning attribute)</a>
 </li>
       <li><a href="api/mala.network.network.html#mala.network.network.LSTM">LSTM (class in mala.network.network)</a>
 </li>
@@ -1406,15 +1412,17 @@
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.ofdft_temperature">ofdft_temperature (ParametersDataGeneration attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.ofdft_timestep">ofdft_timestep (ParametersDataGeneration attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.datageneration.ofdft_initializer.html#mala.datageneration.ofdft_initializer.OFDFTInitializer">OFDFTInitializer (class in mala.datageneration.ofdft_initializer)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.openpmd_configuration">openpmd_configuration (Parameters property)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.openpmd_granularity">openpmd_granularity (Parameters property)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.optimizer">optimizer (ParametersRunning attribute)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.optuna_singlenode_setup">optuna_singlenode_setup() (Parameters method)</a>
 </li>
@@ -1730,17 +1738,15 @@
 </li>
       <li><a href="api/mala.targets.density.html#mala.targets.density.Density.total_energy_contributions">total_energy_contributions (Density property)</a>
 </li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersTargets.tpcf_parameters">tpcf_parameters (ParametersTargets attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersTargets.tpcf_parameters">tpcf_parameters (ParametersTargets attribute)</a>
+</li>
       <li><a href="api/mala.network.trainer.html#mala.network.trainer.Trainer.train_network">train_network() (Trainer method)</a>
 </li>
       <li><a href="api/mala.network.trainer.html#mala.network.trainer.Trainer">Trainer (class in mala.network.trainer)</a>
 </li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.training_report_frequency">training_report_frequency (ParametersRunning attribute)</a>
-</li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.trainingtype">trainingtype (ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.training_log_interval">training_log_interval (ParametersRunning attribute)</a>
 </li>
       <li><a href="api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.trajectory">trajectory (TrajectoryAnalyzer property)</a>
 </li>
@@ -1812,22 +1818,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.verbosity">verbosity (Parameters property)</a>
 </li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.visualisation">visualisation (ParametersRunning attribute)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.visualisation_dir">visualisation_dir (ParametersRunning attribute)</a>
-</li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.visualisation_dir_append_date">visualisation_dir_append_date (ParametersRunning attribute)</a>
-</li>
   </ul></td>
 </tr></table>
 
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.weight_decay">weight_decay (ParametersRunning attribute)</a>
-</li>
       <li><a href="api/mala.targets.target.html#mala.targets.target.Target.write_additional_calculation_data">write_additional_calculation_data() (Target method)</a>
 </li>
       <li><a href="api/mala.targets.cube_parser.html#mala.targets.cube_parser.write_cube">write_cube() (in module mala.targets.cube_parser)</a>
