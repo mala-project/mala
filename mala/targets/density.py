@@ -575,8 +575,8 @@ class Density(Target):
             Integration method used to integrate density on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
         """
         if density_data is None:
