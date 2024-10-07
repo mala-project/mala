@@ -579,12 +579,8 @@ class Runner:
                 )
             else:
                 self.network.save_network(os.path.join(path, model_file))
-            self.data.input_data_scaler.save(
-                os.path.join(path, iscaler_file)
-            )
-            self.data.output_data_scaler.save(
-                os.path.join(path, oscaler_file)
-            )
+            self.data.input_data_scaler.save(os.path.join(path, iscaler_file))
+            self.data.output_data_scaler.save(os.path.join(path, oscaler_file))
 
             files = [model_file, iscaler_file, oscaler_file, params_file]
             if save_runner:
