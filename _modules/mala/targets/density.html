@@ -1108,7 +1108,7 @@
 
         <span class="k">if</span> <span class="n">Density</span><span class="o">.</span><span class="n">te_mutex</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="n">printout</span><span class="p">(</span>
-                <span class="s2">&quot;MALA: Starting QuantumEspresso to get density-based&quot;</span>
+                <span class="s2">&quot;Starting QuantumEspresso to get density-based&quot;</span>
                 <span class="s2">&quot; energy contributions.&quot;</span><span class="p">,</span>
                 <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="p">)</span>
@@ -1116,14 +1116,18 @@
             <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
             <span class="n">te</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_planes</span><span class="p">)</span>
             <span class="n">barrier</span><span class="p">()</span>
-            <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
-            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;time used by total energy initialization: &quot;</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;Total energy module: Time used by total energy initialization: </span><span class="si">{:.8f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+                <span class="p">),</span>
+                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="n">Density</span><span class="o">.</span><span class="n">te_mutex</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;MALA: QuantumEspresso setup done.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;QuantumEspresso setup done.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">printout</span><span class="p">(</span>
-                <span class="s2">&quot;MALA: QuantumEspresso is already running. Except for&quot;</span>
+                <span class="s2">&quot;QuantumEspresso is already running. Except for&quot;</span>
                 <span class="s2">&quot; the atomic positions, no new parameters will be used.&quot;</span><span class="p">,</span>
                 <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="p">)</span>
@@ -1235,10 +1239,10 @@
                 <span class="p">)</span>
             <span class="p">)</span>
             <span class="n">barrier</span><span class="p">()</span>
-            <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
             <span class="n">printout</span><span class="p">(</span>
-                <span class="s2">&quot;time used by gaussian descriptors: &quot;</span><span class="p">,</span>
-                <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span>
+                <span class="s2">&quot;Total energy module: Time used by gaussian descriptors: </span><span class="si">{:.8f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+                <span class="p">),</span>
                 <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span>
 
@@ -1267,10 +1271,10 @@
                 <span class="p">)</span>
             <span class="p">)</span>
             <span class="n">barrier</span><span class="p">()</span>
-            <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
             <span class="n">printout</span><span class="p">(</span>
-                <span class="s2">&quot;time used by reference gaussian descriptors: &quot;</span><span class="p">,</span>
-                <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span>
+                <span class="s2">&quot;Total energy module: Time used by reference gaussian descriptors: </span><span class="si">{:.8f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+                <span class="p">),</span>
                 <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span>
 
@@ -1297,9 +1301,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_atomic_density_energy_formula</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">barrier</span><span class="p">()</span>
-        <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;time used by set_positions: &quot;</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-
+        <span class="n">printout</span><span class="p">(</span>
+            <span class="s2">&quot;Total energy module: Time used by set_positions: </span><span class="si">{:.8f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+            <span class="p">),</span>
+            <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">barrier</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_atomic_density_energy_formula</span><span class="p">:</span>
@@ -1339,9 +1346,11 @@
                 <span class="mi">1</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">barrier</span><span class="p">()</span>
-            <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
             <span class="n">printout</span><span class="p">(</span>
-                <span class="s2">&quot;time used by set_positions_gauss: &quot;</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span>
+                <span class="s2">&quot;Total energy module: Time used by set_positions_gauss: </span><span class="si">{:.8f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+                <span class="p">),</span>
+                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># Now we can set the new density.</span>
@@ -1349,8 +1358,12 @@
         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
         <span class="n">te</span><span class="o">.</span><span class="n">set_rho_of_r</span><span class="p">(</span><span class="n">density_for_qe</span><span class="p">,</span> <span class="n">number_of_gridpoints</span><span class="p">,</span> <span class="n">nr_spin_channels</span><span class="p">)</span>
         <span class="n">barrier</span><span class="p">()</span>
-        <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;time used by set_rho_of_r: &quot;</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">printout</span><span class="p">(</span>
+            <span class="s2">&quot;Total energy module: Time used by set_rho_of_r: </span><span class="si">{:.8f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+            <span class="p">),</span>
+            <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">atoms_Angstrom</span>
 
