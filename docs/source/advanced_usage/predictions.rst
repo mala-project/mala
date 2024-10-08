@@ -42,8 +42,8 @@ Likewise, you can adjust the inference temperature via
 
 .. _production_gpu:
 
-Predictions on GPU
-*******************
+Predictions on multiple GPUs
+****************************
 
 MALA predictions can be run entirely on a GPU. For the NN part of the workflow,
 this seems like a trivial statement, but the GPU acceleration extends to
@@ -56,15 +56,39 @@ with
 
 prior to an ASE calculator calculation or usage of the ``Predictor`` class,
 all computationally heavy parts of the MALA inference, will be offloaded
-to the GPU.
+to the GPU. Please note that this requires LAMMPS to be installed with GPU, i.e., Kokkos
+support. Multiple GPUs can be used during inference by further enabling
+parallelization via
 
-Please note that this requires LAMMPS to be installed with GPU, i.e., Kokkos
-support. A current limitation of this implementation is that only a *single*
-GPU can be used for inference. This puts an upper limit on the number of atoms
-which can be simulated, depending on the hardware you have access to.
-Usual numbers observed by MALA team put this limit at a few thousand atoms, for
-which the electronic structure can be predicted in 1-2 minutes. Currently,
-multi-GPU inference is being implemented.
+      .. code-block:: python
+
+            parameters.use_mpi = True
+
+
+Setting both ``use_mpi`` and ``use_gpu`` to ``True`` yields multi-GPU
+inferences.
+
+.. note::
+
+    To use GPU acceleration for total energy calculation, an additional
+    setting has to be used.
+
+Currently, there is no direct GPU acceleration for the total energy
+calculation. For smaller calculations, this is unproblematic, but it can become
+a problem for systems of even moderate size. To alleviate this problem, MALA
+provides an optimized total energy calculation routine which utilizes a
+Gaussian representation of atomic positions. In this algorithm, most of the
+computational overhead of the total energy calculation is offloaded to the
+computation of this Gaussian representation, which is realized via LAMMPS and
+can therefore be accelerated as outlined above. Simply activate this option
+via
+
+    .. code-block:: python
+
+        parameters.descriptors.use_atomic_density_energy_formula = True
+
+The Gaussian representation algorithm is describe in
+the publication `Predicting electronic structures at any length scale with machine learning <doi.org/10.1038/s41524-023-01070-z>`_
 
 Parallel predictions on CPUs
 ****************************
