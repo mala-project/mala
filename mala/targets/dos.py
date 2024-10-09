@@ -509,6 +509,36 @@ class DOS(Target):
         self.density_of_states = array
         return array
 
+    def read_from_numpy_file(
+        self, path, units=None, array=None, reshape=False
+    ):
+        """
+        Read the data from a numpy file.
+
+        Parameters
+        ----------
+        path : string
+            Path to the numpy file.
+
+        units : string
+            Units the data is saved in.
+
+        array : np.ndarray
+            If not None, the array to save the data into.
+            The array has to be 4-dimensional.
+
+        Returns
+        -------
+        data : numpy.ndarray or None
+            If array is None, a numpy array containing the data.
+            Elsewise, None, as the data will be saved into the provided
+            array.
+
+        """
+        loaded_array = np.load(path)
+        self._process_loaded_array(loaded_array, units=units)
+        return loaded_array
+
     # Calculations
     ##############
 
