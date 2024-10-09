@@ -26,7 +26,7 @@ You can manually specify the inference grid if you wish via
             # ASE calculator
             calculator.mala_parameters.running.inference_data_grid = ...
 
-Where you have to specify a list with three entries ``[x,y,z]``. As matter
+Here you have to specify a list with three entries ``[x,y,z]``. As matter
 of principle, stretching simulation cells in either direction should be
 reflected by the grid.
 
@@ -42,8 +42,8 @@ Likewise, you can adjust the inference temperature via
 
 .. _production_gpu:
 
-Predictions on multiple GPUs
-****************************
+Predictions on GPUs
+*******************
 
 MALA predictions can be run entirely on a GPU. For the NN part of the workflow,
 this seems like a trivial statement, but the GPU acceleration extends to
@@ -57,16 +57,16 @@ with
 prior to an ASE calculator calculation or usage of the ``Predictor`` class,
 all computationally heavy parts of the MALA inference, will be offloaded
 to the GPU. Please note that this requires LAMMPS to be installed with GPU, i.e., Kokkos
-support. Multiple GPUs can be used during inference by further enabling
+support. Multiple GPUs can be used during inference by first enabling
 parallelization via
 
       .. code-block:: python
 
             parameters.use_mpi = True
 
-
-Setting both ``use_mpi`` and ``use_gpu`` to ``True`` yields multi-GPU
-inferences.
+and then invoking the MALA instance through ``mpirun``, ``srun`` or whichever
+MPI wrapper is used on your machine. Details on parallelization
+are provided :ref:`below <production_parallel>`.
 
 .. note::
 
@@ -75,42 +75,41 @@ inferences.
 
 Currently, there is no direct GPU acceleration for the total energy
 calculation. For smaller calculations, this is unproblematic, but it can become
-a problem for systems of even moderate size. To alleviate this problem, MALA
+an issue for systems of even moderate size. To alleviate this problem, MALA
 provides an optimized total energy calculation routine which utilizes a
 Gaussian representation of atomic positions. In this algorithm, most of the
 computational overhead of the total energy calculation is offloaded to the
-computation of this Gaussian representation, which is realized via LAMMPS and
-can therefore be accelerated as outlined above. Simply activate this option
-via
+computation of this Gaussian representation. This calculation is realized via
+LAMMPS and can therefore be GPU accelerated (parallelized) in the same fashion
+as the bispectrum descriptor calculation. Simply activate this option via
 
     .. code-block:: python
 
         parameters.descriptors.use_atomic_density_energy_formula = True
 
 The Gaussian representation algorithm is describe in
-the publication `Predicting electronic structures at any length scale with machine learning <doi.org/10.1038/s41524-023-01070-z>`_
+the publication `Predicting electronic structures at any length scale with machine learning <doi.org/10.1038/s41524-023-01070-z>`_.
 
-Parallel predictions on CPUs
-****************************
+.. _production_parallel:
 
-Since GPU usage is currently limited to one GPU at a time, predictions
-for ten- to hundreds of thousands of atoms rely on the usage of a large number
-of CPUs. Just like with GPU acceleration, nothing about the general inference
-workflow has to be changed. Simply enable MPI usage in MALA
+Parallel predictions
+********************
+
+MALA predictions may be run on a large number of processing units, either
+CPU or GPU. To do so, simply enable MPI usage in MALA
 
       .. code-block:: python
 
             parameters.use_mpi = True
 
-Please be aware that GPU and MPI usage are mutually exclusive for inference
-at the moment. Once MPI is activated, you can start the MPI aware Python script
-with a large number of CPUs to simulate materials at large length scales.
+Once MPI is activated, you can start the MPI aware Python script using
+``mpirun``, ``srun`` or whichever MPI wrapper is used on your machine.
 
-By default, MALA can only operate with a number of CPUs by which the
+By default, MALA can only operate with a number of processes by which the
 z-dimension of the inference grid can be evenly divided, since the Quantum
 ESPRESSO backend of MALA by default only divides data along the z-dimension.
 If you, e.g., have an inference grid of ``[200,200,200]`` points, you can use
-a maximum of 200 CPUs. Using, e.g., 224 CPUs will lead to an error.
+a maximum of 200 ranks. Using, e.g., 224 CPUs will lead to an error.
 
 Parallelization can further be made more efficient by also enabling splitting
 in the y-dimension. This is done by setting the parameter
@@ -122,8 +121,9 @@ in the y-dimension. This is done by setting the parameter
 to an integer value ``ysplit`` (default: 0). If ``ysplit`` is not zero,
 each z-plane will be divided ``ysplit`` times for the parallelization.
 If you, e.g., have an inference grid of ``[200,200,200]``, you could use
-400 CPUs and ``ysplit`` of 2. Then, the grid will be sliced into 200 z-planes,
-and each z-plane will be sliced twice, allowing even faster inference.
+400 processes and ``ysplit`` of 2. Then, the grid will be sliced into 200
+z-planes, and each z-plane will be sliced twice, allowing even faster
+inference.
 
 Visualizing observables
 ************************
