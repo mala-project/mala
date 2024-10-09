@@ -469,6 +469,30 @@ It should work for all implemented targets.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.read_from_numpy_file">
+<span class="sig-name descname"><span class="pre">read_from_numpy_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reshape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.read_from_numpy_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.read_from_numpy_file" title="Link to this definition"></a></dt>
+<dd><p>Read the data from a numpy file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>string</em>) – Path to the numpy file.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the data is saved in.</p></li>
+<li><p><strong>array</strong> (<em>np.ndarray</em>) – If not None, the array to save the data into.
+The array has to be 4-dimensional.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>data</strong> – If array is None, a numpy array containing the data.
+Elsewise, None, as the data will be saved into the provided
+array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.dos.DOS.read_from_qe_dos_txt">
 <span class="sig-name descname"><span class="pre">read_from_qe_dos_txt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.read_from_qe_dos_txt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.read_from_qe_dos_txt" title="Link to this definition"></a></dt>
 <dd><p>Read the DOS from a Quantum Espresso generated file.</p>

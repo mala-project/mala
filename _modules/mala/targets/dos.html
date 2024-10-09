@@ -633,6 +633,39 @@
         <span class="k">return</span> <span class="n">array</span></div>
 
 
+<div class="viewcode-block" id="DOS.read_from_numpy_file">
+<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_numpy_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_from_numpy_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reshape</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read the data from a numpy file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : string</span>
+<span class="sd">            Path to the numpy file.</span>
+
+<span class="sd">        units : string</span>
+<span class="sd">            Units the data is saved in.</span>
+
+<span class="sd">        array : np.ndarray</span>
+<span class="sd">            If not None, the array to save the data into.</span>
+<span class="sd">            The array has to be 4-dimensional.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        data : numpy.ndarray or None</span>
+<span class="sd">            If array is None, a numpy array containing the data.</span>
+<span class="sd">            Elsewise, None, as the data will be saved into the provided</span>
+<span class="sd">            array.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">loaded_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_array</span><span class="p">(</span><span class="n">loaded_array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">loaded_array</span></div>
+
+
     <span class="c1"># Calculations</span>
     <span class="c1">##############</span>
 
