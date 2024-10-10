@@ -434,16 +434,22 @@ class Trainer(Runner):
                             self.network, inputs, outputs
                         )
                         batchid += 1
+                        total_batch_id += 1
+            
             dataset_fractions = ["validation"]
             if self.parameters.validate_on_training_data:
                 dataset_fractions.append("train")
+            validation_metrics = ["ldos"]
+            if (epoch != 0 and
+                (epoch - 1) % self.parameters.validate_every_n_epochs == 0):
+                validation_metrics = self.parameters.validation_metrics
             errors = self._validate_network(
-                dataset_fractions, self.parameters.validation_metrics
+                dataset_fractions, validation_metrics
             )
             for dataset_fraction in dataset_fractions:
                 for metric in errors[dataset_fraction]:
                     errors[dataset_fraction][metric] = np.mean(
-                        errors[dataset_fraction][metric]
+                        np.abs(errors[dataset_fraction][metric])
                     )
             vloss = errors["validation"][
                 self.parameters.during_training_metric
