@@ -746,6 +746,7 @@ class ParametersRunning(ParametersBase):
         self.logger = "tensorboard"
         self.validation_metrics = ["ldos"]
         self.validate_on_training_data = False
+        self.validate_every_n_epochs = 1
         self.inference_data_grid = [0, 0, 0]
         self.use_mixed_precision = False
         self.use_graphs = False
