@@ -527,16 +527,22 @@
                             <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span>
                         <span class="p">)</span>
                         <span class="n">batchid</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">total_batch_id</span> <span class="o">+=</span> <span class="mi">1</span>
+            
             <span class="n">dataset_fractions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;validation&quot;</span><span class="p">]</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">validate_on_training_data</span><span class="p">:</span>
                 <span class="n">dataset_fractions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
+            <span class="n">validation_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ldos&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span>
+                <span class="p">(</span><span class="n">epoch</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">validate_every_n_epochs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">validation_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">validation_metrics</span>
             <span class="n">errors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_network</span><span class="p">(</span>
-                <span class="n">dataset_fractions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">validation_metrics</span>
+                <span class="n">dataset_fractions</span><span class="p">,</span> <span class="n">validation_metrics</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">dataset_fraction</span> <span class="ow">in</span> <span class="n">dataset_fractions</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">[</span><span class="n">dataset_fraction</span><span class="p">]:</span>
                     <span class="n">errors</span><span class="p">[</span><span class="n">dataset_fraction</span><span class="p">][</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
-                        <span class="n">errors</span><span class="p">[</span><span class="n">dataset_fraction</span><span class="p">][</span><span class="n">metric</span><span class="p">]</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">errors</span><span class="p">[</span><span class="n">dataset_fraction</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span>
                     <span class="p">)</span>
             <span class="n">vloss</span> <span class="o">=</span> <span class="n">errors</span><span class="p">[</span><span class="s2">&quot;validation&quot;</span><span class="p">][</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">during_training_metric</span>
