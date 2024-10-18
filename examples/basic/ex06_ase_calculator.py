@@ -34,4 +34,4 @@ calculator.mala_parameters.targets.pseudopotential_path = data_path
 ####################
 atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
 atoms.set_calculator(calculator)
-print(atoms.get_potential_energy())
+mala.printout(atoms.get_potential_energy())
