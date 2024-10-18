@@ -321,6 +321,11 @@ class ParametersDescriptors(ParametersBase):
 
     atomic_density_sigma : float
         Sigma used for the calculation of the Gaussian descriptors.
+
+    use_atomic_density_energy_formula : bool
+        If True, Gaussian descriptors will be calculated for the
+        calculation of the Ewald sum as part of the total energy module.
+        Default is False.
     """
 
     def __init__(self):
