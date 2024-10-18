@@ -79,10 +79,10 @@ class MALA(Calculator):
     @classmethod
     def load_model(cls, run_name, path="./"):
         """
-        Load a model to use for the calculator.
+        DEPRECATED: Load a model to use for the calculator.
 
-        Only supports zipped models with .json parameters. No legacy
-        models supported.
+        MALA.load_model() will be deprecated in MALA v1.4.0. Please use
+        MALA.load_run() instead.
 
         Parameters
         ----------
