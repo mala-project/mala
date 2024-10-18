@@ -225,18 +225,18 @@ class ParametersNetwork(ParametersBase):
     ----------
     nn_type : string
         Type of the neural network that will be used. Currently supported are
+
             - "feed_forward" (default)
             - "transformer"
             - "lstm"
             - "gru"
-
 
     layer_sizes : list
         A list of integers detailing the sizes of the layer of the neural
         network. Please note that the input layer is included therein.
         Default: [10,10,0]
 
-    layer_activations: list
+    layer_activations : list
         A list of strings detailing the activation functions to be used
         by the neural network. If the dimension of layer_activations is
         smaller than the dimension of layer_sizes-1, than the first entry
@@ -247,25 +247,26 @@ class ParametersNetwork(ParametersBase):
             - ReLU
             - LeakyReLU
 
-    loss_function_type: string
+    loss_function_type : string
         Loss function for the neural network
         Currently supported loss functions include:
 
             - mse (Mean squared error; default)
+
     no_hidden_state : bool
         If True hidden and cell state is assigned to zeros for LSTM Network.
         false will keep the hidden state active
         Default: False
 
-    bidirection: bool
+    bidirection : bool
         Sets lstm network size based on bidirectional or just one direction
         Default: False
 
-    num_hidden_layers: int
+    num_hidden_layers : int
         Number of hidden layers to be used in lstm or gru or transformer nets
         Default: None
 
-    num_heads: int
+    num_heads : int
         Number of heads to be used in Multi head attention network
         This should be a divisor of input dimension
         Default: None
@@ -309,7 +310,7 @@ class ParametersDescriptors(ParametersBase):
         descriptors. Default value for jmax is 5, so default value for
         twojmax is 10.
 
-    lammps_compute_file: string
+    lammps_compute_file : string
         Bispectrum calculation: LAMMPS input file that is used to calculate the
         Bispectrum descriptors. If this string is empty, the standard LAMMPS input
         file found in this repository will be used (recommended).
