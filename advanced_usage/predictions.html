@@ -59,8 +59,8 @@
 <li class="toctree-l2"><a class="reference internal" href="descriptors.html">Improved data conversion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hyperparameters.html">Improved hyperparameter optimization</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Using MALA in production</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#predictions-on-gpu">Predictions on GPU</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#parallel-predictions-on-cpus">Parallel predictions on CPUs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#predictions-on-gpus">Predictions on GPUs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parallel-predictions">Parallel predictions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#visualizing-observables">Visualizing observables</a></li>
 </ul>
 </li>
@@ -119,7 +119,7 @@ You can manually specify the inference grid if you wish via</p>
 </pre></div>
 </div>
 </div></blockquote>
-<p>Where you have to specify a list with three entries <code class="docutils literal notranslate"><span class="pre">[x,y,z]</span></code>. As matter
+<p>Here you have to specify a list with three entries <code class="docutils literal notranslate"><span class="pre">[x,y,z]</span></code>. As matter
 of principle, stretching simulation cells in either direction should be
 reflected by the grid.</p>
 <p>Likewise, you can adjust the inference temperature via</p>
@@ -131,8 +131,8 @@ reflected by the grid.</p>
 </pre></div>
 </div>
 </div></blockquote>
-<section id="predictions-on-gpu">
-<span id="production-gpu"></span><h2>Predictions on GPU<a class="headerlink" href="#predictions-on-gpu" title="Link to this heading"></a></h2>
+<section id="predictions-on-gpus">
+<span id="production-gpu"></span><h2>Predictions on GPUs<a class="headerlink" href="#predictions-on-gpus" title="Link to this heading"></a></h2>
 <p>MALA predictions can be run entirely on a GPU. For the NN part of the workflow,
 this seems like a trivial statement, but the GPU acceleration extends to
 descriptor calculation and total energy evaluation. By enabling GPU support
@@ -144,34 +144,55 @@ with</p>
 </div></blockquote>
 <p>prior to an ASE calculator calculation or usage of the <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> class,
 all computationally heavy parts of the MALA inference, will be offloaded
-to the GPU.</p>
-<p>Please note that this requires LAMMPS to be installed with GPU, i.e., Kokkos
-support. A current limitation of this implementation is that only a <em>single</em>
-GPU can be used for inference. This puts an upper limit on the number of atoms
-which can be simulated, depending on the hardware you have access to.
-Usual numbers observed by MALA team put this limit at a few thousand atoms, for
-which the electronic structure can be predicted in 1-2 minutes. Currently,
-multi-GPU inference is being implemented.</p>
-</section>
-<section id="parallel-predictions-on-cpus">
-<h2>Parallel predictions on CPUs<a class="headerlink" href="#parallel-predictions-on-cpus" title="Link to this heading"></a></h2>
-<p>Since GPU usage is currently limited to one GPU at a time, predictions
-for ten- to hundreds of thousands of atoms rely on the usage of a large number
-of CPUs. Just like with GPU acceleration, nothing about the general inference
-workflow has to be changed. Simply enable MPI usage in MALA</p>
+to the GPU. Please note that this requires LAMMPS to be installed with GPU, i.e., Kokkos
+support. Multiple GPUs can be used during inference by first enabling
+parallelization via</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>Please be aware that GPU and MPI usage are mutually exclusive for inference
-at the moment. Once MPI is activated, you can start the MPI aware Python script
-with a large number of CPUs to simulate materials at large length scales.</p>
-<p>By default, MALA can only operate with a number of CPUs by which the
+<p>and then invoking the MALA instance through <code class="docutils literal notranslate"><span class="pre">mpirun</span></code>, <code class="docutils literal notranslate"><span class="pre">srun</span></code> or whichever
+MPI wrapper is used on your machine. Details on parallelization
+are provided <a class="reference internal" href="#production-parallel"><span class="std std-ref">below</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To use GPU acceleration for total energy calculation, an additional
+setting has to be used.</p>
+</div>
+<p>Currently, there is no direct GPU acceleration for the total energy
+calculation. For smaller calculations, this is unproblematic, but it can become
+an issue for systems of even moderate size. To alleviate this problem, MALA
+provides an optimized total energy calculation routine which utilizes a
+Gaussian representation of atomic positions. In this algorithm, most of the
+computational overhead of the total energy calculation is offloaded to the
+computation of this Gaussian representation. This calculation is realized via
+LAMMPS and can therefore be GPU accelerated (parallelized) in the same fashion
+as the bispectrum descriptor calculation. Simply activate this option via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_atomic_density_energy_formula</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The Gaussian representation algorithm is describe in
+the publication <a class="reference external" href="doi.org/10.1038/s41524-023-01070-z">Predicting electronic structures at any length scale with machine learning</a>.</p>
+</section>
+<section id="parallel-predictions">
+<span id="production-parallel"></span><h2>Parallel predictions<a class="headerlink" href="#parallel-predictions" title="Link to this heading"></a></h2>
+<p>MALA predictions may be run on a large number of processing units, either
+CPU or GPU. To do so, simply enable MPI usage in MALA</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Once MPI is activated, you can start the MPI aware Python script using
+<code class="docutils literal notranslate"><span class="pre">mpirun</span></code>, <code class="docutils literal notranslate"><span class="pre">srun</span></code> or whichever MPI wrapper is used on your machine.</p>
+<p>By default, MALA can only operate with a number of processes by which the
 z-dimension of the inference grid can be evenly divided, since the Quantum
 ESPRESSO backend of MALA by default only divides data along the z-dimension.
 If you, e.g., have an inference grid of <code class="docutils literal notranslate"><span class="pre">[200,200,200]</span></code> points, you can use
-a maximum of 200 CPUs. Using, e.g., 224 CPUs will lead to an error.</p>
+a maximum of 200 ranks. Using, e.g., 224 CPUs will lead to an error.</p>
 <p>Parallelization can further be made more efficient by also enabling splitting
 in the y-dimension. This is done by setting the parameter</p>
 <blockquote>
@@ -182,8 +203,9 @@ in the y-dimension. This is done by setting the parameter</p>
 <p>to an integer value <code class="docutils literal notranslate"><span class="pre">ysplit</span></code> (default: 0). If <code class="docutils literal notranslate"><span class="pre">ysplit</span></code> is not zero,
 each z-plane will be divided <code class="docutils literal notranslate"><span class="pre">ysplit</span></code> times for the parallelization.
 If you, e.g., have an inference grid of <code class="docutils literal notranslate"><span class="pre">[200,200,200]</span></code>, you could use
-400 CPUs and <code class="docutils literal notranslate"><span class="pre">ysplit</span></code> of 2. Then, the grid will be sliced into 200 z-planes,
-and each z-plane will be sliced twice, allowing even faster inference.</p>
+400 processes and <code class="docutils literal notranslate"><span class="pre">ysplit</span></code> of 2. Then, the grid will be sliced into 200
+z-planes, and each z-plane will be sliced twice, allowing even faster
+inference.</p>
 </section>
 <section id="visualizing-observables">
 <h2>Visualizing observables<a class="headerlink" href="#visualizing-observables" title="Link to this heading"></a></h2>
