@@ -231,8 +231,8 @@ class ObjectiveBase:
                         turned_off_layers.append(layer_counter)
                     layer_counter += 1
 
-            elif "trainingtype" == par.name:
-                self.params.running.trainingtype = par.get_parameter(trial)
+            elif "optimizer" == par.name:
+                self.params.running.optimizer = par.get_parameter(trial)
 
             elif "mini_batch_size" == par.name:
                 self.params.running.mini_batch_size = par.get_parameter(trial)
@@ -358,8 +358,8 @@ class ObjectiveBase:
                         turned_off_layers.append(layer_counter)
                     layer_counter += 1
 
-            elif "trainingtype" == par.name:
-                self.params.running.trainingtype = par.get_parameter(
+            elif "optimizer" == par.name:
+                self.params.running.optimizer = par.get_parameter(
                     trial, factor_idx
                 )
             elif "mini_batch_size" == par.name:

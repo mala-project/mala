@@ -575,8 +575,8 @@ class Density(Target):
             Integration method used to integrate density on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
         """
         if density_data is None:
@@ -969,7 +969,7 @@ class Density(Target):
 
         if Density.te_mutex is False:
             printout(
-                "MALA: Starting QuantumEspresso to get density-based"
+                "Starting QuantumEspresso to get density-based"
                 " energy contributions.",
                 min_verbosity=0,
             )
@@ -977,14 +977,18 @@ class Density(Target):
             t0 = time.perf_counter()
             te.initialize(self.y_planes)
             barrier()
-            t1 = time.perf_counter()
-            printout("time used by total energy initialization: ", t1 - t0)
+            printout(
+                "Total energy module: Time used by total energy initialization: {:.8f}s".format(
+                    time.perf_counter() - t0
+                ),
+                min_verbosity=2,
+            )
 
             Density.te_mutex = True
-            printout("MALA: QuantumEspresso setup done.", min_verbosity=0)
+            printout("QuantumEspresso setup done.", min_verbosity=0)
         else:
             printout(
-                "MALA: QuantumEspresso is already running. Except for"
+                "QuantumEspresso is already running. Except for"
                 " the atomic positions, no new parameters will be used.",
                 min_verbosity=0,
             )
@@ -1096,10 +1100,10 @@ class Density(Target):
                 )
             )
             barrier()
-            t1 = time.perf_counter()
             printout(
-                "time used by gaussian descriptors: ",
-                t1 - t0,
+                "Total energy module: Time used by gaussian descriptors: {:.8f}s".format(
+                    time.perf_counter() - t0
+                ),
                 min_verbosity=2,
             )
 
@@ -1128,10 +1132,10 @@ class Density(Target):
                 )
             )
             barrier()
-            t1 = time.perf_counter()
             printout(
-                "time used by reference gaussian descriptors: ",
-                t1 - t0,
+                "Total energy module: Time used by reference gaussian descriptors: {:.8f}s".format(
+                    time.perf_counter() - t0
+                ),
                 min_verbosity=2,
             )
 
@@ -1158,9 +1162,12 @@ class Density(Target):
             self._parameters_full.descriptors.use_atomic_density_energy_formula,
         )
         barrier()
-        t1 = time.perf_counter()
-        printout("time used by set_positions: ", t1 - t0, min_verbosity=2)
-
+        printout(
+            "Total energy module: Time used by set_positions: {:.8f}s".format(
+                time.perf_counter() - t0
+            ),
+            min_verbosity=2,
+        )
         barrier()
 
         if self._parameters_full.descriptors.use_atomic_density_energy_formula:
@@ -1200,9 +1207,11 @@ class Density(Target):
                 1,
             )
             barrier()
-            t1 = time.perf_counter()
             printout(
-                "time used by set_positions_gauss: ", t1 - t0, min_verbosity=2
+                "Total energy module: Time used by set_positions_gauss: {:.8f}s".format(
+                    time.perf_counter() - t0
+                ),
+                min_verbosity=2,
             )
 
         # Now we can set the new density.
@@ -1210,8 +1219,12 @@ class Density(Target):
         t0 = time.perf_counter()
         te.set_rho_of_r(density_for_qe, number_of_gridpoints, nr_spin_channels)
         barrier()
-        t1 = time.perf_counter()
-        printout("time used by set_rho_of_r: ", t1 - t0, min_verbosity=2)
+        printout(
+            "Total energy module: Time used by set_rho_of_r: {:.8f}s".format(
+                time.perf_counter() - t0
+            ),
+            min_verbosity=2,
+        )
 
         return atoms_Angstrom
 

@@ -22,7 +22,7 @@ parameters.data.input_rescaling_type = "feature-wise-standard"
 parameters.data.output_rescaling_type = "normal"
 parameters.running.max_number_epochs = 20
 parameters.running.mini_batch_size = 40
-parameters.running.trainingtype = "Adam"
+parameters.running.optimizer = "Adam"
 parameters.hyperparameters.n_trials = 20
 
 ####################

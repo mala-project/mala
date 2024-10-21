@@ -28,7 +28,7 @@ parameters.network.layer_activations = ["ReLU"]
 parameters.running.max_number_epochs = 100
 parameters.running.mini_batch_size = 40
 parameters.running.learning_rate = 0.00001
-parameters.running.trainingtype = "Adam"
+parameters.running.optimizer = "Adam"
 # These parameters characterize how the LDOS and bispectrum descriptors
 # were calculated. They are _technically_ not needed to train a simple
 # network. However, it is useful to define them prior to training. Then,

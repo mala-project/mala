@@ -1,6 +1,7 @@
 """Bispectrum descriptor class."""
 
 import os
+import tempfile
 
 import ase
 import ase.io
@@ -141,9 +142,8 @@ class Bispectrum(Descriptor):
         keep_logs = kwargs.get("keep_logs", False)
 
         lammps_format = "lammps-data"
-        self.lammps_temporary_input = os.path.join(
-            outdir, "lammps_input_" + self.calculation_timestamp + ".tmp"
-        )
+        self.setup_lammps_tmp_files("bgrid", outdir)
+
         ase.io.write(
             self.lammps_temporary_input, self.atoms, format=lammps_format
         )
@@ -157,11 +157,6 @@ class Bispectrum(Descriptor):
             "twojmax": self.parameters.bispectrum_twojmax,
             "rcutfac": self.parameters.bispectrum_cutoff,
         }
-
-        self.lammps_temporary_log = os.path.join(
-            outdir,
-            "lammps_bgrid_log_" + self.calculation_timestamp + ".tmp",
-        )
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # An empty string means that the user wants to use the standard input.
@@ -227,6 +222,7 @@ class Bispectrum(Descriptor):
                 array_shape=(nrows_local, ncols_local),
                 use_fp64=use_fp64,
             )
+
             self._clean_calculation(lmp, keep_logs)
 
             # Copy the grid dimensions only at the end.
@@ -243,6 +239,7 @@ class Bispectrum(Descriptor):
                 (nz, ny, nx, self.fingerprint_length),
                 use_fp64=use_fp64,
             )
+
             self._clean_calculation(lmp, keep_logs)
 
             # switch from x-fastest to z-fastest order (swaps 0th and 2nd
@@ -511,7 +508,6 @@ class Bispectrum(Descriptor):
     ########
 
     class _ZIndices:
-
         def __init__(self):
             self.j1 = 0
             self.j2 = 0
@@ -525,7 +521,6 @@ class Bispectrum(Descriptor):
             self.jju = 0
 
     class _BIndices:
-
         def __init__(self):
             self.j1 = 0
             self.j2 = 0
@@ -968,21 +963,21 @@ class Bispectrum(Descriptor):
                     )
                     jju1 += 1
                 if jju_outer in self.__index_u1_symmetry_pos:
-                    ulist_r_ij[:, self.__index_u1_symmetry_pos[jju2]] = (
-                        ulist_r_ij[:, self.__index_u_symmetry_pos[jju2]]
-                    )
-                    ulist_i_ij[:, self.__index_u1_symmetry_pos[jju2]] = (
-                        -ulist_i_ij[:, self.__index_u_symmetry_pos[jju2]]
-                    )
+                    ulist_r_ij[
+                        :, self.__index_u1_symmetry_pos[jju2]
+                    ] = ulist_r_ij[:, self.__index_u_symmetry_pos[jju2]]
+                    ulist_i_ij[
+                        :, self.__index_u1_symmetry_pos[jju2]
+                    ] = -ulist_i_ij[:, self.__index_u_symmetry_pos[jju2]]
                     jju2 += 1
 
                 if jju_outer in self.__index_u1_symmetry_neg:
-                    ulist_r_ij[:, self.__index_u1_symmetry_neg[jju3]] = (
-                        -ulist_r_ij[:, self.__index_u_symmetry_neg[jju3]]
-                    )
-                    ulist_i_ij[:, self.__index_u1_symmetry_neg[jju3]] = (
-                        ulist_i_ij[:, self.__index_u_symmetry_neg[jju3]]
-                    )
+                    ulist_r_ij[
+                        :, self.__index_u1_symmetry_neg[jju3]
+                    ] = -ulist_r_ij[:, self.__index_u_symmetry_neg[jju3]]
+                    ulist_i_ij[
+                        :, self.__index_u1_symmetry_neg[jju3]
+                    ] = ulist_i_ij[:, self.__index_u_symmetry_neg[jju3]]
                     jju3 += 1
 
             # This emulates add_uarraytot.

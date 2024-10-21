@@ -225,18 +225,18 @@ class ParametersNetwork(ParametersBase):
     ----------
     nn_type : string
         Type of the neural network that will be used. Currently supported are
+
             - "feed_forward" (default)
             - "transformer"
             - "lstm"
             - "gru"
-
 
     layer_sizes : list
         A list of integers detailing the sizes of the layer of the neural
         network. Please note that the input layer is included therein.
         Default: [10,10,0]
 
-    layer_activations: list
+    layer_activations : list
         A list of strings detailing the activation functions to be used
         by the neural network. If the dimension of layer_activations is
         smaller than the dimension of layer_sizes-1, than the first entry
@@ -247,30 +247,26 @@ class ParametersNetwork(ParametersBase):
             - ReLU
             - LeakyReLU
 
-    loss_function_type: string
+    loss_function_type : string
         Loss function for the neural network
         Currently supported loss functions include:
 
             - mse (Mean squared error; default)
+
     no_hidden_state : bool
         If True hidden and cell state is assigned to zeros for LSTM Network.
         false will keep the hidden state active
         Default: False
 
-    bidirection: bool
+    bidirection : bool
         Sets lstm network size based on bidirectional or just one direction
         Default: False
 
-    num_hidden_layers: int
+    num_hidden_layers : int
         Number of hidden layers to be used in lstm or gru or transformer nets
         Default: None
 
-    dropout: float
-        Dropout rate for transformer net
-        0.0 ≤ dropout ≤ 1.0
-        Default: 0.0
-
-    num_heads: int
+    num_heads : int
         Number of heads to be used in Multi head attention network
         This should be a divisor of input dimension
         Default: None
@@ -314,7 +310,7 @@ class ParametersDescriptors(ParametersBase):
         descriptors. Default value for jmax is 5, so default value for
         twojmax is 10.
 
-    lammps_compute_file: string
+    lammps_compute_file : string
         Bispectrum calculation: LAMMPS input file that is used to calculate the
         Bispectrum descriptors. If this string is empty, the standard LAMMPS input
         file found in this repository will be used (recommended).
@@ -326,6 +322,11 @@ class ParametersDescriptors(ParametersBase):
 
     atomic_density_sigma : float
         Sigma used for the calculation of the Gaussian descriptors.
+
+    use_atomic_density_energy_formula : bool
+        If True, Gaussian descriptors will be calculated for the
+        calculation of the Ewald sum as part of the total energy module.
+        Default is False.
     """
 
     def __init__(self):
@@ -452,7 +453,7 @@ class ParametersTargets(ParametersBase):
         Number of points in the energy grid that is used to calculate the
         (L)DOS.
 
-    ldos_gridsize : float
+    ldos_gridsize : int
         Gridsize of the LDOS.
 
     ldos_gridspacing_ev: float
@@ -633,9 +634,8 @@ class ParametersRunning(ParametersBase):
 
     Attributes
     ----------
-    trainingtype : string
-        Training type to be used. Supported options at the moment:
-
+    optimizer : string
+        Optimizer to be used. Supported options at the moment:
             - SGD: Stochastic gradient descent.
             - Adam: Adam Optimization Algorithm
 
@@ -647,10 +647,6 @@ class ParametersRunning(ParametersBase):
 
     mini_batch_size : int
         Size of the mini batch for the optimization algorihm. Default: 10.
-
-    weight_decay : float
-        Weight decay for regularization. Always refers to L2 regularization.
-        Default: 0.
 
     early_stopping_epochs : int
         Number of epochs the validation accuracy is allowed to not improve by
@@ -704,19 +700,13 @@ class ParametersRunning(ParametersBase):
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
 
-    visualisation : int
-        If True then Tensorboard is activated for visualisation
-        case 0: No tensorboard activated
-        case 1: tensorboard activated with Loss and learning rate
-        case 2; additonally weights and biases and gradient
+    logging_dir : string
+        Name of the folder that logging files will be saved to.
 
-    visualisation_dir : string
-        Name of the folder that visualization files will be saved to.
-
-    visualisation_dir_append_date : bool
-        If True, then upon creating visualization files, these will be saved
-        in a subfolder of visualisation_dir labelled with the starting date
-        of the visualization, to avoid having to change input scripts often.
+    logging_dir_append_date : bool
+        If True, then upon creating logging files, these will be saved
+        in a subfolder of logging_dir labelled with the starting date
+        of the logging, to avoid having to change input scripts often.
 
     inference_data_grid : list
         List holding the grid to be used for inference in the form of
@@ -725,7 +715,7 @@ class ParametersRunning(ParametersBase):
     use_mixed_precision : bool
         If True, mixed precision computation (via AMP) will be used.
 
-    training_report_frequency : int
+    training_log_interval : int
         Determines how often detailed performance info is printed during
         training (only has an effect if the verbosity is high enough).
 
@@ -737,36 +727,50 @@ class ParametersRunning(ParametersBase):
 
     def __init__(self):
         super(ParametersRunning, self).__init__()
-        self.trainingtype = "SGD"
-        self.learning_rate = 0.5
+        self.optimizer = "Adam"
+        self.learning_rate = 10 ** (-5)
+        self.learning_rate_embedding = 10 ** (-4)
         self.max_number_epochs = 100
         self.verbosity = True
         self.mini_batch_size = 10
-        self.weight_decay = 0
+        self.snapshots_per_epoch = -1
+
+        self.l1_regularization = 0.0
+        self.l2_regularization = 0.0
+        self.dropout = 0.0
+        self.batch_norm = False
+        self.input_noise = 0.0
+
         self.early_stopping_epochs = 0
         self.early_stopping_threshold = 0
         self.learning_rate_scheduler = None
         self.learning_rate_decay = 0.1
         self.learning_rate_patience = 0
+        self._during_training_metric = "ldos"
+        self._after_training_metric = "ldos"
+        self.use_compression = False
         self.num_workers = 0
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
+        self.checkpoint_best_so_far = False
         self.checkpoint_name = "checkpoint_mala"
-        self.visualisation = 0
-        self.visualisation_dir = os.path.join(".", "mala_logging")
-        self.visualisation_dir_append_date = True
-        self.during_training_metric = "ldos"
-        self.after_before_training_metric = "ldos"
+        self.run_name = ""
+        self.logging_dir = "./mala_logging"
+        self.logging_dir_append_date = True
+        self.logger = "tensorboard"
+        self.validation_metrics = ["ldos"]
+        self.validate_on_training_data = False
+        self.validate_every_n_epochs = 1
         self.inference_data_grid = [0, 0, 0]
         self.use_mixed_precision = False
         self.use_graphs = False
-        self.training_report_frequency = 1000
-        self.profiler_range = None  # [1000, 2000]
+        self.training_log_interval = 1000
+        self.profiler_range = [1000, 2000]
 
     def _update_ddp(self, new_ddp):
         super(ParametersRunning, self)._update_ddp(new_ddp)
         self.during_training_metric = self.during_training_metric
-        self.after_before_training_metric = self.after_before_training_metric
+        self.after_training_metric = self.after_training_metric
 
     @property
     def during_training_metric(self):
@@ -791,10 +795,12 @@ class ParametersRunning(ParametersBase):
                     "Currently, MALA can only operate with the "
                     '"ldos" metric for ddp runs.'
                 )
+            if value not in self.validation_metrics:
+                self.validation_metrics.append(value)
         self._during_training_metric = value
 
     @property
-    def after_before_training_metric(self):
+    def after_training_metric(self):
         """
         Get the metric used during training.
 
@@ -806,27 +812,17 @@ class ParametersRunning(ParametersBase):
         DFT results. Of these, the mean average error in eV/atom will be
         calculated.
         """
-        return self._after_before_training_metric
+        return self._after_training_metric
 
-    @after_before_training_metric.setter
-    def after_before_training_metric(self, value):
+    @after_training_metric.setter
+    def after_training_metric(self, value):
         if value != "ldos":
             if self._configuration["ddp"]:
                 raise Exception(
                     "Currently, MALA can only operate with the "
                     '"ldos" metric for ddp runs.'
                 )
-        self._after_before_training_metric = value
-
-    @during_training_metric.setter
-    def during_training_metric(self, value):
-        if value != "ldos":
-            if self._configuration["ddp"]:
-                raise Exception(
-                    "Currently, MALA can only operate with the "
-                    '"ldos" metric for ddp runs.'
-                )
-        self._during_training_metric = value
+        self._after_training_metric = value
 
     @property
     def use_graphs(self):
@@ -1482,7 +1478,7 @@ class Parameters:
                 if member[0][0] != "_":
                     if isinstance(member[1], ParametersBase):
                         # All the subclasses have to provide this function.
-                        member[1]: ParametersBase
+                        member[1]: ParametersBase  # type: ignore
                         json_dict[member[0]] = member[1].to_json()
             with open(filename, "w", encoding="utf-8") as f:
                 json.dump(json_dict, f, ensure_ascii=False, indent=4)

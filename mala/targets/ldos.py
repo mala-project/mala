@@ -618,15 +618,15 @@ class LDOS(Target):
             Integration method used to integrate the density on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
             Integration method to integrate the DOS. Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
         atoms_Angstrom : ase.Atoms
@@ -811,15 +811,15 @@ class LDOS(Target):
             Integration method used to integrate the LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
             Integration method to integrate the DOS. Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
         voxel : ase.cell.Cell
@@ -887,15 +887,15 @@ class LDOS(Target):
             Integration method used to integrate the LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
             Integration method to integrate the DOS. Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
         voxel : ase.cell.Cell
@@ -963,15 +963,15 @@ class LDOS(Target):
             Integration method used to integrate the LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
             Integration method to integrate the DOS. Currently supported:
 
                 - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
         voxel : ase.cell.Cell
@@ -1039,15 +1039,15 @@ class LDOS(Target):
             Integration method used to integrate the LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
             Integration method to integrate the DOS. Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
         voxel : ase.cell.Cell
@@ -1113,8 +1113,8 @@ class LDOS(Target):
         integration_method : string
             Integration method to be used. Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
         ldos_data : numpy.array
@@ -1125,8 +1125,8 @@ class LDOS(Target):
             Integration method to integrate LDOS on energygrid.
             Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
         gather_density : bool
@@ -1193,12 +1193,12 @@ class LDOS(Target):
         )
 
         # Calculate the number of electrons.
-        if integration_method == "trapz":
-            density_values = integrate.trapz(
+        if integration_method == "trapezoid":
+            density_values = integrate.trapezoid(
                 ldos_data_used * fermi_values, energy_grid, axis=-1
             )
-        elif integration_method == "simps":
-            density_values = integrate.simps(
+        elif integration_method == "simpson":
+            density_values = integrate.simpson(
                 ldos_data_used * fermi_values, energy_grid, axis=-1
             )
         elif integration_method == "analytical":
@@ -1277,8 +1277,8 @@ class LDOS(Target):
             Integration method used to integrate LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         gather_dos : bool

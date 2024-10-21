@@ -21,7 +21,7 @@ def initial_setup():
     parameters.running.max_number_epochs = 10
     parameters.running.mini_batch_size = 40
     parameters.running.learning_rate = 0.00001
-    parameters.running.trainingtype = "Adam"
+    parameters.running.optimizer = "Adam"
     parameters.hyperparameters.n_trials = 9
     parameters.hyperparameters.checkpoints_each_trial = 5
     parameters.hyperparameters.checkpoint_name = "ex05_checkpoint"

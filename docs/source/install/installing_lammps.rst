@@ -49,7 +49,7 @@ The MALA team recommends to build LAMMPS with ``cmake``. To do so
 
             cmake ../cmake -D PKG_KOKKOS=yes -D BUILD_MPI=yes -D PKG_ML-SNAP=yes -D Kokkos_ENABLE_CUDA=yes -D Kokkos_ARCH_HSW=yes -D Kokkos_ARCH_VOLTA70=yes -D CMAKE_CXX_COMPILER=/path/to/lammps/lib/kokkos/bin/nvcc_wrapper -D BUILD_SHARED_LIBS=yes
 
-   .. note::
+.. note::
       When using a GPU by setting ``parameters.use_gpu = True``, you *need* to
       have a GPU version of ``LAMMPS`` installed. See :ref:`production_gpu` for
       details.
