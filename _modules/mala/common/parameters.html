@@ -322,18 +322,18 @@
 <span class="sd">    ----------</span>
 <span class="sd">    nn_type : string</span>
 <span class="sd">        Type of the neural network that will be used. Currently supported are</span>
+
 <span class="sd">            - &quot;feed_forward&quot; (default)</span>
 <span class="sd">            - &quot;transformer&quot;</span>
 <span class="sd">            - &quot;lstm&quot;</span>
 <span class="sd">            - &quot;gru&quot;</span>
-
 
 <span class="sd">    layer_sizes : list</span>
 <span class="sd">        A list of integers detailing the sizes of the layer of the neural</span>
 <span class="sd">        network. Please note that the input layer is included therein.</span>
 <span class="sd">        Default: [10,10,0]</span>
 
-<span class="sd">    layer_activations: list</span>
+<span class="sd">    layer_activations : list</span>
 <span class="sd">        A list of strings detailing the activation functions to be used</span>
 <span class="sd">        by the neural network. If the dimension of layer_activations is</span>
 <span class="sd">        smaller than the dimension of layer_sizes-1, than the first entry</span>
@@ -344,25 +344,26 @@
 <span class="sd">            - ReLU</span>
 <span class="sd">            - LeakyReLU</span>
 
-<span class="sd">    loss_function_type: string</span>
+<span class="sd">    loss_function_type : string</span>
 <span class="sd">        Loss function for the neural network</span>
 <span class="sd">        Currently supported loss functions include:</span>
 
 <span class="sd">            - mse (Mean squared error; default)</span>
+
 <span class="sd">    no_hidden_state : bool</span>
 <span class="sd">        If True hidden and cell state is assigned to zeros for LSTM Network.</span>
 <span class="sd">        false will keep the hidden state active</span>
 <span class="sd">        Default: False</span>
 
-<span class="sd">    bidirection: bool</span>
+<span class="sd">    bidirection : bool</span>
 <span class="sd">        Sets lstm network size based on bidirectional or just one direction</span>
 <span class="sd">        Default: False</span>
 
-<span class="sd">    num_hidden_layers: int</span>
+<span class="sd">    num_hidden_layers : int</span>
 <span class="sd">        Number of hidden layers to be used in lstm or gru or transformer nets</span>
 <span class="sd">        Default: None</span>
 
-<span class="sd">    num_heads: int</span>
+<span class="sd">    num_heads : int</span>
 <span class="sd">        Number of heads to be used in Multi head attention network</span>
 <span class="sd">        This should be a divisor of input dimension</span>
 <span class="sd">        Default: None</span>
@@ -409,7 +410,7 @@
 <span class="sd">        descriptors. Default value for jmax is 5, so default value for</span>
 <span class="sd">        twojmax is 10.</span>
 
-<span class="sd">    lammps_compute_file: string</span>
+<span class="sd">    lammps_compute_file : string</span>
 <span class="sd">        Bispectrum calculation: LAMMPS input file that is used to calculate the</span>
 <span class="sd">        Bispectrum descriptors. If this string is empty, the standard LAMMPS input</span>
 <span class="sd">        file found in this repository will be used (recommended).</span>

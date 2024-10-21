@@ -1071,15 +1071,15 @@ as an estimate of the minimal accuracy to be expected. Currently,
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersNetwork.nn_type">
 <span class="sig-name descname"><span class="pre">nn_type</span></span><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.nn_type" title="Link to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>Type of the neural network that will be used. Currently supported are</dt><dd><ul class="simple">
+<dd><p>Type of the neural network that will be used. Currently supported are</p>
+<blockquote>
+<div><ul class="simple">
 <li><p>“feed_forward” (default)</p></li>
 <li><p>“transformer”</p></li>
 <li><p>“lstm”</p></li>
 <li><p>“gru”</p></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>string</p>
@@ -1087,12 +1087,23 @@ as an estimate of the minimal accuracy to be expected. Currently,
 </dl>
 </dd></dl>
 
-<dl>
-<dt>layer_sizes<span class="classifier">list</span></dt><dd><p>A list of integers detailing the sizes of the layer of the neural
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersNetwork.layer_sizes">
+<span class="sig-name descname"><span class="pre">layer_sizes</span></span><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.layer_sizes" title="Link to this definition"></a></dt>
+<dd><p>A list of integers detailing the sizes of the layer of the neural
 network. Please note that the input layer is included therein.
 Default: [10,10,0]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
 </dd>
-<dt>layer_activations: list</dt><dd><p>A list of strings detailing the activation functions to be used
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersNetwork.layer_activations">
+<span class="sig-name descname"><span class="pre">layer_activations</span></span><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.layer_activations" title="Link to this definition"></a></dt>
+<dd><p>A list of strings detailing the activation functions to be used
 by the neural network. If the dimension of layer_activations is
 smaller than the dimension of layer_sizes-1, than the first entry
 is used for all layers.
@@ -1104,30 +1115,80 @@ Currently supported activation functions are:</p>
 <li><p>LeakyReLU</p></li>
 </ul>
 </div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
 </dd>
-<dt>loss_function_type: string</dt><dd><p>Loss function for the neural network
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersNetwork.loss_function_type">
+<span class="sig-name descname"><span class="pre">loss_function_type</span></span><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.loss_function_type" title="Link to this definition"></a></dt>
+<dd><p>Loss function for the neural network
 Currently supported loss functions include:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>mse (Mean squared error; default)</p></li>
 </ul>
 </div></blockquote>
-</dd>
-<dt>no_hidden_state<span class="classifier">bool</span></dt><dd><p>If True hidden and cell state is assigned to zeros for LSTM Network.
-false will keep the hidden state active
-Default: False</p>
-</dd>
-<dt>bidirection: bool</dt><dd><p>Sets lstm network size based on bidirectional or just one direction
-Default: False</p>
-</dd>
-<dt>num_hidden_layers: int</dt><dd><p>Number of hidden layers to be used in lstm or gru or transformer nets
-Default: None</p>
-</dd>
-<dt>num_heads: int</dt><dd><p>Number of heads to be used in Multi head attention network
-This should be a divisor of input dimension
-Default: None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersNetwork.no_hidden_state">
+<span class="sig-name descname"><span class="pre">no_hidden_state</span></span><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.no_hidden_state" title="Link to this definition"></a></dt>
+<dd><p>If True hidden and cell state is assigned to zeros for LSTM Network.
+false will keep the hidden state active
+Default: False</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersNetwork.bidirection">
+<span class="sig-name descname"><span class="pre">bidirection</span></span><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.bidirection" title="Link to this definition"></a></dt>
+<dd><p>Sets lstm network size based on bidirectional or just one direction
+Default: False</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersNetwork.num_hidden_layers">
+<span class="sig-name descname"><span class="pre">num_hidden_layers</span></span><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.num_hidden_layers" title="Link to this definition"></a></dt>
+<dd><p>Number of hidden layers to be used in lstm or gru or transformer nets
+Default: None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersNetwork.num_heads">
+<span class="sig-name descname"><span class="pre">num_heads</span></span><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.num_heads" title="Link to this definition"></a></dt>
+<dd><p>Number of heads to be used in Multi head attention network
+This should be a divisor of input dimension
+Default: None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
