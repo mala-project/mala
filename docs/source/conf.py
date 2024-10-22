@@ -80,6 +80,7 @@ autodoc_mock_imports = [
     "asap3",
     "openpmd_io",
     "skspatial",
+    "tqdm",
 ]
 
 myst_heading_anchors = 3

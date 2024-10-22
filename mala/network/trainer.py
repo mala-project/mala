@@ -21,6 +21,7 @@ from mala.datahandling.lazy_load_dataset_single import LazyLoadDatasetSingle
 from mala.datahandling.multi_lazy_load_data_loader import (
     MultiLazyLoadDataLoader,
 )
+from tqdm.auto import trange, tqdm
 
 
 class Trainer(Runner):
@@ -54,8 +55,6 @@ class Trainer(Runner):
                 self.network = DDP(self.network)
             torch.cuda.current_stream().wait_stream(s)
 
-        self.final_test_loss = float("inf")
-        self.initial_test_loss = float("inf")
         self.final_validation_loss = float("inf")
         self.initial_validation_loss = float("inf")
         self.optimizer = None
@@ -65,36 +64,44 @@ class Trainer(Runner):
         self.last_loss = None
         self.training_data_loaders = []
         self.validation_data_loaders = []
-        self.test_data_loaders = []
 
         # Samplers for the ddp case.
         self.train_sampler = None
-        self.test_sampler = None
         self.validation_sampler = None
 
         self.__prepare_to_train(optimizer_dict)
 
-        self.tensor_board = None
-        self.full_visualization_path = None
-        if self.parameters.visualisation:
-            if not os.path.exists(self.parameters.visualisation_dir):
-                os.makedirs(self.parameters.visualisation_dir)
-            if self.parameters.visualisation_dir_append_date:
+        self.logger = None
+        self.full_logging_path = None
+        if self.parameters.logger is not None:
+            os.makedirs(self.parameters.logging_dir, exist_ok=True)
+            if self.parameters.logging_dir_append_date:
                 date_time = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-                self.full_visualization_path = os.path.join(
-                    self.parameters.visualisation_dir, date_time
+                if len(self.parameters.run_name) > 0:
+                    name = self.parameters.run_name + "_" + date_time
+                else:
+                    name = date_time
+                self.full_logging_path = os.path.join(
+                    self.parameters.logging_dir, name
                 )
-                os.makedirs(self.full_visualization_path)
+                os.makedirs(self.full_logging_path, exist_ok=True)
             else:
-                self.full_visualization_path = (
-                    self.parameters.visualisation_dir
-                )
+                self.full_logging_path = self.parameters.logging_dir
 
             # Set the path to log files
-            self.tensor_board = SummaryWriter(self.full_visualization_path)
+            if self.parameters.logger == "wandb":
+                import wandb
+
+                self.logger = wandb
+            elif self.parameters.logger == "tensorboard":
+                self.logger = SummaryWriter(self.full_logging_path)
+            else:
+                raise Exception(
+                    f"Unsupported logger {self.parameters.logger}."
+                )
             printout(
-                "Writing visualization output to",
-                self.full_visualization_path,
+                "Writing logging output to",
+                self.full_logging_path,
                 min_verbosity=1,
             )
 
@@ -256,45 +263,10 @@ class Trainer(Runner):
         # CALCULATE INITIAL METRICS
         ############################
 
-        tloss = float("inf")
-        vloss = self.__validate_network(
-            self.network,
-            "validation",
-            self.parameters.after_before_training_metric,
-        )
-
-        if self.data.test_data_sets:
-            tloss = self.__validate_network(
-                self.network,
-                "test",
-                self.parameters.after_before_training_metric,
-            )
-
-        # Collect and average all the losses from all the devices
-        if self.parameters_full.use_ddp:
-            vloss = self.__average_validation(
-                vloss, "average_loss", self.parameters._configuration["device"]
-            )
-            self.initial_validation_loss = vloss
-            if self.data.test_data_sets:
-                tloss = self.__average_validation(
-                    tloss,
-                    "average_loss",
-                    self.parameters._configuration["device"],
-                )
-                self.initial_test_loss = tloss
-
-        printout(
-            "Initial Guess - validation data loss: ", vloss, min_verbosity=1
-        )
-        if self.data.test_data_sets:
-            printout(
-                "Initial Guess - test data loss: ", tloss, min_verbosity=1
-            )
+        vloss = float("inf")
 
         # Save losses for later use.
         self.initial_validation_loss = vloss
-        self.initial_test_loss = tloss
 
         # Initialize all the counters.
         checkpoint_counter = 0
@@ -310,11 +282,15 @@ class Trainer(Runner):
         # PERFORM TRAINING
         ############################
 
+        total_batch_id = 0
+
         for epoch in range(self.last_epoch, self.parameters.max_number_epochs):
             start_time = time.time()
 
             # Prepare model for training.
             self.network.train()
+
+            training_loss_sum_logging = 0.0
 
             # Process each mini batch and save the training loss.
             training_loss_sum = torch.zeros(
@@ -337,7 +313,15 @@ class Trainer(Runner):
                 t0 = time.time()
                 batchid = 0
                 for loader in self.training_data_loaders:
-                    for inputs, outputs in loader:
+                    t = time.time()
+                    for inputs, outputs in tqdm(
+                        loader,
+                        desc="training",
+                        disable=self.parameters_full.verbosity < 2,
+                        total=len(loader),
+                    ):
+                        dt = time.time() - t
+                        printout(f"load time: {dt}", min_verbosity=3)
 
                         if self.parameters.profiler_range is not None:
                             if batchid == self.parameters.profiler_range[0]:
@@ -348,6 +332,7 @@ class Trainer(Runner):
                         torch.cuda.nvtx.range_push(f"step {batchid}")
 
                         torch.cuda.nvtx.range_push("data copy in")
+                        t = time.time()
                         inputs = inputs.to(
                             self.parameters._configuration["device"],
                             non_blocking=True,
@@ -356,6 +341,8 @@ class Trainer(Runner):
                             self.parameters._configuration["device"],
                             non_blocking=True,
                         )
+                        dt = time.time() - t
+                        printout(f"data copy in time: {dt}", min_verbosity=3)
                         # data copy in
                         torch.cuda.nvtx.range_pop()
 
@@ -365,11 +352,12 @@ class Trainer(Runner):
                         # step
                         torch.cuda.nvtx.range_pop()
                         training_loss_sum += loss
+                        training_loss_sum_logging += loss.item()
 
                         if (
                             batchid != 0
                             and (batchid + 1)
-                            % self.parameters.training_report_frequency
+                            % self.parameters.training_log_interval
                             == 0
                         ):
                             torch.cuda.synchronize(
@@ -378,10 +366,10 @@ class Trainer(Runner):
                             sample_time = time.time() - tsample
                             avg_sample_time = (
                                 sample_time
-                                / self.parameters.training_report_frequency
+                                / self.parameters.training_log_interval
                             )
                             avg_sample_tput = (
-                                self.parameters.training_report_frequency
+                                self.parameters.training_log_interval
                                 * inputs.shape[0]
                                 / sample_time
                             )
@@ -389,17 +377,44 @@ class Trainer(Runner):
                                 f"batch {batchid + 1}, "  # /{total_samples}, "
                                 f"train avg time: {avg_sample_time} "
                                 f"train avg throughput: {avg_sample_tput}",
-                                min_verbosity=2,
+                                min_verbosity=3,
                             )
                             tsample = time.time()
+
+                            # summary_writer tensor board
+                            if self.parameters.logger == "tensorboard":
+                                training_loss_mean = (
+                                    training_loss_sum_logging
+                                    / self.parameters.training_log_interval
+                                )
+                                self.logger.add_scalars(
+                                    "ldos",
+                                    {"during_training": training_loss_mean},
+                                    total_batch_id,
+                                )
+                                self.logger.close()
+                                training_loss_sum_logging = 0.0
+                            if self.parameters.logger == "wandb":
+                                training_loss_mean = (
+                                    training_loss_sum_logging
+                                    / self.parameters.training_log_interval
+                                )
+                                self.logger.log(
+                                    {
+                                        "ldos_during_training": training_loss_mean
+                                    },
+                                    step=total_batch_id,
+                                )
+                                training_loss_sum_logging = 0.0
+
                         batchid += 1
+                        total_batch_id += 1
+                        t = time.time()
                 torch.cuda.synchronize(
                     self.parameters._configuration["device"]
                 )
                 t1 = time.time()
                 printout(f"training time: {t1 - t0}", min_verbosity=2)
-
-                training_loss = training_loss_sum.item() / batchid
 
                 # Calculate the validation loss. and output it.
                 torch.cuda.synchronize(
@@ -419,14 +434,26 @@ class Trainer(Runner):
                             self.network, inputs, outputs
                         )
                         batchid += 1
-                training_loss = training_loss_sum.item() / batchid
-
-            vloss = self.__validate_network(
-                self.network,
-                "validation",
-                self.parameters.during_training_metric,
+                        total_batch_id += 1
+            
+            dataset_fractions = ["validation"]
+            if self.parameters.validate_on_training_data:
+                dataset_fractions.append("train")
+            validation_metrics = ["ldos"]
+            if (epoch != 0 and
+                (epoch - 1) % self.parameters.validate_every_n_epochs == 0):
+                validation_metrics = self.parameters.validation_metrics
+            errors = self._validate_network(
+                dataset_fractions, validation_metrics
             )
-
+            for dataset_fraction in dataset_fractions:
+                for metric in errors[dataset_fraction]:
+                    errors[dataset_fraction][metric] = np.mean(
+                        np.abs(errors[dataset_fraction][metric])
+                    )
+            vloss = errors["validation"][
+                self.parameters.during_training_metric
+            ]
             if self.parameters_full.use_ddp:
                 vloss = self.__average_validation(
                     vloss,
@@ -434,41 +461,37 @@ class Trainer(Runner):
                     self.parameters._configuration["device"],
                 )
             if self.parameters_full.verbosity > 1:
-                printout(
-                    "Epoch {0}: validation data loss: {1}, "
-                    "training data loss: {2}".format(
-                        epoch, vloss, training_loss
-                    ),
-                    min_verbosity=2,
-                )
+                printout("Errors:", errors, min_verbosity=2)
             else:
                 printout(
-                    "Epoch {0}: validation data loss: {1}".format(
-                        epoch, vloss
-                    ),
+                    f"Epoch {epoch}: validation data loss: {vloss:.3e}",
                     min_verbosity=1,
                 )
 
-            # summary_writer tensor board
-            if self.parameters.visualisation:
-                self.tensor_board.add_scalars(
-                    "Loss",
-                    {"validation": vloss, "training": training_loss},
-                    epoch,
-                )
-                self.tensor_board.add_scalar(
-                    "Learning rate", self.parameters.learning_rate, epoch
-                )
-                if self.parameters.visualisation == 2:
-                    for name, param in self.network.named_parameters():
-                        self.tensor_board.add_histogram(name, param, epoch)
-                        self.tensor_board.add_histogram(
-                            f"{name}.grad", param.grad, epoch
+            if self.parameters.logger == "tensorboard":
+                for dataset_fraction in dataset_fractions:
+                    for metric in errors[dataset_fraction]:
+                        self.logger.add_scalars(
+                            metric,
+                            {
+                                dataset_fraction: errors[dataset_fraction][
+                                    metric
+                                ]
+                            },
+                            total_batch_id,
                         )
-
-                # method to make sure that all pending events have been written
-                # to disk
-                self.tensor_board.close()
+                self.logger.close()
+            if self.parameters.logger == "wandb":
+                for dataset_fraction in dataset_fractions:
+                    for metric in errors[dataset_fraction]:
+                        self.logger.log(
+                            {
+                                f"{dataset_fraction}_{metric}": errors[
+                                    dataset_fraction
+                                ][metric]
+                            },
+                            step=total_batch_id,
+                        )
 
             if self.parameters._configuration["gpu"]:
                 torch.cuda.synchronize(
@@ -541,49 +564,149 @@ class Trainer(Runner):
         ############################
         # CALCULATE FINAL METRICS
         ############################
-
-        if (
-            self.parameters.after_before_training_metric
-            != self.parameters.during_training_metric
-        ):
-            vloss = self.__validate_network(
-                self.network,
-                "validation",
-                self.parameters.after_before_training_metric,
+        if self.parameters.after_training_metric in errors["validation"]:
+            self.final_validation_loss = errors["validation"][
+                self.parameters.after_training_metric
+            ]
+        else:
+            final_errors = self._validate_network(
+                ["validation"], [self.parameters.after_training_metric]
             )
+            vloss = np.mean(
+                final_errors["validation"][
+                    self.parameters.after_training_metric
+                ]
+            )
+
             if self.parameters_full.use_ddp:
                 vloss = self.__average_validation(
                     vloss,
                     "average_loss",
                     self.parameters._configuration["device"],
                 )
-
-        # Calculate final loss.
-        self.final_validation_loss = vloss
-        printout("Final validation data loss: ", vloss, min_verbosity=0)
-
-        tloss = float("inf")
-        if len(self.data.test_data_sets) > 0:
-            tloss = self.__validate_network(
-                self.network,
-                "test",
-                self.parameters.after_before_training_metric,
-            )
-            if self.parameters_full.use_ddp:
-                tloss = self.__average_validation(
-                    tloss,
-                    "average_loss",
-                    self.parameters._configuration["device"],
-                )
-            printout("Final test data loss: ", tloss, min_verbosity=0)
-        self.final_test_loss = tloss
+            self.final_validation_loss = vloss
 
         # Clean-up for pre-fetching lazy loading.
         if self.data.parameters.use_lazy_loading_prefetch:
             self.training_data_loaders.cleanup()
             self.validation_data_loaders.cleanup()
-            if len(self.data.test_data_sets) > 0:
-                self.test_data_loaders.cleanup()
+
+    def _validate_network(self, data_set_fractions, metrics):
+        # """Validate a network, using train or validation data."""
+        self.network.eval()
+        errors = {}
+        for data_set_type in data_set_fractions:
+            if data_set_type == "train":
+                data_loaders = self.training_data_loaders
+                data_sets = self.data.training_data_sets
+                number_of_snapshots = self.data.nr_training_snapshots
+                offset_snapshots = 0
+
+            elif data_set_type == "validation":
+                data_loaders = self.validation_data_loaders
+                data_sets = self.data.validation_data_sets
+                number_of_snapshots = self.data.nr_validation_snapshots
+                offset_snapshots = self.data.nr_training_snapshots
+
+            elif data_set_type == "test":
+                raise Exception(
+                    "You should not look at test set results during training"
+                )
+            else:
+                raise Exception(
+                    f"Dataset type ({data_set_type}) not recognized."
+                )
+
+            errors[data_set_type] = {}
+            for metric in metrics:
+                errors[data_set_type][metric] = []
+
+            if isinstance(data_loaders, MultiLazyLoadDataLoader):
+                loader_id = 0
+                for loader in data_loaders:
+                    grid_size = self.data.parameters.snapshot_directories_list[
+                        loader_id + offset_snapshots
+                    ].grid_size
+
+                    actual_outputs = np.zeros(
+                        (grid_size, self.data.output_dimension)
+                    )
+                    predicted_outputs = np.zeros(
+                        (grid_size, self.data.output_dimension)
+                    )
+                    last_start = 0
+
+                    for x, y in loader:
+
+                        x = x.to(self.parameters._configuration["device"])
+                        length = int(x.size()[0])
+                        predicted_outputs[
+                            last_start : last_start + length, :
+                        ] = self.data.output_data_scaler.inverse_transform(
+                            self.network(x).to("cpu"), as_numpy=True
+                        )
+                        actual_outputs[last_start : last_start + length, :] = (
+                            self.data.output_data_scaler.inverse_transform(
+                                y, as_numpy=True
+                            )
+                        )
+
+                        last_start += length
+                    calculated_errors = self._calculate_errors(
+                        actual_outputs,
+                        predicted_outputs,
+                        metrics,
+                        loader_id + offset_snapshots,
+                    )
+                    for metric in metrics:
+                        errors[data_set_type][metric].append(
+                            calculated_errors[metric]
+                        )
+                    loader_id += 1
+            else:
+                with torch.no_grad():
+                    for snapshot_number in trange(
+                        offset_snapshots,
+                        number_of_snapshots + offset_snapshots,
+                        desc="Validation",
+                        disable=self.parameters_full.verbosity < 2,
+                    ):
+                        # Get optimal batch size and number of batches per snapshotss
+                        grid_size = (
+                            self.data.parameters.snapshot_directories_list[
+                                snapshot_number
+                            ].grid_size
+                        )
+
+                        optimal_batch_size = (
+                            self._correct_batch_size_for_testing(
+                                grid_size, self.parameters.mini_batch_size
+                            )
+                        )
+                        number_of_batches_per_snapshot = int(
+                            grid_size / optimal_batch_size
+                        )
+
+                        actual_outputs, predicted_outputs = (
+                            self._forward_entire_snapshot(
+                                snapshot_number,
+                                data_sets[0],
+                                data_set_type[0:2],
+                                number_of_batches_per_snapshot,
+                                optimal_batch_size,
+                            )
+                        )
+                        calculated_errors = self._calculate_errors(
+                            actual_outputs,
+                            predicted_outputs,
+                            metrics,
+                            snapshot_number,
+                        )
+                        for metric in metrics:
+                            errors[data_set_type][metric].append(
+                                calculated_errors[metric]
+                            )
+        return errors
 
     def __prepare_to_train(self, optimizer_dict):
         """Prepare everything for training."""
@@ -612,32 +735,30 @@ class Trainer(Runner):
                 )
 
         # Choose an optimizer to use.
-        if self.parameters.trainingtype == "SGD":
+        if self.parameters.optimizer == "SGD":
             self.optimizer = optim.SGD(
                 self.network.parameters(),
                 lr=self.parameters.learning_rate,
-                weight_decay=self.parameters.weight_decay,
+                weight_decay=self.parameters.l2_regularization,
             )
-        elif self.parameters.trainingtype == "Adam":
+        elif self.parameters.optimizer == "Adam":
             self.optimizer = optim.Adam(
                 self.network.parameters(),
                 lr=self.parameters.learning_rate,
-                weight_decay=self.parameters.weight_decay,
+                weight_decay=self.parameters.l2_regularization,
             )
-        elif self.parameters.trainingtype == "FusedAdam":
+        elif self.parameters.optimizer == "FusedAdam":
             if version.parse(torch.__version__) >= version.parse("1.13.0"):
                 self.optimizer = optim.Adam(
                     self.network.parameters(),
                     lr=self.parameters.learning_rate,
-                    weight_decay=self.parameters.weight_decay,
+                    weight_decay=self.parameters.l2_regularization,
                     fused=True,
                 )
             else:
-                raise Exception(
-                    "Training method requires at least torch 1.13.0."
-                )
+                raise Exception("Optimizer requires " "at least torch 1.13.0.")
         else:
-            raise Exception("Unsupported training method.")
+            raise Exception("Unsupported optimizer.")
 
         # Load data from pytorch file.
         if optimizer_dict is not None:
@@ -676,16 +797,6 @@ class Trainer(Runner):
                     shuffle=False,
                 )
             )
-
-            if self.data.test_data_sets:
-                self.test_sampler = (
-                    torch.utils.data.distributed.DistributedSampler(
-                        self.data.test_data_sets[0],
-                        num_replicas=dist.get_world_size(),
-                        rank=dist.get_rank(),
-                        shuffle=False,
-                    )
-                )
 
         # Instantiate the learning rate scheduler, if necessary.
         if self.parameters.learning_rate_scheduler == "ReduceLROnPlateau":
@@ -774,21 +885,6 @@ class Trainer(Runner):
                     )
                 )
 
-        if self.data.test_data_sets:
-            if isinstance(self.data.test_data_sets[0], LazyLoadDatasetSingle):
-                self.test_data_loaders = MultiLazyLoadDataLoader(
-                    self.data.test_data_sets, **kwargs
-                )
-            else:
-                self.test_data_loaders.append(
-                    DataLoader(
-                        self.data.test_data_sets[0],
-                        batch_size=self.parameters.mini_batch_size * 1,
-                        sampler=self.test_sampler,
-                        **kwargs,
-                    )
-                )
-
     def __process_mini_batch(self, network, input_data, target_data):
         """Process a mini batch."""
         if self.parameters._configuration["gpu"]:
@@ -870,7 +966,10 @@ class Trainer(Runner):
                     enabled=self.parameters.use_mixed_precision
                 ):
                     torch.cuda.nvtx.range_push("forward")
+                    t = time.time()
                     prediction = network(input_data)
+                    dt = time.time() - t
+                    printout(f"forward time: {dt}", min_verbosity=3)
                     # forward
                     torch.cuda.nvtx.range_pop()
 
@@ -881,6 +980,8 @@ class Trainer(Runner):
                         )
                     else:
                         loss = network.calculate_loss(prediction, target_data)
+                    dt = time.time() - t
+                    printout(f"loss time: {dt}", min_verbosity=3)
                     # loss
                     torch.cuda.nvtx.range_pop()
 
@@ -889,12 +990,15 @@ class Trainer(Runner):
                 else:
                     loss.backward()
 
+            t = time.time()
             torch.cuda.nvtx.range_push("optimizer")
             if self.gradscaler:
                 self.gradscaler.step(self.optimizer)
                 self.gradscaler.update()
             else:
                 self.optimizer.step()
+            dt = time.time() - t
+            printout(f"optimizer time: {dt}", min_verbosity=3)
             torch.cuda.nvtx.range_pop()  # optimizer
 
             if self.train_graph:
@@ -911,327 +1015,6 @@ class Trainer(Runner):
             self.optimizer.step()
             self.optimizer.zero_grad()
             return loss
-
-    def __validate_network(self, network, data_set_type, validation_type):
-        """Validate a network, using test or validation data."""
-        if data_set_type == "test":
-            data_loaders = self.test_data_loaders
-            data_sets = self.data.test_data_sets
-            number_of_snapshots = self.data.nr_test_snapshots
-            offset_snapshots = (
-                self.data.nr_validation_snapshots
-                + self.data.nr_training_snapshots
-            )
-
-        elif data_set_type == "validation":
-            data_loaders = self.validation_data_loaders
-            data_sets = self.data.validation_data_sets
-            number_of_snapshots = self.data.nr_validation_snapshots
-            offset_snapshots = self.data.nr_training_snapshots
-
-        else:
-            raise Exception(
-                "Please select test or validation when using this function."
-            )
-        network.eval()
-        if validation_type == "ldos":
-            validation_loss_sum = torch.zeros(
-                1, device=self.parameters._configuration["device"]
-            )
-            with torch.no_grad():
-                if self.parameters._configuration["gpu"]:
-                    report_freq = self.parameters.training_report_frequency
-                    torch.cuda.synchronize(
-                        self.parameters._configuration["device"]
-                    )
-                    tsample = time.time()
-                    batchid = 0
-                    for loader in data_loaders:
-                        for x, y in loader:
-                            x = x.to(
-                                self.parameters._configuration["device"],
-                                non_blocking=True,
-                            )
-                            y = y.to(
-                                self.parameters._configuration["device"],
-                                non_blocking=True,
-                            )
-
-                            if (
-                                self.parameters.use_graphs
-                                and self.validation_graph is None
-                            ):
-                                printout(
-                                    "Capturing CUDA graph for validation.",
-                                    min_verbosity=2,
-                                )
-                                s = torch.cuda.Stream(
-                                    self.parameters._configuration["device"]
-                                )
-                                s.wait_stream(
-                                    torch.cuda.current_stream(
-                                        self.parameters._configuration[
-                                            "device"
-                                        ]
-                                    )
-                                )
-                                # Warmup for graphs
-                                with torch.cuda.stream(s):
-                                    for _ in range(20):
-                                        with torch.cuda.amp.autocast(
-                                            enabled=self.parameters.use_mixed_precision
-                                        ):
-                                            prediction = network(x)
-                                            if self.parameters_full.use_ddp:
-                                                loss = network.module.calculate_loss(
-                                                    prediction, y
-                                                )
-                                            else:
-                                                loss = network.calculate_loss(
-                                                    prediction, y
-                                                )
-                                torch.cuda.current_stream(
-                                    self.parameters._configuration["device"]
-                                ).wait_stream(s)
-
-                                # Create static entry point tensors to graph
-                                self.static_input_validation = (
-                                    torch.empty_like(x)
-                                )
-                                self.static_target_validation = (
-                                    torch.empty_like(y)
-                                )
-
-                                # Capture graph
-                                self.validation_graph = torch.cuda.CUDAGraph()
-                                with torch.cuda.graph(self.validation_graph):
-                                    with torch.cuda.amp.autocast(
-                                        enabled=self.parameters.use_mixed_precision
-                                    ):
-                                        self.static_prediction_validation = (
-                                            network(
-                                                self.static_input_validation
-                                            )
-                                        )
-                                        if self.parameters_full.use_ddp:
-                                            self.static_loss_validation = network.module.calculate_loss(
-                                                self.static_prediction_validation,
-                                                self.static_target_validation,
-                                            )
-                                        else:
-                                            self.static_loss_validation = network.calculate_loss(
-                                                self.static_prediction_validation,
-                                                self.static_target_validation,
-                                            )
-
-                            if self.validation_graph:
-                                self.static_input_validation.copy_(x)
-                                self.static_target_validation.copy_(y)
-                                self.validation_graph.replay()
-                                validation_loss_sum += (
-                                    self.static_loss_validation
-                                )
-                            else:
-                                with torch.cuda.amp.autocast(
-                                    enabled=self.parameters.use_mixed_precision
-                                ):
-                                    prediction = network(x)
-                                    if self.parameters_full.use_ddp:
-                                        loss = network.module.calculate_loss(
-                                            prediction, y
-                                        )
-                                    else:
-                                        loss = network.calculate_loss(
-                                            prediction, y
-                                        )
-                                    validation_loss_sum += loss
-                            if (
-                                batchid != 0
-                                and (batchid + 1) % report_freq == 0
-                            ):
-                                torch.cuda.synchronize(
-                                    self.parameters._configuration["device"]
-                                )
-                                sample_time = time.time() - tsample
-                                avg_sample_time = sample_time / report_freq
-                                avg_sample_tput = (
-                                    report_freq * x.shape[0] / sample_time
-                                )
-                                printout(
-                                    f"batch {batchid + 1}, "  # /{total_samples}, "
-                                    f"validation avg time: {avg_sample_time} "
-                                    f"validation avg throughput: {avg_sample_tput}",
-                                    min_verbosity=2,
-                                )
-                                tsample = time.time()
-                            batchid += 1
-                    torch.cuda.synchronize(
-                        self.parameters._configuration["device"]
-                    )
-                else:
-                    batchid = 0
-                    for loader in data_loaders:
-                        for x, y in loader:
-                            x = x.to(self.parameters._configuration["device"])
-                            y = y.to(self.parameters._configuration["device"])
-                            prediction = network(x)
-                            if self.parameters_full.use_ddp:
-                                validation_loss_sum += (
-                                    network.module.calculate_loss(
-                                        prediction, y
-                                    ).item()
-                                )
-                            else:
-                                validation_loss_sum += network.calculate_loss(
-                                    prediction, y
-                                ).item()
-                            batchid += 1
-
-            validation_loss = validation_loss_sum.item() / batchid
-            return validation_loss
-        elif (
-            validation_type == "band_energy"
-            or validation_type == "total_energy"
-        ):
-            errors = []
-            if isinstance(
-                self.validation_data_loaders, MultiLazyLoadDataLoader
-            ):
-                loader_id = 0
-                for loader in data_loaders:
-                    grid_size = self.data.parameters.snapshot_directories_list[
-                        loader_id + offset_snapshots
-                    ].grid_size
-
-                    actual_outputs = np.zeros(
-                        (grid_size, self.data.output_dimension)
-                    )
-                    predicted_outputs = np.zeros(
-                        (grid_size, self.data.output_dimension)
-                    )
-                    last_start = 0
-
-                    for x, y in loader:
-
-                        x = x.to(self.parameters._configuration["device"])
-                        length = int(x.size()[0])
-                        predicted_outputs[
-                            last_start : last_start + length, :
-                        ] = self.data.output_data_scaler.inverse_transform(
-                            self.network(x).to("cpu"), as_numpy=True
-                        )
-                        actual_outputs[last_start : last_start + length, :] = (
-                            self.data.output_data_scaler.inverse_transform(
-                                y, as_numpy=True
-                            )
-                        )
-
-                        last_start += length
-                    errors.append(
-                        self._calculate_energy_errors(
-                            actual_outputs,
-                            predicted_outputs,
-                            validation_type,
-                            loader_id + offset_snapshots,
-                        )
-                    )
-                    loader_id += 1
-
-            else:
-                for snapshot_number in range(
-                    offset_snapshots, number_of_snapshots + offset_snapshots
-                ):
-                    # Get optimal batch size and number of batches per snapshotss
-                    grid_size = self.data.parameters.snapshot_directories_list[
-                        snapshot_number
-                    ].grid_size
-
-                    optimal_batch_size = self._correct_batch_size_for_testing(
-                        grid_size, self.parameters.mini_batch_size
-                    )
-                    number_of_batches_per_snapshot = int(
-                        grid_size / optimal_batch_size
-                    )
-
-                    actual_outputs, predicted_outputs = (
-                        self._forward_entire_snapshot(
-                            snapshot_number,
-                            data_sets[0],
-                            data_set_type[0:2],
-                            number_of_batches_per_snapshot,
-                            optimal_batch_size,
-                        )
-                    )
-
-                    errors.append(
-                        self._calculate_energy_errors(
-                            actual_outputs,
-                            predicted_outputs,
-                            validation_type,
-                            snapshot_number,
-                        )
-                    )
-            return np.mean(errors)
-        else:
-            raise Exception("Selected validation method not supported.")
-
-    def _calculate_energy_errors(
-        self, actual_outputs, predicted_outputs, energy_type, snapshot_number
-    ):
-        self.data.target_calculator.read_additional_calculation_data(
-            self.data.get_snapshot_calculation_output(snapshot_number)
-        )
-        if energy_type == "band_energy":
-            try:
-                fe_actual = self.data.target_calculator.get_self_consistent_fermi_energy(
-                    actual_outputs
-                )
-                be_actual = self.data.target_calculator.get_band_energy(
-                    actual_outputs, fermi_energy=fe_actual
-                )
-
-                fe_predicted = self.data.target_calculator.get_self_consistent_fermi_energy(
-                    predicted_outputs
-                )
-                be_predicted = self.data.target_calculator.get_band_energy(
-                    predicted_outputs, fermi_energy=fe_predicted
-                )
-                return np.abs(be_predicted - be_actual) * (
-                    1000 / len(self.data.target_calculator.atoms)
-                )
-            except ValueError:
-                # If the training went badly, it might be that the above
-                # code results in an error, due to the LDOS being so wrong
-                # that the estimation of the self consistent Fermi energy
-                # fails.
-                return float("inf")
-        elif energy_type == "total_energy":
-            try:
-                fe_actual = self.data.target_calculator.get_self_consistent_fermi_energy(
-                    actual_outputs
-                )
-                be_actual = self.data.target_calculator.get_total_energy(
-                    ldos_data=actual_outputs, fermi_energy=fe_actual
-                )
-
-                fe_predicted = self.data.target_calculator.get_self_consistent_fermi_energy(
-                    predicted_outputs
-                )
-                be_predicted = self.data.target_calculator.get_total_energy(
-                    ldos_data=predicted_outputs, fermi_energy=fe_predicted
-                )
-                return np.abs(be_predicted - be_actual) * (
-                    1000 / len(self.data.target_calculator.atoms)
-                )
-            except ValueError:
-                # If the training went badly, it might be that the above
-                # code results in an error, due to the LDOS being so wrong
-                # that the estimation of the self consistent Fermi energy
-                # fails.
-                return float("inf")
-
-        else:
-            raise Exception("Invalid energy type requested.")
 
     def __create_training_checkpoint(self):
         """
@@ -1265,8 +1048,14 @@ class Trainer(Runner):
         torch.save(
             save_dict, optimizer_name, _use_new_zipfile_serialization=False
         )
-
-        self.save_run(self.parameters.checkpoint_name, save_runner=True)
+        if self.parameters.run_name != "":
+            self.save_run(
+                self.parameters.checkpoint_name,
+                save_runner=True,
+                path=self.parameters.run_name,
+            )
+        else:
+            self.save_run(self.parameters.checkpoint_name, save_runner=True)
 
     @staticmethod
     def __average_validation(val, name, device="cpu"):

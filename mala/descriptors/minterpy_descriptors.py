@@ -163,9 +163,8 @@ class MinterpyDescriptors(Descriptor):
 
             # The rest is the stanfard LAMMPS atomic density stuff.
             lammps_format = "lammps-data"
-            self.lammps_temporary_input = os.path.join(
-                outdir, "lammps_input_" + self.calculation_timestamp + ".tmp"
-            )
+            self.setup_lammps_tmp_files("minterpy", outdir)
+
             ase.io.write(
                 self.lammps_temporary_input, self.atoms, format=lammps_format
             )
@@ -175,10 +174,6 @@ class MinterpyDescriptors(Descriptor):
                 "sigma": self.parameters.atomic_density_sigma,
                 "rcutfac": self.parameters.atomic_density_cutoff,
             }
-            self.lammps_temporary_log = os.path.join(
-                outdir,
-                "lammps_bgrid_log_" + self.calculation_timestamp + ".tmp",
-            )
             lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
             # For now the file is chosen automatically, because this is used

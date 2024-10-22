@@ -118,9 +118,9 @@ properties of the ``Parameters`` class:
        during the optimization.
      - ``network.layer_sizes``
      - ``"int"``, ``"categorical"``
-   * - ``"trainingtype"``
+   * - ``"optimizer"``
      - Optimization algorithm used during the NN optimization.
-     - ``running.trainingtype``
+     - ``running.optimizer``
      - ``"categorical"``
    * - ``"mini_batch_size"``
      - Size of the mini batches used to calculate the gradient during

@@ -21,8 +21,8 @@ def integrate_values_on_spacing(values, spacing, method, axis=0):
     method : string
         Integration method to be used. Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapezoid" for trapezoid method
+            - "simpson" for Simpson method.
     axis : int
         Axis along which the integration is performed.
 
@@ -31,10 +31,10 @@ def integrate_values_on_spacing(values, spacing, method, axis=0):
     integral_values : float
         The value of the integral.
     """
-    if method == "trapz":
-        return integrate.trapz(values, dx=spacing, axis=axis)
-    elif method == "simps":
-        return integrate.simps(values, dx=spacing, axis=axis)
+    if method == "trapezoid":
+        return integrate.trapezoid(values, dx=spacing, axis=axis)
+    elif method == "simpson":
+        return integrate.simpson(values, dx=spacing, axis=axis)
     else:
         raise Exception("Unknown integration method.")
 

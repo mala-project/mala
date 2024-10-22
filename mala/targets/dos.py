@@ -509,6 +509,36 @@ class DOS(Target):
         self.density_of_states = array
         return array
 
+    def read_from_numpy_file(
+        self, path, units=None, array=None, reshape=False
+    ):
+        """
+        Read the data from a numpy file.
+
+        Parameters
+        ----------
+        path : string
+            Path to the numpy file.
+
+        units : string
+            Units the data is saved in.
+
+        array : np.ndarray
+            If not None, the array to save the data into.
+            The array has to be 4-dimensional.
+
+        Returns
+        -------
+        data : numpy.ndarray or None
+            If array is None, a numpy array containing the data.
+            Elsewise, None, as the data will be saved into the provided
+            array.
+
+        """
+        loaded_array = np.load(path)
+        self._process_loaded_array(loaded_array, units=units)
+        return loaded_array
+
     # Calculations
     ##############
 
@@ -558,8 +588,8 @@ class DOS(Target):
         integration_method : string
             Integration method to be used. Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
         broadcast_band_energy : bool
@@ -655,8 +685,8 @@ class DOS(Target):
         integration_method : string
             Integration method to be used. Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
         Returns
@@ -723,8 +753,8 @@ class DOS(Target):
         integration_method : string
             Integration method to be used. Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
         broadcast_entropy : bool
@@ -813,8 +843,8 @@ class DOS(Target):
         integration_method : string
             Integration method to be used. Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
         broadcast_fermi_energy : bool
@@ -913,12 +943,12 @@ class DOS(Target):
             energy_grid, fermi_energy, temperature, suppress_overflow=True
         )
         # Calculate the number of electrons.
-        if integration_method == "trapz":
-            number_of_electrons = integrate.trapz(
+        if integration_method == "trapezoid":
+            number_of_electrons = integrate.trapezoid(
                 dos_data * fermi_vals, energy_grid, axis=-1
             )
-        elif integration_method == "simps":
-            number_of_electrons = integrate.simps(
+        elif integration_method == "simpson":
+            number_of_electrons = integrate.simpson(
                 dos_data * fermi_vals, energy_grid, axis=-1
             )
         elif integration_method == "quad":
@@ -954,11 +984,11 @@ class DOS(Target):
 
         # Calculate the band energy.
         if integration_method == "trapz":
-            band_energy = integrate.trapz(
+            band_energy = integrate.trapezoid(
                 dos_data * (energy_grid * fermi_vals), energy_grid, axis=-1
             )
-        elif integration_method == "simps":
-            band_energy = integrate.simps(
+        elif integration_method == "simpson":
+            band_energy = integrate.simpson(
                 dos_data * (energy_grid * fermi_vals), energy_grid, axis=-1
             )
         elif integration_method == "quad":
@@ -999,19 +1029,19 @@ class DOS(Target):
         More specifically, this gives -\beta^-1*S_S
         """
         # Calculate the entropy contribution to the energy.
-        if integration_method == "trapz":
+        if integration_method == "trapezoid":
             multiplicator = entropy_multiplicator(
                 energy_grid, fermi_energy, temperature
             )
-            entropy_contribution = integrate.trapz(
+            entropy_contribution = integrate.trapezoid(
                 dos_data * multiplicator, energy_grid, axis=-1
             )
             entropy_contribution /= get_beta(temperature)
-        elif integration_method == "simps":
+        elif integration_method == "simpson":
             multiplicator = entropy_multiplicator(
                 energy_grid, fermi_energy, temperature
             )
-            entropy_contribution = integrate.simps(
+            entropy_contribution = integrate.simpson(
                 dos_data * multiplicator, energy_grid, axis=-1
             )
             entropy_contribution /= get_beta(temperature)
