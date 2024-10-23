@@ -99,7 +99,7 @@ class LDOS(Target):
 
     @classmethod
     def from_cube_file(
-        cls, params, path_name_scheme, units="1/(eV*A^3)", use_memmap=None
+        cls, params, path_name_scheme, units="1/(Ry*Bohr^3)", use_memmap=None
     ):
         """
         Create an LDOS calculator from multiple cube files.
@@ -463,7 +463,7 @@ class LDOS(Target):
             raise Exception("Unsupported unit for LDOS.")
 
     def read_from_cube(
-        self, path_scheme, units="1/(eV*A^3)", use_memmap=None, **kwargs
+        self, path_scheme, units="1/(Ry*Bohr^3)", use_memmap=None, **kwargs
     ):
         """
         Read the LDOS data from multiple cube files.

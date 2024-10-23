@@ -102,7 +102,7 @@ class Density(Target):
         return return_dos
 
     @classmethod
-    def from_cube_file(cls, params, path, units="1/A^3"):
+    def from_cube_file(cls, params, path, units="1/Bohr^3"):
         """
         Create a Density calculator from a cube file.
 
@@ -391,7 +391,7 @@ class Density(Target):
         else:
             raise Exception("Unsupported unit for density.")
 
-    def read_from_cube(self, path, units="1/A^3", **kwargs):
+    def read_from_cube(self, path, units="1/Bohr^3", **kwargs):
         """
         Read the density data from a cube file.
 
