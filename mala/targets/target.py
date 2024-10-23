@@ -629,7 +629,6 @@ class Target(PhysicalData):
             If True, no file will be written, and instead a json dict will
             be returned.
         """
-
         additional_calculation_data = {
             "fermi_energy_dft": self.fermi_energy_dft,
             "temperature": self.temperature,
