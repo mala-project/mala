@@ -14,7 +14,7 @@ from scipy.spatial import distance
 from scipy.integrate import simps
 
 from mala.common.parameters import Parameters, ParametersTargets
-from mala.common.parallelizer import printout, parallel_warn
+from mala.common.parallelizer import printout, parallel_warn, get_rank
 from mala.targets.calculation_helpers import fermi_function
 from mala.common.physical_data import PhysicalData
 from mala.descriptors.atomic_density import AtomicDensity
@@ -1428,6 +1428,8 @@ class Target(PhysicalData):
         )
 
     def _set_openpmd_attribtues(self, iteration, mesh):
+        import openpmd_api as io
+
         super(Target, self)._set_openpmd_attribtues(iteration, mesh)
 
         # If no atoms have been read, neither have any of the other
@@ -1443,6 +1445,7 @@ class Target(PhysicalData):
                 and key is not None
                 and key != "pseudopotentials"
                 and additional_calculation_data[key] is not None
+                and key != "atomic_forces_dft"
             ):
                 iteration.set_attribute(key, additional_calculation_data[key])
             if key == "pseudopotentials":
@@ -1455,6 +1458,43 @@ class Target(PhysicalData):
                             pseudokey
                         ],
                     )
+
+        # If the data contains atomic forces from a DFT calculation, we need
+        # to process it in much the same fashion as the atoms.
+        if "atomic_forces_dft" in additional_calculation_data:
+            atomic_forces = additional_calculation_data["atomic_forces_dft"]
+            atomic_forces_2 = self.atomic_forces_dft
+            if atomic_forces is not None:
+                # This data is equivalent across the ranks, so just write it once
+                atomic_forces_dft_openpmd = iteration.particles[
+                    "atomic_forces_dft"
+                ]
+                forces = io.Dataset(
+                    # Need bugfix https://github.com/openPMD/openPMD-api/pull/1357
+                    (
+                        np.array(atomic_forces[0]).dtype
+                        if io.__version__ >= "0.15.0"
+                        else io.Datatype.DOUBLE
+                    ),
+                    np.array(atomic_forces[0]).shape,
+                )
+                # atoms_openpmd["position"].time_offset = 0.0
+                # atoms_openpmd["positionOffset"].time_offset = 0.0
+                for atom in range(0, np.shape(atomic_forces_dft_openpmd)[0]):
+                    atomic_forces_dft_openpmd["atomic_forces_dft"][
+                        str(atom)
+                    ].reset_dataset(forces)
+
+                    individual_force = atomic_forces_dft_openpmd[
+                        "atomic_forces_dft"
+                    ][str(atom)]
+                    if get_rank() == 0:
+                        individual_force.store_chunk(atomic_forces[atom])
+
+                    # Positions are stored in Angstrom.
+                    atomic_forces_dft_openpmd["position"][
+                        str(atom)
+                    ].unit_SI = 1.0e-10
 
     def _process_openpmd_attributes(self, series, iteration, mesh):
         super(Target, self)._process_openpmd_attributes(
