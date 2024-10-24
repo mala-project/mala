@@ -14,7 +14,7 @@ from scipy.spatial import distance
 from scipy.integrate import simpson
 
 from mala.common.parameters import Parameters, ParametersTargets
-from mala.common.parallelizer import printout, parallel_warn
+from mala.common.parallelizer import printout, parallel_warn, get_rank
 from mala.targets.calculation_helpers import fermi_function
 from mala.common.physical_data import PhysicalData
 from mala.descriptors.atomic_density import AtomicDensity
@@ -119,6 +119,13 @@ class Target(PhysicalData):
         self.band_energy_dft_calculation = None
         self.total_energy_dft_calculation = None
         self.entropy_contribution_dft_calculation = None
+        self.total_energy_contributions_dft_calculation = {
+            "one_electron_contribution": None,
+            "hartree_contribution": None,
+            "xc_contribution": None,
+            "ewald_contribution": None,
+        }
+        self.atomic_forces_dft = None
         self.atoms = None
         self.electrons_per_atom = None
         self.qe_input_data = {
@@ -319,6 +326,13 @@ class Target(PhysicalData):
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.entropy_contribution_dft_calculation = None
+            self.total_energy_contributions_dft_calculation = {
+                "one_electron_contribution": None,
+                "hartree_contribution": None,
+                "xc_contribution": None,
+                "ewald_contribution": None,
+            }
+            self.atomic_forces_dft = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms = None
 
@@ -328,12 +342,26 @@ class Target(PhysicalData):
             self.fermi_energy_dft = (
                 self.atoms.get_calculator().get_fermi_level()
             )
+            # The forces may not have been computed. If they are indeed
+            # not computed, ASE will by default throw an PropertyNotImplementedError
+            # error
+            try:
+                self.atomic_forces_dft = self.atoms.get_forces()
+            except ase.calculators.calculator.PropertyNotImplementedError:
+                pass
 
             # Parse the file for energy values.
             total_energy = None
             past_calculation_part = False
             bands_included = True
+
+            # individual energy contributions.
             entropy_contribution = None
+            one_electron_contribution = None
+            hartree_contribution = None
+            xc_contribution = None
+            ewald_contribution = None
+
             with open(data) as out:
                 pseudolinefound = False
                 lastpseudo = None
@@ -390,6 +418,32 @@ class Target(PhysicalData):
                             entropy_contribution = float(
                                 (line.split("=")[1]).split("Ry")[0]
                             )
+                    if (
+                        "one-electron contribution" in line
+                        and past_calculation_part
+                    ):
+                        if one_electron_contribution is None:
+                            one_electron_contribution = float(
+                                (line.split("=")[1]).split("Ry")[0]
+                            )
+                    if (
+                        "hartree contribution" in line
+                        and past_calculation_part
+                    ):
+                        if hartree_contribution is None:
+                            hartree_contribution = float(
+                                (line.split("=")[1]).split("Ry")[0]
+                            )
+                    if "xc contribution" in line and past_calculation_part:
+                        if xc_contribution is None:
+                            xc_contribution = float(
+                                (line.split("=")[1]).split("Ry")[0]
+                            )
+                    if "ewald contribution" in line and past_calculation_part:
+                        if ewald_contribution is None:
+                            ewald_contribution = float(
+                                (line.split("=")[1]).split("Ry")[0]
+                            )
                     if "set verbosity='high' to print them." in line:
                         bands_included = False
 
@@ -413,6 +467,25 @@ class Target(PhysicalData):
                 self.entropy_contribution_dft_calculation = (
                     entropy_contribution * Rydberg
                 )
+            if one_electron_contribution is not None:
+                self.total_energy_contributions_dft_calculation[
+                    "one_electron_contribution"
+                ] = (one_electron_contribution * Rydberg)
+
+            if hartree_contribution is not None:
+                self.total_energy_contributions_dft_calculation[
+                    "hartree_contribution"
+                ] = (hartree_contribution * Rydberg)
+
+            if xc_contribution is not None:
+                self.total_energy_contributions_dft_calculation[
+                    "xc_contribution"
+                ] = (xc_contribution * Rydberg)
+
+            if ewald_contribution is not None:
+                self.total_energy_contributions_dft_calculation[
+                    "ewald_contribution"
+                ] = (ewald_contribution * Rydberg)
 
             # Calculate band energy, if the necessary data is included in
             # the output file.
@@ -446,6 +519,13 @@ class Target(PhysicalData):
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.entropy_contribution_dft_calculation = None
+            self.total_energy_contributions_dft_calculation = {
+                "one_electron_contribution": None,
+                "hartree_contribution": None,
+                "xc_contribution": None,
+                "ewald_contribution": None,
+            }
+            self.atomic_forces_dft = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms: ase.Atoms = data[0]
 
@@ -490,6 +570,13 @@ class Target(PhysicalData):
             self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
+            self.total_energy_contributions_dft_calculation = {
+                "one_electron_contribution": None,
+                "hartree_contribution": None,
+                "xc_contribution": None,
+                "ewald_contribution": None,
+            }
+            self.atomic_forces_dft = None
             self.entropy_contribution_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms = None
@@ -504,6 +591,24 @@ class Target(PhysicalData):
             self.qe_input_data["ecutrho"] = json_dict["ecutrho"]
             self.qe_input_data["degauss"] = json_dict["degauss"]
             self.qe_pseudopotentials = json_dict["pseudopotentials"]
+
+            energy_contribution_ids = [
+                "one_electron_contribution",
+                "hartree_contribution",
+                "xc_contribution",
+                "ewald_contribution",
+            ]
+            for key in energy_contribution_ids:
+                if key in json_dict:
+                    self.total_energy_contributions_dft_calculation[key] = (
+                        json_dict[key]
+                    )
+
+            # Not always read from DFT files.
+            if "atomic_forces_dft" in json_dict:
+                self.atomic_forces_dft = np.array(
+                    json_dict["atomic_forces_dft"]
+                )
 
         else:
             raise Exception("Unsupported auxiliary file type.")
@@ -539,6 +644,18 @@ class Target(PhysicalData):
             "degauss": self.qe_input_data["degauss"],
             "pseudopotentials": self.qe_pseudopotentials,
             "entropy_contribution_dft_calculation": self.entropy_contribution_dft_calculation,
+            "one_electron_contribution": self.total_energy_contributions_dft_calculation[
+                "one_electron_contribution"
+            ],
+            "hartree_contribution": self.total_energy_contributions_dft_calculation[
+                "hartree_contribution"
+            ],
+            "xc_contribution": self.total_energy_contributions_dft_calculation[
+                "xc_contribution"
+            ],
+            "ewald_contribution": self.total_energy_contributions_dft_calculation[
+                "ewald_contribution"
+            ],
         }
         if self.voxel is not None:
             additional_calculation_data["voxel"] = self.voxel.todict()
@@ -560,6 +677,11 @@ class Target(PhysicalData):
             additional_calculation_data["atoms"]["pbc"] = (
                 additional_calculation_data["atoms"]["pbc"].tolist()
             )
+        if self.atomic_forces_dft is not None:
+            additional_calculation_data["atomic_forces_dft"] = (
+                self.atomic_forces_dft.tolist()
+            )
+
         if return_string is False:
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(
@@ -1306,6 +1428,8 @@ class Target(PhysicalData):
         )
 
     def _set_openpmd_attribtues(self, iteration, mesh):
+        import openpmd_api as io
+
         super(Target, self)._set_openpmd_attribtues(iteration, mesh)
 
         # If no atoms have been read, neither have any of the other
@@ -1321,6 +1445,7 @@ class Target(PhysicalData):
                 and key is not None
                 and key != "pseudopotentials"
                 and additional_calculation_data[key] is not None
+                and key != "atomic_forces_dft"
             ):
                 iteration.set_attribute(key, additional_calculation_data[key])
             if key == "pseudopotentials":
@@ -1333,6 +1458,42 @@ class Target(PhysicalData):
                             pseudokey
                         ],
                     )
+
+        # If the data contains atomic forces from a DFT calculation, we need
+        # to process it in much the same fashion as the atoms.
+        if "atomic_forces_dft" in additional_calculation_data:
+            atomic_forces = additional_calculation_data["atomic_forces_dft"]
+            if atomic_forces is not None:
+                # This data is equivalent across the ranks, so just write it once
+                atomic_forces_dft_openpmd = iteration.particles[
+                    "atomic_forces_dft"
+                ]
+                forces = io.Dataset(
+                    # Need bugfix https://github.com/openPMD/openPMD-api/pull/1357
+                    (
+                        np.array(atomic_forces[0]).dtype
+                        if io.__version__ >= "0.15.0"
+                        else io.Datatype.DOUBLE
+                    ),
+                    np.array(atomic_forces[0]).shape,
+                )
+                for atom in range(0, np.shape(atomic_forces)[0]):
+                    atomic_forces_dft_openpmd["force_compopnents"][
+                        str(atom)
+                    ].reset_dataset(forces)
+
+                    individual_force = atomic_forces_dft_openpmd[
+                        "force_compopnents"
+                    ][str(atom)]
+                    if get_rank() == 0:
+                        individual_force.store_chunk(
+                            np.array(atomic_forces)[atom]
+                        )
+
+                    # Positions are stored in Angstrom.
+                    atomic_forces_dft_openpmd["force_compopnents"][
+                        str(atom)
+                    ].unit_SI = 1.0e-10
 
     def _process_openpmd_attributes(self, series, iteration, mesh):
         super(Target, self)._process_openpmd_attributes(
@@ -1373,6 +1534,20 @@ class Target(PhysicalData):
             self.atoms.pbc[2] = iteration.get_attribute(
                 "periodic_boundary_conditions_z"
             )
+
+        # Forces may not necessarily have been read (and therefore written)
+
+        try:
+            atomic_forces_dft = iteration.particles["atomic_forces_dft"]
+            nr_atoms = len(atomic_forces_dft["force_compopnents"])
+            self.atomic_forces_dft = np.zeros((nr_atoms, 3))
+            for i in range(0, nr_atoms):
+                atomic_forces_dft["force_compopnents"][str(i)].load_chunk(
+                    self.atomic_forces_dft[i, :]
+                )
+            series.flush()
+        except IndexError:
+            pass
 
         # Process all the regular meta info.
         self.fermi_energy_dft = self._get_attribute_if_attribute_exists(
@@ -1446,6 +1621,43 @@ class Target(PhysicalData):
                 self.qe_pseudopotentials[attribute.split("psp_")[1]] = (
                     iteration.get_attribute(attribute)
                 )
+
+        self.total_energy_contributions_dft_calculation[
+            "one_electron_contribution"
+        ] = self._get_attribute_if_attribute_exists(
+            iteration,
+            "one_electron_contribution",
+            default_value=self.total_energy_contributions_dft_calculation[
+                "one_electron_contribution"
+            ],
+        )
+        self.total_energy_contributions_dft_calculation[
+            "hartree_contribution"
+        ] = self._get_attribute_if_attribute_exists(
+            iteration,
+            "hartree_contribution",
+            default_value=self.total_energy_contributions_dft_calculation[
+                "hartree_contribution"
+            ],
+        )
+        self.total_energy_contributions_dft_calculation["xc_contribution"] = (
+            self._get_attribute_if_attribute_exists(
+                iteration,
+                "xc_contribution",
+                default_value=self.total_energy_contributions_dft_calculation[
+                    "xc_contribution"
+                ],
+            )
+        )
+        self.total_energy_contributions_dft_calculation[
+            "ewald_contribution"
+        ] = self._get_attribute_if_attribute_exists(
+            iteration,
+            "ewald_contribution",
+            default_value=self.total_energy_contributions_dft_calculation[
+                "ewald_contribution"
+            ],
+        )
 
     def _set_geometry_info(self, mesh):
         # Geometry: Save the cell parameters and angles of the grid.
