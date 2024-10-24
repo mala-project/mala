@@ -262,7 +262,7 @@ class DataHandler(DataHandlerBase):
             "Checking the snapshots and your inputs for consistency.",
             min_verbosity=1,
         )
-        self.__check_snapshots(from_arrays_dict=from_arrays_dict)
+        self._check_snapshots(from_arrays_dict=from_arrays_dict)
         printout("Consistency check successful.", min_verbosity=0)
 
         # Reallocate arrays for data storage
@@ -566,7 +566,7 @@ class DataHandler(DataHandlerBase):
     # Loading data
     ######################
 
-    def __check_snapshots(self, from_arrays_dict=None):
+    def _check_snapshots(self, from_arrays_dict=None):
         """Check the snapshots for consistency."""
         super(DataHandler, self)._check_snapshots(from_arrays_dict)
 
@@ -983,7 +983,7 @@ class DataHandler(DataHandlerBase):
                 self.input_data_scaler.transform(self.validation_data_inputs)
 
                 self.__load_data(
-                    "test", "outputs", from_arrays_dict=from_arrays_dict
+                    "validation", "outputs", from_arrays_dict=from_arrays_dict
                 )
                 self.output_data_scaler.transform(self.validation_data_outputs)
                 if self.parameters.use_fast_tensor_data_set:
