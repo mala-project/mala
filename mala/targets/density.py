@@ -404,9 +404,12 @@ class Density(Target):
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file ", path, min_verbosity=0)
-        if units != "1/(Ry*Bohr^3)":
+        # automatically convert units if they are None since cube files take atomic units
+        if units is None:
+            units="1/Bohr^3"
+        if units != "1/Bohr^3":
             printout(
-                "The expected units for the LDOS from cube files are 1/(Ry*Bohr^3)\n"
+                "The expected units for the density from cube files are 1/Bohr^3\n"
                 f"Proceeding with specified units of {units}\n"
                 "We recommend to check and change the requested units"
             )

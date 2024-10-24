@@ -495,6 +495,9 @@ class LDOS(Target):
         # tmp.pp003ELEMENT_ldos.cube
         # ...
         # tmp.pp100ELEMENT_ldos.cube
+        # automatically convert units if they are None since cube files take atomic units
+        if units is None:
+            units = "1/(Ry*Bohr^3)"
         if units != "1/(Ry*Bohr^3)":
             printout(
                 "The expected units for the LDOS from cube files are 1/(Ry*Bohr^3)\n"
