@@ -14,7 +14,7 @@ from scipy.spatial import distance
 from scipy.integrate import simpson
 
 from mala.common.parameters import Parameters, ParametersTargets
-from mala.common.parallelizer import printout, parallel_warn
+from mala.common.parallelizer import printout, parallel_warn, get_rank
 from mala.targets.calculation_helpers import fermi_function
 from mala.common.physical_data import PhysicalData
 from mala.descriptors.atomic_density import AtomicDensity
@@ -629,7 +629,6 @@ class Target(PhysicalData):
             If True, no file will be written, and instead a json dict will
             be returned.
         """
-
         additional_calculation_data = {
             "fermi_energy_dft": self.fermi_energy_dft,
             "temperature": self.temperature,
@@ -1429,6 +1428,8 @@ class Target(PhysicalData):
         )
 
     def _set_openpmd_attribtues(self, iteration, mesh):
+        import openpmd_api as io
+
         super(Target, self)._set_openpmd_attribtues(iteration, mesh)
 
         # If no atoms have been read, neither have any of the other
@@ -1444,6 +1445,7 @@ class Target(PhysicalData):
                 and key is not None
                 and key != "pseudopotentials"
                 and additional_calculation_data[key] is not None
+                and key != "atomic_forces_dft"
             ):
                 iteration.set_attribute(key, additional_calculation_data[key])
             if key == "pseudopotentials":
@@ -1456,6 +1458,42 @@ class Target(PhysicalData):
                             pseudokey
                         ],
                     )
+
+        # If the data contains atomic forces from a DFT calculation, we need
+        # to process it in much the same fashion as the atoms.
+        if "atomic_forces_dft" in additional_calculation_data:
+            atomic_forces = additional_calculation_data["atomic_forces_dft"]
+            if atomic_forces is not None:
+                # This data is equivalent across the ranks, so just write it once
+                atomic_forces_dft_openpmd = iteration.particles[
+                    "atomic_forces_dft"
+                ]
+                forces = io.Dataset(
+                    # Need bugfix https://github.com/openPMD/openPMD-api/pull/1357
+                    (
+                        np.array(atomic_forces[0]).dtype
+                        if io.__version__ >= "0.15.0"
+                        else io.Datatype.DOUBLE
+                    ),
+                    np.array(atomic_forces[0]).shape,
+                )
+                for atom in range(0, np.shape(atomic_forces)[0]):
+                    atomic_forces_dft_openpmd["force_compopnents"][
+                        str(atom)
+                    ].reset_dataset(forces)
+
+                    individual_force = atomic_forces_dft_openpmd[
+                        "force_compopnents"
+                    ][str(atom)]
+                    if get_rank() == 0:
+                        individual_force.store_chunk(
+                            np.array(atomic_forces)[atom]
+                        )
+
+                    # Positions are stored in Angstrom.
+                    atomic_forces_dft_openpmd["force_compopnents"][
+                        str(atom)
+                    ].unit_SI = 1.0e-10
 
     def _process_openpmd_attributes(self, series, iteration, mesh):
         super(Target, self)._process_openpmd_attributes(
@@ -1496,6 +1534,20 @@ class Target(PhysicalData):
             self.atoms.pbc[2] = iteration.get_attribute(
                 "periodic_boundary_conditions_z"
             )
+
+        # Forces may not necessarily have been read (and therefore written)
+
+        try:
+            atomic_forces_dft = iteration.particles["atomic_forces_dft"]
+            nr_atoms = len(atomic_forces_dft["force_compopnents"])
+            self.atomic_forces_dft = np.zeros((nr_atoms, 3))
+            for i in range(0, nr_atoms):
+                atomic_forces_dft["force_compopnents"][str(i)].load_chunk(
+                    self.atomic_forces_dft[i, :]
+                )
+            series.flush()
+        except IndexError:
+            pass
 
         # Process all the regular meta info.
         self.fermi_energy_dft = self._get_attribute_if_attribute_exists(
