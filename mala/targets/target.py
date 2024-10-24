@@ -1536,26 +1536,18 @@ class Target(PhysicalData):
             )
 
         # Forces may not necessarily have been read (and therefore written)
-        atomic_forces_dft = iteration.particles["atomic_forces_dft"]
-        nr_atoms = len(atomic_forces_dft["force_compopnents"])
-        self.atomic_forces_dft = np.zeros((nr_atoms, 3))
-        for i in range(0, nr_atoms):
-            atomic_forces_dft["force_compopnents"][str(i)].load_chunk(
-                self.atomic_forces_dft[i, :]
-            )
-        series.flush()
 
-        # try:
-        #     atomic_forces_dft = iteration.particles["atomic_forces_dft"]
-        #     nr_atoms = len(atomic_forces_dft["atomic_forces_dft"])
-        #     self.atomic_forces_dft = np.zeros((nr_atoms, 3))
-        #     for i in range(0, nr_atoms):
-        #         self.atomic_forces_dft["atomic_forces_dft"][str(i)].load_chunk(
-        #             self.atomic_forces_dft[i, :]
-        #         )
-        #     series.flush()
-        # except IndexError:
-        #     pass
+        try:
+            atomic_forces_dft = iteration.particles["atomic_forces_dft"]
+            nr_atoms = len(atomic_forces_dft["force_compopnents"])
+            self.atomic_forces_dft = np.zeros((nr_atoms, 3))
+            for i in range(0, nr_atoms):
+                atomic_forces_dft["force_compopnents"][str(i)].load_chunk(
+                    self.atomic_forces_dft[i, :]
+                )
+            series.flush()
+        except IndexError:
+            pass
 
         # Process all the regular meta info.
         self.fermi_energy_dft = self._get_attribute_if_attribute_exists(
