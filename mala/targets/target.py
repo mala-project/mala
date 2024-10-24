@@ -1540,7 +1540,7 @@ class Target(PhysicalData):
         nr_atoms = len(atomic_forces_dft["force_compopnents"])
         self.atomic_forces_dft = np.zeros((nr_atoms, 3))
         for i in range(0, nr_atoms):
-            self.atomic_forces_dft["force_compopnents"][str(i)].load_chunk(
+            atomic_forces_dft["force_compopnents"][str(i)].load_chunk(
                 self.atomic_forces_dft[i, :]
             )
         series.flush()
