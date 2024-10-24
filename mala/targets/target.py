@@ -1463,7 +1463,6 @@ class Target(PhysicalData):
         # to process it in much the same fashion as the atoms.
         if "atomic_forces_dft" in additional_calculation_data:
             atomic_forces = additional_calculation_data["atomic_forces_dft"]
-            atomic_forces_2 = self.atomic_forces_dft
             if atomic_forces is not None:
                 # This data is equivalent across the ranks, so just write it once
                 atomic_forces_dft_openpmd = iteration.particles[
@@ -1478,21 +1477,21 @@ class Target(PhysicalData):
                     ),
                     np.array(atomic_forces[0]).shape,
                 )
-                # atoms_openpmd["position"].time_offset = 0.0
-                # atoms_openpmd["positionOffset"].time_offset = 0.0
-                for atom in range(0, np.shape(atomic_forces_dft_openpmd)[0]):
-                    atomic_forces_dft_openpmd["atomic_forces_dft"][
+                for atom in range(0, np.shape(atomic_forces)[0]):
+                    atomic_forces_dft_openpmd["force_compopnents"][
                         str(atom)
                     ].reset_dataset(forces)
 
                     individual_force = atomic_forces_dft_openpmd[
-                        "atomic_forces_dft"
+                        "force_compopnents"
                     ][str(atom)]
                     if get_rank() == 0:
-                        individual_force.store_chunk(atomic_forces[atom])
+                        individual_force.store_chunk(
+                            np.array(atomic_forces)[atom]
+                        )
 
                     # Positions are stored in Angstrom.
-                    atomic_forces_dft_openpmd["position"][
+                    atomic_forces_dft_openpmd["force_compopnents"][
                         str(atom)
                     ].unit_SI = 1.0e-10
 
@@ -1535,6 +1534,28 @@ class Target(PhysicalData):
             self.atoms.pbc[2] = iteration.get_attribute(
                 "periodic_boundary_conditions_z"
             )
+
+        # Forces may not necessarily have been read (and therefore written)
+        atomic_forces_dft = iteration.particles["atomic_forces_dft"]
+        nr_atoms = len(atomic_forces_dft["force_compopnents"])
+        self.atomic_forces_dft = np.zeros((nr_atoms, 3))
+        for i in range(0, nr_atoms):
+            self.atomic_forces_dft["force_compopnents"][str(i)].load_chunk(
+                self.atomic_forces_dft[i, :]
+            )
+        series.flush()
+
+        # try:
+        #     atomic_forces_dft = iteration.particles["atomic_forces_dft"]
+        #     nr_atoms = len(atomic_forces_dft["atomic_forces_dft"])
+        #     self.atomic_forces_dft = np.zeros((nr_atoms, 3))
+        #     for i in range(0, nr_atoms):
+        #         self.atomic_forces_dft["atomic_forces_dft"][str(i)].load_chunk(
+        #             self.atomic_forces_dft[i, :]
+        #         )
+        #     series.flush()
+        # except IndexError:
+        #     pass
 
         # Process all the regular meta info.
         self.fermi_energy_dft = self._get_attribute_if_attribute_exists(
