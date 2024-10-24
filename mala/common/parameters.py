@@ -1556,7 +1556,7 @@ class Parameters:
 
         Parameters
         ----------
-        file : string or ZipExtFile
+        file : string or ZipExtFile or dict
             File to which the parameters will be saved to.
 
         save_format : string
@@ -1585,36 +1585,50 @@ class Parameters:
                 json_dict = json.load(open(file, encoding="utf-8"))
             else:
                 json_dict = json.load(file)
+            loaded_parameters = cls.load_from_dict(
+                json_dict, no_snapshots, force_no_ddp
+            )
 
-            loaded_parameters = cls()
-            for key in json_dict:
-                if (
-                    isinstance(json_dict[key], dict)
-                    and key != "openpmd_configuration"
-                ):
-                    # These are the other parameter classes.
-                    sub_parameters = globals()[
-                        json_dict[key]["_parameters_type"]
-                    ].from_json(json_dict[key])
-                    setattr(loaded_parameters, key, sub_parameters)
+        elif save_format == "dict":
+            loaded_parameters = cls.load_from_dict(
+                file, no_snapshots, force_no_ddp
+            )
 
-            # We iterate a second time, to set global values, so that they
-            # are properly forwarded.
-            for key in json_dict:
-                if (
-                    not isinstance(json_dict[key], dict)
-                    or key == "openpmd_configuration"
-                ):
-                    if key == "use_ddp" and force_no_ddp is True:
-                        setattr(loaded_parameters, key, False)
-                    else:
-                        setattr(loaded_parameters, key, json_dict[key])
-            if no_snapshots is True:
-                loaded_parameters.data.snapshot_directories_list = []
         else:
             raise Exception("Unsupported parameter save format.")
 
         return loaded_parameters
+
+    @classmethod
+    def _process_loaded_parameters(
+        cls, parameters_dict, no_snapshots, force_no_ddp
+    ):
+        parameters_object = cls()
+        for key in parameters_dict:
+            if (
+                isinstance(parameters_dict[key], dict)
+                and key != "openpmd_configuration"
+            ):
+                # These are the other parameter classes.
+                sub_parameters = globals()[
+                    parameters_dict[key]["_parameters_type"]
+                ].from_json(parameters_dict[key])
+                setattr(parameters_object, key, sub_parameters)
+
+        # We iterate a second time, to set global values, so that they
+        # are properly forwarded.
+        for key in parameters_dict:
+            if (
+                not isinstance(parameters_dict[key], dict)
+                or key == "openpmd_configuration"
+            ):
+                if key == "use_ddp" and force_no_ddp is True:
+                    setattr(parameters_object, key, False)
+                else:
+                    setattr(parameters_object, key, parameters_dict[key])
+        if no_snapshots is True:
+            parameters_object.data.snapshot_directories_list = []
+        return parameters_object
 
     @classmethod
     def load_from_pickle(cls, file, no_snapshots=False):
@@ -1663,6 +1677,35 @@ class Parameters:
         return Parameters.load_from_file(
             file,
             save_format="json",
+            no_snapshots=no_snapshots,
+            force_no_ddp=force_no_ddp,
+        )
+
+    @classmethod
+    def load_from_dict(
+        cls, param_dict, no_snapshots=False, force_no_ddp=False
+    ):
+        """
+        Load a Parameters object from a file.
+
+        Parameters
+        ----------
+        param_dict : dictionary
+            Dictionary containing parameters to be loaded
+
+        no_snapshots : bool
+            If True, than the snapshot list will be emptied. Useful when
+            performing inference/testing after training a network.
+
+        Returns
+        -------
+        loaded_parameters : Parameters
+            The loaded Parameters object.
+
+        """
+        return Parameters.load_from_file(
+            param_dict,
+            save_format="dict",
             no_snapshots=no_snapshots,
             force_no_ddp=force_no_ddp,
         )

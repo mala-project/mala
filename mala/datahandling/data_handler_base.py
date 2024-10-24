@@ -92,6 +92,7 @@ class DataHandlerBase(ABC):
         input_units="None",
         calculation_output_file="",
         snapshot_type="numpy",
+        selection_mask=None,
     ):
         """
         Add a snapshot to the data pipeline.
@@ -130,7 +131,16 @@ class DataHandlerBase(ABC):
         snapshot_type : string
             Either "numpy" or "openpmd" based on what kind of files you
             want to operate on.
+
+        selection_mask : None or [boolean]
+            If None, entire snapshot is loaded, if [boolean], it is used as a
+            mask to select which examples are loaded
         """
+        if selection_mask is not None and self.parameters.use_lazy_loading:
+            raise NotImplementedError(
+                "Example selection hasn't been "
+                "implemented for lazy loading yet."
+            )
         snapshot = Snapshot(
             input_file,
             input_directory,
@@ -159,13 +169,15 @@ class DataHandlerBase(ABC):
     # Loading data
     ######################
 
-    def _check_snapshots(self, comm=None):
+    def _check_snapshots(self, from_arrays_dict=None, comm=None):
         """Check the snapshots for consistency."""
         self.nr_snapshots = len(self.parameters.snapshot_directories_list)
 
         # Read the snapshots using a memorymap to see if there is consistency.
         firstsnapshot = True
-        for snapshot in self.parameters.snapshot_directories_list:
+        for i, snapshot in enumerate(
+            self.parameters.snapshot_directories_list
+        ):
             ####################
             # Descriptors.
             ####################
@@ -177,7 +189,28 @@ class DataHandlerBase(ABC):
                 snapshot.input_npy_directory,
                 min_verbosity=1,
             )
-            if snapshot.snapshot_type == "numpy":
+            if from_arrays_dict is not None:
+                printout(
+                    f'arrdim:   {from_arrays_dict[(i, "inputs")].shape}',
+                    min_verbosity=2,
+                )
+                printout(
+                    f"featmask: {self.descriptor_calculator._feature_mask()}",
+                    min_verbosity=2,
+                )
+                tmp_dimension = from_arrays_dict[(i, "inputs")][
+                    :, self.descriptor_calculator._feature_mask() :
+                ].shape
+                # We don't need any reference to full grid dim at this point
+                # so this is just for compatibility w other code
+                if len(tmp_dimension) > 2:
+                    raise ValueError("Flatten the data pool arrays.")
+                tmp_dimension = (tmp_dimension[0], 1, 1, tmp_dimension[-1])
+                printout(
+                    f"from_arrays_dict dim {i}: {from_arrays_dict[(i, 'inputs')].shape}",
+                    min_verbosity=2,
+                )
+            elif snapshot.snapshot_type == "numpy":
                 tmp_dimension = (
                     self.descriptor_calculator.read_dimensions_from_numpy_file(
                         os.path.join(
@@ -200,6 +233,11 @@ class DataHandlerBase(ABC):
             # for flexible grid sizes only this need be consistent
             tmp_input_dimension = tmp_dimension[-1]
             tmp_grid_dim = tmp_dimension[0:3]
+
+            # If using selection_mask, apply to dimensions
+            if snapshot._selection_mask is not None:
+                tmp_grid_dim = (sum(snapshot._selection_mask), 1, 1)
+
             snapshot.grid_dimension = tmp_grid_dim
             snapshot.grid_size = int(np.prod(snapshot.grid_dimension))
             if firstsnapshot:
@@ -221,7 +259,16 @@ class DataHandlerBase(ABC):
                 snapshot.output_npy_directory,
                 min_verbosity=1,
             )
-            if snapshot.snapshot_type == "numpy":
+            if from_arrays_dict is not None:
+                tmp_dimension = from_arrays_dict[(i, "outputs")][
+                    :, self.target_calculator._feature_mask() :
+                ].shape
+                # We don't need any reference to full grid dim at this point
+                # so this is just for compatibility w other code
+                if len(tmp_dimension) > 2:
+                    raise ValueError("Flatten the data pool arrays.")
+                tmp_dimension = (tmp_dimension[0], 1, 1, tmp_dimension[-1])
+            elif snapshot.snapshot_type == "numpy":
                 tmp_dimension = (
                     self.target_calculator.read_dimensions_from_numpy_file(
                         os.path.join(
