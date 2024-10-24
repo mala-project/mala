@@ -24,9 +24,18 @@ create data for MALA. In order to do so
 Make sure to use enough k-points in the DFT calculation (LDOS sampling
 requires denser k-grids then regular DFT calculations) and an appropriate
 energy grid when calculating the LDOS. See the `initial MALA publication <https://www.doi.org/10.1103/PhysRevB.104.035120>`_
-for more information on this topic. Lastly, when calculating
-the LDOS with ``pp.x``, make sure to set ``use_gauss_ldos=.true.`` in the
-``inputpp`` section.
+for more information on this topic.
+
+Also be aware that due to error cancellation in the total free energy, using
+regular SCF accuracy may be not be sufficient to accurately sample the LDOS.
+If you work with systems which include regions of small electronic density
+(e.g., non-metallic systems, 2D systems, etc.) the MALA team strongly advises
+to reduce the SCF threshold by roughly three orders of magnitude. I.e., if the
+default SCF accuracy in Quantum ESPRESSO is 1e-6, one should use 1e-9 for such
+systems.
+
+Lastly, when calculating the LDOS with ``pp.x``, make sure to set
+``use_gauss_ldos=.true.`` in the ``inputpp`` section.
 
 
 Data conversion

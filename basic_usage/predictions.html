@@ -99,6 +99,12 @@
 This guide follows the examples <code class="docutils literal notranslate"><span class="pre">ex05_run_predictions.py</span></code> and
 <code class="docutils literal notranslate"><span class="pre">ex06_ase_calculator.py</span></code>. In the <a class="reference internal" href="../advanced_usage/predictions.html#production"><span class="std std-ref">advanced section</span></a> on
 this topic, performance tweaks and extended access to observables are covered.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are working with a 2D-system, and you have explicitly calculated
+training data as a 2D-system in Quantum ESPRESSO, make sure to set
+<code class="docutils literal notranslate"><span class="pre">parameters.target.assume_two_dimensional</span> <span class="pre">=</span> <span class="pre">True</span></code> before any prediction.</p>
+</div>
 <p>In order to get direct access to electronic structure via ML, MALA uses
 the <code class="docutils literal notranslate"><span class="pre">Predictor</span></code> class. Provided that the trained model was saved with
 all the necessary information on the bispectrum descriptors and the LDOS,

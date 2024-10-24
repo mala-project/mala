@@ -613,6 +613,13 @@
 
 <span class="sd">        kMax : float</span>
 <span class="sd">            Maximum wave vector up to which to calculate the SSF.</span>
+
+<span class="sd">    assume_two_dimensional : bool</span>
+<span class="sd">        If True, the total energy calculations will be performed without</span>
+<span class="sd">        periodic boundary conditions in z-direction, i.e., the cell will</span>
+<span class="sd">        be truncated in the z-direction. NOTE: This parameter may be</span>
+<span class="sd">        moved up to a global parameter, depending on whether descriptor</span>
+<span class="sd">        calculation may benefit from it.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -626,6 +633,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">rdf_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;rMax&quot;</span><span class="p">:</span> <span class="s2">&quot;mic&quot;</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tpcf_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;rMax&quot;</span><span class="p">:</span> <span class="s2">&quot;mic&quot;</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ssf_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;kMax&quot;</span><span class="p">:</span> <span class="mf">12.0</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assume_two_dimensional</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">restrict_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

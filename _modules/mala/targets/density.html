@@ -1090,12 +1090,21 @@
             <span class="k">if</span> <span class="n">qe_pseudopotentials</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">qe_pseudopotentials</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qe_pseudopotentials</span>
 
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">assume_two_dimensional</span><span class="p">:</span>
+                <span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;assume_isolated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;2D&quot;</span>
+
+                <span class="c1"># In the 2D case, the Gamma point approximation introduces</span>
+                <span class="c1"># errors in the Ewald and Hartree energy for some reason.</span>
+                <span class="n">kpoints</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">kpoints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">write_tem_input_file</span><span class="p">(</span>
                 <span class="n">atoms_Angstrom</span><span class="p">,</span>
                 <span class="n">qe_input_data</span><span class="p">,</span>
                 <span class="n">qe_pseudopotentials</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
+                <span class="n">kpoints</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># initialize the total energy module.</span>
