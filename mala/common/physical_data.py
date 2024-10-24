@@ -111,7 +111,6 @@ class PhysicalData(ABC):
                 loaded_array = loaded_array.reshape(
                     (-1, 1, 1, original_dims[-1])
                 )[selection_mask]
-                print(f"post-mask array_dims = {loaded_array.shape}")
                 return loaded_array
             else:
                 return loaded_array
@@ -139,7 +138,6 @@ class PhysicalData(ABC):
                     array = array.reshape((-1, 1, 1, array_dims[-1]))[
                         selection_mask
                     ]
-                print(f"post-mask array_dims = {array.shape}")
             self._process_loaded_array(array, units=units)
 
     def read_from_openpmd_file(self, path, units=None, array=None):

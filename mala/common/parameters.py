@@ -1585,12 +1585,12 @@ class Parameters:
                 json_dict = json.load(open(file, encoding="utf-8"))
             else:
                 json_dict = json.load(file)
-            loaded_parameters = cls.load_from_dict(
+            loaded_parameters = cls._process_loaded_dict(
                 json_dict, no_snapshots, force_no_ddp
             )
 
         elif save_format == "dict":
-            loaded_parameters = cls.load_from_dict(
+            loaded_parameters = cls._process_loaded_dict(
                 file, no_snapshots, force_no_ddp
             )
 
@@ -1600,9 +1600,7 @@ class Parameters:
         return loaded_parameters
 
     @classmethod
-    def _process_loaded_parameters(
-        cls, parameters_dict, no_snapshots, force_no_ddp
-    ):
+    def _process_loaded_dict(cls, parameters_dict, no_snapshots, force_no_ddp):
         parameters_object = cls()
         for key in parameters_dict:
             if (

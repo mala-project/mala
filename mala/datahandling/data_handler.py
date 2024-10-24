@@ -235,10 +235,10 @@ class DataHandler(DataHandlerBase):
         """
         Replace tr, va, te data for next generation of active learning.
 
+        Internally replicates prepare_data function.
 
         Parameters
         ----------
-
         from_arrays_dict : dict or None
             (Allows user to provide data directly from memory)
             Dictionary which assigns an array (values) to each snapshot, e.g.,

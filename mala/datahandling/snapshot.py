@@ -101,6 +101,7 @@ class Snapshot(JSONSerializable):
             self._selection_mask = selection_mask
 
     def set_selection_mask(self, selection_mask):
+        """Set the selection mask for snapshot loading."""
         if isinstance(selection_mask, np.ndarray):
             self._selection_mask = selection_mask.tolist()
         else:

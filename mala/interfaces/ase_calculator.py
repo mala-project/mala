@@ -79,7 +79,7 @@ class MALA(Calculator):
     @classmethod
     def load_model(cls, run_name, path="./"):
         """
-        DEPRECATED: Load a model to use for the calculator.
+        Load a model to use for the calculator (DEPRECATED).
 
         MALA.load_model() will be deprecated in MALA v1.4.0. Please use
         MALA.load_run() instead.
@@ -239,5 +239,5 @@ class MALA(Calculator):
 
         """
         self.predictor.save_run(
-            filename, path=save_path, additional_calculation_data=True
+            filename, path=path, additional_calculation_data=True
         )
