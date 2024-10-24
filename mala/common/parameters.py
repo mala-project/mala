@@ -510,6 +510,13 @@ class ParametersTargets(ParametersBase):
 
         kMax : float
             Maximum wave vector up to which to calculate the SSF.
+
+    assume_two_dimensional : bool
+        If True, the total energy calculations will be performed without
+        periodic boundary conditions in z-direction, i.e., the cell will
+        be truncated in the z-direction. NOTE: This parameter may be
+        moved up to a global parameter, depending on whether descriptor
+        calculation may benefit from it.
     """
 
     def __init__(self):
@@ -523,6 +530,7 @@ class ParametersTargets(ParametersBase):
         self.rdf_parameters = {"number_of_bins": 500, "rMax": "mic"}
         self.tpcf_parameters = {"number_of_bins": 20, "rMax": "mic"}
         self.ssf_parameters = {"number_of_bins": 100, "kMax": 12.0}
+        self.assume_two_dimensional = False
 
     @property
     def restrict_targets(self):
