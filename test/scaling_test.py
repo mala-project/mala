@@ -19,8 +19,8 @@ class TestScaling:
             "feature-wise-standard",
             "standard",
             "None",
-            "normal",
-            "feature-wise-normal",
+            "minmax",
+            "feature-wise-minmax",
         ]:
             data = np.load(os.path.join(data_path, "Be_snapshot2.out.npy"))
             data = data.astype(np.float32)

@@ -61,7 +61,7 @@ class TestHyperoptCheckpointing:
 
         # Specify the data scaling.
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
 
         # Specify the training parameters.
         test_parameters.running.max_number_epochs = 10

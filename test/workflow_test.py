@@ -523,7 +523,7 @@ class TestFullWorkflow:
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.network.layer_activations = ["ReLU"]
         test_parameters.running.max_number_epochs = 400
         test_parameters.running.mini_batch_size = 40

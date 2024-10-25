@@ -573,27 +573,45 @@ class ParametersData(ParametersBase):
         Specifies how input quantities are normalized.
         Options:
 
-            - "None": No normalization is applied.
-            - "standard": Standardization (Scale to mean 0, standard
-              deviation 1)
-            - "normal": Min-Max scaling (Scale to be in range 0...1)
-            - "feature-wise-standard": Row Standardization (Scale to mean 0,
-              standard deviation 1)
-            - "feature-wise-normal": Row Min-Max scaling (Scale to be in range
-              0...1)
+            - "None": No scaling is applied.
+            - "standard": Standardization (Scale to mean 0,
+              standard deviation 1) is applied to the entire array.
+            - "minmax": Min-Max scaling (Scale to be in range 0...1) is applied
+              to the entire array.
+            - "feature-wise-standard": Standardization (Scale to mean 0,
+              standard deviation 1) is applied to each feature dimension
+              individually. I.e., if your training data has dimensions
+              (x,y,z,f), then each of the f rows with (x,y,z) entries is scaled
+               indiviually.
+            - "feature-wise-minmax": Row Min-Max scaling (Scale to be in range
+              0...1) is applied to each feature dimension individually.
+              I.e., if your training data has dimensions (x,y,z,f), then each
+              of the f rows with (x,y,z) entries is scaled indiviually.
+            - "normal": (DEPRECATED) Old name for "minmax".
+            - "feature-wise-normal": (DEPRECATED) Old name for
+              "feature-wise-minmax"
 
     output_rescaling_type : string
         Specifies how output quantities are normalized.
         Options:
 
-            - "None": No normalization is applied.
+            - "None": No scaling is applied.
             - "standard": Standardization (Scale to mean 0,
-              standard deviation 1)
-            - "normal": Min-Max scaling (Scale to be in range 0...1)
-            - "feature-wise-standard": Row Standardization (Scale to mean 0,
-              standard deviation 1)
-            - "feature-wise-normal": Row Min-Max scaling (Scale to be in
-              range 0...1)
+              standard deviation 1) is applied to the entire array.
+            - "minmax": Min-Max scaling (Scale to be in range 0...1) is applied
+              to the entire array.
+            - "feature-wise-standard": Standardization (Scale to mean 0,
+              standard deviation 1) is applied to each feature dimension
+              individually. I.e., if your training data has dimensions
+              (x,y,z,f), then each of the f rows with (x,y,z) entries is scaled
+               indiviually.
+            - "feature-wise-minmax": Row Min-Max scaling (Scale to be in range
+              0...1) is applied to each feature dimension individually.
+              I.e., if your training data has dimensions (x,y,z,f), then each
+              of the f rows with (x,y,z) entries is scaled indiviually.
+            - "normal": (DEPRECATED) Old name for "minmax".
+            - "feature-wise-normal": (DEPRECATED) Old name for
+              "feature-wise-minmax"
 
     use_lazy_loading : bool
         If True, data is lazily loaded, i.e. only the snapshots that are
