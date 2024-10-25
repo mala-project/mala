@@ -285,7 +285,7 @@ class DataScaler:
 
         self.cantransform = True
 
-    def transform(self, unscaled):
+    def transform(self, unscaled, copy=False):
         """
         Transform data from unscaled to scaled.
 
@@ -297,11 +297,19 @@ class DataScaler:
         unscaled : torch.Tensor
             Real world data.
 
+        copy : bool
+            If False, data is modified in-place. If True, a copy of the
+            data is modified. Default is False.
+
         Returns
         -------
         scaled : torch.Tensor
             Scaled data.
         """
+        # Backward compatability.
+        if not hasattr(self, "scale_minmax") and hasattr(self, "scale_normal"):
+            self.scale_minmax = self.scale_normal
+
         # First we need to find out if we even have to do anything.
         if self.scale_standard is False and self.scale_minmax is False:
             pass
@@ -314,6 +322,8 @@ class DataScaler:
 
         # Perform the actual scaling, but use no_grad to make sure
         # that the next couple of iterations stay untracked.
+        scaled = unscaled if copy is False else unscaled.clone()
+
         with torch.no_grad():
             if self.feature_wise:
 
@@ -322,12 +332,12 @@ class DataScaler:
                 ##########################
 
                 if self.scale_standard:
-                    unscaled -= self.means
-                    unscaled /= self.stds
+                    scaled -= self.means
+                    scaled /= self.stds
 
                 if self.scale_minmax:
-                    unscaled -= self.mins
-                    unscaled /= self.maxs - self.mins
+                    scaled -= self.mins
+                    scaled /= self.maxs - self.mins
 
             else:
 
@@ -336,14 +346,16 @@ class DataScaler:
                 ##########################
 
                 if self.scale_standard:
-                    unscaled -= self.total_mean
-                    unscaled /= self.total_std
+                    scaled -= self.total_mean
+                    scaled /= self.total_std
 
                 if self.scale_minmax:
-                    unscaled -= self.total_min
-                    unscaled /= self.total_max - self.total_min
+                    scaled -= self.total_min
+                    scaled /= self.total_max - self.total_min
 
-    def inverse_transform(self, scaled, as_numpy=False):
+        return scaled
+
+    def inverse_transform(self, scaled, copy=False, as_numpy=False):
         """
         Transform data from scaled to unscaled.
 
@@ -356,7 +368,11 @@ class DataScaler:
             Scaled data.
 
         as_numpy : bool
-            If True, a numpy array is returned, otherwsie.
+            If True, a numpy array is returned, otherwise a torch tensor.
+
+        copy : bool
+            If False, data is modified in-place. If True, a copy of the
+            data is modified. Default is False.
 
         Returns
         -------
@@ -364,9 +380,17 @@ class DataScaler:
             Real world data.
 
         """
+        # Backward compatability.
+        if not hasattr(self, "scale_minmax") and hasattr(self, "scale_normal"):
+            self.scale_minmax = self.scale_normal
+
+        # Perform the actual scaling, but use no_grad to make sure
+        # that the next couple of iterations stay untracked.
+        unscaled = scaled if copy is False else scaled.clone()
+
         # First we need to find out if we even have to do anything.
         if self.scale_standard is False and self.scale_minmax is False:
-            unscaled = scaled
+            pass
 
         else:
             if self.cantransform is False:
@@ -385,12 +409,12 @@ class DataScaler:
                     ##########################
 
                     if self.scale_standard:
-                        unscaled = (scaled * self.stds) + self.means
+                        unscaled *= self.stds
+                        unscaled += self.means
 
                     if self.scale_minmax:
-                        unscaled = (
-                            scaled * (self.maxs - self.mins)
-                        ) + self.mins
+                        unscaled *= self.maxs - self.mins
+                        unscaled += self.mins
 
                 else:
 
@@ -399,12 +423,12 @@ class DataScaler:
                     ##########################
 
                     if self.scale_standard:
-                        unscaled = (scaled * self.total_std) + self.total_mean
+                        unscaled *= self.total_std
+                        unscaled += self.total_mean
 
                     if self.scale_minmax:
-                        unscaled = (
-                            scaled * (self.total_max - self.total_min)
-                        ) + self.total_min
+                        unscaled *= self.total_max - self.total_min
+                        unscaled += self.total_min
         #
         if as_numpy:
             return unscaled.detach().numpy().astype(np.float64)
