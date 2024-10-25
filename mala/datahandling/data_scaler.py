@@ -429,7 +429,7 @@ class DataScaler:
                     if self.scale_minmax:
                         unscaled *= self.total_max - self.total_min
                         unscaled += self.total_min
-        #
+
         if as_numpy:
             return unscaled.detach().numpy().astype(np.float64)
         else:
