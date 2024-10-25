@@ -40,8 +40,6 @@ SUBROUTINE initialize(file_name, y_planes_in, calculate_eigts_in)
     ENDIF
   ENDIF
 
-  print *, file_name
-
   !! checks if first string is contained in the second
   !
   CALL mp_startup ( start_images=.true., images_only=.true.)
