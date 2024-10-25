@@ -1,5 +1,6 @@
 """Electronic density calculation class."""
 
+import os.path
 import time
 
 from ase.units import Rydberg, Bohr, m
@@ -16,6 +17,8 @@ from mala.common.parallelizer import (
     parallel_warn,
     barrier,
     get_size,
+    get_comm,
+    get_rank,
 )
 from mala.targets.target import Target
 from mala.targets.cube_parser import read_cube, write_cube
@@ -406,7 +409,7 @@ class Density(Target):
         printout("Reading density from .cube file ", path, min_verbosity=0)
         # automatically convert units if they are None since cube files take atomic units
         if units is None:
-            units="1/Bohr^3"
+            units = "1/Bohr^3"
         if units != "1/Bohr^3":
             printout(
                 "The expected units for the density from cube files are 1/Bohr^3\n"
@@ -960,12 +963,14 @@ class Density(Target):
             else:
                 kpoints = self.kpoints
 
-            self.write_tem_input_file(
+            tem_input_name = self.write_tem_input_file(
                 atoms_Angstrom,
                 qe_input_data,
                 qe_pseudopotentials,
                 self.grid_dimensions,
                 kpoints,
+                get_comm(),
+                get_rank(),
             )
 
         # initialize the total energy module.
@@ -984,8 +989,22 @@ class Density(Target):
             )
             barrier()
             t0 = time.perf_counter()
-            te.initialize(self.y_planes)
+
+            # We have to make sure we have the correct format for the file.
+            # QE expects the file without a path, and with a fixed length.
+            # I chose 256 for this length, simply to have some space in case
+            # we need it at some point (i.e., the tempfile format changes).
+            tem_input_name_qe = os.path.basename(tem_input_name)
+            tem_input_name_qe = tem_input_name_qe + " " * (
+                256 - len(tem_input_name_qe)
+            )
+            te.initialize(tem_input_name_qe, self.y_planes)
             barrier()
+
+            # Right after setup we can delete the file.
+            if get_rank() == 0:
+                os.remove(tem_input_name)
+
             printout(
                 "Total energy module: Time used by total energy initialization: {:.8f}s".format(
                     time.perf_counter() - t0

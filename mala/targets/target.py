@@ -4,6 +4,7 @@ from abc import abstractmethod
 import itertools
 import json
 import os
+import tempfile
 
 from ase.neighborlist import NeighborList
 from ase.units import Rydberg, kB
@@ -14,7 +15,12 @@ from scipy.spatial import distance
 from scipy.integrate import simpson
 
 from mala.common.parameters import Parameters, ParametersTargets
-from mala.common.parallelizer import printout, parallel_warn, get_rank
+from mala.common.parallelizer import (
+    printout,
+    parallel_warn,
+    get_rank,
+    get_comm,
+)
 from mala.targets.calculation_helpers import fermi_function
 from mala.common.physical_data import PhysicalData
 from mala.descriptors.atomic_density import AtomicDensity
@@ -1333,6 +1339,8 @@ class Target(PhysicalData):
         qe_pseudopotentials,
         grid_dimensions,
         kpoints,
+        mpi_communicator,
+        mpi_rank,
     ):
         """
         Write a QE-style input file for the total energy module.
@@ -1360,6 +1368,14 @@ class Target(PhysicalData):
 
         kpoints : dict
             k-grid used, usually None or (1,1,1) for TEM calculations.
+
+        mpi_communicator : MPI.COMM_WORLD
+            An MPI comminucator. If no MPI is enabled, this will simply be
+            None.
+
+        mpi_rank : int
+            Rank within MPI
+
         """
         # Specify grid dimensions, if any are given.
         if (
@@ -1379,14 +1395,24 @@ class Target(PhysicalData):
         # the DFT calculation. If symmetry is then on in here, that
         # leads to errors.
         # qe_input_data["nosym"] = False
+        if mpi_rank == 0:
+            tem_input_file = tempfile.NamedTemporaryFile(
+                delete=False, prefix="mala.pw.scf.", suffix=".in", dir="./"
+            ).name
+        else:
+            tem_input_file = None
+
+        if mpi_communicator is not None:
+            tem_input_file = mpi_communicator.bcast(tem_input_file, root=0)
         ase.io.write(
-            "mala.pw.scf.in",
+            tem_input_file,
             atoms_Angstrom,
             "espresso-in",
             input_data=qe_input_data,
             pseudopotentials=qe_pseudopotentials,
             kpts=kpoints,
         )
+        return tem_input_file
 
     def restrict_data(self, array):
         """

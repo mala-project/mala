@@ -228,7 +228,7 @@ class Descriptor(PhysicalData):
             Type of descriptor calculation (e.g. bgrid for bispectrum)
         outdir: str
             Directory where lammps files are kept
-        
+
         Returns
         -------
         None
@@ -236,25 +236,28 @@ class Descriptor(PhysicalData):
         if get_rank() == 0:
             prefix_inp_str = "lammps_" + lammps_type + "_input"
             prefix_log_str = "lammps_" + lammps_type + "_log"
-            lammps_tmp_input_file=tempfile.NamedTemporaryFile(
+            lammps_tmp_input_file = tempfile.NamedTemporaryFile(
                 delete=False, prefix=prefix_inp_str, suffix="_.tmp", dir=outdir
             )
             self.lammps_temporary_input = lammps_tmp_input_file.name
             lammps_tmp_input_file.close()
 
-            lammps_tmp_log_file=tempfile.NamedTemporaryFile(
+            lammps_tmp_log_file = tempfile.NamedTemporaryFile(
                 delete=False, prefix=prefix_log_str, suffix="_.tmp", dir=outdir
             )
             self.lammps_temporary_log = lammps_tmp_log_file.name
             lammps_tmp_log_file.close()
         else:
-            self.lammps_temporary_input=None
-            self.lammps_temporary_log=None
+            self.lammps_temporary_input = None
+            self.lammps_temporary_log = None
 
         if self.parameters._configuration["mpi"]:
-            self.lammps_temporary_input = get_comm().bcast(self.lammps_temporary_input, root=0)
-            self.lammps_temporary_log = get_comm().bcast(self.lammps_temporary_log, root=0)
-        
+            self.lammps_temporary_input = get_comm().bcast(
+                self.lammps_temporary_input, root=0
+            )
+            self.lammps_temporary_log = get_comm().bcast(
+                self.lammps_temporary_log, root=0
+            )
 
     # Calculations
     ##############
