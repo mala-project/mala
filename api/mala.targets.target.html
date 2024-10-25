@@ -461,7 +461,7 @@ be returned.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.write_tem_input_file">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">write_tem_input_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpoints</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_tem_input_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_tem_input_file" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">write_tem_input_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpoints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpi_communicator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpi_rank</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_tem_input_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_tem_input_file" title="Link to this definition"></a></dt>
 <dd><p>Write a QE-style input file for the total energy module.</p>
 <p>Usually, the used parameters should correspond to the properties of
 the object calling this function, but they don’t necessarily have
@@ -477,6 +477,9 @@ If None (recommended), MALA will create one.</p></li>
 interface. If None (recommended), MALA will create one.</p></li>
 <li><p><strong>grid_dimensions</strong> (<em>List</em>) – A list containing the x,y,z dimensions of the real space grid.</p></li>
 <li><p><strong>kpoints</strong> (<em>dict</em>) – k-grid used, usually None or (1,1,1) for TEM calculations.</p></li>
+<li><p><strong>mpi_communicator</strong> (<em>MPI.COMM_WORLD</em>) – An MPI comminucator. If no MPI is enabled, this will simply be
+None.</p></li>
+<li><p><strong>mpi_rank</strong> (<em>int</em>) – Rank within MPI</p></li>
 </ul>
 </dd>
 </dl>

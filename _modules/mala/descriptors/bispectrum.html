@@ -84,7 +84,6 @@
 <span></span><span class="sd">&quot;&quot;&quot;Bispectrum descriptor class.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
 
 <span class="kn">import</span> <span class="nn">ase</span>
 <span class="kn">import</span> <span class="nn">ase.io</span>
@@ -1054,21 +1053,21 @@
                     <span class="p">)</span>
                     <span class="n">jju1</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="n">jju_outer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">:</span>
-                    <span class="n">ulist_r_ij</span><span class="p">[</span>
-                        <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]</span>
-                    <span class="p">]</span> <span class="o">=</span> <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span>
-                    <span class="n">ulist_i_ij</span><span class="p">[</span>
-                        <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]</span>
-                    <span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span>
+                    <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span>
+                    <span class="p">)</span>
+                    <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="o">-</span><span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_pos</span><span class="p">[</span><span class="n">jju2</span><span class="p">]]</span>
+                    <span class="p">)</span>
                     <span class="n">jju2</span> <span class="o">+=</span> <span class="mi">1</span>
 
                 <span class="k">if</span> <span class="n">jju_outer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">:</span>
-                    <span class="n">ulist_r_ij</span><span class="p">[</span>
-                        <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]</span>
-                    <span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span>
-                    <span class="n">ulist_i_ij</span><span class="p">[</span>
-                        <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]</span>
-                    <span class="p">]</span> <span class="o">=</span> <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span>
+                    <span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="o">-</span><span class="n">ulist_r_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span>
+                    <span class="p">)</span>
+                    <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u1_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">ulist_i_ij</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_u_symmetry_neg</span><span class="p">[</span><span class="n">jju3</span><span class="p">]]</span>
+                    <span class="p">)</span>
                     <span class="n">jju3</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="c1"># This emulates add_uarraytot.</span>

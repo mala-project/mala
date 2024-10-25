@@ -321,7 +321,7 @@
 <span class="sd">            Type of descriptor calculation (e.g. bgrid for bispectrum)</span>
 <span class="sd">        outdir: str</span>
 <span class="sd">            Directory where lammps files are kept</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        None</span>
@@ -329,26 +329,29 @@
         <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">prefix_inp_str</span> <span class="o">=</span> <span class="s2">&quot;lammps_&quot;</span> <span class="o">+</span> <span class="n">lammps_type</span> <span class="o">+</span> <span class="s2">&quot;_input&quot;</span>
             <span class="n">prefix_log_str</span> <span class="o">=</span> <span class="s2">&quot;lammps_&quot;</span> <span class="o">+</span> <span class="n">lammps_type</span> <span class="o">+</span> <span class="s2">&quot;_log&quot;</span>
-            <span class="n">lammps_tmp_input_file</span><span class="o">=</span><span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span>
+            <span class="n">lammps_tmp_input_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span>
                 <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix_inp_str</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_.tmp&quot;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">outdir</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span> <span class="o">=</span> <span class="n">lammps_tmp_input_file</span><span class="o">.</span><span class="n">name</span>
             <span class="n">lammps_tmp_input_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-            <span class="n">lammps_tmp_log_file</span><span class="o">=</span><span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span>
+            <span class="n">lammps_tmp_log_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span>
                 <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix_log_str</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_.tmp&quot;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">outdir</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_log</span> <span class="o">=</span> <span class="n">lammps_tmp_log_file</span><span class="o">.</span><span class="n">name</span>
             <span class="n">lammps_tmp_log_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span><span class="o">=</span><span class="kc">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_log</span><span class="o">=</span><span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_log</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_log</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_log</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_log</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_log</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span></div>
 
-        
 
     <span class="c1"># Calculations</span>
     <span class="c1">##############</span>

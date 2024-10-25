@@ -86,7 +86,7 @@
 <span class="kn">from</span> <span class="nn">ase.calculators.calculator</span> <span class="kn">import</span> <span class="n">Calculator</span><span class="p">,</span> <span class="n">all_changes</span>
 
 <span class="kn">from</span> <span class="nn">mala</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">DataHandler</span><span class="p">,</span> <span class="n">Predictor</span><span class="p">,</span> <span class="n">LDOS</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">barrier</span><span class="p">,</span> <span class="n">parallel_warn</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">barrier</span><span class="p">,</span> <span class="n">parallel_warn</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_comm</span>
 
 
 <div class="viewcode-block" id="MALA">
@@ -247,29 +247,24 @@
         <span class="c1"># Get the LDOS from the NN.</span>
         <span class="n">ldos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="o">.</span><span class="n">predict_for_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
 
-        <span class="c1"># forces = np.zeros([len(atoms), 3], dtype=np.float64)</span>
-
-        <span class="c1"># If an MPI environment is detected, ASE will use it for writing.</span>
-        <span class="c1"># Therefore we have to do this before forking.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">write_tem_input_file</span><span class="p">(</span>
-            <span class="n">atoms</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">qe_pseudopotentials</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
-        <span class="p">)</span>
-
+        <span class="c1"># Use the LDOS determined DOS and density to get energy and forces.</span>
         <span class="n">ldos_calculator</span><span class="p">:</span> <span class="n">LDOS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span>
-
         <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">ldos</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">total_energy</span>
         <span class="n">energy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_energy_contributions</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">get_total_energy</span><span class="p">(</span><span class="n">return_energy_contributions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">barrier</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_energy_contributions</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">_density_calculator</span><span class="o">.</span><span class="n">total_energy_contributions</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_energy_contributions</span><span class="p">[</span><span class="s2">&quot;e_band&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">band_energy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_energy_contributions</span><span class="p">[</span><span class="s2">&quot;e_entropy_contribution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">entropy_contribution</span>
+        <span class="p">)</span>
+        <span class="n">barrier</span><span class="p">()</span></div>
 
-        <span class="c1"># Use the LDOS determined DOS and density to get energy and forces.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy</span></div>
 
+        <span class="c1"># forces = np.zeros([len(atoms), 3], dtype=np.float64)</span>
         <span class="c1"># if &quot;forces&quot; in properties:</span>
         <span class="c1">#     self.results[&quot;forces&quot;] = forces</span>
 

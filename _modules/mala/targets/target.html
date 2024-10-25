@@ -87,6 +87,7 @@
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
 
 <span class="kn">from</span> <span class="nn">ase.neighborlist</span> <span class="kn">import</span> <span class="n">NeighborList</span>
 <span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">kB</span>
@@ -97,7 +98,12 @@
 <span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">simpson</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">ParametersTargets</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">parallel_warn</span><span class="p">,</span> <span class="n">get_rank</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">printout</span><span class="p">,</span>
+    <span class="n">parallel_warn</span><span class="p">,</span>
+    <span class="n">get_rank</span><span class="p">,</span>
+    <span class="n">get_comm</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="n">fermi_function</span>
 <span class="kn">from</span> <span class="nn">mala.common.physical_data</span> <span class="kn">import</span> <span class="n">PhysicalData</span>
 <span class="kn">from</span> <span class="nn">mala.descriptors.atomic_density</span> <span class="kn">import</span> <span class="n">AtomicDensity</span>
@@ -1468,6 +1474,8 @@
         <span class="n">qe_pseudopotentials</span><span class="p">,</span>
         <span class="n">grid_dimensions</span><span class="p">,</span>
         <span class="n">kpoints</span><span class="p">,</span>
+        <span class="n">mpi_communicator</span><span class="p">,</span>
+        <span class="n">mpi_rank</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write a QE-style input file for the total energy module.</span>
@@ -1495,6 +1503,14 @@
 
 <span class="sd">        kpoints : dict</span>
 <span class="sd">            k-grid used, usually None or (1,1,1) for TEM calculations.</span>
+
+<span class="sd">        mpi_communicator : MPI.COMM_WORLD</span>
+<span class="sd">            An MPI comminucator. If no MPI is enabled, this will simply be</span>
+<span class="sd">            None.</span>
+
+<span class="sd">        mpi_rank : int</span>
+<span class="sd">            Rank within MPI</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Specify grid dimensions, if any are given.</span>
         <span class="k">if</span> <span class="p">(</span>
@@ -1514,14 +1530,24 @@
         <span class="c1"># the DFT calculation. If symmetry is then on in here, that</span>
         <span class="c1"># leads to errors.</span>
         <span class="c1"># qe_input_data[&quot;nosym&quot;] = False</span>
+        <span class="k">if</span> <span class="n">mpi_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">tem_input_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span>
+                <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;mala.pw.scf.&quot;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.in&quot;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="s2">&quot;./&quot;</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tem_input_file</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">mpi_communicator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tem_input_file</span> <span class="o">=</span> <span class="n">mpi_communicator</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">tem_input_file</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
-            <span class="s2">&quot;mala.pw.scf.in&quot;</span><span class="p">,</span>
+            <span class="n">tem_input_file</span><span class="p">,</span>
             <span class="n">atoms_Angstrom</span><span class="p">,</span>
             <span class="s2">&quot;espresso-in&quot;</span><span class="p">,</span>
             <span class="n">input_data</span><span class="o">=</span><span class="n">qe_input_data</span><span class="p">,</span>
             <span class="n">pseudopotentials</span><span class="o">=</span><span class="n">qe_pseudopotentials</span><span class="p">,</span>
             <span class="n">kpts</span><span class="o">=</span><span class="n">kpoints</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">tem_input_file</span></div>
 
 
 <div class="viewcode-block" id="Target.restrict_data">
