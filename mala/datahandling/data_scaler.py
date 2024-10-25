@@ -92,7 +92,7 @@ class DataScaler:
         if self.scale_standard is True and self.scale_minmax is True:
             raise Exception("Invalid input data rescaling.")
 
-    def start_incremental_fitting(self):
+    def reset(self):
         """
         Start the incremental calculation of scaling parameters.
 
@@ -100,7 +100,7 @@ class DataScaler:
         """
         self.total_data_count = 0
 
-    def incremental_fit(self, unscaled):
+    def partial_fit(self, unscaled):
         """
         Add data to the incremental calculation of scaling parameters.
 
@@ -113,6 +113,7 @@ class DataScaler:
 
         """
         if self.scale_standard is False and self.scale_minmax is False:
+            self.cantransform = True
             return
         else:
             with torch.no_grad():
@@ -232,13 +233,6 @@ class DataScaler:
                         new_min = torch.min(unscaled)
                         if new_min < self.total_min:
                             self.total_min = new_min
-
-    def finish_incremental_fitting(self):
-        """
-        Indicate that all data has been added to the incremental calculation.
-
-        This is necessary for lazy loading.
-        """
         self.cantransform = True
 
     def fit(self, unscaled):
