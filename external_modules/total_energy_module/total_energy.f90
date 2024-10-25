@@ -1,4 +1,4 @@
-SUBROUTINE initialize(y_planes_in, calculate_eigts_in)
+SUBROUTINE initialize(file_name, y_planes_in, calculate_eigts_in)
   !----------------------------------------------------------------------------
   !  Derived from Quantum Espresso code
   !! author: Paolo Giannozzi
@@ -29,6 +29,7 @@ SUBROUTINE initialize(y_planes_in, calculate_eigts_in)
   LOGICAL, INTENT(IN), OPTIONAL :: calculate_eigts_in
   LOGICAL :: calculate_eigts = .false.
   INTEGER, INTENT(IN), OPTIONAL :: y_planes_in
+  CHARACTER(len=256), INTENT(IN) :: file_name
     ! Parse optional arguments.
   IF (PRESENT(calculate_eigts_in)) THEN
     calculate_eigts = calculate_eigts_in
@@ -39,13 +40,15 @@ SUBROUTINE initialize(y_planes_in, calculate_eigts_in)
     ENDIF
   ENDIF
 
+  print *, file_name
+
   !! checks if first string is contained in the second
   !
   CALL mp_startup ( start_images=.true., images_only=.true.)
   !
   CALL environment_start ( 'PWSCF' )
   !
-  CALL read_input_file ('PW', 'mala.pw.scf.in' )
+  CALL read_input_file ('PW', file_name )
   CALL run_pwscf_setup ( exit_status, calculate_eigts)
 
   print *, "Setup completed"

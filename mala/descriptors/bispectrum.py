@@ -1,7 +1,6 @@
 """Bispectrum descriptor class."""
 
 import os
-import tempfile
 
 import ase
 import ase.io
@@ -963,21 +962,21 @@ class Bispectrum(Descriptor):
                     )
                     jju1 += 1
                 if jju_outer in self.__index_u1_symmetry_pos:
-                    ulist_r_ij[
-                        :, self.__index_u1_symmetry_pos[jju2]
-                    ] = ulist_r_ij[:, self.__index_u_symmetry_pos[jju2]]
-                    ulist_i_ij[
-                        :, self.__index_u1_symmetry_pos[jju2]
-                    ] = -ulist_i_ij[:, self.__index_u_symmetry_pos[jju2]]
+                    ulist_r_ij[:, self.__index_u1_symmetry_pos[jju2]] = (
+                        ulist_r_ij[:, self.__index_u_symmetry_pos[jju2]]
+                    )
+                    ulist_i_ij[:, self.__index_u1_symmetry_pos[jju2]] = (
+                        -ulist_i_ij[:, self.__index_u_symmetry_pos[jju2]]
+                    )
                     jju2 += 1
 
                 if jju_outer in self.__index_u1_symmetry_neg:
-                    ulist_r_ij[
-                        :, self.__index_u1_symmetry_neg[jju3]
-                    ] = -ulist_r_ij[:, self.__index_u_symmetry_neg[jju3]]
-                    ulist_i_ij[
-                        :, self.__index_u1_symmetry_neg[jju3]
-                    ] = ulist_i_ij[:, self.__index_u_symmetry_neg[jju3]]
+                    ulist_r_ij[:, self.__index_u1_symmetry_neg[jju3]] = (
+                        -ulist_r_ij[:, self.__index_u_symmetry_neg[jju3]]
+                    )
+                    ulist_i_ij[:, self.__index_u1_symmetry_neg[jju3]] = (
+                        ulist_i_ij[:, self.__index_u_symmetry_neg[jju3]]
+                    )
                     jju3 += 1
 
             # This emulates add_uarraytot.

@@ -3,7 +3,7 @@
 from ase.calculators.calculator import Calculator, all_changes
 
 from mala import Parameters, Network, DataHandler, Predictor, LDOS
-from mala.common.parallelizer import barrier, parallel_warn
+from mala.common.parallelizer import barrier, parallel_warn, get_rank, get_comm
 
 
 class MALA(Calculator):
@@ -164,6 +164,8 @@ class MALA(Calculator):
             self.data_handler.target_calculator.qe_pseudopotentials,
             self.data_handler.target_calculator.grid_dimensions,
             self.data_handler.target_calculator.kpoints,
+            get_comm(),
+            get_rank(),
         )
 
         ldos_calculator: LDOS = self.data_handler.target_calculator
