@@ -223,7 +223,7 @@ jobs:
 
       - name: Test mala
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
-        run: MALA_DATA_REPO=$(pwd)/mala_data pytest --cov=mala -m "not examples" --disable-warnings
+        run: MALA_DATA_REPO=$(pwd)/mala_data pytest --cov=mala --cov-fail-under=60 -m "not examples" --disable-warnings
 
   retag-docker-image-cpu:
     needs: [cpu-tests, build-docker-image-cpu]
