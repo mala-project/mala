@@ -192,7 +192,7 @@
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_cube_file">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_cube_file</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path_name_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span> <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path_name_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(Ry*Bohr^3)&quot;</span><span class="p">,</span> <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an LDOS calculator from multiple cube files.</span>
@@ -580,7 +580,7 @@
 <div class="viewcode-block" id="LDOS.read_from_cube">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_cube">[docs]</a>
     <span class="k">def</span> <span class="nf">read_from_cube</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span> <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(Ry*Bohr^3)&quot;</span><span class="p">,</span> <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the LDOS data from multiple cube files.</span>
@@ -612,6 +612,15 @@
         <span class="c1"># tmp.pp003ELEMENT_ldos.cube</span>
         <span class="c1"># ...</span>
         <span class="c1"># tmp.pp100ELEMENT_ldos.cube</span>
+        <span class="c1"># automatically convert units if they are None since cube files take atomic units</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;1/(Ry*Bohr^3)&quot;</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="o">!=</span> <span class="s2">&quot;1/(Ry*Bohr^3)&quot;</span><span class="p">:</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;The expected units for the LDOS from cube files are 1/(Ry*Bohr^3)</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Proceeding with specified units of </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;We recommend to check and change the requested units&quot;</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_from_qe_files</span><span class="p">(</span>
             <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">use_memmap</span><span class="p">,</span> <span class="s2">&quot;.cube&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span></div>

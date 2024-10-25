@@ -195,7 +195,7 @@
 <div class="viewcode-block" id="Density.from_cube_file">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.from_cube_file">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_cube_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_cube_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/Bohr^3&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Density calculator from a cube file.</span>
 
@@ -511,7 +511,7 @@
 
 <div class="viewcode-block" id="Density.read_from_cube">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.read_from_cube">[docs]</a>
-    <span class="k">def</span> <span class="nf">read_from_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">read_from_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/Bohr^3&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the density data from a cube file.</span>
 
@@ -524,6 +524,15 @@
 <span class="sd">            Units the density is saved in. Usually none.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Reading density from .cube file &quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># automatically convert units if they are None since cube files take atomic units</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/Bohr^3&quot;</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="o">!=</span> <span class="s2">&quot;1/Bohr^3&quot;</span><span class="p">:</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;The expected units for the density from cube files are 1/Bohr^3</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Proceeding with specified units of </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;We recommend to check and change the requested units&quot;</span>
+            <span class="p">)</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">read_cube</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="n">data</span>
