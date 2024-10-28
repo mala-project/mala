@@ -947,7 +947,7 @@ class Density(Target):
         qe_input_data=None,
         qe_pseudopotentials=None,
     ):
-        if create_file:
+        if create_file and Density.te_mutex is False:
             # If not otherwise specified, use values as read in.
             if qe_input_data is None:
                 qe_input_data = self.qe_input_data
