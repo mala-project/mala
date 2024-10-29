@@ -852,7 +852,7 @@ class Runner:
         # activated AFTER loading a model.
         if self.parameters_full.use_ddp:
             self.network.module.to(
-                self.network.params._configuration["device"]
+                self.network.module.params._configuration["device"]
             )
         else:
             self.network.to(self.network.params._configuration["device"])
