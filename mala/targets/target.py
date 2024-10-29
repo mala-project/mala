@@ -1699,6 +1699,8 @@ class Target(PhysicalData):
         if "angles" in mesh.attributes:
             angles = mesh.get_attribute("angles")
             self.voxel = ase.cell.Cell.new(cell=spacing + angles)
+        else:
+            self.voxel = None
 
     def _get_atoms(self):
         return self.atoms
