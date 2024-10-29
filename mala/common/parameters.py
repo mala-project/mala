@@ -582,7 +582,7 @@ class ParametersData(ParametersBase):
               standard deviation 1) is applied to each feature dimension
               individually. I.e., if your training data has dimensions
               (x,y,z,f), then each of the f rows with (x,y,z) entries is scaled
-               indiviually.
+              indiviually.
             - "feature-wise-minmax": Row Min-Max scaling (Scale to be in range
               0...1) is applied to each feature dimension individually.
               I.e., if your training data has dimensions (x,y,z,f), then each
@@ -604,7 +604,7 @@ class ParametersData(ParametersBase):
               standard deviation 1) is applied to each feature dimension
               individually. I.e., if your training data has dimensions
               (x,y,z,f), then each of the f rows with (x,y,z) entries is scaled
-               indiviually.
+              indiviually.
             - "feature-wise-minmax": Row Min-Max scaling (Scale to be in range
               0...1) is applied to each feature dimension individually.
               I.e., if your training data has dimensions (x,y,z,f), then each
