@@ -91,6 +91,8 @@ class MinterpyDescriptors(Descriptor):
         # general LAMMPS import.
         from lammps import constants as lammps_constants
 
+        keep_logs = kwargs.get("keep_logs", False)
+
         nx = grid_dimensions[0]
         ny = grid_dimensions[1]
         nz = grid_dimensions[2]
@@ -161,22 +163,18 @@ class MinterpyDescriptors(Descriptor):
 
             # The rest is the stanfard LAMMPS atomic density stuff.
             lammps_format = "lammps-data"
-            ase_out_path = os.path.join(outdir, "lammps_input.tmp")
-            ase.io.write(ase_out_path, atoms_copied, format=lammps_format)
+            self.setup_lammps_tmp_files("minterpy", outdir)
+
+            ase.io.write(
+                self.lammps_temporary_input, self.atoms, format=lammps_format
+            )
 
             # Create LAMMPS instance.
-            lammps_dict = {}
-            lammps_dict["sigma"] = self.parameters.atomic_density_sigma
-            lammps_dict["rcutfac"] = self.parameters.atomic_density_cutoff
-            lammps_dict["atom_config_fname"] = ase_out_path
-            lmp = self._setup_lammps(
-                nx,
-                ny,
-                nz,
-                outdir,
-                lammps_dict,
-                log_file_name="lammps_mgrid_log.tmp",
-            )
+            lammps_dict = {
+                "sigma": self.parameters.atomic_density_sigma,
+                "rcutfac": self.parameters.atomic_density_cutoff,
+            }
+            lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
             # For now the file is chosen automatically, because this is used
             # mostly under the hood anyway.
@@ -191,8 +189,12 @@ class MinterpyDescriptors(Descriptor):
                 # else:
                 #     runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
             else:
-                runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
-            lmp.file(runfile)
+                self.parameters.lammps_compute_file = os.path.join(
+                    filepath, "in.ggrid_defaultproc.python"
+                )
+
+            # Do the LAMMPS calculation and clean up.
+            lmp.file(self.parameters.lammps_compute_file)
 
             # Extract the data.
             nrows_ggrid = extract_compute_np(
@@ -216,7 +218,7 @@ class MinterpyDescriptors(Descriptor):
                 array_shape=(nrows_ggrid, ncols_ggrid),
             )
 
-            lmp.close()
+            self._clean_calculation(lmp, keep_logs)
 
             gaussian_descriptors_np = gaussian_descriptors_np.reshape(
                 (

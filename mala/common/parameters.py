@@ -7,19 +7,13 @@ import os
 import pickle
 from time import sleep
 
-horovod_available = False
-try:
-    import horovod.torch as hvd
-
-    horovod_available = True
-except ModuleNotFoundError:
-    pass
 import numpy as np
 import torch
+import torch.distributed as dist
 
 from mala.common.parallelizer import (
     printout,
-    set_horovod_status,
+    set_ddp_status,
     set_mpi_status,
     get_rank,
     get_local_rank,
@@ -40,7 +34,7 @@ class ParametersBase(JSONSerializable):
         super(ParametersBase, self).__init__()
         self._configuration = {
             "gpu": False,
-            "horovod": False,
+            "ddp": False,
             "mpi": False,
             "device": "cpu",
             "openpmd_configuration": {},
@@ -76,8 +70,8 @@ class ParametersBase(JSONSerializable):
     def _update_gpu(self, new_gpu):
         self._configuration["gpu"] = new_gpu
 
-    def _update_horovod(self, new_horovod):
-        self._configuration["horovod"] = new_horovod
+    def _update_ddp(self, new_ddp):
+        self._configuration["ddp"] = new_ddp
 
     def _update_mpi(self, new_mpi):
         self._configuration["mpi"] = new_mpi
@@ -231,18 +225,18 @@ class ParametersNetwork(ParametersBase):
     ----------
     nn_type : string
         Type of the neural network that will be used. Currently supported are
+
             - "feed_forward" (default)
             - "transformer"
             - "lstm"
             - "gru"
-
 
     layer_sizes : list
         A list of integers detailing the sizes of the layer of the neural
         network. Please note that the input layer is included therein.
         Default: [10,10,0]
 
-    layer_activations: list
+    layer_activations : list
         A list of strings detailing the activation functions to be used
         by the neural network. If the dimension of layer_activations is
         smaller than the dimension of layer_sizes-1, than the first entry
@@ -253,30 +247,26 @@ class ParametersNetwork(ParametersBase):
             - ReLU
             - LeakyReLU
 
-    loss_function_type: string
+    loss_function_type : string
         Loss function for the neural network
         Currently supported loss functions include:
 
             - mse (Mean squared error; default)
+
     no_hidden_state : bool
         If True hidden and cell state is assigned to zeros for LSTM Network.
         false will keep the hidden state active
         Default: False
 
-    bidirection: bool
+    bidirection : bool
         Sets lstm network size based on bidirectional or just one direction
         Default: False
 
-    num_hidden_layers: int
+    num_hidden_layers : int
         Number of hidden layers to be used in lstm or gru or transformer nets
         Default: None
 
-    dropout: float
-        Dropout rate for transformer net
-        0.0 ≤ dropout ≤ 1.0
-        Default: 0.0
-
-    num_heads: int
+    num_heads : int
         Number of heads to be used in Multi head attention network
         This should be a divisor of input dimension
         Default: None
@@ -320,7 +310,7 @@ class ParametersDescriptors(ParametersBase):
         descriptors. Default value for jmax is 5, so default value for
         twojmax is 10.
 
-    lammps_compute_file: string
+    lammps_compute_file : string
         Bispectrum calculation: LAMMPS input file that is used to calculate the
         Bispectrum descriptors. If this string is empty, the standard LAMMPS input
         file found in this repository will be used (recommended).
@@ -332,6 +322,11 @@ class ParametersDescriptors(ParametersBase):
 
     atomic_density_sigma : float
         Sigma used for the calculation of the Gaussian descriptors.
+
+    use_atomic_density_energy_formula : bool
+        If True, Gaussian descriptors will be calculated for the
+        calculation of the Ewald sum as part of the total energy module.
+        Default is False.
     """
 
     def __init__(self):
@@ -458,7 +453,7 @@ class ParametersTargets(ParametersBase):
         Number of points in the energy grid that is used to calculate the
         (L)DOS.
 
-    ldos_gridsize : float
+    ldos_gridsize : int
         Gridsize of the LDOS.
 
     ldos_gridspacing_ev: float
@@ -515,6 +510,13 @@ class ParametersTargets(ParametersBase):
 
         kMax : float
             Maximum wave vector up to which to calculate the SSF.
+
+    assume_two_dimensional : bool
+        If True, the total energy calculations will be performed without
+        periodic boundary conditions in z-direction, i.e., the cell will
+        be truncated in the z-direction. NOTE: This parameter may be
+        moved up to a global parameter, depending on whether descriptor
+        calculation may benefit from it.
     """
 
     def __init__(self):
@@ -528,6 +530,7 @@ class ParametersTargets(ParametersBase):
         self.rdf_parameters = {"number_of_bins": 500, "rMax": "mic"}
         self.tpcf_parameters = {"number_of_bins": 20, "rMax": "mic"}
         self.ssf_parameters = {"number_of_bins": 100, "kMax": 12.0}
+        self.assume_two_dimensional = False
 
     @property
     def restrict_targets(self):
@@ -631,9 +634,8 @@ class ParametersRunning(ParametersBase):
 
     Attributes
     ----------
-    trainingtype : string
-        Training type to be used. Supported options at the moment:
-
+    optimizer : string
+        Optimizer to be used. Supported options at the moment:
             - SGD: Stochastic gradient descent.
             - Adam: Adam Optimization Algorithm
 
@@ -645,10 +647,6 @@ class ParametersRunning(ParametersBase):
 
     mini_batch_size : int
         Size of the mini batch for the optimization algorihm. Default: 10.
-
-    weight_decay : float
-        Weight decay for regularization. Always refers to L2 regularization.
-        Default: 0.
 
     early_stopping_epochs : int
         Number of epochs the validation accuracy is allowed to not improve by
@@ -686,10 +684,6 @@ class ParametersRunning(ParametersBase):
         validation loss has to plateau before the schedule takes effect).
         Default: 0.
 
-    use_compression : bool
-        If True and horovod is used, horovod compression will be used for
-        allreduce communication. This can improve performance.
-
     num_workers : int
         Number of workers to be used for data loading.
 
@@ -706,19 +700,13 @@ class ParametersRunning(ParametersBase):
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
 
-    visualisation : int
-        If True then Tensorboard is activated for visualisation
-        case 0: No tensorboard activated
-        case 1: tensorboard activated with Loss and learning rate
-        case 2; additonally weights and biases and gradient
+    logging_dir : string
+        Name of the folder that logging files will be saved to.
 
-    visualisation_dir : string
-        Name of the folder that visualization files will be saved to.
-
-    visualisation_dir_append_date : bool
-        If True, then upon creating visualization files, these will be saved
-        in a subfolder of visualisation_dir labelled with the starting date
-        of the visualization, to avoid having to change input scripts often.
+    logging_dir_append_date : bool
+        If True, then upon creating logging files, these will be saved
+        in a subfolder of logging_dir labelled with the starting date
+        of the logging, to avoid having to change input scripts often.
 
     inference_data_grid : list
         List holding the grid to be used for inference in the form of
@@ -727,7 +715,7 @@ class ParametersRunning(ParametersBase):
     use_mixed_precision : bool
         If True, mixed precision computation (via AMP) will be used.
 
-    training_report_frequency : int
+    training_log_interval : int
         Determines how often detailed performance info is printed during
         training (only has an effect if the verbosity is high enough).
 
@@ -739,37 +727,50 @@ class ParametersRunning(ParametersBase):
 
     def __init__(self):
         super(ParametersRunning, self).__init__()
-        self.trainingtype = "SGD"
-        self.learning_rate = 0.5
+        self.optimizer = "Adam"
+        self.learning_rate = 10 ** (-5)
+        self.learning_rate_embedding = 10 ** (-4)
         self.max_number_epochs = 100
         self.verbosity = True
         self.mini_batch_size = 10
-        self.weight_decay = 0
+        self.snapshots_per_epoch = -1
+
+        self.l1_regularization = 0.0
+        self.l2_regularization = 0.0
+        self.dropout = 0.0
+        self.batch_norm = False
+        self.input_noise = 0.0
+
         self.early_stopping_epochs = 0
         self.early_stopping_threshold = 0
         self.learning_rate_scheduler = None
         self.learning_rate_decay = 0.1
         self.learning_rate_patience = 0
+        self._during_training_metric = "ldos"
+        self._after_training_metric = "ldos"
         self.use_compression = False
         self.num_workers = 0
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
+        self.checkpoint_best_so_far = False
         self.checkpoint_name = "checkpoint_mala"
-        self.visualisation = 0
-        self.visualisation_dir = os.path.join(".", "mala_logging")
-        self.visualisation_dir_append_date = True
-        self.during_training_metric = "ldos"
-        self.after_before_training_metric = "ldos"
+        self.run_name = ""
+        self.logging_dir = "./mala_logging"
+        self.logging_dir_append_date = True
+        self.logger = "tensorboard"
+        self.validation_metrics = ["ldos"]
+        self.validate_on_training_data = False
+        self.validate_every_n_epochs = 1
         self.inference_data_grid = [0, 0, 0]
         self.use_mixed_precision = False
         self.use_graphs = False
-        self.training_report_frequency = 1000
-        self.profiler_range = None  # [1000, 2000]
+        self.training_log_interval = 1000
+        self.profiler_range = [1000, 2000]
 
-    def _update_horovod(self, new_horovod):
-        super(ParametersRunning, self)._update_horovod(new_horovod)
+    def _update_ddp(self, new_ddp):
+        super(ParametersRunning, self)._update_ddp(new_ddp)
         self.during_training_metric = self.during_training_metric
-        self.after_before_training_metric = self.after_before_training_metric
+        self.after_training_metric = self.after_training_metric
 
     @property
     def during_training_metric(self):
@@ -789,15 +790,17 @@ class ParametersRunning(ParametersBase):
     @during_training_metric.setter
     def during_training_metric(self, value):
         if value != "ldos":
-            if self._configuration["horovod"]:
+            if self._configuration["ddp"]:
                 raise Exception(
                     "Currently, MALA can only operate with the "
-                    '"ldos" metric for horovod runs.'
+                    '"ldos" metric for ddp runs.'
                 )
+            if value not in self.validation_metrics:
+                self.validation_metrics.append(value)
         self._during_training_metric = value
 
     @property
-    def after_before_training_metric(self):
+    def after_training_metric(self):
         """
         Get the metric used during training.
 
@@ -809,27 +812,17 @@ class ParametersRunning(ParametersBase):
         DFT results. Of these, the mean average error in eV/atom will be
         calculated.
         """
-        return self._after_before_training_metric
+        return self._after_training_metric
 
-    @after_before_training_metric.setter
-    def after_before_training_metric(self, value):
+    @after_training_metric.setter
+    def after_training_metric(self, value):
         if value != "ldos":
-            if self._configuration["horovod"]:
+            if self._configuration["ddp"]:
                 raise Exception(
                     "Currently, MALA can only operate with the "
-                    '"ldos" metric for horovod runs.'
+                    '"ldos" metric for ddp runs.'
                 )
-        self._after_before_training_metric = value
-
-    @during_training_metric.setter
-    def during_training_metric(self, value):
-        if value != "ldos":
-            if self._configuration["horovod"]:
-                raise Exception(
-                    "Currently, MALA can only operate with the "
-                    '"ldos" metric for horovod runs.'
-                )
-        self._during_training_metric = value
+        self._after_training_metric = value
 
     @property
     def use_graphs(self):
@@ -1218,7 +1211,7 @@ class Parameters:
 
         # Properties
         self.use_gpu = False
-        self.use_horovod = False
+        self.use_ddp = False
         self.use_mpi = False
         self.verbosity = 1
         self.device = "cpu"
@@ -1304,32 +1297,36 @@ class Parameters:
         self.hyperparameters._update_gpu(self.use_gpu)
 
     @property
-    def use_horovod(self):
-        """Control whether or not horovod is used for parallel training."""
-        return self._use_horovod
+    def use_ddp(self):
+        """Control whether or not dd is used for parallel training."""
+        return self._use_ddp
 
-    @use_horovod.setter
-    def use_horovod(self, value):
-        if value is False:
-            self._use_horovod = False
-        else:
-            if horovod_available:
-                hvd.init()
-                # Invalidate, will be updated in setter.
-                set_horovod_status(value)
-                self.device = None
-                self._use_horovod = value
-                self.network._update_horovod(self.use_horovod)
-                self.descriptors._update_horovod(self.use_horovod)
-                self.targets._update_horovod(self.use_horovod)
-                self.data._update_horovod(self.use_horovod)
-                self.running._update_horovod(self.use_horovod)
-                self.hyperparameters._update_horovod(self.use_horovod)
-            else:
-                parallel_warn(
-                    "Horovod requested, but not installed found. "
-                    "MALA will operate without horovod only."
-                )
+    @use_ddp.setter
+    def use_ddp(self, value):
+        if value:
+            if self.verbosity > 1:
+                print("Initializing torch.distributed.")
+            # JOSHR:
+            # We start up torch distributed here. As is fairly standard
+            # convention, we get the rank and world size arguments via
+            # environment variables (RANK, WORLD_SIZE). In addition to
+            # those variables, LOCAL_RANK, MASTER_ADDR and MASTER_PORT
+            # should be set.
+            rank = int(os.environ.get("RANK"))
+            world_size = int(os.environ.get("WORLD_SIZE"))
+
+            dist.init_process_group("nccl", rank=rank, world_size=world_size)
+
+        set_ddp_status(value)
+        # Invalidate, will be updated in setter.
+        self.device = None
+        self._use_ddp = value
+        self.network._update_ddp(self.use_ddp)
+        self.descriptors._update_ddp(self.use_ddp)
+        self.targets._update_ddp(self.use_ddp)
+        self.data._update_ddp(self.use_ddp)
+        self.running._update_ddp(self.use_ddp)
+        self.hyperparameters._update_ddp(self.use_ddp)
 
     @property
     def device(self):
@@ -1352,7 +1349,7 @@ class Parameters:
 
     @property
     def use_mpi(self):
-        """Control whether or not horovod is used for parallel training."""
+        """Control whether or not MPI is used for paralle inference."""
         return self._use_mpi
 
     @use_mpi.setter
@@ -1481,7 +1478,7 @@ class Parameters:
                 if member[0][0] != "_":
                     if isinstance(member[1], ParametersBase):
                         # All the subclasses have to provide this function.
-                        member[1]: ParametersBase
+                        member[1]: ParametersBase  # type: ignore
                         json_dict[member[0]] = member[1].to_json()
             with open(filename, "w", encoding="utf-8") as f:
                 json.dump(json_dict, f, ensure_ascii=False, indent=4)
@@ -1551,7 +1548,9 @@ class Parameters:
         self.hyperparameters._update_device(device_temp)
 
     @classmethod
-    def load_from_file(cls, file, save_format="json", no_snapshots=False):
+    def load_from_file(
+        cls, file, save_format="json", no_snapshots=False, force_no_ddp=False
+    ):
         """
         Load a Parameters object from a file.
 
@@ -1606,7 +1605,10 @@ class Parameters:
                     not isinstance(json_dict[key], dict)
                     or key == "openpmd_configuration"
                 ):
-                    setattr(loaded_parameters, key, json_dict[key])
+                    if key == "use_ddp" and force_no_ddp is True:
+                        setattr(loaded_parameters, key, False)
+                    else:
+                        setattr(loaded_parameters, key, json_dict[key])
             if no_snapshots is True:
                 loaded_parameters.data.snapshot_directories_list = []
         else:
@@ -1639,7 +1641,7 @@ class Parameters:
         )
 
     @classmethod
-    def load_from_json(cls, file, no_snapshots=False):
+    def load_from_json(cls, file, no_snapshots=False, force_no_ddp=False):
         """
         Load a Parameters object from a json file.
 
@@ -1659,5 +1661,8 @@ class Parameters:
 
         """
         return Parameters.load_from_file(
-            file, save_format="json", no_snapshots=no_snapshots
+            file,
+            save_format="json",
+            no_snapshots=no_snapshots,
+            force_no_ddp=force_no_ddp,
         )

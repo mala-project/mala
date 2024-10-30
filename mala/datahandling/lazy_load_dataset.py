@@ -2,13 +2,9 @@
 
 import os
 
-try:
-    import horovod.torch as hvd
-except ModuleNotFoundError:
-    # Warning is thrown by Parameters class.
-    pass
 import numpy as np
 import torch
+import torch.distributed as dist
 from torch.utils.data import Dataset
 
 from mala.common.parallelizer import barrier
@@ -47,8 +43,8 @@ class LazyLoadDataset(Dataset):
     target_calculator : mala.targets.target.Target or derivative
         Used to do unit conversion on output data.
 
-    use_horovod : bool
-        If true, it is assumed that horovod is used.
+    use_ddp : bool
+        If true, it is assumed that ddp is used.
 
     input_requires_grad : bool
         If True, then the gradient is stored for the inputs.
@@ -62,7 +58,8 @@ class LazyLoadDataset(Dataset):
         output_data_scaler,
         descriptor_calculator,
         target_calculator,
-        use_horovod,
+        use_ddp,
+        device,
         input_requires_grad=False,
     ):
         self.snapshot_list = []
@@ -80,9 +77,10 @@ class LazyLoadDataset(Dataset):
         self.currently_loaded_file = None
         self.input_data = np.empty(0)
         self.output_data = np.empty(0)
-        self.use_horovod = use_horovod
+        self.use_ddp = use_ddp
         self.return_outputs_directly = False
         self.input_requires_grad = input_requires_grad
+        self.device = device
 
     @property
     def return_outputs_directly(self):
@@ -122,9 +120,14 @@ class LazyLoadDataset(Dataset):
         """
         used_perm = torch.randperm(self.number_of_snapshots)
         barrier()
-        if self.use_horovod:
-            used_perm = hvd.broadcast(used_perm, 0)
-        self.snapshot_list = [self.snapshot_list[i] for i in used_perm]
+        if self.use_ddp:
+            used_perm = used_perm.to(device=self.device)
+            dist.broadcast(used_perm, 0)
+            self.snapshot_list = [
+                self.snapshot_list[i] for i in used_perm.to("cpu")
+            ]
+        else:
+            self.snapshot_list = [self.snapshot_list[i] for i in used_perm]
         self.get_new_data(0)
 
     def get_new_data(self, file_index):

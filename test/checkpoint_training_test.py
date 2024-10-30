@@ -4,9 +4,8 @@ import mala
 from mala import printout
 import numpy as np
 
-from mala.datahandling.data_repo import data_repo_path
+from mala.datahandling.data_repo import data_path
 
-data_path = os.path.join(data_repo_path, "Be2")
 test_checkpoint_name = "test"
 
 # Define the accuracy used in the tests.
@@ -21,7 +20,7 @@ class TestTrainingCheckpoint:
         # First run the entire test.
         trainer = self.__original_setup(test_checkpoint_name, 40)
         trainer.train_network()
-        original_final_test_loss = trainer.final_test_loss
+        original_final_validation_loss = trainer.final_validation_loss
 
         # Now do the same, but cut at epoch 22 and see if it recovers the
         # correct result.
@@ -29,9 +28,11 @@ class TestTrainingCheckpoint:
         trainer.train_network()
         trainer = self.__resume_checkpoint(test_checkpoint_name, 40)
         trainer.train_network()
-        new_final_test_loss = trainer.final_test_loss
+        new_final_validation_loss = trainer.final_validation_loss
         assert np.isclose(
-            original_final_test_loss, new_final_test_loss, atol=accuracy
+            original_final_validation_loss,
+            new_final_validation_loss,
+            atol=accuracy,
         )
 
     def test_learning_rate(self):
@@ -145,7 +146,7 @@ class TestTrainingCheckpoint:
         test_parameters.running.max_number_epochs = maxepochs
         test_parameters.running.mini_batch_size = 38
         test_parameters.running.learning_rate = learning_rate
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.running.learning_rate_scheduler = (
             learning_rate_scheduler
         )

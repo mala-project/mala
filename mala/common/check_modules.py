@@ -11,10 +11,6 @@ def check_modules():
             "available": False,
             "description": "Enables inference parallelization.",
         },
-        "horovod": {
-            "available": False,
-            "description": "Enables training parallelization.",
-        },
         "lammps": {
             "available": False,
             "description": "Enables descriptor calculation for data preprocessing "

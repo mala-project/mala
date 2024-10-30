@@ -4,9 +4,7 @@ import mala
 import numpy as np
 import torch
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 # This test checks that all scaling options are working and are not messing
 # up the data.

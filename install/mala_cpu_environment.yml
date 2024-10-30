@@ -63,8 +63,8 @@ dependencies:
   - libdeflate=1.14
   - libffi=3.4.2
   - libgcc-ng=12.2.0
-  - libgfortran-ng=12.2.0
-  - libgfortran5=12.2.0
+  - libgfortran-ng=12.3.0
+  - libgfortran5=12.3.0
   - libgrpc=1.51.1
   - libhwloc=2.8.0
   - libiconv=1.17
@@ -95,7 +95,7 @@ dependencies:
   - numpy=1.24.0
   - oauthlib=3.2.2
   - openjpeg=2.5.0
-  - openssl=3.0.7
+  - openssl=3.3.1
   - optuna=3.0.5
   - packaging=22.0
   - pandas=1.5.2
@@ -113,7 +113,7 @@ dependencies:
   - pyparsing=3.0.9
   - pyperclip=1.8.2
   - pysocks=1.7.1
-  - python=3.8.15
+  - python=3.8.16
   - python-dateutil=2.8.2
   - python_abi=3.8
   - pytorch=1.13.0
@@ -153,4 +153,6 @@ dependencies:
   - yarl=1.8.1
   - zipp=3.11.0
   - zlib=1.2.13
-  - zstd=1.5.2
+  - zstd=1.5.5
+  - pip:
+      - openpmd-api==0.15.2

@@ -2,14 +2,12 @@ import os
 
 import mala
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 """
-ex09_distributed_hyperopt.py: Shows how a hyperparameter 
+ex09_distributed_hyperopt.py: Shows how a hyperparameter
 optimization can be sped up using a RDB storage. Ideally this should be done
-using a database server system, such as PostgreSQL or MySQL. 
+using a database server system, such as PostgreSQL or MySQL.
 For this easy example, sqlite will be used. It is highly advisory not to
 to use this for actual, at-scale calculations!
 
@@ -30,7 +28,7 @@ parameters.data.output_rescaling_type = "normal"
 parameters.running.max_number_epochs = 5
 parameters.running.mini_batch_size = 40
 parameters.running.learning_rate = 0.00001
-parameters.running.trainingtype = "Adam"
+parameters.running.optimizer = "Adam"
 parameters.hyperparameters.n_trials = 10
 parameters.hyperparameters.checkpoints_each_trial = -1
 parameters.hyperparameters.checkpoint_name = "ex06"
@@ -46,7 +44,7 @@ parameters.targets.ldos_gridsize = 11
 parameters.targets.ldos_gridspacing_ev = 2.5
 parameters.targets.ldos_gridoffset_ev = -5
 parameters.hyperparameters.number_training_per_trial = 3
-parameters.running.after_before_training_metric = "band_energy"
+parameters.running.after_training_metric = "band_energy"
 
 data_handler = mala.DataHandler(parameters)
 

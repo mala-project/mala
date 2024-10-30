@@ -3,17 +3,16 @@ import os
 import mala
 from mala import printout
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 """
 This example shows how a trained network can be tested
 with additional test snapshots. Either execute ex01 before executing this one
 or download the appropriate model from the provided test data repo.
 """
-assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
 
+model_name = "Be_model"
+model_path = "./" if os.path.exists("Be_model.zip") else data_path
 
 ####################
 # 1. LOADING A NETWORK
@@ -22,13 +21,15 @@ assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
 # It is recommended to enable the "lazy-loading" feature, so that
 # data is loaded into memory one snapshot at a time during testing - this
 # helps keep RAM requirement down. Furthermore, you have to decide which
-# observables to test (usual choices are "band_energy", "total_energy" and
-# "number_of_electrons") and whether you want the results per snapshot
+# observables to test (usual choices are "band_energy", "total_energy")
+# and whether you want the results per snapshot
 # (output_format="list") or as an averaged value (output_format="mae")
 ####################
 
-parameters, network, data_handler, tester = mala.Tester.load_run("be_model")
-tester.observables_to_test = ["band_energy", "number_of_electrons"]
+parameters, network, data_handler, tester = mala.Tester.load_run(
+    run_name=model_name, path=model_path
+)
+tester.observables_to_test = ["band_energy", "density"]
 tester.output_format = "list"
 parameters.data.use_lazy_loading = True
 

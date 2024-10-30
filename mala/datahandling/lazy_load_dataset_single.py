@@ -39,8 +39,8 @@ class LazyLoadDatasetSingle(Dataset):
     target_calculator : mala.targets.target.Target or derivative
         Used to do unit conversion on output data.
 
-    use_horovod : bool
-        If true, it is assumed that horovod is used.
+    use_ddp : bool
+        If true, it is assumed that ddp is used.
 
     input_requires_grad : bool
         If True, then the gradient is stored for the inputs.
@@ -56,7 +56,7 @@ class LazyLoadDatasetSingle(Dataset):
         output_data_scaler,
         descriptor_calculator,
         target_calculator,
-        use_horovod,
+        use_ddp,
         input_requires_grad=False,
     ):
         self.snapshot = snapshot
@@ -74,7 +74,7 @@ class LazyLoadDatasetSingle(Dataset):
         self.currently_loaded_file = None
         self.input_data = np.empty(0)
         self.output_data = np.empty(0)
-        self.use_horovod = use_horovod
+        self.use_ddp = use_ddp
         self.return_outputs_directly = False
         self.input_requires_grad = input_requires_grad
 

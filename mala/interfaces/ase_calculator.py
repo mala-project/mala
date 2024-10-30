@@ -3,7 +3,7 @@
 from ase.calculators.calculator import Calculator, all_changes
 
 from mala import Parameters, Network, DataHandler, Predictor, LDOS
-from mala.common.parallelizer import barrier
+from mala.common.parallelizer import barrier, parallel_warn, get_rank, get_comm
 
 
 class MALA(Calculator):
@@ -79,6 +79,30 @@ class MALA(Calculator):
     @classmethod
     def load_model(cls, run_name, path="./"):
         """
+        Load a model to use for the calculator (DEPRECATED).
+
+        MALA.load_model() will be deprecated in MALA v1.4.0. Please use
+        MALA.load_run() instead.
+
+        Parameters
+        ----------
+        run_name : str
+            Name under which the model is saved.
+
+        path : str
+            Path where the model is saved.
+        """
+        parallel_warn(
+            "MALA.load_model() will be deprecated in MALA v1.4.0."
+            " Please use MALA.load_run() instead.",
+            0,
+            category=FutureWarning,
+        )
+        return MALA.load_run(run_name, path=path)
+
+    @classmethod
+    def load_run(cls, run_name, path="./"):
+        """
         Load a model to use for the calculator.
 
         Only supports zipped models with .json parameters. No legacy
@@ -130,28 +154,23 @@ class MALA(Calculator):
         # Get the LDOS from the NN.
         ldos = self.predictor.predict_for_atoms(atoms)
 
-        # forces = np.zeros([len(atoms), 3], dtype=np.float64)
-
-        # If an MPI environment is detected, ASE will use it for writing.
-        # Therefore we have to do this before forking.
-        self.data_handler.target_calculator.write_tem_input_file(
-            atoms,
-            self.data_handler.target_calculator.qe_input_data,
-            self.data_handler.target_calculator.qe_pseudopotentials,
-            self.data_handler.target_calculator.grid_dimensions,
-            self.data_handler.target_calculator.kpoints,
-        )
-
+        # Use the LDOS determined DOS and density to get energy and forces.
         ldos_calculator: LDOS = self.data_handler.target_calculator
-
         ldos_calculator.read_from_array(ldos)
+        self.results["energy"] = ldos_calculator.total_energy
         energy, self.last_energy_contributions = (
             ldos_calculator.get_total_energy(return_energy_contributions=True)
         )
+        self.last_energy_contributions = (
+            ldos_calculator._density_calculator.total_energy_contributions.copy()
+        )
+        self.last_energy_contributions["e_band"] = ldos_calculator.band_energy
+        self.last_energy_contributions["e_entropy_contribution"] = (
+            ldos_calculator.entropy_contribution
+        )
         barrier()
 
-        # Use the LDOS determined DOS and density to get energy and forces.
-        self.results["energy"] = energy
+        # forces = np.zeros([len(atoms), 3], dtype=np.float64)
         # if "forces" in properties:
         #     self.results["forces"] = forces
 
@@ -199,7 +218,7 @@ class MALA(Calculator):
                 "e_ewald"
             ]
 
-    def save_calculator(self, filename, save_path="./"):
+    def save_calculator(self, filename, path="./"):
         """
         Save parameters used for this calculator.
 
@@ -210,10 +229,10 @@ class MALA(Calculator):
         filename : string
             Name of the file in which to store the calculator.
 
-        save_path : string
+        path : string
             Path where the calculator should be saved.
 
         """
         self.predictor.save_run(
-            filename, save_path=save_path, additional_calculation_data=True
+            filename, path=path, additional_calculation_data=True
         )

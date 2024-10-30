@@ -7,9 +7,7 @@ import numpy as np
 import torch
 import pytest
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 # This test compares the data scaling using the regular scaling procedure and
 # the lazy-loading one (incremental fitting).
@@ -40,7 +38,7 @@ class TestLazyLoading:
         test_parameters.running.max_number_epochs = 3
         test_parameters.running.mini_batch_size = 512
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.comment = "Lazy loading test."
         test_parameters.network.nn_type = "feed-forward"
         test_parameters.running.use_gpu = True
@@ -159,10 +157,7 @@ class TestLazyLoading:
                         test_parameters, test_network, data_handler
                     )
                     test_trainer.train_network()
-                    training_tester.append(
-                        test_trainer.final_test_loss
-                        - test_trainer.initial_test_loss
-                    )
+                    training_tester.append(test_trainer.final_validation_loss)
 
                 elif scalingtype == "feature-wise-standard":
                     # The lazy-loading STD equation (and to a smaller amount the
@@ -271,7 +266,7 @@ class TestLazyLoading:
         test_parameters.network.layer_activations = ["LeakyReLU"]
         test_parameters.running.max_number_epochs = 20
         test_parameters.running.mini_batch_size = 500
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.comment = "Horovod / lazy loading benchmark."
         test_parameters.network.nn_type = "feed-forward"
         test_parameters.manual_seed = 2021
@@ -354,8 +349,8 @@ class TestLazyLoading:
                     [
                         hvdstring,
                         llstring,
-                        test_trainer.initial_test_loss,
-                        test_trainer.final_test_loss,
+                        test_trainer.initial_validation_loss,
+                        test_trainer.final_validation_loss,
                         time.time() - start_time,
                     ]
                 )
@@ -402,8 +397,8 @@ class TestLazyLoading:
         test_parameters.running.max_number_epochs = 100
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
-        test_parameters.verbosity = 2
+        test_parameters.running.optimizer = "Adam"
+        test_parameters.verbosity = 1
         test_parameters.data.use_lazy_loading = True
         test_parameters.data.use_lazy_loading_prefetch = prefetching
 

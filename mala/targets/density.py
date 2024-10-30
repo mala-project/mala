@@ -1,5 +1,6 @@
 """Electronic density calculation class."""
 
+import os.path
 import time
 
 from ase.units import Rydberg, Bohr, m
@@ -16,6 +17,8 @@ from mala.common.parallelizer import (
     parallel_warn,
     barrier,
     get_size,
+    get_comm,
+    get_rank,
 )
 from mala.targets.target import Target
 from mala.targets.cube_parser import read_cube, write_cube
@@ -102,7 +105,7 @@ class Density(Target):
         return return_dos
 
     @classmethod
-    def from_cube_file(cls, params, path, units="1/A^3"):
+    def from_cube_file(cls, params, path, units="1/Bohr^3"):
         """
         Create a Density calculator from a cube file.
 
@@ -391,7 +394,7 @@ class Density(Target):
         else:
             raise Exception("Unsupported unit for density.")
 
-    def read_from_cube(self, path, units="1/A^3", **kwargs):
+    def read_from_cube(self, path, units="1/Bohr^3", **kwargs):
         """
         Read the density data from a cube file.
 
@@ -404,6 +407,15 @@ class Density(Target):
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file ", path, min_verbosity=0)
+        # automatically convert units if they are None since cube files take atomic units
+        if units is None:
+            units = "1/Bohr^3"
+        if units != "1/Bohr^3":
+            printout(
+                "The expected units for the density from cube files are 1/Bohr^3\n"
+                f"Proceeding with specified units of {units}\n"
+                "We recommend to check and change the requested units"
+            )
         data, meta = read_cube(path)
         data *= self.convert_units(1, in_units=units)
         self.density = data
@@ -575,8 +587,8 @@ class Density(Target):
             Integration method used to integrate density on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
         """
         if density_data is None:
@@ -935,19 +947,30 @@ class Density(Target):
         qe_input_data=None,
         qe_pseudopotentials=None,
     ):
-        if create_file:
+        if create_file and Density.te_mutex is False:
             # If not otherwise specified, use values as read in.
             if qe_input_data is None:
                 qe_input_data = self.qe_input_data
             if qe_pseudopotentials is None:
                 qe_pseudopotentials = self.qe_pseudopotentials
 
-            self.write_tem_input_file(
+            if self.parameters.assume_two_dimensional:
+                qe_input_data["assume_isolated"] = "2D"
+
+                # In the 2D case, the Gamma point approximation introduces
+                # errors in the Ewald and Hartree energy for some reason.
+                kpoints = [1, 1, 1]
+            else:
+                kpoints = self.kpoints
+
+            tem_input_name = self.write_tem_input_file(
                 atoms_Angstrom,
                 qe_input_data,
                 qe_pseudopotentials,
                 self.grid_dimensions,
-                self.kpoints,
+                kpoints,
+                get_comm(),
+                get_rank(),
             )
 
         # initialize the total energy module.
@@ -960,22 +983,40 @@ class Density(Target):
 
         if Density.te_mutex is False:
             printout(
-                "MALA: Starting QuantumEspresso to get density-based"
+                "Starting QuantumEspresso to get density-based"
                 " energy contributions.",
                 min_verbosity=0,
             )
             barrier()
             t0 = time.perf_counter()
-            te.initialize(self.y_planes)
+
+            # We have to make sure we have the correct format for the file.
+            # QE expects the file without a path, and with a fixed length.
+            # I chose 256 for this length, simply to have some space in case
+            # we need it at some point (i.e., the tempfile format changes).
+            tem_input_name_qe = os.path.basename(tem_input_name)
+            tem_input_name_qe = tem_input_name_qe + " " * (
+                256 - len(tem_input_name_qe)
+            )
+            te.initialize(tem_input_name_qe, self.y_planes)
             barrier()
-            t1 = time.perf_counter()
-            printout("time used by total energy initialization: ", t1 - t0)
+
+            # Right after setup we can delete the file.
+            if get_rank() == 0:
+                os.remove(tem_input_name)
+
+            printout(
+                "Total energy module: Time used by total energy initialization: {:.8f}s".format(
+                    time.perf_counter() - t0
+                ),
+                min_verbosity=2,
+            )
 
             Density.te_mutex = True
-            printout("MALA: QuantumEspresso setup done.", min_verbosity=0)
+            printout("QuantumEspresso setup done.", min_verbosity=0)
         else:
             printout(
-                "MALA: QuantumEspresso is already running. Except for"
+                "QuantumEspresso is already running. Except for"
                 " the atomic positions, no new parameters will be used.",
                 min_verbosity=0,
             )
@@ -1087,10 +1128,10 @@ class Density(Target):
                 )
             )
             barrier()
-            t1 = time.perf_counter()
             printout(
-                "time used by gaussian descriptors: ",
-                t1 - t0,
+                "Total energy module: Time used by gaussian descriptors: {:.8f}s".format(
+                    time.perf_counter() - t0
+                ),
                 min_verbosity=2,
             )
 
@@ -1119,10 +1160,10 @@ class Density(Target):
                 )
             )
             barrier()
-            t1 = time.perf_counter()
             printout(
-                "time used by reference gaussian descriptors: ",
-                t1 - t0,
+                "Total energy module: Time used by reference gaussian descriptors: {:.8f}s".format(
+                    time.perf_counter() - t0
+                ),
                 min_verbosity=2,
             )
 
@@ -1149,9 +1190,12 @@ class Density(Target):
             self._parameters_full.descriptors.use_atomic_density_energy_formula,
         )
         barrier()
-        t1 = time.perf_counter()
-        printout("time used by set_positions: ", t1 - t0, min_verbosity=2)
-
+        printout(
+            "Total energy module: Time used by set_positions: {:.8f}s".format(
+                time.perf_counter() - t0
+            ),
+            min_verbosity=2,
+        )
         barrier()
 
         if self._parameters_full.descriptors.use_atomic_density_energy_formula:
@@ -1191,9 +1235,11 @@ class Density(Target):
                 1,
             )
             barrier()
-            t1 = time.perf_counter()
             printout(
-                "time used by set_positions_gauss: ", t1 - t0, min_verbosity=2
+                "Total energy module: Time used by set_positions_gauss: {:.8f}s".format(
+                    time.perf_counter() - t0
+                ),
+                min_verbosity=2,
             )
 
         # Now we can set the new density.
@@ -1201,8 +1247,12 @@ class Density(Target):
         t0 = time.perf_counter()
         te.set_rho_of_r(density_for_qe, number_of_gridpoints, nr_spin_channels)
         barrier()
-        t1 = time.perf_counter()
-        printout("time used by set_rho_of_r: ", t1 - t0, min_verbosity=2)
+        printout(
+            "Total energy module: Time used by set_rho_of_r: {:.8f}s".format(
+                time.perf_counter() - t0
+            ),
+            min_verbosity=2,
+        )
 
         return atoms_Angstrom
 

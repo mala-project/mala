@@ -2,17 +2,14 @@ import os
 
 import mala
 
-from mala.datahandling.data_repo import data_repo_path
+from mala.datahandling.data_repo import data_path
 
-atoms_path = os.path.join(
-    os.path.join(data_repo_path, "Be2"), "Be_snapshot1.out"
-)
-ldos_path = os.path.join(
-    os.path.join(data_repo_path, "Be2"), "Be_snapshot1.out.npy"
-)
 """
-Shows how MALA can be used to visualize observables of interest. 
+Shows how MALA can be used to visualize observables of interest.
 """
+
+atoms_path = os.path.join(data_path, "Be_snapshot1.out")
+ldos_path = os.path.join(data_path, "Be_snapshot1.out.npy")
 
 ####################
 # 1. READ ELECTRONIC STRUCTURE DATA

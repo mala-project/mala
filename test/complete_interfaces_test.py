@@ -8,9 +8,7 @@ import numpy as np
 import pytest
 
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 
 # This test checks whether MALA interfaces to other codes, mainly the ASE
@@ -116,7 +114,7 @@ class TestInterfaces:
         test_parameters.running.max_number_epochs = 100
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.targets.target_type = "LDOS"
         test_parameters.targets.ldos_gridsize = 11
         test_parameters.targets.ldos_gridspacing_ev = 2.5
@@ -125,9 +123,7 @@ class TestInterfaces:
         test_parameters.descriptors.descriptor_type = "Bispectrum"
         test_parameters.descriptors.bispectrum_twojmax = 10
         test_parameters.descriptors.bispectrum_cutoff = 4.67637
-        test_parameters.targets.pseudopotential_path = os.path.join(
-            data_repo_path, "Be2"
-        )
+        test_parameters.targets.pseudopotential_path = data_path
 
         ####################
         # DATA

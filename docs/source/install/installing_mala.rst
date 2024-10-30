@@ -37,17 +37,13 @@ The examples and tests need additional data to run. The MALA team provides a
 to check out the correct tag for the data repository, since the data repository
 itself is subject to ongoing development as well.
 
-Also make sure to have the `Git LFS <https://git-lfs.com/>`_ installed on your
-machine, since the data repository operates using Git LFS to handle large
-binary files for example training data. 
-
 * Download data repository and check out correct tag:
 
 .. code-block:: bash
 
     git clone https://github.com/mala-project/test-data ~/path/to/data/repo
     cd ~/path/to/data/repo
-    git checkout v1.7.0
+    git checkout v1.8.1
 
 * Export the path to that repo by ``export MALA_DATA_REPO=~/path/to/data/repo``
 

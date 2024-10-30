@@ -77,7 +77,7 @@ Specifically, when setting
 
       .. code-block:: python
 
-            parameters.running.after_before_training_metric = "band_energy"
+            parameters.running.after_training_metric = "band_energy"
 
 the error in the band energy between actual and predicted LDOS will be
 calculated and printed before and after network training (in meV/atom).
@@ -205,18 +205,83 @@ visualization prior to training via
 
             # 0: No visualizatuon, 1: loss and learning rate, 2: like 1,
             # but additionally weights and biases are saved
-            parameters.running.visualisation = 1
-            parameters.running.visualisation_dir = "mala_vis"
+            parameters.running.logging = 1
+            parameters.running.logging_dir = "mala_vis"
 
-where ``visualisation_dir`` specifies some directory in which to save the
-MALA visualization data. Afterwards, you can run the training without any
+where ``logging_dir`` specifies some directory in which to save the
+MALA logging data. Afterwards, you can run the training without any
 other modifications. Once training is finished (or during training, in case
 you want to use tensorboard to monitor progress), you can launch tensorboard
 via
 
       .. code-block:: bash
 
-            tensorboard --logdir path_to_visualization
+            tensorboard --logdir path_to_log_directory
 
-The full path for ``path_to_visualization`` can be accessed via
-``trainer.full_visualization_path``.
+The full path for ``path_to_log_directory`` can be accessed via
+``trainer.full_logging_path``.
+
+
+Training in parallel
+********************
+
+If large models or large data sets are employed, training may be slow even
+if a GPU is used. In this case, multiple GPUs can be employed with MALA
+using the ``DistributedDataParallel`` (DDP) formalism of the ``torch`` library.
+To use DDP, make sure you have `NCCL <https://developer.nvidia.com/nccl>`_
+installed on your system.
+
+To activate and use DDP in MALA, almost no modification of your training script
+is necessary. Simply activate DDP in your ``Parameters`` object. Make sure to
+also enable GPU, since parallel training is currently only supported on GPUs.
+
+      .. code-block:: python
+
+            parameters = mala.Parameters()
+            parameters.use_gpu = True
+            parameters.use_ddp = True
+
+MALA is now set up for parallel training. DDP works across multiple compute
+nodes on HPC infrastructure as well as on a single machine hosting multiple
+GPUs. While essentially no modification of the python script is necessary, some
+modifications for calling the python script may be necessary, to ensure
+that DDP has all the information it needs for inter/intra-node communication.
+This setup *may* differ across machines/clusters. During testing, the
+following setup was confirmed to work on an HPC cluster using the
+``slurm`` scheduler.
+
+    .. code-block:: bash
+
+        #SBATCH --nodes=NUMBER_OF_NODES
+        #SBATCH --ntasks-per-node=NUMBER_OF_TASKS_PER_NODE
+        #SBATCH --gres=gpu:NUMBER_OF_TASKS_PER_NODE
+        # Add more arguments as needed
+        ...
+
+        # Load more modules as needed
+        ...
+
+        # This port can be arbitrarily chosen.
+        # Given here is the torchrun default
+        export MASTER_PORT=29500
+
+        # Find out the host node.
+        echo "NODELIST="${SLURM_NODELIST}
+        master_addr=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
+        export MASTER_ADDR=$master_addr
+        echo "MASTER_ADDR="$MASTER_ADDR
+
+        # Run using srun.
+        srun -N NUMBER_OF_NODES -u bash -c '
+        # Export additional per process variables
+        export RANK=$SLURM_PROCID
+        export LOCAL_RANK=$SLURM_LOCALID
+        export WORLD_SIZE=$SLURM_NTASKS
+
+        python3 -u  training.py
+        '
+
+An overview of environment variables to be set can be found `in the official documentation <https://pytorch.org/docs/stable/distributed.html#environment-variable-initialization>`_.
+A general tutorial on DDP itself can be found `here <https://pytorch.org/tutorials/beginner/ddp_series_theory.html>`_.
+
+

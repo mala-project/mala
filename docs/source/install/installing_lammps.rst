@@ -41,16 +41,22 @@ The MALA team recommends to build LAMMPS with ``cmake``. To do so
       * ``Kokkos_ARCH_GPUARCH=???``: Your GPU architecture (see see `Kokkos instructions <https://docs.lammps.org/Build_extras.html#kokkos-package>`_)
       * ``CMAKE_CXX_COMPILER=???``: Path to the ``nvcc_wrapper`` executable
         shipped with the LAMMPS code, should be at ``/your/path/to/lammps/lib/kokkos/bin/nvcc_wrapper``
-* For example, this configures the LAMMPS cmake build with Kokkos support
-  for an Intel Haswell CPU and an Nvidia Volta GPU, with MPI support:
+
+    For example, this configures the LAMMPS cmake build with Kokkos support
+    for an Intel Haswell CPU and an Nvidia Volta GPU, with MPI support:
 
       .. code-block:: bash
 
             cmake ../cmake -D PKG_KOKKOS=yes -D BUILD_MPI=yes -D PKG_ML-SNAP=yes -D Kokkos_ENABLE_CUDA=yes -D Kokkos_ARCH_HSW=yes -D Kokkos_ARCH_VOLTA70=yes -D CMAKE_CXX_COMPILER=/path/to/lammps/lib/kokkos/bin/nvcc_wrapper -D BUILD_SHARED_LIBS=yes
 
+.. note::
+      When using a GPU by setting ``parameters.use_gpu = True``, you *need* to
+      have a GPU version of ``LAMMPS`` installed. See :ref:`production_gpu` for
+      details.
 
 * Build the library and executable with ``cmake --build .``
   (Add ``--parallel=8`` for a faster build)
+
 
 
 Installing the Python extension

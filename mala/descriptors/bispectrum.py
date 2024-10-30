@@ -138,10 +138,14 @@ class Bispectrum(Descriptor):
         from lammps import constants as lammps_constants
 
         use_fp64 = kwargs.get("use_fp64", False)
+        keep_logs = kwargs.get("keep_logs", False)
 
         lammps_format = "lammps-data"
-        ase_out_path = os.path.join(outdir, "lammps_input.tmp")
-        ase.io.write(ase_out_path, self.atoms, format=lammps_format)
+        self.setup_lammps_tmp_files("bgrid", outdir)
+
+        ase.io.write(
+            self.lammps_temporary_input, self.atoms, format=lammps_format
+        )
 
         nx = self.grid_dimensions[0]
         ny = self.grid_dimensions[1]
@@ -151,16 +155,8 @@ class Bispectrum(Descriptor):
         lammps_dict = {
             "twojmax": self.parameters.bispectrum_twojmax,
             "rcutfac": self.parameters.bispectrum_cutoff,
-            "atom_config_fname": ase_out_path,
         }
-        lmp = self._setup_lammps(
-            nx,
-            ny,
-            nz,
-            outdir,
-            lammps_dict,
-            log_file_name="lammps_bgrid_log.tmp",
-        )
+        lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # An empty string means that the user wants to use the standard input.
         # What that is differs depending on serial/parallel execution.
@@ -180,7 +176,7 @@ class Bispectrum(Descriptor):
                     filepath, "in.bgrid.python"
                 )
 
-        # Do the LAMMPS calculation.
+        # Do the LAMMPS calculation and clean up.
         lmp.file(self.parameters.lammps_compute_file)
 
         # Set things not accessible from LAMMPS
@@ -225,7 +221,8 @@ class Bispectrum(Descriptor):
                 array_shape=(nrows_local, ncols_local),
                 use_fp64=use_fp64,
             )
-            lmp.close()
+
+            self._clean_calculation(lmp, keep_logs)
 
             # Copy the grid dimensions only at the end.
             self.grid_dimensions = [nx, ny, nz]
@@ -241,7 +238,8 @@ class Bispectrum(Descriptor):
                 (nz, ny, nx, self.fingerprint_length),
                 use_fp64=use_fp64,
             )
-            lmp.close()
+
+            self._clean_calculation(lmp, keep_logs)
 
             # switch from x-fastest to z-fastest order (swaps 0th and 2nd
             # dimension)
@@ -509,7 +507,6 @@ class Bispectrum(Descriptor):
     ########
 
     class _ZIndices:
-
         def __init__(self):
             self.j1 = 0
             self.j2 = 0
@@ -523,7 +520,6 @@ class Bispectrum(Descriptor):
             self.jju = 0
 
     class _BIndices:
-
         def __init__(self):
             self.j1 = 0
             self.j2 = 0

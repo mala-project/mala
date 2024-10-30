@@ -1,4 +1,4 @@
-SUBROUTINE initialize(y_planes_in, calculate_eigts_in)
+SUBROUTINE initialize(file_name, y_planes_in, calculate_eigts_in)
   !----------------------------------------------------------------------------
   !  Derived from Quantum Espresso code
   !! author: Paolo Giannozzi
@@ -29,6 +29,7 @@ SUBROUTINE initialize(y_planes_in, calculate_eigts_in)
   LOGICAL, INTENT(IN), OPTIONAL :: calculate_eigts_in
   LOGICAL :: calculate_eigts = .false.
   INTEGER, INTENT(IN), OPTIONAL :: y_planes_in
+  CHARACTER(len=256), INTENT(IN) :: file_name
     ! Parse optional arguments.
   IF (PRESENT(calculate_eigts_in)) THEN
     calculate_eigts = calculate_eigts_in
@@ -45,7 +46,7 @@ SUBROUTINE initialize(y_planes_in, calculate_eigts_in)
   !
   CALL environment_start ( 'PWSCF' )
   !
-  CALL read_input_file ('PW', 'mala.pw.scf.in' )
+  CALL read_input_file ('PW', file_name )
   CALL run_pwscf_setup ( exit_status, calculate_eigts)
 
   print *, "Setup completed"
@@ -250,11 +251,14 @@ SUBROUTINE init_run_setup(calculate_eigts)
      CALL ggen( dfftp, gamma_only, at, bg, gcutm, ngm_g, ngm, &
        g, gg, mill, ig_l2g, gstart )
   END IF
+
+
+  IF (do_cutoff_2D) CALL cutoff_fact()
+
   !
   !  This seems to be needed by set_rhoc()
   !
   CALL gshells ( lmovecell )
-
   !
   ! ... allocate memory for structure factors
   !

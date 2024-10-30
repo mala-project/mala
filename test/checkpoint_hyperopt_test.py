@@ -4,9 +4,7 @@ import mala
 from mala import printout
 import numpy as np
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 checkpoint_name = "test_ho"
 
@@ -69,7 +67,7 @@ class TestHyperoptCheckpointing:
         test_parameters.running.max_number_epochs = 10
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
 
         # Specify the number of trials, the hyperparameter optimizer should run
         # and the type of hyperparameter.

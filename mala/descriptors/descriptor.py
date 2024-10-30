@@ -1,7 +1,9 @@
 """Base class for all descriptor calculators."""
 
 from abc import abstractmethod
+from functools import cached_property
 import os
+import tempfile
 
 import ase
 from ase.units import m
@@ -122,6 +124,12 @@ class Descriptor(PhysicalData):
         self.atoms = None
         self.voxel = None
 
+        # If we ever have NON LAMMPS descriptors, these parameters have no
+        # meaning anymore and should probably be moved to an intermediate
+        # DescriptorsLAMMPS class, from which the LAMMPS descriptors inherit.
+        self.lammps_temporary_input = None
+        self.lammps_temporary_log = None
+
     ##############################
     # Properties
     ##############################
@@ -210,6 +218,47 @@ class Descriptor(PhysicalData):
             "this descriptor type."
         )
 
+    def setup_lammps_tmp_files(self, lammps_type, outdir):
+        """
+        Create the temporary lammps input and log files.
+
+        Parameters
+        ----------
+        lammps_type: str
+            Type of descriptor calculation (e.g. bgrid for bispectrum)
+        outdir: str
+            Directory where lammps files are kept
+
+        Returns
+        -------
+        None
+        """
+        if get_rank() == 0:
+            prefix_inp_str = "lammps_" + lammps_type + "_input"
+            prefix_log_str = "lammps_" + lammps_type + "_log"
+            lammps_tmp_input_file = tempfile.NamedTemporaryFile(
+                delete=False, prefix=prefix_inp_str, suffix="_.tmp", dir=outdir
+            )
+            self.lammps_temporary_input = lammps_tmp_input_file.name
+            lammps_tmp_input_file.close()
+
+            lammps_tmp_log_file = tempfile.NamedTemporaryFile(
+                delete=False, prefix=prefix_log_str, suffix="_.tmp", dir=outdir
+            )
+            self.lammps_temporary_log = lammps_tmp_log_file.name
+            lammps_tmp_log_file.close()
+        else:
+            self.lammps_temporary_input = None
+            self.lammps_temporary_log = None
+
+        if self.parameters._configuration["mpi"]:
+            self.lammps_temporary_input = get_comm().bcast(
+                self.lammps_temporary_input, root=0
+            )
+            self.lammps_temporary_log = get_comm().bcast(
+                self.lammps_temporary_log, root=0
+            )
+
     # Calculations
     ##############
 
@@ -273,6 +322,17 @@ class Descriptor(PhysicalData):
             Usually the local directory should suffice, given that there
             are no multiple instances running in the same directory.
 
+        kwargs : dict
+            A collection of keyword arguments, that are mainly used for
+            debugging and development. Different types of descriptors
+            may support different keyword arguments. Commonly supported
+            are
+
+            - "use_fp64": To use enforce floating point 64 precision for
+              descriptors.
+            - "keep_logs": To not delete temporary files created during
+              LAMMPS calculation of descriptors.
+
         Returns
         -------
         descriptors : numpy.array
@@ -333,6 +393,17 @@ class Descriptor(PhysicalData):
             A directory in which to write the output of the LAMMPS calculation.
             Usually the local directory should suffice, given that there
             are no multiple instances running in the same directory.
+
+        kwargs : dict
+            A collection of keyword arguments, that are mainly used for
+            debugging and development. Different types of descriptors
+            may support different keyword arguments. Commonly supported
+            are
+
+            - "use_fp64": To use enforce floating point 64 precision for
+              descriptors.
+            - "keep_logs": To not delete temporary files created during
+              LAMMPS calculation of descriptors.
 
         Returns
         -------
@@ -542,9 +613,7 @@ class Descriptor(PhysicalData):
         else:
             return 0
 
-    def _setup_lammps(
-        self, nx, ny, nz, outdir, lammps_dict, log_file_name="lammps_log.tmp"
-    ):
+    def _setup_lammps(self, nx, ny, nz, lammps_dict):
         """
         Set up the lammps processor grid.
 
@@ -552,20 +621,14 @@ class Descriptor(PhysicalData):
         """
         from lammps import lammps
 
-        parallel_warn(
-            "Using LAMMPS for descriptor calculation. "
-            "Do not initialize more than one pre-processing "
-            "calculation in the same directory at the same time. "
-            "Data may be over-written."
-        )
-
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = [
             "-screen",
             "none",
             "-log",
-            os.path.join(outdir, log_file_name),
+            self.lammps_temporary_log,
         ]
+        lammps_dict["atom_config_fname"] = self.lammps_temporary_input
 
         if self.parameters._configuration["mpi"]:
             size = get_size()
@@ -753,22 +816,23 @@ class Descriptor(PhysicalData):
                     )
 
         else:
+            size = 1
             lammps_dict["ngridx"] = nx
             lammps_dict["ngridy"] = ny
             lammps_dict["ngridz"] = nz
             lammps_dict["switch"] = self.parameters.bispectrum_switchflag
-            if self.parameters._configuration["gpu"]:
-                # Tell Kokkos to use one GPU.
-                lmp_cmdargs.append("-k")
-                lmp_cmdargs.append("on")
-                lmp_cmdargs.append("g")
-                lmp_cmdargs.append("1")
+        if self.parameters._configuration["gpu"]:
+            # Tell Kokkos to use one GPU.
+            lmp_cmdargs.append("-k")
+            lmp_cmdargs.append("on")
+            lmp_cmdargs.append("g")
+            lmp_cmdargs.append(str(size))
 
-                # Tell LAMMPS to use Kokkos versions of those commands for
-                # which a Kokkos version exists.
-                lmp_cmdargs.append("-sf")
-                lmp_cmdargs.append("kk")
-                pass
+            # Tell LAMMPS to use Kokkos versions of those commands for
+            # which a Kokkos version exists.
+            lmp_cmdargs.append("-sf")
+            lmp_cmdargs.append("kk")
+            pass
 
         lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
 
@@ -776,6 +840,13 @@ class Descriptor(PhysicalData):
         set_lammps_instance(lmp)
 
         return lmp
+
+    def _clean_calculation(self, lmp, keep_logs):
+        lmp.close()
+        if not keep_logs:
+            if get_rank() == 0:
+                os.remove(self.lammps_temporary_log)
+                os.remove(self.lammps_temporary_input)
 
     def _setup_atom_list(self):
         """

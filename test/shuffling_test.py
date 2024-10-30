@@ -3,9 +3,7 @@ import os
 import mala
 import numpy as np
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 # Accuracy for the shuffling test.
 accuracy = np.finfo(float).eps
@@ -126,7 +124,7 @@ class TestDataShuffling:
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.verbosity = 1
         test_parameters.data.use_lazy_loading = True
 
@@ -170,7 +168,7 @@ class TestDataShuffling:
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.verbosity = 1
         test_parameters.data.use_lazy_loading = True
         data_shuffler = mala.DataShuffler(test_parameters)
@@ -222,7 +220,7 @@ class TestDataShuffling:
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.verbosity = 1
         test_parameters.data.use_lazy_loading = True
 
@@ -268,7 +266,7 @@ class TestDataShuffling:
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.verbosity = 1
         test_parameters.data.use_lazy_loading = True
 

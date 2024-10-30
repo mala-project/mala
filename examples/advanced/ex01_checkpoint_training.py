@@ -3,18 +3,16 @@ import os
 import mala
 from mala import printout
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 """
-Shows how a training run can be paused and 
+Shows how a training run can be paused and
 resumed. Delete the ex07.zip file prior to execution to see the effect
 of checkpointing.
-Afterwards, execute this script twice to see how MALA progresses from a 
+Afterwards, execute this script twice to see how MALA progresses from a
 checkpoint. As the number of total epochs cannot be divided by the number
-of epochs after which a checkpoint is created without residual, this will 
-lead to MALA performing the missing epochs again. 
+of epochs after which a checkpoint is created without residual, this will
+lead to MALA performing the missing epochs again.
 """
 
 
@@ -28,7 +26,7 @@ def initial_setup():
     parameters.running.max_number_epochs = 9
     parameters.running.mini_batch_size = 8
     parameters.running.learning_rate = 0.00001
-    parameters.running.trainingtype = "Adam"
+    parameters.running.optimizer = "Adam"
 
     # We checkpoint the training every 5 epochs and save the results
     # as "ex07".

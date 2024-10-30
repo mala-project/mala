@@ -3,12 +3,10 @@ import os
 import mala
 from mala import printout
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 """
-Shows how recent developments in hyperparameter optimization techniques can be 
+Shows how recent developments in hyperparameter optimization techniques can be
 used (OAT / training-free NAS).
 
 REQUIRES OAPACKAGE.
@@ -23,7 +21,7 @@ def optimize_hyperparameters(hyper_optimizer):
     parameters.running.max_number_epochs = 10
     parameters.running.mini_batch_size = 40
     parameters.running.learning_rate = 0.00001
-    parameters.running.trainingtype = "Adam"
+    parameters.running.optimizer = "Adam"
     parameters.hyperparameters.n_trials = 8
     parameters.hyperparameters.hyper_opt_method = hyper_optimizer
 
@@ -66,7 +64,7 @@ def optimize_hyperparameters(hyper_optimizer):
         data_handler.output_dimension,
     ]
     hyperoptimizer.add_hyperparameter(
-        "categorical", "trainingtype", choices=["Adam", "SGD"]
+        "categorical", "optimizer", choices=["Adam", "SGD"]
     )
     hyperoptimizer.add_hyperparameter(
         "categorical", "layer_activation_00", choices=["ReLU", "Sigmoid"]

@@ -14,9 +14,11 @@ from mala.common.parallelizer import parallel_warn
 name = "MALA_DATA_REPO"
 if name in os.environ:
     data_repo_path = os.environ[name]
+    data_path = os.path.join(data_repo_path, "Be2")
 else:
     parallel_warn(
         f"Environment variable {name} not set. You won't be able "
         "to run all examples and tests."
     )
     data_repo_path = None
+    data_path = None

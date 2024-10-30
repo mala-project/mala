@@ -418,7 +418,8 @@ class PhysicalData(ABC):
         import openpmd_api as io
 
         if isinstance(path, str):
-            file_name = os.path.basename(path)
+            directory, file_name = os.path.split(path)
+            path = os.path.join(directory, file_name.replace("*", "%T"))
             file_ending = file_name.split(".")[-1]
             if file_name == file_ending:
                 path += ".h5"
@@ -641,6 +642,11 @@ match the array dimensions (extent {} in the feature dimension)""".format(
 
         # Third loop: Extra flushes to harmonize ranks
         for _ in range(extra_flushes):
+            # This following line is a workaround for issue
+            # https://github.com/openPMD/openPMD-api/issues/1616
+            # Fixed in openPMD-api 0.16 by
+            # https://github.com/openPMD/openPMD-api/pull/1619
+            iteration.dt = iteration.dt
             iteration.series_flush()
 
         iteration.close(flush=True)
