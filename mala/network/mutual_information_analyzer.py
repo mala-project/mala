@@ -51,12 +51,8 @@ def mutual_information(
     dim_X = X.shape[-1]
     rand_subset = np.random.permutation(n)[:n_samples]
     if normalize_data:
-        scaler = Normalizer()
-        X = scaler.fit_transform(X)
-        scaler = Normalizer()
-        Y = scaler.fit_transform(Y)
-        # X = normalize(X)
-        # Y = normalize(Y)
+        X = normalize(X)
+        Y = normalize(Y)
     X = X[rand_subset]
     Y = Y[rand_subset]
     XY = np.concatenate([X, Y], axis=1)
