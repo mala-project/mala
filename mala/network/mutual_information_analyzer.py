@@ -34,7 +34,6 @@ def normalize(data):
     return data
 
 
-@staticmethod
 def mutual_information(
     X,
     Y,
