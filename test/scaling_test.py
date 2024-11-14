@@ -57,9 +57,9 @@ class TestScaling:
         ]:
             data = np.load(os.path.join(data_path, "Be_snapshot2.in.npy"))
             data = data.astype(np.float32)
-            data = data.reshape(
-                [np.prod(np.shape(data)[0:3]), np.shape(data)[3]]
-            )
+            # data = data.reshape(
+            #     [np.prod(np.shape(data)[0:3]), np.shape(data)[3]]
+            # )
             data = torch.from_numpy(data).float()
 
             scaler = mala.DataScaler(scaling)

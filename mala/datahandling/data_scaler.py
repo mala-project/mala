@@ -13,7 +13,9 @@ class DataScaler:
     """Scales input and output data.
 
     Sort of emulates the functionality of the scikit-learn library, but by
-    implementing the class by ourselves we have more freedom.
+    implementing the class by ourselves we have more freedom. Specifically
+    assumes data of the form (d,f), where d=x*y*z, i.e., the product of spatial
+    dimensions, and f is the feature dimension.
 
     Parameters
     ----------
@@ -29,12 +31,12 @@ class DataScaler:
         - "feature-wise-standard": Standardization (Scale to mean 0,
           standard deviation 1) is applied to each feature dimension
           individually.
-          I.e., if your training data has dimensions (x,y,z,f), then each
-          of the f rows with (x,y,z) entries is scaled indiviually.
+          I.e., if your training data has dimensions (d,f), then each
+          of the f rows with d entries is scaled indiviually.
         - "feature-wise-minmax": Min-Max scaling (Scale to be in range
           0...1) is applied to each feature dimension individually.
-          I.e., if your training data has dimensions (x,y,z,f), then each
-          of the f rows with (x,y,z) entries is scaled indiviually.
+          I.e., if your training data has dimensions (d,f), then each
+          of the f rows with d entries is scaled indiviually.
         - "normal": (DEPRECATED) Old name for "minmax".
         - "feature-wise-normal": (DEPRECATED) Old name for
           "feature-wise-minmax"
@@ -112,6 +114,14 @@ class DataScaler:
             Data that is to be added to the fit.
 
         """
+        if len(unscaled.size()) != 2:
+            raise ValueError(
+                "MALA DataScaler are designed for 2D-arrays, "
+                "while a {0}D-array has been provided.".format(
+                    len(unscaled.size())
+                )
+            )
+
         if self.scale_standard is False and self.scale_minmax is False:
             self.cantransform = True
             return
@@ -245,6 +255,14 @@ class DataScaler:
             Data that on which the scaling will be calculated.
 
         """
+        if len(unscaled.size()) != 2:
+            raise ValueError(
+                "MALA DataScaler are designed for 2D-arrays, "
+                "while a {0}D-array has been provided.".format(
+                    len(unscaled.size())
+                )
+            )
+
         if self.scale_standard is False and self.scale_minmax is False:
             return
         else:
@@ -300,6 +318,14 @@ class DataScaler:
         scaled : torch.Tensor
             Scaled data.
         """
+        if len(unscaled.size()) != 2:
+            raise ValueError(
+                "MALA DataScaler are designed for 2D-arrays, "
+                "while a {0}D-array has been provided.".format(
+                    len(unscaled.size())
+                )
+            )
+
         # Backward compatability.
         if not hasattr(self, "scale_minmax") and hasattr(self, "scale_normal"):
             self.scale_minmax = self.scale_normal
@@ -374,6 +400,14 @@ class DataScaler:
             Real world data.
 
         """
+        if len(scaled.size()) != 2:
+            raise ValueError(
+                "MALA DataScaler are designed for 2D-arrays, "
+                "while a {0}D-array has been provided.".format(
+                    len(scaled.size())
+                )
+            )
+
         # Backward compatability.
         if not hasattr(self, "scale_minmax") and hasattr(self, "scale_normal"):
             self.scale_minmax = self.scale_normal
