@@ -215,10 +215,12 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">results</span></div>
 
-    
+
 <div class="viewcode-block" id="Tester.get_energy_targets_and_predictions">
 <a class="viewcode-back" href="../../../api/mala.network.tester.html#mala.network.tester.Tester.get_energy_targets_and_predictions">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_energy_targets_and_predictions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;te&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_energy_targets_and_predictions</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;te&quot;</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the energy targets and predictions for a single snapshot.</span>
 
@@ -238,8 +240,10 @@
         <span class="n">actual_outputs</span><span class="p">,</span> <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_targets</span><span class="p">(</span>
             <span class="n">snapshot_number</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span>
         <span class="p">)</span>
-        
-        <span class="n">energy_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric</span> <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observables_to_test</span> <span class="k">if</span> <span class="s2">&quot;energy&quot;</span> <span class="ow">in</span> <span class="n">metric</span><span class="p">]</span>
+
+        <span class="n">energy_metrics</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">metric</span> <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observables_to_test</span> <span class="k">if</span> <span class="s2">&quot;energy&quot;</span> <span class="ow">in</span> <span class="n">metric</span>
+        <span class="p">]</span>
         <span class="n">targets</span><span class="p">,</span> <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_energy_targets_and_predictions</span><span class="p">(</span>
             <span class="n">actual_outputs</span><span class="p">,</span>
             <span class="n">predicted_outputs</span><span class="p">,</span>
@@ -316,7 +320,7 @@
                     <span class="k">break</span>
                 <span class="n">test_snapshot</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_correct_batch_size_for_testing</span><span class="p">(</span>
+        <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_correct_batch_size</span><span class="p">(</span>
             <span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">optimal_batch_size</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">:</span>

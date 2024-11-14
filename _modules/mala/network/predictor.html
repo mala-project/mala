@@ -306,7 +306,7 @@
         <span class="c1"># Only predict if there is something to predict.</span>
         <span class="c1"># Elsewise, we just wait at the barrier down below.</span>
         <span class="k">if</span> <span class="n">local_data_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_correct_batch_size_for_testing</span><span class="p">(</span>
+            <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_correct_batch_size</span><span class="p">(</span>
                 <span class="n">local_data_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">optimal_batch_size</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">:</span>

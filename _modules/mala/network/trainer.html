@@ -528,13 +528,15 @@
                         <span class="p">)</span>
                         <span class="n">batchid</span> <span class="o">+=</span> <span class="mi">1</span>
                         <span class="n">total_batch_id</span> <span class="o">+=</span> <span class="mi">1</span>
-            
+
             <span class="n">dataset_fractions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;validation&quot;</span><span class="p">]</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">validate_on_training_data</span><span class="p">:</span>
                 <span class="n">dataset_fractions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
             <span class="n">validation_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ldos&quot;</span><span class="p">]</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span>
-                <span class="p">(</span><span class="n">epoch</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">validate_every_n_epochs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">epoch</span> <span class="o">!=</span> <span class="mi">0</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">validate_every_n_epochs</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="p">):</span>
                 <span class="n">validation_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">validation_metrics</span>
             <span class="n">errors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_network</span><span class="p">(</span>
                 <span class="n">dataset_fractions</span><span class="p">,</span> <span class="n">validation_metrics</span>
@@ -772,10 +774,8 @@
                             <span class="p">]</span><span class="o">.</span><span class="n">grid_size</span>
                         <span class="p">)</span>
 
-                        <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_correct_batch_size_for_testing</span><span class="p">(</span>
-                                <span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span>
-                            <span class="p">)</span>
+                        <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_correct_batch_size</span><span class="p">(</span>
+                            <span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span>
                         <span class="p">)</span>
                         <span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
                             <span class="n">grid_size</span> <span class="o">/</span> <span class="n">optimal_batch_size</span>
@@ -921,6 +921,22 @@
             <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span>
         <span class="p">):</span>
             <span class="n">do_shuffle</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># To use graphs, our batch size has to be an even divisor of the data</span>
+        <span class="c1"># set size.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_graphs</span><span class="p">:</span>
+            <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_correct_batch_size</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nr_training_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">optimal_batch_size</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">:</span>
+                <span class="n">printout</span><span class="p">(</span>
+                    <span class="s2">&quot;Had to readjust batch size from&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">,</span>
+                    <span class="s2">&quot;to&quot;</span><span class="p">,</span>
+                    <span class="n">optimal_batch_size</span><span class="p">,</span>
+                    <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="o">=</span> <span class="n">optimal_batch_size</span>
 
         <span class="c1"># Prepare data loaders.(look into mini-batch size)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">FastTensorDataset</span><span class="p">):</span>
