@@ -435,13 +435,15 @@ class Trainer(Runner):
                         )
                         batchid += 1
                         total_batch_id += 1
-            
+
             dataset_fractions = ["validation"]
             if self.parameters.validate_on_training_data:
                 dataset_fractions.append("train")
             validation_metrics = ["ldos"]
-            if (epoch != 0 and
-                (epoch - 1) % self.parameters.validate_every_n_epochs == 0):
+            if (
+                epoch != 0
+                and (epoch - 1) % self.parameters.validate_every_n_epochs == 0
+            ):
                 validation_metrics = self.parameters.validation_metrics
             errors = self._validate_network(
                 dataset_fractions, validation_metrics
@@ -678,10 +680,8 @@ class Trainer(Runner):
                             ].grid_size
                         )
 
-                        optimal_batch_size = (
-                            self._correct_batch_size_for_testing(
-                                grid_size, self.parameters.mini_batch_size
-                            )
+                        optimal_batch_size = self._correct_batch_size(
+                            grid_size, self.parameters.mini_batch_size
                         )
                         number_of_batches_per_snapshot = int(
                             grid_size / optimal_batch_size
@@ -827,6 +827,22 @@ class Trainer(Runner):
             or self.parameters_full.use_ddp
         ):
             do_shuffle = False
+
+        # To use graphs, our batch size has to be an even divisor of the data
+        # set size.
+        if self.parameters.use_graphs:
+            optimal_batch_size = self._correct_batch_size(
+                self.data.nr_training_data, self.parameters.mini_batch_size
+            )
+            if optimal_batch_size != self.parameters.mini_batch_size:
+                printout(
+                    "Had to readjust batch size from",
+                    self.parameters.mini_batch_size,
+                    "to",
+                    optimal_batch_size,
+                    min_verbosity=0,
+                )
+                self.parameters.mini_batch_size = optimal_batch_size
 
         # Prepare data loaders.(look into mini-batch size)
         if isinstance(self.data.training_data_sets[0], FastTensorDataset):
