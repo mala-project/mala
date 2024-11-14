@@ -144,18 +144,6 @@
         <span class="c1"># Check if we&#39;re accessing through base class.</span>
         <span class="c1"># If not, we need to return the correct object directly.</span>
         <span class="k">if</span> <span class="bp">cls</span> <span class="o">==</span> <span class="n">Descriptor</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">==</span> <span class="s2">&quot;SNAP&quot;</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">mala.descriptors.bispectrum</span> <span class="kn">import</span> <span class="n">Bispectrum</span>
-
-                <span class="n">parallel_warn</span><span class="p">(</span>
-                    <span class="s2">&quot;Using &#39;SNAP&#39; as descriptors will be deprecated &quot;</span>
-                    <span class="s2">&quot;starting in MALA v1.3.0. Please use &#39;Bispectrum&#39; &quot;</span>
-                    <span class="s2">&quot;instead.&quot;</span><span class="p">,</span>
-                    <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                    <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">descriptors</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Descriptor</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">Bispectrum</span><span class="p">)</span>
-
             <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">==</span> <span class="s2">&quot;Bispectrum&quot;</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">mala.descriptors.bispectrum</span> <span class="kn">import</span> <span class="n">Bispectrum</span>
 
@@ -608,7 +596,7 @@
             <span class="n">ny</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">nz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
             <span class="n">descriptors_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span><span class="p">])</span>
-            <span class="c1"># Fill the full SNAP descriptors array.</span>
+            <span class="c1"># Fill the full bispectrum descriptors array.</span>
             <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">local_grid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">all_descriptors_list</span><span class="p">):</span>
                 <span class="c1"># We glue the individual cells back together, and transpose.</span>
                 <span class="n">first_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
