@@ -316,7 +316,7 @@ class DataScaler:
 
         # Perform the actual scaling, but use no_grad to make sure
         # that the next couple of iterations stay untracked.
-        scaled = unscaled if copy is False else unscaled.clone()
+        scaled = unscaled.clone() if copy else unscaled
 
         with torch.no_grad():
             if self.feature_wise:
