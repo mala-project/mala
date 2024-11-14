@@ -417,6 +417,7 @@ class Density(Target):
                 "We recommend to check and change the requested units"
             )
         data, meta = read_cube(path)
+        data = np.expand_dims(data, -1)
         data *= self.convert_units(1, in_units=units)
         self.density = data
         self.grid_dimensions = list(np.shape(data)[0:3])
