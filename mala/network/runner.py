@@ -932,7 +932,7 @@ class Runner:
         return actual_outputs, predicted_outputs
 
     @staticmethod
-    def _correct_batch_size_for_testing(datasize, batchsize):
+    def _correct_batch_size(datasize, batchsize):
         """
         Get the correct batch size for testing.
 

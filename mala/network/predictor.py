@@ -215,7 +215,7 @@ class Predictor(Runner):
         # Only predict if there is something to predict.
         # Elsewise, we just wait at the barrier down below.
         if local_data_size > 0:
-            optimal_batch_size = self._correct_batch_size_for_testing(
+            optimal_batch_size = self._correct_batch_size(
                 local_data_size, self.parameters.mini_batch_size
             )
             if optimal_batch_size != self.parameters.mini_batch_size:

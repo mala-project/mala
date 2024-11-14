@@ -124,8 +124,10 @@ class Tester(Runner):
             snapshot_number,
         )
         return results
-    
-    def get_energy_targets_and_predictions(self, snapshot_number, data_type="te"):
+
+    def get_energy_targets_and_predictions(
+        self, snapshot_number, data_type="te"
+    ):
         """
         Get the energy targets and predictions for a single snapshot.
 
@@ -145,8 +147,10 @@ class Tester(Runner):
         actual_outputs, predicted_outputs = self.predict_targets(
             snapshot_number, data_type=data_type
         )
-        
-        energy_metrics = [metric for metric in self.observables_to_test if "energy" in metric]
+
+        energy_metrics = [
+            metric for metric in self.observables_to_test if "energy" in metric
+        ]
         targets, predictions = self._calculate_energy_targets_and_predictions(
             actual_outputs,
             predicted_outputs,
@@ -219,7 +223,7 @@ class Tester(Runner):
                     break
                 test_snapshot += 1
 
-        optimal_batch_size = self._correct_batch_size_for_testing(
+        optimal_batch_size = self._correct_batch_size(
             grid_size, self.parameters.mini_batch_size
         )
         if optimal_batch_size != self.parameters.mini_batch_size:
