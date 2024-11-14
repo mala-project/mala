@@ -306,9 +306,9 @@ class ParametersDescriptors(ParametersBase):
                                 descriptors.
 
     bispectrum_twojmax : int
-        Bispectrum calculation: 2*jmax-parameter used for calculation of SNAP
-        descriptors. Default value for jmax is 5, so default value for
-        twojmax is 10.
+        Bispectrum calculation: 2*jmax-parameter used for calculation of
+        bispectrum descriptors. Default value for jmax is 5, so default value
+        for twojmax is 10.
 
     lammps_compute_file : string
         Bispectrum calculation: LAMMPS input file that is used to calculate the
