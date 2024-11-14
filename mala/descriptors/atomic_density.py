@@ -205,7 +205,7 @@ class AtomicDensity(Descriptor):
         )
         self._clean_calculation(lmp, keep_logs)
 
-        # In comparison to SNAP, the atomic density always returns
+        # In comparison to bispectrum, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments
         # if we operate without MPI.
         self.grid_dimensions = [nx, ny, nz]
