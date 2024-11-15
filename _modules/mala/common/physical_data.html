@@ -663,6 +663,11 @@
                 <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="mf">1.0e-10</span>
                 <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;positionOffset&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="mf">1.0e-10</span>
 
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkipArrayWriting</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
         <span class="n">dataset</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">array</span><span class="o">.</span><span class="n">dataset</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkipArrayWriting</span><span class="p">)</span>
@@ -672,8 +677,12 @@
         <span class="c1"># Global feature sizes:</span>
         <span class="n">feature_global_from</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">feature_global_to</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span>
-        <span class="k">if</span> <span class="n">feature_global_to</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkipArrayWriting</span><span class="p">):</span>
-            <span class="n">feature_global_to</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">feature_size</span>
+        <span class="k">if</span> <span class="n">feature_global_to</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">feature_global_to</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">array</span><span class="o">.</span><span class="n">feature_size</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkipArrayWriting</span><span class="p">)</span>
+                <span class="k">else</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
 
         <span class="c1"># First loop: Only metadata, write metadata equivalently across ranks</span>
         <span class="k">for</span> <span class="n">current_feature</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">feature_global_from</span><span class="p">,</span> <span class="n">feature_global_to</span><span class="p">):</span>
