@@ -137,6 +137,12 @@ class Bispectrum(Descriptor):
         # general LAMMPS import.
         from lammps import constants as lammps_constants
 
+        if len(set(self.atoms.numbers)) > 2:
+            raise ValueError(
+                "MALA can only compute bispectrum descriptors for 1- or "
+                "2-element systems currently."
+            )
+
         use_fp64 = kwargs.get("use_fp64", False)
         keep_logs = kwargs.get("keep_logs", False)
 
@@ -173,7 +179,10 @@ class Bispectrum(Descriptor):
                     )
             else:
                 self.parameters.lammps_compute_file = os.path.join(
-                    filepath, "in.bgrid.python"
+                    filepath,
+                    "in.bgrid_n{0}.python".format(
+                        len(set(self.atoms.numbers))
+                    ),
                 )
 
         # Do the LAMMPS calculation and clean up.
@@ -278,6 +287,12 @@ class Bispectrum(Descriptor):
             "The resulting calculation will be slow for "
             "large systems."
         )
+
+        if len(set(self.atoms.numbers)) > 1:
+            raise ValueError(
+                " MALA cannot compute bispectrum descriptors for "
+                "multi-element systems with python currently."
+            )
 
         # The entire bispectrum calculation may be extensively profiled.
         profile_calculation = kwargs.get("profile_calculation", False)

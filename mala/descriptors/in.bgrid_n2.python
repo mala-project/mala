@@ -43,7 +43,7 @@ compute bgrid all sna/grid grid ${ngridx} ${ngridy} ${ngridz} ${rcutfac} ${rfac0
 
 
 # is this important? or does it just need to be big enough?
-variable rcutneigh equal 2.0*${rcutfac}*${radelem}
+variable rcutneigh equal 2.0*${rcutfac}*${radelem1}
 # for water
 #variable rcutneigh equal 4.0*${rcutfac}*${radelem1}
 
