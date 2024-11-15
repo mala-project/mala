@@ -596,12 +596,13 @@ class DataShuffler(DataHandlerBase):
                 )
             tot_points_missing = sum(self.data_points_to_remove)
 
-            printout(
-                "Warning: number of requested snapshots is not a divisor of",
-                "the original grid sizes.\n",
-                f"{tot_points_missing} / {number_of_data_points} data points",
-                "will be left out of the shuffled snapshots.",
-            )
+            if tot_points_missing > 0:
+                printout(
+                    "Warning: number of requested snapshots is not a divisor of",
+                    "the original grid sizes.\n",
+                    f"{tot_points_missing} / {number_of_data_points} data points",
+                    "will be left out of the shuffled snapshots.",
+                )
 
             shuffle_dimensions = [
                 int(number_of_data_points / number_of_new_snapshots),
