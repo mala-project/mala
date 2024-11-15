@@ -604,13 +604,14 @@ class DataShuffler(DataHandlerBase):
                     "will be left out of the shuffled snapshots.",
                 )
 
-            shuffle_dimensions = [
-                int(number_of_data_points / number_of_new_snapshots),
-                1,
-                1,
-            ]
         else:
             raise Exception("Invalid snapshot type.")
+
+        shuffle_dimensions = [
+            int(number_of_data_points / number_of_new_snapshots),
+            1,
+            1,
+        ]
 
         printout(
             "Data shuffler will generate",
