@@ -10,8 +10,8 @@ from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
 from mala.version import __version__ as mala_version
 
-descriptor_input_types = ["espresso-out"]
-target_input_types = [".cube", ".xsf"]
+descriptor_input_types = ["espresso-out", "openpmd", "numpy"]
+target_input_types = [".cube", ".xsf", "openpmd", "numpy"]
 additional_info_input_types = ["espresso-out"]
 
 
@@ -547,6 +547,20 @@ class DataConverter:
                 )
             )
 
+        elif description["input"] == "openpmd":
+            if self.parameters_full.descriptors.descriptors_contain_xyz:
+                printout(
+                    "[Warning] parameters.descriptors.descriptors_contain_xyz is True, will be ignored since this mode is unimplemented for openPMD data."
+                )
+            self.descriptor_calculator._feature_mask = lambda: 0
+            tmp_input = self.descriptor_calculator.read_from_openpmd_file(
+                snapshot["input"], units=original_units["input"]
+            )
+        elif description["input"] == "numpy":
+            tmp_input = self.descriptor_calculator.read_from_numpy_file(
+                snapshot["input"], units=original_units["input"]
+            )
+
         elif description["input"] is None:
             # In this case, only the output is processed.
             pass
@@ -617,6 +631,17 @@ class DataConverter:
                         snapshot["output"], **target_calculator_kwargs
                     )
 
+                elif description["output"] == "openpmd":
+                    tmp_output = self.target_calculator.read_from_openpmd_file(
+                        snapshot["output"], units=original_units["output"]
+                    )
+                elif description["output"] == "numpy":
+                    tmp_output = (
+                        self.target_calculator.read_from_numpy_file(
+                            snapshot["output"], units=original_units["output"]
+                        )
+                    )
+
                 elif description["output"] is None:
                     # In this case, only the input is processed.
                     pass
@@ -655,6 +680,17 @@ class DataConverter:
                     # If no units are provided we just assume standard units.
                     tmp_output = self.target_calculator.read_from_xsf(
                         snapshot["output"], **target_calculator_kwargs
+                    )
+
+                elif description["output"] == "openpmd":
+                    tmp_output = self.target_calculator.read_from_openpmd_file(
+                        snapshot["output"], units=original_units["output"]
+                    )
+                elif description["output"] == "numpy":
+                    tmp_output = (
+                        self.target_calculator.read_from_numpy_file(
+                            snapshot["output"]
+                        )
                     )
 
                 elif description["output"] is None:
