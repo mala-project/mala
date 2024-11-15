@@ -11,10 +11,12 @@ read_data ${atom_config_fname}
 
 mass * 1.0
 
+# Needs to be defined for Kokkos
+run_style verlet
+
 # define grid compute and atom compute
 
 group 		snapgroup type 1 2
-#variable 	rcutfac equal 4.67637
 variable 	rfac0 equal 0.99363
 variable 	rmin0 equal 0
 
@@ -41,9 +43,9 @@ compute bgrid all sna/grid grid ${ngridx} ${ngridy} ${ngridz} ${rcutfac} ${rfac0
 
 
 # is this important? or does it just need to be big enough?
-#variable rcutneigh equal 2.0*${rcutfac}*${radelem}
+variable rcutneigh equal 2.0*${rcutfac}*${radelem}
 # for water
-variable rcutneigh equal 4.0*${rcutfac}*${radelem1}
+#variable rcutneigh equal 4.0*${rcutfac}*${radelem1}
 
 pair_style zero ${rcutneigh}
 pair_coeff * *
