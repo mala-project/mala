@@ -225,7 +225,6 @@ class ParametersNetwork(ParametersBase):
     ----------
     nn_type : string
         Type of the neural network that will be used. Currently supported are
-
             - "feed_forward" (default)
             - "transformer"
             - "lstm"
@@ -279,12 +278,12 @@ class ParametersNetwork(ParametersBase):
         self.layer_activations = ["Sigmoid"]
         self.loss_function_type = "mse"
 
-        # for LSTM/Gru + Transformer
-        self.num_hidden_layers = 1
-
         # for LSTM/Gru
         self.no_hidden_state = False
         self.bidirection = False
+        
+        # for LSTM/Gru + Transformer
+        self.num_hidden_layers = 1
 
         # for transformer net
         self.dropout = 0.1
@@ -556,11 +555,6 @@ class ParametersData(ParametersBase):
 
     Attributes
     ----------
-    descriptors_contain_xyz : bool
-        Legacy option. If True, it is assumed that the first three entries of
-        the descriptor vector are the xyz coordinates and they are cut from the
-        descriptor vector. If False, no such cutting is peformed.
-
     snapshot_directories_list : list
         A list of all added snapshots.
 
@@ -699,6 +693,9 @@ class ParametersRunning(ParametersBase):
     checkpoint_name : string
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
+        
+    run_name : string
+        Name of the run used for logging.
 
     logging_dir : string
         Name of the folder that logging files will be saved to.
@@ -707,6 +704,31 @@ class ParametersRunning(ParametersBase):
         If True, then upon creating logging files, these will be saved
         in a subfolder of logging_dir labelled with the starting date
         of the logging, to avoid having to change input scripts often.
+        
+    logger : string
+        Name of the logger to be used. Currently supported are:
+            - "tensorboard": Tensorboard logger.
+            - "wandb": Weights and Biases logger.
+    
+    validation_metrics : list
+        List of metrics to be used for validation. Default is ["ldos"].
+        Possible options are:
+            - "ldos": Loss on the LDOS.
+            - "band_energy": Band energy.
+            - "band_energy_actual_fe": Band energy computed with ground truth Fermi energy.
+            - "total_energy": Total energy.
+            - "total_energy_actual_fe": Total energy computed with ground truth Fermi energy.
+            - "fermi_energy": Fermi energy.
+            - "density": Electron density.
+            - "density_relative": Rlectron density (MAPE).
+            - "dos": Density of states.
+            - "dos_relative": Density of states (MAPE).
+            
+    validate_on_training_data : bool
+        Whether to validate on the training data as well. Default is False.
+        
+    validate_every_n_epochs : int
+        Determines how often validation is performed. Default is 1.
 
     inference_data_grid : list
         List holding the grid to be used for inference in the form of
@@ -728,12 +750,11 @@ class ParametersRunning(ParametersBase):
     def __init__(self):
         super(ParametersRunning, self).__init__()
         self.optimizer = "Adam"
-        self.learning_rate = 10 ** (-5)
+        self.learning_rate = 0.5
         self.learning_rate_embedding = 10 ** (-4)
         self.max_number_epochs = 100
         self.verbosity = True
         self.mini_batch_size = 10
-        self.snapshots_per_epoch = -1
 
         self.l1_regularization = 0.0
         self.l2_regularization = 0.0
@@ -752,7 +773,6 @@ class ParametersRunning(ParametersBase):
         self.num_workers = 0
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
-        self.checkpoint_best_so_far = False
         self.checkpoint_name = "checkpoint_mala"
         self.run_name = ""
         self.logging_dir = "./mala_logging"
@@ -883,7 +903,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
               that _xxx is only so that optuna will differentiate between
               variables. No reordering is performed by MALA; the order
               depends on the order in the list. _xxx can be essentially
-              anything.
+              anything.use_graphs
 
         Users normally don't have to fill this list by hand, the hyperparamer
         optimizer provide interfaces for this task.
