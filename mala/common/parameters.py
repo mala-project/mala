@@ -903,7 +903,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
               that _xxx is only so that optuna will differentiate between
               variables. No reordering is performed by MALA; the order
               depends on the order in the list. _xxx can be essentially
-              anything.use_graphs
+              anything.
 
         Users normally don't have to fill this list by hand, the hyperparamer
         optimizer provide interfaces for this task.
