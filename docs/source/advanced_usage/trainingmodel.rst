@@ -194,22 +194,64 @@ keyword, you can fine-tune the number of new snapshots being created.
 By default, the same number of snapshots as had been provided will be created
 (if possible).
 
-Using tensorboard
+Logging metrics during training
 ******************
 
-Training routines in MALA can be visualized via tensorboard, as also shown
-in the file ``advanced/ex03_tensor_board``. Simply enable tensorboard
-visualization prior to training via
+Training progress in MALA can be visualized via tensorboard or wandb, as also shown
+in the file ``advanced/ex03_tensor_board``. Simply select a logger prior to training as
 
       .. code-block:: python
 
-            # 0: No visualizatuon, 1: loss and learning rate, 2: like 1,
-            # but additionally weights and biases are saved
-            parameters.running.logging = 1
+            parameters.running.logger = "tensorboard"
+            parameters.running.logging_dir = "mala_vis"
+
+or
+
+      .. code-block:: python
+
+            import wandb
+            wandb.init(
+                  project="mala_training",
+                  entity="your_wandb_entity"
+            )
+            parameters.running.logger = "wandb"
             parameters.running.logging_dir = "mala_vis"
 
 where ``logging_dir`` specifies some directory in which to save the
-MALA logging data. Afterwards, you can run the training without any
+MALA logging data. You can also select which metrics to record via
+
+      .. code-block:: python
+
+            parameters.validation_metrics = ["ldos", "dos", "density", "total_energy"]
+
+Full list of available metrics:
+      - "ldos": MSE of the LDOS.
+      - "band_energy": Band energy.
+      - "band_energy_actual_fe": Band energy computed with ground truth Fermi energy.
+      - "total_energy": Total energy.
+      - "total_energy_actual_fe": Total energy computed with ground truth Fermi energy.
+      - "fermi_energy": Fermi energy.
+      - "density": Electron density.
+      - "density_relative": Rlectron density (Mean Absolute Percentage Error).
+      - "dos": Density of states.
+      - "dos_relative": Density of states (Mean Absolute Percentage Error).
+
+To save time and resources you can specify the logging interval via
+
+      .. code-block:: python
+
+            parameters.running.validate_every_n_epochs = 10
+
+If you want to monitor the degree to which the model overfits to the training data,
+you can use the option
+
+      .. code-block:: python
+            
+            parameters.running.validate_on_training_data = True
+
+MALA will evaluate the validation metrics on the training set as well as the validation set.
+
+Afterwards, you can run the training without any
 other modifications. Once training is finished (or during training, in case
 you want to use tensorboard to monitor progress), you can launch tensorboard
 via
@@ -221,6 +263,7 @@ via
 The full path for ``path_to_log_directory`` can be accessed via
 ``trainer.full_logging_path``.
 
+If you're using wandb, you can monitor the training progress on the wandb website.
 
 Training in parallel
 ********************
