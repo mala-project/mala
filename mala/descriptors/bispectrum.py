@@ -171,11 +171,17 @@ class Bispectrum(Descriptor):
             if self.parameters._configuration["mpi"]:
                 if self.parameters.use_z_splitting:
                     self.parameters.lammps_compute_file = os.path.join(
-                        filepath, "in.bgridlocal.python"
+                        filepath,
+                        "in.bgridlocal_n{0}.python".format(
+                            len(set(self.atoms.numbers))
+                        ),
                     )
                 else:
                     self.parameters.lammps_compute_file = os.path.join(
-                        filepath, "in.bgridlocal_defaultproc.python"
+                        filepath,
+                        "in.bgridlocal_defaultproc_n{0}.python".format(
+                            len(set(self.atoms.numbers))
+                        ),
                     )
             else:
                 self.parameters.lammps_compute_file = os.path.join(
@@ -184,7 +190,6 @@ class Bispectrum(Descriptor):
                         len(set(self.atoms.numbers))
                     ),
                 )
-
         # Do the LAMMPS calculation and clean up.
         lmp.file(self.parameters.lammps_compute_file)
 
