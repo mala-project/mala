@@ -305,7 +305,10 @@ class DataHandler(DataHandlerBase):
     ######################
 
     def raw_numpy_to_converted_scaled_tensor(
-        self, numpy_array, data_type, units, convert3Dto1D=False
+        self,
+        numpy_array,
+        data_type,
+        units,
     ):
         """
         Transform a raw numpy array into a scaled torch tensor.
@@ -322,9 +325,6 @@ class DataHandler(DataHandlerBase):
             processed.
         units : string
             Units of the data that is processed.
-        convert3Dto1D : bool
-            If True (default: False), then a (x,y,z,dim) array is transformed
-            into a (x*y*z,dim) array.
 
         Returns
         -------
@@ -343,12 +343,12 @@ class DataHandler(DataHandlerBase):
         )
 
         # If desired, the dimensions can be changed.
-        if convert3Dto1D:
+        if len(np.shape(numpy_array)) == 4:
             if data_type == "in":
                 data_dimension = self.input_dimension
             else:
                 data_dimension = self.output_dimension
-            grid_size = np.prod(numpy_array[0:3])
+            grid_size = np.prod(np.shape(numpy_array)[0:3])
             desired_dimensions = [grid_size, data_dimension]
         else:
             desired_dimensions = None
