@@ -11,7 +11,8 @@ SUBROUTINE initialize(file_name, y_planes_in, calculate_eigts_in)
   USE mp_global,         ONLY : mp_startup
   USE mp,                ONLY : mp_size
   USE read_input,        ONLY : read_input_file
-  USE command_line_options, ONLY: input_file_, command_line, ndiag_, nyfft_
+  USE command_line_options, ONLY: input_file_, command_line, ndiag_, nyfft_, &
+          pencil_decomposition_
   !
   IMPLICIT NONE
   CHARACTER(len=256) :: srvaddress
@@ -37,9 +38,9 @@ SUBROUTINE initialize(file_name, y_planes_in, calculate_eigts_in)
   IF (PRESENT(y_planes_in)) THEN
     IF (y_planes_in > 1) THEN
       nyfft_ = y_planes_in
+      pencil_decomposition_ = .true.
     ENDIF
   ENDIF
-
   !! checks if first string is contained in the second
   !
   CALL mp_startup ( start_images=.true., images_only=.true.)
