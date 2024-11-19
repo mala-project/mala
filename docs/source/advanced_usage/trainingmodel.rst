@@ -195,7 +195,7 @@ By default, the same number of snapshots as had been provided will be created
 (if possible).
 
 Logging metrics during training
-******************
+*******************************
 
 Training progress in MALA can be visualized via tensorboard or wandb, as also shown
 in the file ``advanced/ex03_tensor_board``. Simply select a logger prior to training as

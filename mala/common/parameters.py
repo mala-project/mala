@@ -713,7 +713,7 @@ class ParametersRunning(ParametersBase):
     validation_metrics : list
         List of metrics to be used for validation. Default is ["ldos"].
         Possible options are:
-            - "ldos": Loss on the LDOS.
+            - "ldos": MSE of the LDOS.
             - "band_energy": Band energy.
             - "band_energy_actual_fe": Band energy computed with ground truth Fermi energy.
             - "total_energy": Total energy.
@@ -743,8 +743,8 @@ class ParametersRunning(ParametersBase):
 
     profiler_range : list
         List with two entries determining with which batch/iteration number
-         the CUDA profiler will start and stop profiling. Please note that
-         this option only holds significance if the nsys profiler is used.
+        the CUDA profiler will start and stop profiling. Please note that
+        this option only holds significance if the nsys profiler is used.
     """
 
     def __init__(self):
