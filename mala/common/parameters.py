@@ -556,11 +556,6 @@ class ParametersData(ParametersBase):
 
     Attributes
     ----------
-    descriptors_contain_xyz : bool
-        Legacy option. If True, it is assumed that the first three entries of
-        the descriptor vector are the xyz coordinates and they are cut from the
-        descriptor vector. If False, no such cutting is peformed.
-
     snapshot_directories_list : list
         A list of all added snapshots.
 
@@ -1186,9 +1181,6 @@ class Parameters:
     hyperparameters : ParametersHyperparameterOptimization
         Parameters used for hyperparameter optimization.
 
-    debug : ParametersDebug
-        Container for all debugging parameters.
-
     manual_seed: int
         If not none, this value is used as manual seed for the neural networks.
         Can be used to make experiments comparable. Default: None.
@@ -1220,6 +1212,7 @@ class Parameters:
         # different.
         self.openpmd_granularity = 1
         self.use_lammps = True
+        self.use_atomic_density_formula = False
 
     @property
     def openpmd_granularity(self):
@@ -1597,6 +1590,18 @@ class Parameters:
                         json_dict[key]["_parameters_type"]
                     ].from_json(json_dict[key])
                     setattr(loaded_parameters, key, sub_parameters)
+
+                    # Backwards compatability:
+                    if key == "descriptors":
+                        if (
+                            "use_atomic_density_energy_formula"
+                            in json_dict[key]
+                        ):
+                            loaded_parameters.use_atomic_density_formula = (
+                                json_dict[key][
+                                    "use_atomic_density_energy_formula"
+                                ]
+                            )
 
             # We iterate a second time, to set global values, so that they
             # are properly forwarded.
