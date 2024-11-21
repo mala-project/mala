@@ -222,7 +222,10 @@
             <span class="c1"># if the number of new snapshots is not a divisor of the grid size</span>
             <span class="c1"># then we have to trim the original snapshots to size</span>
             <span class="c1"># the indicies to be removed are selected at random</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="p">):</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">)</span>
                 <span class="n">ngrid</span> <span class="o">=</span> <span class="p">(</span>
@@ -638,74 +641,64 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">number_of_shuffled_snapshots</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">number_of_shuffled_snapshots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_snapshots</span>
-        <span class="n">number_of_new_snapshots</span> <span class="o">=</span> <span class="n">number_of_shuffled_snapshots</span>
 
-        <span class="k">if</span> <span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">math</span>
-            <span class="kn">import</span> <span class="nn">functools</span>
-
-            <span class="n">specified_number_of_new_snapshots</span> <span class="o">=</span> <span class="n">number_of_new_snapshots</span>
-            <span class="n">number_of_new_snapshots</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span>
-                <span class="n">math</span><span class="o">.</span><span class="n">gcd</span><span class="p">,</span>
+        <span class="c1"># Currently, the openPMD interface is not feature-complete.</span>
+        <span class="k">if</span> <span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
                 <span class="p">[</span>
-                    <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="n">number_of_shuffled_snapshots</span>
                     <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span>
-                <span class="p">],</span>
-                <span class="n">number_of_new_snapshots</span><span class="p">,</span>
+                <span class="p">]</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">number_of_new_snapshots</span> <span class="o">!=</span> <span class="n">specified_number_of_new_snapshots</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;[openPMD shuffling] Reduced the number of output snapshots to &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">number_of_new_snapshots</span><span class="si">}</span><span class="s2"> because of the dataset dimensions.&quot;</span>
-                <span class="p">)</span>
-            <span class="k">del</span> <span class="n">specified_number_of_new_snapshots</span>
-        <span class="k">elif</span> <span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
-            <span class="c1"># Implement all of the below for OpenPMD later.</span>
-            <span class="c1"># We need to check if we need to reduce the overall grid size</span>
-            <span class="c1"># because the individual snapshots may not contain enough data</span>
-            <span class="c1"># points</span>
-            <span class="n">shuffled_gridsizes</span> <span class="o">=</span> <span class="n">snapshot_size_list</span> <span class="o">//</span> <span class="n">number_of_new_snapshots</span>
+            <span class="o">!=</span> <span class="mi">0</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Shuffling from OpenPMD files currently only &quot;</span>
+                <span class="s2">&quot;supported if first dimension of all snapshots &quot;</span>
+                <span class="s2">&quot;can evenly be divided by number of snapshots. &quot;</span>
+                <span class="s2">&quot;Please select a different number of shuffled &quot;</span>
+                <span class="s2">&quot;snapshots or use the numpy interface. &quot;</span>
+            <span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">snapshot_size_list</span><span class="p">)</span>
-                <span class="o">-</span> <span class="p">(</span>
-                    <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">snapshot_size_list</span><span class="p">)</span> <span class="o">//</span> <span class="n">number_of_new_snapshots</span><span class="p">)</span>
-                    <span class="o">*</span> <span class="n">number_of_new_snapshots</span>
-                <span class="p">)</span>
-                <span class="o">&gt;</span> <span class="mi">0</span>
-            <span class="p">):</span>
-                <span class="n">number_of_data_points</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">shuffled_gridsizes</span><span class="p">)</span> <span class="o">*</span> <span class="n">number_of_new_snapshots</span>
-                <span class="p">)</span>
+        <span class="n">shuffled_gridsizes</span> <span class="o">=</span> <span class="n">snapshot_size_list</span> <span class="o">//</span> <span class="n">number_of_shuffled_snapshots</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_snapshots</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">snapshot_size_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                    <span class="o">-</span> <span class="n">shuffled_gridsizes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">number_of_new_snapshots</span>
-                <span class="p">)</span>
-            <span class="n">tot_points_missing</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">snapshot_size_list</span><span class="p">)</span>
+            <span class="o">-</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">snapshot_size_list</span><span class="p">)</span> <span class="o">//</span> <span class="n">number_of_shuffled_snapshots</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">number_of_shuffled_snapshots</span>
+            <span class="p">)</span>
+            <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="p">):</span>
+            <span class="n">number_of_data_points</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">shuffled_gridsizes</span><span class="p">)</span> <span class="o">*</span> <span class="n">number_of_shuffled_snapshots</span>
+            <span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">tot_points_missing</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">printout</span><span class="p">(</span>
-                    <span class="s2">&quot;Warning: number of requested snapshots is not a divisor of&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;the original grid sizes.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tot_points_missing</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">number_of_data_points</span><span class="si">}</span><span class="s2"> data points&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;will be left out of the shuffled snapshots.&quot;</span><span class="p">,</span>
-                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_snapshots</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">snapshot_size_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="o">-</span> <span class="n">shuffled_gridsizes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">number_of_shuffled_snapshots</span>
+            <span class="p">)</span>
+        <span class="n">tot_points_missing</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span><span class="p">)</span>
 
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid snapshot type.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tot_points_missing</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;Warning: number of requested snapshots is not a divisor of&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;the original grid sizes.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tot_points_missing</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">number_of_data_points</span><span class="si">}</span><span class="s2"> data points&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;will be left out of the shuffled snapshots.&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="n">shuffle_dimensions</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="nb">int</span><span class="p">(</span><span class="n">number_of_data_points</span> <span class="o">/</span> <span class="n">number_of_new_snapshots</span><span class="p">),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">number_of_data_points</span> <span class="o">/</span> <span class="n">number_of_shuffled_snapshots</span><span class="p">),</span>
             <span class="mi">1</span><span class="p">,</span>
             <span class="mi">1</span><span class="p">,</span>
         <span class="p">]</span>
 
         <span class="n">printout</span><span class="p">(</span>
             <span class="s2">&quot;Data shuffler will generate&quot;</span><span class="p">,</span>
-            <span class="n">number_of_new_snapshots</span><span class="p">,</span>
+            <span class="n">number_of_shuffled_snapshots</span><span class="p">,</span>
             <span class="s2">&quot;new snapshots.&quot;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Shuffled snapshot dimension will be &quot;</span><span class="p">,</span> <span class="n">shuffle_dimensions</span><span class="p">)</span>
@@ -713,7 +706,7 @@
         <span class="c1"># Prepare permutations.</span>
         <span class="n">permutations</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">seeds</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_new_snapshots</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_shuffled_snapshots</span><span class="p">):</span>
             <span class="c1"># This makes the shuffling deterministic, if specified by the user.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">)</span>
@@ -723,7 +716,7 @@
 
         <span class="k">if</span> <span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__shuffle_numpy</span><span class="p">(</span>
-                <span class="n">number_of_new_snapshots</span><span class="p">,</span>
+                <span class="n">number_of_shuffled_snapshots</span><span class="p">,</span>
                 <span class="n">shuffle_dimensions</span><span class="p">,</span>
                 <span class="n">descriptor_save_path</span><span class="p">,</span>
                 <span class="n">save_name</span><span class="p">,</span>
@@ -742,7 +735,7 @@
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__shuffle_openpmd</span><span class="p">(</span>
                 <span class="n">descriptor</span><span class="p">,</span>
-                <span class="n">number_of_new_snapshots</span><span class="p">,</span>
+                <span class="n">number_of_shuffled_snapshots</span><span class="p">,</span>
                 <span class="n">shuffle_dimensions</span><span class="p">,</span>
                 <span class="n">save_name</span><span class="p">,</span>
                 <span class="n">permutations</span><span class="p">,</span>
@@ -758,7 +751,7 @@
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__shuffle_openpmd</span><span class="p">(</span>
                 <span class="n">target</span><span class="p">,</span>
-                <span class="n">number_of_new_snapshots</span><span class="p">,</span>
+                <span class="n">number_of_shuffled_snapshots</span><span class="p">,</span>
                 <span class="n">shuffle_dimensions</span><span class="p">,</span>
                 <span class="n">save_name</span><span class="p">,</span>
                 <span class="n">permutations</span><span class="p">,</span>
