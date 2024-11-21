@@ -40,6 +40,7 @@ class ParametersBase(JSONSerializable):
             "openpmd_configuration": {},
             "openpmd_granularity": 1,
             "lammps": True,
+            "atomic_density_formula": False,
         }
         pass
 
@@ -1278,6 +1279,12 @@ class Parameters:
                     "GPU requested, but no GPU found. MALA will "
                     "operate with CPU only."
                 )
+        if self._use_gpu and self.use_lammps:
+            printout(
+                "Enabling atomic density formula because LAMMPS and GPU "
+                "are used."
+            )
+            self.use_atomic_density_formula = True
 
         # Invalidate, will be updated in setter.
         self.device = None
@@ -1391,6 +1398,12 @@ class Parameters:
     @use_lammps.setter
     def use_lammps(self, value):
         self._use_lammps = value
+        if self.use_gpu and value:
+            printout(
+                "Enabling atomic density formula because LAMMPS and GPU "
+                "are used."
+            )
+            self.use_atomic_density_formula = True
         self.network._update_lammps(self.use_lammps)
         self.descriptors._update_lammps(self.use_lammps)
         self.targets._update_lammps(self.use_lammps)
@@ -1657,6 +1670,13 @@ class Parameters:
                         setattr(loaded_parameters, key, json_dict[key])
             if no_snapshots is True:
                 loaded_parameters.data.snapshot_directories_list = []
+            # Backwards compatability: since the transfer of old property
+            # to new property happens _before_ all children descriptor classes
+            # are instantiated, it is not properly propagated. Thus, we
+            # simply have to set it to its own value again.
+            loaded_parameters.use_atomic_density_formula = (
+                loaded_parameters.use_atomic_density_formula
+            )
         else:
             raise Exception("Unsupported parameter save format.")
 

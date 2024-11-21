@@ -1199,7 +1199,7 @@ class Density(Target):
         )
         barrier()
 
-        if self.self.parameters._configuration["atomic_density_formula"]:
+        if self.parameters._configuration["atomic_density_formula"]:
             t0 = time.perf_counter()
             gaussian_descriptors = np.reshape(
                 gaussian_descriptors,
