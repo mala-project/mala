@@ -168,9 +168,11 @@ Gaussian representation of atomic positions. In this algorithm, most of the
 computational overhead of the total energy calculation is offloaded to the
 computation of this Gaussian representation. This calculation is realized via
 LAMMPS and can therefore be GPU accelerated (parallelized) in the same fashion
-as the bispectrum descriptor calculation. Simply activate this option via</p>
+as the bispectrum descriptor calculation. If a GPU is activated (and LAMMPS
+is available), this option will be used by default. It can also manually be
+activated via</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_atomic_density_energy_formula</span> <span class="o">=</span> <span class="kc">True</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">use_atomic_density_formula</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
 </div></blockquote>

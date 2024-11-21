@@ -1266,7 +1266,7 @@
         <span class="c1"># instantiate the process with the file.</span>
         <span class="n">positions_for_qe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_scaled_positions_for_qe</span><span class="p">(</span><span class="n">atoms_Angstrom</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_atomic_density_energy_formula</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;atomic_density_formula&quot;</span><span class="p">]:</span>
             <span class="c1"># Calculate the Gaussian descriptors for the calculation of the</span>
             <span class="c1"># structure factors.</span>
             <span class="n">barrier</span><span class="p">()</span>
@@ -1335,8 +1335,8 @@
         <span class="n">te</span><span class="o">.</span><span class="n">set_positions</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">positions_for_qe</span><span class="p">),</span>
             <span class="n">number_of_atoms</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_atomic_density_energy_formula</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_atomic_density_energy_formula</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;atomic_density_formula&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;atomic_density_formula&quot;</span><span class="p">],</span>
         <span class="p">)</span>
         <span class="n">barrier</span><span class="p">()</span>
         <span class="n">printout</span><span class="p">(</span>
@@ -1347,7 +1347,7 @@
         <span class="p">)</span>
         <span class="n">barrier</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_atomic_density_energy_formula</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;atomic_density_formula&quot;</span><span class="p">]:</span>
             <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
             <span class="n">gaussian_descriptors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
                 <span class="n">gaussian_descriptors</span><span class="p">,</span>

@@ -193,17 +193,6 @@ quantites.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.Parameters.debug">
-<span class="sig-name descname"><span class="pre">debug</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.debug" title="Link to this definition"></a></dt>
-<dd><p>Container for all debugging parameters.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ParametersDebug</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.Parameters.manual_seed">
 <span class="sig-name descname"><span class="pre">manual_seed</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.manual_seed" title="Link to this definition"></a></dt>
 <dd><p>If not none, this value is used as manual seed for the neural networks.
@@ -372,27 +361,45 @@ automatically be set to the feature dimension upon loading.</p>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="mala.common.parameters.Parameters.use_atomic_density_formula">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_atomic_density_formula</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.use_atomic_density_formula" title="Link to this definition"></a></dt>
+<dd><p>Control whether to use the atomic density formula.</p>
+<p>This formula uses as a Gaussian representation of the atomic density
+to calculate the structure factor and with it, the Ewald energy
+and parts of the exchange-correlation energy. By using it, one can
+go from N^2 to NlogN scaling, and offloads most of the computational
+overhead of energy calculation from QE to LAMMPS. This is beneficial
+since LAMMPS can benefit from GPU acceleration (QE GPU acceleration
+is not used in the portion of the QE code MALA employs). If set
+to True, this means MALA will perform another LAMMPS calculation
+during inference. The hyperparameters for this atomic density
+calculation are set via the parameters.descriptors object.
+Default is False, except for when both use_gpu and use_lammps
+are True, in which case this value will be set to True as well.</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="mala.common.parameters.Parameters.use_ddp">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_ddp</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.use_ddp" title="Link to this definition"></a></dt>
-<dd><p>Control whether or not dd is used for parallel training.</p>
+<dd><p>Control whether ddp is used for parallel training.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.common.parameters.Parameters.use_gpu">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_gpu</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.use_gpu" title="Link to this definition"></a></dt>
-<dd><p>Control whether or not a GPU is used (provided there is one).</p>
+<dd><p>Control whether a GPU is used (provided there is one).</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.common.parameters.Parameters.use_lammps">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_lammps</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.use_lammps" title="Link to this definition"></a></dt>
-<dd><p>Control whether or not to use LAMMPS for descriptor calculation.</p>
+<dd><p>Control whether to use LAMMPS for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.common.parameters.Parameters.use_mpi">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_mpi</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.use_mpi" title="Link to this definition"></a></dt>
-<dd><p>Control whether or not MPI is used for paralle inference.</p>
+<dd><p>Control whether MPI is used for paralle inference.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -467,19 +474,6 @@ shows itself.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ParametersData</span></span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParametersBase</span></code></a></p>
 <p>Parameters necessary for loading and preprocessing data.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersData.descriptors_contain_xyz">
-<span class="sig-name descname"><span class="pre">descriptors_contain_xyz</span></span><a class="headerlink" href="#mala.common.parameters.ParametersData.descriptors_contain_xyz" title="Link to this definition"></a></dt>
-<dd><p>Legacy option. If True, it is assumed that the first three entries of
-the descriptor vector are the xyz coordinates and they are cut from the
-descriptor vector. If False, no such cutting is peformed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersData.snapshot_directories_list">
 <span class="sig-name descname"><span class="pre">snapshot_directories_list</span></span><a class="headerlink" href="#mala.common.parameters.ParametersData.snapshot_directories_list" title="Link to this definition"></a></dt>
@@ -829,19 +823,6 @@ descriptor vector. If False, no such cutting is peformed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.use_atomic_density_energy_formula">
-<span class="sig-name descname"><span class="pre">use_atomic_density_energy_formula</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.use_atomic_density_energy_formula" title="Link to this definition"></a></dt>
-<dd><p>If True, Gaussian descriptors will be calculated for the
-calculation of the Ewald sum as part of the total energy module.
-Default is False.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>

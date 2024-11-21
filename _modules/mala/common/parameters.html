@@ -125,6 +125,7 @@
             <span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">:</span> <span class="p">{},</span>
             <span class="s2">&quot;openpmd_granularity&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
             <span class="s2">&quot;lammps&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;atomic_density_formula&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">pass</span>
 
@@ -175,6 +176,11 @@
 
     <span class="k">def</span> <span class="nf">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_lammps</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;lammps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_lammps</span>
+
+    <span class="k">def</span> <span class="nf">_update_atomic_density_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_atomic_density_formula</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;atomic_density_formula&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">new_atomic_density_formula</span>
+        <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_member_to_json</span><span class="p">(</span><span class="n">member</span><span class="p">):</span>
@@ -422,11 +428,6 @@
 
 <span class="sd">    atomic_density_sigma : float</span>
 <span class="sd">        Sigma used for the calculation of the Gaussian descriptors.</span>
-
-<span class="sd">    use_atomic_density_energy_formula : bool</span>
-<span class="sd">        If True, Gaussian descriptors will be calculated for the</span>
-<span class="sd">        calculation of the Ewald sum as part of the total energy module.</span>
-<span class="sd">        Default is False.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -456,7 +457,6 @@
         <span class="c1"># atomic density may be used at the same time, if e.g. bispectrum</span>
         <span class="c1"># descriptors are used for a full inference, which then uses the atomic</span>
         <span class="c1"># density for the calculation of the Ewald sum.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_atomic_density_energy_formula</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atomic_density_sigma</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atomic_density_cutoff</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -662,11 +662,6 @@
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    descriptors_contain_xyz : bool</span>
-<span class="sd">        Legacy option. If True, it is assumed that the first three entries of</span>
-<span class="sd">        the descriptor vector are the xyz coordinates and they are cut from the</span>
-<span class="sd">        descriptor vector. If False, no such cutting is peformed.</span>
-
 <span class="sd">    snapshot_directories_list : list</span>
 <span class="sd">        A list of all added snapshots.</span>
 
@@ -1307,9 +1302,6 @@
 <span class="sd">    hyperparameters : ParametersHyperparameterOptimization</span>
 <span class="sd">        Parameters used for hyperparameter optimization.</span>
 
-<span class="sd">    debug : ParametersDebug</span>
-<span class="sd">        Container for all debugging parameters.</span>
-
 <span class="sd">    manual_seed: int</span>
 <span class="sd">        If not none, this value is used as manual seed for the neural networks.</span>
 <span class="sd">        Can be used to make experiments comparable. Default: None.</span>
@@ -1341,6 +1333,7 @@
         <span class="c1"># different.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">openpmd_granularity</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_atomic_density_formula</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">openpmd_granularity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1392,7 +1385,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_gpu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether or not a GPU is used (provided there is one).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether a GPU is used (provided there is one).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_gpu</span>
 
     <span class="nd">@use_gpu</span><span class="o">.</span><span class="n">setter</span>
@@ -1407,6 +1400,12 @@
                     <span class="s2">&quot;GPU requested, but no GPU found. MALA will &quot;</span>
                     <span class="s2">&quot;operate with CPU only.&quot;</span>
                 <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_gpu</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span><span class="p">:</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;Enabling atomic density formula because LAMMPS and GPU &quot;</span>
+                <span class="s2">&quot;are used.&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">use_atomic_density_formula</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># Invalidate, will be updated in setter.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1419,7 +1418,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether or not dd is used for parallel training.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether ddp is used for parallel training.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_ddp</span>
 
     <span class="nd">@use_ddp</span><span class="o">.</span><span class="n">setter</span>
@@ -1470,7 +1469,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether or not MPI is used for paralle inference.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether MPI is used for paralle inference.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_mpi</span>
 
     <span class="nd">@use_mpi</span><span class="o">.</span><span class="n">setter</span>
@@ -1514,18 +1513,66 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether or not to use LAMMPS for descriptor calculation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether to use LAMMPS for descriptor calculation.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_lammps</span>
 
     <span class="nd">@use_lammps</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">use_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_use_lammps</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_gpu</span> <span class="ow">and</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;Enabling atomic density formula because LAMMPS and GPU &quot;</span>
+                <span class="s2">&quot;are used.&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">use_atomic_density_formula</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">use_atomic_density_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether to use the atomic density formula.</span>
+
+<span class="sd">        This formula uses as a Gaussian representation of the atomic density</span>
+<span class="sd">        to calculate the structure factor and with it, the Ewald energy</span>
+<span class="sd">        and parts of the exchange-correlation energy. By using it, one can</span>
+<span class="sd">        go from N^2 to NlogN scaling, and offloads most of the computational</span>
+<span class="sd">        overhead of energy calculation from QE to LAMMPS. This is beneficial</span>
+<span class="sd">        since LAMMPS can benefit from GPU acceleration (QE GPU acceleration</span>
+<span class="sd">        is not used in the portion of the QE code MALA employs). If set</span>
+<span class="sd">        to True, this means MALA will perform another LAMMPS calculation</span>
+<span class="sd">        during inference. The hyperparameters for this atomic density</span>
+<span class="sd">        calculation are set via the parameters.descriptors object.</span>
+<span class="sd">        Default is False, except for when both use_gpu and use_lammps</span>
+<span class="sd">        are True, in which case this value will be set to True as well.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_atomic_density_formula</span>
+
+    <span class="nd">@use_atomic_density_formula</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">use_atomic_density_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_atomic_density_formula</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">_update_atomic_density_formula</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">use_atomic_density_formula</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_update_atomic_density_formula</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">use_atomic_density_formula</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">_update_atomic_density_formula</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">use_atomic_density_formula</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_update_atomic_density_formula</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">use_atomic_density_formula</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">_update_atomic_density_formula</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">use_atomic_density_formula</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_atomic_density_formula</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">use_atomic_density_formula</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="Parameters.show">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.show">[docs]</a>
@@ -1736,6 +1783,18 @@
                     <span class="p">]</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="n">loaded_parameters</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">sub_parameters</span><span class="p">)</span>
 
+                    <span class="c1"># Backwards compatability:</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;descriptors&quot;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="p">(</span>
+                            <span class="s2">&quot;use_atomic_density_energy_formula&quot;</span>
+                            <span class="ow">in</span> <span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                        <span class="p">):</span>
+                            <span class="n">loaded_parameters</span><span class="o">.</span><span class="n">use_atomic_density_formula</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span>
+                                    <span class="s2">&quot;use_atomic_density_energy_formula&quot;</span>
+                                <span class="p">]</span>
+                            <span class="p">)</span>
+
             <span class="c1"># We iterate a second time, to set global values, so that they</span>
             <span class="c1"># are properly forwarded.</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">json_dict</span><span class="p">:</span>
@@ -1749,6 +1808,13 @@
                         <span class="nb">setattr</span><span class="p">(</span><span class="n">loaded_parameters</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">no_snapshots</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="n">loaded_parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">snapshot_directories_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># Backwards compatability: since the transfer of old property</span>
+            <span class="c1"># to new property happens _before_ all children descriptor classes</span>
+            <span class="c1"># are instantiated, it is not properly propagated. Thus, we</span>
+            <span class="c1"># simply have to set it to its own value again.</span>
+            <span class="n">loaded_parameters</span><span class="o">.</span><span class="n">use_atomic_density_formula</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">loaded_parameters</span><span class="o">.</span><span class="n">use_atomic_density_formula</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported parameter save format.&quot;</span><span class="p">)</span>
 
