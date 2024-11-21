@@ -81,7 +81,9 @@ Gaussian representation of atomic positions. In this algorithm, most of the
 computational overhead of the total energy calculation is offloaded to the
 computation of this Gaussian representation. This calculation is realized via
 LAMMPS and can therefore be GPU accelerated (parallelized) in the same fashion
-as the bispectrum descriptor calculation. Simply activate this option via
+as the bispectrum descriptor calculation. If a GPU is activated (and LAMMPS
+is available), this option will be used by default. It can also manually be
+activated via
 
     .. code-block:: python
 
