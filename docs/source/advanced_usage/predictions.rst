@@ -85,7 +85,7 @@ as the bispectrum descriptor calculation. Simply activate this option via
 
     .. code-block:: python
 
-        parameters.descriptors.use_atomic_density_energy_formula = True
+        parameters.use_atomic_density_formula = True
 
 The Gaussian representation algorithm is describe in
 the publication `Predicting electronic structures at any length scale with machine learning <doi.org/10.1038/s41524-023-01070-z>`_.

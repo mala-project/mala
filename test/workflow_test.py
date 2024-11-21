@@ -500,7 +500,7 @@ class TestFullWorkflow:
         )
         ldos_calculator.read_from_array(predicted_ldos)
         total_energy_traditional = ldos_calculator.total_energy
-        parameters.descriptors.use_atomic_density_energy_formula = True
+        parameters.use_atomic_density_formula = True
         ldos_calculator.read_from_array(predicted_ldos)
         total_energy_atomic_density = ldos_calculator.total_energy
         assert np.isclose(

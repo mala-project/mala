@@ -88,6 +88,11 @@ class ParametersBase(JSONSerializable):
     def _update_lammps(self, new_lammps):
         self._configuration["lammps"] = new_lammps
 
+    def _update_atomic_density_formula(self, new_atomic_density_formula):
+        self._configuration["atomic_density_formula"] = (
+            new_atomic_density_formula
+        )
+
     @staticmethod
     def _member_to_json(member):
         if isinstance(member, (int, float, type(None), str)):
@@ -322,11 +327,6 @@ class ParametersDescriptors(ParametersBase):
 
     atomic_density_sigma : float
         Sigma used for the calculation of the Gaussian descriptors.
-
-    use_atomic_density_energy_formula : bool
-        If True, Gaussian descriptors will be calculated for the
-        calculation of the Ewald sum as part of the total energy module.
-        Default is False.
     """
 
     def __init__(self):
@@ -356,7 +356,6 @@ class ParametersDescriptors(ParametersBase):
         # atomic density may be used at the same time, if e.g. bispectrum
         # descriptors are used for a full inference, which then uses the atomic
         # density for the calculation of the Ewald sum.
-        self.use_atomic_density_energy_formula = False
         self.atomic_density_sigma = None
         self.atomic_density_cutoff = None
 
@@ -1264,7 +1263,7 @@ class Parameters:
 
     @property
     def use_gpu(self):
-        """Control whether or not a GPU is used (provided there is one)."""
+        """Control whether a GPU is used (provided there is one)."""
         return self._use_gpu
 
     @use_gpu.setter
@@ -1291,7 +1290,7 @@ class Parameters:
 
     @property
     def use_ddp(self):
-        """Control whether or not dd is used for parallel training."""
+        """Control whether ddp is used for parallel training."""
         return self._use_ddp
 
     @use_ddp.setter
@@ -1342,7 +1341,7 @@ class Parameters:
 
     @property
     def use_mpi(self):
-        """Control whether or not MPI is used for paralle inference."""
+        """Control whether MPI is used for paralle inference."""
         return self._use_mpi
 
     @use_mpi.setter
@@ -1386,7 +1385,7 @@ class Parameters:
 
     @property
     def use_lammps(self):
-        """Control whether or not to use LAMMPS for descriptor calculation."""
+        """Control whether to use LAMMPS for descriptor calculation."""
         return self._use_lammps
 
     @use_lammps.setter
@@ -1398,6 +1397,48 @@ class Parameters:
         self.data._update_lammps(self.use_lammps)
         self.running._update_lammps(self.use_lammps)
         self.hyperparameters._update_lammps(self.use_lammps)
+
+    @property
+    def use_atomic_density_formula(self):
+        """Control whether to use the atomic density formula.
+
+        This formula uses as a Gaussian representation of the atomic density
+        to calculate the structure factor and with it, the Ewald energy
+        and parts of the exchange-correlation energy. By using it, one can
+        go from N^2 to NlogN scaling, and offloads most of the computational
+        overhead of energy calculation from QE to LAMMPS. This is beneficial
+        since LAMMPS can benefit from GPU acceleration (QE GPU acceleration
+        is not used in the portion of the QE code MALA employs). If set
+        to True, this means MALA will perform another LAMMPS calculation
+        during inference. The hyperparameters for this atomic density
+        calculation are set via the parameters.descriptors object.
+        Default is False, except for when both use_gpu and use_lammps
+        are True, in which case this value will be set to True as well.
+        """
+        return self._use_atomic_density_formula
+
+    @use_atomic_density_formula.setter
+    def use_atomic_density_formula(self, value):
+        self._use_atomic_density_formula = value
+
+        self.network._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.descriptors._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.targets._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.data._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.running._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.hyperparameters._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
 
     def show(self):
         """Print name and values of all attributes of this object."""

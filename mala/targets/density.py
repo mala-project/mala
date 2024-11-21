@@ -1118,7 +1118,7 @@ class Density(Target):
         # instantiate the process with the file.
         positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
 
-        if self._parameters_full.descriptors.use_atomic_density_energy_formula:
+        if self.parameters._configuration["atomic_density_formula"]:
             # Calculate the Gaussian descriptors for the calculation of the
             # structure factors.
             barrier()
@@ -1187,8 +1187,8 @@ class Density(Target):
         te.set_positions(
             np.transpose(positions_for_qe),
             number_of_atoms,
-            self._parameters_full.descriptors.use_atomic_density_energy_formula,
-            self._parameters_full.descriptors.use_atomic_density_energy_formula,
+            self.parameters._configuration["atomic_density_formula"],
+            self.parameters._configuration["atomic_density_formula"],
         )
         barrier()
         printout(
@@ -1199,7 +1199,7 @@ class Density(Target):
         )
         barrier()
 
-        if self._parameters_full.descriptors.use_atomic_density_energy_formula:
+        if self.self.parameters._configuration["atomic_density_formula"]:
             t0 = time.perf_counter()
             gaussian_descriptors = np.reshape(
                 gaussian_descriptors,
