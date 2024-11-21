@@ -553,7 +553,7 @@ class DataShuffler(DataHandlerBase):
             number_of_shuffled_snapshots = self.nr_snapshots
 
         # Currently, the openPMD interface is not feature-complete.
-        if np.any(
+        if snapshot_type == "openpmd" and np.any(
             np.array(
                 [
                     snapshot.grid_dimension[0] % number_of_shuffled_snapshots
