@@ -384,12 +384,6 @@ class HyperOptOptuna(HyperOpt):
 
             self._save_params_and_scaler()
 
-            # Next, we save all the other objects.
-            # Here some horovod stuff would have to go.
-            # But so far, the optuna implementation is not horovod-ready...
-            # if self.params.use_horovod:
-            #     if hvd.rank() != 0:
-            #         return
             # The study only has to be saved if the no RDB storage is used.
             if self.params.hyperparameters.rdb_storage is None:
                 hyperopt_name = (

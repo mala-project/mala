@@ -40,6 +40,7 @@ class ParametersBase(JSONSerializable):
             "openpmd_configuration": {},
             "openpmd_granularity": 1,
             "lammps": True,
+            "atomic_density_formula": False,
         }
         pass
 
@@ -87,6 +88,11 @@ class ParametersBase(JSONSerializable):
 
     def _update_lammps(self, new_lammps):
         self._configuration["lammps"] = new_lammps
+
+    def _update_atomic_density_formula(self, new_atomic_density_formula):
+        self._configuration["atomic_density_formula"] = (
+            new_atomic_density_formula
+        )
 
     @staticmethod
     def _member_to_json(member):
@@ -322,11 +328,6 @@ class ParametersDescriptors(ParametersBase):
 
     atomic_density_sigma : float
         Sigma used for the calculation of the Gaussian descriptors.
-
-    use_atomic_density_energy_formula : bool
-        If True, Gaussian descriptors will be calculated for the
-        calculation of the Ewald sum as part of the total energy module.
-        Default is False.
     """
 
     def __init__(self):
@@ -356,7 +357,6 @@ class ParametersDescriptors(ParametersBase):
         # atomic density may be used at the same time, if e.g. bispectrum
         # descriptors are used for a full inference, which then uses the atomic
         # density for the calculation of the Ewald sum.
-        self.use_atomic_density_energy_formula = False
         self.atomic_density_sigma = None
         self.atomic_density_cutoff = None
 
@@ -556,11 +556,6 @@ class ParametersData(ParametersBase):
 
     Attributes
     ----------
-    descriptors_contain_xyz : bool
-        Legacy option. If True, it is assumed that the first three entries of
-        the descriptor vector are the xyz coordinates and they are cut from the
-        descriptor vector. If False, no such cutting is peformed.
-
     snapshot_directories_list : list
         A list of all added snapshots.
 
@@ -1186,9 +1181,6 @@ class Parameters:
     hyperparameters : ParametersHyperparameterOptimization
         Parameters used for hyperparameter optimization.
 
-    debug : ParametersDebug
-        Container for all debugging parameters.
-
     manual_seed: int
         If not none, this value is used as manual seed for the neural networks.
         Can be used to make experiments comparable. Default: None.
@@ -1220,6 +1212,7 @@ class Parameters:
         # different.
         self.openpmd_granularity = 1
         self.use_lammps = True
+        self.use_atomic_density_formula = False
 
     @property
     def openpmd_granularity(self):
@@ -1271,7 +1264,7 @@ class Parameters:
 
     @property
     def use_gpu(self):
-        """Control whether or not a GPU is used (provided there is one)."""
+        """Control whether a GPU is used (provided there is one)."""
         return self._use_gpu
 
     @use_gpu.setter
@@ -1286,6 +1279,12 @@ class Parameters:
                     "GPU requested, but no GPU found. MALA will "
                     "operate with CPU only."
                 )
+        if self._use_gpu and self.use_lammps:
+            printout(
+                "Enabling atomic density formula because LAMMPS and GPU "
+                "are used."
+            )
+            self.use_atomic_density_formula = True
 
         # Invalidate, will be updated in setter.
         self.device = None
@@ -1298,7 +1297,7 @@ class Parameters:
 
     @property
     def use_ddp(self):
-        """Control whether or not dd is used for parallel training."""
+        """Control whether ddp is used for parallel training."""
         return self._use_ddp
 
     @use_ddp.setter
@@ -1349,7 +1348,7 @@ class Parameters:
 
     @property
     def use_mpi(self):
-        """Control whether or not MPI is used for paralle inference."""
+        """Control whether MPI is used for paralle inference."""
         return self._use_mpi
 
     @use_mpi.setter
@@ -1393,18 +1392,66 @@ class Parameters:
 
     @property
     def use_lammps(self):
-        """Control whether or not to use LAMMPS for descriptor calculation."""
+        """Control whether to use LAMMPS for descriptor calculation."""
         return self._use_lammps
 
     @use_lammps.setter
     def use_lammps(self, value):
         self._use_lammps = value
+        if self.use_gpu and value:
+            printout(
+                "Enabling atomic density formula because LAMMPS and GPU "
+                "are used."
+            )
+            self.use_atomic_density_formula = True
         self.network._update_lammps(self.use_lammps)
         self.descriptors._update_lammps(self.use_lammps)
         self.targets._update_lammps(self.use_lammps)
         self.data._update_lammps(self.use_lammps)
         self.running._update_lammps(self.use_lammps)
         self.hyperparameters._update_lammps(self.use_lammps)
+
+    @property
+    def use_atomic_density_formula(self):
+        """Control whether to use the atomic density formula.
+
+        This formula uses as a Gaussian representation of the atomic density
+        to calculate the structure factor and with it, the Ewald energy
+        and parts of the exchange-correlation energy. By using it, one can
+        go from N^2 to NlogN scaling, and offloads most of the computational
+        overhead of energy calculation from QE to LAMMPS. This is beneficial
+        since LAMMPS can benefit from GPU acceleration (QE GPU acceleration
+        is not used in the portion of the QE code MALA employs). If set
+        to True, this means MALA will perform another LAMMPS calculation
+        during inference. The hyperparameters for this atomic density
+        calculation are set via the parameters.descriptors object.
+        Default is False, except for when both use_gpu and use_lammps
+        are True, in which case this value will be set to True as well.
+        """
+        return self._use_atomic_density_formula
+
+    @use_atomic_density_formula.setter
+    def use_atomic_density_formula(self, value):
+        self._use_atomic_density_formula = value
+
+        self.network._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.descriptors._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.targets._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.data._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.running._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.hyperparameters._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
 
     def show(self):
         """Print name and values of all attributes of this object."""
@@ -1598,6 +1645,18 @@ class Parameters:
                     ].from_json(json_dict[key])
                     setattr(loaded_parameters, key, sub_parameters)
 
+                    # Backwards compatability:
+                    if key == "descriptors":
+                        if (
+                            "use_atomic_density_energy_formula"
+                            in json_dict[key]
+                        ):
+                            loaded_parameters.use_atomic_density_formula = (
+                                json_dict[key][
+                                    "use_atomic_density_energy_formula"
+                                ]
+                            )
+
             # We iterate a second time, to set global values, so that they
             # are properly forwarded.
             for key in json_dict:
@@ -1611,6 +1670,13 @@ class Parameters:
                         setattr(loaded_parameters, key, json_dict[key])
             if no_snapshots is True:
                 loaded_parameters.data.snapshot_directories_list = []
+            # Backwards compatability: since the transfer of old property
+            # to new property happens _before_ all children descriptor classes
+            # are instantiated, it is not properly propagated. Thus, we
+            # simply have to set it to its own value again.
+            loaded_parameters.use_atomic_density_formula = (
+                loaded_parameters.use_atomic_density_formula
+            )
         else:
             raise Exception("Unsupported parameter save format.")
 
