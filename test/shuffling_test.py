@@ -50,70 +50,70 @@ class TestDataShuffling:
         new = np.load("Be_REshuffled1.out.npy")
         assert np.isclose(np.sum(np.abs(old - new)), 0.0, atol=accuracy)
 
-    # def test_seed_openpmd(self):
-    #     """
-    #     Test that the shuffling is handled correctly internally.
-    #
-    #     This function tests the shuffling for OpenPMD and confirms that
-    #     shuffling both from numpy and openpmd into openpmd always gives the
-    #     same results. The first shuffling shuffles from openpmd to openpmd
-    #     format, the second from numpy to openpmd.
-    #     """
-    #     test_parameters = mala.Parameters()
-    #     test_parameters.data.shuffling_seed = 1234
-    #     data_shuffler = mala.DataShuffler(test_parameters)
-    #
-    #     # Add a snapshot we want to use in to the list.
-    #     data_shuffler.add_snapshot(
-    #         "Be_snapshot0.in.h5",
-    #         data_path,
-    #         "Be_snapshot0.out.h5",
-    #         data_path,
-    #         snapshot_type="openpmd",
-    #     )
-    #     data_shuffler.add_snapshot(
-    #         "Be_snapshot1.in.h5",
-    #         data_path,
-    #         "Be_snapshot1.out.h5",
-    #         data_path,
-    #         snapshot_type="openpmd",
-    #     )
-    #
-    #     # After shuffling, these snapshots can be loaded as regular snapshots
-    #     # for lazily loaded training-
-    #     data_shuffler.shuffle_snapshots("./", save_name="Be_shuffled*.h5")
-    #
-    #     test_parameters = mala.Parameters()
-    #     test_parameters.data.shuffling_seed = 1234
-    #     data_shuffler = mala.DataShuffler(test_parameters)
-    #
-    #     # Add a snapshot we want to use in to the list.
-    #     data_shuffler.add_snapshot(
-    #         "Be_snapshot0.in.npy",
-    #         data_path,
-    #         "Be_snapshot0.out.npy",
-    #         data_path,
-    #         snapshot_type="numpy",
-    #     )
-    #     data_shuffler.add_snapshot(
-    #         "Be_snapshot1.in.npy",
-    #         data_path,
-    #         "Be_snapshot1.out.npy",
-    #         data_path,
-    #         snapshot_type="numpy",
-    #     )
-    #
-    #     # After shuffling, these snapshots can be loaded as regular snapshots
-    #     # for lazily loaded training-
-    #     data_shuffler.shuffle_snapshots("./", save_name="Be_REshuffled*.h5")
-    #
-    #     old = data_shuffler.target_calculator.read_from_openpmd_file(
-    #         "Be_shuffled1.out.h5"
-    #     )
-    #     new = data_shuffler.target_calculator.read_from_openpmd_file(
-    #         "Be_REshuffled1.out.h5"
-    #     )
-    #     assert np.isclose(np.sum(np.abs(old - new)), 0.0, atol=accuracy)
+    def test_seed_openpmd(self):
+        """
+        Test that the shuffling is handled correctly internally.
+
+        This function tests the shuffling for OpenPMD and confirms that
+        shuffling both from numpy and openpmd into openpmd always gives the
+        same results. The first shuffling shuffles from openpmd to openpmd
+        format, the second from numpy to openpmd.
+        """
+        test_parameters = mala.Parameters()
+        test_parameters.data.shuffling_seed = 1234
+        data_shuffler = mala.DataShuffler(test_parameters)
+
+        # Add a snapshot we want to use in to the list.
+        data_shuffler.add_snapshot(
+            "Be_snapshot0.in.h5",
+            data_path,
+            "Be_snapshot0.out.h5",
+            data_path,
+            snapshot_type="openpmd",
+        )
+        data_shuffler.add_snapshot(
+            "Be_snapshot1.in.h5",
+            data_path,
+            "Be_snapshot1.out.h5",
+            data_path,
+            snapshot_type="openpmd",
+        )
+
+        # After shuffling, these snapshots can be loaded as regular snapshots
+        # for lazily loaded training-
+        data_shuffler.shuffle_snapshots("./", save_name="Be_shuffled*.h5")
+
+        test_parameters = mala.Parameters()
+        test_parameters.data.shuffling_seed = 1234
+        data_shuffler = mala.DataShuffler(test_parameters)
+
+        # Add a snapshot we want to use in to the list.
+        data_shuffler.add_snapshot(
+            "Be_snapshot0.in.npy",
+            data_path,
+            "Be_snapshot0.out.npy",
+            data_path,
+            snapshot_type="numpy",
+        )
+        data_shuffler.add_snapshot(
+            "Be_snapshot1.in.npy",
+            data_path,
+            "Be_snapshot1.out.npy",
+            data_path,
+            snapshot_type="numpy",
+        )
+
+        # After shuffling, these snapshots can be loaded as regular snapshots
+        # for lazily loaded training-
+        data_shuffler.shuffle_snapshots("./", save_name="Be_REshuffled*.h5")
+
+        old = data_shuffler.target_calculator.read_from_openpmd_file(
+            "Be_shuffled1.out.h5"
+        )
+        new = data_shuffler.target_calculator.read_from_openpmd_file(
+            "Be_REshuffled1.out.h5"
+        )
+        assert np.isclose(np.sum(np.abs(old - new)), 0.0, atol=accuracy)
 
     def test_training(self):
         test_parameters = mala.Parameters()
