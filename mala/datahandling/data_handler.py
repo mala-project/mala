@@ -569,7 +569,7 @@ class DataHandler(DataHandlerBase):
             raise Exception("Unknown data type detected.")
 
         # Extracting all the information pertaining to the data set.
-        array = function + "_data_" + data_type
+        array = "_" + function + "_data_" + data_type
         if data_type == "inputs":
             calculator = self.descriptor_calculator
         else:
