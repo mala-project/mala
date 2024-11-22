@@ -139,7 +139,7 @@ class Predictor(Runner):
         self.data.target_calculator.read_additional_calculation_data(
             [atoms, self.data.grid_dimension], "atoms+grid"
         )
-        feature_length = self.data.descriptor_calculator.fingerprint_length
+        feature_length = self.data.descriptor_calculator.feature_size
 
         # The actual calculation of the LDOS from the descriptors depends
         # on whether we run in parallel or serial. In the former case,

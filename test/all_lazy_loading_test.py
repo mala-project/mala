@@ -110,34 +110,34 @@ class TestLazyLoading:
                     # I presume to be due to numerical constraints. To make a
                     # meaningful comparison it is wise to scale the value here.
                     this_result.append(
-                        data_handler.input_data_scaler._total_mean
+                        data_handler.input_data_scaler.total_mean
                         / data_handler.nr_training_data
                     )
                     this_result.append(
-                        data_handler.input_data_scaler._total_std
+                        data_handler.input_data_scaler.total_std
                         / data_handler.nr_training_data
                     )
                     this_result.append(
-                        data_handler.output_data_scaler._total_mean
+                        data_handler.output_data_scaler.total_mean
                         / data_handler.nr_training_data
                     )
                     this_result.append(
-                        data_handler.output_data_scaler._total_std
+                        data_handler.output_data_scaler.total_std
                         / data_handler.nr_training_data
                     )
                 elif scalingtype == "normal":
                     torch.manual_seed(2002)
                     this_result.append(
-                        data_handler.input_data_scaler._total_max
+                        data_handler.input_data_scaler.total_max
                     )
                     this_result.append(
-                        data_handler.input_data_scaler._total_min
+                        data_handler.input_data_scaler.total_min
                     )
                     this_result.append(
-                        data_handler.output_data_scaler._total_max
+                        data_handler.output_data_scaler.total_max
                     )
                     this_result.append(
-                        data_handler.output_data_scaler._total_min
+                        data_handler.output_data_scaler.total_min
                     )
                     dataset_tester.append(
                         (data_handler.training_data_sets[0][3998])[0].sum()
@@ -165,41 +165,41 @@ class TestLazyLoading:
                     # I presume to be due to numerical constraints. To make a
                     # meaningful comparison it is wise to scale the value here.
                     this_result.append(
-                        torch.mean(data_handler.input_data_scaler._means)
+                        torch.mean(data_handler.input_data_scaler.means)
                         / data_handler.parameters.snapshot_directories_list[
                             0
                         ].grid_size
                     )
                     this_result.append(
-                        torch.mean(data_handler.input_data_scaler._stds)
+                        torch.mean(data_handler.input_data_scaler.stds)
                         / data_handler.parameters.snapshot_directories_list[
                             0
                         ].grid_size
                     )
                     this_result.append(
-                        torch.mean(data_handler.output_data_scaler._means)
+                        torch.mean(data_handler.output_data_scaler.means)
                         / data_handler.parameters.snapshot_directories_list[
                             0
                         ].grid_size
                     )
                     this_result.append(
-                        torch.mean(data_handler.output_data_scaler._stds)
+                        torch.mean(data_handler.output_data_scaler.stds)
                         / data_handler.parameters.snapshot_directories_list[
                             0
                         ].grid_size
                     )
                 elif scalingtype == "feature-wise-normal":
                     this_result.append(
-                        torch.mean(data_handler.input_data_scaler._maxs)
+                        torch.mean(data_handler.input_data_scaler.maxs)
                     )
                     this_result.append(
-                        torch.mean(data_handler.input_data_scaler._mins)
+                        torch.mean(data_handler.input_data_scaler.mins)
                     )
                     this_result.append(
-                        torch.mean(data_handler.output_data_scaler._maxs)
+                        torch.mean(data_handler.output_data_scaler.maxs)
                     )
                     this_result.append(
-                        torch.mean(data_handler.output_data_scaler._mins)
+                        torch.mean(data_handler.output_data_scaler.mins)
                     )
 
                 comparison.append(this_result)
