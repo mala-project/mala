@@ -9,6 +9,9 @@ from mala.common.parameters import printout
 from mala.common.parallelizer import parallel_warn
 
 
+# IMPORTANT: If you change the docstrings, make sure to also change them
+# in the ParametersData subclass, because users do usually not interact
+# with this class directly.
 class DataScaler:
     """Scales input and output data.
 
