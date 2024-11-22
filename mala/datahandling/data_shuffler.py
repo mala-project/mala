@@ -53,7 +53,7 @@ class DataShuffler(DataHandlerBase):
             self.descriptor_calculator.parameters.descriptors_contain_xyz = (
                 False
             )
-        self.data_points_to_remove = None
+        self._data_points_to_remove = None
 
     def add_snapshot(
         self,
@@ -135,8 +135,8 @@ class DataShuffler(DataHandlerBase):
             # then we have to trim the original snapshots to size
             # the indicies to be removed are selected at random
             if (
-                self.data_points_to_remove is not None
-                and np.sum(self.data_points_to_remove) > 0
+                self._data_points_to_remove is not None
+                and np.sum(self._data_points_to_remove) > 0
             ):
                 if self.parameters.shuffling_seed is not None:
                     np.random.seed(idx * self.parameters.shuffling_seed)
@@ -155,7 +155,7 @@ class DataShuffler(DataHandlerBase):
 
                 indices = np.random.choice(
                     ngrid,
-                    size=ngrid - self.data_points_to_remove[idx],
+                    size=ngrid - self._data_points_to_remove[idx],
                 )
 
                 descriptor_data[idx] = current_descriptor[indices]
@@ -548,7 +548,7 @@ class DataShuffler(DataHandlerBase):
             ]
         )
         number_of_data_points = np.sum(snapshot_size_list)
-        self.data_points_to_remove = None
+        self._data_points_to_remove = None
         if number_of_shuffled_snapshots is None:
             number_of_shuffled_snapshots = self.nr_snapshots
 
@@ -584,13 +584,13 @@ class DataShuffler(DataHandlerBase):
                 np.sum(shuffled_gridsizes) * number_of_shuffled_snapshots
             )
 
-        self.data_points_to_remove = []
+        self._data_points_to_remove = []
         for i in range(0, self.nr_snapshots):
-            self.data_points_to_remove.append(
+            self._data_points_to_remove.append(
                 snapshot_size_list[i]
                 - shuffled_gridsizes[i] * number_of_shuffled_snapshots
             )
-        tot_points_missing = sum(self.data_points_to_remove)
+        tot_points_missing = sum(self._data_points_to_remove)
 
         if tot_points_missing > 0:
             printout(

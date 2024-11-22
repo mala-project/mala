@@ -48,6 +48,17 @@ class LazyLoadDataset(Dataset):
 
     input_requires_grad : bool
         If True, then the gradient is stored for the inputs.
+
+    Attributes
+    ----------
+    currently_loaded_file : int
+        Index of currently loaded file.
+
+    input_data : torch.Tensor
+        Input data tensor.
+
+    output_data : torch.Tensor
+        Output data tensor.
     """
 
     def __init__(
@@ -62,25 +73,22 @@ class LazyLoadDataset(Dataset):
         device,
         input_requires_grad=False,
     ):
-        self.snapshot_list = []
-        self.input_dimension = input_dimension
-        self.output_dimension = output_dimension
-        self.input_data_scaler = input_data_scaler
-        self.output_data_scaler = output_data_scaler
-        self.descriptor_calculator = descriptor_calculator
-        self.target_calculator = target_calculator
-        self.number_of_snapshots = 0
-        self.total_size = 0
-        self.descriptors_contain_xyz = (
-            self.descriptor_calculator.descriptors_contain_xyz
-        )
+        self._snapshot_list = []
+        self._input_dimension = input_dimension
+        self._output_dimension = output_dimension
+        self._input_data_scaler = input_data_scaler
+        self._output_data_scaler = output_data_scaler
+        self._descriptor_calculator = descriptor_calculator
+        self._target_calculator = target_calculator
+        self._number_of_snapshots = 0
+        self._total_size = 0
         self.currently_loaded_file = None
         self.input_data = np.empty(0)
         self.output_data = np.empty(0)
-        self.use_ddp = use_ddp
+        self._use_ddp = use_ddp
         self.return_outputs_directly = False
-        self.input_requires_grad = input_requires_grad
-        self.device = device
+        self._input_requires_grad = input_requires_grad
+        self._device = device
 
     @property
     def return_outputs_directly(self):
@@ -108,9 +116,9 @@ class LazyLoadDataset(Dataset):
             Snapshot that is to be added to this DataSet.
 
         """
-        self.snapshot_list.append(snapshot)
-        self.number_of_snapshots += 1
-        self.total_size += snapshot.grid_size
+        self._snapshot_list.append(snapshot)
+        self._number_of_snapshots += 1
+        self._total_size += snapshot.grid_size
 
     def mix_datasets(self):
         """
@@ -118,16 +126,16 @@ class LazyLoadDataset(Dataset):
 
         With this, there can be some variance between runs.
         """
-        used_perm = torch.randperm(self.number_of_snapshots)
+        used_perm = torch.randperm(self._number_of_snapshots)
         barrier()
-        if self.use_ddp:
-            used_perm = used_perm.to(device=self.device)
+        if self._use_ddp:
+            used_perm = used_perm.to(device=self._device)
             dist.broadcast(used_perm, 0)
-            self.snapshot_list = [
-                self.snapshot_list[i] for i in used_perm.to("cpu")
+            self._snapshot_list = [
+                self._snapshot_list[i] for i in used_perm.to("cpu")
             ]
         else:
-            self.snapshot_list = [self.snapshot_list[i] for i in used_perm]
+            self._snapshot_list = [self._snapshot_list[i] for i in used_perm]
         self.get_new_data(0)
 
     def get_new_data(self, file_index):
@@ -140,50 +148,50 @@ class LazyLoadDataset(Dataset):
             File to be read.
         """
         # Load the data into RAM.
-        if self.snapshot_list[file_index].snapshot_type == "numpy":
-            self.input_data = self.descriptor_calculator.read_from_numpy_file(
+        if self._snapshot_list[file_index].snapshot_type == "numpy":
+            self.input_data = self._descriptor_calculator.read_from_numpy_file(
                 os.path.join(
-                    self.snapshot_list[file_index].input_npy_directory,
-                    self.snapshot_list[file_index].input_npy_file,
+                    self._snapshot_list[file_index].input_npy_directory,
+                    self._snapshot_list[file_index].input_npy_file,
                 ),
-                units=self.snapshot_list[file_index].input_units,
+                units=self._snapshot_list[file_index].input_units,
             )
-            self.output_data = self.target_calculator.read_from_numpy_file(
+            self.output_data = self._target_calculator.read_from_numpy_file(
                 os.path.join(
-                    self.snapshot_list[file_index].output_npy_directory,
-                    self.snapshot_list[file_index].output_npy_file,
+                    self._snapshot_list[file_index].output_npy_directory,
+                    self._snapshot_list[file_index].output_npy_file,
                 ),
-                units=self.snapshot_list[file_index].output_units,
+                units=self._snapshot_list[file_index].output_units,
             )
 
-        elif self.snapshot_list[file_index].snapshot_type == "openpmd":
+        elif self._snapshot_list[file_index].snapshot_type == "openpmd":
             self.input_data = (
-                self.descriptor_calculator.read_from_openpmd_file(
+                self._descriptor_calculator.read_from_openpmd_file(
                     os.path.join(
-                        self.snapshot_list[file_index].input_npy_directory,
-                        self.snapshot_list[file_index].input_npy_file,
+                        self._snapshot_list[file_index].input_npy_directory,
+                        self._snapshot_list[file_index].input_npy_file,
                     )
                 )
             )
-            self.output_data = self.target_calculator.read_from_openpmd_file(
+            self.output_data = self._target_calculator.read_from_openpmd_file(
                 os.path.join(
-                    self.snapshot_list[file_index].output_npy_directory,
-                    self.snapshot_list[file_index].output_npy_file,
+                    self._snapshot_list[file_index].output_npy_directory,
+                    self._snapshot_list[file_index].output_npy_file,
                 )
             )
 
         # Transform the data.
         self.input_data = self.input_data.reshape(
-            [self.snapshot_list[file_index].grid_size, self.input_dimension]
+            [self._snapshot_list[file_index].grid_size, self._input_dimension]
         )
         if self.input_data.dtype != DEFAULT_NP_DATA_DTYPE:
             self.input_data = self.input_data.astype(DEFAULT_NP_DATA_DTYPE)
         self.input_data = torch.from_numpy(self.input_data).float()
-        self.input_data_scaler.transform(self.input_data)
-        self.input_data.requires_grad = self.input_requires_grad
+        self._input_data_scaler.transform(self.input_data)
+        self.input_data.requires_grad = self._input_requires_grad
 
         self.output_data = self.output_data.reshape(
-            [self.snapshot_list[file_index].grid_size, self.output_dimension]
+            [self._snapshot_list[file_index].grid_size, self._output_dimension]
         )
         if self.return_outputs_directly is False:
             self.output_data = np.array(self.output_data)
@@ -192,7 +200,7 @@ class LazyLoadDataset(Dataset):
                     DEFAULT_NP_DATA_DTYPE
                 )
             self.output_data = torch.from_numpy(self.output_data).float()
-            self.output_data_scaler.transform(self.output_data)
+            self._output_data_scaler.transform(self.output_data)
 
         # Save which data we have currently loaded.
         self.currently_loaded_file = file_index
@@ -201,28 +209,28 @@ class LazyLoadDataset(Dataset):
         file_index = None
         index_in_file = idx
         if is_slice:
-            for i in range(len(self.snapshot_list)):
-                if index_in_file - self.snapshot_list[i].grid_size <= 0:
+            for i in range(len(self._snapshot_list)):
+                if index_in_file - self._snapshot_list[i].grid_size <= 0:
                     file_index = i
 
                     # From the end of previous file to beginning of new.
                     if (
-                        index_in_file == self.snapshot_list[i].grid_size
+                        index_in_file == self._snapshot_list[i].grid_size
                         and is_start
                     ):
                         file_index = i + 1
                         index_in_file = 0
                     break
                 else:
-                    index_in_file -= self.snapshot_list[i].grid_size
+                    index_in_file -= self._snapshot_list[i].grid_size
             return file_index, index_in_file
         else:
-            for i in range(len(self.snapshot_list)):
-                if index_in_file - self.snapshot_list[i].grid_size < 0:
+            for i in range(len(self._snapshot_list)):
+                if index_in_file - self._snapshot_list[i].grid_size < 0:
                     file_index = i
                     break
                 else:
-                    index_in_file -= self.snapshot_list[i].grid_size
+                    index_in_file -= self._snapshot_list[i].grid_size
             return file_index, index_in_file
 
     def __getitem__(self, idx):
@@ -266,7 +274,7 @@ class LazyLoadDataset(Dataset):
             # the stop index will point to the wrong file.
             if file_index_start != file_index_stop:
                 if index_in_file_stop == 0:
-                    index_in_file_stop = self.snapshot_list[
+                    index_in_file_stop = self._snapshot_list[
                         file_index_stop
                     ].grid_size
                 else:
@@ -297,4 +305,4 @@ class LazyLoadDataset(Dataset):
         length : int
             Number of data points in DataSet.
         """
-        return self.total_size
+        return self._total_size
