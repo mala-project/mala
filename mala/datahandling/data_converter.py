@@ -44,8 +44,12 @@ class DataConverter:
     target_calculator : mala.targets.target.Target
         Target calculator used for parsing/converting target data.
 
-    parameters : mala.Parama
-    parameters_full
+    parameters : mala.common.parameters.ParametersData
+        MALA data handling parameters object.
+
+    parameters_full : mala.common.parameters.Parameters
+        MALA parameters object. The full object is necessary for some data
+        handling tasks.
     """
 
     def __init__(
@@ -502,9 +506,6 @@ class DataConverter:
 
         output_path : string
             If not None, outputs will be saved in this file.
-
-        return_data : bool
-            If True, inputs and outputs will be returned directly.
 
         target_calculator_kwargs : dict
             Dictionary with additional keyword arguments for the calculation
