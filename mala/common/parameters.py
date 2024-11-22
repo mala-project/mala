@@ -366,6 +366,35 @@ class ParametersDescriptors(ParametersBase):
         self.minterpy_polynomial_degree = 4
         self.minterpy_lp_norm = 2
 
+        # ace descriptors
+        self.ace_elements = ["Al", "G"]
+        self.ace_mumax = len(self.ace_elements)
+        self.ace_ranks = [1, 2, 3]
+        self.ace_nmax = [6, 2, 2]
+        self.ace_lmax = [0, 2, 2]
+        self.ace_nradbase = max(self.ace_nmax)
+        self.ace_lmin = [0, 0, 0]
+        self.ace_reference_ens = [0.0, 0.0]
+
+        self.ace_nshell = 2.0
+        self.ace_apply_shift = False
+        self.ace_metal_max = True
+        self.ace_use_vdw = False
+
+        self.ace_L_R = 0
+        self.ace_M_R = 0
+
+        self.ace_coupling_type = "cg"
+        self.ace_lmax_traditional = 12
+        
+        # TODO: add consistency check for these
+        # if grid_filter, types_like_snap must be False
+        # if grid_filter, padfunc must be True
+        self.ace_grid_filter = True
+        self.ace_types_like_snap = False
+        self.ace_padfunc = True
+
+
     @property
     def use_z_splitting(self):
         """
