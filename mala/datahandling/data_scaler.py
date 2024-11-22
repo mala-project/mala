@@ -36,7 +36,7 @@ class DataScaler:
         - "feature-wise-minmax": Min-Max scaling (Scale to be in range
           0...1) is applied to each feature dimension individually.
           I.e., if your training data has dimensions (d,f), then each
-          of the f rows with d entries is scaled indiviually.
+          of the f columns with d entries is scaled indiviually.
         - "normal": (DEPRECATED) Old name for "minmax".
         - "feature-wise-normal": (DEPRECATED) Old name for
           "feature-wise-minmax"
