@@ -53,6 +53,7 @@ class DataShuffler(DataHandlerBase):
             self.descriptor_calculator.parameters.descriptors_contain_xyz = (
                 False
             )
+        self.data_points_to_remove = None
 
     def add_snapshot(
         self,
@@ -133,10 +134,17 @@ class DataShuffler(DataHandlerBase):
             # if the number of new snapshots is not a divisor of the grid size
             # then we have to trim the original snapshots to size
             # the indicies to be removed are selected at random
-            if self.data_points_to_remove is not None:
+            if (
+                self.data_points_to_remove is not None
+                and np.sum(self.data_points_to_remove) > 0
+            ):
                 if self.parameters.shuffling_seed is not None:
                     np.random.seed(idx * self.parameters.shuffling_seed)
-                ngrid = descriptor_data[idx].shape[0]
+                ngrid = (
+                    descriptor_data[idx].shape[0]
+                    * descriptor_data[idx].shape[1]
+                    * descriptor_data[idx].shape[2]
+                )
                 n_descriptor = descriptor_data[idx].shape[-1]
                 n_target = target_data[idx].shape[-1]
 
@@ -146,8 +154,8 @@ class DataShuffler(DataHandlerBase):
                 )
 
                 indices = np.random.choice(
-                    ngrid**3,
-                    size=ngrid**3 - self.data_points_to_remove[idx],
+                    ngrid,
+                    size=ngrid - self.data_points_to_remove[idx],
                 )
 
                 descriptor_data[idx] = current_descriptor[indices]
@@ -532,121 +540,75 @@ class DataShuffler(DataHandlerBase):
         snapshot_type = snapshot_types.pop()
         del snapshot_types
 
-        snapshot_size_list = [
-            snapshot.grid_size
-            for snapshot in self.parameters.snapshot_directories_list
-        ]
+        # Set the defaults, these may be changed below as needed.
+        snapshot_size_list = np.array(
+            [
+                snapshot.grid_size
+                for snapshot in self.parameters.snapshot_directories_list
+            ]
+        )
         number_of_data_points = np.sum(snapshot_size_list)
-
         self.data_points_to_remove = None
-
         if number_of_shuffled_snapshots is None:
-            # If the user does not tell us how many snapshots to use,
-            # we have to check if the number of snapshots is straightforward.
-            # If all snapshots have the same size, we can just replicate the
-            # snapshot structure.
-            if np.max(snapshot_size_list) == np.min(snapshot_size_list):
-                shuffle_dimensions = self.parameters.snapshot_directories_list[
-                    0
-                ].grid_dimension
-                number_of_new_snapshots = self.nr_snapshots
-            else:
-                # If the snapshots have different sizes we simply create
-                # (x, 1, 1) snapshots big enough to hold the data.
-                number_of_new_snapshots = self.nr_snapshots
-                while number_of_data_points % number_of_new_snapshots != 0:
-                    number_of_new_snapshots += 1
-                # If they do have different sizes, we start with the smallest
-                # snapshot, there is some padding down below anyhow.
-                shuffle_dimensions = [
-                    int(number_of_data_points / number_of_new_snapshots),
-                    1,
-                    1,
+            number_of_shuffled_snapshots = self.nr_snapshots
+
+        # Currently, the openPMD interface is not feature-complete.
+        if snapshot_type == "openpmd" and np.any(
+            np.array(
+                [
+                    snapshot.grid_dimension[0] % number_of_shuffled_snapshots
+                    for snapshot in self.parameters.snapshot_directories_list
                 ]
+            )
+            != 0
+        ):
+            raise ValueError(
+                "Shuffling from OpenPMD files currently only "
+                "supported if first dimension of all snapshots "
+                "can evenly be divided by number of snapshots. "
+                "Please select a different number of shuffled "
+                "snapshots or use the numpy interface. "
+            )
 
-            if snapshot_type == "openpmd":
-                import math
-                import functools
+        shuffled_gridsizes = snapshot_size_list // number_of_shuffled_snapshots
 
-                number_of_new_snapshots = functools.reduce(
-                    math.gcd,
-                    [
-                        snapshot.grid_dimension[0]
-                        for snapshot in self.parameters.snapshot_directories_list
-                    ],
-                    number_of_new_snapshots,
-                )
-        else:
-            number_of_new_snapshots = number_of_shuffled_snapshots
+        if np.any(
+            np.array(snapshot_size_list)
+            - (
+                (np.array(snapshot_size_list) // number_of_shuffled_snapshots)
+                * number_of_shuffled_snapshots
+            )
+            > 0
+        ):
+            number_of_data_points = int(
+                np.sum(shuffled_gridsizes) * number_of_shuffled_snapshots
+            )
 
-            if snapshot_type == "openpmd":
-                import math
-                import functools
+        self.data_points_to_remove = []
+        for i in range(0, self.nr_snapshots):
+            self.data_points_to_remove.append(
+                snapshot_size_list[i]
+                - shuffled_gridsizes[i] * number_of_shuffled_snapshots
+            )
+        tot_points_missing = sum(self.data_points_to_remove)
 
-                specified_number_of_new_snapshots = number_of_new_snapshots
-                number_of_new_snapshots = functools.reduce(
-                    math.gcd,
-                    [
-                        snapshot.grid_dimension[0]
-                        for snapshot in self.parameters.snapshot_directories_list
-                    ],
-                    number_of_new_snapshots,
-                )
-                if (
-                    number_of_new_snapshots
-                    != specified_number_of_new_snapshots
-                ):
-                    print(
-                        f"[openPMD shuffling] Reduced the number of output snapshots to "
-                        f"{number_of_new_snapshots} because of the dataset dimensions."
-                    )
-                del specified_number_of_new_snapshots
+        if tot_points_missing > 0:
+            printout(
+                "Warning: number of requested snapshots is not a divisor of",
+                "the original grid sizes.\n",
+                f"{tot_points_missing} / {number_of_data_points} data points",
+                "will be left out of the shuffled snapshots.",
+            )
 
-            if number_of_data_points % number_of_new_snapshots != 0:
-                if snapshot_type == "numpy":
-                    self.data_points_to_remove = []
-                    for i in range(0, self.nr_snapshots):
-                        gridsize = self.parameters.snapshot_directories_list[
-                            i
-                        ].grid_size
-                        shuffled_gridsize = int(
-                            gridsize / number_of_new_snapshots
-                        )
-                        self.data_points_to_remove.append(
-                            gridsize
-                            - shuffled_gridsize * number_of_new_snapshots
-                        )
-                    tot_points_missing = sum(self.data_points_to_remove)
-
-                    printout(
-                        "Warning: number of requested snapshots is not a divisor of",
-                        "the original grid sizes.\n",
-                        f"{tot_points_missing} / {number_of_data_points} data points",
-                        "will be left out of the shuffled snapshots."
-                    )
-
-                    shuffle_dimensions = [
-                        int(number_of_data_points / number_of_new_snapshots),
-                        1,
-                        1,
-                    ]
-
-                elif snapshot_type == "openpmd":
-                    # TODO implement arbitrary grid sizes for openpmd
-                    raise Exception(
-                        "Cannot create this number of snapshots "
-                        "from data provided."
-                    )
-            else:
-                shuffle_dimensions = [
-                    int(number_of_data_points / number_of_new_snapshots),
-                    1,
-                    1,
-                ]
+        shuffle_dimensions = [
+            int(number_of_data_points / number_of_shuffled_snapshots),
+            1,
+            1,
+        ]
 
         printout(
             "Data shuffler will generate",
-            number_of_new_snapshots,
+            number_of_shuffled_snapshots,
             "new snapshots.",
         )
         printout("Shuffled snapshot dimension will be ", shuffle_dimensions)
@@ -654,7 +616,7 @@ class DataShuffler(DataHandlerBase):
         # Prepare permutations.
         permutations = []
         seeds = []
-        for i in range(0, number_of_new_snapshots):
+        for i in range(0, number_of_shuffled_snapshots):
             # This makes the shuffling deterministic, if specified by the user.
             if self.parameters.shuffling_seed is not None:
                 np.random.seed(i * self.parameters.shuffling_seed)
@@ -664,7 +626,7 @@ class DataShuffler(DataHandlerBase):
 
         if snapshot_type == "numpy":
             self.__shuffle_numpy(
-                number_of_new_snapshots,
+                number_of_shuffled_snapshots,
                 shuffle_dimensions,
                 descriptor_save_path,
                 save_name,
@@ -683,7 +645,7 @@ class DataShuffler(DataHandlerBase):
             )
             self.__shuffle_openpmd(
                 descriptor,
-                number_of_new_snapshots,
+                number_of_shuffled_snapshots,
                 shuffle_dimensions,
                 save_name,
                 permutations,
@@ -699,7 +661,7 @@ class DataShuffler(DataHandlerBase):
             )
             self.__shuffle_openpmd(
                 target,
-                number_of_new_snapshots,
+                number_of_shuffled_snapshots,
                 shuffle_dimensions,
                 save_name,
                 permutations,

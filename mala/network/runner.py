@@ -850,7 +850,12 @@ class Runner:
         # Ensure the Network is on the correct device.
         # This line is necessary because GPU acceleration may have been
         # activated AFTER loading a model.
-        self.network.to(self.network.params._configuration["device"])
+        if self.parameters_full.use_ddp:
+            self.network.module.to(
+                self.network.module.params._configuration["device"]
+            )
+        else:
+            self.network.to(self.network.params._configuration["device"])
 
         # Determine where the snapshot begins and ends.
         from_index = 0
@@ -927,7 +932,7 @@ class Runner:
         return actual_outputs, predicted_outputs
 
     @staticmethod
-    def _correct_batch_size_for_testing(datasize, batchsize):
+    def _correct_batch_size(datasize, batchsize):
         """
         Get the correct batch size for testing.
 

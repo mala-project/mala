@@ -59,18 +59,6 @@ class Descriptor(PhysicalData):
         # Check if we're accessing through base class.
         # If not, we need to return the correct object directly.
         if cls == Descriptor:
-            if params.descriptors.descriptor_type == "SNAP":
-                from mala.descriptors.bispectrum import Bispectrum
-
-                parallel_warn(
-                    "Using 'SNAP' as descriptors will be deprecated "
-                    "starting in MALA v1.3.0. Please use 'Bispectrum' "
-                    "instead.",
-                    min_verbosity=0,
-                    category=FutureWarning,
-                )
-                descriptors = super(Descriptor, Bispectrum).__new__(Bispectrum)
-
             if params.descriptors.descriptor_type == "Bispectrum":
                 from mala.descriptors.bispectrum import Bispectrum
 
@@ -503,7 +491,7 @@ class Descriptor(PhysicalData):
             ny = self.grid_dimensions[1]
             nz = self.grid_dimensions[2]
             descriptors_full = np.zeros([nx, ny, nz, self.fingerprint_length])
-            # Fill the full SNAP descriptors array.
+            # Fill the full bispectrum descriptors array.
             for idx, local_grid in enumerate(all_descriptors_list):
                 # We glue the individual cells back together, and transpose.
                 first_x = int(local_grid[0][0])

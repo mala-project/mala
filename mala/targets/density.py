@@ -417,6 +417,7 @@ class Density(Target):
                 "We recommend to check and change the requested units"
             )
         data, meta = read_cube(path)
+        data = np.expand_dims(data, -1)
         data *= self.convert_units(1, in_units=units)
         self.density = data
         self.grid_dimensions = list(np.shape(data)[0:3])
@@ -947,7 +948,7 @@ class Density(Target):
         qe_input_data=None,
         qe_pseudopotentials=None,
     ):
-        if create_file:
+        if create_file and Density.te_mutex is False:
             # If not otherwise specified, use values as read in.
             if qe_input_data is None:
                 qe_input_data = self.qe_input_data
@@ -1117,7 +1118,7 @@ class Density(Target):
         # instantiate the process with the file.
         positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
 
-        if self._parameters_full.descriptors.use_atomic_density_energy_formula:
+        if self.parameters._configuration["atomic_density_formula"]:
             # Calculate the Gaussian descriptors for the calculation of the
             # structure factors.
             barrier()
@@ -1186,8 +1187,8 @@ class Density(Target):
         te.set_positions(
             np.transpose(positions_for_qe),
             number_of_atoms,
-            self._parameters_full.descriptors.use_atomic_density_energy_formula,
-            self._parameters_full.descriptors.use_atomic_density_energy_formula,
+            self.parameters._configuration["atomic_density_formula"],
+            self.parameters._configuration["atomic_density_formula"],
         )
         barrier()
         printout(
@@ -1198,7 +1199,7 @@ class Density(Target):
         )
         barrier()
 
-        if self._parameters_full.descriptors.use_atomic_density_energy_formula:
+        if self.parameters._configuration["atomic_density_formula"]:
             t0 = time.perf_counter()
             gaussian_descriptors = np.reshape(
                 gaussian_descriptors,
