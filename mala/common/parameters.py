@@ -687,7 +687,7 @@ class ParametersRunning(ParametersBase):
         a "by snapshot" basis.
 
     checkpoints_each_epoch : int
-        If not 0, checkpoint files will be saved after eac
+        If not 0, checkpoint files will be saved after each
         checkpoints_each_epoch epoch.
 
     checkpoint_name : string
@@ -706,13 +706,16 @@ class ParametersRunning(ParametersBase):
         of the logging, to avoid having to change input scripts often.
         
     logger : string
-        Name of the logger to be used. Currently supported are:
+        Name of the logger to be used.
+        Currently supported are:
+        
             - "tensorboard": Tensorboard logger.
             - "wandb": Weights and Biases logger.
     
     validation_metrics : list
         List of metrics to be used for validation. Default is ["ldos"].
         Possible options are:
+        
             - "ldos": MSE of the LDOS.
             - "band_energy": Band energy.
             - "band_energy_actual_fe": Band energy computed with ground truth Fermi energy.
