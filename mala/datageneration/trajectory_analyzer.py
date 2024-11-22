@@ -29,6 +29,19 @@ class TrajectoryAnalyzer:
     target_calculator : mala.targets.target.Target
         A target calculator to calculate e.g. the RDF. If None is provided,
         one will be generated ad-hoc (recommended).
+
+    temperatures : string or numpy.ndarray
+        Array holding the temperatures for the trajectory or path to numpy
+        file containing temperatures.
+
+    target_temperature : float
+        Target temperature for equilibration.
+
+    malada_compatability : bool
+        If True, twice the radius set by the minimum imaging convention (MIC)
+        will be used for RDF calculation. This is generally discouraged,
+        but some older malada calculations have been performed with it, so
+        this parameter provides reproducibility.
     """
 
     def __init__(

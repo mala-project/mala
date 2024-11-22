@@ -29,7 +29,7 @@ class PhysicalData(ABC):
     Attributes
     ----------
     parameters : mala.Parameters
-        Internal copy of the MALA parameters object
+        Internal copy of the MALA parameters object.
 
     grid_dimensions : list
         List of the grid dimensions (x,y,z)
@@ -542,13 +542,21 @@ class PhysicalData(ABC):
             metadata will be read from this source. This metadata will then,
             depending on the class, be saved in the OpenPMD file.
 
-        local_offset  : int
+        local_offset  : list
+            [x,y,z] value from which to start writing the array.
 
-        local_reach  : int
+        local_reach  : list
+            [x,y,z] value until which to read the array.
 
         feature_from  : int
+            Value from which to start writing in the feature dimension. With
+            this parameter and feature_to, one can parallelize over the feature
+            dimension.
 
         feature_to : int
+            Value until which to write in the feature dimension. With
+            this parameter and feature_from, one can parallelize over the feature
+            dimension.
         """
         import openpmd_api as io
 
