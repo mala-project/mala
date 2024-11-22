@@ -29,7 +29,7 @@ class PhysicalData(ABC):
     Attributes
     ----------
     parameters : mala.Parameters
-        Internal copy of the MALA parameters object.
+        MALA parameters object.
 
     grid_dimensions : list
         List of the grid dimensions (x,y,z)
@@ -427,10 +427,10 @@ class PhysicalData(ABC):
         Attributes
         ----------
         dataset : mala.Parameters
-            Internal copy of the openPMD Data set to eventually write to.
+            OpenPMD Data set to eventually write to.
 
         feature_size : list
-            Internal copy of the size of the feature dimension.
+            Size of the feature dimension.
         """
 
         # dataset has type openpmd_api.Dataset (not adding a type hint to avoid

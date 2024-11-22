@@ -42,6 +42,34 @@ class TrajectoryAnalyzer:
         will be used for RDF calculation. This is generally discouraged,
         but some older malada calculations have been performed with it, so
         this parameter provides reproducibility.
+
+    Attributes
+    ----------
+    parameters : mala.common.parameters.ParametersDataGeneration
+        MALA data generation parameters.
+
+    average_distance_equilibrated : float
+        Distance threshold for determination of first equilibrated snapshot.
+
+    distance_metrics_denoised : numpy.ndarray
+        RDF based distance metrics used for equilibration analysis.
+
+    distances_realspace : numpy.ndarray
+        Realspace distance metrics used to sample snapshots.
+
+    first_considered_snapshot : int
+        First snapshot to be considered during equilibration analysis (i.e.,
+        after pruning).
+
+    first_snapshot : int
+        First snapshot that can be considered to be equilibrated.
+
+    last_considered_snapshot : int
+        Last snapshot to be considered during equilibration analysis (i.e.,
+        after pruning).
+
+    target_calculator : mala.targets.target.Target
+        Target calculator used for computing RDFs.
     """
 
     def __init__(
@@ -59,7 +87,7 @@ class TrajectoryAnalyzer:
             "large changes."
         )
 
-        self.params: ParametersDataGeneration = parameters.datageneration
+        self.parameters: ParametersDataGeneration = parameters.datageneration
 
         # If needed, read the trajectory
         self.trajectory = None
@@ -71,12 +99,12 @@ class TrajectoryAnalyzer:
             raise Exception("Incompatible trajectory format provided.")
 
         # If needed, read the temperature files
-        self.temperatures = None
+        self._temperatures = None
         if temperatures is not None:
             if isinstance(temperatures, np.ndarray):
-                self.temperatures = temperatures
+                self._temperatures = temperatures
             elif isinstance(temperatures, str):
-                self.temperatures = np.load(temperatures)
+                self._temperatures = np.load(temperatures)
             else:
                 raise Exception("Incompatible temperature format provided.")
 
@@ -89,7 +117,7 @@ class TrajectoryAnalyzer:
             self.target_calculator.temperature = target_temperature
 
         # Initialize variables.
-        self.distance_metrics = []
+        self._distance_metrics = []
         self.distance_metrics_denoised = []
         self.average_distance_equilibrated = None
         self.__saved_rdf = None
@@ -163,11 +191,11 @@ class TrajectoryAnalyzer:
         # First, we ned to calculate the reduced metrics for the trajectory.
         # For this, we calculate the distance between all the snapshots
         # and the last one.
-        self.distance_metrics = []
+        self._distance_metrics = []
         if equilibrated_snapshot is None:
             equilibrated_snapshot = self.trajectory[-1]
         for idx, step in enumerate(self.trajectory):
-            self.distance_metrics.append(
+            self._distance_metrics.append(
                 self._calculate_distance_between_snapshots(
                     equilibrated_snapshot,
                     step,
@@ -178,16 +206,16 @@ class TrajectoryAnalyzer:
             )
 
         # Now, we denoise the distance metrics.
-        self.distance_metrics_denoised = self.__denoise(self.distance_metrics)
+        self.distance_metrics_denoised = self.__denoise(self._distance_metrics)
 
         # Which snapshots are considered depends on how we denoise the
         # distance metrics.
         self.first_considered_snapshot = (
-            self.params.trajectory_analysis_denoising_width
+            self.parameters.trajectory_analysis_denoising_width
         )
         self.last_considered_snapshot = (
             np.shape(self.distance_metrics_denoised)[0]
-            - self.params.trajectory_analysis_denoising_width
+            - self.parameters.trajectory_analysis_denoising_width
         )
         considered_length = (
             self.last_considered_snapshot - self.first_considered_snapshot
@@ -202,7 +230,7 @@ class TrajectoryAnalyzer:
                 self.distance_metrics_denoised[
                     considered_length
                     - int(
-                        self.params.trajectory_analysis_estimated_equilibrium
+                        self.parameters.trajectory_analysis_estimated_equilibrium
                         * considered_length
                     ) : self.last_considered_snapshot
                 ]
@@ -225,7 +253,7 @@ class TrajectoryAnalyzer:
                     is_below = False
                 if (
                     counter
-                    == self.params.trajectory_analysis_below_average_counter
+                    == self.parameters.trajectory_analysis_below_average_counter
                 ):
                     first_snapshot = idx
                     break
@@ -255,10 +283,12 @@ class TrajectoryAnalyzer:
             to each other to a degree that suggests temporal neighborhood.
 
         """
-        if self.params.trajectory_analysis_correlation_metric_cutoff < 0:
+        if self.parameters.trajectory_analysis_correlation_metric_cutoff < 0:
             return self._analyze_distance_metric(self.trajectory)
         else:
-            return self.params.trajectory_analysis_correlation_metric_cutoff
+            return (
+                self.parameters.trajectory_analysis_correlation_metric_cutoff
+            )
 
     def get_uncorrelated_snapshots(self, filename_uncorrelated_snapshots):
         """
@@ -278,7 +308,8 @@ class TrajectoryAnalyzer:
             filename_uncorrelated_snapshots
         ).split(".")[0]
         allowed_temp_diff_K = (
-            self.params.trajectory_analysis_temperature_tolerance_percent / 100
+            self.parameters.trajectory_analysis_temperature_tolerance_percent
+            / 100
         ) * self.target_calculator.temperature
         current_snapshot = self.first_snapshot
         begin_snapshot = self.first_snapshot + 1
@@ -288,9 +319,9 @@ class TrajectoryAnalyzer:
         for i in range(begin_snapshot, end_snapshot):
             if self.__check_if_snapshot_is_valid(
                 self.trajectory[i],
-                self.temperatures[i],
+                self._temperatures[i],
                 self.trajectory[current_snapshot],
-                self.temperatures[current_snapshot],
+                self._temperatures[current_snapshot],
                 self.snapshot_correlation_cutoff,
                 allowed_temp_diff_K,
             ):
@@ -329,7 +360,7 @@ class TrajectoryAnalyzer:
             + self.first_snapshot
         )
         width = int(
-            self.params.trajectory_analysis_estimated_equilibrium
+            self.parameters.trajectory_analysis_estimated_equilibrium
             * np.shape(self.distance_metrics_denoised)[0]
         )
         self.distances_realspace = []
@@ -416,8 +447,8 @@ class TrajectoryAnalyzer:
     def __denoise(self, signal):
         denoised_signal = np.convolve(
             signal,
-            np.ones(self.params.trajectory_analysis_denoising_width)
-            / self.params.trajectory_analysis_denoising_width,
+            np.ones(self.parameters.trajectory_analysis_denoising_width)
+            / self.parameters.trajectory_analysis_denoising_width,
             mode="same",
         )
         return denoised_signal

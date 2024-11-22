@@ -32,11 +32,11 @@ class OFDFTInitializer:
 
     Attributes
     ----------
-    parameters : mala.Parameters
-        Internal copy of the MALA parameters object.
+    parameters : mala.mala.common.parameters.ParametersDataGeneration
+        MALA data generation parameters object.
 
     atoms : ase.Atoms
-        Internal copy of the initial atomic configuration for which an
+        Initial atomic configuration for which an
         equilibrated configuration is to be created.
 
     dftpy_configuration : dict
