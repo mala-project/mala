@@ -51,14 +51,10 @@ improves the performance of NN based ML models. Options are
 * ``minmax``: Min-Max scaling (Scale to be in range 0...1) is applied to the entire array.
 
 * ``feature-wise-standard``: Standardization (Scale to mean 0, standard
-  deviation 1) is applied to each feature dimension individually. I.e., if your
-  training data has dimensions (x,y,z,f), then each of the f rows with (x,y,z)
-  entries is scaled indiviually.
+  deviation 1) is applied to each feature dimension individually.
 
 * ``feature-wise-minmax``: Min-Max scaling (Scale to be in range 0...1) is
-  applied to each feature dimension individually. I.e., if your training data
-  has dimensions (x,y,z,f), then each of the f rows with (x,y,z) entries is
-  scaled indiviually.
+  applied to each feature dimension individually.
 
 Here, we specify that MALA should standardize the input (=descriptors)
 by feature (i.e., each entry of the vector separately on the grid) and

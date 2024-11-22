@@ -580,13 +580,13 @@ class ParametersData(ParametersBase):
               to the entire array.
             - "feature-wise-standard": Standardization (Scale to mean 0,
               standard deviation 1) is applied to each feature dimension
-              individually. I.e., if your training data has dimensions
-              (x,y,z,f), then each of the f rows with (x,y,z) entries is scaled
-              indiviually.
-            - "feature-wise-minmax": Row Min-Max scaling (Scale to be in range
+              individually.
+              I.e., if your training data has dimensions (d,f), then each
+              of the f columns with d entries is scaled indiviually.
+            - "feature-wise-minmax": Min-Max scaling (Scale to be in range
               0...1) is applied to each feature dimension individually.
-              I.e., if your training data has dimensions (x,y,z,f), then each
-              of the f rows with (x,y,z) entries is scaled indiviually.
+              I.e., if your training data has dimensions (d,f), then each
+              of the f columns with d entries is scaled indiviually.
             - "normal": (DEPRECATED) Old name for "minmax".
             - "feature-wise-normal": (DEPRECATED) Old name for
               "feature-wise-minmax"
@@ -602,13 +602,13 @@ class ParametersData(ParametersBase):
               to the entire array.
             - "feature-wise-standard": Standardization (Scale to mean 0,
               standard deviation 1) is applied to each feature dimension
-              individually. I.e., if your training data has dimensions
-              (x,y,z,f), then each of the f rows with (x,y,z) entries is scaled
-              indiviually.
-            - "feature-wise-minmax": Row Min-Max scaling (Scale to be in range
+              individually.
+              I.e., if your training data has dimensions (d,f), then each
+              of the f columns with d entries is scaled indiviually.
+            - "feature-wise-minmax": Min-Max scaling (Scale to be in range
               0...1) is applied to each feature dimension individually.
-              I.e., if your training data has dimensions (x,y,z,f), then each
-              of the f rows with (x,y,z) entries is scaled indiviually.
+              I.e., if your training data has dimensions (d,f), then each
+              of the f columns with d entries is scaled indiviually.
             - "normal": (DEPRECATED) Old name for "minmax".
             - "feature-wise-normal": (DEPRECATED) Old name for
               "feature-wise-minmax"
