@@ -107,14 +107,14 @@ class DataHandler(DataHandlerBase):
         if self.input_data_scaler is None:
             self.input_data_scaler = DataScaler(
                 self.parameters.input_rescaling_type,
-                use_ddp=self.use_ddp,
+                use_ddp=self._use_ddp,
             )
 
         self.output_data_scaler = output_data_scaler
         if self.output_data_scaler is None:
             self.output_data_scaler = DataScaler(
                 self.parameters.output_rescaling_type,
-                use_ddp=self.use_ddp,
+                use_ddp=self._use_ddp,
             )
 
         # Actual data points in the different categories.
@@ -677,7 +677,7 @@ class DataHandler(DataHandlerBase):
                     self.output_data_scaler,
                     self.descriptor_calculator,
                     self.target_calculator,
-                    self.use_ddp,
+                    self._use_ddp,
                     self.parameters._configuration["device"],
                 )
             )
@@ -689,7 +689,7 @@ class DataHandler(DataHandlerBase):
                     self.output_data_scaler,
                     self.descriptor_calculator,
                     self.target_calculator,
-                    self.use_ddp,
+                    self._use_ddp,
                     self.parameters._configuration["device"],
                 )
             )
@@ -703,7 +703,7 @@ class DataHandler(DataHandlerBase):
                         self.output_data_scaler,
                         self.descriptor_calculator,
                         self.target_calculator,
-                        self.use_ddp,
+                        self._use_ddp,
                         self.parameters._configuration["device"],
                         input_requires_grad=True,
                     )
@@ -747,7 +747,7 @@ class DataHandler(DataHandlerBase):
                             self.output_data_scaler,
                             self.descriptor_calculator,
                             self.target_calculator,
-                            self.use_ddp,
+                            self._use_ddp,
                         )
                     )
                 if snapshot.snapshot_function == "va":
@@ -761,7 +761,7 @@ class DataHandler(DataHandlerBase):
                             self.output_data_scaler,
                             self.descriptor_calculator,
                             self.target_calculator,
-                            self.use_ddp,
+                            self._use_ddp,
                         )
                     )
                 if snapshot.snapshot_function == "te":
@@ -775,7 +775,7 @@ class DataHandler(DataHandlerBase):
                             self.output_data_scaler,
                             self.descriptor_calculator,
                             self.target_calculator,
-                            self.use_ddp,
+                            self._use_ddp,
                             input_requires_grad=True,
                         )
                     )
