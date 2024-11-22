@@ -7,6 +7,7 @@ from mala.network.hyperparameter_optuna import HyperparameterOptuna
 from mala.network.hyperparameter_oat import HyperparameterOAT
 from mala.network.network import Network
 from mala.network.trainer import Trainer
+from mala.common.parameters import Parameters
 from mala import printout
 
 
@@ -29,7 +30,7 @@ class ObjectiveBase:
         data_handler : mala.datahandling.data_handler.DataHandler
             datahandler to be used during the hyperparameter optimization.
         """
-        self.params = params
+        self.params: Parameters = params
         self.data_handler = data_handler
 
         # We need to find out if we have to reparametrize the lists with the

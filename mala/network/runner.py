@@ -46,7 +46,7 @@ class Runner:
         self.parameters_full: Parameters = params
         self.parameters: ParametersRunning = params.running
         self.network = network
-        self.data = data
+        self.data: DataHandler = data
         self.__prepare_to_run()
 
     def _calculate_errors(
