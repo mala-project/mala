@@ -45,7 +45,7 @@ class TestTrainingCheckpoint:
             learning_rate=0.1,
         )
         trainer.train_network()
-        original_learning_rate = trainer.optimizer.param_groups[0]["lr"]
+        original_learning_rate = trainer._optimizer.param_groups[0]["lr"]
 
         # Now do the same, but cut at epoch 22 and see if it recovers the
         # correct result.
@@ -58,7 +58,7 @@ class TestTrainingCheckpoint:
         trainer.train_network()
         trainer = self.__resume_checkpoint(test_checkpoint_name, 40)
         trainer.train_network()
-        new_learning_rate = trainer.optimizer.param_groups[0]["lr"]
+        new_learning_rate = trainer._optimizer.param_groups[0]["lr"]
         assert np.isclose(
             original_learning_rate, new_learning_rate, atol=accuracy
         )

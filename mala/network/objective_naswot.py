@@ -46,10 +46,10 @@ class ObjectiveNASWOT(ObjectiveBase):
         batch_size=None,
     ):
         super(ObjectiveNASWOT, self).__init__(search_parameters, data_handler)
-        self.trial_type = trial_type
-        self.batch_size = batch_size
-        if self.batch_size is None:
-            self.batch_size = search_parameters.running.mini_batch_size
+        self._trial_type = trial_type
+        self._batch_size = batch_size
+        if self._batch_size is None:
+            self._batch_size = search_parameters.running.mini_batch_size
 
     def __call__(self, trial):
         """
@@ -83,7 +83,7 @@ class ObjectiveNASWOT(ObjectiveBase):
                 self._data_handler.mix_datasets()
             loader = DataLoader(
                 self._data_handler.training_data_sets[0],
-                batch_size=self.batch_size,
+                batch_size=self._batch_size,
                 shuffle=do_shuffle,
             )
             jac = ObjectiveNASWOT.__get_batch_jacobian(net, loader, device)
