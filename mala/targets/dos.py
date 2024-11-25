@@ -28,6 +28,11 @@ class DOS(Target):
     ----------
     params : mala.common.parameters.Parameters
         Parameters used to create this TargetBase object.
+
+    Attributes
+    ----------
+    density_of_states : numpy.ndarray
+        Electronic density of states.
     """
 
     ##############################
@@ -248,6 +253,12 @@ class DOS(Target):
 
         This is the generic interface for cached target quantities.
         It should work for all implemented targets.
+
+        Returns
+        -------
+        density_of_states : numpy.ndarray
+            Electronic density of states.
+
         """
         return self.density_of_states
 

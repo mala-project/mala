@@ -29,12 +29,23 @@ from mala.descriptors.atomic_density import AtomicDensity
 
 
 class Density(Target):
-    """Postprocessing / parsing functions for the electronic density.
+    """
+    Postprocessing / parsing functions for the electronic density.
 
     Parameters
     ----------
     params : mala.common.parameters.Parameters
         Parameters used to create this Target object.
+
+    Attributes
+    ----------
+    density : numpy.ndarray
+        Electronic charge density as a volumetric array. May be 4D or 2D
+        depending on workflow.
+
+    te_mutex : bool
+        Total energy module mutual exclusion token used to make sure there
+        the total energy module is not initialized twice.
     """
 
     ##############################
@@ -278,6 +289,12 @@ class Density(Target):
 
         This is the generic interface for cached target quantities.
         It should work for all implemented targets.
+
+        Returns
+        -------
+        density : numpy.ndarray
+            Electronic charge density as a volumetric array. May be 4D or 2D
+            depending on workflow.
         """
         return self.density
 
@@ -407,7 +424,8 @@ class Density(Target):
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file ", path, min_verbosity=0)
-        # automatically convert units if they are None since cube files take atomic units
+        # automatically convert units if they are None since cube files take
+        # atomic units
         if units is None:
             units = "1/Bohr^3"
         if units != "1/Bohr^3":

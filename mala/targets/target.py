@@ -34,11 +34,66 @@ class Target(PhysicalData):
     (i.e. the quantity the NN will learn to predict) from a specified file
     format and performs postprocessing calculations on the quantity.
 
+    Target parsers often read DFT reference information.
+
     Parameters
     ----------
     params : mala.common.parameters.Parameters or
     mala.common.parameters.ParametersTargets
         Parameters used to create this Target object.
+
+    Attributes
+    ----------
+    atomic_forces_dft : numpy.ndarray
+        Atomic forces as per DFT reference file.
+
+    atoms : ase.Atoms
+        ASE atoms object used for calculations.
+
+    band_energy_dft_calculation
+        Band energy as per DFT reference file.
+
+    electrons_per_atom : int
+        Electrons per atom, usually determined by DFT reference file.
+
+    entropy_contribution_dft_calculation : float
+        Electronic entropy contribution as per DFT reference file.
+
+    fermi_energy_dft : float
+        Fermi energy as per DFT reference file.
+
+    kpoints : list
+        k-grid used for MALA calculations. Managed internally.
+
+    local_grid : list
+        Size of local grid (in MPI mode).
+
+    number_of_electrons_exact
+        Exact number of electrons, usually given via DFT reference file.
+
+    number_of_electrons_from_eigenvals : float
+        Number of electrons as calculated from DFT reference eigenvalues.
+
+    parameters : mala.common.parameters.ParametersTarget
+        MALA target calculation parameters.
+
+    qe_input_data : dict
+        Quantum ESPRESSO data dictionary, read from DFT reference file and
+        used for the total energy module.
+
+    qe_pseudopotentials : list
+        List of Quantum ESPRESSO pseudopotentials, read from DFT reference file
+         and used for the total energy module.
+
+    save_target_data : bool
+        Control whether target data will be saved. Can be important for I/O
+        applications. Managed internally, default is True.
+
+    temperature
+    total_energy_contributions_dft_calculation
+    total_energy_dft_calculation
+    voxel
+    y_planes
     """
 
     ##############################
@@ -1608,7 +1663,7 @@ class Target(PhysicalData):
             "electrons_per_atom",
             default_value=self.electrons_per_atom,
         )
-        self.number_of_electrons_from_eigenval = (
+        self.number_of_electrons_from_eigenvals = (
             self._get_attribute_if_attribute_exists(
                 iteration,
                 "number_of_electrons_from_eigenvals",
