@@ -36,22 +36,15 @@ class Density(Target):
     ----------
     params : mala.common.parameters.Parameters
         Parameters used to create this Target object.
-
-    Attributes
-    ----------
-    density : numpy.ndarray
-        Electronic charge density as a volumetric array. May be 4D or 2D
-        depending on workflow.
-
-    te_mutex : bool
-        Total energy module mutual exclusion token used to make sure there
-        the total energy module is not initialized twice.
     """
 
     ##############################
     # Class attributes
     ##############################
-
+    """
+    Total energy module mutual exclusion token used to make sure there
+    the total energy module is not initialized twice.
+    """
     te_mutex = False
 
     ##############################

@@ -27,7 +27,7 @@ from mala.descriptors.atomic_density import AtomicDensity
 
 
 class Target(PhysicalData):
-    """
+    r"""
     Base class for all target quantity parser.
 
     Target parsers read the target quantity
@@ -76,10 +76,6 @@ class Target(PhysicalData):
 
     parameters : mala.common.parameters.ParametersTarget
         MALA target calculation parameters.
-
-    qe_input_data : dict
-        Quantum ESPRESSO data dictionary, read from DFT reference file and
-        used for the total energy module.
 
     qe_pseudopotentials : list
         List of Quantum ESPRESSO pseudopotentials, read from DFT reference file

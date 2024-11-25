@@ -45,10 +45,6 @@ class Snapshot(JSONSerializable):
 
     Attributes
     ----------
-    calculation_output : string
-        File with the output of the original snapshot calculation. This is
-        only needed when testing multiple snapshots.
-
     grid_dimensions :  list
         Grid dimension [x,y,z].
 

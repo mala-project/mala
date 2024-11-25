@@ -320,11 +320,6 @@ class ParametersDescriptors(ParametersBase):
         bispectrum descriptors. Default value for jmax is 5, so default value
         for twojmax is 10.
 
-    lammps_compute_file : string
-        Bispectrum calculation: LAMMPS input file that is used to calculate the
-        Bispectrum descriptors. If this string is empty, the standard LAMMPS input
-        file found in this repository will be used (recommended).
-
     descriptors_contain_xyz : bool
         Legacy option. If True, it is assumed that the first three entries of
         the descriptor vector are the xyz coordinates and they are cut from the
@@ -348,11 +343,6 @@ class ParametersDescriptors(ParametersBase):
         correctly during inference based on model parameters. This parameter
         mainly exists for debugging purposes. If the atomic density is instead
         used for model training itself, this parameter needs to be set.
-
-    descriptor_type : str
-        Type of Descriptors used for model training. Supported are "Bispectrum"
-        and "AtomicDensity", although only the former is currently used for
-        published models.
 
     lammps_compute_file : str
         Path to a LAMMPS compute file for the bispectrum descriptor
@@ -750,13 +740,6 @@ class ParametersRunning(ParametersBase):
         If True, then upon creating logging files, these will be saved
         in a subfolder of logging_dir labelled with the starting date
         of the logging, to avoid having to change input scripts often.
-
-    inference_data_grid : list
-        List holding the grid to be used for inference in the form of
-        [x,y,z].
-
-    use_mixed_precision : bool
-        If True, mixed precision computation (via AMP) will be used.
 
     training_log_interval : int
         Determines how often detailed performance info is printed during

@@ -43,7 +43,6 @@ class Trainer(Runner):
 
     Attributes
     ----------
-
     final_validation_loss : float
         Validation loss after training
 

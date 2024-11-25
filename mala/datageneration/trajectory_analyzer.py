@@ -61,9 +61,6 @@ class TrajectoryAnalyzer:
         First snapshot to be considered during equilibration analysis (i.e.,
         after pruning).
 
-    first_snapshot : int
-        First snapshot that can be considered to be equilibrated.
-
     last_considered_snapshot : int
         Last snapshot to be considered during equilibration analysis (i.e.,
         after pruning).

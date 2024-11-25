@@ -34,13 +34,6 @@ class LDOS(Target):
     ----------
     params : mala.common.parameters.Parameters
         Parameters used to create this LDOS object.
-
-    Attributes
-    ----------
-
-    local_density_of_states : numpy.ndarray
-        Electronic local density of states as a volumetric array.
-        May be 4D- or 2D depending on workflow.
     """
 
     ##############################
@@ -248,6 +241,7 @@ class LDOS(Target):
         It should work for all implemented targets.
 
         Returns
+        -------
         local_density_of_states : numpy.ndarray
             Electronic local density of states as a volumetric array.
             May be 4D- or 2D depending on workflow.

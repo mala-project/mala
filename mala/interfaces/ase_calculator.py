@@ -46,9 +46,6 @@ class MALA(Calculator):
 
     last_energy_contributions : dict
         Contains all total energy contributions for the last prediction.
-
-    implemented_properties : list
-        List of which properties can be computed by this calculator.
     """
 
     implemented_properties = ["energy"]
