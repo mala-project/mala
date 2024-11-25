@@ -89,11 +89,30 @@ class Target(PhysicalData):
         Control whether target data will be saved. Can be important for I/O
         applications. Managed internally, default is True.
 
-    temperature
-    total_energy_contributions_dft_calculation
-    total_energy_dft_calculation
-    voxel
-    y_planes
+    temperature : float
+        Temperature used for all computations. By default read from DFT
+        reference file, but can freely be changed from the outside.
+
+    total_energy_contributions_dft_calculation : dict
+        Dictionary holding contributions to total free energy not given
+        as individual properties, as read from the DFT reference file.
+        Contains:
+
+            - "one_electron_contribution", :math:`n\,V_\mathrm{xc}` plus band
+              energy
+            - "hartree_contribution", :math:`E_\mathrm{H}`
+            - "xc_contribution", :math:`E_\mathrm{xc}`
+            - "ewald_contribution", :math:`E_\mathrm{Ewald}`
+
+    total_energy_dft_calculation : float
+        Total free energy as read from DFT reference file.
+    voxel : ase.cell.Cell
+        Voxel to be used for grid intergation. Reflects the
+        symmetry of the simulation cell. Calculated from DFT reference data.
+
+    y_planes : int
+        Number of y_planes used for Quantum ESPRESSO parallelization. Handled
+        internally.
     """
 
     ##############################
@@ -153,7 +172,6 @@ class Target(PhysicalData):
         Get the necessary arguments to call __new__.
 
         Used for pickling.
-
 
         Returns
         -------
@@ -847,7 +865,14 @@ class Target(PhysicalData):
         raise Exception("No method implement to calculate an energy grid.")
 
     def get_real_space_grid(self):
-        """Get the real space grid."""
+        """
+        Get the real space grid.
+
+        Returns
+        -------
+        grid3D : numpy.ndarray
+            Numpy array holding the entire grid.
+        """
         grid3D = np.zeros(
             (
                 self.grid_dimensions[0],
@@ -1429,8 +1454,7 @@ class Target(PhysicalData):
             None.
 
         mpi_rank : int
-            Rank within MPI
-
+            Rank within MPI.
         """
         # Specify grid dimensions, if any are given.
         if (

@@ -600,7 +600,7 @@ class Density(Target):
 
         voxel : ase.cell.Cell
             Voxel to be used for grid intergation. Needs to reflect the
-            symmetry of the simulation cell. In Bohr.
+            symmetry of the simulation cell.
 
         integration_method : str
             Integration method used to integrate density on the grid.
