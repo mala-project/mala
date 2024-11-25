@@ -165,6 +165,8 @@ class DataHandler(DataHandlerBase):
         self.nr_training_snapshots = 0
         self.nr_test_snapshots = 0
         self.nr_validation_snapshots = 0
+        self.input_data_scaler.reset()
+        self.output_data_scaler.reset()
         super(DataHandler, self).clear_data()
 
     # Preparing data
@@ -338,7 +340,10 @@ class DataHandler(DataHandlerBase):
     ######################
 
     def raw_numpy_to_converted_scaled_tensor(
-        self, numpy_array, data_type, units, convert3Dto1D=False
+        self,
+        numpy_array,
+        data_type,
+        units,
     ):
         """
         Transform a raw numpy array into a scaled torch tensor.
@@ -358,10 +363,6 @@ class DataHandler(DataHandlerBase):
         units : string
             Units of the data that is processed.
 
-        convert3Dto1D : bool
-            If True (default: False), then a (x,y,z,dim) array is transformed
-            into a (x*y*z,dim) array.
-
         Returns
         -------
         converted_tensor: torch.Tensor
@@ -379,12 +380,12 @@ class DataHandler(DataHandlerBase):
         )
 
         # If desired, the dimensions can be changed.
-        if convert3Dto1D:
+        if len(np.shape(numpy_array)) == 4:
             if data_type == "in":
                 data_dimension = self.input_dimension
             else:
                 data_dimension = self.output_dimension
-            grid_size = np.prod(numpy_array[0:3])
+            grid_size = np.prod(np.shape(numpy_array)[0:3])
             desired_dimensions = [grid_size, data_dimension]
         else:
             desired_dimensions = None
@@ -855,7 +856,6 @@ class DataHandler(DataHandlerBase):
         # scaling. This should save some performance.
 
         if self.parameters.use_lazy_loading:
-            self.input_data_scaler.start_incremental_fitting()
             # We need to perform the data scaling over the entirety of the
             # training data.
             for snapshot in self.parameters.snapshot_directories_list:
@@ -893,9 +893,7 @@ class DataHandler(DataHandlerBase):
                         [snapshot.grid_size, self.input_dimension]
                     )
                     tmp = torch.from_numpy(tmp).float()
-                    self.input_data_scaler.incremental_fit(tmp)
-
-            self.input_data_scaler.finish_incremental_fitting()
+                    self.input_data_scaler.partial_fit(tmp)
 
         else:
             self.__load_data("training", "inputs")
@@ -916,7 +914,6 @@ class DataHandler(DataHandlerBase):
 
         if self.parameters.use_lazy_loading:
             i = 0
-            self.output_data_scaler.start_incremental_fitting()
             # We need to perform the data scaling over the entirety of the
             # training data.
             for snapshot in self.parameters.snapshot_directories_list:
@@ -952,9 +949,8 @@ class DataHandler(DataHandlerBase):
                         [snapshot.grid_size, self.output_dimension]
                     )
                     tmp = torch.from_numpy(tmp).float()
-                    self.output_data_scaler.incremental_fit(tmp)
+                    self.output_data_scaler.partial_fit(tmp)
                 i += 1
-            self.output_data_scaler.finish_incremental_fitting()
 
         else:
             self.__load_data("training", "outputs")

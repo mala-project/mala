@@ -30,7 +30,7 @@ class TestLazyLoading:
         ####################
         test_parameters = Parameters()
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.descriptors.bispectrum_twojmax = 11
         test_parameters.targets.ldos_gridsize = 10
@@ -53,9 +53,9 @@ class TestLazyLoading:
         training_tester = []
         for scalingtype in [
             "standard",
-            "normal",
+            "minmax",
             "feature-wise-standard",
-            "feature-wise-normal",
+            "feature-wise-minmax",
         ]:
             comparison = [scalingtype]
             for ll_type in [True, False]:
@@ -125,7 +125,7 @@ class TestLazyLoading:
                         data_handler.output_data_scaler.total_std
                         / data_handler.nr_training_data
                     )
-                elif scalingtype == "normal":
+                elif scalingtype == "minmax":
                     torch.manual_seed(2002)
                     this_result.append(
                         data_handler.input_data_scaler.total_max
@@ -188,7 +188,7 @@ class TestLazyLoading:
                             0
                         ].grid_size
                     )
-                elif scalingtype == "feature-wise-normal":
+                elif scalingtype == "feature-wise-minmax":
                     this_result.append(
                         torch.mean(data_handler.input_data_scaler.maxs)
                     )
@@ -255,7 +255,7 @@ class TestLazyLoading:
         test_parameters = Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.network.layer_activations = ["ReLU"]
         test_parameters.manual_seed = 1234
         test_parameters.running.max_number_epochs = 100

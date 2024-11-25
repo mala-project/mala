@@ -137,7 +137,7 @@ class TestTrainingCheckpoint:
 
         # Specify the data scaling.
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
 
         # Specify the used activation function.
         test_parameters.network.layer_activations = ["ReLU"]

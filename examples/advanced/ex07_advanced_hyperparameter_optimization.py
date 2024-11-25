@@ -17,7 +17,7 @@ def optimize_hyperparameters(hyper_optimizer):
 
     parameters = mala.Parameters()
     parameters.data.input_rescaling_type = "feature-wise-standard"
-    parameters.data.output_rescaling_type = "normal"
+    parameters.data.output_rescaling_type = "minmax"
     parameters.running.max_number_epochs = 10
     parameters.running.mini_batch_size = 40
     parameters.running.learning_rate = 0.00001

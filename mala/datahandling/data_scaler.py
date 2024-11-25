@@ -6,13 +6,19 @@ import torch
 import torch.distributed as dist
 
 from mala.common.parameters import printout
+from mala.common.parallelizer import parallel_warn
 
 
+# IMPORTANT: If you change the docstrings, make sure to also change them
+# in the ParametersData subclass, because users do usually not interact
+# with this class directly.
 class DataScaler:
     """Scales input and output data.
 
     Sort of emulates the functionality of the scikit-learn library, but by
-    implementing the class by ourselves we have more freedom.
+    implementing the class by ourselves we have more freedom. Specifically
+    assumes data of the form (d,f), where d=x*y*z, i.e., the product of spatial
+    dimensions, and f is the feature dimension.
 
     Parameters
     ----------
@@ -20,14 +26,23 @@ class DataScaler:
         Specifies how scaling should be performed.
         Options:
 
-        - "None": No normalization is applied.
+        - "None": No scaling is applied.
         - "standard": Standardization (Scale to mean 0,
-          standard deviation 1)
-        - "normal": Min-Max scaling (Scale to be in range 0...1)
-        - "feature-wise-standard": Row Standardization (Scale to mean 0,
-          standard deviation 1)
-        - "feature-wise-normal": Row Min-Max scaling (Scale to be in range
-          0...1)
+          standard deviation 1) is applied to the entire array.
+        - "minmax": Min-Max scaling (Scale to be in range 0...1) is applied
+          to the entire array.
+        - "feature-wise-standard": Standardization (Scale to mean 0,
+          standard deviation 1) is applied to each feature dimension
+          individually.
+          I.e., if your training data has dimensions (d,f), then each
+          of the f columns with d entries is scaled indiviually.
+        - "feature-wise-minmax": Min-Max scaling (Scale to be in range
+          0...1) is applied to each feature dimension individually.
+          I.e., if your training data has dimensions (d,f), then each
+          of the f columns with d entries is scaled indiviually.
+        - "normal": (DEPRECATED) Old name for "minmax".
+        - "feature-wise-normal": (DEPRECATED) Old name for
+          "feature-wise-minmax"
 
     use_ddp : bool
         If True, the DataScaler will use ddp to check that data is
@@ -85,7 +100,7 @@ class DataScaler:
         self.use_ddp = use_ddp
         self.typestring = typestring
         self.scale_standard = False
-        self.scale_normal = False
+        self.scale_minmax = False
         self.feature_wise = False
         self.cantransform = False
         self.__parse_typestring()
@@ -104,23 +119,32 @@ class DataScaler:
     def __parse_typestring(self):
         """Parse the typestring to class attributes."""
         self.scale_standard = False
-        self.scale_normal = False
+        self.scale_minmax = False
         self.feature_wise = False
 
         if "standard" in self.typestring:
             self.scale_standard = True
         if "normal" in self.typestring:
-            self.scale_normal = True
+            parallel_warn(
+                "Options 'normal' and 'feature-wise-normal' will be "
+                "deprecated, starting in MALA v1.4.0. Please use 'minmax' and "
+                "'feature-wise-minmax' instead.",
+                min_verbosity=0,
+                category=FutureWarning,
+            )
+            self.scale_minmax = True
+        if "minmax" in self.typestring:
+            self.scale_minmax = True
         if "feature-wise" in self.typestring:
             self.feature_wise = True
-        if self.scale_standard is False and self.scale_normal is False:
+        if self.scale_standard is False and self.scale_minmax is False:
             printout("No data rescaling will be performed.", min_verbosity=1)
             self.cantransform = True
             return
-        if self.scale_standard is True and self.scale_normal is True:
+        if self.scale_standard is True and self.scale_minmax is True:
             raise Exception("Invalid input data rescaling.")
 
-    def start_incremental_fitting(self):
+    def reset(self):
         """
         Start the incremental calculation of scaling parameters.
 
@@ -128,7 +152,7 @@ class DataScaler:
         """
         self.total_data_count = 0
 
-    def incremental_fit(self, unscaled):
+    def partial_fit(self, unscaled):
         """
         Add data to the incremental calculation of scaling parameters.
 
@@ -140,7 +164,16 @@ class DataScaler:
             Data that is to be added to the fit.
 
         """
-        if self.scale_standard is False and self.scale_normal is False:
+        if len(unscaled.size()) != 2:
+            raise ValueError(
+                "MALA DataScaler are designed for 2D-arrays, "
+                "while a {0}D-array has been provided.".format(
+                    len(unscaled.size())
+                )
+            )
+
+        if self.scale_standard is False and self.scale_minmax is False:
+            self.cantransform = True
             return
         else:
             with torch.no_grad():
@@ -189,7 +222,7 @@ class DataScaler:
                             self.stds = new_std
                         self.total_data_count += current_data_count
 
-                    if self.scale_normal:
+                    if self.scale_minmax:
                         new_maxs = torch.max(unscaled, 0, keepdim=True)
                         if list(self.maxs.size())[0] > 0:
                             for i in range(list(new_maxs.values.size())[1]):
@@ -252,7 +285,7 @@ class DataScaler:
                         self.total_std = torch.sqrt(self.total_std)
                         self.total_data_count += current_data_count
 
-                    if self.scale_normal:
+                    if self.scale_minmax:
                         new_max = torch.max(unscaled)
                         if new_max > self.total_max:
                             self.total_max = new_max
@@ -260,13 +293,6 @@ class DataScaler:
                         new_min = torch.min(unscaled)
                         if new_min < self.total_min:
                             self.total_min = new_min
-
-    def finish_incremental_fitting(self):
-        """
-        Indicate that all data has been added to the incremental calculation.
-
-        This is necessary for lazy loading.
-        """
         self.cantransform = True
 
     def fit(self, unscaled):
@@ -279,7 +305,15 @@ class DataScaler:
             Data that on which the scaling will be calculated.
 
         """
-        if self.scale_standard is False and self.scale_normal is False:
+        if len(unscaled.size()) != 2:
+            raise ValueError(
+                "MALA DataScaler are designed for 2D-arrays, "
+                "while a {0}D-array has been provided.".format(
+                    len(unscaled.size())
+                )
+            )
+
+        if self.scale_standard is False and self.scale_minmax is False:
             return
         else:
             with torch.no_grad():
@@ -293,7 +327,7 @@ class DataScaler:
                         self.means = torch.mean(unscaled, 0, keepdim=True)
                         self.stds = torch.std(unscaled, 0, keepdim=True)
 
-                    if self.scale_normal:
+                    if self.scale_minmax:
                         self.maxs = torch.max(unscaled, 0, keepdim=True).values
                         self.mins = torch.min(unscaled, 0, keepdim=True).values
 
@@ -307,13 +341,13 @@ class DataScaler:
                         self.total_mean = torch.mean(unscaled)
                         self.total_std = torch.std(unscaled)
 
-                    if self.scale_normal:
+                    if self.scale_minmax:
                         self.total_max = torch.max(unscaled)
                         self.total_min = torch.min(unscaled)
 
         self.cantransform = True
 
-    def transform(self, unscaled):
+    def transform(self, unscaled, copy=False):
         """
         Transform data from unscaled to scaled.
 
@@ -325,13 +359,29 @@ class DataScaler:
         unscaled : torch.Tensor
             Real world data.
 
+        copy : bool
+            If False, data is modified in-place. If True, a copy of the
+            data is modified. Default is False.
+
         Returns
         -------
         scaled : torch.Tensor
             Scaled data.
         """
+        if len(unscaled.size()) != 2:
+            raise ValueError(
+                "MALA DataScaler are designed for 2D-arrays, "
+                "while a {0}D-array has been provided.".format(
+                    len(unscaled.size())
+                )
+            )
+
+        # Backward compatability.
+        if not hasattr(self, "scale_minmax") and hasattr(self, "scale_normal"):
+            self.scale_minmax = self.scale_normal
+
         # First we need to find out if we even have to do anything.
-        if self.scale_standard is False and self.scale_normal is False:
+        if self.scale_standard is False and self.scale_minmax is False:
             pass
 
         elif self.cantransform is False:
@@ -342,6 +392,8 @@ class DataScaler:
 
         # Perform the actual scaling, but use no_grad to make sure
         # that the next couple of iterations stay untracked.
+        scaled = unscaled.clone() if copy else unscaled
+
         with torch.no_grad():
             if self.feature_wise:
 
@@ -350,12 +402,12 @@ class DataScaler:
                 ##########################
 
                 if self.scale_standard:
-                    unscaled -= self.means
-                    unscaled /= self.stds
+                    scaled -= self.means
+                    scaled /= self.stds
 
-                if self.scale_normal:
-                    unscaled -= self.mins
-                    unscaled /= self.maxs - self.mins
+                if self.scale_minmax:
+                    scaled -= self.mins
+                    scaled /= self.maxs - self.mins
 
             else:
 
@@ -364,14 +416,16 @@ class DataScaler:
                 ##########################
 
                 if self.scale_standard:
-                    unscaled -= self.total_mean
-                    unscaled /= self.total_std
+                    scaled -= self.total_mean
+                    scaled /= self.total_std
 
-                if self.scale_normal:
-                    unscaled -= self.total_min
-                    unscaled /= self.total_max - self.total_min
+                if self.scale_minmax:
+                    scaled -= self.total_min
+                    scaled /= self.total_max - self.total_min
 
-    def inverse_transform(self, scaled, as_numpy=False):
+        return scaled
+
+    def inverse_transform(self, scaled, copy=False, as_numpy=False):
         """
         Transform data from scaled to unscaled.
 
@@ -384,7 +438,11 @@ class DataScaler:
             Scaled data.
 
         as_numpy : bool
-            If True, a numpy array is returned, otherwsie.
+            If True, a numpy array is returned, otherwise a torch tensor.
+
+        copy : bool
+            If False, data is modified in-place. If True, a copy of the
+            data is modified. Default is False.
 
         Returns
         -------
@@ -392,9 +450,25 @@ class DataScaler:
             Real world data.
 
         """
+        if len(scaled.size()) != 2:
+            raise ValueError(
+                "MALA DataScaler are designed for 2D-arrays, "
+                "while a {0}D-array has been provided.".format(
+                    len(scaled.size())
+                )
+            )
+
+        # Backward compatability.
+        if not hasattr(self, "scale_minmax") and hasattr(self, "scale_normal"):
+            self.scale_minmax = self.scale_normal
+
+        # Perform the actual scaling, but use no_grad to make sure
+        # that the next couple of iterations stay untracked.
+        unscaled = scaled.clone() if copy else scaled
+
         # First we need to find out if we even have to do anything.
-        if self.scale_standard is False and self.scale_normal is False:
-            unscaled = scaled
+        if self.scale_standard is False and self.scale_minmax is False:
+            pass
 
         else:
             if self.cantransform is False:
@@ -413,12 +487,12 @@ class DataScaler:
                     ##########################
 
                     if self.scale_standard:
-                        unscaled = (scaled * self.stds) + self.means
+                        unscaled *= self.stds
+                        unscaled += self.means
 
-                    if self.scale_normal:
-                        unscaled = (
-                            scaled * (self.maxs - self.mins)
-                        ) + self.mins
+                    if self.scale_minmax:
+                        unscaled *= self.maxs - self.mins
+                        unscaled += self.mins
 
                 else:
 
@@ -427,13 +501,13 @@ class DataScaler:
                     ##########################
 
                     if self.scale_standard:
-                        unscaled = (scaled * self.total_std) + self.total_mean
+                        unscaled *= self.total_std
+                        unscaled += self.total_mean
 
-                    if self.scale_normal:
-                        unscaled = (
-                            scaled * (self.total_max - self.total_min)
-                        ) + self.total_min
-        #
+                    if self.scale_minmax:
+                        unscaled *= self.total_max - self.total_min
+                        unscaled += self.total_min
+
         if as_numpy:
             return unscaled.detach().numpy().astype(np.float64)
         else:

@@ -13,7 +13,7 @@ tensorboard. The training is a basic MALA network training.
 
 parameters = mala.Parameters()
 parameters.data.input_rescaling_type = "feature-wise-standard"
-parameters.data.output_rescaling_type = "normal"
+parameters.data.output_rescaling_type = "minmax"
 parameters.targets.ldos_gridsize = 11
 parameters.targets.ldos_gridspacing_ev = 2.5
 parameters.targets.ldos_gridoffset_ev = -5
