@@ -16,22 +16,19 @@ class ObjectiveBase:
     Represents the objective function of a training process.
 
     This is usually the result of a training of a network.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this objective.
+
+    data_handler : mala.datahandling.data_handler.DataHandler
+        datahandler to be used during the hyperparameter optimization.
     """
 
     def __init__(self, params, data_handler):
-        """
-        Create an ObjectiveBase object.
-
-        Parameters
-        ----------
-        params : mala.common.parametes.Parameters
-            Parameters used to create this objective.
-
-        data_handler : mala.datahandling.data_handler.DataHandler
-            datahandler to be used during the hyperparameter optimization.
-        """
         self.params: Parameters = params
-        self.data_handler = data_handler
+        self._data_handler = data_handler
 
         # We need to find out if we have to reparametrize the lists with the
         # layers and the activations.
@@ -59,17 +56,17 @@ class ObjectiveBase:
                 "the range of neurons or number of layers is missing. "
                 "This input will be ignored."
             )
-        self.optimize_layer_list = contains_single_layer or (
+        self._optimize_layer_list = contains_single_layer or (
             contains_multiple_layer_neurons and contains_multiple_layers_count
         )
-        self.optimize_activation_list = list(
+        self._optimize_activation_list = list(
             map(
                 lambda p: "layer_activation" in p.name,
                 self.params.hyperparameters.hlist,
             )
         ).count(True)
 
-        self.trial_type = self.params.hyperparameters.hyper_opt_method
+        self._trial_type = self.params.hyperparameters.hyper_opt_method
 
     def __call__(self, trial):
         """
@@ -84,7 +81,7 @@ class ObjectiveBase:
         # Parse the parameters included in the trial.
         self.parse_trial(trial)
         if (
-            self.trial_type == "optuna"
+            self._trial_type == "optuna"
             and self.params.hyperparameters.pruner == "naswot"
         ):
             if trial.should_prune():
@@ -97,12 +94,12 @@ class ObjectiveBase:
         ):
             test_network = Network(self.params)
             test_trainer = Trainer(
-                self.params, test_network, self.data_handler
+                self.params, test_network, self._data_handler
             )
             test_trainer.train_network()
             final_validation_loss.append(test_trainer.final_validation_loss)
             if (
-                self.trial_type == "optuna"
+                self._trial_type == "optuna"
                 and self.params.hyperparameters.pruner == "multi_training"
             ):
 
@@ -149,9 +146,9 @@ class ObjectiveBase:
             A trial is a set of hyperparameters; can be an optuna based
             trial or simply a OAT compatible list.
         """
-        if self.trial_type == "optuna":
+        if self._trial_type == "optuna":
             self.parse_trial_optuna(trial)
-        elif self.trial_type == "oat":
+        elif self._trial_type == "oat":
             self.parse_trial_oat(trial)
         else:
             raise Exception(
@@ -168,11 +165,11 @@ class ObjectiveBase:
         trial : optuna.trial.Trial.
             A set of hyperparameters encoded by optuna.
         """
-        if self.optimize_layer_list:
+        if self._optimize_layer_list:
             self.params.network.layer_sizes = [
-                self.data_handler.input_dimension
+                self._data_handler.input_dimension
             ]
-        if self.optimize_activation_list > 0:
+        if self._optimize_activation_list > 0:
             self.params.network.layer_activations = []
 
         # Some layers may have been turned off by optuna.
@@ -275,9 +272,9 @@ class ObjectiveBase:
                     )
                 layer_counter += 1
 
-        if self.optimize_layer_list:
+        if self._optimize_layer_list:
             self.params.network.layer_sizes.append(
-                self.data_handler.output_dimension
+                self._data_handler.output_dimension
             )
 
     def parse_trial_oat(self, trial):
@@ -289,12 +286,12 @@ class ObjectiveBase:
         trial : numpy.array
             Row in an orthogonal array which respresents current trial.
         """
-        if self.optimize_layer_list:
+        if self._optimize_layer_list:
             self.params.network.layer_sizes = [
-                self.data_handler.input_dimension
+                self._data_handler.input_dimension
             ]
 
-        if self.optimize_activation_list:
+        if self._optimize_activation_list:
             self.params.network.layer_activations = []
 
         # Some layers may have been turned off by optuna.
@@ -405,7 +402,7 @@ class ObjectiveBase:
                     )
                 layer_counter += 1
 
-        if self.optimize_layer_list:
+        if self._optimize_layer_list:
             self.params.network.layer_sizes.append(
-                self.data_handler.output_dimension
+                self._data_handler.output_dimension
             )

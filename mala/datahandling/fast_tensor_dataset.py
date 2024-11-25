@@ -26,7 +26,6 @@ class FastTensorDataset(torch.utils.data.Dataset):
     """
 
     def __init__(self, batch_size, *tensors):
-        """ """
         super(FastTensorDataset).__init__()
         self.batch_size = batch_size
         self._tensors = tensors

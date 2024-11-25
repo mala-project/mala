@@ -32,11 +32,19 @@ parameters.running.validate_every_n_epochs = 5
 
 data_handler = mala.DataHandler(parameters)
 data_handler.add_snapshot(
-    "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path, "tr",
+    "Be_snapshot0.in.npy",
+    data_path,
+    "Be_snapshot0.out.npy",
+    data_path,
+    "tr",
     calculation_output_file=os.path.join(data_path, "Be_snapshot0.out"),
 )
 data_handler.add_snapshot(
-    "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path, "va",
+    "Be_snapshot1.in.npy",
+    data_path,
+    "Be_snapshot1.out.npy",
+    data_path,
+    "va",
     calculation_output_file=os.path.join(data_path, "Be_snapshot1.out"),
 )
 data_handler.prepare_data()

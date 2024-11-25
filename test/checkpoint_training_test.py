@@ -73,7 +73,7 @@ class TestTrainingCheckpoint:
             learning_rate=0.1,
         )
         trainer.train_network()
-        original_nr_epochs = trainer.last_epoch
+        original_nr_epochs = trainer._last_epoch
 
         # Now do the same, but cut at epoch 22 and see if it recovers the
         # correct result.
@@ -86,7 +86,7 @@ class TestTrainingCheckpoint:
         trainer.train_network()
         trainer = self.__resume_checkpoint(test_checkpoint_name, 40)
         trainer.train_network()
-        last_nr_epochs = trainer.last_epoch
+        last_nr_epochs = trainer._last_epoch
 
         # integer comparison!
         assert original_nr_epochs == last_nr_epochs

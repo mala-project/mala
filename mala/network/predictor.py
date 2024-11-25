@@ -26,6 +26,12 @@ class Predictor(Runner):
     data : mala.datahandling.data_handler.DataHandler
         DataHandler, in this case not directly holding data, but serving
         as an interface to Target and Descriptor objects.
+
+    Attributes
+    ----------
+    target_calculator : mala.targets.target.Target
+        Target calculator used for predictions. Can be used for further
+        processing.
     """
 
     def __init__(self, params, network, data):
@@ -37,8 +43,8 @@ class Predictor(Runner):
             * self.data.grid_dimension[1]
             * self.data.grid_dimension[2]
         )
-        self.test_data_loader = None
-        self.number_of_batches_per_snapshot = 0
+        self._test_data_loader = None
+        self._number_of_batches_per_snapshot = 0
         self.target_calculator = data.target_calculator
 
     def predict_from_qeout(self, path_to_file, gather_ldos=False):
@@ -228,11 +234,11 @@ class Predictor(Runner):
                 )
                 self.parameters.mini_batch_size = optimal_batch_size
 
-            self.number_of_batches_per_snapshot = int(
+            self._number_of_batches_per_snapshot = int(
                 local_data_size / self.parameters.mini_batch_size
             )
 
-            for i in range(0, self.number_of_batches_per_snapshot):
+            for i in range(0, self._number_of_batches_per_snapshot):
                 sl = slice(
                     i * self.parameters.mini_batch_size,
                     (i + 1) * self.parameters.mini_batch_size,

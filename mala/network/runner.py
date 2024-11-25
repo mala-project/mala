@@ -40,6 +40,20 @@ class Runner:
 
     data : mala.datahandling.data_handler.DataHandler
         DataHandler holding the data for the run.
+
+    Attributes
+    ----------
+    parameters : mala.common.parametes.ParametersRunning
+        MALA neural network training/inference parameters.
+
+    parameters_full : mala.common.parametes.Parameters
+        Full MALA Parameters object.
+
+    network : mala.network.network.Network
+        Network which is being run.
+
+    data : mala.datahandling.data_handler.DataHandler
+        DataHandler holding the data for the run.
     """
 
     def __init__(self, params, network, data, runner_dict=None):
