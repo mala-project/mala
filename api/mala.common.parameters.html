@@ -505,14 +505,23 @@ which splits the data by snapshot boundaries. It is also the default.</p>
 Options:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>“None”: No normalization is applied.</p></li>
-<li><p>“standard”: Standardization (Scale to mean 0, standard
-deviation 1)</p></li>
-<li><p>“normal”: Min-Max scaling (Scale to be in range 0…1)</p></li>
-<li><p>“feature-wise-standard”: Row Standardization (Scale to mean 0,
-standard deviation 1)</p></li>
-<li><p>“feature-wise-normal”: Row Min-Max scaling (Scale to be in range
-0…1)</p></li>
+<li><p>“None”: No scaling is applied.</p></li>
+<li><p>“standard”: Standardization (Scale to mean 0,
+standard deviation 1) is applied to the entire array.</p></li>
+<li><p>“minmax”: Min-Max scaling (Scale to be in range 0…1) is applied
+to the entire array.</p></li>
+<li><p>“feature-wise-standard”: Standardization (Scale to mean 0,
+standard deviation 1) is applied to each feature dimension
+individually.
+I.e., if your training data has dimensions (d,f), then each
+of the f columns with d entries is scaled indiviually.</p></li>
+<li><p>“feature-wise-minmax”: Min-Max scaling (Scale to be in range
+0…1) is applied to each feature dimension individually.
+I.e., if your training data has dimensions (d,f), then each
+of the f columns with d entries is scaled indiviually.</p></li>
+<li><p>“normal”: (DEPRECATED) Old name for “minmax”.</p></li>
+<li><p>“feature-wise-normal”: (DEPRECATED) Old name for
+“feature-wise-minmax”</p></li>
 </ul>
 </div></blockquote>
 <dl class="field-list simple">
@@ -529,14 +538,23 @@ standard deviation 1)</p></li>
 Options:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>“None”: No normalization is applied.</p></li>
+<li><p>“None”: No scaling is applied.</p></li>
 <li><p>“standard”: Standardization (Scale to mean 0,
-standard deviation 1)</p></li>
-<li><p>“normal”: Min-Max scaling (Scale to be in range 0…1)</p></li>
-<li><p>“feature-wise-standard”: Row Standardization (Scale to mean 0,
-standard deviation 1)</p></li>
-<li><p>“feature-wise-normal”: Row Min-Max scaling (Scale to be in
-range 0…1)</p></li>
+standard deviation 1) is applied to the entire array.</p></li>
+<li><p>“minmax”: Min-Max scaling (Scale to be in range 0…1) is applied
+to the entire array.</p></li>
+<li><p>“feature-wise-standard”: Standardization (Scale to mean 0,
+standard deviation 1) is applied to each feature dimension
+individually.
+I.e., if your training data has dimensions (d,f), then each
+of the f columns with d entries is scaled indiviually.</p></li>
+<li><p>“feature-wise-minmax”: Min-Max scaling (Scale to be in range
+0…1) is applied to each feature dimension individually.
+I.e., if your training data has dimensions (d,f), then each
+of the f columns with d entries is scaled indiviually.</p></li>
+<li><p>“normal”: (DEPRECATED) Old name for “minmax”.</p></li>
+<li><p>“feature-wise-normal”: (DEPRECATED) Old name for
+“feature-wise-minmax”</p></li>
 </ul>
 </div></blockquote>
 <dl class="field-list simple">

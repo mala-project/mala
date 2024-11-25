@@ -89,15 +89,21 @@
 <span class="kn">import</span> <span class="nn">torch.distributed</span> <span class="k">as</span> <span class="nn">dist</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">printout</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">parallel_warn</span>
 
 
+<span class="c1"># IMPORTANT: If you change the docstrings, make sure to also change them</span>
+<span class="c1"># in the ParametersData subclass, because users do usually not interact</span>
+<span class="c1"># with this class directly.</span>
 <div class="viewcode-block" id="DataScaler">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler">[docs]</a>
 <span class="k">class</span> <span class="nc">DataScaler</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Scales input and output data.</span>
 
 <span class="sd">    Sort of emulates the functionality of the scikit-learn library, but by</span>
-<span class="sd">    implementing the class by ourselves we have more freedom.</span>
+<span class="sd">    implementing the class by ourselves we have more freedom. Specifically</span>
+<span class="sd">    assumes data of the form (d,f), where d=x*y*z, i.e., the product of spatial</span>
+<span class="sd">    dimensions, and f is the feature dimension.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -105,14 +111,23 @@
 <span class="sd">        Specifies how scaling should be performed.</span>
 <span class="sd">        Options:</span>
 
-<span class="sd">        - &quot;None&quot;: No normalization is applied.</span>
+<span class="sd">        - &quot;None&quot;: No scaling is applied.</span>
 <span class="sd">        - &quot;standard&quot;: Standardization (Scale to mean 0,</span>
-<span class="sd">          standard deviation 1)</span>
-<span class="sd">        - &quot;normal&quot;: Min-Max scaling (Scale to be in range 0...1)</span>
-<span class="sd">        - &quot;feature-wise-standard&quot;: Row Standardization (Scale to mean 0,</span>
-<span class="sd">          standard deviation 1)</span>
-<span class="sd">        - &quot;feature-wise-normal&quot;: Row Min-Max scaling (Scale to be in range</span>
-<span class="sd">          0...1)</span>
+<span class="sd">          standard deviation 1) is applied to the entire array.</span>
+<span class="sd">        - &quot;minmax&quot;: Min-Max scaling (Scale to be in range 0...1) is applied</span>
+<span class="sd">          to the entire array.</span>
+<span class="sd">        - &quot;feature-wise-standard&quot;: Standardization (Scale to mean 0,</span>
+<span class="sd">          standard deviation 1) is applied to each feature dimension</span>
+<span class="sd">          individually.</span>
+<span class="sd">          I.e., if your training data has dimensions (d,f), then each</span>
+<span class="sd">          of the f columns with d entries is scaled indiviually.</span>
+<span class="sd">        - &quot;feature-wise-minmax&quot;: Min-Max scaling (Scale to be in range</span>
+<span class="sd">          0...1) is applied to each feature dimension individually.</span>
+<span class="sd">          I.e., if your training data has dimensions (d,f), then each</span>
+<span class="sd">          of the f columns with d entries is scaled indiviually.</span>
+<span class="sd">        - &quot;normal&quot;: (DEPRECATED) Old name for &quot;minmax&quot;.</span>
+<span class="sd">        - &quot;feature-wise-normal&quot;: (DEPRECATED) Old name for</span>
+<span class="sd">          &quot;feature-wise-minmax&quot;</span>
 
 <span class="sd">    use_ddp : bool</span>
 <span class="sd">        If True, the DataScaler will use ddp to check that data is</span>
@@ -123,7 +138,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span> <span class="o">=</span> <span class="n">use_ddp</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">typestring</span> <span class="o">=</span> <span class="n">typestring</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_wise</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cantransform</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__parse_typestring</span><span class="p">()</span>
@@ -142,25 +157,34 @@
     <span class="k">def</span> <span class="nf">__parse_typestring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse the typestring to class attributes.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_wise</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">if</span> <span class="s2">&quot;standard&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">typestring</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="s2">&quot;normal&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">typestring</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">parallel_warn</span><span class="p">(</span>
+                <span class="s2">&quot;Options &#39;normal&#39; and &#39;feature-wise-normal&#39; will be &quot;</span>
+                <span class="s2">&quot;deprecated, starting in MALA v1.4.0. Please use &#39;minmax&#39; and &quot;</span>
+                <span class="s2">&quot;&#39;feature-wise-minmax&#39; instead.&quot;</span><span class="p">,</span>
+                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="s2">&quot;minmax&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">typestring</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="s2">&quot;feature-wise&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">typestring</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">feature_wise</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;No data rescaling will be performed.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cantransform</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid input data rescaling.&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="DataScaler.start_incremental_fitting">
-<a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.start_incremental_fitting">[docs]</a>
-    <span class="k">def</span> <span class="nf">start_incremental_fitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="DataScaler.reset">
+<a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Start the incremental calculation of scaling parameters.</span>
 
@@ -169,9 +193,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="DataScaler.incremental_fit">
-<a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.incremental_fit">[docs]</a>
-    <span class="k">def</span> <span class="nf">incremental_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unscaled</span><span class="p">):</span>
+<div class="viewcode-block" id="DataScaler.partial_fit">
+<a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.partial_fit">[docs]</a>
+    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unscaled</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add data to the incremental calculation of scaling parameters.</span>
 
@@ -183,7 +207,16 @@
 <span class="sd">            Data that is to be added to the fit.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unscaled</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;MALA DataScaler are designed for 2D-arrays, &quot;</span>
+                <span class="s2">&quot;while a </span><span class="si">{0}</span><span class="s2">D-array has been provided.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">unscaled</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cantransform</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
@@ -232,7 +265,7 @@
                             <span class="bp">self</span><span class="o">.</span><span class="n">stds</span> <span class="o">=</span> <span class="n">new_std</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+=</span> <span class="n">current_data_count</span>
 
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span><span class="p">:</span>
                         <span class="n">new_maxs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">unscaled</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                         <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxs</span><span class="o">.</span><span class="n">size</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">new_maxs</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">size</span><span class="p">())[</span><span class="mi">1</span><span class="p">]):</span>
@@ -295,24 +328,14 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_std</span><span class="p">)</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">+=</span> <span class="n">current_data_count</span>
 
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span><span class="p">:</span>
                         <span class="n">new_max</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">unscaled</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">new_max</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_max</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">total_max</span> <span class="o">=</span> <span class="n">new_max</span>
 
                         <span class="n">new_min</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">unscaled</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">new_min</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span> <span class="o">=</span> <span class="n">new_min</span></div>
-
-
-<div class="viewcode-block" id="DataScaler.finish_incremental_fitting">
-<a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting">[docs]</a>
-    <span class="k">def</span> <span class="nf">finish_incremental_fitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Indicate that all data has been added to the incremental calculation.</span>
-
-<span class="sd">        This is necessary for lazy loading.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span> <span class="o">=</span> <span class="n">new_min</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cantransform</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
@@ -328,7 +351,15 @@
 <span class="sd">            Data that on which the scaling will be calculated.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unscaled</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;MALA DataScaler are designed for 2D-arrays, &quot;</span>
+                <span class="s2">&quot;while a </span><span class="si">{0}</span><span class="s2">D-array has been provided.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">unscaled</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
@@ -342,7 +373,7 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">unscaled</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">stds</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">unscaled</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">maxs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">unscaled</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">mins</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">unscaled</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
 
@@ -356,7 +387,7 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">unscaled</span><span class="p">)</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">unscaled</span><span class="p">)</span>
 
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">total_max</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">unscaled</span><span class="p">)</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">unscaled</span><span class="p">)</span>
 
@@ -365,7 +396,7 @@
 
 <div class="viewcode-block" id="DataScaler.transform">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.transform">[docs]</a>
-    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unscaled</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unscaled</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transform data from unscaled to scaled.</span>
 
@@ -377,13 +408,29 @@
 <span class="sd">        unscaled : torch.Tensor</span>
 <span class="sd">            Real world data.</span>
 
+<span class="sd">        copy : bool</span>
+<span class="sd">            If False, data is modified in-place. If True, a copy of the</span>
+<span class="sd">            data is modified. Default is False.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        scaled : torch.Tensor</span>
 <span class="sd">            Scaled data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unscaled</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;MALA DataScaler are designed for 2D-arrays, &quot;</span>
+                <span class="s2">&quot;while a </span><span class="si">{0}</span><span class="s2">D-array has been provided.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">unscaled</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Backward compatability.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;scale_minmax&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;scale_normal&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span>
+
         <span class="c1"># First we need to find out if we even have to do anything.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">pass</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cantransform</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
@@ -394,6 +441,8 @@
 
         <span class="c1"># Perform the actual scaling, but use no_grad to make sure</span>
         <span class="c1"># that the next couple of iterations stay untracked.</span>
+        <span class="n">scaled</span> <span class="o">=</span> <span class="n">unscaled</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span> <span class="k">if</span> <span class="n">copy</span> <span class="k">else</span> <span class="n">unscaled</span>
+
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_wise</span><span class="p">:</span>
 
@@ -402,12 +451,12 @@
                 <span class="c1">##########################</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span><span class="p">:</span>
-                    <span class="n">unscaled</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span>
-                    <span class="n">unscaled</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stds</span>
+                    <span class="n">scaled</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span>
+                    <span class="n">scaled</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stds</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
-                    <span class="n">unscaled</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span>
-                    <span class="n">unscaled</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxs</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span><span class="p">:</span>
+                    <span class="n">scaled</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span>
+                    <span class="n">scaled</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxs</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span>
 
             <span class="k">else</span><span class="p">:</span>
 
@@ -416,17 +465,19 @@
                 <span class="c1">##########################</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span><span class="p">:</span>
-                    <span class="n">unscaled</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span>
-                    <span class="n">unscaled</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span>
+                    <span class="n">scaled</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span>
+                    <span class="n">scaled</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
-                    <span class="n">unscaled</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span>
-                    <span class="n">unscaled</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span></div>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span><span class="p">:</span>
+                    <span class="n">scaled</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span>
+                    <span class="n">scaled</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span>
+
+        <span class="k">return</span> <span class="n">scaled</span></div>
 
 
 <div class="viewcode-block" id="DataScaler.inverse_transform">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.inverse_transform">[docs]</a>
-    <span class="k">def</span> <span class="nf">inverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaled</span><span class="p">,</span> <span class="n">as_numpy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">inverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaled</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">as_numpy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transform data from scaled to unscaled.</span>
 
@@ -439,7 +490,11 @@
 <span class="sd">            Scaled data.</span>
 
 <span class="sd">        as_numpy : bool</span>
-<span class="sd">            If True, a numpy array is returned, otherwsie.</span>
+<span class="sd">            If True, a numpy array is returned, otherwise a torch tensor.</span>
+
+<span class="sd">        copy : bool</span>
+<span class="sd">            If False, data is modified in-place. If True, a copy of the</span>
+<span class="sd">            data is modified. Default is False.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -447,9 +502,25 @@
 <span class="sd">            Real world data.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scaled</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;MALA DataScaler are designed for 2D-arrays, &quot;</span>
+                <span class="s2">&quot;while a </span><span class="si">{0}</span><span class="s2">D-array has been provided.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">scaled</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Backward compatability.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;scale_minmax&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;scale_normal&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span>
+
+        <span class="c1"># Perform the actual scaling, but use no_grad to make sure</span>
+        <span class="c1"># that the next couple of iterations stay untracked.</span>
+        <span class="n">unscaled</span> <span class="o">=</span> <span class="n">scaled</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span> <span class="k">if</span> <span class="n">copy</span> <span class="k">else</span> <span class="n">scaled</span>
+
         <span class="c1"># First we need to find out if we even have to do anything.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">unscaled</span> <span class="o">=</span> <span class="n">scaled</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">pass</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cantransform</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
@@ -468,12 +539,12 @@
                     <span class="c1">##########################</span>
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span><span class="p">:</span>
-                        <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">scaled</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">stds</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span>
+                        <span class="n">unscaled</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stds</span>
+                        <span class="n">unscaled</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span>
 
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
-                        <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="n">scaled</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxs</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span><span class="p">)</span>
-                        <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span><span class="p">:</span>
+                        <span class="n">unscaled</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxs</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span>
+                        <span class="n">unscaled</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span>
 
                 <span class="k">else</span><span class="p">:</span>
 
@@ -482,13 +553,13 @@
                     <span class="c1">##########################</span>
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span><span class="p">:</span>
-                        <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">scaled</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span>
+                        <span class="n">unscaled</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span>
+                        <span class="n">unscaled</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span>
 
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
-                        <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="n">scaled</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span><span class="p">)</span>
-                        <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span>
-        <span class="c1">#</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span><span class="p">:</span>
+                        <span class="n">unscaled</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span>
+                        <span class="n">unscaled</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span>
+
         <span class="k">if</span> <span class="n">as_numpy</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">unscaled</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

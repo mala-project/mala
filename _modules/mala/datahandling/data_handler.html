@@ -217,6 +217,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_snapshots</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_snapshots</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_snapshots</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">DataHandler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">clear_data</span><span class="p">()</span></div>
 
 
@@ -408,7 +410,10 @@
 <div class="viewcode-block" id="DataHandler.raw_numpy_to_converted_scaled_tensor">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.raw_numpy_to_converted_scaled_tensor">[docs]</a>
     <span class="k">def</span> <span class="nf">raw_numpy_to_converted_scaled_tensor</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">numpy_array</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">convert3Dto1D</span><span class="o">=</span><span class="kc">False</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">numpy_array</span><span class="p">,</span>
+        <span class="n">data_type</span><span class="p">,</span>
+        <span class="n">units</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transform a raw numpy array into a scaled torch tensor.</span>
@@ -425,9 +430,6 @@
 <span class="sd">            processed.</span>
 <span class="sd">        units : string</span>
 <span class="sd">            Units of the data that is processed.</span>
-<span class="sd">        convert3Dto1D : bool</span>
-<span class="sd">            If True (default: False), then a (x,y,z,dim) array is transformed</span>
-<span class="sd">            into a (x*y*z,dim) array.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -446,12 +448,12 @@
         <span class="p">)</span>
 
         <span class="c1"># If desired, the dimensions can be changed.</span>
-        <span class="k">if</span> <span class="n">convert3Dto1D</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">numpy_array</span><span class="p">))</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;in&quot;</span><span class="p">:</span>
                 <span class="n">data_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">data_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span>
-            <span class="n">grid_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">numpy_array</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">grid_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">numpy_array</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
             <span class="n">desired_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">data_dimension</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">desired_dimensions</span> <span class="o">=</span> <span class="kc">None</span>
@@ -924,7 +926,6 @@
         <span class="c1"># scaling. This should save some performance.</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">start_incremental_fitting</span><span class="p">()</span>
             <span class="c1"># We need to perform the data scaling over the entirety of the</span>
             <span class="c1"># training data.</span>
             <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">:</span>
@@ -962,9 +963,7 @@
                         <span class="p">[</span><span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">]</span>
                     <span class="p">)</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">incremental_fit</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">finish_incremental_fitting</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__load_data</span><span class="p">(</span><span class="s2">&quot;training&quot;</span><span class="p">,</span> <span class="s2">&quot;inputs&quot;</span><span class="p">)</span>
@@ -985,7 +984,6 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span><span class="p">:</span>
             <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">start_incremental_fitting</span><span class="p">()</span>
             <span class="c1"># We need to perform the data scaling over the entirety of the</span>
             <span class="c1"># training data.</span>
             <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">:</span>
@@ -1021,9 +1019,8 @@
                         <span class="p">[</span><span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">]</span>
                     <span class="p">)</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">incremental_fit</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">finish_incremental_fitting</span><span class="p">()</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__load_data</span><span class="p">(</span><span class="s2">&quot;training&quot;</span><span class="p">,</span> <span class="s2">&quot;outputs&quot;</span><span class="p">)</span>

@@ -119,7 +119,7 @@ options to train a simple network with example data, namely</p>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Parameters</span><span class="p">()</span>
 
 <span class="n">parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">input_rescaling_type</span> <span class="o">=</span> <span class="s2">&quot;feature-wise-standard&quot;</span>
-<span class="n">parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_rescaling_type</span> <span class="o">=</span> <span class="s2">&quot;normal&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_rescaling_type</span> <span class="o">=</span> <span class="s2">&quot;minmax&quot;</span>
 
 <span class="n">parameters</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_activations</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ReLU&quot;</span><span class="p">]</span>
 
@@ -136,11 +136,14 @@ sub-objects dealing with the individual aspects of the workflow. In the first
 two lines, which data scaling MALA should employ. Scaling data greatly
 improves the performance of NN based ML models. Options are</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: No normalization is applied.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">standard</span></code>: Standardization (Scale to mean 0, standard deviation 1)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">normal</span></code>: Min-Max scaling (Scale to be in range 0…1)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">feature-wise-standard</span></code>: Row Standardization (Scale to mean 0, standard deviation 1)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">feature-wise-normal</span></code>: Row Min-Max scaling (Scale to be in range 0…1)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: No scaling is applied.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">standard</span></code>: Standardization (Scale to mean 0, standard deviation 1) is
+applied to the entire array.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">minmax</span></code>: Min-Max scaling (Scale to be in range 0…1) is applied to the entire array.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">feature-wise-standard</span></code>: Standardization (Scale to mean 0, standard
+deviation 1) is applied to each feature dimension individually.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">feature-wise-minmax</span></code>: Min-Max scaling (Scale to be in range 0…1) is
+applied to each feature dimension individually.</p></li>
 </ul>
 <p>Here, we specify that MALA should standardize the input (=descriptors)
 by feature (i.e., each entry of the vector separately on the grid) and

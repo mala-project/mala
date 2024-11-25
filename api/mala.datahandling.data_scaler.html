@@ -122,21 +122,32 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Scales input and output data.</p>
 <p>Sort of emulates the functionality of the scikit-learn library, but by
-implementing the class by ourselves we have more freedom.</p>
+implementing the class by ourselves we have more freedom. Specifically
+assumes data of the form (d,f), where d=x*y*z, i.e., the product of spatial
+dimensions, and f is the feature dimension.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>typestring</strong> (<em>string</em>) – <p>Specifies how scaling should be performed.
 Options:</p>
 <ul>
-<li><p>”None”: No normalization is applied.</p></li>
+<li><p>”None”: No scaling is applied.</p></li>
 <li><p>”standard”: Standardization (Scale to mean 0,
-standard deviation 1)</p></li>
-<li><p>”normal”: Min-Max scaling (Scale to be in range 0…1)</p></li>
-<li><p>”feature-wise-standard”: Row Standardization (Scale to mean 0,
-standard deviation 1)</p></li>
-<li><p>”feature-wise-normal”: Row Min-Max scaling (Scale to be in range
-0…1)</p></li>
+standard deviation 1) is applied to the entire array.</p></li>
+<li><p>”minmax”: Min-Max scaling (Scale to be in range 0…1) is applied
+to the entire array.</p></li>
+<li><p>”feature-wise-standard”: Standardization (Scale to mean 0,
+standard deviation 1) is applied to each feature dimension
+individually.
+I.e., if your training data has dimensions (d,f), then each
+of the f columns with d entries is scaled indiviually.</p></li>
+<li><p>”feature-wise-minmax”: Min-Max scaling (Scale to be in range
+0…1) is applied to each feature dimension individually.
+I.e., if your training data has dimensions (d,f), then each
+of the f columns with d entries is scaled indiviually.</p></li>
+<li><p>”normal”: (DEPRECATED) Old name for “minmax”.</p></li>
+<li><p>”feature-wise-normal”: (DEPRECATED) Old name for
+“feature-wise-minmax”</p></li>
 </ul>
 </p></li>
 <li><p><strong>use_ddp</strong> (<em>bool</em>) – If True, the DataScaler will use ddp to check that data is
@@ -144,13 +155,6 @@ only saved on the root process in parallel execution.</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting">
-<span class="sig-name descname"><span class="pre">finish_incremental_fitting</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.finish_incremental_fitting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting" title="Link to this definition"></a></dt>
-<dd><p>Indicate that all data has been added to the incremental calculation.</p>
-<p>This is necessary for lazy loading.</p>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.fit">
 <span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unscaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.fit" title="Link to this definition"></a></dt>
@@ -163,20 +167,8 @@ only saved on the root process in parallel execution.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.incremental_fit">
-<span class="sig-name descname"><span class="pre">incremental_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unscaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.incremental_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.incremental_fit" title="Link to this definition"></a></dt>
-<dd><p>Add data to the incremental calculation of scaling parameters.</p>
-<p>This is necessary for lazy loading.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>unscaled</strong> (<em>torch.Tensor</em>) – Data that is to be added to the fit.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.inverse_transform">
-<span class="sig-name descname"><span class="pre">inverse_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaled</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.inverse_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.inverse_transform" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">inverse_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaled</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.inverse_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.inverse_transform" title="Link to this definition"></a></dt>
 <dd><p>Transform data from scaled to unscaled.</p>
 <p>Unscaled means real world data, scaled means data as is used in
 the network.</p>
@@ -184,7 +176,9 @@ the network.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>scaled</strong> (<em>torch.Tensor</em>) – Scaled data.</p></li>
-<li><p><strong>as_numpy</strong> (<em>bool</em>) – If True, a numpy array is returned, otherwsie.</p></li>
+<li><p><strong>as_numpy</strong> (<em>bool</em>) – If True, a numpy array is returned, otherwise a torch tensor.</p></li>
+<li><p><strong>copy</strong> (<em>bool</em>) – If False, data is modified in-place. If True, a copy of the
+data is modified. Default is False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -217,6 +211,25 @@ the network.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.partial_fit">
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unscaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.partial_fit" title="Link to this definition"></a></dt>
+<dd><p>Add data to the incremental calculation of scaling parameters.</p>
+<p>This is necessary for lazy loading.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>unscaled</strong> (<em>torch.Tensor</em>) – Data that is to be added to the fit.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.reset" title="Link to this definition"></a></dt>
+<dd><p>Start the incremental calculation of scaling parameters.</p>
+<p>This is necessary for lazy loading.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.save">
 <span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pickle'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.save" title="Link to this definition"></a></dt>
 <dd><p>Save the Scaler object so that it can be accessed again later.</p>
@@ -231,21 +244,18 @@ the network.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.start_incremental_fitting">
-<span class="sig-name descname"><span class="pre">start_incremental_fitting</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.start_incremental_fitting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.start_incremental_fitting" title="Link to this definition"></a></dt>
-<dd><p>Start the incremental calculation of scaling parameters.</p>
-<p>This is necessary for lazy loading.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.transform">
-<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unscaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.transform" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unscaled</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.transform" title="Link to this definition"></a></dt>
 <dd><p>Transform data from unscaled to scaled.</p>
 <p>Unscaled means real world data, scaled means data as is used in
 the network. Data is transformed in-place.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>unscaled</strong> (<em>torch.Tensor</em>) – Real world data.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unscaled</strong> (<em>torch.Tensor</em>) – Real world data.</p></li>
+<li><p><strong>copy</strong> (<em>bool</em>) – If False, data is modified in-place. If True, a copy of the
+data is modified. Default is False.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>scaled</strong> – Scaled data.</p>
