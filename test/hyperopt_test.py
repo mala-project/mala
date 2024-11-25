@@ -294,7 +294,7 @@ class TestHyperparameterOptimization:
         for idx, trial in enumerate(correct_trial_list):
             assert np.isclose(
                 trial,
-                test_hp_optimizer.trial_losses[idx],
+                test_hp_optimizer._trial_losses[idx],
                 rtol=naswot_accuracy,
             )
 

@@ -251,7 +251,7 @@ class TestInterfaces:
             reference_data=os.path.join(data_path, "Be_snapshot1.out"),
         )
         total_energy_dft_calculation = (
-            calculator.data_handler.target_calculator.total_energy_dft_calculation
+            calculator._data_handler.target_calculator.total_energy_dft_calculation
         )
         calculator.calculate(atoms, properties=["energy"])
         assert np.isclose(

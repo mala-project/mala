@@ -33,7 +33,7 @@ class TestInference:
 
         # Confirm that unit conversion does not introduce any errors.
 
-        from_file_1 = data_handler.target_calculator.convert_units(
+        from_file_1 = data_handler._target_calculator.convert_units(
             np.load(
                 os.path.join(data_path, "Be_snapshot" + str(0) + ".out.npy")
             ),
@@ -41,7 +41,7 @@ class TestInference:
         )
         from_file_2 = np.load(
             os.path.join(data_path, "Be_snapshot" + str(0) + ".out.npy")
-        ) * data_handler.target_calculator.convert_units(
+        ) * data_handler._target_calculator.convert_units(
             1, in_units="1/(eV*Bohr^3)"
         )
 
