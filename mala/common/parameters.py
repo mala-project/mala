@@ -169,7 +169,7 @@ class ParametersBase(JSONSerializable):
     @classmethod
     def from_json(cls, json_dict):
         """
-        Read this object from a dictionary saved in a JSON file.
+        Read parameters from a dictionary saved in a JSON file.
 
         Parameters
         ----------
@@ -276,6 +276,10 @@ class ParametersNetwork(ParametersBase):
         Number of heads to be used in Multi head attention network
         This should be a divisor of input dimension
         Default: None
+
+    dropout : float
+        Dropout rate for positional encoding in transformer.
+        Default: 0.1
     """
 
     def __init__(self):
@@ -327,7 +331,51 @@ class ParametersDescriptors(ParametersBase):
         descriptor vector. If False, no such cutting is peformed.
 
     atomic_density_sigma : float
-        Sigma used for the calculation of the Gaussian descriptors.
+        Sigma (=width) used for the calculation of the Gaussian descriptors.
+        Explicitly setting this value is discouraged if the atomic density is
+        used only during the total energy calculation and, e.g., bispectrum
+        descriptors are used for models. In this case, the width will
+        automatically be set correctly during inference based on model
+        parameters. This parameter mainly exists for debugging purposes.
+        If the atomic density is instead used for model training itself, this
+        parameter needs to be set.
+
+    atomic_density_cutoff : float
+        Cutoff radius used for atomic density calculation. Explicitly setting
+        this value is discouraged if the atomic density is used only during the
+        total energy calculation and, e.g., bispectrum descriptors are used
+        for models. In this case, the cutoff will automatically be set
+        correctly during inference based on model parameters. This parameter
+        mainly exists for debugging purposes. If the atomic density is instead
+        used for model training itself, this parameter needs to be set.
+
+    descriptor_type : str
+        Type of Descriptors used for model training. Supported are "Bispectrum"
+        and "AtomicDensity", although only the former is currently used for
+        published models.
+
+    lammps_compute_file : str
+        Path to a LAMMPS compute file for the bispectrum descriptor
+        calculation. MALA has its own collection of compute files which are
+        used by default. Setting this parameter is thus not necessarys for
+        model training and inference, and it exists mainly for debugging
+        purposes.
+
+    minterpy_cutoff_cube_size : float
+        WILL BE DEPRECATED IN MALA v1.4.0 - size of cube for minterpy
+        descriptor calculation.
+
+    minterpy_lp_norm : int
+        WILL BE DEPRECATED IN MALA v1.4.0 - LP norm for minterpy
+        descriptor calculation.
+
+    minterpy_point_list : list
+        WILL BE DEPRECATED IN MALA v1.4.0 - list of points for minterpy
+        descriptor calculation.
+
+    minterpy_polynomial_degree : int
+        WILL BE DEPRECATED IN MALA v1.4.0 - polynomial degree for minterpy
+        descriptor calculation.
     """
 
     def __init__(self):
@@ -718,6 +766,14 @@ class ParametersRunning(ParametersBase):
         List with two entries determining with which batch/iteration number
          the CUDA profiler will start and stop profiling. Please note that
          this option only holds significance if the nsys profiler is used.
+
+    inference_data_grid : list
+        Grid dimensions used during inference. Typically, these are automatically
+        determined by DFT reference data, and this parameter does not need to
+        be set. Thus, this parameter mainly exists for debugging purposes.
+
+    use_mixed_precision :
+        If True, mixed precision computation (via AMP) will be used.
     """
 
     def __init__(self):
@@ -726,7 +782,6 @@ class ParametersRunning(ParametersBase):
         self.learning_rate = 10 ** (-5)
         self.learning_rate_embedding = 10 ** (-4)
         self.max_number_epochs = 100
-        self.verbosity = True
         self.mini_batch_size = 10
         self.snapshots_per_epoch = -1
 
@@ -975,6 +1030,15 @@ class ParametersHyperparameterOptimization(ParametersBase):
         not recommended because it is file based and can lead to errors;
         With a suitable timeout it can be used somewhat stable though and
         help in HPC settings.
+
+    acsd_points : int
+        Parameter of the ACSD HyperparamterOptimization scheme. Controls
+        the number of point-pairs which are used to compute the ACSD.
+        An array of acsd_points*acsd_points will be computed, i.e., if
+        acsd_points=100, 100 points will be drawn at random, and thereafter
+        each of these 100 points will be compared with a new, random set
+        of 100 points, leading to 10000 points in total for the calculation
+        of the ACSD.
     """
 
     def __init__(self):
@@ -1184,6 +1248,9 @@ class Parameters:
     manual_seed: int
         If not none, this value is used as manual seed for the neural networks.
         Can be used to make experiments comparable. Default: None.
+
+    datageneration : ParametersDataGeneration
+        Parameters used for data generation routines.
     """
 
     def __init__(self):
