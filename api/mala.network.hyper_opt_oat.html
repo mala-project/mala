@@ -153,26 +153,6 @@ conventions, but currently only supports “categorical” (a list).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.network.hyper_opt_oat.HyperOptOAT.get_best_trial_results">
-<span class="sig-name descname"><span class="pre">get_best_trial_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT.get_best_trial_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.get_best_trial_results" title="Link to this definition"></a></dt>
-<dd><p>Get the best trial out of the list, including the value.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.network.hyper_opt_oat.HyperOptOAT.get_optimal_parameters">
-<span class="sig-name descname"><span class="pre">get_optimal_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT.get_optimal_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.get_optimal_parameters" title="Link to this definition"></a></dt>
-<dd><p>Find the optimal set of hyperparameters by doing range analysis.</p>
-<p>This is done using loss instead of accuracy as done in the paper.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.network.hyper_opt_oat.HyperOptOAT.get_orthogonal_array">
-<span class="sig-name descname"><span class="pre">get_orthogonal_array</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT.get_orthogonal_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.get_orthogonal_array" title="Link to this definition"></a></dt>
-<dd><p>Generate the best OA used for optimal hyperparameter sampling.</p>
-<p>This is function is taken from the example notebook of OApackage.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mala.network.hyper_opt_oat.HyperOptOAT.load_from_file">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.load_from_file" title="Link to this definition"></a></dt>
 <dd><p>Load a hyperparameter optimizer from a file.</p>
@@ -196,19 +176,11 @@ be loaded.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.network.hyper_opt_oat.HyperOptOAT.number_of_runs">
-<span class="sig-name descname"><span class="pre">number_of_runs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT.number_of_runs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.number_of_runs" title="Link to this definition"></a></dt>
-<dd><p>Calculate the minimum number of runs required for an Orthogonal array.</p>
-<p>Based on the factor levels and the strength of the array requested.
-See also here:
-<a class="reference external" href="https://oapackage.readthedocs.io/en/latest/examples/example_minimal_number_of_runs_oa.html">https://oapackage.readthedocs.io/en/latest/examples/example_minimal_number_of_runs_oa.html</a></p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mala.network.hyper_opt_oat.HyperOptOAT.perform_study">
 <span class="sig-name descname"><span class="pre">perform_study</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT.perform_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.perform_study" title="Link to this definition"></a></dt>
 <dd><p>Perform the study, i.e. the optimization.</p>
-<p>Uses Optunas TPE sampler.</p>
+<p>Internally constructs an orthogonal array and performs trial NN
+trainings based on it.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -250,6 +222,22 @@ hyperparameter optimizer was created.</p>
 <dt class="sig sig-object py" id="mala.network.hyper_opt_oat.HyperOptOAT.show_order_of_importance">
 <span class="sig-name descname"><span class="pre">show_order_of_importance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT.show_order_of_importance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.show_order_of_importance" title="Link to this definition"></a></dt>
 <dd><p>Print the order of importance of the hyperparameters.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.network.hyper_opt_oat.HyperOptOAT.best_trial_index">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">best_trial_index</span></span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.best_trial_index" title="Link to this definition"></a></dt>
+<dd><p>Get the index and loss of best trial determined in this NASWOT run.</p>
+<p>This property is read only, and will be recomputed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>best_trial_index</strong> – A list containing [0] the best trial index and [1] the best
+trial loss.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

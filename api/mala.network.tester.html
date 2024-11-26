@@ -158,6 +158,57 @@ will be calculated and returned.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.network.tester.Tester.target_calculator">
+<span class="sig-name descname"><span class="pre">target_calculator</span></span><a class="headerlink" href="#mala.network.tester.Tester.target_calculator" title="Link to this definition"></a></dt>
+<dd><p>Target calculator used for predictions. Can be used for further
+processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target" title="mala.targets.target.Target">mala.targets.target.Target</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.network.tester.Tester.observables_to_test">
+<span class="sig-name descname"><span class="pre">observables_to_test</span></span><a class="headerlink" href="#mala.network.tester.Tester.observables_to_test" title="Link to this definition"></a></dt>
+<dd><p>List of observables to test. Supported are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“ldos”: Calculate the MSE loss of the LDOS.</p></li>
+<li><p>“band_energy”: Band energy error</p></li>
+<li><p>“band_energy_full”: Band energy absolute values (only works with
+list, as both actual and predicted are returned)</p></li>
+<li><p>“total_energy”: Total energy error</p></li>
+<li><p>“total_energy_full”: Total energy absolute values (only works
+with list, as both actual and predicted are returned)</p></li>
+<li><p>“number_of_electrons”: Number of electrons (Fermi energy is not
+determined dynamically for this quantity.</p></li>
+<li><p>“density”: MAPE of the density prediction</p></li>
+<li><p>“dos”: MAPE of the DOS prediction</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.network.tester.Tester.output_format">
+<span class="sig-name descname"><span class="pre">output_format</span></span><a class="headerlink" href="#mala.network.tester.Tester.output_format" title="Link to this definition"></a></dt>
+<dd><p>Can be “list” or “mae”. If “list”, then a list of results across all
+snapshots is returned. If “mae”, then the MAE across all snapshots
+will be calculated and returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.tester.Tester.get_energy_targets_and_predictions">
 <span class="sig-name descname"><span class="pre">get_energy_targets_and_predictions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'te'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/tester.html#Tester.get_energy_targets_and_predictions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.tester.Tester.get_energy_targets_and_predictions" title="Link to this definition"></a></dt>

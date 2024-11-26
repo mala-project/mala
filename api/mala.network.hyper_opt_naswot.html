@@ -138,12 +138,6 @@
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.network.hyper_opt_naswot.HyperOptNASWOT.get_best_trial_results">
-<span class="sig-name descname"><span class="pre">get_best_trial_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_naswot.html#HyperOptNASWOT.get_best_trial_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_naswot.HyperOptNASWOT.get_best_trial_results" title="Link to this definition"></a></dt>
-<dd><p>Get the best trial out of the list, including the value.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mala.network.hyper_opt_naswot.HyperOptNASWOT.perform_study">
 <span class="sig-name descname"><span class="pre">perform_study</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_naswot.html#HyperOptNASWOT.perform_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_naswot.HyperOptNASWOT.perform_study" title="Link to this definition"></a></dt>
 <dd><p>Perform the study, i.e. the optimization.</p>
@@ -154,6 +148,12 @@ will be optional later on.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>trial_list</strong> (<em>list</em>) – A list containing trials from either HyperOptOptuna or HyperOptOAT.</p>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>best_trial_loss</strong> – Loss of the best trial.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -163,6 +163,29 @@ will be optional later on.</p>
 <dd><p>Set the optimal parameters found in the present study.</p>
 <p>The parameters will be written to the parameter object with which the
 hyperparameter optimizer was created.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.network.hyper_opt_naswot.HyperOptNASWOT.best_trial">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">best_trial</span></span><a class="headerlink" href="#mala.network.hyper_opt_naswot.HyperOptNASWOT.best_trial" title="Link to this definition"></a></dt>
+<dd><p>Get the best trial determined in this NASWOT run.</p>
+<p>This property is read only, and will be recomputed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.network.hyper_opt_naswot.HyperOptNASWOT.best_trial_index">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">best_trial_index</span></span><a class="headerlink" href="#mala.network.hyper_opt_naswot.HyperOptNASWOT.best_trial_index" title="Link to this definition"></a></dt>
+<dd><p>Get the index and loss of best trial determined in this NASWOT run.</p>
+<p>This property is read only, and will be recomputed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>best_trial_index</strong> – A list containing [0] the best trial index and [1] the best
+trial loss.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

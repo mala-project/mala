@@ -138,7 +138,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="kc">False</span>
             <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_points_to_remove</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="DataShuffler.add_snapshot">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler.add_snapshot">[docs]</a>
@@ -223,8 +223,8 @@
             <span class="c1"># then we have to trim the original snapshots to size</span>
             <span class="c1"># the indicies to be removed are selected at random</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data_points_to_remove</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_points_to_remove</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
             <span class="p">):</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">)</span>
@@ -243,7 +243,7 @@
 
                 <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
                     <span class="n">ngrid</span><span class="p">,</span>
-                    <span class="n">size</span><span class="o">=</span><span class="n">ngrid</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+                    <span class="n">size</span><span class="o">=</span><span class="n">ngrid</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_points_to_remove</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
                 <span class="p">)</span>
 
                 <span class="n">descriptor_data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_descriptor</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
@@ -638,7 +638,7 @@
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="n">number_of_data_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">snapshot_size_list</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_points_to_remove</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">number_of_shuffled_snapshots</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">number_of_shuffled_snapshots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_snapshots</span>
 
@@ -674,13 +674,13 @@
                 <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">shuffled_gridsizes</span><span class="p">)</span> <span class="o">*</span> <span class="n">number_of_shuffled_snapshots</span>
             <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_points_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_snapshots</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_points_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">snapshot_size_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
                 <span class="o">-</span> <span class="n">shuffled_gridsizes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">number_of_shuffled_snapshots</span>
             <span class="p">)</span>
-        <span class="n">tot_points_missing</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_points_to_remove</span><span class="p">)</span>
+        <span class="n">tot_points_missing</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_points_to_remove</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">tot_points_missing</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">printout</span><span class="p">(</span>

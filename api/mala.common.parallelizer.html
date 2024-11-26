@@ -127,7 +127,7 @@
 <dd><p>Return the MPI communicator, if MPI is being used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>comm</strong> – A MPI communicator.</p>
+<dd class="field-odd"><p><strong>comm</strong> – An MPI communicator.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>MPI.COMM_WORLD</p>
@@ -161,6 +161,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>local_rank</strong> – The local rank of the current thread.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -201,7 +209,7 @@ treated as high level messages and will be printed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>warning</strong> – Warning to be printed.</p></li>
+<li><p><strong>warning</strong> (<em>str</em>) – Warning to be printed.</p></li>
 <li><p><strong>min_verbosity</strong> (<em>int</em>) – Minimum number of verbosity for this output to still be printed.</p></li>
 <li><p><strong>category</strong> (<em>class</em>) – Category of the warning to be thrown.</p></li>
 </ul>
@@ -218,7 +226,7 @@ treated as high level messages and will be printed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>values</strong> – Values to be printed.</p></li>
+<li><p><strong>values</strong> (<em>object</em>) – Values to be printed.</p></li>
 <li><p><strong>sep</strong> (<em>string</em>) – Separator between printed values.</p></li>
 <li><p><strong>min_verbosity</strong> (<em>int</em>) – Minimum number of verbosity for this output to still be printed.</p></li>
 </ul>

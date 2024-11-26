@@ -114,7 +114,8 @@
 <div class="viewcode-block" id="Density">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density">[docs]</a>
 <span class="k">class</span> <span class="nc">Density</span><span class="p">(</span><span class="n">Target</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Postprocessing / parsing functions for the electronic density.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Postprocessing / parsing functions for the electronic density.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -125,7 +126,10 @@
     <span class="c1">##############################</span>
     <span class="c1"># Class attributes</span>
     <span class="c1">##############################</span>
-
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Total energy module mutual exclusion token used to make sure there</span>
+<span class="sd">    the total energy module is not initialized twice.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">te_mutex</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1">##############################</span>
@@ -383,6 +387,12 @@
 
 <span class="sd">        This is the generic interface for cached target quantities.</span>
 <span class="sd">        It should work for all implemented targets.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        density : numpy.ndarray</span>
+<span class="sd">            Electronic charge density as a volumetric array. May be 4D or 2D</span>
+<span class="sd">            depending on workflow.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span></div>
 
@@ -527,7 +537,8 @@
 <span class="sd">            Units the density is saved in. Usually none.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Reading density from .cube file &quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="c1"># automatically convert units if they are None since cube files take atomic units</span>
+        <span class="c1"># automatically convert units if they are None since cube files take</span>
+        <span class="c1"># atomic units</span>
         <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;1/Bohr^3&quot;</span>
         <span class="k">if</span> <span class="n">units</span> <span class="o">!=</span> <span class="s2">&quot;1/Bohr^3&quot;</span><span class="p">:</span>
@@ -717,7 +728,7 @@
 
 <span class="sd">        voxel : ase.cell.Cell</span>
 <span class="sd">            Voxel to be used for grid intergation. Needs to reflect the</span>
-<span class="sd">            symmetry of the simulation cell. In Bohr.</span>
+<span class="sd">            symmetry of the simulation cell.</span>
 
 <span class="sd">        integration_method : str</span>
 <span class="sd">            Integration method used to integrate density on the grid.</span>

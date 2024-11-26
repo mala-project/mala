@@ -120,9 +120,9 @@
 <dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_data_scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_data_scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clear_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="mala.datahandling.data_handler_base.html#mala.datahandling.data_handler_base.DataHandlerBase" title="mala.datahandling.data_handler_base.DataHandlerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataHandlerBase</span></code></a></p>
-<p>Loads and scales data. Can only process numpy arrays at the moment.</p>
-<p>Data that is not in a numpy array can be converted using the DataConverter
-class.</p>
+<p>Loads and scales data. Can load from numpy or OpenPMD files.</p>
+<p>Data that is not saved as numpy or OpenPMD file can be converted using the
+DataConverter class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -140,6 +140,127 @@ the object.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.input_data_scaler">
+<span class="sig-name descname"><span class="pre">input_data_scaler</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.input_data_scaler" title="Link to this definition"></a></dt>
+<dd><p>Used to scale the input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler" title="mala.datahandling.data_scaler.DataScaler">mala.datahandling.data_scaler.DataScaler</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.nr_test_data">
+<span class="sig-name descname"><span class="pre">nr_test_data</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.nr_test_data" title="Link to this definition"></a></dt>
+<dd><p>Number of test data points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.nr_test_snapshots">
+<span class="sig-name descname"><span class="pre">nr_test_snapshots</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.nr_test_snapshots" title="Link to this definition"></a></dt>
+<dd><p>Number of test snapshots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.nr_training_data">
+<span class="sig-name descname"><span class="pre">nr_training_data</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.nr_training_data" title="Link to this definition"></a></dt>
+<dd><p>Number of training data points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.nr_training_snapshots">
+<span class="sig-name descname"><span class="pre">nr_training_snapshots</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.nr_training_snapshots" title="Link to this definition"></a></dt>
+<dd><p>Number of training snapshots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.nr_validation_data">
+<span class="sig-name descname"><span class="pre">nr_validation_data</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.nr_validation_data" title="Link to this definition"></a></dt>
+<dd><p>Number of validation data points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.nr_validation_snapshots">
+<span class="sig-name descname"><span class="pre">nr_validation_snapshots</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.nr_validation_snapshots" title="Link to this definition"></a></dt>
+<dd><p>Number of validation snapshots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.output_data_scaler">
+<span class="sig-name descname"><span class="pre">output_data_scaler</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.output_data_scaler" title="Link to this definition"></a></dt>
+<dd><p>Used to scale the output data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler" title="mala.datahandling.data_scaler.DataScaler">mala.datahandling.data_scaler.DataScaler</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.test_data_sets">
+<span class="sig-name descname"><span class="pre">test_data_sets</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.test_data_sets" title="Link to this definition"></a></dt>
+<dd><p>List containing torch data sets for test data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.training_data_sets">
+<span class="sig-name descname"><span class="pre">training_data_sets</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.training_data_sets" title="Link to this definition"></a></dt>
+<dd><p>List containing torch data sets for training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.validation_data_sets">
+<span class="sig-name descname"><span class="pre">validation_data_sets</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.validation_data_sets" title="Link to this definition"></a></dt>
+<dd><p>List containing torch data sets for validation data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.clear_data">
 <span class="sig-name descname"><span class="pre">clear_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.clear_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.clear_data" title="Link to this definition"></a></dt>
@@ -179,7 +300,7 @@ slice it.</p>
 <dd class="field-odd"><p><strong>snapshot_number</strong> (<em>int</em>) – Number of the snapshot for which the entire test inputs.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Tensor holding the gradient.</p>
+<dd class="field-even"><p><strong>gradient</strong> – Tensor holding the gradient.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>torch.Tensor</p>
@@ -233,8 +354,9 @@ simply be put into a MALA network.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>numpy_array</strong> (<em>np.array</em>) – Array that is to be converted.</p></li>
-<li><p><strong>data_type</strong> (<em>string</em>) – Either “in” or “out”, depending if input or output data is
-processed.</p></li>
+<li><p><strong>data_type</strong> (<em>string</em>) – <p>Either “in” or “out”, depending if input or output data is</p>
+<p>processed.</p>
+</p></li>
 <li><p><strong>units</strong> (<em>string</em>) – Units of the data that is processed.</p></li>
 </ul>
 </dd>

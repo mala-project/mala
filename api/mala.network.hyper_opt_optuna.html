@@ -137,10 +137,45 @@
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.network.hyper_opt_optuna.HyperOptOptuna.params">
+<span class="sig-name descname"><span class="pre">params</span></span><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.params" title="Link to this definition"></a></dt>
+<dd><p>MALA Parameters object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters">mala.common.parameters.Parameters</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.network.hyper_opt_optuna.HyperOptOptuna.objective">
+<span class="sig-name descname"><span class="pre">objective</span></span><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.objective" title="Link to this definition"></a></dt>
+<dd><p>MALA objective to be optimized, i.e., a MALA NN model training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.network.objective_base.html#mala.network.objective_base.ObjectiveBase" title="mala.network.objective_base.ObjectiveBase">mala.network.objective_base.ObjectiveBase</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.network.hyper_opt_optuna.HyperOptOptuna.study">
+<span class="sig-name descname"><span class="pre">study</span></span><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.study" title="Link to this definition"></a></dt>
+<dd><p>An Optuna study used to collect the results of the hyperparameter
+optimization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>optuna.study.Study</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study">
 <span class="sig-name descname"><span class="pre">get_trials_from_study</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna.get_trials_from_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study" title="Link to this definition"></a></dt>
 <dd><p>Return the trials from the last study.</p>
+<p>Only returns completed trials.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>last_trials</strong> – A list of optuna.FrozenTrial objects.</p>
@@ -180,6 +215,14 @@ be loaded.</p></li>
 <dd><p>Perform the study, i.e. the optimization.</p>
 <p>This is done by sampling a certain subset of network architectures.
 In this case, optuna is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>best_trial_loss</strong> – Loss of the best trial.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

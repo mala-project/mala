@@ -88,7 +88,6 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torch.distributed</span> <span class="k">as</span> <span class="nn">dist</span>
 
 <span class="n">use_ddp</span> <span class="o">=</span> <span class="kc">False</span>
@@ -254,6 +253,11 @@
 <span class="sd">    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING</span>
 <span class="sd">    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER</span>
 <span class="sd">    DEALINGS IN THE SOFTWARE.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    local_rank : int</span>
+<span class="sd">        The local rank of the current thread.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">use_ddp</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;LOCAL_RANK&quot;</span><span class="p">))</span>
@@ -293,7 +297,6 @@
 
 
 
-<span class="c1"># TODO: This is hacky, improve it.</span>
 <div class="viewcode-block" id="get_comm">
 <a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.get_comm">[docs]</a>
 <span class="k">def</span> <span class="nf">get_comm</span><span class="p">():</span>
@@ -303,7 +306,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    comm : MPI.COMM_WORLD</span>
-<span class="sd">        A MPI communicator.</span>
+<span class="sd">        An MPI communicator.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">comm</span></div>
@@ -333,7 +336,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    values</span>
+<span class="sd">    values : object</span>
 <span class="sd">        Values to be printed.</span>
 
 <span class="sd">    sep : string</span>
@@ -360,7 +363,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    warning</span>
+<span class="sd">    warning : str</span>
 <span class="sd">        Warning to be printed.</span>
 <span class="sd">    min_verbosity : int</span>
 <span class="sd">        Minimum number of verbosity for this output to still be printed.</span>

@@ -133,6 +133,17 @@ be created by this class.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.ldos_aligner.LDOSAligner.ldos_parameters">
+<span class="sig-name descname"><span class="pre">ldos_parameters</span></span><a class="headerlink" href="#mala.datahandling.ldos_aligner.LDOSAligner.ldos_parameters" title="Link to this definition"></a></dt>
+<dd><p>MALA target calculation parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersTargets" title="mala.common.parameters.ParametersTargets">mala.common.parameters.ParametersTargets</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.ldos_aligner.LDOSAligner.add_snapshot">
 <span class="sig-name descname"><span class="pre">add_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapshot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'numpy'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/ldos_aligner.html#LDOSAligner.add_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.ldos_aligner.LDOSAligner.add_snapshot" title="Link to this definition"></a></dt>
@@ -150,15 +161,14 @@ be created by this class.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.ldos_aligner.LDOSAligner.align_ldos_to_ref">
-<span class="sig-name descname"><span class="pre">align_ldos_to_ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_path_ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'aligned/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_truncate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_truncate_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_electrons</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_shift_mse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/ldos_aligner.html#LDOSAligner.align_ldos_to_ref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.ldos_aligner.LDOSAligner.align_ldos_to_ref" title="Link to this definition"></a></dt>
-<dd><p>Add a snapshot to the data pipeline.</p>
+<span class="sig-name descname"><span class="pre">align_ldos_to_ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_path_ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'aligned/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_truncate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_truncate_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_electrons</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_shift_mse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/ldos_aligner.html#LDOSAligner.align_ldos_to_ref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.ldos_aligner.LDOSAligner.align_ldos_to_ref" title="Link to this definition"></a></dt>
+<dd><p>Align LDOS to reference.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>save_path</strong> (<em>string</em>) – path to save the aligned LDOS vectors</p></li>
-<li><p><strong>save_name</strong> (<em>string</em>) – naming convention for the aligned LDOS vectors</p></li>
-<li><p><strong>save_path_ext</strong> (<em>string</em>) – additional path for the LDOS vectors (useful if
-save_path is left as default None)</p></li>
+<li><p><strong>save_path_ext</strong> (<em>string</em>) – Extra path to be added to the input path before saving.
+By default, new snapshot files are saved into exactly the
+same directory they were read from with exactly the same name.</p></li>
 <li><p><strong>reference_index</strong> (<em>int</em>) – the snapshot number (in the snapshot directory list)
 to which all other LDOS vectors are aligned</p></li>
 <li><p><strong>zero_tol</strong> (<em>float</em>) – the “zero” value for alignment / left side truncation
@@ -167,8 +177,6 @@ always scaled by norm of reference LDOS mean</p></li>
 <li><p><strong>right_truncate_value</strong> (<em>float</em>) – right-hand energy value (based on reference LDOS vector)
 to which truncate LDOS vectors
 if None, no right-side truncation</p></li>
-<li><p><strong>egrid_spacing_ev</strong> (<em>float</em>) – spacing of energy grid</p></li>
-<li><p><strong>egrid_offset_ev</strong> (<em>float</em>) – original offset of energy grid</p></li>
 <li><p><strong>number_of_electrons</strong> (<em>float / int</em>) – if not None, computes the energy shift relative to QE energies</p></li>
 <li><p><strong>n_shift_mse</strong> (<em>int</em>) – how many energy grid points to consider when aligning LDOS
 vectors based on mean-squared error
@@ -180,14 +188,13 @@ computed automatically if None</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.ldos_aligner.LDOSAligner.calc_optimal_ldos_shift">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calc_optimal_ldos_shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ldos_mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ldos_mean_ref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_index_ref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_shift_mse</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/ldos_aligner.html#LDOSAligner.calc_optimal_ldos_shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.ldos_aligner.LDOSAligner.calc_optimal_ldos_shift" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calc_optimal_ldos_shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ldos_mean_ref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_index_ref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_shift_mse</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/ldos_aligner.html#LDOSAligner.calc_optimal_ldos_shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.ldos_aligner.LDOSAligner.calc_optimal_ldos_shift" title="Link to this definition"></a></dt>
 <dd><p>Calculate the optimal amount by which to align the LDOS with reference.</p>
 <p>‘Optimized’ is currently based on minimizing the mean-square error with
 the reference, up to a cut-off (typically 10% of the full LDOS length).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>e_grid</strong> (<em>array_like</em>) – energy grid</p></li>
 <li><p><strong>ldos_mean</strong> (<em>array_like</em>) – mean of LDOS vector for shifting</p></li>
 <li><p><strong>ldos_mean_ref</strong> (<em>array_like</em>) – mean of LDOS reference vector</p></li>
 <li><p><strong>left_index</strong> (<em>int</em>) – index at which LDOS for shifting becomes non-zero</p></li>

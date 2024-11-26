@@ -110,6 +110,18 @@
 
 <span class="sd">    use_pkl_checkpoints : bool</span>
 <span class="sd">        If true, .pkl checkpoints will be created.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    params : mala.common.parameters.Parameters</span>
+<span class="sd">        MALA Parameters object.</span>
+
+<span class="sd">    objective : mala.network.objective_base.ObjectiveBase</span>
+<span class="sd">        MALA objective to be optimized, i.e., a MALA NN model training.</span>
+
+<span class="sd">    study : optuna.study.Study</span>
+<span class="sd">        An Optuna study used to collect the results of the hyperparameter</span>
+<span class="sd">        optimization.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -178,7 +190,7 @@
                 <span class="n">load_if_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">pruner</span><span class="o">=</span><span class="n">pruner</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint_counter</span> <span class="o">=</span> <span class="mi">0</span>
 
 <div class="viewcode-block" id="HyperOptOptuna.perform_study">
 <a class="viewcode-back" href="../../../api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.perform_study">[docs]</a>
@@ -188,9 +200,14 @@
 
 <span class="sd">        This is done by sampling a certain subset of network architectures.</span>
 <span class="sd">        In this case, optuna is used.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        best_trial_loss : float</span>
+<span class="sd">            Loss of the best trial.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># The parameters could have changed.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">ObjectiveBase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">ObjectiveBase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="p">)</span>
 
         <span class="c1"># Fill callback list based on user checkpoint wishes.</span>
         <span class="n">callback_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__check_stopping</span><span class="p">]</span>
@@ -223,6 +240,8 @@
     <span class="k">def</span> <span class="nf">get_trials_from_study</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the trials from the last study.</span>
+
+<span class="sd">        Only returns completed trials.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -453,11 +472,11 @@
 
     <span class="k">def</span> <span class="nf">__create_checkpointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a checkpoint of optuna study, if necessary.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint_counter</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">need_to_checkpoint</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">if</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint_counter</span>
             <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoints_each_trial</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoints_each_trial</span> <span class="o">&gt;</span> <span class="mi">0</span>
         <span class="p">):</span>
@@ -483,7 +502,7 @@
 
         <span class="k">if</span> <span class="n">need_to_checkpoint</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="c1"># We need to create a checkpoint!</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint_counter</span> <span class="o">=</span> <span class="mi">0</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_save_params_and_scaler</span><span class="p">()</span>
 

@@ -144,12 +144,164 @@ only needed when testing multiple snapshots.</p></li>
 <li><p>va: This snapshot will be a validation snapshot.</p></li>
 </ul>
 </div></blockquote>
-<p>Replaces the old approach of MALA to have a separate list.
-Default is None.</p>
 </p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.snapshot.Snapshot.grid_dimensions">
+<span class="sig-name descname"><span class="pre">grid_dimensions</span></span><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.grid_dimensions" title="Link to this definition"></a></dt>
+<dd><p>Grid dimension [x,y,z].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.snapshot.Snapshot.grid_size">
+<span class="sig-name descname"><span class="pre">grid_size</span></span><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.grid_size" title="Link to this definition"></a></dt>
+<dd><p>Number of grid points in total.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.snapshot.Snapshot.input_dimension">
+<span class="sig-name descname"><span class="pre">input_dimension</span></span><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.input_dimension" title="Link to this definition"></a></dt>
+<dd><p>Input feature dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.snapshot.Snapshot.output_dimension">
+<span class="sig-name descname"><span class="pre">output_dimension</span></span><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.output_dimension" title="Link to this definition"></a></dt>
+<dd><p>Output feature dimension</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.snapshot.Snapshot.input_npy_file">
+<span class="sig-name descname"><span class="pre">input_npy_file</span></span><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.input_npy_file" title="Link to this definition"></a></dt>
+<dd><p>File with saved numpy input array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.snapshot.Snapshot.input_npy_directory">
+<span class="sig-name descname"><span class="pre">input_npy_directory</span></span><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.input_npy_directory" title="Link to this definition"></a></dt>
+<dd><p>Directory containing input_npy_directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.snapshot.Snapshot.output_npy_file">
+<span class="sig-name descname"><span class="pre">output_npy_file</span></span><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.output_npy_file" title="Link to this definition"></a></dt>
+<dd><p>File with saved numpy output array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.snapshot.Snapshot.output_npy_directory">
+<span class="sig-name descname"><span class="pre">output_npy_directory</span></span><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.output_npy_directory" title="Link to this definition"></a></dt>
+<dd><p>Directory containing output_npy_file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.snapshot.Snapshot.input_units">
+<span class="sig-name descname"><span class="pre">input_units</span></span><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.input_units" title="Link to this definition"></a></dt>
+<dd><p>Units of input data. See descriptor classes to see which units are
+supported.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.snapshot.Snapshot.output_units">
+<span class="sig-name descname"><span class="pre">output_units</span></span><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.output_units" title="Link to this definition"></a></dt>
+<dd><p>Units of output data. See target classes to see which units are
+supported.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.snapshot.Snapshot.calculation_output">
+<span class="sig-name descname"><span class="pre">calculation_output</span></span><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.calculation_output" title="Link to this definition"></a></dt>
+<dd><p>File with the output of the original snapshot calculation. This is
+only needed when testing multiple snapshots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.snapshot.Snapshot.snapshot_function">
+<span class="sig-name descname"><span class="pre">snapshot_function</span></span><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.snapshot_function" title="Link to this definition"></a></dt>
+<dd><p>“Function” of the snapshot in the MALA workflow.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>te: This snapshot will be a testing snapshot.</p></li>
+<li><p>tr: This snapshot will be a training snapshot.</p></li>
+<li><p>va: This snapshot will be a validation snapshot.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.snapshot.Snapshot.snapshot_type">
+<span class="sig-name descname"><span class="pre">snapshot_type</span></span><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.snapshot_type" title="Link to this definition"></a></dt>
+<dd><p>Can be either “numpy” or “openpmd” and denotes which type of files
+this snapshot contains.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.snapshot.Snapshot.from_json">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/snapshot.html#Snapshot.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.from_json" title="Link to this definition"></a></dt>

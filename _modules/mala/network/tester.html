@@ -130,6 +130,32 @@
 <span class="sd">        Can be &quot;list&quot; or &quot;mae&quot;. If &quot;list&quot;, then a list of results across all</span>
 <span class="sd">        snapshots is returned. If &quot;mae&quot;, then the MAE across all snapshots</span>
 <span class="sd">        will be calculated and returned.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    target_calculator : mala.targets.target.Target</span>
+<span class="sd">        Target calculator used for predictions. Can be used for further</span>
+<span class="sd">        processing.</span>
+
+<span class="sd">    observables_to_test : list</span>
+<span class="sd">        List of observables to test. Supported are:</span>
+
+<span class="sd">            - &quot;ldos&quot;: Calculate the MSE loss of the LDOS.</span>
+<span class="sd">            - &quot;band_energy&quot;: Band energy error</span>
+<span class="sd">            - &quot;band_energy_full&quot;: Band energy absolute values (only works with</span>
+<span class="sd">              list, as both actual and predicted are returned)</span>
+<span class="sd">            - &quot;total_energy&quot;: Total energy error</span>
+<span class="sd">            - &quot;total_energy_full&quot;: Total energy absolute values (only works</span>
+<span class="sd">              with list, as both actual and predicted are returned)</span>
+<span class="sd">            - &quot;number_of_electrons&quot;: Number of electrons (Fermi energy is not</span>
+<span class="sd">              determined dynamically for this quantity.</span>
+<span class="sd">            - &quot;density&quot;: MAPE of the density prediction</span>
+<span class="sd">            - &quot;dos&quot;: MAPE of the DOS prediction</span>
+
+<span class="sd">    output_format : string</span>
+<span class="sd">        Can be &quot;list&quot; or &quot;mae&quot;. If &quot;list&quot;, then a list of results across all</span>
+<span class="sd">        snapshots is returned. If &quot;mae&quot;, then the MAE across all snapshots</span>
+<span class="sd">        will be calculated and returned.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -142,8 +168,8 @@
     <span class="p">):</span>
         <span class="c1"># copy the parameters into the class.</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Tester</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observables_to_test</span> <span class="o">=</span> <span class="n">observables_to_test</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_format</span> <span class="o">=</span> <span class="n">output_format</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_format</span> <span class="o">!=</span> <span class="s2">&quot;list&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_format</span> <span class="o">!=</span> <span class="s2">&quot;mae&quot;</span><span class="p">:</span>
@@ -301,7 +327,7 @@
             <span class="n">offset_snapshots</span> <span class="o">+</span> <span class="n">snapshot_number</span><span class="p">,</span>
             <span class="n">data_set</span><span class="p">,</span>
             <span class="n">data_type</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_number_of_batches_per_snapshot</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -332,7 +358,7 @@
                 <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="o">=</span> <span class="n">optimal_batch_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
             <span class="n">grid_size</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span>
         <span class="p">)</span></div>
 

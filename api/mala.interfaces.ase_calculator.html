@@ -128,9 +128,33 @@ the neural network), calculator can access all important data such as
 temperature, number of electrons, etc. that might not be known simply
 from the atomic positions.</p>
 </p></li>
+<li><p><strong>predictor</strong> (<a class="reference internal" href="mala.network.predictor.html#mala.network.predictor.Predictor" title="mala.network.predictor.Predictor"><em>mala.network.predictor.Predictor</em></a>) – A Predictor class object to be used for the underlying MALA
+predictions.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.interfaces.ase_calculator.MALA.mala_parameters">
+<span class="sig-name descname"><span class="pre">mala_parameters</span></span><a class="headerlink" href="#mala.interfaces.ase_calculator.MALA.mala_parameters" title="Link to this definition"></a></dt>
+<dd><p>MALA parameters used for predictions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters">mala.common.parameters.Parameters</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.interfaces.ase_calculator.MALA.last_energy_contributions">
+<span class="sig-name descname"><span class="pre">last_energy_contributions</span></span><a class="headerlink" href="#mala.interfaces.ase_calculator.MALA.last_energy_contributions" title="Link to this definition"></a></dt>
+<dd><p>Contains all total energy contributions for the last prediction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.interfaces.ase_calculator.MALA.calculate">
 <span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['energy']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_changes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ase.calculators.calculator.all_changes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/interfaces/ase_calculator.html#MALA.calculate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.interfaces.ase_calculator.MALA.calculate" title="Link to this definition"></a></dt>
@@ -183,6 +207,12 @@ MALA.load_run() instead.</p>
 <li><p><strong>path</strong> (<em>str</em>) – Path where the model is saved.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>calculator</strong> – The calculator object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mala.interfaces.calculator.Calculator</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -198,6 +228,12 @@ models supported.</p>
 <li><p><strong>run_name</strong> (<em>str</em>) – Name under which the model is saved.</p></li>
 <li><p><strong>path</strong> (<em>str</em>) – Path where the model is saved.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>calculator</strong> – The calculator object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mala.interfaces.calculator.Calculator</p>
 </dd>
 </dl>
 </dd></dl>
@@ -219,7 +255,7 @@ models supported.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.interfaces.ase_calculator.MALA.implemented_properties">
-<span class="sig-name descname"><span class="pre">implemented_properties</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['energy',</span> <span class="pre">'forces']</span></em><a class="headerlink" href="#mala.interfaces.ase_calculator.MALA.implemented_properties" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">implemented_properties</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['energy']</span></em><a class="headerlink" href="#mala.interfaces.ase_calculator.MALA.implemented_properties" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

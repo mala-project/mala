@@ -114,12 +114,47 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parameters</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters object used to create this instance.</p></li>
+<li><p><strong>parameters</strong> (<em>mala.Parameters</em>) – MALA parameters object used to create this instance.</p></li>
 <li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Initial atomic configuration for which an equilibrated configuration
 is to be created.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datageneration.ofdft_initializer.OFDFTInitializer.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#mala.datageneration.ofdft_initializer.OFDFTInitializer.parameters" title="Link to this definition"></a></dt>
+<dd><p>MALA data generation parameters object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mala.mala.common.parameters.ParametersDataGeneration</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datageneration.ofdft_initializer.OFDFTInitializer.atoms">
+<span class="sig-name descname"><span class="pre">atoms</span></span><a class="headerlink" href="#mala.datageneration.ofdft_initializer.OFDFTInitializer.atoms" title="Link to this definition"></a></dt>
+<dd><p>Initial atomic configuration for which an
+equilibrated configuration is to be created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ase.Atoms</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datageneration.ofdft_initializer.OFDFTInitializer.dftpy_configuration">
+<span class="sig-name descname"><span class="pre">dftpy_configuration</span></span><a class="headerlink" href="#mala.datageneration.ofdft_initializer.OFDFTInitializer.dftpy_configuration" title="Link to this definition"></a></dt>
+<dd><p>Dictionary containing the DFTpy configuration. Will partially be
+populated via the MALA parameters object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datageneration.ofdft_initializer.OFDFTInitializer.get_equilibrated_configuration">
 <span class="sig-name descname"><span class="pre">get_equilibrated_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logging_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/ofdft_initializer.html#OFDFTInitializer.get_equilibrated_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.ofdft_initializer.OFDFTInitializer.get_equilibrated_configuration" title="Link to this definition"></a></dt>
@@ -128,6 +163,12 @@ is to be created.</p></li>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>logging_period</strong> (<em>int</em>) – If not None, a .log and .traj file will be filled with snapshot
 information every logging_period steps.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>equilibrated_configuration</strong> – Equilibrated atomic configuration.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ase.Atoms</p>
 </dd>
 </dl>
 </dd></dl>

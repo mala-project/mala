@@ -131,10 +131,10 @@
         <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ObjectiveNASWOT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">search_parameters</span><span class="p">,</span> <span class="n">data_handler</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">trial_type</span> <span class="o">=</span> <span class="n">trial_type</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">search_parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">mini_batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trial_type</span> <span class="o">=</span> <span class="n">trial_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span> <span class="o">=</span> <span class="n">search_parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">mini_batch_size</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -160,15 +160,15 @@
             <span class="c1"># Load the batchesand get the jacobian.</span>
             <span class="n">do_shuffle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">use_shuffling_for_samplers</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span>
                 <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">use_ddp</span>
             <span class="p">):</span>
                 <span class="n">do_shuffle</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">use_shuffling_for_samplers</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">mix_datasets</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">mix_datasets</span><span class="p">()</span>
             <span class="n">loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span><span class="p">,</span>
                 <span class="n">shuffle</span><span class="o">=</span><span class="n">do_shuffle</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">jac</span> <span class="o">=</span> <span class="n">ObjectiveNASWOT</span><span class="o">.</span><span class="n">__get_batch_jacobian</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">loader</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>

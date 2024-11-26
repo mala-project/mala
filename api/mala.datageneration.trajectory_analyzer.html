@@ -118,9 +118,95 @@
 <li><p><strong>trajectory</strong> (<em>ase.io.Trajectory</em><em> or </em><em>string</em>) – Trajectory or path to trajectory to be analyzed.</p></li>
 <li><p><strong>target_calculator</strong> (<a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target" title="mala.targets.target.Target"><em>mala.targets.target.Target</em></a>) – A target calculator to calculate e.g. the RDF. If None is provided,
 one will be generated ad-hoc (recommended).</p></li>
+<li><p><strong>temperatures</strong> (<em>string</em><em> or </em><em>numpy.ndarray</em>) – Array holding the temperatures for the trajectory or path to numpy
+file containing temperatures.</p></li>
+<li><p><strong>target_temperature</strong> (<em>float</em>) – Target temperature for equilibration.</p></li>
+<li><p><strong>malada_compatability</strong> (<em>bool</em>) – If True, twice the radius set by the minimum imaging convention (MIC)
+will be used for RDF calculation. This is generally discouraged,
+but some older malada calculations have been performed with it, so
+this parameter provides reproducibility.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.parameters" title="Link to this definition"></a></dt>
+<dd><p>MALA data generation parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration" title="mala.common.parameters.ParametersDataGeneration">mala.common.parameters.ParametersDataGeneration</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.average_distance_equilibrated">
+<span class="sig-name descname"><span class="pre">average_distance_equilibrated</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.average_distance_equilibrated" title="Link to this definition"></a></dt>
+<dd><p>Distance threshold for determination of first equilibrated snapshot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.distance_metrics_denoised">
+<span class="sig-name descname"><span class="pre">distance_metrics_denoised</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.distance_metrics_denoised" title="Link to this definition"></a></dt>
+<dd><p>RDF based distance metrics used for equilibration analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.distances_realspace">
+<span class="sig-name descname"><span class="pre">distances_realspace</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.distances_realspace" title="Link to this definition"></a></dt>
+<dd><p>Realspace distance metrics used to sample snapshots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.first_considered_snapshot">
+<span class="sig-name descname"><span class="pre">first_considered_snapshot</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.first_considered_snapshot" title="Link to this definition"></a></dt>
+<dd><p>First snapshot to be considered during equilibration analysis (i.e.,
+after pruning).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.last_considered_snapshot">
+<span class="sig-name descname"><span class="pre">last_considered_snapshot</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.last_considered_snapshot" title="Link to this definition"></a></dt>
+<dd><p>Last snapshot to be considered during equilibration analysis (i.e.,
+after pruning).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.target_calculator">
+<span class="sig-name descname"><span class="pre">target_calculator</span></span><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.target_calculator" title="Link to this definition"></a></dt>
+<dd><p>Target calculator used for computing RDFs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target" title="mala.targets.target.Target">mala.targets.target.Target</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_first_snapshot">
 <span class="sig-name descname"><span class="pre">get_first_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equilibrated_snapshot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/trajectory_analyzer.html#TrajectoryAnalyzer.get_first_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_first_snapshot" title="Link to this definition"></a></dt>

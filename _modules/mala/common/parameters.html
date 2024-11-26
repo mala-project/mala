@@ -262,7 +262,7 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Read this object from a dictionary saved in a JSON file.</span>
+<span class="sd">        Read parameters from a dictionary saved in a JSON file.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -328,6 +328,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    nn_type : string</span>
 <span class="sd">        Type of the neural network that will be used. Currently supported are</span>
+
 <span class="sd">            - &quot;feed_forward&quot; (default)</span>
 <span class="sd">            - &quot;transformer&quot;</span>
 <span class="sd">            - &quot;lstm&quot;</span>
@@ -372,6 +373,10 @@
 <span class="sd">        Number of heads to be used in Multi head attention network</span>
 <span class="sd">        This should be a divisor of input dimension</span>
 <span class="sd">        Default: None</span>
+
+<span class="sd">    dropout : float</span>
+<span class="sd">        Dropout rate for positional encoding in transformer.</span>
+<span class="sd">        Default: 0.1</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -384,7 +389,7 @@
         <span class="c1"># for LSTM/Gru</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">no_hidden_state</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bidirection</span> <span class="o">=</span> <span class="kc">False</span>
-        
+
         <span class="c1"># for LSTM/Gru + Transformer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_hidden_layers</span> <span class="o">=</span> <span class="mi">1</span>
 
@@ -415,18 +420,52 @@
 <span class="sd">        bispectrum descriptors. Default value for jmax is 5, so default value</span>
 <span class="sd">        for twojmax is 10.</span>
 
-<span class="sd">    lammps_compute_file : string</span>
-<span class="sd">        Bispectrum calculation: LAMMPS input file that is used to calculate the</span>
-<span class="sd">        Bispectrum descriptors. If this string is empty, the standard LAMMPS input</span>
-<span class="sd">        file found in this repository will be used (recommended).</span>
-
 <span class="sd">    descriptors_contain_xyz : bool</span>
 <span class="sd">        Legacy option. If True, it is assumed that the first three entries of</span>
 <span class="sd">        the descriptor vector are the xyz coordinates and they are cut from the</span>
 <span class="sd">        descriptor vector. If False, no such cutting is peformed.</span>
 
 <span class="sd">    atomic_density_sigma : float</span>
-<span class="sd">        Sigma used for the calculation of the Gaussian descriptors.</span>
+<span class="sd">        Sigma (=width) used for the calculation of the Gaussian descriptors.</span>
+<span class="sd">        Explicitly setting this value is discouraged if the atomic density is</span>
+<span class="sd">        used only during the total energy calculation and, e.g., bispectrum</span>
+<span class="sd">        descriptors are used for models. In this case, the width will</span>
+<span class="sd">        automatically be set correctly during inference based on model</span>
+<span class="sd">        parameters. This parameter mainly exists for debugging purposes.</span>
+<span class="sd">        If the atomic density is instead used for model training itself, this</span>
+<span class="sd">        parameter needs to be set.</span>
+
+<span class="sd">    atomic_density_cutoff : float</span>
+<span class="sd">        Cutoff radius used for atomic density calculation. Explicitly setting</span>
+<span class="sd">        this value is discouraged if the atomic density is used only during the</span>
+<span class="sd">        total energy calculation and, e.g., bispectrum descriptors are used</span>
+<span class="sd">        for models. In this case, the cutoff will automatically be set</span>
+<span class="sd">        correctly during inference based on model parameters. This parameter</span>
+<span class="sd">        mainly exists for debugging purposes. If the atomic density is instead</span>
+<span class="sd">        used for model training itself, this parameter needs to be set.</span>
+
+<span class="sd">    lammps_compute_file : str</span>
+<span class="sd">        Path to a LAMMPS compute file for the bispectrum descriptor</span>
+<span class="sd">        calculation. MALA has its own collection of compute files which are</span>
+<span class="sd">        used by default. Setting this parameter is thus not necessarys for</span>
+<span class="sd">        model training and inference, and it exists mainly for debugging</span>
+<span class="sd">        purposes.</span>
+
+<span class="sd">    minterpy_cutoff_cube_size : float</span>
+<span class="sd">        WILL BE DEPRECATED IN MALA v1.4.0 - size of cube for minterpy</span>
+<span class="sd">        descriptor calculation.</span>
+
+<span class="sd">    minterpy_lp_norm : int</span>
+<span class="sd">        WILL BE DEPRECATED IN MALA v1.4.0 - LP norm for minterpy</span>
+<span class="sd">        descriptor calculation.</span>
+
+<span class="sd">    minterpy_point_list : list</span>
+<span class="sd">        WILL BE DEPRECATED IN MALA v1.4.0 - list of points for minterpy</span>
+<span class="sd">        descriptor calculation.</span>
+
+<span class="sd">    minterpy_polynomial_degree : int</span>
+<span class="sd">        WILL BE DEPRECATED IN MALA v1.4.0 - polynomial degree for minterpy</span>
+<span class="sd">        descriptor calculation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -820,7 +859,7 @@
 <span class="sd">    checkpoint_name : string</span>
 <span class="sd">        Name used for the checkpoints. Using this, multiple runs</span>
 <span class="sd">        can be performed in the same directory.</span>
-<span class="sd">        </span>
+
 <span class="sd">    run_name : string</span>
 <span class="sd">        Name of the run used for logging.</span>
 
@@ -831,18 +870,18 @@
 <span class="sd">        If True, then upon creating logging files, these will be saved</span>
 <span class="sd">        in a subfolder of logging_dir labelled with the starting date</span>
 <span class="sd">        of the logging, to avoid having to change input scripts often.</span>
-<span class="sd">        </span>
+
 <span class="sd">    logger : string</span>
 <span class="sd">        Name of the logger to be used.</span>
 <span class="sd">        Currently supported are:</span>
-<span class="sd">        </span>
+
 <span class="sd">            - &quot;tensorboard&quot;: Tensorboard logger.</span>
 <span class="sd">            - &quot;wandb&quot;: Weights and Biases logger.</span>
-<span class="sd">    </span>
+
 <span class="sd">    validation_metrics : list</span>
 <span class="sd">        List of metrics to be used for validation. Default is [&quot;ldos&quot;].</span>
 <span class="sd">        Possible options are:</span>
-<span class="sd">        </span>
+
 <span class="sd">            - &quot;ldos&quot;: MSE of the LDOS.</span>
 <span class="sd">            - &quot;band_energy&quot;: Band energy.</span>
 <span class="sd">            - &quot;band_energy_actual_fe&quot;: Band energy computed with ground truth Fermi energy.</span>
@@ -853,19 +892,12 @@
 <span class="sd">            - &quot;density_relative&quot;: Rlectron density (MAPE).</span>
 <span class="sd">            - &quot;dos&quot;: Density of states.</span>
 <span class="sd">            - &quot;dos_relative&quot;: Density of states (MAPE).</span>
-<span class="sd">            </span>
+
 <span class="sd">    validate_on_training_data : bool</span>
 <span class="sd">        Whether to validate on the training data as well. Default is False.</span>
-<span class="sd">        </span>
+
 <span class="sd">    validate_every_n_epochs : int</span>
 <span class="sd">        Determines how often validation is performed. Default is 1.</span>
-
-<span class="sd">    inference_data_grid : list</span>
-<span class="sd">        List holding the grid to be used for inference in the form of</span>
-<span class="sd">        [x,y,z].</span>
-
-<span class="sd">    use_mixed_precision : bool</span>
-<span class="sd">        If True, mixed precision computation (via AMP) will be used.</span>
 
 <span class="sd">    training_log_interval : int</span>
 <span class="sd">        Determines how often detailed performance info is printed during</span>
@@ -873,24 +905,38 @@
 
 <span class="sd">    profiler_range : list</span>
 <span class="sd">        List with two entries determining with which batch/iteration number</span>
-<span class="sd">        the CUDA profiler will start and stop profiling. Please note that</span>
-<span class="sd">        this option only holds significance if the nsys profiler is used.</span>
+<span class="sd">         the CUDA profiler will start and stop profiling. Please note that</span>
+<span class="sd">         this option only holds significance if the nsys profiler is used.</span>
+
+<span class="sd">    inference_data_grid : list</span>
+<span class="sd">        Grid dimensions used during inference. Typically, these are automatically</span>
+<span class="sd">        determined by DFT reference data, and this parameter does not need to</span>
+<span class="sd">        be set. Thus, this parameter mainly exists for debugging purposes.</span>
+
+<span class="sd">    use_mixed_precision : bool</span>
+<span class="sd">        If True, mixed precision computation (via AMP) will be used.</span>
+
+<span class="sd">    l2_regularization : float</span>
+<span class="sd">        Weight decay rate for NN optimizer.</span>
+
+<span class="sd">    dropout : float</span>
+<span class="sd">        Dropout rate for positional encoding in transformer net.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersRunning</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="s2">&quot;Adam&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">0.5</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_embedding</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>
+        <span class="c1"># self.learning_rate_embedding = 10 ** (-4)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_number_epochs</span> <span class="o">=</span> <span class="mi">100</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="c1"># self.snapshots_per_epoch = -1</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">l1_regularization</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="c1"># self.l1_regularization = 0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">l2_regularization</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">batch_norm</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_noise</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="c1"># self.batch_norm = False</span>
+        <span class="c1"># self.input_noise = 0.0</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_epochs</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_threshold</span> <span class="o">=</span> <span class="mi">0</span>
@@ -899,10 +945,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_patience</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_during_training_metric</span> <span class="o">=</span> <span class="s2">&quot;ldos&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_after_training_metric</span> <span class="o">=</span> <span class="s2">&quot;ldos&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_compression</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># self.use_compression = False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_shuffling_for_samplers</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoints_each_epoch</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># self.checkpoint_best_so_far = False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_name</span> <span class="o">=</span> <span class="s2">&quot;checkpoint_mala&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging_dir</span> <span class="o">=</span> <span class="s2">&quot;./mala_logging&quot;</span>
@@ -1133,6 +1180,15 @@
 <span class="sd">        not recommended because it is file based and can lead to errors;</span>
 <span class="sd">        With a suitable timeout it can be used somewhat stable though and</span>
 <span class="sd">        help in HPC settings.</span>
+
+<span class="sd">    acsd_points : int</span>
+<span class="sd">        Parameter of the ACSD HyperparamterOptimization scheme. Controls</span>
+<span class="sd">        the number of point-pairs which are used to compute the ACSD.</span>
+<span class="sd">        An array of acsd_points*acsd_points will be computed, i.e., if</span>
+<span class="sd">        acsd_points=100, 100 points will be drawn at random, and thereafter</span>
+<span class="sd">        each of these 100 points will be compared with a new, random set</span>
+<span class="sd">        of 100 points, leading to 10000 points in total for the calculation</span>
+<span class="sd">        of the ACSD.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1351,6 +1407,9 @@
 <span class="sd">    manual_seed: int</span>
 <span class="sd">        If not none, this value is used as manual seed for the neural networks.</span>
 <span class="sd">        Can be used to make experiments comparable. Default: None.</span>
+
+<span class="sd">    datageneration : ParametersDataGeneration</span>
+<span class="sd">        Parameters used for data generation routines.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

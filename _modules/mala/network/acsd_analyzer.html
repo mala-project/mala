@@ -134,16 +134,18 @@
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ACSDAnalyzer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
         <span class="c1"># Calculators used to parse data from compatible files.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">target_calculator</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">Target</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">descriptor_calculator</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">Descriptor</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_target_calculator</span> <span class="o">=</span> <span class="n">target_calculator</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_calculator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_target_calculator</span> <span class="o">=</span> <span class="n">Target</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span> <span class="o">=</span> <span class="n">descriptor_calculator</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span> <span class="o">=</span> <span class="n">Descriptor</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span>
-            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">AtomicDensity</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">MinterpyDescriptors</span><span class="p">)</span>
+            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">AtomicDensity</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">MinterpyDescriptors</span>
+            <span class="p">)</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                 <span class="s2">&quot;Cannot calculate ACSD for the selected descriptors.&quot;</span>
@@ -155,10 +157,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Filled after the analysis.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reduced_study</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">internal_hyperparam_list</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_study</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reduced_study</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="ACSDAnalyzer.add_snapshot">
 <a class="viewcode-back" href="../../../api/mala.network.acsd_analyzer.html#mala.network.acsd_analyzer.ACSDAnalyzer.add_snapshot">[docs]</a>
@@ -282,7 +284,7 @@
         <span class="c1"># Prepare the hyperparameter lists.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_construct_hyperparam_list</span><span class="p">()</span>
         <span class="n">hyperparameter_tuples</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">internal_hyperparam_list</span><span class="p">)</span>
+            <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">)</span>
         <span class="p">)</span>
 
         <span class="c1"># Perform the ACSD analysis separately for each snapshot.</span>
@@ -301,14 +303,14 @@
             <span class="p">)</span>
 
             <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">hyperparameter_tuple</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hyperparameter_tuples</span><span class="p">):</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_cutoff</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">hyperparameter_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">hyperparameter_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                     <span class="p">)</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">AtomicDensity</span><span class="p">):</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">AtomicDensity</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_cutoff</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">hyperparameter_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="p">)</span>
@@ -316,7 +318,7 @@
                         <span class="n">hyperparameter_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                     <span class="p">)</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">MinterpyDescriptors</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">MinterpyDescriptors</span>
                 <span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_cutoff</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">hyperparameter_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -362,11 +364,11 @@
                         <span class="p">)</span>
 
                     <span class="n">outstring</span> <span class="o">=</span> <span class="s2">&quot;[&quot;</span>
-                    <span class="k">for</span> <span class="n">label_id</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">label_id</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">):</span>
                         <span class="n">outstring</span> <span class="o">+=</span> <span class="p">(</span>
                             <span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">hyperparameter_tuple</span><span class="p">[</span><span class="n">label_id</span><span class="p">])</span>
                         <span class="p">)</span>
-                        <span class="k">if</span> <span class="n">label_id</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">label_id</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                             <span class="n">outstring</span> <span class="o">+=</span> <span class="s2">&quot;, &quot;</span>
                     <span class="n">outstring</span> <span class="o">+=</span> <span class="s2">&quot;]&quot;</span>
                     <span class="n">best_trial_string</span> <span class="o">=</span> <span class="s2">&quot;. No suitable trial found yet.&quot;</span>
@@ -388,34 +390,34 @@
                     <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_list</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_list</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_study</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
             <span class="c1"># TODO: Does this even make sense for the minterpy descriptors?</span>
             <span class="k">if</span> <span class="n">return_plotting</span><span class="p">:</span>
                 <span class="n">results_to_plot</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">internal_hyperparam_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">len_first_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">internal_hyperparam_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="n">len_second_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">internal_hyperparam_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">len_first_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">len_second_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">len_first_dim</span><span class="p">):</span>
                         <span class="n">results_to_plot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="p">[</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="p">[</span>
                                 <span class="n">i</span> <span class="o">*</span> <span class="n">len_second_dim</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">len_second_dim</span><span class="p">,</span>
                                 <span class="mi">2</span><span class="p">:,</span>
                             <span class="p">]</span>
                         <span class="p">)</span>
 
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">):</span>
                         <span class="k">return</span> <span class="n">results_to_plot</span><span class="p">,</span> <span class="p">{</span>
-                            <span class="s2">&quot;twojmax&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">internal_hyperparam_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                            <span class="s2">&quot;cutoff&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">internal_hyperparam_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                            <span class="s2">&quot;twojmax&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                            <span class="s2">&quot;cutoff&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                         <span class="p">}</span>
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">AtomicDensity</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">AtomicDensity</span><span class="p">):</span>
                         <span class="k">return</span> <span class="n">results_to_plot</span><span class="p">,</span> <span class="p">{</span>
-                            <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">internal_hyperparam_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                            <span class="s2">&quot;cutoff&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">internal_hyperparam_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                            <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                            <span class="s2">&quot;cutoff&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                         <span class="p">}</span></div>
 
 
@@ -429,9 +431,9 @@
 <span class="sd">        hyperparameter optimizer was created.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">minimum_acsd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">internal_hyperparam_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">):</span>
+            <span class="n">minimum_acsd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_cutoff</span> <span class="o">=</span> <span class="n">minimum_acsd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
                         <span class="n">minimum_acsd</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -447,7 +449,7 @@
                         <span class="s2">&quot;Bispectrum cutoff: &quot;</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_cutoff</span><span class="p">,</span>
                     <span class="p">)</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">AtomicDensity</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">AtomicDensity</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_cutoff</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">minimum_acsd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="p">)</span>
@@ -465,8 +467,10 @@
                         <span class="s2">&quot;Atomic density cutoff: &quot;</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_cutoff</span><span class="p">,</span>
                     <span class="p">)</span>
-            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">internal_hyperparam_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">MinterpyDescriptors</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">MinterpyDescriptors</span>
+                <span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_cutoff</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">minimum_acsd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="p">)</span>
@@ -508,7 +512,7 @@
 
 
     <span class="k">def</span> <span class="nf">_construct_hyperparam_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="nb">list</span><span class="p">(</span>
                     <span class="nb">map</span><span class="p">(</span>
@@ -549,10 +553,10 @@
                     <span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
                 <span class="p">]</span><span class="o">.</span><span class="n">choices</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">internal_hyperparam_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">first_dim_list</span><span class="p">,</span> <span class="n">second_dim_list</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cutoff&quot;</span><span class="p">,</span> <span class="s2">&quot;twojmax&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">first_dim_list</span><span class="p">,</span> <span class="n">second_dim_list</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cutoff&quot;</span><span class="p">,</span> <span class="s2">&quot;twojmax&quot;</span><span class="p">]</span>
 
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">AtomicDensity</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">AtomicDensity</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="nb">list</span><span class="p">(</span>
                     <span class="nb">map</span><span class="p">(</span>
@@ -596,10 +600,10 @@
                         <span class="p">)</span>
                     <span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
                 <span class="p">]</span><span class="o">.</span><span class="n">choices</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">internal_hyperparam_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">first_dim_list</span><span class="p">,</span> <span class="n">second_dim_list</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cutoff&quot;</span><span class="p">,</span> <span class="s2">&quot;sigma&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">first_dim_list</span><span class="p">,</span> <span class="n">second_dim_list</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cutoff&quot;</span><span class="p">,</span> <span class="s2">&quot;sigma&quot;</span><span class="p">]</span>
 
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="n">MinterpyDescriptors</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">MinterpyDescriptors</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="nb">list</span><span class="p">(</span>
                     <span class="nb">map</span><span class="p">(</span>
@@ -708,14 +712,14 @@
                     <span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
                 <span class="p">]</span><span class="o">.</span><span class="n">choices</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">internal_hyperparam_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">first_dim_list</span><span class="p">,</span>
                 <span class="n">second_dim_list</span><span class="p">,</span>
                 <span class="n">third_dim_list</span><span class="p">,</span>
                 <span class="n">fourth_dim_list</span><span class="p">,</span>
                 <span class="n">fifth_dim_list</span><span class="p">,</span>
             <span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="s2">&quot;cutoff&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;sigma&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;minterpy_cutoff&quot;</span><span class="p">,</span>
@@ -735,7 +739,7 @@
         <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;espresso-out&quot;</span><span class="p">:</span>
             <span class="n">descriptor_calculation_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span>
             <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">calculate_from_qe_out</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="o">.</span><span class="n">calculate_from_qe_out</span><span class="p">(</span>
                     <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">descriptor_calculation_kwargs</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -749,7 +753,7 @@
                 <span class="s2">&quot;Unknown file extension, cannot convert descriptor&quot;</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
-            <span class="n">tmp_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">gather_descriptors</span><span class="p">(</span>
+            <span class="n">tmp_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="o">.</span><span class="n">gather_descriptors</span><span class="p">(</span>
                 <span class="n">tmp_input</span>
             <span class="p">)</span>
 
@@ -773,7 +777,7 @@
             <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
             <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_memmap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">memmap</span>
             <span class="c1"># If no units are provided we just assume standard units.</span>
-            <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span>
+            <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_calculator</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span>
                 <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">target_calculator_kwargs</span>
             <span class="p">)</span>
 
@@ -781,19 +785,19 @@
             <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
             <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_memmap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">memmap</span>
             <span class="c1"># If no units are provided we just assume standard units.</span>
-            <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_xsf</span><span class="p">(</span>
+            <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_calculator</span><span class="o">.</span><span class="n">read_from_xsf</span><span class="p">(</span>
                 <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">target_calculator_kwargs</span>
             <span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
+                <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
                     <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span> <span class="n">units</span><span class="o">=</span><span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
                 <span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
+                <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
                     <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span> <span class="n">units</span><span class="o">=</span><span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

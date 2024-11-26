@@ -204,6 +204,17 @@ Can be used to make experiments comparable. Default: None.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.Parameters.datageneration">
+<span class="sig-name descname"><span class="pre">datageneration</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.datageneration" title="Link to this definition"></a></dt>
+<dd><p>Parameters used for data generation routines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.common.parameters.ParametersDataGeneration" title="mala.common.parameters.ParametersDataGeneration">ParametersDataGeneration</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.common.parameters.Parameters.load_from_file">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_no_ddp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_file" title="Link to this definition"></a></dt>
@@ -426,7 +437,7 @@ are True, in which case this value will be set to True as well.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersBase.from_json">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersBase.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersBase.from_json" title="Link to this definition"></a></dt>
-<dd><p>Read this object from a dictionary saved in a JSON file.</p>
+<dd><p>Read parameters from a dictionary saved in a JSON file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>json_dict</strong> (<em>dict</em>) – A dictionary containing all attributes, properties, etc. as saved
@@ -809,19 +820,6 @@ for twojmax is 10.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.lammps_compute_file">
-<span class="sig-name descname"><span class="pre">lammps_compute_file</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.lammps_compute_file" title="Link to this definition"></a></dt>
-<dd><p>Bispectrum calculation: LAMMPS input file that is used to calculate the
-Bispectrum descriptors. If this string is empty, the standard LAMMPS input
-file found in this repository will be used (recommended).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>string</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.descriptors_contain_xyz">
 <span class="sig-name descname"><span class="pre">descriptors_contain_xyz</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.descriptors_contain_xyz" title="Link to this definition"></a></dt>
 <dd><p>Legacy option. If True, it is assumed that the first three entries of
@@ -837,10 +835,97 @@ descriptor vector. If False, no such cutting is peformed.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.atomic_density_sigma">
 <span class="sig-name descname"><span class="pre">atomic_density_sigma</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.atomic_density_sigma" title="Link to this definition"></a></dt>
-<dd><p>Sigma used for the calculation of the Gaussian descriptors.</p>
+<dd><p>Sigma (=width) used for the calculation of the Gaussian descriptors.
+Explicitly setting this value is discouraged if the atomic density is
+used only during the total energy calculation and, e.g., bispectrum
+descriptors are used for models. In this case, the width will
+automatically be set correctly during inference based on model
+parameters. This parameter mainly exists for debugging purposes.
+If the atomic density is instead used for model training itself, this
+parameter needs to be set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.atomic_density_cutoff">
+<span class="sig-name descname"><span class="pre">atomic_density_cutoff</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.atomic_density_cutoff" title="Link to this definition"></a></dt>
+<dd><p>Cutoff radius used for atomic density calculation. Explicitly setting
+this value is discouraged if the atomic density is used only during the
+total energy calculation and, e.g., bispectrum descriptors are used
+for models. In this case, the cutoff will automatically be set
+correctly during inference based on model parameters. This parameter
+mainly exists for debugging purposes. If the atomic density is instead
+used for model training itself, this parameter needs to be set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.lammps_compute_file">
+<span class="sig-name descname"><span class="pre">lammps_compute_file</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.lammps_compute_file" title="Link to this definition"></a></dt>
+<dd><p>Path to a LAMMPS compute file for the bispectrum descriptor
+calculation. MALA has its own collection of compute files which are
+used by default. Setting this parameter is thus not necessarys for
+model training and inference, and it exists mainly for debugging
+purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.minterpy_cutoff_cube_size">
+<span class="sig-name descname"><span class="pre">minterpy_cutoff_cube_size</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.minterpy_cutoff_cube_size" title="Link to this definition"></a></dt>
+<dd><p>WILL BE DEPRECATED IN MALA v1.4.0 - size of cube for minterpy
+descriptor calculation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.minterpy_lp_norm">
+<span class="sig-name descname"><span class="pre">minterpy_lp_norm</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.minterpy_lp_norm" title="Link to this definition"></a></dt>
+<dd><p>WILL BE DEPRECATED IN MALA v1.4.0 - LP norm for minterpy
+descriptor calculation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.minterpy_point_list">
+<span class="sig-name descname"><span class="pre">minterpy_point_list</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.minterpy_point_list" title="Link to this definition"></a></dt>
+<dd><p>WILL BE DEPRECATED IN MALA v1.4.0 - list of points for minterpy
+descriptor calculation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.minterpy_polynomial_degree">
+<span class="sig-name descname"><span class="pre">minterpy_polynomial_degree</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.minterpy_polynomial_degree" title="Link to this definition"></a></dt>
+<dd><p>WILL BE DEPRECATED IN MALA v1.4.0 - polynomial degree for minterpy
+descriptor calculation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1024,6 +1109,14 @@ not recommended because it is file based and can lead to errors;
 With a suitable timeout it can be used somewhat stable though and
 help in HPC settings.</p>
 </dd>
+<dt>acsd_points<span class="classifier">int</span></dt><dd><p>Parameter of the ACSD HyperparamterOptimization scheme. Controls
+the number of point-pairs which are used to compute the ACSD.
+An array of acsd_points*acsd_points will be computed, i.e., if
+acsd_points=100, 100 points will be drawn at random, and thereafter
+each of these 100 points will be compared with a new, random set
+of 100 points, leading to 10000 points in total for the calculation
+of the ACSD.</p>
+</dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersHyperparameterOptimization.show">
@@ -1070,15 +1163,15 @@ as an estimate of the minimal accuracy to be expected. Currently,
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersNetwork.nn_type">
 <span class="sig-name descname"><span class="pre">nn_type</span></span><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.nn_type" title="Link to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>Type of the neural network that will be used. Currently supported are</dt><dd><ul class="simple">
+<dd><p>Type of the neural network that will be used. Currently supported are</p>
+<blockquote>
+<div><ul class="simple">
 <li><p>“feed_forward” (default)</p></li>
 <li><p>“transformer”</p></li>
 <li><p>“lstm”</p></li>
 <li><p>“gru”</p></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>string</p>
@@ -1184,6 +1277,18 @@ Default: None</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersNetwork.dropout">
+<span class="sig-name descname"><span class="pre">dropout</span></span><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.dropout" title="Link to this definition"></a></dt>
+<dd><p>Dropout rate for positional encoding in transformer.
+Default: 0.1</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1471,10 +1576,38 @@ Possible options are:</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.training_log_interval">
+<span class="sig-name descname"><span class="pre">training_log_interval</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.training_log_interval" title="Link to this definition"></a></dt>
+<dd><p>Determines how often detailed performance info is printed during
+training (only has an effect if the verbosity is high enough).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.profiler_range">
+<span class="sig-name descname"><span class="pre">profiler_range</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.profiler_range" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>List with two entries determining with which batch/iteration number</dt><dd><p>the CUDA profiler will start and stop profiling. Please note that
+this option only holds significance if the nsys profiler is used.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.inference_data_grid">
 <span class="sig-name descname"><span class="pre">inference_data_grid</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.inference_data_grid" title="Link to this definition"></a></dt>
-<dd><p>List holding the grid to be used for inference in the form of
-[x,y,z].</p>
+<dd><p>Grid dimensions used during inference. Typically, these are automatically
+determined by DFT reference data, and this parameter does not need to
+be set. Thus, this parameter mainly exists for debugging purposes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list</p>
@@ -1494,26 +1627,23 @@ Possible options are:</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.training_log_interval">
-<span class="sig-name descname"><span class="pre">training_log_interval</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.training_log_interval" title="Link to this definition"></a></dt>
-<dd><p>Determines how often detailed performance info is printed during
-training (only has an effect if the verbosity is high enough).</p>
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.l2_regularization">
+<span class="sig-name descname"><span class="pre">l2_regularization</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.l2_regularization" title="Link to this definition"></a></dt>
+<dd><p>Weight decay rate for NN optimizer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.profiler_range">
-<span class="sig-name descname"><span class="pre">profiler_range</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.profiler_range" title="Link to this definition"></a></dt>
-<dd><p>List with two entries determining with which batch/iteration number
-the CUDA profiler will start and stop profiling. Please note that
-this option only holds significance if the nsys profiler is used.</p>
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.dropout">
+<span class="sig-name descname"><span class="pre">dropout</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.dropout" title="Link to this definition"></a></dt>
+<dd><p>Dropout rate for positional encoding in transformer net.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list</p>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>

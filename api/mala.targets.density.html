@@ -423,7 +423,7 @@ density will be used for the calculation.</p>
 </dl>
 <dl class="simple">
 <dt>voxel<span class="classifier">ase.cell.Cell</span></dt><dd><p>Voxel to be used for grid intergation. Needs to reflect the
-symmetry of the simulation cell. In Bohr.</p>
+symmetry of the simulation cell.</p>
 </dd>
 <dt>integration_method<span class="classifier">str</span></dt><dd><p>Integration method used to integrate density on the grid.
 Currently supported:</p>
@@ -464,6 +464,15 @@ calculated.</p>
 <dd><p>Get the target quantity.</p>
 <p>This is the generic interface for cached target quantities.
 It should work for all implemented targets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>density</strong> – Electronic charge density as a volumetric array. May be 4D or 2D
+depending on workflow.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

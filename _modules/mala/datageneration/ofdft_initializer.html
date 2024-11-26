@@ -107,12 +107,26 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    parameters : mala.common.parameters.Parameters</span>
-<span class="sd">        Parameters object used to create this instance.</span>
+<span class="sd">    parameters : mala.Parameters</span>
+<span class="sd">        MALA parameters object used to create this instance.</span>
 
 <span class="sd">    atoms : ase.Atoms</span>
 <span class="sd">        Initial atomic configuration for which an equilibrated configuration</span>
 <span class="sd">        is to be created.</span>
+
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : mala.mala.common.parameters.ParametersDataGeneration</span>
+<span class="sd">        MALA data generation parameters object.</span>
+
+<span class="sd">    atoms : ase.Atoms</span>
+<span class="sd">        Initial atomic configuration for which an</span>
+<span class="sd">        equilibrated configuration is to be created.</span>
+
+<span class="sd">    dftpy_configuration : dict</span>
+<span class="sd">        Dictionary containing the DFTpy configuration. Will partially be</span>
+<span class="sd">        populated via the MALA parameters object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">atoms</span><span class="p">):</span>
@@ -122,7 +136,7 @@
             <span class="s2">&quot;large changes.&quot;</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">datageneration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">datageneration</span>
 
         <span class="c1"># Check that only one element is used in the atoms.</span>
         <span class="n">number_of_elements</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">]))</span>
@@ -132,11 +146,13 @@
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span> <span class="o">=</span> <span class="n">DefaultOption</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s2">&quot;PATH&quot;</span><span class="p">][</span><span class="s2">&quot;pppath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">local_psp_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s2">&quot;PATH&quot;</span><span class="p">][</span>
+            <span class="s2">&quot;pppath&quot;</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">local_psp_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s2">&quot;PP&quot;</span><span class="p">][</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">local_psp_name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s2">&quot;OPT&quot;</span><span class="p">][</span><span class="s2">&quot;method&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_kedf</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">local_psp_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s2">&quot;OPT&quot;</span><span class="p">][</span><span class="s2">&quot;method&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ofdft_kedf</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s2">&quot;KEDF&quot;</span><span class="p">][</span><span class="s2">&quot;kedf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;WT&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s2">&quot;JOB&quot;</span><span class="p">][</span><span class="s2">&quot;calctype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Energy Force&quot;</span>
 
@@ -151,6 +167,11 @@
 <span class="sd">        logging_period : int</span>
 <span class="sd">            If not None, a .log and .traj file will be filled with snapshot</span>
 <span class="sd">            information every logging_period steps.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        equilibrated_configuration : ase.Atoms</span>
+<span class="sd">            Equilibrated atomic configuration.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Set the DFTPy configuration.</span>
         <span class="n">conf</span> <span class="o">=</span> <span class="n">OptionFormat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">)</span>
@@ -162,14 +183,14 @@
         <span class="c1"># Create the initial velocities, and dynamics object.</span>
         <span class="n">MaxwellBoltzmannDistribution</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span>
-            <span class="n">temperature_K</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_temperature</span><span class="p">,</span>
+            <span class="n">temperature_K</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ofdft_temperature</span><span class="p">,</span>
             <span class="n">force_temp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">dyn</span> <span class="o">=</span> <span class="n">Langevin</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_timestep</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span>
-            <span class="n">temperature_K</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_temperature</span><span class="p">,</span>
-            <span class="n">friction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_friction</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ofdft_timestep</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span>
+            <span class="n">temperature_K</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ofdft_temperature</span><span class="p">,</span>
+            <span class="n">friction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ofdft_friction</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># If logging is desired, do the logging.</span>
@@ -192,7 +213,7 @@
 
         <span class="c1"># Let the OF-DFT-MD run.</span>
         <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;POSCAR_initial&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="s2">&quot;vasp&quot;</span><span class="p">)</span>
-        <span class="n">dyn</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_number_of_timesteps</span><span class="p">)</span>
+        <span class="n">dyn</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ofdft_number_of_timesteps</span><span class="p">)</span>
         <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;POSCAR_equilibrated&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="s2">&quot;vasp&quot;</span><span class="p">)</span></div>
 </div>
 

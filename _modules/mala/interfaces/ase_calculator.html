@@ -119,9 +119,21 @@
 <span class="sd">        the neural network), calculator can access all important data such as</span>
 <span class="sd">        temperature, number of electrons, etc. that might not be known simply</span>
 <span class="sd">        from the atomic positions.</span>
+
+<span class="sd">    predictor : mala.network.predictor.Predictor</span>
+<span class="sd">        A Predictor class object to be used for the underlying MALA</span>
+<span class="sd">        predictions.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mala_parameters : mala.common.parameters.Parameters</span>
+<span class="sd">        MALA parameters used for predictions.</span>
+
+<span class="sd">    last_energy_contributions : dict</span>
+<span class="sd">        Contains all total energy contributions for the last prediction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">implemented_properties</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">,</span> <span class="s2">&quot;forces&quot;</span><span class="p">]</span>
+    <span class="n">implemented_properties</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -140,21 +152,21 @@
                 <span class="s2">&quot;The MALA calculator currently only works with the LDOS.&quot;</span>
             <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">:</span> <span class="n">Network</span> <span class="o">=</span> <span class="n">network</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">:</span> <span class="n">DataHandler</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_network</span><span class="p">:</span> <span class="n">Network</span> <span class="o">=</span> <span class="n">network</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="p">:</span> <span class="n">DataHandler</span> <span class="o">=</span> <span class="n">data</span>
 
         <span class="c1"># Prepare for prediction.</span>
         <span class="k">if</span> <span class="n">predictor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="o">=</span> <span class="n">Predictor</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">mala_parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_predictor</span> <span class="o">=</span> <span class="n">Predictor</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mala_parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_predictor</span> <span class="o">=</span> <span class="n">predictor</span>
 
         <span class="k">if</span> <span class="n">reference_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Get critical values from a reference file (cutoff,</span>
             <span class="c1"># temperature, etc.)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
                 <span class="n">reference_data</span>
             <span class="p">)</span>
 
@@ -178,6 +190,11 @@
 
 <span class="sd">        path : str</span>
 <span class="sd">            Path where the model is saved.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        calculator : mala.interfaces.calculator.Calculator</span>
+<span class="sd">            The calculator object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">parallel_warn</span><span class="p">(</span>
             <span class="s2">&quot;MALA.load_model() will be deprecated in MALA v1.4.0.&quot;</span>
@@ -205,6 +222,11 @@
 
 <span class="sd">        path : str</span>
 <span class="sd">            Path where the model is saved.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        calculator : mala.interfaces.calculator.Calculator</span>
+<span class="sd">            The calculator object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">loaded_params</span><span class="p">,</span> <span class="n">loaded_network</span><span class="p">,</span> <span class="n">new_datahandler</span><span class="p">,</span> <span class="n">loaded_runner</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">Predictor</span><span class="o">.</span><span class="n">load_run</span><span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
@@ -245,10 +267,10 @@
         <span class="n">Calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">system_changes</span><span class="p">)</span>
 
         <span class="c1"># Get the LDOS from the NN.</span>
-        <span class="n">ldos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="o">.</span><span class="n">predict_for_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="n">ldos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predictor</span><span class="o">.</span><span class="n">predict_for_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
 
         <span class="c1"># Use the LDOS determined DOS and density to get energy and forces.</span>
-        <span class="n">ldos_calculator</span><span class="p">:</span> <span class="n">LDOS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span>
+        <span class="n">ldos_calculator</span><span class="p">:</span> <span class="n">LDOS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">target_calculator</span>
         <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">ldos</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">total_energy</span>
         <span class="n">energy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_energy_contributions</span> <span class="o">=</span> <span class="p">(</span>
@@ -293,19 +315,19 @@
 
         <span class="k">if</span> <span class="s2">&quot;rdf&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;rdf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">get_radial_distribution_function</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">get_radial_distribution_function</span><span class="p">(</span>
                     <span class="n">atoms</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;tpcf&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;tpcf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">get_three_particle_correlation_function</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">get_three_particle_correlation_function</span><span class="p">(</span>
                     <span class="n">atoms</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;static_structure_factor&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;static_structure_factor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">get_static_structure_factor</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">get_static_structure_factor</span><span class="p">(</span>
                     <span class="n">atoms</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -332,7 +354,7 @@
 <span class="sd">            Path where the calculator should be saved.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="o">.</span><span class="n">save_run</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_predictor</span><span class="o">.</span><span class="n">save_run</span><span class="p">(</span>
             <span class="n">filename</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">additional_calculation_data</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
 </div>

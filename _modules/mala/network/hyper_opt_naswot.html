@@ -85,8 +85,9 @@
 
 <span class="kn">import</span> <span class="nn">itertools</span>
 
-<span class="kn">import</span> <span class="nn">optuna</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">optuna</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">printout</span><span class="p">,</span>
@@ -94,6 +95,7 @@
     <span class="n">get_size</span><span class="p">,</span>
     <span class="n">get_comm</span><span class="p">,</span>
     <span class="n">barrier</span><span class="p">,</span>
+    <span class="n">parallel_warn</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mala.network.hyper_opt</span> <span class="kn">import</span> <span class="n">HyperOpt</span>
 <span class="kn">from</span> <span class="nn">mala.network.objective_naswot</span> <span class="kn">import</span> <span class="n">ObjectiveNASWOT</span>
@@ -118,11 +120,10 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">HyperOptNASWOT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">best_trial</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">trial_list</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ignored_hyperparameters</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_objective</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trial_losses</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trial_list</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ignored_hyperparameters</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">&quot;learning_rate&quot;</span><span class="p">,</span>
             <span class="s2">&quot;optimizer&quot;</span><span class="p">,</span>
             <span class="s2">&quot;mini_batch_size&quot;</span><span class="p">,</span>
@@ -132,8 +133,68 @@
         <span class="p">]</span>
 
         <span class="c1"># For parallelization.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">first_trial</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_trial</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_first_trial</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_trial</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">best_trial_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the index and loss of best trial determined in this NASWOT run.</span>
+
+<span class="sd">        This property is read only, and will be recomputed.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        best_trial_index : list</span>
+<span class="sd">            A list containing [0] the best trial index and [1] the best</span>
+<span class="sd">            trial loss.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trial_losses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parallel_warn</span><span class="p">(</span>
+                <span class="s2">&quot;Trial list is not yet computed, cannot determine &quot;</span>
+                <span class="s2">&quot;best trial.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
+            <span class="n">comm</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span>
+            <span class="n">local_result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trial_losses</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_trial</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trial_losses</span><span class="p">),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">all_results</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">allgather</span><span class="p">(</span><span class="n">local_result</span><span class="p">)</span>
+            <span class="n">max_on_node</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">all_results</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">all_results</span><span class="p">[</span><span class="n">max_on_node</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>
+                <span class="n">all_results</span><span class="p">[</span><span class="n">max_on_node</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trial_losses</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trial_losses</span><span class="p">)]</span>
+
+    <span class="nd">@best_trial_index</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">best_trial_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">best_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the best trial determined in this NASWOT run.</span>
+
+<span class="sd">        This property is read only, and will be recomputed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trial_losses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parallel_warn</span><span class="p">(</span>
+                <span class="s2">&quot;Trial list is not yet computed, cannot determine &quot;</span>
+                <span class="s2">&quot;best trial.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trial_list</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">best_trial_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+    <span class="nd">@best_trial</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">best_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">pass</span>
 
 <div class="viewcode-block" id="HyperOptNASWOT.perform_study">
 <a class="viewcode-back" href="../../../api/mala.network.hyper_opt_naswot.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.perform_study">[docs]</a>
@@ -149,6 +210,11 @@
 <span class="sd">        ----------</span>
 <span class="sd">        trial_list : list</span>
 <span class="sd">            A list containing trials from either HyperOptOptuna or HyperOptOAT.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        best_trial_loss : float</span>
+<span class="sd">            Loss of the best trial.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># The minibatch size can not vary in the analysis.</span>
         <span class="c1"># This check ensures that e.g. optuna results can be used.</span>
@@ -163,29 +229,29 @@
 
         <span class="c1"># Ideally, this type of HO is called with a list of trials for which</span>
         <span class="c1"># the parameter has to be identified.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">trial_list</span> <span class="o">=</span> <span class="n">trial_list</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trial_list</span> <span class="o">=</span> <span class="n">trial_list</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trial_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">printout</span><span class="p">(</span>
                 <span class="s2">&quot;No trial list provided, one will be created using all &quot;</span>
                 <span class="s2">&quot;possible permutations of hyperparameters. &quot;</span>
                 <span class="s2">&quot;The following hyperparameters will be ignored:&quot;</span><span class="p">,</span>
                 <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">printout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ignored_hyperparameters</span><span class="p">)</span>
+            <span class="n">printout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ignored_hyperparameters</span><span class="p">)</span>
 
             <span class="c1"># Please note for the parallel case: The trial list returned</span>
             <span class="c1"># here is deterministic.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">trial_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__all_combinations</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trial_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__all_combinations</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
             <span class="n">trials_per_rank</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_list</span><span class="p">)</span> <span class="o">/</span> <span class="n">get_size</span><span class="p">()))</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trial_list</span><span class="p">)</span> <span class="o">/</span> <span class="n">get_size</span><span class="p">()))</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">first_trial</span> <span class="o">=</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">*</span> <span class="n">trials_per_rank</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">last_trial</span> <span class="o">=</span> <span class="p">(</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">trials_per_rank</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_first_trial</span> <span class="o">=</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">*</span> <span class="n">trials_per_rank</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_trial</span> <span class="o">=</span> <span class="p">(</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">trials_per_rank</span>
             <span class="k">if</span> <span class="n">get_size</span><span class="p">()</span> <span class="o">==</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">trials_per_rank</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_list</span><span class="p">)</span> <span class="o">%</span> <span class="n">get_size</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">last_trial</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_list</span><span class="p">)</span> <span class="o">%</span> <span class="n">get_size</span><span class="p">()</span>
+                <span class="n">trials_per_rank</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trial_list</span><span class="p">)</span> <span class="o">%</span> <span class="n">get_size</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_last_trial</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trial_list</span><span class="p">)</span> <span class="o">%</span> <span class="n">get_size</span><span class="p">()</span>
 
             <span class="c1"># We currently do not support checkpointing in parallel mode</span>
             <span class="c1"># for performance reasons.</span>
@@ -196,81 +262,58 @@
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoints_each_trial</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">first_trial</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">last_trial</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_list</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_first_trial</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_trial</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trial_list</span><span class="p">)</span>
 
         <span class="c1"># TODO: For now. Needs some refinements later.</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">trial_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">FrozenTrial</span>
-        <span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">FixedTrial</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trial_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">FrozenTrial</span>
+        <span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trial_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">FixedTrial</span><span class="p">):</span>
             <span class="n">trial_type</span> <span class="o">=</span> <span class="s2">&quot;optuna&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">trial_type</span> <span class="o">=</span> <span class="s2">&quot;oat&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">ObjectiveNASWOT</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">,</span> <span class="n">trial_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_objective</span> <span class="o">=</span> <span class="n">ObjectiveNASWOT</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="p">,</span> <span class="n">trial_type</span>
         <span class="p">)</span>
         <span class="n">printout</span><span class="p">(</span>
             <span class="s2">&quot;Starting NASWOT hyperparameter optimization,&quot;</span><span class="p">,</span>
-            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_list</span><span class="p">),</span>
+            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trial_list</span><span class="p">),</span>
             <span class="s2">&quot;trials will be performed.&quot;</span><span class="p">,</span>
             <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trial_losses</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">trial_list</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">first_trial</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_trial</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trial_list</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_first_trial</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_trial</span><span class="p">]</span>
         <span class="p">):</span>
-            <span class="n">trial_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trial_loss</span><span class="p">)</span>
+            <span class="n">trial_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_objective</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trial_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trial_loss</span><span class="p">)</span>
 
             <span class="c1"># Output diagnostic information.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="s2">&quot;Trial number&quot;</span><span class="p">,</span>
-                    <span class="n">idx</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_trial</span><span class="p">,</span>
+                    <span class="n">idx</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_trial</span><span class="p">,</span>
                     <span class="s2">&quot;finished with:&quot;</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_trial_losses</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">best_trial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_best_trial_results</span><span class="p">()</span>
                 <span class="n">printout</span><span class="p">(</span>
                     <span class="s2">&quot;Trial number&quot;</span><span class="p">,</span>
                     <span class="n">idx</span><span class="p">,</span>
                     <span class="s2">&quot;finished with:&quot;</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_trial_losses</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
                     <span class="s2">&quot;, best is trial&quot;</span><span class="p">,</span>
-                    <span class="n">best_trial</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">best_trial_index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                     <span class="s2">&quot;with&quot;</span><span class="p">,</span>
-                    <span class="n">best_trial</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">best_trial_index</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                     <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                 <span class="p">)</span>
 
         <span class="n">barrier</span><span class="p">()</span>
 
         <span class="c1"># Return the best loss value we could achieve.</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_best_trial_results</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span></div>
-
-
-<div class="viewcode-block" id="HyperOptNASWOT.get_best_trial_results">
-<a class="viewcode-back" href="../../../api/mala.network.hyper_opt_naswot.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.get_best_trial_results">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_best_trial_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the best trial out of the list, including the value.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
-            <span class="n">comm</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span>
-            <span class="n">local_result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_trial</span><span class="p">),</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="p">),</span>
-                <span class="p">]</span>
-            <span class="p">)</span>
-            <span class="n">all_results</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">allgather</span><span class="p">(</span><span class="n">local_result</span><span class="p">)</span>
-            <span class="n">max_on_node</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">all_results</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">])</span>
-            <span class="k">return</span> <span class="p">[</span>
-                <span class="nb">int</span><span class="p">(</span><span class="n">all_results</span><span class="p">[</span><span class="n">max_on_node</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>
-                <span class="n">all_results</span><span class="p">[</span><span class="n">max_on_node</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
-            <span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="p">)]</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_trial_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="HyperOptNASWOT.set_optimal_parameters">
@@ -282,30 +325,14 @@
 <span class="sd">        The parameters will be written to the parameter object with which the</span>
 <span class="sd">        hyperparameter optimizer was created.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Getting the best trial based on the test errors</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
-            <span class="n">comm</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span>
-            <span class="n">local_result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_trial</span><span class="p">),</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="p">),</span>
-                <span class="p">]</span>
-            <span class="p">)</span>
-            <span class="n">all_results</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">allgather</span><span class="p">(</span><span class="n">local_result</span><span class="p">)</span>
-            <span class="n">max_on_node</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">all_results</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">])</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">all_results</span><span class="p">[</span><span class="n">max_on_node</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="p">))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">best_trial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_list</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="o">.</span><span class="n">parse_trial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_trial</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_objective</span><span class="o">.</span><span class="n">parse_trial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_trial</span><span class="p">)</span></div>
 
 
     <span class="k">def</span> <span class="nf">__all_combinations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># First, remove all the hyperparameters we don&#39;t actually need.</span>
         <span class="n">indices_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">par</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ignored_hyperparameters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ignored_hyperparameters</span><span class="p">:</span>
                 <span class="n">indices_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indices_to_remove</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>

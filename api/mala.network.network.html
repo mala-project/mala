@@ -239,6 +239,61 @@ network directly by calling upon the subclass.</p>
 <dd class="field-odd"><p><strong>params</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this neural network.</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.network.network.Network.loss_func">
+<span class="sig-name descname"><span class="pre">loss_func</span></span><a class="headerlink" href="#mala.network.network.Network.loss_func" title="Link to this definition"></a></dt>
+<dd><p>Loss function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>function</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.network.network.Network.mini_batch_size">
+<span class="sig-name descname"><span class="pre">mini_batch_size</span></span><a class="headerlink" href="#mala.network.network.Network.mini_batch_size" title="Link to this definition"></a></dt>
+<dd><p>Size of mini batches propagated through network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.network.network.Network.number_of_layers">
+<span class="sig-name descname"><span class="pre">number_of_layers</span></span><a class="headerlink" href="#mala.network.network.Network.number_of_layers" title="Link to this definition"></a></dt>
+<dd><p>Number of NN layers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.network.network.Network.params">
+<span class="sig-name descname"><span class="pre">params</span></span><a class="headerlink" href="#mala.network.network.Network.params" title="Link to this definition"></a></dt>
+<dd><p>MALA neural network parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mala.common.parametes.ParametersNetwork</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.network.network.Network.use_ddp">
+<span class="sig-name descname"><span class="pre">use_ddp</span></span><a class="headerlink" href="#mala.network.network.Network.use_ddp" title="Link to this definition"></a></dt>
+<dd><p>If True, the torch distributed data parallel formalism will be used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.network.Network.calculate_loss">
 <span class="sig-name descname"><span class="pre">calculate_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network.calculate_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.network.Network.calculate_loss" title="Link to this definition"></a></dt>
@@ -262,7 +317,7 @@ network directly by calling upon the subclass.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.network.Network.do_prediction">
 <span class="sig-name descname"><span class="pre">do_prediction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network.do_prediction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.network.Network.do_prediction" title="Link to this definition"></a></dt>
-<dd><p>Predict the output values for an input array..</p>
+<dd><p>Predict the output values for an input array.</p>
 <p>Interface to do predictions. The data put in here is assumed to be a
 scaled torch.Tensor and in the right units. Be aware that this will
 pass the entire array through the network, which might be very
@@ -284,6 +339,11 @@ demanding in terms of RAM.</p>
 <dt class="sig sig-object py" id="mala.network.network.Network.forward">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.network.Network.forward" title="Link to this definition"></a></dt>
 <dd><p>Abstract method. To be implemented by the derived class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inputs</strong> (<em>torch.Tensor</em>) – Torch tensor to be propagated.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

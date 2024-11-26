@@ -112,18 +112,88 @@
 <div class="viewcode-block" id="Target">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target">[docs]</a>
 <span class="k">class</span> <span class="nc">Target</span><span class="p">(</span><span class="n">PhysicalData</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for all target quantity parser.</span>
 
 <span class="sd">    Target parsers read the target quantity</span>
 <span class="sd">    (i.e. the quantity the NN will learn to predict) from a specified file</span>
 <span class="sd">    format and performs postprocessing calculations on the quantity.</span>
 
+<span class="sd">    Target parsers often read DFT reference information.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    params : mala.common.parameters.Parameters or</span>
 <span class="sd">    mala.common.parameters.ParametersTargets</span>
 <span class="sd">        Parameters used to create this Target object.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    atomic_forces_dft : numpy.ndarray</span>
+<span class="sd">        Atomic forces as per DFT reference file.</span>
+
+<span class="sd">    atoms : ase.Atoms</span>
+<span class="sd">        ASE atoms object used for calculations.</span>
+
+<span class="sd">    band_energy_dft_calculation</span>
+<span class="sd">        Band energy as per DFT reference file.</span>
+
+<span class="sd">    electrons_per_atom : int</span>
+<span class="sd">        Electrons per atom, usually determined by DFT reference file.</span>
+
+<span class="sd">    entropy_contribution_dft_calculation : float</span>
+<span class="sd">        Electronic entropy contribution as per DFT reference file.</span>
+
+<span class="sd">    fermi_energy_dft : float</span>
+<span class="sd">        Fermi energy as per DFT reference file.</span>
+
+<span class="sd">    kpoints : list</span>
+<span class="sd">        k-grid used for MALA calculations. Managed internally.</span>
+
+<span class="sd">    local_grid : list</span>
+<span class="sd">        Size of local grid (in MPI mode).</span>
+
+<span class="sd">    number_of_electrons_exact</span>
+<span class="sd">        Exact number of electrons, usually given via DFT reference file.</span>
+
+<span class="sd">    number_of_electrons_from_eigenvals : float</span>
+<span class="sd">        Number of electrons as calculated from DFT reference eigenvalues.</span>
+
+<span class="sd">    parameters : mala.common.parameters.ParametersTarget</span>
+<span class="sd">        MALA target calculation parameters.</span>
+
+<span class="sd">    qe_pseudopotentials : list</span>
+<span class="sd">        List of Quantum ESPRESSO pseudopotentials, read from DFT reference file</span>
+<span class="sd">         and used for the total energy module.</span>
+
+<span class="sd">    save_target_data : bool</span>
+<span class="sd">        Control whether target data will be saved. Can be important for I/O</span>
+<span class="sd">        applications. Managed internally, default is True.</span>
+
+<span class="sd">    temperature : float</span>
+<span class="sd">        Temperature used for all computations. By default read from DFT</span>
+<span class="sd">        reference file, but can freely be changed from the outside.</span>
+
+<span class="sd">    total_energy_contributions_dft_calculation : dict</span>
+<span class="sd">        Dictionary holding contributions to total free energy not given</span>
+<span class="sd">        as individual properties, as read from the DFT reference file.</span>
+<span class="sd">        Contains:</span>
+
+<span class="sd">            - &quot;one_electron_contribution&quot;, :math:`n\,V_\mathrm{xc}` plus band</span>
+<span class="sd">              energy</span>
+<span class="sd">            - &quot;hartree_contribution&quot;, :math:`E_\mathrm{H}`</span>
+<span class="sd">            - &quot;xc_contribution&quot;, :math:`E_\mathrm{xc}`</span>
+<span class="sd">            - &quot;ewald_contribution&quot;, :math:`E_\mathrm{Ewald}`</span>
+
+<span class="sd">    total_energy_dft_calculation : float</span>
+<span class="sd">        Total free energy as read from DFT reference file.</span>
+<span class="sd">    voxel : ase.cell.Cell</span>
+<span class="sd">        Voxel to be used for grid intergation. Reflects the</span>
+<span class="sd">        symmetry of the simulation cell. Calculated from DFT reference data.</span>
+
+<span class="sd">    y_planes : int</span>
+<span class="sd">        Number of y_planes used for Quantum ESPRESSO parallelization. Handled</span>
+<span class="sd">        internally.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">##############################</span>
@@ -183,7 +253,6 @@
 <span class="sd">        Get the necessary arguments to call __new__.</span>
 
 <span class="sd">        Used for pickling.</span>
-
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -906,7 +975,14 @@
 <div class="viewcode-block" id="Target.get_real_space_grid">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_real_space_grid">[docs]</a>
     <span class="k">def</span> <span class="nf">get_real_space_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the real space grid.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the real space grid.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        grid3D : numpy.ndarray</span>
+<span class="sd">            Numpy array holding the entire grid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">grid3D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
             <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
@@ -1509,8 +1585,7 @@
 <span class="sd">            None.</span>
 
 <span class="sd">        mpi_rank : int</span>
-<span class="sd">            Rank within MPI</span>
-
+<span class="sd">            Rank within MPI.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Specify grid dimensions, if any are given.</span>
         <span class="k">if</span> <span class="p">(</span>
@@ -1747,7 +1822,7 @@
             <span class="s2">&quot;electrons_per_atom&quot;</span><span class="p">,</span>
             <span class="n">default_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenval</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_get_attribute_if_attribute_exists</span><span class="p">(</span>
                 <span class="n">iteration</span><span class="p">,</span>
                 <span class="s2">&quot;number_of_electrons_from_eigenvals&quot;</span><span class="p">,</span>

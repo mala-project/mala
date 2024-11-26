@@ -123,6 +123,25 @@
 <p>A special type of tensor data set for improved performance.</p>
 <p>This version of TensorDataset gathers data using a single call
 within  __getitem__. A bit more tricky to manage but is faster still.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size to be used with this data set.</p></li>
+<li><p><strong>tensors</strong> (<em>object</em>) – Torch tensors for this data set.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.fast_tensor_dataset.FastTensorDataset.batch_size">
+<span class="sig-name descname"><span class="pre">batch_size</span></span><a class="headerlink" href="#mala.datahandling.fast_tensor_dataset.FastTensorDataset.batch_size" title="Link to this definition"></a></dt>
+<dd><p>Batch size to be used with this data set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.fast_tensor_dataset.FastTensorDataset.shuffle">
 <span class="sig-name descname"><span class="pre">shuffle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/fast_tensor_dataset.html#FastTensorDataset.shuffle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.fast_tensor_dataset.FastTensorDataset.shuffle" title="Link to this definition"></a></dt>

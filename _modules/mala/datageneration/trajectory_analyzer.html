@@ -114,6 +114,44 @@
 <span class="sd">    target_calculator : mala.targets.target.Target</span>
 <span class="sd">        A target calculator to calculate e.g. the RDF. If None is provided,</span>
 <span class="sd">        one will be generated ad-hoc (recommended).</span>
+
+<span class="sd">    temperatures : string or numpy.ndarray</span>
+<span class="sd">        Array holding the temperatures for the trajectory or path to numpy</span>
+<span class="sd">        file containing temperatures.</span>
+
+<span class="sd">    target_temperature : float</span>
+<span class="sd">        Target temperature for equilibration.</span>
+
+<span class="sd">    malada_compatability : bool</span>
+<span class="sd">        If True, twice the radius set by the minimum imaging convention (MIC)</span>
+<span class="sd">        will be used for RDF calculation. This is generally discouraged,</span>
+<span class="sd">        but some older malada calculations have been performed with it, so</span>
+<span class="sd">        this parameter provides reproducibility.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : mala.common.parameters.ParametersDataGeneration</span>
+<span class="sd">        MALA data generation parameters.</span>
+
+<span class="sd">    average_distance_equilibrated : float</span>
+<span class="sd">        Distance threshold for determination of first equilibrated snapshot.</span>
+
+<span class="sd">    distance_metrics_denoised : numpy.ndarray</span>
+<span class="sd">        RDF based distance metrics used for equilibration analysis.</span>
+
+<span class="sd">    distances_realspace : numpy.ndarray</span>
+<span class="sd">        Realspace distance metrics used to sample snapshots.</span>
+
+<span class="sd">    first_considered_snapshot : int</span>
+<span class="sd">        First snapshot to be considered during equilibration analysis (i.e.,</span>
+<span class="sd">        after pruning).</span>
+
+<span class="sd">    last_considered_snapshot : int</span>
+<span class="sd">        Last snapshot to be considered during equilibration analysis (i.e.,</span>
+<span class="sd">        after pruning).</span>
+
+<span class="sd">    target_calculator : mala.targets.target.Target</span>
+<span class="sd">        Target calculator used for computing RDFs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -131,7 +169,7 @@
             <span class="s2">&quot;large changes.&quot;</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">:</span> <span class="n">ParametersDataGeneration</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">datageneration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span> <span class="n">ParametersDataGeneration</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">datageneration</span>
 
         <span class="c1"># If needed, read the trajectory</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span> <span class="o">=</span> <span class="kc">None</span>
@@ -143,12 +181,12 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Incompatible trajectory format provided.&quot;</span><span class="p">)</span>
 
         <span class="c1"># If needed, read the temperature files</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">temperatures</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_temperatures</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">temperatures</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">temperatures</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">temperatures</span> <span class="o">=</span> <span class="n">temperatures</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_temperatures</span> <span class="o">=</span> <span class="n">temperatures</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">temperatures</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">temperatures</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">temperatures</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_temperatures</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">temperatures</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Incompatible temperature format provided.&quot;</span><span class="p">)</span>
 
@@ -161,7 +199,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">target_temperature</span>
 
         <span class="c1"># Initialize variables.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distance_metrics</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">average_distance_equilibrated</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__saved_rdf</span> <span class="o">=</span> <span class="kc">None</span>
@@ -240,11 +278,11 @@
         <span class="c1"># First, we ned to calculate the reduced metrics for the trajectory.</span>
         <span class="c1"># For this, we calculate the distance between all the snapshots</span>
         <span class="c1"># and the last one.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distance_metrics</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">equilibrated_snapshot</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">equilibrated_snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_distance_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_distance_between_snapshots</span><span class="p">(</span>
                     <span class="n">equilibrated_snapshot</span><span class="p">,</span>
                     <span class="n">step</span><span class="p">,</span>
@@ -255,16 +293,16 @@
             <span class="p">)</span>
 
         <span class="c1"># Now, we denoise the distance metrics.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__denoise</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__denoise</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_distance_metrics</span><span class="p">)</span>
 
         <span class="c1"># Which snapshots are considered depends on how we denoise the</span>
         <span class="c1"># distance metrics.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">first_considered_snapshot</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_considered_snapshot</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span>
+            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span>
         <span class="p">)</span>
         <span class="n">considered_length</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">last_considered_snapshot</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_considered_snapshot</span>
@@ -279,7 +317,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">[</span>
                     <span class="n">considered_length</span>
                     <span class="o">-</span> <span class="nb">int</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_estimated_equilibrium</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">trajectory_analysis_estimated_equilibrium</span>
                         <span class="o">*</span> <span class="n">considered_length</span>
                     <span class="p">)</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_considered_snapshot</span>
                 <span class="p">]</span>
@@ -302,7 +340,7 @@
                     <span class="n">is_below</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">if</span> <span class="p">(</span>
                     <span class="n">counter</span>
-                    <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_below_average_counter</span>
+                    <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">trajectory_analysis_below_average_counter</span>
                 <span class="p">):</span>
                     <span class="n">first_snapshot</span> <span class="o">=</span> <span class="n">idx</span>
                     <span class="k">break</span>
@@ -335,10 +373,12 @@
 <span class="sd">            to each other to a degree that suggests temporal neighborhood.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_correlation_metric_cutoff</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">trajectory_analysis_correlation_metric_cutoff</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analyze_distance_metric</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_correlation_metric_cutoff</span></div>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">trajectory_analysis_correlation_metric_cutoff</span>
+            <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TrajectoryAnalyzer.get_uncorrelated_snapshots">
@@ -361,7 +401,8 @@
             <span class="n">filename_uncorrelated_snapshots</span>
         <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">allowed_temp_diff_K</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_temperature_tolerance_percent</span> <span class="o">/</span> <span class="mi">100</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">trajectory_analysis_temperature_tolerance_percent</span>
+            <span class="o">/</span> <span class="mi">100</span>
         <span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">temperature</span>
         <span class="n">current_snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_snapshot</span>
         <span class="n">begin_snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_snapshot</span> <span class="o">+</span> <span class="mi">1</span>
@@ -371,9 +412,9 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">begin_snapshot</span><span class="p">,</span> <span class="n">end_snapshot</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__check_if_snapshot_is_valid</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">temperatures</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_temperatures</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="n">current_snapshot</span><span class="p">],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">temperatures</span><span class="p">[</span><span class="n">current_snapshot</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_temperatures</span><span class="p">[</span><span class="n">current_snapshot</span><span class="p">],</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_correlation_cutoff</span><span class="p">,</span>
                 <span class="n">allowed_temp_diff_K</span><span class="p">,</span>
             <span class="p">):</span>
@@ -413,7 +454,7 @@
             <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_snapshot</span>
         <span class="p">)</span>
         <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_estimated_equilibrium</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">trajectory_analysis_estimated_equilibrium</span>
             <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distances_realspace</span> <span class="o">=</span> <span class="p">[]</span>
@@ -500,8 +541,8 @@
     <span class="k">def</span> <span class="nf">__denoise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">):</span>
         <span class="n">denoised_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span>
             <span class="n">signal</span><span class="p">,</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span><span class="p">)</span>
-            <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span><span class="p">)</span>
+            <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span><span class="p">,</span>
             <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">denoised_signal</span>

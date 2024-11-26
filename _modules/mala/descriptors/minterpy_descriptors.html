@@ -81,7 +81,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mala.descriptors.minterpy_descriptors</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Gaussian descriptor class.&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;Minterpy descriptor class.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -93,12 +93,16 @@
 <span class="kn">from</span> <span class="nn">mala.descriptors.lammps_utils</span> <span class="kn">import</span> <span class="n">extract_compute_np</span>
 <span class="kn">from</span> <span class="nn">mala.descriptors.descriptor</span> <span class="kn">import</span> <span class="n">Descriptor</span>
 <span class="kn">from</span> <span class="nn">mala.descriptors.atomic_density</span> <span class="kn">import</span> <span class="n">AtomicDensity</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">parallel_warn</span>
 
 
 <div class="viewcode-block" id="MinterpyDescriptors">
 <a class="viewcode-back" href="../../../api/mala.descriptors.minterpy_descriptors.html#mala.descriptors.minterpy_descriptors.MinterpyDescriptors">[docs]</a>
 <span class="k">class</span> <span class="nc">MinterpyDescriptors</span><span class="p">(</span><span class="n">Descriptor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for calculation and parsing of Gaussian descriptors.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for calculation and parsing of Minterpy descriptors.</span>
+
+<span class="sd">    Marked for deprecation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -108,17 +112,15 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MinterpyDescriptors</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">verbosity</span>
+        <span class="n">parallel_warn</span><span class="p">(</span>
+            <span class="s2">&quot;Minterpy descriptors will be deprecated starting with MALA v1.4.0&quot;</span><span class="p">,</span>
+            <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a string that describes the target (for e.g. metadata).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;Minterpy&quot;</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the feature dimension of this data.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span>
 
 <div class="viewcode-block" id="MinterpyDescriptors.convert_units">
 <a class="viewcode-back" href="../../../api/mala.descriptors.minterpy_descriptors.html#mala.descriptors.minterpy_descriptors.MinterpyDescriptors.convert_units">[docs]</a>
@@ -240,11 +242,11 @@
             <span class="p">],</span>
             <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">=</span> <span class="p">(</span>
             <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">minterpy_point_list</span><span class="p">)</span> <span class="o">+</span> <span class="n">coord_length</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">minterpy_point_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">minterpy_point_list</span><span class="p">)</span>
         <span class="c1"># Perform one LAMMPS call for each point in the Minterpy point list.</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">minterpy_point_list</span><span class="p">):</span>
             <span class="c1"># Shift the atoms in negative direction of the point(s) we actually</span>
@@ -257,7 +259,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">setup_lammps_tmp_files</span><span class="p">(</span><span class="s2">&quot;minterpy&quot;</span><span class="p">,</span> <span class="n">outdir</span><span class="p">)</span>
 
             <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lammps_temporary_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">lammps_format</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_lammps_temporary_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">lammps_format</span>
             <span class="p">)</span>
 
             <span class="c1"># Create LAMMPS instance.</span>

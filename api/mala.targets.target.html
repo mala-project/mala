@@ -23,6 +23,7 @@
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
         <script src="../_static/copybutton.js?v=f281be69"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -120,6 +121,7 @@
 <p>Target parsers read the target quantity
 (i.e. the quantity the NN will learn to predict) from a specified file
 format and performs postprocessing calculations on the quantity.</p>
+<p>Target parsers often read DFT reference information.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -128,6 +130,212 @@ format and performs postprocessing calculations on the quantity.</p>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.atomic_forces_dft">
+<span class="sig-name descname"><span class="pre">atomic_forces_dft</span></span><a class="headerlink" href="#mala.targets.target.Target.atomic_forces_dft" title="Link to this definition"></a></dt>
+<dd><p>Atomic forces as per DFT reference file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.atoms">
+<span class="sig-name descname"><span class="pre">atoms</span></span><a class="headerlink" href="#mala.targets.target.Target.atoms" title="Link to this definition"></a></dt>
+<dd><p>ASE atoms object used for calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ase.Atoms</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.band_energy_dft_calculation">
+<span class="sig-name descname"><span class="pre">band_energy_dft_calculation</span></span><a class="headerlink" href="#mala.targets.target.Target.band_energy_dft_calculation" title="Link to this definition"></a></dt>
+<dd><p>Band energy as per DFT reference file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.electrons_per_atom">
+<span class="sig-name descname"><span class="pre">electrons_per_atom</span></span><a class="headerlink" href="#mala.targets.target.Target.electrons_per_atom" title="Link to this definition"></a></dt>
+<dd><p>Electrons per atom, usually determined by DFT reference file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.entropy_contribution_dft_calculation">
+<span class="sig-name descname"><span class="pre">entropy_contribution_dft_calculation</span></span><a class="headerlink" href="#mala.targets.target.Target.entropy_contribution_dft_calculation" title="Link to this definition"></a></dt>
+<dd><p>Electronic entropy contribution as per DFT reference file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.fermi_energy_dft">
+<span class="sig-name descname"><span class="pre">fermi_energy_dft</span></span><a class="headerlink" href="#mala.targets.target.Target.fermi_energy_dft" title="Link to this definition"></a></dt>
+<dd><p>Fermi energy as per DFT reference file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.kpoints">
+<span class="sig-name descname"><span class="pre">kpoints</span></span><a class="headerlink" href="#mala.targets.target.Target.kpoints" title="Link to this definition"></a></dt>
+<dd><p>k-grid used for MALA calculations. Managed internally.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.local_grid">
+<span class="sig-name descname"><span class="pre">local_grid</span></span><a class="headerlink" href="#mala.targets.target.Target.local_grid" title="Link to this definition"></a></dt>
+<dd><p>Size of local grid (in MPI mode).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.number_of_electrons_exact">
+<span class="sig-name descname"><span class="pre">number_of_electrons_exact</span></span><a class="headerlink" href="#mala.targets.target.Target.number_of_electrons_exact" title="Link to this definition"></a></dt>
+<dd><p>Exact number of electrons, usually given via DFT reference file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.number_of_electrons_from_eigenvals">
+<span class="sig-name descname"><span class="pre">number_of_electrons_from_eigenvals</span></span><a class="headerlink" href="#mala.targets.target.Target.number_of_electrons_from_eigenvals" title="Link to this definition"></a></dt>
+<dd><p>Number of electrons as calculated from DFT reference eigenvalues.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#mala.targets.target.Target.parameters" title="Link to this definition"></a></dt>
+<dd><p>MALA target calculation parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mala.common.parameters.ParametersTarget</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.qe_pseudopotentials">
+<span class="sig-name descname"><span class="pre">qe_pseudopotentials</span></span><a class="headerlink" href="#mala.targets.target.Target.qe_pseudopotentials" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>List of Quantum ESPRESSO pseudopotentials, read from DFT reference file</dt><dd><p>and used for the total energy module.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.save_target_data">
+<span class="sig-name descname"><span class="pre">save_target_data</span></span><a class="headerlink" href="#mala.targets.target.Target.save_target_data" title="Link to this definition"></a></dt>
+<dd><p>Control whether target data will be saved. Can be important for I/O
+applications. Managed internally, default is True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.temperature">
+<span class="sig-name descname"><span class="pre">temperature</span></span><a class="headerlink" href="#mala.targets.target.Target.temperature" title="Link to this definition"></a></dt>
+<dd><p>Temperature used for all computations. By default read from DFT
+reference file, but can freely be changed from the outside.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.total_energy_contributions_dft_calculation">
+<span class="sig-name descname"><span class="pre">total_energy_contributions_dft_calculation</span></span><a class="headerlink" href="#mala.targets.target.Target.total_energy_contributions_dft_calculation" title="Link to this definition"></a></dt>
+<dd><p>Dictionary holding contributions to total free energy not given
+as individual properties, as read from the DFT reference file.
+Contains:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“one_electron_contribution”, <span class="math notranslate nohighlight">\(n\,V_\mathrm{xc}\)</span> plus band
+energy</p></li>
+<li><p>“hartree_contribution”, <span class="math notranslate nohighlight">\(E_\mathrm{H}\)</span></p></li>
+<li><p>“xc_contribution”, <span class="math notranslate nohighlight">\(E_\mathrm{xc}\)</span></p></li>
+<li><p>“ewald_contribution”, <span class="math notranslate nohighlight">\(E_\mathrm{Ewald}\)</span></p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.total_energy_dft_calculation">
+<span class="sig-name descname"><span class="pre">total_energy_dft_calculation</span></span><a class="headerlink" href="#mala.targets.target.Target.total_energy_dft_calculation" title="Link to this definition"></a></dt>
+<dd><p>Total free energy as read from DFT reference file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.voxel">
+<span class="sig-name descname"><span class="pre">voxel</span></span><a class="headerlink" href="#mala.targets.target.Target.voxel" title="Link to this definition"></a></dt>
+<dd><p>Voxel to be used for grid intergation. Reflects the
+symmetry of the simulation cell. Calculated from DFT reference data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ase.cell.Cell</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.targets.target.Target.y_planes">
+<span class="sig-name descname"><span class="pre">y_planes</span></span><a class="headerlink" href="#mala.targets.target.Target.y_planes" title="Link to this definition"></a></dt>
+<dd><p>Number of y_planes used for Quantum ESPRESSO parallelization. Handled
+internally.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.backconvert_units">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backconvert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.backconvert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.backconvert_units" title="Link to this definition"></a></dt>
@@ -207,6 +415,14 @@ automatically calculated.</p></li>
 <dt class="sig sig-object py" id="mala.targets.target.Target.get_real_space_grid">
 <span class="sig-name descname"><span class="pre">get_real_space_grid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_real_space_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_real_space_grid" title="Link to this definition"></a></dt>
 <dd><p>Get the real space grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>grid3D</strong> – Numpy array holding the entire grid.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -479,7 +695,7 @@ interface. If None (recommended), MALA will create one.</p></li>
 <li><p><strong>kpoints</strong> (<em>dict</em>) – k-grid used, usually None or (1,1,1) for TEM calculations.</p></li>
 <li><p><strong>mpi_communicator</strong> (<em>MPI.COMM_WORLD</em>) – An MPI comminucator. If no MPI is enabled, this will simply be
 None.</p></li>
-<li><p><strong>mpi_rank</strong> (<em>int</em>) – Rank within MPI</p></li>
+<li><p><strong>mpi_rank</strong> (<em>int</em>) – Rank within MPI.</p></li>
 </ul>
 </dd>
 </dl>

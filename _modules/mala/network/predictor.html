@@ -111,6 +111,12 @@
 <span class="sd">    data : mala.datahandling.data_handler.DataHandler</span>
 <span class="sd">        DataHandler, in this case not directly holding data, but serving</span>
 <span class="sd">        as an interface to Target and Descriptor objects.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    target_calculator : mala.targets.target.Target</span>
+<span class="sd">        Target calculator used for predictions. Can be used for further</span>
+<span class="sd">        processing.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
@@ -122,8 +128,8 @@
             <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
 
 <div class="viewcode-block" id="Predictor.predict_from_qeout">
@@ -229,7 +235,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
             <span class="p">[</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">],</span> <span class="s2">&quot;atoms+grid&quot;</span>
         <span class="p">)</span>
-        <span class="n">feature_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">fingerprint_length</span>
+        <span class="n">feature_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">feature_size</span>
 
         <span class="c1"># The actual calculation of the LDOS from the descriptors depends</span>
         <span class="c1"># on whether we run in parallel or serial. In the former case,</span>
@@ -319,11 +325,11 @@
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="o">=</span> <span class="n">optimal_batch_size</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
                 <span class="n">local_data_size</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span>
             <span class="p">)</span>
 
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_number_of_batches_per_snapshot</span><span class="p">):</span>
                 <span class="n">sl</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span>
                     <span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">,</span>
                     <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">,</span>

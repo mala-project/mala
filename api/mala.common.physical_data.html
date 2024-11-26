@@ -113,9 +113,40 @@
 <dt class="sig sig-object py" id="mala.common.physical_data.PhysicalData">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhysicalData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/physical_data.html#PhysicalData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.physical_data.PhysicalData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>Base class for physical data.</p>
+<p>Base class for volumetric physical data.</p>
 <p>Implements general framework to read and write such data to and from
-files.</p>
+files. Volumetric data is assumed to exist on a 3D grid. As such it
+either has the dimensions [x,y,z,f], where f is the feature dimension.
+All loading functions within this class assume such a 4D array. Within
+MALA, occasionally 2D arrays of dimension [x*y*z,f] are used and reshaped
+accordingly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parameters</strong> (<em>mala.Parameters</em>) – MALA Parameters object used to create this class.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.physical_data.PhysicalData.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#mala.common.physical_data.PhysicalData.parameters" title="Link to this definition"></a></dt>
+<dd><p>MALA parameters object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mala.Parameters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.physical_data.PhysicalData.grid_dimensions">
+<span class="sig-name descname"><span class="pre">grid_dimensions</span></span><a class="headerlink" href="#mala.common.physical_data.PhysicalData.grid_dimensions" title="Link to this definition"></a></dt>
+<dd><p>List of the grid dimensions (x,y,z)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="mala.common.physical_data.PhysicalData.SkipArrayWriting">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SkipArrayWriting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/physical_data.html#PhysicalData.SkipArrayWriting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.physical_data.PhysicalData.SkipArrayWriting" title="Link to this definition"></a></dt>
@@ -138,6 +169,36 @@ would normally be extracted from the numpy array:</p>
 </ol>
 <p>In order to provide this data, the numpy array can be replaced with an
 instance of the class SkipArrayWriting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<em>openpmd_api.Dataset</em>) – OpenPMD Data set to eventually write to.</p></li>
+<li><p><strong>feature_size</strong> (<em>int</em>) – Size of the feature dimension.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.physical_data.PhysicalData.SkipArrayWriting.dataset">
+<span class="sig-name descname"><span class="pre">dataset</span></span><a class="headerlink" href="#mala.common.physical_data.PhysicalData.SkipArrayWriting.dataset" title="Link to this definition"></a></dt>
+<dd><p>OpenPMD Data set to eventually write to.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mala.Parameters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.physical_data.PhysicalData.SkipArrayWriting.feature_size">
+<span class="sig-name descname"><span class="pre">feature_size</span></span><a class="headerlink" href="#mala.common.physical_data.PhysicalData.SkipArrayWriting.feature_size" title="Link to this definition"></a></dt>
+<dd><p>Size of the feature dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py method">
@@ -151,6 +212,15 @@ instance of the class SkipArrayWriting.</p>
 <li><p><strong>read_dtype</strong> (<em>bool</em>) – If True, the dtype is read alongside the dimensions.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>dimension_info</strong> – If read_dtype is False, then only a list containing the dimensions
+of the saved array is returned. If read_dtype is True, a tuple
+containing this list of dimensions and the dtype of the array will
+be returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list or tuple</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -163,7 +233,14 @@ instance of the class SkipArrayWriting.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>string</em>) – Path to the openPMD file.</p></li>
 <li><p><strong>read_dtype</strong> (<em>bool</em>) – If True, the dtype is read alongside the dimensions.</p></li>
+<li><p><strong>comm</strong> (<em>MPI.Comm</em>) – An MPI communicator to be used for parallelized I/O</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>dimension_info</strong> – A list containing the dimensions of the saved array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -179,6 +256,7 @@ instance of the class SkipArrayWriting.</p>
 <li><p><strong>units</strong> (<em>string</em>) – Units the data is saved in.</p></li>
 <li><p><strong>array</strong> (<em>np.ndarray</em>) – If not None, the array to save the data into.
 The array has to be 4-dimensional.</p></li>
+<li><p><strong>reshape</strong> (<em>bool</em>) – If True, the loaded 4D array will be reshaped into a 2D array.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -241,7 +319,7 @@ array.</p>
 Alternatively: A Series, opened already.</p></li>
 <li><p><strong>array</strong> (<em>Either numpy.ndarray</em><em> or </em><em>an SkipArrayWriting object</em>) – Either the array to save or the meta information needed to create
 the openPMD structure.</p></li>
-<li><p><strong>additional_attributes</strong> (<em>dict</em>) – Dict containing additional attributes to be saved.</p></li>
+<li><p><strong>additional_attributes</strong> (<em>dict</em>) – Dictionary containing additional attributes to be saved.</p></li>
 <li><p><strong>internal_iteration_number</strong> (<em>int</em>) – Internal OpenPMD iteration number. Ideally, this number should
 match any number present in the file name, if this data is part
 of a larger data set.</p></li>
@@ -262,6 +340,14 @@ of a larger data set.</p></li>
 <li><p><strong>additional_metadata</strong> (<em>list</em>) – If not None, and the selected class implements it, additional
 metadata will be read from this source. This metadata will then,
 depending on the class, be saved in the OpenPMD file.</p></li>
+<li><p><strong>local_offset</strong> (<em>list</em>) – [x,y,z] value from which to start writing the array.</p></li>
+<li><p><strong>local_reach</strong> (<em>list</em>) – [x,y,z] value until which to read the array.</p></li>
+<li><p><strong>feature_from</strong> (<em>int</em>) – Value from which to start writing in the feature dimension. With
+this parameter and feature_to, one can parallelize over the feature
+dimension.</p></li>
+<li><p><strong>feature_to</strong> (<em>int</em>) – Value until which to write in the feature dimension. With
+this parameter and feature_from, one can parallelize over the feature
+dimension.</p></li>
 </ul>
 </dd>
 </dl>

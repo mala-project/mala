@@ -125,13 +125,27 @@
 
 <span class="sd">    data : mala.datahandling.data_handler.DataHandler</span>
 <span class="sd">        DataHandler holding the data for the run.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : mala.common.parametes.ParametersRunning</span>
+<span class="sd">        MALA neural network training/inference parameters.</span>
+
+<span class="sd">    parameters_full : mala.common.parametes.Parameters</span>
+<span class="sd">        Full MALA Parameters object.</span>
+
+<span class="sd">    network : mala.network.network.Network</span>
+<span class="sd">        Network which is being run.</span>
+
+<span class="sd">    data : mala.datahandling.data_handler.DataHandler</span>
+<span class="sd">        DataHandler holding the data for the run.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">runner_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="p">:</span> <span class="n">Parameters</span> <span class="o">=</span> <span class="n">params</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span> <span class="n">ParametersRunning</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">running</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="n">DataHandler</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__prepare_to_run</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_calculate_errors</span><span class="p">(</span>

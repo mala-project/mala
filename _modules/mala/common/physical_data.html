@@ -97,10 +97,27 @@
 <a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData">[docs]</a>
 <span class="k">class</span> <span class="nc">PhysicalData</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Base class for physical data.</span>
+<span class="sd">    Base class for volumetric physical data.</span>
 
 <span class="sd">    Implements general framework to read and write such data to and from</span>
-<span class="sd">    files.</span>
+<span class="sd">    files. Volumetric data is assumed to exist on a 3D grid. As such it</span>
+<span class="sd">    either has the dimensions [x,y,z,f], where f is the feature dimension.</span>
+<span class="sd">    All loading functions within this class assume such a 4D array. Within</span>
+<span class="sd">    MALA, occasionally 2D arrays of dimension [x*y*z,f] are used and reshaped</span>
+<span class="sd">    accordingly.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : mala.Parameters</span>
+<span class="sd">        MALA Parameters object used to create this class.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : mala.Parameters</span>
+<span class="sd">        MALA parameters object.</span>
+
+<span class="sd">    grid_dimensions : list</span>
+<span class="sd">        List of the grid dimensions (x,y,z)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">##############################</span>
@@ -172,6 +189,9 @@
 <span class="sd">        array : np.ndarray</span>
 <span class="sd">            If not None, the array to save the data into.</span>
 <span class="sd">            The array has to be 4-dimensional.</span>
+
+<span class="sd">        reshape : bool</span>
+<span class="sd">            If True, the loaded 4D array will be reshaped into a 2D array.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -356,6 +376,14 @@
 
 <span class="sd">        read_dtype : bool</span>
 <span class="sd">            If True, the dtype is read alongside the dimensions.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dimension_info : list or tuple</span>
+<span class="sd">            If read_dtype is False, then only a list containing the dimensions</span>
+<span class="sd">            of the saved array is returned. If read_dtype is True, a tuple</span>
+<span class="sd">            containing this list of dimensions and the dtype of the array will</span>
+<span class="sd">            be returned.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">loaded_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mmap_mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">read_dtype</span><span class="p">:</span>
@@ -382,6 +410,14 @@
 
 <span class="sd">        read_dtype : bool</span>
 <span class="sd">            If True, the dtype is read alongside the dimensions.</span>
+
+<span class="sd">        comm : MPI.Comm</span>
+<span class="sd">            An MPI communicator to be used for parallelized I/O</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dimension_info : list</span>
+<span class="sd">            A list containing the dimensions of the saved array.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">comm</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
@@ -481,6 +517,22 @@
 
 <span class="sd">        In order to provide this data, the numpy array can be replaced with an</span>
 <span class="sd">        instance of the class SkipArrayWriting.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dataset : openpmd_api.Dataset</span>
+<span class="sd">            OpenPMD Data set to eventually write to.</span>
+
+<span class="sd">        feature_size : int</span>
+<span class="sd">            Size of the feature dimension.</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dataset : mala.Parameters</span>
+<span class="sd">            OpenPMD Data set to eventually write to.</span>
+
+<span class="sd">        feature_size : list</span>
+<span class="sd">            Size of the feature dimension.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># dataset has type openpmd_api.Dataset (not adding a type hint to avoid</span>
@@ -513,7 +565,7 @@
 <span class="sd">            the openPMD structure.</span>
 
 <span class="sd">        additional_attributes : dict</span>
-<span class="sd">            Dict containing additional attributes to be saved.</span>
+<span class="sd">            Dictionary containing additional attributes to be saved.</span>
 
 <span class="sd">        internal_iteration_number : int</span>
 <span class="sd">            Internal OpenPMD iteration number. Ideally, this number should</span>
@@ -597,6 +649,22 @@
 <span class="sd">            If not None, and the selected class implements it, additional</span>
 <span class="sd">            metadata will be read from this source. This metadata will then,</span>
 <span class="sd">            depending on the class, be saved in the OpenPMD file.</span>
+
+<span class="sd">        local_offset  : list</span>
+<span class="sd">            [x,y,z] value from which to start writing the array.</span>
+
+<span class="sd">        local_reach  : list</span>
+<span class="sd">            [x,y,z] value until which to read the array.</span>
+
+<span class="sd">        feature_from  : int</span>
+<span class="sd">            Value from which to start writing in the feature dimension. With</span>
+<span class="sd">            this parameter and feature_to, one can parallelize over the feature</span>
+<span class="sd">            dimension.</span>
+
+<span class="sd">        feature_to : int</span>
+<span class="sd">            Value until which to write in the feature dimension. With</span>
+<span class="sd">            this parameter and feature_from, one can parallelize over the feature</span>
+<span class="sd">            dimension.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
 

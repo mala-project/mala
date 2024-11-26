@@ -86,6 +86,7 @@
 <span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">Bohr</span>
 
 <span class="kn">from</span> <span class="nn">.target</span> <span class="kn">import</span> <span class="n">Target</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">parallel_warn</span>
 
 
 <div class="viewcode-block" id="AtomicForce">
@@ -109,6 +110,10 @@
 <span class="sd">            Parameters used to create this TargetBase object.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">parallel_warn</span><span class="p">(</span>
+            <span class="s2">&quot;The AtomicForce class is currently be developed and&quot;</span>
+            <span class="s2">&quot; not feature-complete.&quot;</span>
+        <span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">AtomicForce</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AtomicForce.get_feature_size">

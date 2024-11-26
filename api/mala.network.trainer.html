@@ -125,7 +125,7 @@
 <p>Trainer class for training a network.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mala.network.trainer.Trainer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Trainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.trainer.Trainer" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Trainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_optimizer_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.trainer.Trainer" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="mala.network.runner.html#mala.network.runner.Runner" title="mala.network.runner.Runner"><code class="xref py py-class docutils literal notranslate"><span class="pre">Runner</span></code></a></p>
 <p>A class for training a neural network.</p>
 <dl class="field-list simple">
@@ -134,10 +134,43 @@
 <li><p><strong>params</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this Trainer object.</p></li>
 <li><p><strong>network</strong> (<a class="reference internal" href="mala.network.network.html#mala.network.network.Network" title="mala.network.network.Network"><em>mala.network.network.Network</em></a>) – Network which is being trained.</p></li>
 <li><p><strong>data</strong> (<a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – DataHandler holding the training data.</p></li>
-<li><p><strong>use_pkl_checkpoints</strong> (<em>bool</em>) – If true, .pkl checkpoints will be created.</p></li>
+<li><p><strong>_optimizer_dict</strong> (<em>dict</em>) – For internal use by the Trainer class during loading procecdures only.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.network.trainer.Trainer.final_validation_loss">
+<span class="sig-name descname"><span class="pre">final_validation_loss</span></span><a class="headerlink" href="#mala.network.trainer.Trainer.final_validation_loss" title="Link to this definition"></a></dt>
+<dd><p>Validation loss after training</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.network.trainer.Trainer.network">
+<span class="sig-name descname"><span class="pre">network</span></span><a class="headerlink" href="#mala.network.trainer.Trainer.network" title="Link to this definition"></a></dt>
+<dd><p>Network which is being trained.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.network.network.html#mala.network.network.Network" title="mala.network.network.Network">mala.network.network.Network</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.network.trainer.Trainer.full_logging_path">
+<span class="sig-name descname"><span class="pre">full_logging_path</span></span><a class="headerlink" href="#mala.network.trainer.Trainer.full_logging_path" title="Link to this definition"></a></dt>
+<dd><p>Full path to training logs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.trainer.Trainer.load_run">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_runner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepare_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer.load_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.trainer.Trainer.load_run" title="Link to this definition"></a></dt>

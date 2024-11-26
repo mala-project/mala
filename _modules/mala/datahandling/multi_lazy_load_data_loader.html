@@ -105,23 +105,23 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="n">datasets</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loaders</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_datasets</span> <span class="o">=</span> <span class="n">datasets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loaders</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">DataLoader</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="p">)</span>
 
         <span class="c1"># Create single process pool for prefetching</span>
         <span class="c1"># Can use ThreadPoolExecutor for debugging.</span>
         <span class="c1"># self.pool = concurrent.futures.ThreadPoolExecutor(1)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ProcessPoolExecutor</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span> <span class="o">=</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ProcessPoolExecutor</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># Allocate shared memory and commence file load for first</span>
         <span class="c1"># dataset in list</span>
-        <span class="n">dset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">dset</span><span class="o">.</span><span class="n">allocate_shared_mem</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">load_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">load_snapshot_to_shm</span><span class="p">,</span>
             <span class="n">dset</span><span class="o">.</span><span class="n">snapshot</span><span class="p">,</span>
             <span class="n">dset</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span>
@@ -139,7 +139,7 @@
 <span class="sd">        length : int</span>
 <span class="sd">            Number of datasets/snapshots contained within this loader.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loaders</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loaders</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -151,7 +151,7 @@
 <span class="sd">            An iterator over the individual datasets/snapshots in this</span>
 <span class="sd">            object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -163,25 +163,25 @@
 <span class="sd">        iterator: DataLoader</span>
 <span class="sd">            The next data loader.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loaders</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loaders</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">StopIteration</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Wait on last prefetch</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">load_future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">loaded</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_load_future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_datasets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">loaded</span> <span class="o">=</span> <span class="kc">True</span>
 
             <span class="c1"># Delete last</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">delete_data</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_datasets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">delete_data</span><span class="p">()</span>
 
             <span class="c1"># Prefetch next file (looping around epoch boundary)</span>
-            <span class="n">dset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loaders</span><span class="p">)]</span>
+            <span class="n">dset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loaders</span><span class="p">)]</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">dset</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
                 <span class="n">dset</span><span class="o">.</span><span class="n">allocate_shared_mem</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">load_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_load_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">load_snapshot_to_shm</span><span class="p">,</span>
                     <span class="n">dset</span><span class="o">.</span><span class="n">snapshot</span><span class="p">,</span>
                     <span class="n">dset</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span>
@@ -191,7 +191,7 @@
                 <span class="p">)</span>
 
             <span class="c1"># Return current</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaders</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loaders</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
 
     <span class="c1"># TODO: Without this function, I get 2 times the number of snapshots</span>
     <span class="c1"># memory leaks after shutdown. With it, I get 1 times the number of</span>
@@ -201,9 +201,9 @@
 <a class="viewcode-back" href="../../../api/mala.datahandling.multi_lazy_load_data_loader.html#mala.datahandling.multi_lazy_load_data_loader.MultiLazyLoadDataLoader.cleanup">[docs]</a>
     <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Deallocate arrays still left in memory.&quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">dset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">dset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasets</span><span class="p">:</span>
             <span class="n">dset</span><span class="o">.</span><span class="n">deallocate_shared_mem</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span></div>
 
 
     <span class="c1"># Worker function to load data into shared memory (limited to numpy files</span>

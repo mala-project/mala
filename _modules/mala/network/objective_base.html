@@ -90,6 +90,7 @@
 <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_oat</span> <span class="kn">import</span> <span class="n">HyperparameterOAT</span>
 <span class="kn">from</span> <span class="nn">mala.network.network</span> <span class="kn">import</span> <span class="n">Network</span>
 <span class="kn">from</span> <span class="nn">mala.network.trainer</span> <span class="kn">import</span> <span class="n">Trainer</span>
+<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
 <span class="kn">from</span> <span class="nn">mala</span> <span class="kn">import</span> <span class="n">printout</span>
 
 
@@ -100,22 +101,19 @@
 <span class="sd">    Represents the objective function of a training process.</span>
 
 <span class="sd">    This is usually the result of a training of a network.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    params : mala.common.parametes.Parameters</span>
+<span class="sd">        Parameters used to create this objective.</span>
+
+<span class="sd">    data_handler : mala.datahandling.data_handler.DataHandler</span>
+<span class="sd">        datahandler to be used during the hyperparameter optimization.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">data_handler</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create an ObjectiveBase object.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        params : mala.common.parametes.Parameters</span>
-<span class="sd">            Parameters used to create this objective.</span>
-
-<span class="sd">        data_handler : mala.datahandling.data_handler.DataHandler</span>
-<span class="sd">            datahandler to be used during the hyperparameter optimization.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">data_handler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span> <span class="o">=</span> <span class="n">data_handler</span>
 
         <span class="c1"># We need to find out if we have to reparametrize the lists with the</span>
         <span class="c1"># layers and the activations.</span>
@@ -143,17 +141,17 @@
                 <span class="s2">&quot;the range of neurons or number of layers is missing. &quot;</span>
                 <span class="s2">&quot;This input will be ignored.&quot;</span>
             <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">optimize_layer_list</span> <span class="o">=</span> <span class="n">contains_single_layer</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_optimize_layer_list</span> <span class="o">=</span> <span class="n">contains_single_layer</span> <span class="ow">or</span> <span class="p">(</span>
             <span class="n">contains_multiple_layer_neurons</span> <span class="ow">and</span> <span class="n">contains_multiple_layers_count</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">optimize_activation_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_optimize_activation_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
             <span class="nb">map</span><span class="p">(</span>
                 <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;layer_activation&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">trial_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trial_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -168,7 +166,7 @@
         <span class="c1"># Parse the parameters included in the trial.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parse_trial</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">trial_type</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trial_type</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">pruner</span> <span class="o">==</span> <span class="s2">&quot;naswot&quot;</span>
         <span class="p">):</span>
             <span class="k">if</span> <span class="n">trial</span><span class="o">.</span><span class="n">should_prune</span><span class="p">():</span>
@@ -181,12 +179,12 @@
         <span class="p">):</span>
             <span class="n">test_network</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
             <span class="n">test_trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">test_network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">test_network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span>
             <span class="p">)</span>
             <span class="n">test_trainer</span><span class="o">.</span><span class="n">train_network</span><span class="p">()</span>
             <span class="n">final_validation_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">test_trainer</span><span class="o">.</span><span class="n">final_validation_loss</span><span class="p">)</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">trial_type</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_trial_type</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span>
                 <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">pruner</span> <span class="o">==</span> <span class="s2">&quot;multi_training&quot;</span>
             <span class="p">):</span>
 
@@ -235,9 +233,9 @@
 <span class="sd">            A trial is a set of hyperparameters; can be an optuna based</span>
 <span class="sd">            trial or simply a OAT compatible list.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_type</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trial_type</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parse_trial_optuna</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_type</span> <span class="o">==</span> <span class="s2">&quot;oat&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trial_type</span> <span class="o">==</span> <span class="s2">&quot;oat&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parse_trial_oat</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
@@ -257,11 +255,11 @@
 <span class="sd">        trial : optuna.trial.Trial.</span>
 <span class="sd">            A set of hyperparameters encoded by optuna.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_layer_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimize_layer_list</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_sizes</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">input_dimension</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">input_dimension</span>
             <span class="p">]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_activation_list</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimize_activation_list</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_activations</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Some layers may have been turned off by optuna.</span>
@@ -364,9 +362,9 @@
                     <span class="p">)</span>
                 <span class="n">layer_counter</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_layer_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimize_layer_list</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">output_dimension</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">output_dimension</span>
             <span class="p">)</span></div>
 
 
@@ -381,12 +379,12 @@
 <span class="sd">        trial : numpy.array</span>
 <span class="sd">            Row in an orthogonal array which respresents current trial.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_layer_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimize_layer_list</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_sizes</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">input_dimension</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">input_dimension</span>
             <span class="p">]</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_activation_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimize_activation_list</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_activations</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Some layers may have been turned off by optuna.</span>
@@ -497,9 +495,9 @@
                     <span class="p">)</span>
                 <span class="n">layer_counter</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_layer_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimize_layer_list</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">output_dimension</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data_handler</span><span class="o">.</span><span class="n">output_dimension</span>
             <span class="p">)</span></div>
 </div>
 

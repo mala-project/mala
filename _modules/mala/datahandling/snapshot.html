@@ -128,8 +128,54 @@
 <span class="sd">          - tr: This snapshot will be a training snapshot.</span>
 <span class="sd">          - va: This snapshot will be a validation snapshot.</span>
 
-<span class="sd">        Replaces the old approach of MALA to have a separate list.</span>
-<span class="sd">        Default is None.</span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    grid_dimensions :  list</span>
+<span class="sd">        Grid dimension [x,y,z].</span>
+
+<span class="sd">    grid_size : int</span>
+<span class="sd">        Number of grid points in total.</span>
+
+<span class="sd">    input_dimension : int</span>
+<span class="sd">        Input feature dimension.</span>
+
+<span class="sd">    output_dimension : int</span>
+<span class="sd">        Output feature dimension</span>
+
+<span class="sd">    input_npy_file : string</span>
+<span class="sd">        File with saved numpy input array.</span>
+
+<span class="sd">    input_npy_directory : string</span>
+<span class="sd">        Directory containing input_npy_directory.</span>
+
+<span class="sd">    output_npy_file : string</span>
+<span class="sd">        File with saved numpy output array.</span>
+
+<span class="sd">    output_npy_directory : string</span>
+<span class="sd">        Directory containing output_npy_file.</span>
+
+<span class="sd">    input_units : string</span>
+<span class="sd">        Units of input data. See descriptor classes to see which units are</span>
+<span class="sd">        supported.</span>
+
+<span class="sd">    output_units : string</span>
+<span class="sd">        Units of output data. See target classes to see which units are</span>
+<span class="sd">        supported.</span>
+
+<span class="sd">    calculation_output : string</span>
+<span class="sd">        File with the output of the original snapshot calculation. This is</span>
+<span class="sd">        only needed when testing multiple snapshots.</span>
+
+<span class="sd">    snapshot_function : string</span>
+<span class="sd">        &quot;Function&quot; of the snapshot in the MALA workflow.</span>
+
+<span class="sd">          - te: This snapshot will be a testing snapshot.</span>
+<span class="sd">          - tr: This snapshot will be a training snapshot.</span>
+<span class="sd">          - va: This snapshot will be a validation snapshot.</span>
+
+<span class="sd">    snapshot_type : string</span>
+<span class="sd">        Can be either &quot;numpy&quot; or &quot;openpmd&quot; and denotes which type of files</span>
+<span class="sd">        this snapshot contains.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>

@@ -123,11 +123,22 @@
 <span class="sd">    data : mala.datahandling.data_handler.DataHandler</span>
 <span class="sd">        DataHandler holding the training data.</span>
 
-<span class="sd">    use_pkl_checkpoints : bool</span>
-<span class="sd">        If true, .pkl checkpoints will be created.</span>
+<span class="sd">    _optimizer_dict : dict</span>
+<span class="sd">        For internal use by the Trainer class during loading procecdures only.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    final_validation_loss : float</span>
+<span class="sd">        Validation loss after training</span>
+
+<span class="sd">    network : mala.network.network.Network</span>
+<span class="sd">        Network which is being trained.</span>
+
+<span class="sd">    full_logging_path : str</span>
+<span class="sd">        Full path to training logs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">optimizer_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">_optimizer_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># copy the parameters into the class.</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Trainer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
@@ -141,22 +152,21 @@
             <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_stream</span><span class="p">()</span><span class="o">.</span><span class="n">wait_stream</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">final_validation_loss</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">initial_validation_loss</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">patience_counter</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_loss</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loaders</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patience_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_epoch</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_loss</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_training_data_loaders</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validation_data_loaders</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Samplers for the ddp case.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">validation_sampler</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_train_sampler</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validation_sampler</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__prepare_to_train</span><span class="p">(</span><span class="n">optimizer_dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__prepare_to_train</span><span class="p">(</span><span class="n">_optimizer_dict</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">full_logging_path</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">logging_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -177,9 +187,9 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">logger</span> <span class="o">==</span> <span class="s2">&quot;wandb&quot;</span><span class="p">:</span>
                 <span class="kn">import</span> <span class="nn">wandb</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">wandb</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">wandb</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">logger</span> <span class="o">==</span> <span class="s2">&quot;tensorboard&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_logging_path</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_logging_path</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Unsupported logger </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">logger</span><span class="si">}</span><span class="s2">.&quot;</span>
@@ -190,13 +200,13 @@
                 <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gradscaler</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mixed_precision</span><span class="p">:</span>
             <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Using mixed precision via AMP.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">amp</span><span class="o">.</span><span class="n">GradScaler</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gradscaler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">amp</span><span class="o">.</span><span class="n">GradScaler</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">train_graph</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">validation_graph</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_train_graph</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validation_graph</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="Trainer.run_exists">
 <a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer.run_exists">[docs]</a>
@@ -344,7 +354,7 @@
 
         <span class="c1"># Now, create the Trainer class with it.</span>
         <span class="n">loaded_trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span>
-            <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">optimizer_dict</span><span class="o">=</span><span class="n">checkpoint</span>
+            <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">_optimizer_dict</span><span class="o">=</span><span class="n">checkpoint</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">loaded_trainer</span>
 
@@ -358,18 +368,15 @@
 
         <span class="n">vloss</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Save losses for later use.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">initial_validation_loss</span> <span class="o">=</span> <span class="n">vloss</span>
-
         <span class="c1"># Initialize all the counters.</span>
         <span class="n">checkpoint_counter</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="c1"># If we restarted from a checkpoint, we have to differently initialize</span>
         <span class="c1"># the loss.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_loss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_loss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">vloss_old</span> <span class="o">=</span> <span class="n">vloss</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">vloss_old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_loss</span>
+            <span class="n">vloss_old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_loss</span>
 
         <span class="c1">############################</span>
         <span class="c1"># PERFORM TRAINING</span>
@@ -377,7 +384,9 @@
 
         <span class="n">total_batch_id</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">max_number_epochs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_epoch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">max_number_epochs</span>
+        <span class="p">):</span>
             <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
             <span class="c1"># Prepare model for training.</span>
@@ -391,8 +400,8 @@
             <span class="p">)</span>
 
             <span class="c1"># train sampler</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span><span class="o">.</span><span class="n">set_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_sampler</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_train_sampler</span><span class="o">.</span><span class="n">set_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
 
             <span class="c1"># shuffle dataset if necessary</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">FastTensorDataset</span><span class="p">):</span>
@@ -405,7 +414,7 @@
                 <span class="n">tsample</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
                 <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
                 <span class="n">batchid</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_data_loaders</span><span class="p">:</span>
                     <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
                     <span class="k">for</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span>
                         <span class="n">loader</span><span class="p">,</span>
@@ -480,19 +489,19 @@
                                     <span class="n">training_loss_sum_logging</span>
                                     <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">training_log_interval</span>
                                 <span class="p">)</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">add_scalars</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">add_scalars</span><span class="p">(</span>
                                     <span class="s2">&quot;ldos&quot;</span><span class="p">,</span>
                                     <span class="p">{</span><span class="s2">&quot;during_training&quot;</span><span class="p">:</span> <span class="n">training_loss_mean</span><span class="p">},</span>
                                     <span class="n">total_batch_id</span><span class="p">,</span>
                                 <span class="p">)</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                                 <span class="n">training_loss_sum_logging</span> <span class="o">=</span> <span class="mf">0.0</span>
                             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">logger</span> <span class="o">==</span> <span class="s2">&quot;wandb&quot;</span><span class="p">:</span>
                                 <span class="n">training_loss_mean</span> <span class="o">=</span> <span class="p">(</span>
                                     <span class="n">training_loss_sum_logging</span>
                                     <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">training_log_interval</span>
                                 <span class="p">)</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
                                     <span class="p">{</span>
                                         <span class="s2">&quot;ldos_during_training&quot;</span><span class="p">:</span> <span class="n">training_loss_mean</span>
                                     <span class="p">},</span>
@@ -515,7 +524,7 @@
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">batchid</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_data_loaders</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">:</span>
                         <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
@@ -566,7 +575,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">logger</span> <span class="o">==</span> <span class="s2">&quot;tensorboard&quot;</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">dataset_fraction</span> <span class="ow">in</span> <span class="n">dataset_fractions</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">[</span><span class="n">dataset_fraction</span><span class="p">]:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">add_scalars</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">add_scalars</span><span class="p">(</span>
                             <span class="n">metric</span><span class="p">,</span>
                             <span class="p">{</span>
                                 <span class="n">dataset_fraction</span><span class="p">:</span> <span class="n">errors</span><span class="p">[</span><span class="n">dataset_fraction</span><span class="p">][</span>
@@ -575,11 +584,11 @@
                             <span class="p">},</span>
                             <span class="n">total_batch_id</span><span class="p">,</span>
                         <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">logger</span> <span class="o">==</span> <span class="s2">&quot;wandb&quot;</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">dataset_fraction</span> <span class="ow">in</span> <span class="n">dataset_fractions</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">[</span><span class="n">dataset_fraction</span><span class="p">]:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
                             <span class="p">{</span>
                                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dataset_fraction</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">errors</span><span class="p">[</span>
                                     <span class="n">dataset_fraction</span>
@@ -603,38 +612,38 @@
                 <span class="p">)</span>
 
             <span class="c1"># If a scheduler is used, update it.</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">learning_rate_scheduler</span>
                     <span class="o">==</span> <span class="s2">&quot;ReduceLROnPlateau&quot;</span>
                 <span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">vloss</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">vloss</span><span class="p">)</span>
 
             <span class="c1"># If early stopping is used, check if we need to do something.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">early_stopping_epochs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">vloss</span> <span class="o">&lt;</span> <span class="n">vloss_old</span> <span class="o">*</span> <span class="p">(</span>
                     <span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">early_stopping_threshold</span>
                 <span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">patience_counter</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_patience_counter</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="n">vloss_old</span> <span class="o">=</span> <span class="n">vloss</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">patience_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_patience_counter</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">printout</span><span class="p">(</span>
                         <span class="s2">&quot;Validation accuracy has not improved enough.&quot;</span><span class="p">,</span>
                         <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">patience_counter</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_patience_counter</span>
                         <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">early_stopping_epochs</span>
                     <span class="p">):</span>
                         <span class="n">printout</span><span class="p">(</span>
                             <span class="s2">&quot;Stopping the training, validation &quot;</span>
                             <span class="s2">&quot;accuracy has not improved for&quot;</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">patience_counter</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_patience_counter</span><span class="p">,</span>
                             <span class="s2">&quot;epochs.&quot;</span><span class="p">,</span>
                             <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                         <span class="p">)</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">=</span> <span class="n">epoch</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_last_epoch</span> <span class="o">=</span> <span class="n">epoch</span>
                         <span class="k">break</span>
 
             <span class="c1"># If checkpointing is enabled, we need to checkpoint.</span>
@@ -645,8 +654,8 @@
                     <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">checkpoints_each_epoch</span>
                 <span class="p">):</span>
                     <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Checkpointing training.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">=</span> <span class="n">epoch</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">last_loss</span> <span class="o">=</span> <span class="n">vloss_old</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_last_epoch</span> <span class="o">=</span> <span class="n">epoch</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_last_loss</span> <span class="o">=</span> <span class="n">vloss_old</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__create_training_checkpoint</span><span class="p">()</span>
                     <span class="n">checkpoint_counter</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -683,8 +692,8 @@
 
         <span class="c1"># Clean-up for pre-fetching lazy loading.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading_prefetch</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loaders</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_training_data_loaders</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validation_data_loaders</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span></div>
 
 
     <span class="k">def</span> <span class="nf">_validate_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_set_fractions</span><span class="p">,</span> <span class="n">metrics</span><span class="p">):</span>
@@ -693,13 +702,13 @@
         <span class="n">errors</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">data_set_type</span> <span class="ow">in</span> <span class="n">data_set_fractions</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">data_set_type</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
-                <span class="n">data_loaders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span>
+                <span class="n">data_loaders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_data_loaders</span>
                 <span class="n">data_sets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span>
                 <span class="n">number_of_snapshots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nr_training_snapshots</span>
                 <span class="n">offset_snapshots</span> <span class="o">=</span> <span class="mi">0</span>
 
             <span class="k">elif</span> <span class="n">data_set_type</span> <span class="o">==</span> <span class="s2">&quot;validation&quot;</span><span class="p">:</span>
-                <span class="n">data_loaders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loaders</span>
+                <span class="n">data_loaders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validation_data_loaders</span>
                 <span class="n">data_sets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span>
                 <span class="n">number_of_snapshots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nr_validation_snapshots</span>
                 <span class="n">offset_snapshots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nr_training_snapshots</span>
@@ -814,11 +823,11 @@
 
         <span class="c1"># Read last epoch</span>
         <span class="k">if</span> <span class="n">optimizer_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">=</span> <span class="n">optimizer_dict</span><span class="p">[</span><span class="s2">&quot;epoch&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_epoch</span> <span class="o">=</span> <span class="n">optimizer_dict</span><span class="p">[</span><span class="s2">&quot;epoch&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
 
         <span class="c1"># Scale the learning rate according to ddp.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_epoch</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">printout</span><span class="p">(</span>
                     <span class="s2">&quot;Rescaling learning rate because multiple workers are&quot;</span>
                     <span class="s2">&quot; used for training.&quot;</span><span class="p">,</span>
@@ -830,20 +839,20 @@
 
         <span class="c1"># Choose an optimizer to use.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">==</span> <span class="s2">&quot;SGD&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
                 <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
                 <span class="n">weight_decay</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">l2_regularization</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">==</span> <span class="s2">&quot;Adam&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
                 <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
                 <span class="n">weight_decay</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">l2_regularization</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">==</span> <span class="s2">&quot;FusedAdam&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;1.13.0&quot;</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
                     <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
                     <span class="n">weight_decay</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">l2_regularization</span><span class="p">,</span>
@@ -856,11 +865,11 @@
 
         <span class="c1"># Load data from pytorch file.</span>
         <span class="k">if</span> <span class="n">optimizer_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span>
                 <span class="n">optimizer_dict</span><span class="p">[</span><span class="s2">&quot;optimizer_state_dict&quot;</span><span class="p">]</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">patience_counter</span> <span class="o">=</span> <span class="n">optimizer_dict</span><span class="p">[</span><span class="s2">&quot;early_stopping_counter&quot;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">last_loss</span> <span class="o">=</span> <span class="n">optimizer_dict</span><span class="p">[</span><span class="s2">&quot;early_stopping_last_loss&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patience_counter</span> <span class="o">=</span> <span class="n">optimizer_dict</span><span class="p">[</span><span class="s2">&quot;early_stopping_counter&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_loss</span> <span class="o">=</span> <span class="n">optimizer_dict</span><span class="p">[</span><span class="s2">&quot;early_stopping_last_loss&quot;</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
             <span class="c1"># scaling the batch size for multiGPU per node</span>
@@ -875,7 +884,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span><span class="p">:</span>
                 <span class="n">do_shuffle</span> <span class="o">=</span> <span class="kc">False</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_train_sampler</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">DistributedSampler</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                     <span class="n">num_replicas</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">(),</span>
@@ -883,7 +892,7 @@
                     <span class="n">shuffle</span><span class="o">=</span><span class="n">do_shuffle</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">validation_sampler</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validation_sampler</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">DistributedSampler</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                     <span class="n">num_replicas</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">(),</span>
@@ -894,8 +903,8 @@
 
         <span class="c1"># Instantiate the learning rate scheduler, if necessary.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">learning_rate_scheduler</span> <span class="o">==</span> <span class="s2">&quot;ReduceLROnPlateau&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">ReduceLROnPlateau</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">ReduceLROnPlateau</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span><span class="p">,</span>
                 <span class="n">patience</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">learning_rate_patience</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;min&quot;</span><span class="p">,</span>
                 <span class="n">factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">learning_rate_decay</span><span class="p">,</span>
@@ -905,8 +914,8 @@
             <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported learning rate schedule.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">optimizer_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">optimizer_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span>
                 <span class="n">optimizer_dict</span><span class="p">[</span><span class="s2">&quot;lr_scheduler_state_dict&quot;</span><span class="p">]</span>
             <span class="p">)</span>
 
@@ -942,11 +951,11 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">FastTensorDataset</span><span class="p">):</span>
             <span class="c1"># Not shuffling in loader.</span>
             <span class="c1"># I manually shuffle the data set each epoch.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_training_data_loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">DataLoader</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                     <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span><span class="p">,</span>
+                    <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_train_sampler</span><span class="p">,</span>
                     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                     <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -955,26 +964,26 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">LazyLoadDatasetSingle</span>
             <span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span> <span class="o">=</span> <span class="n">MultiLazyLoadDataLoader</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_training_data_loaders</span> <span class="o">=</span> <span class="n">MultiLazyLoadDataLoader</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">training_data_loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_training_data_loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">DataLoader</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                         <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">,</span>
-                        <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_sampler</span><span class="p">,</span>
+                        <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_train_sampler</span><span class="p">,</span>
                         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                         <span class="n">shuffle</span><span class="o">=</span><span class="n">do_shuffle</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">FastTensorDataset</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validation_data_loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">DataLoader</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                     <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_sampler</span><span class="p">,</span>
+                    <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_validation_sampler</span><span class="p">,</span>
                     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -982,15 +991,15 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">LazyLoadDatasetSingle</span>
             <span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loaders</span> <span class="o">=</span> <span class="n">MultiLazyLoadDataLoader</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_validation_data_loaders</span> <span class="o">=</span> <span class="n">MultiLazyLoadDataLoader</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_validation_data_loaders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">DataLoader</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                         <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,</span>
-                        <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_sampler</span><span class="p">,</span>
+                        <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_validation_sampler</span><span class="p">,</span>
                         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
@@ -998,7 +1007,7 @@
     <span class="k">def</span> <span class="nf">__process_mini_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">input_data</span><span class="p">,</span> <span class="n">target_data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process a mini batch.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_graphs</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_graph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_graphs</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_graph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Capturing CUDA graph for training.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
                 <span class="n">s</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
                 <span class="n">s</span><span class="o">.</span><span class="n">wait_stream</span><span class="p">(</span>
@@ -1025,8 +1034,8 @@
                                     <span class="n">prediction</span><span class="p">,</span> <span class="n">target_data</span>
                                 <span class="p">)</span>
 
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gradscaler</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_gradscaler</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_stream</span><span class="p">(</span>
@@ -1034,38 +1043,40 @@
                 <span class="p">)</span><span class="o">.</span><span class="n">wait_stream</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 
                 <span class="c1"># Create static entry point tensors to graph</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">static_input_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">static_target_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">target_data</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_static_input_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_static_target_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">target_data</span><span class="p">)</span>
 
                 <span class="c1"># Capture graph</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">train_graph</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">CUDAGraph</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_train_graph</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">CUDAGraph</span><span class="p">()</span>
                 <span class="n">network</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">(</span><span class="n">set_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_graph</span><span class="p">):</span>
+                <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_train_graph</span><span class="p">):</span>
                     <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">amp</span><span class="o">.</span><span class="n">autocast</span><span class="p">(</span>
                         <span class="n">enabled</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_mixed_precision</span>
                     <span class="p">):</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">static_prediction</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">static_input_data</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_static_prediction</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_static_input_data</span>
                         <span class="p">)</span>
 
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">static_loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">static_prediction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_target_data</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_static_loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_static_prediction</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_static_target_data</span><span class="p">,</span>
                             <span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">static_loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">static_prediction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_target_data</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_static_loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_static_prediction</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_static_target_data</span><span class="p">,</span>
                             <span class="p">)</span>
 
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_loss</span><span class="p">)</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gradscaler</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_gradscaler</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_static_loss</span><span class="p">)</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">static_loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_static_loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_graph</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">static_input_data</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">static_target_data</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">target_data</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">train_graph</span><span class="o">.</span><span class="n">replay</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_graph</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_static_input_data</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_static_target_data</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">target_data</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_train_graph</span><span class="o">.</span><span class="n">replay</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;zero_grad&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">(</span><span class="n">set_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1095,24 +1106,24 @@
                     <span class="c1"># loss</span>
                     <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gradscaler</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_gradscaler</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
 
             <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;optimizer&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">gradscaler</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gradscaler</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_gradscaler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_gradscaler</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
             <span class="n">dt</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span>
             <span class="n">printout</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;optimizer time: </span><span class="si">{</span><span class="n">dt</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>  <span class="c1"># optimizer</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_graph</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_loss</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_graph</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_loss</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">loss</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1122,8 +1133,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target_data</span><span class="p">)</span>
             <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">loss</span>
 
     <span class="k">def</span> <span class="nf">__create_training_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1140,20 +1151,20 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">save_dict</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span><span class="p">,</span>
-                <span class="s2">&quot;optimizer_state_dict&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
-                <span class="s2">&quot;early_stopping_counter&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">patience_counter</span><span class="p">,</span>
-                <span class="s2">&quot;early_stopping_last_loss&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_loss</span><span class="p">,</span>
+                <span class="s2">&quot;epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_epoch</span><span class="p">,</span>
+                <span class="s2">&quot;optimizer_state_dict&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
+                <span class="s2">&quot;early_stopping_counter&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patience_counter</span><span class="p">,</span>
+                <span class="s2">&quot;early_stopping_last_loss&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_loss</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">save_dict</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span><span class="p">,</span>
-                <span class="s2">&quot;optimizer_state_dict&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
-                <span class="s2">&quot;lr_scheduler_state_dict&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
-                <span class="s2">&quot;early_stopping_counter&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">patience_counter</span><span class="p">,</span>
-                <span class="s2">&quot;early_stopping_last_loss&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_loss</span><span class="p">,</span>
+                <span class="s2">&quot;epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_epoch</span><span class="p">,</span>
+                <span class="s2">&quot;optimizer_state_dict&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
+                <span class="s2">&quot;lr_scheduler_state_dict&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
+                <span class="s2">&quot;early_stopping_counter&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patience_counter</span><span class="p">,</span>
+                <span class="s2">&quot;early_stopping_last_loss&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_loss</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
             <span class="n">save_dict</span><span class="p">,</span> <span class="n">optimizer_name</span><span class="p">,</span> <span class="n">_use_new_zipfile_serialization</span><span class="o">=</span><span class="kc">False</span>

@@ -118,6 +118,11 @@
 <span class="sd">    target_calculator : mala.targets.target.Target</span>
 <span class="sd">        Used to do unit conversion on output data. If None, then one will</span>
 <span class="sd">        be created by this class.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ldos_parameters : mala.common.parameters.ParametersTargets</span>
+<span class="sd">        MALA target calculation parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -175,8 +180,6 @@
 <a class="viewcode-back" href="../../../api/mala.datahandling.ldos_aligner.html#mala.datahandling.ldos_aligner.LDOSAligner.align_ldos_to_ref">[docs]</a>
     <span class="k">def</span> <span class="nf">align_ldos_to_ref</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">save_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">save_path_ext</span><span class="o">=</span><span class="s2">&quot;aligned/&quot;</span><span class="p">,</span>
         <span class="n">reference_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">zero_tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
@@ -186,35 +189,34 @@
         <span class="n">n_shift_mse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add a snapshot to the data pipeline.</span>
+<span class="sd">        Align LDOS to reference.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        save_path : string</span>
-<span class="sd">            path to save the aligned LDOS vectors</span>
-<span class="sd">        save_name : string</span>
-<span class="sd">            naming convention for the aligned LDOS vectors</span>
 <span class="sd">        save_path_ext : string</span>
-<span class="sd">            additional path for the LDOS vectors (useful if</span>
-<span class="sd">            save_path is left as default None)</span>
+<span class="sd">            Extra path to be added to the input path before saving.</span>
+<span class="sd">            By default, new snapshot files are saved into exactly the</span>
+<span class="sd">            same directory they were read from with exactly the same name.</span>
+
 <span class="sd">        reference_index : int</span>
 <span class="sd">            the snapshot number (in the snapshot directory list)</span>
 <span class="sd">            to which all other LDOS vectors are aligned</span>
+
 <span class="sd">        zero_tol : float</span>
 <span class="sd">            the &quot;zero&quot; value for alignment / left side truncation</span>
 <span class="sd">            always scaled by norm of reference LDOS mean</span>
+
 <span class="sd">        left_truncate : bool</span>
 <span class="sd">            whether to truncate the zero values on the LHS</span>
+
 <span class="sd">        right_truncate_value : float</span>
 <span class="sd">            right-hand energy value (based on reference LDOS vector)</span>
 <span class="sd">            to which truncate LDOS vectors</span>
 <span class="sd">            if None, no right-side truncation</span>
-<span class="sd">        egrid_spacing_ev : float</span>
-<span class="sd">            spacing of energy grid</span>
-<span class="sd">        egrid_offset_ev : float</span>
-<span class="sd">           original offset of energy grid</span>
+
 <span class="sd">        number_of_electrons : float / int</span>
 <span class="sd">            if not None, computes the energy shift relative to QE energies</span>
+
 <span class="sd">        n_shift_mse : int</span>
 <span class="sd">            how many energy grid points to consider when aligning LDOS</span>
 <span class="sd">            vectors based on mean-squared error</span>
@@ -395,12 +397,11 @@
 
         <span class="n">barrier</span><span class="p">()</span></div>
 
-    
+
 <div class="viewcode-block" id="LDOSAligner.calc_optimal_ldos_shift">
 <a class="viewcode-back" href="../../../api/mala.datahandling.ldos_aligner.html#mala.datahandling.ldos_aligner.LDOSAligner.calc_optimal_ldos_shift">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">calc_optimal_ldos_shift</span><span class="p">(</span>
-        <span class="n">e_grid</span><span class="p">,</span>
         <span class="n">ldos_mean</span><span class="p">,</span>
         <span class="n">ldos_mean_ref</span><span class="p">,</span>
         <span class="n">left_index</span><span class="p">,</span>
@@ -415,8 +416,6 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        e_grid : array_like</span>
-<span class="sd">            energy grid</span>
 <span class="sd">        ldos_mean : array_like</span>
 <span class="sd">            mean of LDOS vector for shifting</span>
 <span class="sd">        ldos_mean_ref : array_like</span>

@@ -341,6 +341,12 @@
 
 <span class="sd">        This is the generic interface for cached target quantities.</span>
 <span class="sd">        It should work for all implemented targets.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        local_density_of_states : numpy.ndarray</span>
+<span class="sd">            Electronic local density of states as a volumetric array.</span>
+<span class="sd">            May be 4D- or 2D depending on workflow.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span></div>
 
@@ -726,8 +732,6 @@
 
 <span class="sd">        If neither LDOS nor DOS+Density data is provided, the cached LDOS will</span>
 <span class="sd">        be attempted to be used for the calculation.</span>
-
-
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
