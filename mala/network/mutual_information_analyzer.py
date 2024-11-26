@@ -1,26 +1,17 @@
 """Class for performing a full mutual information analysis."""
 
-import itertools
-import os
-
 import numpy as np
 
 from mala.datahandling.data_converter import (
     descriptor_input_types,
     target_input_types,
 )
-from mala.network.acsd_analyzer import ACSDAnalyzer
+from mala.network.descriptor_scoring_optimizer import (
+    DescriptorScoringOptimizer,
+)
 import sklearn.mixture
 import sklearn.covariance
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import Normalizer
-from mala.common.parallelizer import get_rank, printout
-from mala.descriptors.bispectrum import Bispectrum
-from mala.descriptors.atomic_density import AtomicDensity
-from mala.descriptors.minterpy_descriptors import MinterpyDescriptors
-
-descriptor_input_types_acsd = descriptor_input_types + ["numpy", "openpmd"]
-target_input_types_acsd = target_input_types + ["numpy", "openpmd"]
 
 
 def normalize(data):
@@ -102,7 +93,7 @@ def mutual_information(
     return mi
 
 
-class MutualInformationAnalyzer(ACSDAnalyzer):
+class MutualInformationAnalyzer(DescriptorScoringOptimizer):
     """
     Analyzer based on mutual information analysis.
 
@@ -131,93 +122,28 @@ class MutualInformationAnalyzer(ACSDAnalyzer):
             descriptor_calculator=descriptor_calculator,
         )
 
-    def set_optimal_parameters(self):
-        """
-        Set the optimal parameters found in the present study.
+    def get_best_trial(self):
+        """Different from best_trial because of parallelization."""
+        return self._study[np.argmax(self._study[:, -1])]
 
-        The parameters will be written to the parameter object with which the
-        hyperparameter optimizer was created.
-        """
-        if get_rank() == 0:
-            minimum_acsd = self.study[np.argmax(self.study[:, -1])]
-            if len(self.internal_hyperparam_list) == 2:
-                if isinstance(self.descriptor_calculator, Bispectrum):
-                    self.params.descriptors.bispectrum_cutoff = minimum_acsd[0]
-                    self.params.descriptors.bispectrum_twojmax = int(
-                        minimum_acsd[1]
-                    )
-                    printout(
-                        "ACSD analysis finished, optimal parameters: ",
-                    )
-                    printout(
-                        "Bispectrum twojmax: ",
-                        self.params.descriptors.bispectrum_twojmax,
-                    )
-                    printout(
-                        "Bispectrum cutoff: ",
-                        self.params.descriptors.bispectrum_cutoff,
-                    )
-                if isinstance(self.descriptor_calculator, AtomicDensity):
-                    self.params.descriptors.atomic_density_cutoff = (
-                        minimum_acsd[0]
-                    )
-                    self.params.descriptors.atomic_density_sigma = (
-                        minimum_acsd[1]
-                    )
-                    printout(
-                        "ACSD analysis finished, optimal parameters: ",
-                    )
-                    printout(
-                        "Atomic density sigma: ",
-                        self.params.descriptors.atomic_density_sigma,
-                    )
-                    printout(
-                        "Atomic density cutoff: ",
-                        self.params.descriptors.atomic_density_cutoff,
-                    )
-            elif len(self.internal_hyperparam_list) == 5:
-                if isinstance(self.descriptor_calculator, MinterpyDescriptors):
-                    self.params.descriptors.atomic_density_cutoff = (
-                        minimum_acsd[0]
-                    )
-                    self.params.descriptors.atomic_density_sigma = (
-                        minimum_acsd[1]
-                    )
-                    self.params.descriptors.minterpy_cutoff_cube_size = (
-                        minimum_acsd[2]
-                    )
-                    self.params.descriptors.minterpy_polynomial_degree = int(
-                        minimum_acsd[3]
-                    )
-                    self.params.descriptors.minterpy_lp_norm = int(
-                        minimum_acsd[4]
-                    )
-                    printout(
-                        "ACSD analysis finished, optimal parameters: ",
-                    )
-                    printout(
-                        "Atomic density sigma: ",
-                        self.params.descriptors.atomic_density_sigma,
-                    )
-                    printout(
-                        "Atomic density cutoff: ",
-                        self.params.descriptors.atomic_density_cutoff,
-                    )
-                    printout(
-                        "Minterpy cube cutoff: ",
-                        self.params.descriptors.minterpy_cutoff_cube_size,
-                    )
-                    printout(
-                        "Minterpy polynomial degree: ",
-                        self.params.descriptors.minterpy_polynomial_degree,
-                    )
-                    printout(
-                        "Minterpy LP norm degree: ",
-                        self.params.descriptors.minterpy_lp_norm,
-                    )
+    def _update_logging(self, score, index):
+        if self.best_score is None:
+            self.best_score = score
+            self.best_trial = index
+        elif score > self.best_score:
+            self.best_score = score
+            self.best_trial = index
+
+    def _calculate_score(self, descriptor, target):
+        return self._calculate_mutual_information(
+            descriptor,
+            target,
+            self.params.hyperparameters.mutual_information_points,
+            descriptor_vectors_contain_xyz=self.params.descriptors.descriptors_contain_xyz,
+        )
 
     @staticmethod
-    def _calculate_acsd(
+    def _calculate_mutual_information(
         descriptor_data,
         ldos_data,
         n_samples,

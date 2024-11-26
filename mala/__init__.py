@@ -40,7 +40,7 @@ from .network import (
     HyperparameterOAT,
     HyperparameterNASWOT,
     HyperparameterOptuna,
-    HyperparameterACSD,
+    HyperparameterDescriptorScoring,
     ACSDAnalyzer,
     Runner,
 )
