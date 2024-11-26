@@ -781,9 +781,6 @@ class ParametersRunning(ParametersBase):
 
     dropout : float
         Dropout rate for positional encoding in transformer net.
-
-    training_log_interval : int
-        Number of data points after which metrics will be logged.
     """
 
     def __init__(self):
