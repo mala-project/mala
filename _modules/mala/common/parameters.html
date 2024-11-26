@@ -328,7 +328,6 @@
 <span class="sd">    ----------</span>
 <span class="sd">    nn_type : string</span>
 <span class="sd">        Type of the neural network that will be used. Currently supported are</span>
-
 <span class="sd">            - &quot;feed_forward&quot; (default)</span>
 <span class="sd">            - &quot;transformer&quot;</span>
 <span class="sd">            - &quot;lstm&quot;</span>
@@ -382,12 +381,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">layer_activations</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Sigmoid&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_function_type</span> <span class="o">=</span> <span class="s2">&quot;mse&quot;</span>
 
-        <span class="c1"># for LSTM/Gru + Transformer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">num_hidden_layers</span> <span class="o">=</span> <span class="mi">1</span>
-
         <span class="c1"># for LSTM/Gru</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">no_hidden_state</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bidirection</span> <span class="o">=</span> <span class="kc">False</span>
+        
+        <span class="c1"># for LSTM/Gru + Transformer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_hidden_layers</span> <span class="o">=</span> <span class="mi">1</span>
 
         <span class="c1"># for transformer net</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="mf">0.1</span>
@@ -815,12 +814,15 @@
 <span class="sd">        a &quot;by snapshot&quot; basis.</span>
 
 <span class="sd">    checkpoints_each_epoch : int</span>
-<span class="sd">        If not 0, checkpoint files will be saved after eac</span>
+<span class="sd">        If not 0, checkpoint files will be saved after each</span>
 <span class="sd">        checkpoints_each_epoch epoch.</span>
 
 <span class="sd">    checkpoint_name : string</span>
 <span class="sd">        Name used for the checkpoints. Using this, multiple runs</span>
 <span class="sd">        can be performed in the same directory.</span>
+<span class="sd">        </span>
+<span class="sd">    run_name : string</span>
+<span class="sd">        Name of the run used for logging.</span>
 
 <span class="sd">    logging_dir : string</span>
 <span class="sd">        Name of the folder that logging files will be saved to.</span>
@@ -829,6 +831,34 @@
 <span class="sd">        If True, then upon creating logging files, these will be saved</span>
 <span class="sd">        in a subfolder of logging_dir labelled with the starting date</span>
 <span class="sd">        of the logging, to avoid having to change input scripts often.</span>
+<span class="sd">        </span>
+<span class="sd">    logger : string</span>
+<span class="sd">        Name of the logger to be used.</span>
+<span class="sd">        Currently supported are:</span>
+<span class="sd">        </span>
+<span class="sd">            - &quot;tensorboard&quot;: Tensorboard logger.</span>
+<span class="sd">            - &quot;wandb&quot;: Weights and Biases logger.</span>
+<span class="sd">    </span>
+<span class="sd">    validation_metrics : list</span>
+<span class="sd">        List of metrics to be used for validation. Default is [&quot;ldos&quot;].</span>
+<span class="sd">        Possible options are:</span>
+<span class="sd">        </span>
+<span class="sd">            - &quot;ldos&quot;: MSE of the LDOS.</span>
+<span class="sd">            - &quot;band_energy&quot;: Band energy.</span>
+<span class="sd">            - &quot;band_energy_actual_fe&quot;: Band energy computed with ground truth Fermi energy.</span>
+<span class="sd">            - &quot;total_energy&quot;: Total energy.</span>
+<span class="sd">            - &quot;total_energy_actual_fe&quot;: Total energy computed with ground truth Fermi energy.</span>
+<span class="sd">            - &quot;fermi_energy&quot;: Fermi energy.</span>
+<span class="sd">            - &quot;density&quot;: Electron density.</span>
+<span class="sd">            - &quot;density_relative&quot;: Rlectron density (MAPE).</span>
+<span class="sd">            - &quot;dos&quot;: Density of states.</span>
+<span class="sd">            - &quot;dos_relative&quot;: Density of states (MAPE).</span>
+<span class="sd">            </span>
+<span class="sd">    validate_on_training_data : bool</span>
+<span class="sd">        Whether to validate on the training data as well. Default is False.</span>
+<span class="sd">        </span>
+<span class="sd">    validate_every_n_epochs : int</span>
+<span class="sd">        Determines how often validation is performed. Default is 1.</span>
 
 <span class="sd">    inference_data_grid : list</span>
 <span class="sd">        List holding the grid to be used for inference in the form of</span>
@@ -843,19 +873,18 @@
 
 <span class="sd">    profiler_range : list</span>
 <span class="sd">        List with two entries determining with which batch/iteration number</span>
-<span class="sd">         the CUDA profiler will start and stop profiling. Please note that</span>
-<span class="sd">         this option only holds significance if the nsys profiler is used.</span>
+<span class="sd">        the CUDA profiler will start and stop profiling. Please note that</span>
+<span class="sd">        this option only holds significance if the nsys profiler is used.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersRunning</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="s2">&quot;Adam&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">0.5</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_embedding</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_number_epochs</span> <span class="o">=</span> <span class="mi">100</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="o">=</span> <span class="mi">10</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">snapshots_per_epoch</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">l1_regularization</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">l2_regularization</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -874,7 +903,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_shuffling_for_samplers</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoints_each_epoch</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_best_so_far</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_name</span> <span class="o">=</span> <span class="s2">&quot;checkpoint_mala&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging_dir</span> <span class="o">=</span> <span class="s2">&quot;./mala_logging&quot;</span>

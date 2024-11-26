@@ -59,7 +59,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#advanced-training-metrics">Advanced training metrics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#checkpointing-a-training-run">Checkpointing a training run</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#using-lazy-loading">Using lazy loading</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#using-tensorboard">Using tensorboard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logging-metrics-during-training">Logging metrics during training</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#training-in-parallel">Training in parallel</a></li>
 </ul>
 </li>
@@ -280,21 +280,65 @@ keyword, you can fine-tune the number of new snapshots being created.
 By default, the same number of snapshots as had been provided will be created
 (if possible).</p>
 </section>
-<section id="using-tensorboard">
-<h2>Using tensorboard<a class="headerlink" href="#using-tensorboard" title="Link to this heading"></a></h2>
-<p>Training routines in MALA can be visualized via tensorboard, as also shown
-in the file <code class="docutils literal notranslate"><span class="pre">advanced/ex03_tensor_board</span></code>. Simply enable tensorboard
-visualization prior to training via</p>
+<section id="logging-metrics-during-training">
+<h2>Logging metrics during training<a class="headerlink" href="#logging-metrics-during-training" title="Link to this heading"></a></h2>
+<p>Training progress in MALA can be visualized via tensorboard or wandb, as also shown
+in the file <code class="docutils literal notranslate"><span class="pre">advanced/ex03_tensor_board</span></code>. Simply select a logger prior to training as</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 0: No visualizatuon, 1: loss and learning rate, 2: like 1,</span>
-<span class="c1"># but additionally weights and biases are saved</span>
-<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">logging</span> <span class="o">=</span> <span class="mi">1</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="s2">&quot;tensorboard&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">logging_dir</span> <span class="o">=</span> <span class="s2">&quot;mala_vis&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>or</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">wandb</span>
+<span class="n">wandb</span><span class="o">.</span><span class="n">init</span><span class="p">(</span>
+      <span class="n">project</span><span class="o">=</span><span class="s2">&quot;mala_training&quot;</span><span class="p">,</span>
+      <span class="n">entity</span><span class="o">=</span><span class="s2">&quot;your_wandb_entity&quot;</span>
+<span class="p">)</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="s2">&quot;wandb&quot;</span>
 <span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">logging_dir</span> <span class="o">=</span> <span class="s2">&quot;mala_vis&quot;</span>
 </pre></div>
 </div>
 </div></blockquote>
 <p>where <code class="docutils literal notranslate"><span class="pre">logging_dir</span></code> specifies some directory in which to save the
-MALA logging data. Afterwards, you can run the training without any
+MALA logging data. You can also select which metrics to record via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">validation_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ldos&quot;</span><span class="p">,</span> <span class="s2">&quot;dos&quot;</span><span class="p">,</span> <span class="s2">&quot;density&quot;</span><span class="p">,</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div></blockquote>
+<dl class="simple">
+<dt>Full list of available metrics:</dt><dd><ul class="simple">
+<li><p>“ldos”: MSE of the LDOS.</p></li>
+<li><p>“band_energy”: Band energy.</p></li>
+<li><p>“band_energy_actual_fe”: Band energy computed with ground truth Fermi energy.</p></li>
+<li><p>“total_energy”: Total energy.</p></li>
+<li><p>“total_energy_actual_fe”: Total energy computed with ground truth Fermi energy.</p></li>
+<li><p>“fermi_energy”: Fermi energy.</p></li>
+<li><p>“density”: Electron density.</p></li>
+<li><p>“density_relative”: Rlectron density (Mean Absolute Percentage Error).</p></li>
+<li><p>“dos”: Density of states.</p></li>
+<li><p>“dos_relative”: Density of states (Mean Absolute Percentage Error).</p></li>
+</ul>
+</dd>
+</dl>
+<p>To save time and resources you can specify the logging interval via</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">validate_every_n_epochs</span> <span class="o">=</span> <span class="mi">10</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>If you want to monitor the degree to which the model overfits to the training data,
+you can use the option</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">validate_on_training_data</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>MALA will evaluate the validation metrics on the training set as well as the validation set.</p>
+<p>Afterwards, you can run the training without any
 other modifications. Once training is finished (or during training, in case
 you want to use tensorboard to monitor progress), you can launch tensorboard
 via</p>
@@ -305,6 +349,7 @@ via</p>
 </div></blockquote>
 <p>The full path for <code class="docutils literal notranslate"><span class="pre">path_to_log_directory</span></code> can be accessed via
 <code class="docutils literal notranslate"><span class="pre">trainer.full_logging_path</span></code>.</p>
+<p>If you’re using wandb, you can monitor the training progress on the wandb website.</p>
 </section>
 <section id="training-in-parallel">
 <h2>Training in parallel<a class="headerlink" href="#training-in-parallel" title="Link to this heading"></a></h2>

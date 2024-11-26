@@ -1070,15 +1070,15 @@ as an estimate of the minimal accuracy to be expected. Currently,
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersNetwork.nn_type">
 <span class="sig-name descname"><span class="pre">nn_type</span></span><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.nn_type" title="Link to this definition"></a></dt>
-<dd><p>Type of the neural network that will be used. Currently supported are</p>
-<blockquote>
-<div><ul class="simple">
+<dd><dl class="simple">
+<dt>Type of the neural network that will be used. Currently supported are</dt><dd><ul class="simple">
 <li><p>“feed_forward” (default)</p></li>
 <li><p>“transformer”</p></li>
 <li><p>“lstm”</p></li>
 <li><p>“gru”</p></li>
 </ul>
-</div></blockquote>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>string</p>
@@ -1348,7 +1348,7 @@ a “by snapshot” basis.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.checkpoints_each_epoch">
 <span class="sig-name descname"><span class="pre">checkpoints_each_epoch</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.checkpoints_each_epoch" title="Link to this definition"></a></dt>
-<dd><p>If not 0, checkpoint files will be saved after eac
+<dd><p>If not 0, checkpoint files will be saved after each
 checkpoints_each_epoch epoch.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1362,6 +1362,17 @@ checkpoints_each_epoch epoch.</p>
 <span class="sig-name descname"><span class="pre">checkpoint_name</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.checkpoint_name" title="Link to this definition"></a></dt>
 <dd><p>Name used for the checkpoints. Using this, multiple runs
 can be performed in the same directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.run_name">
+<span class="sig-name descname"><span class="pre">run_name</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.run_name" title="Link to this definition"></a></dt>
+<dd><p>Name of the run used for logging.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>string</p>
@@ -1389,6 +1400,72 @@ of the logging, to avoid having to change input scripts often.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.logger" title="Link to this definition"></a></dt>
+<dd><p>Name of the logger to be used.
+Currently supported are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“tensorboard”: Tensorboard logger.</p></li>
+<li><p>“wandb”: Weights and Biases logger.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.validation_metrics">
+<span class="sig-name descname"><span class="pre">validation_metrics</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.validation_metrics" title="Link to this definition"></a></dt>
+<dd><p>List of metrics to be used for validation. Default is [“ldos”].
+Possible options are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“ldos”: MSE of the LDOS.</p></li>
+<li><p>“band_energy”: Band energy.</p></li>
+<li><p>“band_energy_actual_fe”: Band energy computed with ground truth Fermi energy.</p></li>
+<li><p>“total_energy”: Total energy.</p></li>
+<li><p>“total_energy_actual_fe”: Total energy computed with ground truth Fermi energy.</p></li>
+<li><p>“fermi_energy”: Fermi energy.</p></li>
+<li><p>“density”: Electron density.</p></li>
+<li><p>“density_relative”: Rlectron density (MAPE).</p></li>
+<li><p>“dos”: Density of states.</p></li>
+<li><p>“dos_relative”: Density of states (MAPE).</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.validate_on_training_data">
+<span class="sig-name descname"><span class="pre">validate_on_training_data</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.validate_on_training_data" title="Link to this definition"></a></dt>
+<dd><p>Whether to validate on the training data as well. Default is False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.validate_every_n_epochs">
+<span class="sig-name descname"><span class="pre">validate_every_n_epochs</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.validate_every_n_epochs" title="Link to this definition"></a></dt>
+<dd><p>Determines how often validation is performed. Default is 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1431,11 +1508,9 @@ training (only has an effect if the verbosity is high enough).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.profiler_range">
 <span class="sig-name descname"><span class="pre">profiler_range</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.profiler_range" title="Link to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>List with two entries determining with which batch/iteration number</dt><dd><p>the CUDA profiler will start and stop profiling. Please note that
+<dd><p>List with two entries determining with which batch/iteration number
+the CUDA profiler will start and stop profiling. Please note that
 this option only holds significance if the nsys profiler is used.</p>
-</dd>
-</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list</p>
