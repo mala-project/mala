@@ -65,7 +65,7 @@ class DataScaler:
     mins : torch.Tensor
         (Managed internally, not set to private due to legacy issues)
 
-    scale_normal : bool
+    scale_minmax : bool
         (Managed internally, not set to private due to legacy issues)
 
     scale_standard : bool
