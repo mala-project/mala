@@ -169,7 +169,7 @@ class ParametersBase(JSONSerializable):
     @classmethod
     def from_json(cls, json_dict):
         """
-        Read this object from a dictionary saved in a JSON file.
+        Read parameters from a dictionary saved in a JSON file.
 
         Parameters
         ----------
@@ -231,6 +231,7 @@ class ParametersNetwork(ParametersBase):
     ----------
     nn_type : string
         Type of the neural network that will be used. Currently supported are
+
             - "feed_forward" (default)
             - "transformer"
             - "lstm"
@@ -275,6 +276,10 @@ class ParametersNetwork(ParametersBase):
         Number of heads to be used in Multi head attention network
         This should be a divisor of input dimension
         Default: None
+
+    dropout : float
+        Dropout rate for positional encoding in transformer.
+        Default: 0.1
     """
 
     def __init__(self):
@@ -287,7 +292,7 @@ class ParametersNetwork(ParametersBase):
         # for LSTM/Gru
         self.no_hidden_state = False
         self.bidirection = False
-        
+
         # for LSTM/Gru + Transformer
         self.num_hidden_layers = 1
 
@@ -315,18 +320,52 @@ class ParametersDescriptors(ParametersBase):
         bispectrum descriptors. Default value for jmax is 5, so default value
         for twojmax is 10.
 
-    lammps_compute_file : string
-        Bispectrum calculation: LAMMPS input file that is used to calculate the
-        Bispectrum descriptors. If this string is empty, the standard LAMMPS input
-        file found in this repository will be used (recommended).
-
     descriptors_contain_xyz : bool
         Legacy option. If True, it is assumed that the first three entries of
         the descriptor vector are the xyz coordinates and they are cut from the
         descriptor vector. If False, no such cutting is peformed.
 
     atomic_density_sigma : float
-        Sigma used for the calculation of the Gaussian descriptors.
+        Sigma (=width) used for the calculation of the Gaussian descriptors.
+        Explicitly setting this value is discouraged if the atomic density is
+        used only during the total energy calculation and, e.g., bispectrum
+        descriptors are used for models. In this case, the width will
+        automatically be set correctly during inference based on model
+        parameters. This parameter mainly exists for debugging purposes.
+        If the atomic density is instead used for model training itself, this
+        parameter needs to be set.
+
+    atomic_density_cutoff : float
+        Cutoff radius used for atomic density calculation. Explicitly setting
+        this value is discouraged if the atomic density is used only during the
+        total energy calculation and, e.g., bispectrum descriptors are used
+        for models. In this case, the cutoff will automatically be set
+        correctly during inference based on model parameters. This parameter
+        mainly exists for debugging purposes. If the atomic density is instead
+        used for model training itself, this parameter needs to be set.
+
+    lammps_compute_file : str
+        Path to a LAMMPS compute file for the bispectrum descriptor
+        calculation. MALA has its own collection of compute files which are
+        used by default. Setting this parameter is thus not necessarys for
+        model training and inference, and it exists mainly for debugging
+        purposes.
+
+    minterpy_cutoff_cube_size : float
+        WILL BE DEPRECATED IN MALA v1.4.0 - size of cube for minterpy
+        descriptor calculation.
+
+    minterpy_lp_norm : int
+        WILL BE DEPRECATED IN MALA v1.4.0 - LP norm for minterpy
+        descriptor calculation.
+
+    minterpy_point_list : list
+        WILL BE DEPRECATED IN MALA v1.4.0 - list of points for minterpy
+        descriptor calculation.
+
+    minterpy_polynomial_degree : int
+        WILL BE DEPRECATED IN MALA v1.4.0 - polynomial degree for minterpy
+        descriptor calculation.
     """
 
     def __init__(self):
@@ -711,7 +750,7 @@ class ParametersRunning(ParametersBase):
     checkpoint_name : string
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
-        
+
     run_name : string
         Name of the run used for logging.
 
@@ -722,18 +761,18 @@ class ParametersRunning(ParametersBase):
         If True, then upon creating logging files, these will be saved
         in a subfolder of logging_dir labelled with the starting date
         of the logging, to avoid having to change input scripts often.
-        
+
     logger : string
         Name of the logger to be used.
         Currently supported are:
-        
+
             - "tensorboard": Tensorboard logger.
             - "wandb": Weights and Biases logger.
-    
+
     validation_metrics : list
         List of metrics to be used for validation. Default is ["ldos"].
         Possible options are:
-        
+
             - "ldos": MSE of the LDOS.
             - "band_energy": Band energy.
             - "band_energy_actual_fe": Band energy computed with ground truth Fermi energy.
@@ -744,19 +783,12 @@ class ParametersRunning(ParametersBase):
             - "density_relative": Rlectron density (MAPE).
             - "dos": Density of states.
             - "dos_relative": Density of states (MAPE).
-            
+
     validate_on_training_data : bool
         Whether to validate on the training data as well. Default is False.
-        
+
     validate_every_n_epochs : int
         Determines how often validation is performed. Default is 1.
-
-    inference_data_grid : list
-        List holding the grid to be used for inference in the form of
-        [x,y,z].
-
-    use_mixed_precision : bool
-        If True, mixed precision computation (via AMP) will be used.
 
     training_log_interval : int
         Determines how often detailed performance info is printed during
@@ -764,24 +796,38 @@ class ParametersRunning(ParametersBase):
 
     profiler_range : list
         List with two entries determining with which batch/iteration number
-        the CUDA profiler will start and stop profiling. Please note that
-        this option only holds significance if the nsys profiler is used.
+         the CUDA profiler will start and stop profiling. Please note that
+         this option only holds significance if the nsys profiler is used.
+
+    inference_data_grid : list
+        Grid dimensions used during inference. Typically, these are automatically
+        determined by DFT reference data, and this parameter does not need to
+        be set. Thus, this parameter mainly exists for debugging purposes.
+
+    use_mixed_precision : bool
+        If True, mixed precision computation (via AMP) will be used.
+
+    l2_regularization : float
+        Weight decay rate for NN optimizer.
+
+    dropout : float
+        Dropout rate for positional encoding in transformer net.
     """
 
     def __init__(self):
         super(ParametersRunning, self).__init__()
         self.optimizer = "Adam"
-        self.learning_rate = 0.5
-        self.learning_rate_embedding = 10 ** (-4)
+        self.learning_rate = 10 ** (-5)
+        # self.learning_rate_embedding = 10 ** (-4)
         self.max_number_epochs = 100
-        self.verbosity = True
         self.mini_batch_size = 10
+        # self.snapshots_per_epoch = -1
 
-        self.l1_regularization = 0.0
+        # self.l1_regularization = 0.0
         self.l2_regularization = 0.0
         self.dropout = 0.0
-        self.batch_norm = False
-        self.input_noise = 0.0
+        # self.batch_norm = False
+        # self.input_noise = 0.0
 
         self.early_stopping_epochs = 0
         self.early_stopping_threshold = 0
@@ -790,10 +836,11 @@ class ParametersRunning(ParametersBase):
         self.learning_rate_patience = 0
         self._during_training_metric = "ldos"
         self._after_training_metric = "ldos"
-        self.use_compression = False
+        # self.use_compression = False
         self.num_workers = 0
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
+        # self.checkpoint_best_so_far = False
         self.checkpoint_name = "checkpoint_mala"
         self.run_name = ""
         self.logging_dir = "./mala_logging"
@@ -1021,6 +1068,15 @@ class ParametersHyperparameterOptimization(ParametersBase):
         not recommended because it is file based and can lead to errors;
         With a suitable timeout it can be used somewhat stable though and
         help in HPC settings.
+
+    acsd_points : int
+        Parameter of the ACSD HyperparamterOptimization scheme. Controls
+        the number of point-pairs which are used to compute the ACSD.
+        An array of acsd_points*acsd_points will be computed, i.e., if
+        acsd_points=100, 100 points will be drawn at random, and thereafter
+        each of these 100 points will be compared with a new, random set
+        of 100 points, leading to 10000 points in total for the calculation
+        of the ACSD.
     """
 
     def __init__(self):
@@ -1230,6 +1286,9 @@ class Parameters:
     manual_seed: int
         If not none, this value is used as manual seed for the neural networks.
         Can be used to make experiments comparable. Default: None.
+
+    datageneration : ParametersDataGeneration
+        Parameters used for data generation routines.
     """
 
     def __init__(self):

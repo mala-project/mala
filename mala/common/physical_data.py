@@ -12,10 +12,27 @@ from mala.version import __version__ as mala_version
 
 class PhysicalData(ABC):
     """
-    Base class for physical data.
+    Base class for volumetric physical data.
 
     Implements general framework to read and write such data to and from
-    files.
+    files. Volumetric data is assumed to exist on a 3D grid. As such it
+    either has the dimensions [x,y,z,f], where f is the feature dimension.
+    All loading functions within this class assume such a 4D array. Within
+    MALA, occasionally 2D arrays of dimension [x*y*z,f] are used and reshaped
+    accordingly.
+
+    Parameters
+    ----------
+    parameters : mala.Parameters
+        MALA Parameters object used to create this class.
+
+    Attributes
+    ----------
+    parameters : mala.Parameters
+        MALA parameters object.
+
+    grid_dimensions : list
+        List of the grid dimensions (x,y,z)
     """
 
     ##############################
@@ -85,6 +102,9 @@ class PhysicalData(ABC):
         array : np.ndarray
             If not None, the array to save the data into.
             The array has to be 4-dimensional.
+
+        reshape : bool
+            If True, the loaded 4D array will be reshaped into a 2D array.
 
         Returns
         -------
@@ -263,6 +283,14 @@ class PhysicalData(ABC):
 
         read_dtype : bool
             If True, the dtype is read alongside the dimensions.
+
+        Returns
+        -------
+        dimension_info : list or tuple
+            If read_dtype is False, then only a list containing the dimensions
+            of the saved array is returned. If read_dtype is True, a tuple
+            containing this list of dimensions and the dtype of the array will
+            be returned.
         """
         loaded_array = np.load(path, mmap_mode="r")
         if read_dtype:
@@ -286,6 +314,14 @@ class PhysicalData(ABC):
 
         read_dtype : bool
             If True, the dtype is read alongside the dimensions.
+
+        comm : MPI.Comm
+            An MPI communicator to be used for parallelized I/O
+
+        Returns
+        -------
+        dimension_info : list
+            A list containing the dimensions of the saved array.
         """
         if comm is None or comm.rank == 0:
             import openpmd_api as io
@@ -379,6 +415,22 @@ class PhysicalData(ABC):
 
         In order to provide this data, the numpy array can be replaced with an
         instance of the class SkipArrayWriting.
+
+        Parameters
+        ----------
+        dataset : openpmd_api.Dataset
+            OpenPMD Data set to eventually write to.
+
+        feature_size : int
+            Size of the feature dimension.
+
+        Attributes
+        ----------
+        dataset : mala.Parameters
+            OpenPMD Data set to eventually write to.
+
+        feature_size : list
+            Size of the feature dimension.
         """
 
         # dataset has type openpmd_api.Dataset (not adding a type hint to avoid
@@ -408,7 +460,7 @@ class PhysicalData(ABC):
             the openPMD structure.
 
         additional_attributes : dict
-            Dict containing additional attributes to be saved.
+            Dictionary containing additional attributes to be saved.
 
         internal_iteration_number : int
             Internal OpenPMD iteration number. Ideally, this number should
@@ -489,6 +541,22 @@ class PhysicalData(ABC):
             If not None, and the selected class implements it, additional
             metadata will be read from this source. This metadata will then,
             depending on the class, be saved in the OpenPMD file.
+
+        local_offset  : list
+            [x,y,z] value from which to start writing the array.
+
+        local_reach  : list
+            [x,y,z] value until which to read the array.
+
+        feature_from  : int
+            Value from which to start writing in the feature dimension. With
+            this parameter and feature_to, one can parallelize over the feature
+            dimension.
+
+        feature_to : int
+            Value until which to write in the feature dimension. With
+            this parameter and feature_from, one can parallelize over the feature
+            dimension.
         """
         import openpmd_api as io
 

@@ -2,8 +2,9 @@
 
 import itertools
 
-import optuna
+from functools import cached_property
 import numpy as np
+import optuna
 
 from mala.common.parallelizer import (
     printout,
@@ -11,6 +12,7 @@ from mala.common.parallelizer import (
     get_size,
     get_comm,
     barrier,
+    parallel_warn,
 )
 from mala.network.hyper_opt import HyperOpt
 from mala.network.objective_naswot import ObjectiveNASWOT
@@ -33,11 +35,10 @@ class HyperOptNASWOT(HyperOpt):
 
     def __init__(self, params, data):
         super(HyperOptNASWOT, self).__init__(params, data)
-        self.objective = None
-        self.trial_losses = None
-        self.best_trial = None
-        self.trial_list = None
-        self.ignored_hyperparameters = [
+        self._objective = None
+        self._trial_losses = None
+        self._trial_list = None
+        self._ignored_hyperparameters = [
             "learning_rate",
             "optimizer",
             "mini_batch_size",
@@ -47,8 +48,68 @@ class HyperOptNASWOT(HyperOpt):
         ]
 
         # For parallelization.
-        self.first_trial = None
-        self.last_trial = None
+        self._first_trial = None
+        self._last_trial = None
+
+    @property
+    def best_trial_index(self):
+        """
+        Get the index and loss of best trial determined in this NASWOT run.
+
+        This property is read only, and will be recomputed.
+
+        Returns
+        -------
+        best_trial_index : list
+            A list containing [0] the best trial index and [1] the best
+            trial loss.
+        """
+        if self._trial_losses is None:
+            parallel_warn(
+                "Trial list is not yet computed, cannot determine "
+                "best trial."
+            )
+            return [-1, np.inf]
+
+        if self.params.use_mpi:
+            comm = get_comm()
+            local_result = np.array(
+                [
+                    float(np.argmax(self._trial_losses) + self._first_trial),
+                    np.max(self._trial_losses),
+                ]
+            )
+            all_results = comm.allgather(local_result)
+            max_on_node = np.argmax(np.array(all_results)[:, 1])
+            return [
+                int(all_results[max_on_node][0]),
+                all_results[max_on_node][1],
+            ]
+        else:
+            return [np.argmax(self._trial_losses), np.max(self._trial_losses)]
+
+    @best_trial_index.setter
+    def best_trial_index(self, value):
+        pass
+
+    @property
+    def best_trial(self):
+        """
+        Get the best trial determined in this NASWOT run.
+
+        This property is read only, and will be recomputed.
+        """
+        if self._trial_losses is None:
+            parallel_warn(
+                "Trial list is not yet computed, cannot determine "
+                "best trial."
+            )
+            return None
+        return self._trial_list[self.best_trial_index[0]]
+
+    @best_trial.setter
+    def best_trial(self, value):
+        pass
 
     def perform_study(self, trial_list=None):
         """
@@ -62,6 +123,11 @@ class HyperOptNASWOT(HyperOpt):
         ----------
         trial_list : list
             A list containing trials from either HyperOptOptuna or HyperOptOAT.
+
+        Returns
+        -------
+        best_trial_loss : float
+            Loss of the best trial.
         """
         # The minibatch size can not vary in the analysis.
         # This check ensures that e.g. optuna results can be used.
@@ -76,29 +142,29 @@ class HyperOptNASWOT(HyperOpt):
 
         # Ideally, this type of HO is called with a list of trials for which
         # the parameter has to be identified.
-        self.trial_list = trial_list
-        if self.trial_list is None:
+        self._trial_list = trial_list
+        if self._trial_list is None:
             printout(
                 "No trial list provided, one will be created using all "
                 "possible permutations of hyperparameters. "
                 "The following hyperparameters will be ignored:",
                 min_verbosity=0,
             )
-            printout(self.ignored_hyperparameters)
+            printout(self._ignored_hyperparameters)
 
             # Please note for the parallel case: The trial list returned
             # here is deterministic.
-            self.trial_list = self.__all_combinations()
+            self._trial_list = self.__all_combinations()
 
         if self.params.use_mpi:
             trials_per_rank = int(
-                np.floor((len(self.trial_list) / get_size()))
+                np.floor((len(self._trial_list) / get_size()))
             )
-            self.first_trial = get_rank() * trials_per_rank
-            self.last_trial = (get_rank() + 1) * trials_per_rank
+            self._first_trial = get_rank() * trials_per_rank
+            self._last_trial = (get_rank() + 1) * trials_per_rank
             if get_size() == get_rank() + 1:
-                trials_per_rank += len(self.trial_list) % get_size()
-                self.last_trial += len(self.trial_list) % get_size()
+                trials_per_rank += len(self._trial_list) % get_size()
+                self._last_trial += len(self._trial_list) % get_size()
 
             # We currently do not support checkpointing in parallel mode
             # for performance reasons.
@@ -109,78 +175,58 @@ class HyperOptNASWOT(HyperOpt):
                 )
                 self.params.hyperparameters.checkpoints_each_trial = 0
         else:
-            self.first_trial = 0
-            self.last_trial = len(self.trial_list)
+            self._first_trial = 0
+            self._last_trial = len(self._trial_list)
 
         # TODO: For now. Needs some refinements later.
         if isinstance(
-            self.trial_list[0], optuna.trial.FrozenTrial
-        ) or isinstance(self.trial_list[0], optuna.trial.FixedTrial):
+            self._trial_list[0], optuna.trial.FrozenTrial
+        ) or isinstance(self._trial_list[0], optuna.trial.FixedTrial):
             trial_type = "optuna"
         else:
             trial_type = "oat"
-        self.objective = ObjectiveNASWOT(
-            self.params, self.data_handler, trial_type
+        self._objective = ObjectiveNASWOT(
+            self.params, self._data_handler, trial_type
         )
         printout(
             "Starting NASWOT hyperparameter optimization,",
-            len(self.trial_list),
+            len(self._trial_list),
             "trials will be performed.",
             min_verbosity=0,
         )
 
-        self.trial_losses = []
+        self._trial_losses = []
         for idx, row in enumerate(
-            self.trial_list[self.first_trial : self.last_trial]
+            self._trial_list[self._first_trial : self._last_trial]
         ):
-            trial_loss = self.objective(row)
-            self.trial_losses.append(trial_loss)
+            trial_loss = self._objective(row)
+            self._trial_losses.append(trial_loss)
 
             # Output diagnostic information.
             if self.params.use_mpi:
                 print(
                     "Trial number",
-                    idx + self.first_trial,
+                    idx + self._first_trial,
                     "finished with:",
-                    self.trial_losses[idx],
+                    self._trial_losses[idx],
                 )
             else:
-                best_trial = self.get_best_trial_results()
                 printout(
                     "Trial number",
                     idx,
                     "finished with:",
-                    self.trial_losses[idx],
+                    self._trial_losses[idx],
                     ", best is trial",
-                    best_trial[0],
+                    self.best_trial_index[0],
                     "with",
-                    best_trial[1],
+                    self.best_trial_index[1],
                     min_verbosity=0,
                 )
 
         barrier()
 
         # Return the best loss value we could achieve.
-        return self.get_best_trial_results()[1]
-
-    def get_best_trial_results(self):
-        """Get the best trial out of the list, including the value."""
-        if self.params.use_mpi:
-            comm = get_comm()
-            local_result = np.array(
-                [
-                    float(np.argmax(self.trial_losses) + self.first_trial),
-                    np.max(self.trial_losses),
-                ]
-            )
-            all_results = comm.allgather(local_result)
-            max_on_node = np.argmax(np.array(all_results)[:, 1])
-            return [
-                int(all_results[max_on_node][0]),
-                all_results[max_on_node][1],
-            ]
-        else:
-            return [np.argmax(self.trial_losses), np.max(self.trial_losses)]
+        return self.best_trial_index[1]
 
     def set_optimal_parameters(self):
         """
@@ -189,29 +235,13 @@ class HyperOptNASWOT(HyperOpt):
         The parameters will be written to the parameter object with which the
         hyperparameter optimizer was created.
         """
-        # Getting the best trial based on the test errors
-        if self.params.use_mpi:
-            comm = get_comm()
-            local_result = np.array(
-                [
-                    float(np.argmax(self.trial_losses) + self.first_trial),
-                    np.max(self.trial_losses),
-                ]
-            )
-            all_results = comm.allgather(local_result)
-            max_on_node = np.argmax(np.array(all_results)[:, 1])
-            idx = int(all_results[max_on_node][0])
-        else:
-            idx = self.trial_losses.index(max(self.trial_losses))
-
-        self.best_trial = self.trial_list[idx]
-        self.objective.parse_trial(self.best_trial)
+        self._objective.parse_trial(self.best_trial)
 
     def __all_combinations(self):
         # First, remove all the hyperparameters we don't actually need.
         indices_to_remove = []
         for idx, par in enumerate(self.params.hyperparameters.hlist):
-            if par.name in self.ignored_hyperparameters:
+            if par.name in self._ignored_hyperparameters:
                 indices_to_remove.append(idx)
         for index in sorted(indices_to_remove, reverse=True):
             del self.params.hyperparameters.hlist[index]

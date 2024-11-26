@@ -49,16 +49,18 @@ class ACSDAnalyzer(HyperOpt):
     ):
         super(ACSDAnalyzer, self).__init__(params)
         # Calculators used to parse data from compatible files.
-        self.target_calculator = target_calculator
-        if self.target_calculator is None:
-            self.target_calculator = Target(params)
-        self.descriptor_calculator = descriptor_calculator
-        if self.descriptor_calculator is None:
-            self.descriptor_calculator = Descriptor(params)
+        self._target_calculator = target_calculator
+        if self._target_calculator is None:
+            self._target_calculator = Target(params)
+        self._descriptor_calculator = descriptor_calculator
+        if self._descriptor_calculator is None:
+            self._descriptor_calculator = Descriptor(params)
         if (
-            not isinstance(self.descriptor_calculator, Bispectrum)
-            and not isinstance(self.descriptor_calculator, AtomicDensity)
-            and not isinstance(self.descriptor_calculator, MinterpyDescriptors)
+            not isinstance(self._descriptor_calculator, Bispectrum)
+            and not isinstance(self._descriptor_calculator, AtomicDensity)
+            and not isinstance(
+                self._descriptor_calculator, MinterpyDescriptors
+            )
         ):
             raise Exception(
                 "Cannot calculate ACSD for the selected descriptors."
@@ -70,10 +72,10 @@ class ACSDAnalyzer(HyperOpt):
         self.__snapshot_units = []
 
         # Filled after the analysis.
-        self.labels = []
-        self.study = []
-        self.reduced_study = None
-        self.internal_hyperparam_list = None
+        self._labels = []
+        self._study = []
+        self._reduced_study = None
+        self._internal_hyperparam_list = None
 
     def add_snapshot(
         self,
@@ -189,7 +191,7 @@ class ACSDAnalyzer(HyperOpt):
         # Prepare the hyperparameter lists.
         self._construct_hyperparam_list()
         hyperparameter_tuples = list(
-            itertools.product(*self.internal_hyperparam_list)
+            itertools.product(*self._internal_hyperparam_list)
         )
 
         # Perform the ACSD analysis separately for each snapshot.
@@ -208,14 +210,14 @@ class ACSDAnalyzer(HyperOpt):
             )
 
             for idx, hyperparameter_tuple in enumerate(hyperparameter_tuples):
-                if isinstance(self.descriptor_calculator, Bispectrum):
+                if isinstance(self._descriptor_calculator, Bispectrum):
                     self.params.descriptors.bispectrum_cutoff = (
                         hyperparameter_tuple[0]
                     )
                     self.params.descriptors.bispectrum_twojmax = (
                         hyperparameter_tuple[1]
                     )
-                elif isinstance(self.descriptor_calculator, AtomicDensity):
+                elif isinstance(self._descriptor_calculator, AtomicDensity):
                     self.params.descriptors.atomic_density_cutoff = (
                         hyperparameter_tuple[0]
                     )
@@ -223,7 +225,7 @@ class ACSDAnalyzer(HyperOpt):
                         hyperparameter_tuple[1]
                     )
                 elif isinstance(
-                    self.descriptor_calculator, MinterpyDescriptors
+                    self._descriptor_calculator, MinterpyDescriptors
                 ):
                     self.params.descriptors.atomic_density_cutoff = (
                         hyperparameter_tuple[0]
@@ -269,11 +271,11 @@ class ACSDAnalyzer(HyperOpt):
                         )
 
                     outstring = "["
-                    for label_id, label in enumerate(self.labels):
+                    for label_id, label in enumerate(self._labels):
                         outstring += (
                             label + ": " + str(hyperparameter_tuple[label_id])
                         )
-                        if label_id < len(self.labels) - 1:
+                        if label_id < len(self._labels) - 1:
                             outstring += ", "
                     outstring += "]"
                     best_trial_string = ". No suitable trial found yet."
@@ -295,34 +297,34 @@ class ACSDAnalyzer(HyperOpt):
                     )
 
             if get_rank() == 0:
-                self.study.append(current_list)
+                self._study.append(current_list)
 
         if get_rank() == 0:
-            self.study = np.mean(self.study, axis=0)
+            self._study = np.mean(self._study, axis=0)
 
             # TODO: Does this even make sense for the minterpy descriptors?
             if return_plotting:
                 results_to_plot = []
-                if len(self.internal_hyperparam_list) == 2:
-                    len_first_dim = len(self.internal_hyperparam_list[0])
-                    len_second_dim = len(self.internal_hyperparam_list[1])
+                if len(self._internal_hyperparam_list) == 2:
+                    len_first_dim = len(self._internal_hyperparam_list[0])
+                    len_second_dim = len(self._internal_hyperparam_list[1])
                     for i in range(0, len_first_dim):
                         results_to_plot.append(
-                            self.study[
+                            self._study[
                                 i * len_second_dim : (i + 1) * len_second_dim,
                                 2:,
                             ]
                         )
 
-                    if isinstance(self.descriptor_calculator, Bispectrum):
+                    if isinstance(self._descriptor_calculator, Bispectrum):
                         return results_to_plot, {
-                            "twojmax": self.internal_hyperparam_list[1],
-                            "cutoff": self.internal_hyperparam_list[0],
+                            "twojmax": self._internal_hyperparam_list[1],
+                            "cutoff": self._internal_hyperparam_list[0],
                         }
-                    if isinstance(self.descriptor_calculator, AtomicDensity):
+                    if isinstance(self._descriptor_calculator, AtomicDensity):
                         return results_to_plot, {
-                            "sigma": self.internal_hyperparam_list[1],
-                            "cutoff": self.internal_hyperparam_list[0],
+                            "sigma": self._internal_hyperparam_list[1],
+                            "cutoff": self._internal_hyperparam_list[0],
                         }
 
     def set_optimal_parameters(self):
@@ -333,9 +335,9 @@ class ACSDAnalyzer(HyperOpt):
         hyperparameter optimizer was created.
         """
         if get_rank() == 0:
-            minimum_acsd = self.study[np.argmin(self.study[:, -1])]
-            if len(self.internal_hyperparam_list) == 2:
-                if isinstance(self.descriptor_calculator, Bispectrum):
+            minimum_acsd = self._study[np.argmin(self._study[:, -1])]
+            if len(self._internal_hyperparam_list) == 2:
+                if isinstance(self._descriptor_calculator, Bispectrum):
                     self.params.descriptors.bispectrum_cutoff = minimum_acsd[0]
                     self.params.descriptors.bispectrum_twojmax = int(
                         minimum_acsd[1]
@@ -351,7 +353,7 @@ class ACSDAnalyzer(HyperOpt):
                         "Bispectrum cutoff: ",
                         self.params.descriptors.bispectrum_cutoff,
                     )
-                if isinstance(self.descriptor_calculator, AtomicDensity):
+                if isinstance(self._descriptor_calculator, AtomicDensity):
                     self.params.descriptors.atomic_density_cutoff = (
                         minimum_acsd[0]
                     )
@@ -369,8 +371,10 @@ class ACSDAnalyzer(HyperOpt):
                         "Atomic density cutoff: ",
                         self.params.descriptors.atomic_density_cutoff,
                     )
-            elif len(self.internal_hyperparam_list) == 5:
-                if isinstance(self.descriptor_calculator, MinterpyDescriptors):
+            elif len(self._internal_hyperparam_list) == 5:
+                if isinstance(
+                    self._descriptor_calculator, MinterpyDescriptors
+                ):
                     self.params.descriptors.atomic_density_cutoff = (
                         minimum_acsd[0]
                     )
@@ -411,7 +415,7 @@ class ACSDAnalyzer(HyperOpt):
                     )
 
     def _construct_hyperparam_list(self):
-        if isinstance(self.descriptor_calculator, Bispectrum):
+        if isinstance(self._descriptor_calculator, Bispectrum):
             if (
                 list(
                     map(
@@ -452,10 +456,10 @@ class ACSDAnalyzer(HyperOpt):
                     ).index(True)
                 ].choices
 
-            self.internal_hyperparam_list = [first_dim_list, second_dim_list]
-            self.labels = ["cutoff", "twojmax"]
+            self._internal_hyperparam_list = [first_dim_list, second_dim_list]
+            self._labels = ["cutoff", "twojmax"]
 
-        elif isinstance(self.descriptor_calculator, AtomicDensity):
+        elif isinstance(self._descriptor_calculator, AtomicDensity):
             if (
                 list(
                     map(
@@ -499,10 +503,10 @@ class ACSDAnalyzer(HyperOpt):
                         )
                     ).index(True)
                 ].choices
-            self.internal_hyperparam_list = [first_dim_list, second_dim_list]
-            self.labels = ["cutoff", "sigma"]
+            self._internal_hyperparam_list = [first_dim_list, second_dim_list]
+            self._labels = ["cutoff", "sigma"]
 
-        elif isinstance(self.descriptor_calculator, MinterpyDescriptors):
+        elif isinstance(self._descriptor_calculator, MinterpyDescriptors):
             if (
                 list(
                     map(
@@ -611,14 +615,14 @@ class ACSDAnalyzer(HyperOpt):
                     ).index(True)
                 ].choices
 
-            self.internal_hyperparam_list = [
+            self._internal_hyperparam_list = [
                 first_dim_list,
                 second_dim_list,
                 third_dim_list,
                 fourth_dim_list,
                 fifth_dim_list,
             ]
-            self.labels = [
+            self._labels = [
                 "cutoff",
                 "sigma",
                 "minterpy_cutoff",
@@ -638,7 +642,7 @@ class ACSDAnalyzer(HyperOpt):
         if description["input"] == "espresso-out":
             descriptor_calculation_kwargs["units"] = original_units["input"]
             tmp_input, local_size = (
-                self.descriptor_calculator.calculate_from_qe_out(
+                self._descriptor_calculator.calculate_from_qe_out(
                     snapshot["input"], **descriptor_calculation_kwargs
                 )
             )
@@ -652,7 +656,7 @@ class ACSDAnalyzer(HyperOpt):
                 "Unknown file extension, cannot convert descriptor"
             )
         if self.params.descriptors._configuration["mpi"]:
-            tmp_input = self.descriptor_calculator.gather_descriptors(
+            tmp_input = self._descriptor_calculator.gather_descriptors(
                 tmp_input
             )
 
@@ -676,7 +680,7 @@ class ACSDAnalyzer(HyperOpt):
             target_calculator_kwargs["units"] = original_units["output"]
             target_calculator_kwargs["use_memmap"] = memmap
             # If no units are provided we just assume standard units.
-            tmp_output = self.target_calculator.read_from_cube(
+            tmp_output = self._target_calculator.read_from_cube(
                 snapshot["output"], **target_calculator_kwargs
             )
 
@@ -684,19 +688,19 @@ class ACSDAnalyzer(HyperOpt):
             target_calculator_kwargs["units"] = original_units["output"]
             target_calculator_kwargs["use_memmap"] = memmap
             # If no units are provided we just assume standard units.
-            tmp_output = self.target_calculator.read_from_xsf(
+            tmp_output = self._target_calculator.read_from_xsf(
                 snapshot["output"], **target_calculator_kwargs
             )
 
         elif description["output"] == "numpy":
             if get_rank() == 0:
-                tmp_output = self.target_calculator.read_from_numpy_file(
+                tmp_output = self._target_calculator.read_from_numpy_file(
                     snapshot["output"], units=original_units["output"]
                 )
 
         elif description["output"] == "openpmd":
             if get_rank() == 0:
-                tmp_output = self.target_calculator.read_from_numpy_file(
+                tmp_output = self._target_calculator.read_from_numpy_file(
                     snapshot["output"], units=original_units["output"]
                 )
         else:

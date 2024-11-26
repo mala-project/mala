@@ -47,6 +47,53 @@ class DataScaler:
     use_ddp : bool
         If True, the DataScaler will use ddp to check that data is
         only saved on the root process in parallel execution.
+
+    Attributes
+    ----------
+    cantransform : bool
+        If True, this scaler is set up to perform scaling.
+
+    feature_wise : bool
+        (Managed internally, not set to private due to legacy issues)
+
+    maxs : torch.Tensor
+        (Managed internally, not set to private due to legacy issues)
+
+    means : torch.Tensor
+        (Managed internally, not set to private due to legacy issues)
+
+    mins : torch.Tensor
+        (Managed internally, not set to private due to legacy issues)
+
+    scale_minmax : bool
+        (Managed internally, not set to private due to legacy issues)
+
+    scale_standard : bool
+        (Managed internally, not set to private due to legacy issues)
+
+    stds : torch.Tensor
+        (Managed internally, not set to private due to legacy issues)
+
+    total_data_count : int
+        (Managed internally, not set to private due to legacy issues)
+
+    total_max : float
+        (Managed internally, not set to private due to legacy issues)
+
+    total_mean : float
+        (Managed internally, not set to private due to legacy issues)
+
+    total_min : float
+        (Managed internally, not set to private due to legacy issues)
+
+    total_std : float
+        (Managed internally, not set to private due to legacy issues)
+
+    typestring : str
+        (Managed internally, not set to private due to legacy issues)
+
+    use_ddp : bool
+        (Managed internally, not set to private due to legacy issues)
     """
 
     def __init__(self, typestring, use_ddp=False):
