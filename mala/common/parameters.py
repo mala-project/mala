@@ -773,24 +773,33 @@ class ParametersRunning(ParametersBase):
         determined by DFT reference data, and this parameter does not need to
         be set. Thus, this parameter mainly exists for debugging purposes.
 
-    use_mixed_precision :
+    use_mixed_precision : bool
         If True, mixed precision computation (via AMP) will be used.
+
+    l2_regularization : float
+        Weight decay rate for NN optimizer.
+
+    dropout : float
+        Dropout rate for positional encoding in transformer net.
+
+    training_log_interval : int
+        Number of data points after which metrics will be logged.
     """
 
     def __init__(self):
         super(ParametersRunning, self).__init__()
         self.optimizer = "Adam"
         self.learning_rate = 10 ** (-5)
-        self.learning_rate_embedding = 10 ** (-4)
+        # self.learning_rate_embedding = 10 ** (-4)
         self.max_number_epochs = 100
         self.mini_batch_size = 10
-        self.snapshots_per_epoch = -1
+        # self.snapshots_per_epoch = -1
 
-        self.l1_regularization = 0.0
+        # self.l1_regularization = 0.0
         self.l2_regularization = 0.0
         self.dropout = 0.0
-        self.batch_norm = False
-        self.input_noise = 0.0
+        # self.batch_norm = False
+        # self.input_noise = 0.0
 
         self.early_stopping_epochs = 0
         self.early_stopping_threshold = 0
@@ -799,11 +808,11 @@ class ParametersRunning(ParametersBase):
         self.learning_rate_patience = 0
         self._during_training_metric = "ldos"
         self._after_training_metric = "ldos"
-        self.use_compression = False
+        # self.use_compression = False
         self.num_workers = 0
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
-        self.checkpoint_best_so_far = False
+        # self.checkpoint_best_so_far = False
         self.checkpoint_name = "checkpoint_mala"
         self.run_name = ""
         self.logging_dir = "./mala_logging"
