@@ -20,7 +20,7 @@ parameters = mala.Parameters()
 # Specify the data scaling. For regular bispectrum and LDOS data,
 # these have proven successful.
 parameters.data.input_rescaling_type = "feature-wise-standard"
-parameters.data.output_rescaling_type = "normal"
+parameters.data.output_rescaling_type = "minmax"
 # Specify the used activation function.
 parameters.network.layer_activations = ["ReLU"]
 # Specify the training parameters.

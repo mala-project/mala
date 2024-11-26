@@ -239,6 +239,12 @@ class LDOS(Target):
 
         This is the generic interface for cached target quantities.
         It should work for all implemented targets.
+
+        Returns
+        -------
+        local_density_of_states : numpy.ndarray
+            Electronic local density of states as a volumetric array.
+            May be 4D- or 2D depending on workflow.
         """
         return self.local_density_of_states
 
@@ -597,8 +603,6 @@ class LDOS(Target):
 
         If neither LDOS nor DOS+Density data is provided, the cached LDOS will
         be attempted to be used for the calculation.
-
-
 
         Parameters
         ----------

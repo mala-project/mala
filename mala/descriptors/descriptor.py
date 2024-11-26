@@ -36,6 +36,10 @@ class Descriptor(PhysicalData):
     parameters : mala.common.parameters.Parameters
         Parameters object used to create this object.
 
+    Attributes
+    ----------
+    parameters: mala.common.parameters.ParametersDescriptors
+        MALA descriptor calculation parameters.
     """
 
     ##############################
@@ -59,18 +63,6 @@ class Descriptor(PhysicalData):
         # Check if we're accessing through base class.
         # If not, we need to return the correct object directly.
         if cls == Descriptor:
-            if params.descriptors.descriptor_type == "SNAP":
-                from mala.descriptors.bispectrum import Bispectrum
-
-                parallel_warn(
-                    "Using 'SNAP' as descriptors will be deprecated "
-                    "starting in MALA v1.3.0. Please use 'Bispectrum' "
-                    "instead.",
-                    min_verbosity=0,
-                    category=FutureWarning,
-                )
-                descriptors = super(Descriptor, Bispectrum).__new__(Bispectrum)
-
             if params.descriptors.descriptor_type == "Bispectrum":
                 from mala.descriptors.bispectrum import Bispectrum
 
@@ -118,17 +110,16 @@ class Descriptor(PhysicalData):
     def __init__(self, parameters):
         super(Descriptor, self).__init__(parameters)
         self.parameters: ParametersDescriptors = parameters.descriptors
-        self.fingerprint_length = 0  # so iterations will fail
-        self.verbosity = parameters.verbosity
-        self.in_format_ase = ""
-        self.atoms = None
-        self.voxel = None
+        self.feature_size = 0  # so iterations will fail
+        self._in_format_ase = ""
+        self._atoms = None
+        self._voxel = None
 
         # If we ever have NON LAMMPS descriptors, these parameters have no
         # meaning anymore and should probably be moved to an intermediate
         # DescriptorsLAMMPS class, from which the LAMMPS descriptors inherit.
-        self.lammps_temporary_input = None
-        self.lammps_temporary_log = None
+        self._lammps_temporary_input = None
+        self._lammps_temporary_log = None
 
     ##############################
     # Properties
@@ -194,6 +185,15 @@ class Descriptor(PhysicalData):
             " descriptor type."
         )
 
+    @property
+    def feature_size(self):
+        """Get the feature dimension of this data."""
+        return self._feature_size
+
+    @feature_size.setter
+    def feature_size(self, value):
+        self._feature_size = value
+
     @staticmethod
     def backconvert_units(array, out_units):
         """
@@ -239,24 +239,24 @@ class Descriptor(PhysicalData):
             lammps_tmp_input_file = tempfile.NamedTemporaryFile(
                 delete=False, prefix=prefix_inp_str, suffix="_.tmp", dir=outdir
             )
-            self.lammps_temporary_input = lammps_tmp_input_file.name
+            self._lammps_temporary_input = lammps_tmp_input_file.name
             lammps_tmp_input_file.close()
 
             lammps_tmp_log_file = tempfile.NamedTemporaryFile(
                 delete=False, prefix=prefix_log_str, suffix="_.tmp", dir=outdir
             )
-            self.lammps_temporary_log = lammps_tmp_log_file.name
+            self._lammps_temporary_log = lammps_tmp_log_file.name
             lammps_tmp_log_file.close()
         else:
-            self.lammps_temporary_input = None
-            self.lammps_temporary_log = None
+            self._lammps_temporary_input = None
+            self._lammps_temporary_log = None
 
         if self.parameters._configuration["mpi"]:
-            self.lammps_temporary_input = get_comm().bcast(
-                self.lammps_temporary_input, root=0
+            self._lammps_temporary_input = get_comm().bcast(
+                self._lammps_temporary_input, root=0
             )
-            self.lammps_temporary_log = get_comm().bcast(
-                self.lammps_temporary_log, root=0
+            self._lammps_temporary_log = get_comm().bcast(
+                self._lammps_temporary_log, root=0
             )
 
     # Calculations
@@ -340,13 +340,13 @@ class Descriptor(PhysicalData):
             (x,y,z,descriptor_dimension)
 
         """
-        self.in_format_ase = "espresso-out"
+        self._in_format_ase = "espresso-out"
         printout("Calculating descriptors from", qe_out_file, min_verbosity=0)
         # We get the atomic information by using ASE.
-        self.atoms = ase.io.read(qe_out_file, format=self.in_format_ase)
+        self._atoms = ase.io.read(qe_out_file, format=self._in_format_ase)
 
         # Enforcing / Checking PBC on the read atoms.
-        self.atoms = self.enforce_pbc(self.atoms)
+        self._atoms = self.enforce_pbc(self._atoms)
 
         # Get the grid dimensions.
         if "grid_dimensions" in kwargs.keys():
@@ -368,10 +368,10 @@ class Descriptor(PhysicalData):
                     self.grid_dimensions[2] = int(tmp.split(",")[2])
                     break
 
-        self.voxel = self.atoms.cell.copy()
-        self.voxel[0] = self.voxel[0] / (self.grid_dimensions[0])
-        self.voxel[1] = self.voxel[1] / (self.grid_dimensions[1])
-        self.voxel[2] = self.voxel[2] / (self.grid_dimensions[2])
+        self._voxel = self._atoms.cell.copy()
+        self._voxel[0] = self._voxel[0] / (self.grid_dimensions[0])
+        self._voxel[1] = self._voxel[1] / (self.grid_dimensions[1])
+        self._voxel[2] = self._voxel[2] / (self.grid_dimensions[2])
 
         return self._calculate(working_directory, **kwargs)
 
@@ -412,12 +412,12 @@ class Descriptor(PhysicalData):
             (x,y,z,descriptor_dimension)
         """
         # Enforcing / Checking PBC on the input atoms.
-        self.atoms = self.enforce_pbc(atoms)
+        self._atoms = self.enforce_pbc(atoms)
         self.grid_dimensions = grid_dimensions
-        self.voxel = self.atoms.cell.copy()
-        self.voxel[0] = self.voxel[0] / (self.grid_dimensions[0])
-        self.voxel[1] = self.voxel[1] / (self.grid_dimensions[1])
-        self.voxel[2] = self.voxel[2] / (self.grid_dimensions[2])
+        self._voxel = self._atoms.cell.copy()
+        self._voxel[0] = self._voxel[0] / (self.grid_dimensions[0])
+        self._voxel[1] = self._voxel[1] / (self.grid_dimensions[1])
+        self._voxel[2] = self._voxel[2] / (self.grid_dimensions[2])
         return self._calculate(working_directory, **kwargs)
 
     def gather_descriptors(self, descriptors_np, use_pickled_comm=False):
@@ -457,7 +457,7 @@ class Descriptor(PhysicalData):
             sendcounts = np.array(
                 comm.gather(np.shape(descriptors_np)[0], root=0)
             )
-            raw_feature_length = self.fingerprint_length + 3
+            raw_feature_length = self.feature_size + 3
 
             if get_rank() == 0:
                 # print("sendcounts: {}, total: {}".format(sendcounts,
@@ -502,8 +502,8 @@ class Descriptor(PhysicalData):
             nx = self.grid_dimensions[0]
             ny = self.grid_dimensions[1]
             nz = self.grid_dimensions[2]
-            descriptors_full = np.zeros([nx, ny, nz, self.fingerprint_length])
-            # Fill the full SNAP descriptors array.
+            descriptors_full = np.zeros([nx, ny, nz, self.feature_size])
+            # Fill the full bispectrum descriptors array.
             for idx, local_grid in enumerate(all_descriptors_list):
                 # We glue the individual cells back together, and transpose.
                 first_x = int(local_grid[0][0])
@@ -520,7 +520,7 @@ class Descriptor(PhysicalData):
                         last_z - first_z,
                         last_y - first_y,
                         last_x - first_x,
-                        self.fingerprint_length,
+                        self.feature_size,
                     ],
                 ).transpose(
                     [2, 1, 0, 3]
@@ -566,10 +566,10 @@ class Descriptor(PhysicalData):
         ny = local_reach[1] - local_offset[1]
         nz = local_reach[2] - local_offset[2]
 
-        descriptors_full = np.zeros([nx, ny, nz, self.fingerprint_length])
+        descriptors_full = np.zeros([nx, ny, nz, self.feature_size])
 
         descriptors_full[0:nx, 0:ny, 0:nz] = np.reshape(
-            descriptors_np[:, 3:], [nz, ny, nx, self.fingerprint_length]
+            descriptors_np[:, 3:], [nz, ny, nx, self.feature_size]
         ).transpose([2, 1, 0, 3])
         return descriptors_full, local_offset, local_reach
 
@@ -592,20 +592,20 @@ class Descriptor(PhysicalData):
 
     def _set_geometry_info(self, mesh):
         # Geometry: Save the cell parameters and angles of the grid.
-        if self.atoms is not None:
+        if self._atoms is not None:
             import openpmd_api as io
 
-            self.voxel = self.atoms.cell.copy()
-            self.voxel[0] = self.voxel[0] / (self.grid_dimensions[0])
-            self.voxel[1] = self.voxel[1] / (self.grid_dimensions[1])
-            self.voxel[2] = self.voxel[2] / (self.grid_dimensions[2])
+            self._voxel = self._atoms.cell.copy()
+            self._voxel[0] = self._voxel[0] / (self.grid_dimensions[0])
+            self._voxel[1] = self._voxel[1] / (self.grid_dimensions[1])
+            self._voxel[2] = self._voxel[2] / (self.grid_dimensions[2])
 
             mesh.geometry = io.Geometry.cartesian
-            mesh.grid_spacing = self.voxel.cellpar()[0:3]
-            mesh.set_attribute("angles", self.voxel.cellpar()[3:])
+            mesh.grid_spacing = self._voxel.cellpar()[0:3]
+            mesh.set_attribute("angles", self._voxel.cellpar()[3:])
 
     def _get_atoms(self):
-        return self.atoms
+        return self._atoms
 
     def _feature_mask(self):
         if self.descriptors_contain_xyz:
@@ -626,9 +626,9 @@ class Descriptor(PhysicalData):
             "-screen",
             "none",
             "-log",
-            self.lammps_temporary_log,
+            self._lammps_temporary_log,
         ]
-        lammps_dict["atom_config_fname"] = self.lammps_temporary_input
+        lammps_dict["atom_config_fname"] = self._lammps_temporary_input
 
         if self.parameters._configuration["mpi"]:
             size = get_size()
@@ -845,8 +845,8 @@ class Descriptor(PhysicalData):
         lmp.close()
         if not keep_logs:
             if get_rank() == 0:
-                os.remove(self.lammps_temporary_log)
-                os.remove(self.lammps_temporary_input)
+                os.remove(self._lammps_temporary_log)
+                os.remove(self._lammps_temporary_input)
 
     def _setup_atom_list(self):
         """
@@ -859,7 +859,7 @@ class Descriptor(PhysicalData):
         FURTHER OPTIMIZATION: Probably not that much, this mostly already uses
         optimized python functions.
         """
-        if np.any(self.atoms.pbc):
+        if np.any(self._atoms.pbc):
 
             # To determine the list of relevant atoms we first take the edges
             # of the simulation cell and use them to determine all cells
@@ -886,19 +886,19 @@ class Descriptor(PhysicalData):
             for edge in edges:
                 edge_point = self._grid_to_coord(edge)
                 neighborlist = NeighborList(
-                    np.zeros(len(self.atoms) + 1)
+                    np.zeros(len(self._atoms) + 1)
                     + [self.parameters.atomic_density_cutoff],
                     bothways=True,
                     self_interaction=False,
                     primitive=NewPrimitiveNeighborList,
                 )
 
-                atoms_with_grid_point = self.atoms.copy()
+                atoms_with_grid_point = self._atoms.copy()
 
                 # Construct a ghost atom representing the grid point.
                 atoms_with_grid_point.append(ase.Atom("H", edge_point))
                 neighborlist.update(atoms_with_grid_point)
-                indices, offsets = neighborlist.get_neighbors(len(self.atoms))
+                indices, offsets = neighborlist.get_neighbors(len(self._atoms))
 
                 # Incrementally fill the list containing all cells to be
                 # considered.
@@ -923,18 +923,18 @@ class Descriptor(PhysicalData):
             # First, instantiate it by filling it will all atoms from all
             # potentiall relevant cells, as identified above.
             all_atoms = None
-            for a in range(0, len(self.atoms)):
+            for a in range(0, len(self._atoms)):
                 if all_atoms is None:
                     all_atoms = (
-                        self.atoms.positions[a]
-                        + all_cells @ self.atoms.get_cell()
+                        self._atoms.positions[a]
+                        + all_cells @ self._atoms.get_cell()
                     )
                 else:
                     all_atoms = np.concatenate(
                         (
                             all_atoms,
-                            self.atoms.positions[a]
-                            + all_cells @ self.atoms.get_cell(),
+                            self._atoms.positions[a]
+                            + all_cells @ self._atoms.get_cell(),
                         )
                     )
 
@@ -987,11 +987,11 @@ class Descriptor(PhysicalData):
                     :,
                 ]
             )
-            return np.concatenate((all_atoms, self.atoms.positions))
+            return np.concatenate((all_atoms, self._atoms.positions))
 
         else:
             # If no PBC are used, only consider a single cell.
-            return self.atoms.positions
+            return self._atoms.positions
 
     def _grid_to_coord(self, gridpoint):
         # Convert grid indices to real space grid point.
@@ -1001,20 +1001,20 @@ class Descriptor(PhysicalData):
         # Orthorhombic cells and triclinic ones have
         # to be treated differently, see domain.cpp
 
-        if self.atoms.cell.orthorhombic:
-            return np.diag(self.voxel) * [i, j, k]
+        if self._atoms.cell.orthorhombic:
+            return np.diag(self._voxel) * [i, j, k]
         else:
             ret = [0, 0, 0]
             ret[0] = (
-                i / self.grid_dimensions[0] * self.atoms.cell[0, 0]
-                + j / self.grid_dimensions[1] * self.atoms.cell[1, 0]
-                + k / self.grid_dimensions[2] * self.atoms.cell[2, 0]
+                i / self.grid_dimensions[0] * self._atoms.cell[0, 0]
+                + j / self.grid_dimensions[1] * self._atoms.cell[1, 0]
+                + k / self.grid_dimensions[2] * self._atoms.cell[2, 0]
             )
             ret[1] = (
-                j / self.grid_dimensions[1] * self.atoms.cell[1, 1]
-                + k / self.grid_dimensions[2] * self.atoms.cell[1, 2]
+                j / self.grid_dimensions[1] * self._atoms.cell[1, 1]
+                + k / self.grid_dimensions[2] * self._atoms.cell[1, 2]
             )
-            ret[2] = k / self.grid_dimensions[2] * self.atoms.cell[2, 2]
+            ret[2] = k / self.grid_dimensions[2] * self._atoms.cell[2, 2]
             return np.array(ret)
 
     @abstractmethod
@@ -1022,4 +1022,4 @@ class Descriptor(PhysicalData):
         pass
 
     def _set_feature_size_from_array(self, array):
-        self.fingerprint_length = np.shape(array)[-1]
+        self.feature_size = np.shape(array)[-1]

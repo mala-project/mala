@@ -1,4 +1,4 @@
-# Calculate SNAP descriptors on a 3D grid
+# Calculate bispectrum descriptors on a 3D grid
 
 # pass in values ngridx, ngridy, ngridz, twojmax, rcutfac, atom_config_fname 
 # using command-line -var option

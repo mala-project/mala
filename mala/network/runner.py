@@ -40,13 +40,27 @@ class Runner:
 
     data : mala.datahandling.data_handler.DataHandler
         DataHandler holding the data for the run.
+
+    Attributes
+    ----------
+    parameters : mala.common.parametes.ParametersRunning
+        MALA neural network training/inference parameters.
+
+    parameters_full : mala.common.parametes.Parameters
+        Full MALA Parameters object.
+
+    network : mala.network.network.Network
+        Network which is being run.
+
+    data : mala.datahandling.data_handler.DataHandler
+        DataHandler holding the data for the run.
     """
 
     def __init__(self, params, network, data, runner_dict=None):
         self.parameters_full: Parameters = params
         self.parameters: ParametersRunning = params.running
         self.network = network
-        self.data = data
+        self.data: DataHandler = data
         self.__prepare_to_run()
 
     def _calculate_errors(
@@ -932,7 +946,7 @@ class Runner:
         return actual_outputs, predicted_outputs
 
     @staticmethod
-    def _correct_batch_size_for_testing(datasize, batchsize):
+    def _correct_batch_size(datasize, batchsize):
         """
         Get the correct batch size for testing.
 

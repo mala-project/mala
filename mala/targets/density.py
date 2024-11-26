@@ -29,7 +29,8 @@ from mala.descriptors.atomic_density import AtomicDensity
 
 
 class Density(Target):
-    """Postprocessing / parsing functions for the electronic density.
+    """
+    Postprocessing / parsing functions for the electronic density.
 
     Parameters
     ----------
@@ -40,7 +41,10 @@ class Density(Target):
     ##############################
     # Class attributes
     ##############################
-
+    """
+    Total energy module mutual exclusion token used to make sure there
+    the total energy module is not initialized twice.
+    """
     te_mutex = False
 
     ##############################
@@ -278,6 +282,12 @@ class Density(Target):
 
         This is the generic interface for cached target quantities.
         It should work for all implemented targets.
+
+        Returns
+        -------
+        density : numpy.ndarray
+            Electronic charge density as a volumetric array. May be 4D or 2D
+            depending on workflow.
         """
         return self.density
 
@@ -407,7 +417,8 @@ class Density(Target):
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file ", path, min_verbosity=0)
-        # automatically convert units if they are None since cube files take atomic units
+        # automatically convert units if they are None since cube files take
+        # atomic units
         if units is None:
             units = "1/Bohr^3"
         if units != "1/Bohr^3":
@@ -417,6 +428,7 @@ class Density(Target):
                 "We recommend to check and change the requested units"
             )
         data, meta = read_cube(path)
+        data = np.expand_dims(data, -1)
         data *= self.convert_units(1, in_units=units)
         self.density = data
         self.grid_dimensions = list(np.shape(data)[0:3])
@@ -581,7 +593,7 @@ class Density(Target):
 
         voxel : ase.cell.Cell
             Voxel to be used for grid intergation. Needs to reflect the
-            symmetry of the simulation cell. In Bohr.
+            symmetry of the simulation cell.
 
         integration_method : str
             Integration method used to integrate density on the grid.
@@ -1117,7 +1129,7 @@ class Density(Target):
         # instantiate the process with the file.
         positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
 
-        if self._parameters_full.descriptors.use_atomic_density_energy_formula:
+        if self.parameters._configuration["atomic_density_formula"]:
             # Calculate the Gaussian descriptors for the calculation of the
             # structure factors.
             barrier()
@@ -1186,8 +1198,8 @@ class Density(Target):
         te.set_positions(
             np.transpose(positions_for_qe),
             number_of_atoms,
-            self._parameters_full.descriptors.use_atomic_density_energy_formula,
-            self._parameters_full.descriptors.use_atomic_density_energy_formula,
+            self.parameters._configuration["atomic_density_formula"],
+            self.parameters._configuration["atomic_density_formula"],
         )
         barrier()
         printout(
@@ -1198,7 +1210,7 @@ class Density(Target):
         )
         barrier()
 
-        if self._parameters_full.descriptors.use_atomic_density_energy_formula:
+        if self.parameters._configuration["atomic_density_formula"]:
             t0 = time.perf_counter()
             gaussian_descriptors = np.reshape(
                 gaussian_descriptors,

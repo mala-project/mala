@@ -31,17 +31,11 @@ class AtomicDensity(Descriptor):
 
     def __init__(self, parameters):
         super(AtomicDensity, self).__init__(parameters)
-        self.verbosity = parameters.verbosity
 
     @property
     def data_name(self):
         """Get a string that describes the target (for e.g. metadata)."""
         return "AtomicDensity"
-
-    @property
-    def feature_size(self):
-        """Get the feature dimension of this data."""
-        return self.fingerprint_length
 
     @staticmethod
     def convert_units(array, in_units="None"):
@@ -140,7 +134,7 @@ class AtomicDensity(Descriptor):
         self.setup_lammps_tmp_files("ggrid", outdir)
 
         ase.io.write(
-            self.lammps_temporary_input, self.atoms, format=lammps_format
+            self._lammps_temporary_input, self._atoms, format=lammps_format
         )
 
         nx = self.grid_dimensions[0]
@@ -151,7 +145,7 @@ class AtomicDensity(Descriptor):
         if self.parameters.atomic_density_sigma is None:
             self.grid_dimensions = [nx, ny, nz]
             self.parameters.atomic_density_sigma = self.get_optimal_sigma(
-                self.voxel
+                self._voxel
             )
 
         # Create LAMMPS instance.
@@ -205,7 +199,7 @@ class AtomicDensity(Descriptor):
         )
         self._clean_calculation(lmp, keep_logs)
 
-        # In comparison to SNAP, the atomic density always returns
+        # In comparison to bispectrum, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments
         # if we operate without MPI.
         self.grid_dimensions = [nx, ny, nz]
@@ -213,7 +207,7 @@ class AtomicDensity(Descriptor):
             if return_directly:
                 return gaussian_descriptors_np
             else:
-                self.fingerprint_length = 4
+                self.feature_size = 4
                 return gaussian_descriptors_np, nrows_ggrid
         else:
             # Since the atomic density may be directly fed back into QE
@@ -238,10 +232,10 @@ class AtomicDensity(Descriptor):
                     [2, 1, 0, 3]
                 )
                 if self.parameters.descriptors_contain_xyz:
-                    self.fingerprint_length = 4
+                    self.feature_size = 4
                     return gaussian_descriptors_np[:, :, :, 3:], nx * ny * nz
                 else:
-                    self.fingerprint_length = 1
+                    self.feature_size = 1
                     return gaussian_descriptors_np[:, :, :, 6:], nx * ny * nz
 
     def __calculate_python(self, **kwargs):
@@ -281,7 +275,7 @@ class AtomicDensity(Descriptor):
         # This follows the implementation in the LAMMPS code.
         if self.parameters.atomic_density_sigma is None:
             self.parameters.atomic_density_sigma = self.get_optimal_sigma(
-                self.voxel
+                self._voxel
             )
         cutoff_squared = (
             self.parameters.atomic_density_cutoff
@@ -329,10 +323,10 @@ class AtomicDensity(Descriptor):
                     )
 
         if self.parameters.descriptors_contain_xyz:
-            self.fingerprint_length = 4
+            self.feature_size = 4
             return gaussian_descriptors_np, np.prod(self.grid_dimensions)
         else:
-            self.fingerprint_length = 1
+            self.feature_size = 1
             return gaussian_descriptors_np[:, :, :, 3:], np.prod(
                 self.grid_dimensions
             )
