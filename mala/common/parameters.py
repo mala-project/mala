@@ -289,12 +289,12 @@ class ParametersNetwork(ParametersBase):
         self.layer_activations = ["Sigmoid"]
         self.loss_function_type = "mse"
 
-        # for LSTM/Gru + Transformer
-        self.num_hidden_layers = 1
-
         # for LSTM/Gru
         self.no_hidden_state = False
         self.bidirection = False
+
+        # for LSTM/Gru + Transformer
+        self.num_hidden_layers = 1
 
         # for transformer net
         self.dropout = 0.1
@@ -744,12 +744,15 @@ class ParametersRunning(ParametersBase):
         a "by snapshot" basis.
 
     checkpoints_each_epoch : int
-        If not 0, checkpoint files will be saved after eac
+        If not 0, checkpoint files will be saved after each
         checkpoints_each_epoch epoch.
 
     checkpoint_name : string
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
+
+    run_name : string
+        Name of the run used for logging.
 
     logging_dir : string
         Name of the folder that logging files will be saved to.
@@ -758,6 +761,34 @@ class ParametersRunning(ParametersBase):
         If True, then upon creating logging files, these will be saved
         in a subfolder of logging_dir labelled with the starting date
         of the logging, to avoid having to change input scripts often.
+
+    logger : string
+        Name of the logger to be used.
+        Currently supported are:
+
+            - "tensorboard": Tensorboard logger.
+            - "wandb": Weights and Biases logger.
+
+    validation_metrics : list
+        List of metrics to be used for validation. Default is ["ldos"].
+        Possible options are:
+
+            - "ldos": MSE of the LDOS.
+            - "band_energy": Band energy.
+            - "band_energy_actual_fe": Band energy computed with ground truth Fermi energy.
+            - "total_energy": Total energy.
+            - "total_energy_actual_fe": Total energy computed with ground truth Fermi energy.
+            - "fermi_energy": Fermi energy.
+            - "density": Electron density.
+            - "density_relative": Rlectron density (MAPE).
+            - "dos": Density of states.
+            - "dos_relative": Density of states (MAPE).
+
+    validate_on_training_data : bool
+        Whether to validate on the training data as well. Default is False.
+
+    validate_every_n_epochs : int
+        Determines how often validation is performed. Default is 1.
 
     training_log_interval : int
         Determines how often detailed performance info is printed during
