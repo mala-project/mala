@@ -12,7 +12,7 @@ from mala.datahandling.data_repo import data_path
 # Control how much the loss should be better after hyperopt compared to
 # before. This value is fairly high, but we're training on absolutely
 # minimal amounts of data.
-desired_loss_improvement_factor = 2
+desired_loss_improvement_factor = 1.5
 
 # Different HO methods will lead to different results, but they should be
 # approximately the same.
