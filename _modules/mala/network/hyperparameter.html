@@ -243,12 +243,12 @@
                 <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterOAT</span><span class="p">(</span>
                     <span class="n">hotype</span><span class="o">=</span><span class="n">hotype</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="n">hotype</span> <span class="o">==</span> <span class="s2">&quot;acsd&quot;</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_acsd</span> <span class="kn">import</span> <span class="p">(</span>
-                    <span class="n">HyperparameterACSD</span><span class="p">,</span>
+            <span class="k">if</span> <span class="n">hotype</span> <span class="o">==</span> <span class="s2">&quot;descriptor_scoring&quot;</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_descriptor_scoring</span> <span class="kn">import</span> <span class="p">(</span>
+                    <span class="n">HyperparameterDescriptorScoring</span><span class="p">,</span>
                 <span class="p">)</span>
 
-                <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterACSD</span><span class="p">(</span>
+                <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterDescriptorScoring</span><span class="p">(</span>
                     <span class="n">hotype</span><span class="o">=</span><span class="n">hotype</span><span class="p">,</span>
                     <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>

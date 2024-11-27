@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mala.network.hyperparameter_acsd &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>mala.network.hyperparameter_descriptor_scoring &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -71,7 +71,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">mala.network.hyperparameter_acsd</li>
+      <li class="breadcrumb-item active">mala.network.hyperparameter_descriptor_scoring</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -80,15 +80,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for mala.network.hyperparameter_acsd</h1><div class="highlight"><pre>
+  <h1>Source code for mala.network.hyperparameter_descriptor_scoring</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Hyperparameter to use with optuna.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">mala.network.hyperparameter</span> <span class="kn">import</span> <span class="n">Hyperparameter</span>
 
 
-<div class="viewcode-block" id="HyperparameterACSD">
-<a class="viewcode-back" href="../../../api/mala.network.hyperparameter_acsd.html#mala.network.hyperparameter_acsd.HyperparameterACSD">[docs]</a>
-<span class="k">class</span> <span class="nc">HyperparameterACSD</span><span class="p">(</span><span class="n">Hyperparameter</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperparameterDescriptorScoring">
+<a class="viewcode-back" href="../../../api/mala.network.hyperparameter_descriptor_scoring.html#mala.network.hyperparameter_descriptor_scoring.HyperparameterDescriptorScoring">[docs]</a>
+<span class="k">class</span> <span class="nc">HyperparameterDescriptorScoring</span><span class="p">(</span><span class="n">Hyperparameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents an optuna parameter.</span>
 
 <span class="sd">    Parameters</span>
@@ -129,7 +129,7 @@
         <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">HyperparameterACSD</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HyperparameterDescriptorScoring</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span>
         <span class="p">)</span>
 

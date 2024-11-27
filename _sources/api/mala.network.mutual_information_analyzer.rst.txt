@@ -1,0 +1,7 @@
+mutual\_information\_analyzer
+=============================
+
+.. automodule:: mala.network.mutual_information_analyzer
+   :members:
+   :undoc-members:
+   :show-inheritance:

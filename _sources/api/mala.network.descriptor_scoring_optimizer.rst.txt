@@ -1,0 +1,7 @@
+descriptor\_scoring\_optimizer
+==============================
+
+.. automodule:: mala.network.descriptor_scoring_optimizer
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -26,7 +26,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="hyper_opt" href="mala.network.hyper_opt.html" />
+    <link rel="next" title="descriptor_scoring_optimizer" href="mala.network.descriptor_scoring_optimizer.html" />
     <link rel="prev" title="network" href="mala.network.html" /> 
 </head>
 
@@ -65,16 +65,18 @@
 <li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="mala.network.html">network</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">acsd_analyzer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.descriptor_scoring_optimizer.html">descriptor_scoring_optimizer</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt.html">hyper_opt</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_naswot.html">hyper_opt_naswot</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html">hyper_opt_oat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_optuna.html">hyper_opt_optuna</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter.html">hyperparameter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_acsd.html">hyperparameter_acsd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_descriptor_scoring.html">hyperparameter_descriptor_scoring</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_naswot.html">hyperparameter_naswot</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_oat.html">hyperparameter_oat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_optuna.html">hyperparameter_optuna</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.multi_training_pruner.html">multi_training_pruner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.mutual_information_analyzer.html">mutual_information_analyzer</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.naswot_pruner.html">naswot_pruner</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.network.html">network</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.objective_base.html">objective_base</a></li>
@@ -126,7 +128,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="mala.network.acsd_analyzer.ACSDAnalyzer">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ACSDAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt" title="mala.network.hyper_opt.HyperOpt"><code class="xref py py-class docutils literal notranslate"><span class="pre">HyperOpt</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="mala.network.descriptor_scoring_optimizer.html#mala.network.descriptor_scoring_optimizer.DescriptorScoringOptimizer" title="mala.network.descriptor_scoring_optimizer.DescriptorScoringOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">DescriptorScoringOptimizer</span></code></a></p>
 <p>Analyzer based on the ACSD analysis.</p>
 <p>Mathematical details see here: doi.org/10.1088/2632-2153/ac9956</p>
 <dl class="field-list simple">
@@ -142,60 +144,6 @@ parameters provided. Default: None</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.network.acsd_analyzer.ACSDAnalyzer.add_hyperparameter">
-<span class="sig-name descname"><span class="pre">add_hyperparameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer.add_hyperparameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer.add_hyperparameter" title="Link to this definition"></a></dt>
-<dd><p>Add a hyperparameter to the current investigation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>string</em>) – Name of the hyperparameter. Please note that these names always
-have to be the same as the parameter names in
-ParametersDescriptors.</p></li>
-<li><p><strong>choices</strong> – List of possible choices.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.network.acsd_analyzer.ACSDAnalyzer.add_snapshot">
-<span class="sig-name descname"><span class="pre">add_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descriptor_input_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_input_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer.add_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer.add_snapshot" title="Link to this definition"></a></dt>
-<dd><p>Add a snapshot to be processed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>descriptor_input_type</strong> (<em>string</em>) – Type of descriptor data to be processed.
-See mala.datahandling.data_converter.descriptor_input_types
-for options.</p></li>
-<li><p><strong>descriptor_input_path</strong> (<em>string</em>) – Path of descriptor data to be processed.</p></li>
-<li><p><strong>target_input_type</strong> (<em>string</em>) – Type of target data to be processed.
-See mala.datahandling.data_converter.target_input_types
-for options.</p></li>
-<li><p><strong>target_input_path</strong> (<em>string</em>) – Path of target data to be processed.</p></li>
-<li><p><strong>descriptor_units</strong> (<em>string</em>) – Units for descriptor data processing.</p></li>
-<li><p><strong>target_units</strong> (<em>string</em>) – Units for target data processing.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.network.acsd_analyzer.ACSDAnalyzer.perform_study">
-<span class="sig-name descname"><span class="pre">perform_study</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_based_communication</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_plotting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer.perform_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer.perform_study" title="Link to this definition"></a></dt>
-<dd><p>Perform the study, i.e. the optimization.</p>
-<p>This is done by sampling different descriptors, calculated with
-different hyperparameters and then calculating the ACSD.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.network.acsd_analyzer.ACSDAnalyzer.set_optimal_parameters">
-<span class="sig-name descname"><span class="pre">set_optimal_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/acsd_analyzer.html#ACSDAnalyzer.set_optimal_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.acsd_analyzer.ACSDAnalyzer.set_optimal_parameters" title="Link to this definition"></a></dt>
-<dd><p>Set the optimal parameters found in the present study.</p>
-<p>The parameters will be written to the parameter object with which the
-hyperparameter optimizer was created.</p>
-</dd></dl>
-
 </dd></dl>
 
 </section>
@@ -205,7 +153,7 @@ hyperparameter optimizer was created.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="mala.network.html" class="btn btn-neutral float-left" title="network" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mala.network.hyper_opt.html" class="btn btn-neutral float-right" title="hyper_opt" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.network.descriptor_scoring_optimizer.html" class="btn btn-neutral float-right" title="descriptor_scoring_optimizer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
