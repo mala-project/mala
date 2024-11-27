@@ -3,7 +3,7 @@
 from mala.network.hyperparameter import Hyperparameter
 
 
-class HyperparameterACSD(Hyperparameter):
+class HyperparameterDescriptorScoring(Hyperparameter):
     """Represents an optuna parameter.
 
     Parameters
@@ -44,7 +44,7 @@ class HyperparameterACSD(Hyperparameter):
         high=0,
         choices=None,
     ):
-        super(HyperparameterACSD, self).__init__(
+        super(HyperparameterDescriptorScoring, self).__init__(
             opttype=opttype, name=name, low=low, high=high, choices=choices
         )
 

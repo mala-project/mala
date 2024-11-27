@@ -1101,6 +1101,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
 
         # For accelerated hyperparameter optimization.
         self.acsd_points = 100
+        self.mutual_information_points = 20000
 
     @property
     def rdb_storage_heartbeat(self):

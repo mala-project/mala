@@ -158,12 +158,12 @@ class Hyperparameter(JSONSerializable):
                 hparam = HyperparameterOAT(
                     hotype=hotype, opttype=opttype, name=name, choices=choices
                 )
-            if hotype == "acsd":
-                from mala.network.hyperparameter_acsd import (
-                    HyperparameterACSD,
+            if hotype == "descriptor_scoring":
+                from mala.network.hyperparameter_descriptor_scoring import (
+                    HyperparameterDescriptorScoring,
                 )
 
-                hparam = HyperparameterACSD(
+                hparam = HyperparameterDescriptorScoring(
                     hotype=hotype,
                     opttype=opttype,
                     name=name,
