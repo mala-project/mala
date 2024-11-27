@@ -33,7 +33,7 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
     """
     Base class for all training-free descriptor hyperparameter optimizers.
 
-    These optimizer use alternative metrics (ACSD, mutual information, etc.
+    These optimizer use alternative metrics ACSD, mutual information, etc.
     to tune descriptor hyperparameters.
 
     Parameters
@@ -50,6 +50,14 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
         Target calculator used for parsing/converting target data. If None,
         the target calculator will be created by this object using the
         parameters provided. Default: None
+
+    Attributes
+    ----------
+    best_score : float
+        Score associated with best-performing trial.
+
+    best_trial_index : int
+        Index of best-performing trial
     """
 
     def __init__(
@@ -199,7 +207,7 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
         Perform the study, i.e. the optimization.
 
         This is done by sampling different descriptors, calculated with
-        different hyperparameters and then calculating the ACSD.
+        different hyperparameters and then calculating some surrogate score.
         """
         # Prepare the hyperparameter lists.
         self._construct_hyperparam_list()
@@ -317,14 +325,20 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
                         }
 
     def set_optimal_parameters(self):
+        """
+        Set optimal parameters.
+
+        This function will write the determined hyperparameters directly to
+        MALA parameters object referenced in this class.
+        """
         if get_rank() == 0:
-            best_trial = self.get_best_trial()
+            best_trial = self._get_best_trial()
             minimum_score = self._study[np.argmin(self._study[:, -1])]
             if isinstance(self._descriptor_calculator, Bispectrum):
                 self.params.descriptors.bispectrum_cutoff = best_trial[0]
                 self.params.descriptors.bispectrum_twojmax = int(best_trial[1])
                 printout(
-                    "ACSD analysis finished, optimal parameters: ",
+                    "Descriptor scoring analysis finished, optimal parameters: ",
                 )
                 printout(
                     "Bispectrum twojmax: ",
@@ -338,7 +352,7 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
                 self.params.descriptors.atomic_density_cutoff = best_trial[0]
                 self.params.descriptors.atomic_density_sigma = best_trial[1]
                 printout(
-                    "ACSD analysis finished, optimal parameters: ",
+                    "Descriptor scoring analysis finished, optimal parameters: ",
                 )
                 printout(
                     "Atomic density sigma: ",
@@ -350,8 +364,8 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
                 )
 
     @abstractmethod
-    def get_best_trial(self):
-        """Different from best_trial because of parallelization."""
+    def _get_best_trial(self):
+        """Determine the best trial as given by this study."""
         pass
 
     def _construct_hyperparam_list(self):
@@ -486,7 +500,7 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
             self.params.descriptors._configuration["mpi"]
             and file_based_communication
         ):
-            memmap = "acsd.out.npy_temp"
+            memmap = "descriptor_scoring.out.npy_temp"
 
         target_calculator_kwargs = {}
 

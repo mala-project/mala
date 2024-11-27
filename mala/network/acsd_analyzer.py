@@ -50,8 +50,8 @@ class ACSDAnalyzer(DescriptorScoringOptimizer):
             self.best_score = score
             self.best_trial_index = index
 
-    def get_best_trial(self):
-        """Different from best_trial because of parallelization."""
+    def _get_best_trial(self):
+        """Determine the best trial as given by this study."""
         return self._study[np.argmin(self._study[:, -1])]
 
     @staticmethod

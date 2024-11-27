@@ -45,8 +45,8 @@ class MutualInformationAnalyzer(DescriptorScoringOptimizer):
             descriptor_calculator=descriptor_calculator,
         )
 
-    def get_best_trial(self):
-        """Different from best_trial because of parallelization."""
+    def _get_best_trial(self):
+        """Determine the best trial as given by this study."""
         return self._study[np.argmax(self._study[:, -1])]
 
     def _update_logging(self, score, index):
@@ -131,7 +131,7 @@ class MutualInformationAnalyzer(DescriptorScoringOptimizer):
         return mi
 
     @staticmethod
-    def normalize(data):
+    def _normalize(data):
         mean = np.mean(data, axis=0)
         std = np.std(data, axis=0)
         std_nonzero = std > 1e-6
@@ -161,8 +161,8 @@ class MutualInformationAnalyzer(DescriptorScoringOptimizer):
         dim_X = X.shape[-1]
         rand_subset = np.random.permutation(n)[:n_samples]
         if normalize_data:
-            X = MutualInformationAnalyzer.normalize(X)
-            Y = MutualInformationAnalyzer.normalize(Y)
+            X = MutualInformationAnalyzer._normalize(X)
+            Y = MutualInformationAnalyzer._normalize(Y)
         X = X[rand_subset]
         Y = Y[rand_subset]
         XY = np.concatenate([X, Y], axis=1)
