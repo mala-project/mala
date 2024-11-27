@@ -2,95 +2,11 @@
 
 import numpy as np
 
-from mala.datahandling.data_converter import (
-    descriptor_input_types,
-    target_input_types,
-)
+
+from mala.common.parallelizer import parallel_warn
 from mala.network.descriptor_scoring_optimizer import (
     DescriptorScoringOptimizer,
 )
-import sklearn.mixture
-import sklearn.covariance
-import matplotlib.pyplot as plt
-
-
-def normalize(data):
-    mean = np.mean(data, axis=0)
-    std = np.std(data, axis=0)
-    std_nonzero = std > 1e-6
-    data = data[:, std_nonzero]
-    mean = mean[std_nonzero]
-    std = std[std_nonzero]
-    data = (data - mean) / std
-    return data
-
-
-def mutual_information(
-    X,
-    Y,
-    n_components=None,
-    max_iter=1000,
-    n_samples=100000,
-    covariance_type="diag",
-    normalize_data=False,
-):
-    assert (
-        covariance_type == "diag"
-    ), "Only support covariance_type='diag' for now"
-    n = X.shape[0]
-    dim_X = X.shape[-1]
-    rand_subset = np.random.permutation(n)[:n_samples]
-    if normalize_data:
-        X = normalize(X)
-        Y = normalize(Y)
-    X = X[rand_subset]
-    Y = Y[rand_subset]
-    XY = np.concatenate([X, Y], axis=1)
-    d = XY.shape[-1]
-    if n_components is None:
-        n_components = d // 2
-    gmm_XY = sklearn.mixture.GaussianMixture(
-        n_components=n_components,
-        covariance_type=covariance_type,
-        max_iter=max_iter,
-    )
-    gmm_XY.fit(XY)
-
-    gmm_X = sklearn.mixture.GaussianMixture(
-        n_components=n_components,
-        covariance_type=covariance_type,
-        max_iter=max_iter,
-    )
-    gmm_X.weights_ = gmm_XY.weights_
-    gmm_X.means_ = gmm_XY.means_[:, :dim_X]
-    gmm_X.covariances_ = gmm_XY.covariances_[:, :dim_X]
-    gmm_X.precisions_ = gmm_XY.precisions_[:, :dim_X]
-    gmm_X.precisions_cholesky_ = gmm_XY.precisions_cholesky_[:, :dim_X]
-
-    gmm_Y = sklearn.mixture.GaussianMixture(
-        n_components=n_components,
-        covariance_type=covariance_type,
-        max_iter=max_iter,
-    )
-    gmm_Y.weights_ = gmm_XY.weights_
-    gmm_Y.means_ = gmm_XY.means_[:, dim_X:]
-    gmm_Y.covariances_ = gmm_XY.covariances_[:, dim_X:]
-    gmm_Y.precisions_ = gmm_XY.precisions_[:, dim_X:]
-    gmm_Y.precisions_cholesky_ = gmm_XY.precisions_cholesky_[:, dim_X:]
-
-    rand_perm = np.random.permutation(Y.shape[0])
-    Y_perm = Y[rand_perm]
-    XY_perm = np.concatenate([X, Y_perm], axis=1)
-    temp = (
-        gmm_XY.score_samples(XY_perm)
-        - gmm_X.score_samples(X)
-        - gmm_Y.score_samples(Y_perm)
-    )
-    temp_exp = np.exp(temp)
-    mi = np.mean(temp_exp * temp)
-    # change log base e to log base 2
-    mi = mi / np.log(2)
-    return mi
 
 
 class MutualInformationAnalyzer(DescriptorScoringOptimizer):
@@ -116,6 +32,13 @@ class MutualInformationAnalyzer(DescriptorScoringOptimizer):
     def __init__(
         self, params, target_calculator=None, descriptor_calculator=None
     ):
+        parallel_warn(
+            "The MutualInformationAnalyzer is still in its "
+            "experimental stage. The API is consistent with "
+            "MALA hyperparameter optimization and will likely not "
+            "change, but the internal algorithm may be subject "
+            "to changes in the near-future."
+        )
         super(MutualInformationAnalyzer, self).__init__(
             params,
             target_calculator=target_calculator,
@@ -129,10 +52,10 @@ class MutualInformationAnalyzer(DescriptorScoringOptimizer):
     def _update_logging(self, score, index):
         if self.best_score is None:
             self.best_score = score
-            self.best_trial = index
+            self.best_trial_index = index
         elif score > self.best_score:
             self.best_score = score
-            self.best_trial = index
+            self.best_trial_index = index
 
     def _calculate_score(self, descriptor, target):
         return self._calculate_mutual_information(
@@ -196,28 +119,8 @@ class MutualInformationAnalyzer(DescriptorScoringOptimizer):
         elif len(ldos_dim) != 2:
             raise Exception("Cannot work with this LDOS data.")
 
-        plot = False
-        if plot:
-            rand_perm = np.random.permutation(ldos_data.shape[0])
-            perm_train = rand_perm[:n_samples]
-            X_train = descriptor_data[perm_train]
-            Y_train = ldos_data[perm_train]
-
-            covariance = sklearn.covariance.EmpiricalCovariance()
-            covariance.fit(Y_train)
-            plt.imshow(
-                covariance.covariance_, cmap="cool", interpolation="nearest"
-            )
-            plt.show()
-
-            covariance = sklearn.covariance.EmpiricalCovariance()
-            covariance.fit(X_train)
-            plt.imshow(
-                covariance.covariance_, cmap="hot", interpolation="nearest"
-            )
-            plt.show()
         # The hyperparameters could be put potentially into the params.
-        mi = mutual_information(
+        mi = MutualInformationAnalyzer._mutual_information(
             descriptor_data,
             ldos_data,
             n_components=None,
@@ -225,4 +128,86 @@ class MutualInformationAnalyzer(DescriptorScoringOptimizer):
             covariance_type="diag",
             normalize_data=True,
         )
+        return mi
+
+    @staticmethod
+    def normalize(data):
+        mean = np.mean(data, axis=0)
+        std = np.std(data, axis=0)
+        std_nonzero = std > 1e-6
+        data = data[:, std_nonzero]
+        mean = mean[std_nonzero]
+        std = std[std_nonzero]
+        data = (data - mean) / std
+        return data
+
+    @staticmethod
+    def _mutual_information(
+        X,
+        Y,
+        n_components=None,
+        max_iter=1000,
+        n_samples=100000,
+        covariance_type="diag",
+        normalize_data=False,
+    ):
+        import sklearn.mixture
+        import sklearn.covariance
+
+        assert (
+            covariance_type == "diag"
+        ), "Only support covariance_type='diag' for now"
+        n = X.shape[0]
+        dim_X = X.shape[-1]
+        rand_subset = np.random.permutation(n)[:n_samples]
+        if normalize_data:
+            X = MutualInformationAnalyzer.normalize(X)
+            Y = MutualInformationAnalyzer.normalize(Y)
+        X = X[rand_subset]
+        Y = Y[rand_subset]
+        XY = np.concatenate([X, Y], axis=1)
+        d = XY.shape[-1]
+        if n_components is None:
+            n_components = d // 2
+        gmm_XY = sklearn.mixture.GaussianMixture(
+            n_components=n_components,
+            covariance_type=covariance_type,
+            max_iter=max_iter,
+        )
+        gmm_XY.fit(XY)
+
+        gmm_X = sklearn.mixture.GaussianMixture(
+            n_components=n_components,
+            covariance_type=covariance_type,
+            max_iter=max_iter,
+        )
+        gmm_X.weights_ = gmm_XY.weights_
+        gmm_X.means_ = gmm_XY.means_[:, :dim_X]
+        gmm_X.covariances_ = gmm_XY.covariances_[:, :dim_X]
+        gmm_X.precisions_ = gmm_XY.precisions_[:, :dim_X]
+        gmm_X.precisions_cholesky_ = gmm_XY.precisions_cholesky_[:, :dim_X]
+
+        gmm_Y = sklearn.mixture.GaussianMixture(
+            n_components=n_components,
+            covariance_type=covariance_type,
+            max_iter=max_iter,
+        )
+        gmm_Y.weights_ = gmm_XY.weights_
+        gmm_Y.means_ = gmm_XY.means_[:, dim_X:]
+        gmm_Y.covariances_ = gmm_XY.covariances_[:, dim_X:]
+        gmm_Y.precisions_ = gmm_XY.precisions_[:, dim_X:]
+        gmm_Y.precisions_cholesky_ = gmm_XY.precisions_cholesky_[:, dim_X:]
+
+        rand_perm = np.random.permutation(Y.shape[0])
+        Y_perm = Y[rand_perm]
+        XY_perm = np.concatenate([X, Y_perm], axis=1)
+        temp = (
+            gmm_XY.score_samples(XY_perm)
+            - gmm_X.score_samples(X)
+            - gmm_Y.score_samples(Y_perm)
+        )
+        temp_exp = np.exp(temp)
+        mi = np.mean(temp_exp * temp)
+        # change log base e to log base 2
+        mi = mi / np.log(2)
         return mi

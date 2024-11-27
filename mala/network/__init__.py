@@ -13,4 +13,5 @@ from .hyperparameter_naswot import HyperparameterNASWOT
 from .hyperparameter_optuna import HyperparameterOptuna
 from .hyperparameter_descriptor_scoring import HyperparameterDescriptorScoring
 from .acsd_analyzer import ACSDAnalyzer
+from .mutual_information_analyzer import MutualInformationAnalyzer
 from .runner import Runner

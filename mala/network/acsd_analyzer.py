@@ -45,10 +45,10 @@ class ACSDAnalyzer(DescriptorScoringOptimizer):
     def _update_logging(self, score, index):
         if self.best_score is None:
             self.best_score = score
-            self.best_trial = index
+            self.best_trial_index = index
         elif score < self.best_score:
             self.best_score = score
-            self.best_trial = index
+            self.best_trial_index = index
 
     def get_best_trial(self):
         """Different from best_trial because of parallelization."""

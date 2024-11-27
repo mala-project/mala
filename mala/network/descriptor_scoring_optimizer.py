@@ -208,9 +208,9 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
         )
 
         # Perform the descriptor scoring analysis separately for each snapshot.
-        self.best_trial_index = None
-        self.best_score = None
         for i in range(0, len(self._snapshots)):
+            self.best_trial_index = None
+            self.best_score = None
             printout(
                 "Starting descriptor scoring analysis of snapshot",
                 str(i),
