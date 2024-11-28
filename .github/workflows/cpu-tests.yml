@@ -167,12 +167,8 @@ jobs:
           # export Docker image Conda environment for a later comparison
           conda env export -n mala-cpu > env_before.yml
 
-          pip list
-
           # install mala package
           pip --no-cache-dir install -e .[opt,test] --no-build-isolation
-
-          pip list
 
 
       - name: Check if Conda environment meets the specified requirements
@@ -180,6 +176,8 @@ jobs:
         run: |
           # export Conda environment _with_ mala package installed in it (and extra dependencies)
           conda env export -n mala-cpu > env_after.yml
+
+          sed -i '/materials-learning-algorithms/d' ./env_after.yml
 
           # if comparison fails, `install/mala_cpu_[base]_environment.yml` needs to be aligned with
           # `requirements.txt` and/or extra dependencies are missing in the Docker Conda environment
