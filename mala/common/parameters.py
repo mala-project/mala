@@ -757,7 +757,7 @@ class ParametersRunning(ParametersBase):
         self.run_name = ""
         self.logging_dir = "./mala_logging"
         self.logging_dir_append_date = True
-        self.logger = "tensorboard"
+        self.logger = None
         self.validation_metrics = ["ldos"]
         self.validate_on_training_data = False
         self.validate_every_n_epochs = 1
