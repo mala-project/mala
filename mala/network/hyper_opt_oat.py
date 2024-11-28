@@ -14,7 +14,7 @@ except ModuleNotFoundError:
 from mala.network.hyper_opt import HyperOpt
 from mala.network.objective_base import ObjectiveBase
 from mala.network.hyperparameter_oat import HyperparameterOAT
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, parallel_warn
 
 
 class HyperOptOAT(HyperOpt):
@@ -38,22 +38,55 @@ class HyperOptOAT(HyperOpt):
         super(HyperOptOAT, self).__init__(
             params, data, use_pkl_checkpoints=use_pkl_checkpoints
         )
-        self.objective = None
-        self.optimal_params = None
-        self.checkpoint_counter = 0
+        self._objective = None
+        self._optimal_params = None
+        self._checkpoint_counter = 0
 
         # Related to the OA itself.
-        self.importance = None
-        self.n_factors = None
-        self.factor_levels = None
-        self.strength = None
-        self.N_runs = None
+        self._importance = None
+        self._n_factors = None
+        self._factor_levels = None
+        self._strength = None
+        self._N_runs = None
         self.__OA = None
 
         # Tracking the trial progress.
-        self.sorted_num_choices = []
-        self.current_trial = 0
-        self.trial_losses = None
+        self._sorted_num_choices = []
+        self._current_trial = 0
+        self._trial_losses = None
+
+    @property
+    def best_trial_index(self):
+        """
+        Get the index and loss of best trial determined in this NASWOT run.
+
+        This property is read only, and will be recomputed.
+
+        Returns
+        -------
+        best_trial_index : list
+            A list containing [0] the best trial index and [1] the best
+            trial loss.
+        """
+        if self._trial_losses is None:
+            parallel_warn(
+                "Trial list is not yet computed, cannot determine "
+                "best trial."
+            )
+            return [-1, np.inf]
+
+        if self.params.hyperparameters.direction == "minimize":
+            return [np.argmin(self._trial_losses), np.min(self._trial_losses)]
+        elif self.params.hyperparameters.direction == "maximize":
+            return [np.argmax(self._trial_losses), np.max(self._trial_losses)]
+        else:
+            raise Exception(
+                "Invalid direction for hyperparameter optimization selected."
+            )
+
+    @best_trial_index.setter
+    def best_trial_index(self, value):
+        pass
 
     def add_hyperparameter(
         self, opttype="categorical", name="", choices=None, **kwargs
@@ -70,15 +103,15 @@ class HyperOptOAT(HyperOpt):
             Datatype of the hyperparameter. Follows optuna's naming
             conventions, but currently only supports "categorical" (a list).
         """
-        if not self.sorted_num_choices:  # if empty
+        if not self._sorted_num_choices:  # if empty
             super(HyperOptOAT, self).add_hyperparameter(
                 opttype=opttype, name=name, choices=choices
             )
-            self.sorted_num_choices.append(len(choices))
+            self._sorted_num_choices.append(len(choices))
 
         else:
-            index = bisect(self.sorted_num_choices, len(choices))
-            self.sorted_num_choices.insert(index, len(choices))
+            index = bisect(self._sorted_num_choices, len(choices))
+            self._sorted_num_choices.insert(index, len(choices))
             self.params.hyperparameters.hlist.insert(
                 index,
                 HyperparameterOAT(opttype=opttype, name=name, choices=choices),
@@ -88,50 +121,50 @@ class HyperOptOAT(HyperOpt):
         """
         Perform the study, i.e. the optimization.
 
-        Uses Optunas TPE sampler.
+        Internally constructs an orthogonal array and performs trial NN
+        trainings based on it.
         """
         if self.__OA is None:
-            self.__OA = self.get_orthogonal_array()
+            self.__OA = self._get_orthogonal_array()
         print(self.__OA)
-        if self.trial_losses is None:
-            self.trial_losses = np.zeros(self.__OA.shape[0]) + float("inf")
+        if self._trial_losses is None:
+            self._trial_losses = np.zeros(self.__OA.shape[0]) + float("inf")
 
         printout(
             "Performing",
-            self.N_runs,
+            self._N_runs,
             "trials, starting with trial number",
-            self.current_trial,
+            self._current_trial,
             min_verbosity=0,
         )
 
         # The parameters could have changed.
-        self.objective = ObjectiveBase(self.params, self.data_handler)
+        self._objective = ObjectiveBase(self.params, self._data_handler)
 
         # Iterate over the OA and perform the trials.
-        for i in range(self.current_trial, self.N_runs):
+        for i in range(self._current_trial, self._N_runs):
             row = self.__OA[i]
-            self.trial_losses[self.current_trial] = self.objective(row)
+            self._trial_losses[self._current_trial] = self._objective(row)
 
             # Output diagnostic information.
-            best_trial = self.get_best_trial_results()
             printout(
                 "Trial number",
-                self.current_trial,
+                self._current_trial,
                 "finished with:",
-                self.trial_losses[self.current_trial],
+                self._trial_losses[self._current_trial],
                 ", best is trial",
-                best_trial[0],
+                self.best_trial_index[0],
                 "with",
-                best_trial[1],
+                self.best_trial_index[1],
                 min_verbosity=0,
             )
-            self.current_trial += 1
+            self._current_trial += 1
             self.__create_checkpointing(row)
 
         # Perform Range Analysis
-        self.get_optimal_parameters()
+        self._range_analysis()
 
-    def get_optimal_parameters(self):
+    def _range_analysis(self):
         """
         Find the optimal set of hyperparameters by doing range analysis.
 
@@ -143,15 +176,15 @@ class HyperOptOAT(HyperOpt):
             return np.where(self.__OA[:, idx] == val)[0]
 
         R = [
-            [self.trial_losses[indices(idx, l)].sum() for l in range(levels)]
-            for (idx, levels) in enumerate(self.factor_levels)
+            [self._trial_losses[indices(idx, l)].sum() for l in range(levels)]
+            for (idx, levels) in enumerate(self._factor_levels)
         ]
 
         A = [[i / len(j) for i in j] for j in R]
 
         # Taking loss as objective to minimise
-        self.optimal_params = np.array([i.index(min(i)) for i in A])
-        self.importance = np.argsort([max(i) - min(i) for i in A])
+        self._optimal_params = np.array([i.index(min(i)) for i in A])
+        self._importance = np.argsort([max(i) - min(i) for i in A])
 
     def show_order_of_importance(self):
         """Print the order of importance of the hyperparameters."""
@@ -159,7 +192,7 @@ class HyperOptOAT(HyperOpt):
         printout(
             *[
                 self.params.hyperparameters.hlist[idx].name
-                for idx in self.importance
+                for idx in self._importance
             ],
             sep=" < ",
             min_verbosity=0
@@ -172,23 +205,23 @@ class HyperOptOAT(HyperOpt):
         The parameters will be written to the parameter object with which the
         hyperparameter optimizer was created.
         """
-        self.objective.parse_trial_oat(self.optimal_params)
+        self._objective.parse_trial_oat(self._optimal_params)
 
-    def get_orthogonal_array(self):
+    def _get_orthogonal_array(self):
         """
         Generate the best OA used for optimal hyperparameter sampling.
 
         This is function is taken from the example notebook of OApackage.
         """
         self.__check_factor_levels()
-        print("Sorted factor levels:", self.sorted_num_choices)
-        self.n_factors = len(self.params.hyperparameters.hlist)
+        print("Sorted factor levels:", self._sorted_num_choices)
+        self._n_factors = len(self.params.hyperparameters.hlist)
 
-        self.factor_levels = [
+        self._factor_levels = [
             par.num_choices for par in self.params.hyperparameters.hlist
         ]
 
-        self.strength = 2
+        self._strength = 2
         arraylist = None
 
         # This is a little bit hacky.
@@ -200,11 +233,14 @@ class HyperOptOAT(HyperOpt):
         # holds. x is unknown, but we can be confident that it should be
         # small. So simply trying 3 time should be fine for now.
         for i in range(1, 4):
-            self.N_runs = self.number_of_runs() * i
-            print("Trying run size:", self.N_runs)
+            self._N_runs = self._number_of_runs() * i
+            print("Trying run size:", self._N_runs)
             print("Generating Suitable Orthogonal Array.")
             arrayclass = oa.arraydata_t(
-                self.factor_levels, self.N_runs, self.strength, self.n_factors
+                self._factor_levels,
+                self._N_runs,
+                self._strength,
+                self._n_factors,
             )
             arraylist = [arrayclass.create_root()]
 
@@ -212,7 +248,7 @@ class HyperOptOAT(HyperOpt):
             options = oa.OAextend()
             options.setAlgorithmAuto(arrayclass)
 
-            for _ in range(self.strength + 1, self.n_factors + 1):
+            for _ in range(self._strength + 1, self._n_factors + 1):
                 arraylist_extensions = oa.extend_arraylist(
                     arraylist, arrayclass, options
                 )
@@ -231,7 +267,7 @@ class HyperOptOAT(HyperOpt):
         else:
             return np.unique(np.array(arraylist[0]), axis=0)
 
-    def number_of_runs(self):
+    def _number_of_runs(self):
         """
         Calculate the minimum number of runs required for an Orthogonal array.
 
@@ -241,29 +277,20 @@ class HyperOptOAT(HyperOpt):
         """
         runs = [
             np.prod(tt)
-            for tt in itertools.combinations(self.factor_levels, self.strength)
+            for tt in itertools.combinations(
+                self._factor_levels, self._strength
+            )
         ]
 
         N = np.lcm.reduce(runs)
         return int(N)
 
-    def get_best_trial_results(self):
-        """Get the best trial out of the list, including the value."""
-        if self.params.hyperparameters.direction == "minimize":
-            return [np.argmin(self.trial_losses), np.min(self.trial_losses)]
-        elif self.params.hyperparameters.direction == "maximize":
-            return [np.argmax(self.trial_losses), np.max(self.trial_losses)]
-        else:
-            raise Exception(
-                "Invalid direction for hyperparameter optimization selected."
-            )
-
     def __check_factor_levels(self):
         """Check that the factors are in a decreasing order."""
-        dx = np.diff(self.sorted_num_choices)
+        dx = np.diff(self._sorted_num_choices)
         if np.all(dx >= 0):
             # Factors in increasing order, we have to reverse the order.
-            self.sorted_num_choices.reverse()
+            self._sorted_num_choices.reverse()
             self.params.hyperparameters.hlist.reverse()
         elif np.all(dx <= 0):
             # Factors are in decreasing order, we don't have to do anything.
@@ -348,31 +375,33 @@ class HyperOptOAT(HyperOpt):
         with open(file_path, "rb") as handle:
             loaded_tracking_data = pickle.load(handle)
             loaded_hyperopt = HyperOptOAT(params, data)
-            loaded_hyperopt.sorted_num_choices = loaded_tracking_data[
+            loaded_hyperopt._sorted_num_choices = loaded_tracking_data[
                 "sorted_num_choices"
             ]
-            loaded_hyperopt.current_trial = loaded_tracking_data[
+            loaded_hyperopt._current_trial = loaded_tracking_data[
                 "current_trial"
             ]
-            loaded_hyperopt.trial_losses = loaded_tracking_data["trial_losses"]
-            loaded_hyperopt.importance = loaded_tracking_data["importance"]
-            loaded_hyperopt.n_factors = loaded_tracking_data["n_factors"]
-            loaded_hyperopt.factor_levels = loaded_tracking_data[
+            loaded_hyperopt._trial_losses = loaded_tracking_data[
+                "trial_losses"
+            ]
+            loaded_hyperopt._importance = loaded_tracking_data["importance"]
+            loaded_hyperopt._n_factors = loaded_tracking_data["n_factors"]
+            loaded_hyperopt._factor_levels = loaded_tracking_data[
                 "factor_levels"
             ]
-            loaded_hyperopt.strength = loaded_tracking_data["strength"]
-            loaded_hyperopt.N_runs = loaded_tracking_data["N_runs"]
+            loaded_hyperopt._strength = loaded_tracking_data["strength"]
+            loaded_hyperopt._N_runs = loaded_tracking_data["N_runs"]
             loaded_hyperopt.__OA = loaded_tracking_data["OA"]
 
         return loaded_hyperopt
 
     def __create_checkpointing(self, trial):
         """Create a checkpoint of optuna study, if necessary."""
-        self.checkpoint_counter += 1
+        self._checkpoint_counter += 1
         need_to_checkpoint = False
 
         if (
-            self.checkpoint_counter
+            self._checkpoint_counter
             >= self.params.hyperparameters.checkpoints_each_trial
             and self.params.hyperparameters.checkpoints_each_trial > 0
         ):
@@ -386,12 +415,12 @@ class HyperOptOAT(HyperOpt):
             )
         if (
             self.params.hyperparameters.checkpoints_each_trial < 0
-            and np.argmin(self.trial_losses) == self.current_trial - 1
+            and np.argmin(self._trial_losses) == self._current_trial - 1
         ):
             need_to_checkpoint = True
             printout(
                 "Best trial is "
-                + str(self.current_trial - 1)
+                + str(self._current_trial - 1)
                 + ", creating a "
                 "checkpoint for it.",
                 min_verbosity=1,
@@ -399,16 +428,10 @@ class HyperOptOAT(HyperOpt):
 
         if need_to_checkpoint is True:
             # We need to create a checkpoint!
-            self.checkpoint_counter = 0
+            self._checkpoint_counter = 0
 
             self._save_params_and_scaler()
 
-            # Next, we save all the other objects.
-            # Here some horovod stuff would have to go.
-            # But so far, the optuna implementation is not horovod-ready...
-            # if self.params.use_horovod:
-            #     if hvd.rank() != 0:
-            #         return
             # The study only has to be saved if the no RDB storage is used.
             if self.params.hyperparameters.rdb_storage is None:
                 hyperopt_name = (
@@ -417,14 +440,14 @@ class HyperOptOAT(HyperOpt):
                 )
 
                 study = {
-                    "sorted_num_choices": self.sorted_num_choices,
-                    "current_trial": self.current_trial,
-                    "trial_losses": self.trial_losses,
-                    "importance": self.importance,
-                    "n_factors": self.n_factors,
-                    "factor_levels": self.factor_levels,
-                    "strength": self.strength,
-                    "N_runs": self.N_runs,
+                    "sorted_num_choices": self._sorted_num_choices,
+                    "current_trial": self._current_trial,
+                    "trial_losses": self._trial_losses,
+                    "importance": self._importance,
+                    "n_factors": self._n_factors,
+                    "factor_levels": self._factor_levels,
+                    "strength": self._strength,
+                    "N_runs": self._N_runs,
                     "OA": self.__OA,
                 }
                 with open(hyperopt_name, "wb") as handle:

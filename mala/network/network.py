@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as functional
 
 from mala.common.parameters import Parameters
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, parallel_warn
 
 
 class Network(nn.Module):
@@ -23,6 +23,23 @@ class Network(nn.Module):
     ----------
     params : mala.common.parametes.Parameters
         Parameters used to create this neural network.
+
+    Attributes
+    ----------
+    loss_func : function
+        Loss function.
+
+    mini_batch_size : int
+        Size of mini batches propagated through network.
+
+    number_of_layers : int
+        Number of NN layers.
+
+    params : mala.common.parametes.ParametersNetwork
+        MALA neural network parameters.
+
+    use_ddp : bool
+        If True, the torch distributed data parallel formalism will be used.
     """
 
     def __new__(cls, params: Parameters):
@@ -78,7 +95,7 @@ class Network(nn.Module):
         super(Network, self).__init__()
 
         # Mappings for parsing of the activation layers.
-        self.activation_mappings = {
+        self._activation_mappings = {
             "Sigmoid": nn.Sigmoid,
             "ReLU": nn.ReLU,
             "LeakyReLU": nn.LeakyReLU,
@@ -96,12 +113,19 @@ class Network(nn.Module):
 
     @abstractmethod
     def forward(self, inputs):
-        """Abstract method. To be implemented by the derived class."""
+        """
+        Abstract method. To be implemented by the derived class.
+
+        Parameters
+        ----------
+        inputs : torch.Tensor
+            Torch tensor to be propagated.
+        """
         pass
 
     def do_prediction(self, array):
         """
-        Predict the output values for an input array..
+        Predict the output values for an input array.
 
         Interface to do predictions. The data put in here is assumed to be a
         scaled torch.Tensor and in the right units. Be aware that this will
@@ -143,8 +167,6 @@ class Network(nn.Module):
         """
         return self.loss_func(output, target)
 
-    # FIXME: This guarentees downwards compatibility, but it is ugly.
-    #  Rather enforce the right package versions in the repo.
     def save_network(self, path_to_file):
         """
         Save the network.
@@ -238,13 +260,13 @@ class FeedForwardNet(Network):
             try:
                 if use_only_one_activation_type:
                     self.layers.append(
-                        self.activation_mappings[
+                        self._activation_mappings[
                             self.params.layer_activations[0]
                         ]()
                     )
                 else:
                     self.layers.append(
-                        self.activation_mappings[
+                        self._activation_mappings[
                             self.params.layer_activations[i]
                         ]()
                     )
@@ -281,6 +303,11 @@ class LSTM(Network):
     # was passed to be used in the entire network.
     def __init__(self, params):
         super(LSTM, self).__init__(params)
+        parallel_warn(
+            "The LSTM class will be deprecated in MALA v1.4.0.",
+            0,
+            category=FutureWarning,
+        )
 
         self.hidden_dim = self.params.layer_sizes[-1]
 
@@ -312,7 +339,7 @@ class LSTM(Network):
                 self.params.num_hidden_layers,
                 batch_first=True,
             )
-        self.activation = self.activation_mappings[
+        self.activation = self._activation_mappings[
             self.params.layer_activations[0]
         ]()
 
@@ -417,6 +444,11 @@ class GRU(LSTM):
     # layer as GRU.
     def __init__(self, params):
         Network.__init__(self, params)
+        parallel_warn(
+            "The GRU class will be deprecated in MALA v1.4.0.",
+            0,
+            category=FutureWarning,
+        )
 
         self.hidden_dim = self.params.layer_sizes[-1]
 
@@ -445,7 +477,7 @@ class GRU(LSTM):
                 self.params.num_hidden_layers,
                 batch_first=True,
             )
-        self.activation = self.activation_mappings[
+        self.activation = self._activation_mappings[
             self.params.layer_activations[0]
         ]()
 
@@ -536,6 +568,11 @@ class TransformerNet(Network):
 
     def __init__(self, params):
         super(TransformerNet, self).__init__(params)
+        parallel_warn(
+            "The TransformerNet class will be deprecated in MALA v1.4.0.",
+            0,
+            category=FutureWarning,
+        )
 
         # Adjust number of heads.
         if self.params.layer_sizes[0] % self.params.num_heads != 0:
@@ -637,6 +674,11 @@ class PositionalEncoding(nn.Module):
     """
 
     def __init__(self, d_model, dropout=0.1, max_len=400):
+        parallel_warn(
+            "The PositionalEncoding class will be deprecated in MALA v1.4.0.",
+            0,
+            category=FutureWarning,
+        )
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
 

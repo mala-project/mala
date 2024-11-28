@@ -5,7 +5,6 @@ import platform
 import os
 import warnings
 
-import torch
 import torch.distributed as dist
 
 use_ddp = False
@@ -154,6 +153,11 @@ def get_local_rank():
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
+
+    Returns
+    -------
+    local_rank : int
+        The local rank of the current thread.
     """
     if use_ddp:
         return int(os.environ.get("LOCAL_RANK"))
@@ -189,7 +193,6 @@ def get_size():
         return comm.Get_size()
 
 
-# TODO: This is hacky, improve it.
 def get_comm():
     """
     Return the MPI communicator, if MPI is being used.
@@ -197,7 +200,7 @@ def get_comm():
     Returns
     -------
     comm : MPI.COMM_WORLD
-        A MPI communicator.
+        An MPI communicator.
 
     """
     return comm
@@ -221,7 +224,7 @@ def printout(*values, sep=" ", min_verbosity=0):
 
     Parameters
     ----------
-    values
+    values : object
         Values to be printed.
 
     sep : string
@@ -245,7 +248,7 @@ def parallel_warn(warning, min_verbosity=0, category=UserWarning):
 
     Parameters
     ----------
-    warning
+    warning : str
         Warning to be printed.
     min_verbosity : int
         Minimum number of verbosity for this output to still be printed.

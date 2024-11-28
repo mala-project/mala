@@ -19,8 +19,8 @@ class TestScaling:
             "feature-wise-standard",
             "standard",
             "None",
-            "normal",
-            "feature-wise-normal",
+            "minmax",
+            "feature-wise-minmax",
         ]:
             data = np.load(os.path.join(data_path, "Be_snapshot2.out.npy"))
             data = data.astype(np.float32)
@@ -43,3 +43,37 @@ class TestScaling:
             transformed = scaler.inverse_transform(transformed)
             relative_error = torch.sum(np.abs((data2 - transformed) / data2))
             assert relative_error < desired_accuracy
+
+    def test_array_referencing(self):
+        # Asserts that even with the new in-place scaling, data is referenced
+        # and not copied (unless that is explicitly asked)
+
+        for scaling in [
+            "feature-wise-standard",
+            "standard",
+            "None",
+            "minmax",
+            "feature-wise-minmax",
+        ]:
+            data = np.load(os.path.join(data_path, "Be_snapshot2.in.npy"))
+            data = data.astype(np.float32)
+            data = data.reshape(
+                [np.prod(np.shape(data)[0:3]), np.shape(data)[3]]
+            )
+            data = torch.from_numpy(data).float()
+
+            scaler = mala.DataScaler(scaling)
+            scaler.fit(data)
+
+            numpy_array = np.expand_dims(np.random.random(94), axis=0)
+            test_data = torch.from_numpy(numpy_array)
+            scaler.transform(test_data)
+            scaler.inverse_transform(test_data)
+            numpy_array *= 2
+            assert np.isclose(
+                np.sum(
+                    test_data.detach().numpy().astype(np.float64) - numpy_array
+                ),
+                0.0,
+                rtol=1e-16,
+            )

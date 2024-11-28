@@ -117,7 +117,7 @@ class TestInterfaces:
             descriptor_save_path="./",
             target_save_path="./",
             additional_info_save_path="./",
-            naming_scheme="converted_from_numpy_*.bp5",
+            naming_scheme="converted_from_numpy_*.h5",
             descriptor_calculation_kwargs={"working_directory": "./"},
         )
 
@@ -128,11 +128,13 @@ class TestInterfaces:
         for snapshot in range(2):
             data_converter.add_snapshot(
                 descriptor_input_type="openpmd",
-                descriptor_input_path="converted_from_numpy_{}.in.bp5".format(
+                descriptor_input_path="converted_from_numpy_{}.in.h5".format(
                     snapshot
                 ),
                 target_input_type="openpmd",
-                target_input_path="converted_from_numpy_{}.out.bp5".format(snapshot),
+                target_input_path="converted_from_numpy_{}.out.h5".format(
+                    snapshot
+                ),
                 additional_info_input_type=None,
                 additional_info_input_path=None,
                 target_units=None,
@@ -151,8 +153,10 @@ class TestInterfaces:
                 original = os.path.join(
                     data_path, "Be_snapshot{}.{}.npy".format(snapshot, i_o)
                 )
-                roundtrip = "verify_against_original_numpy_data_{}.{}.npy".format(
-                    snapshot, i_o
+                roundtrip = (
+                    "verify_against_original_numpy_data_{}.{}.npy".format(
+                        snapshot, i_o
+                    )
                 )
                 import numpy as np
 
@@ -180,7 +184,7 @@ class TestInterfaces:
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.network.layer_activations = ["ReLU"]
         test_parameters.running.max_number_epochs = 100
         test_parameters.running.mini_batch_size = 40
@@ -247,7 +251,7 @@ class TestInterfaces:
             reference_data=os.path.join(data_path, "Be_snapshot1.out"),
         )
         total_energy_dft_calculation = (
-            calculator.data_handler.target_calculator.total_energy_dft_calculation
+            calculator._data_handler.target_calculator.total_energy_dft_calculation
         )
         calculator.calculate(atoms, properties=["energy"])
         assert np.isclose(

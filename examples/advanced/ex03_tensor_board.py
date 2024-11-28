@@ -13,7 +13,7 @@ tensorboard. The training is a basic MALA network training.
 
 parameters = mala.Parameters()
 parameters.data.input_rescaling_type = "feature-wise-standard"
-parameters.data.output_rescaling_type = "normal"
+parameters.data.output_rescaling_type = "minmax"
 parameters.targets.ldos_gridsize = 11
 parameters.targets.ldos_gridspacing_ev = 2.5
 parameters.targets.ldos_gridoffset_ev = -5
@@ -32,11 +32,19 @@ parameters.running.validate_every_n_epochs = 5
 
 data_handler = mala.DataHandler(parameters)
 data_handler.add_snapshot(
-    "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path, "tr",
+    "Be_snapshot0.in.npy",
+    data_path,
+    "Be_snapshot0.out.npy",
+    data_path,
+    "tr",
     calculation_output_file=os.path.join(data_path, "Be_snapshot0.out"),
 )
 data_handler.add_snapshot(
-    "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path, "va",
+    "Be_snapshot1.in.npy",
+    data_path,
+    "Be_snapshot1.out.npy",
+    data_path,
+    "va",
     calculation_output_file=os.path.join(data_path, "Be_snapshot1.out"),
 )
 data_handler.prepare_data()

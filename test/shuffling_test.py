@@ -119,7 +119,7 @@ class TestDataShuffling:
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.network.layer_activations = ["ReLU"]
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
@@ -163,7 +163,7 @@ class TestDataShuffling:
         test_parameters.data.shuffling_seed = 1234
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.network.layer_activations = ["ReLU"]
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
@@ -215,7 +215,7 @@ class TestDataShuffling:
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.network.layer_activations = ["ReLU"]
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
@@ -261,7 +261,7 @@ class TestDataShuffling:
         test_parameters.data.shuffling_seed = 1234
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.network.layer_activations = ["ReLU"]
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
@@ -326,3 +326,31 @@ class TestDataShuffling:
         test_trainer.train_network()
         new_loss = test_trainer.final_validation_loss
         assert old_loss > new_loss
+
+    def test_arbitrary_number_snapshots(self):
+        parameters = mala.Parameters()
+
+        # This ensures reproducibility of the created data sets.
+        parameters.data.shuffling_seed = 1234
+
+        data_shuffler = mala.DataShuffler(parameters)
+
+        for i in range(5):
+            data_shuffler.add_snapshot(
+                "Be_snapshot0.in.npy",
+                data_path,
+                "Be_snapshot0.out.npy",
+                data_path,
+            )
+        data_shuffler.shuffle_snapshots(
+            complete_save_path=".",
+            save_name="Be_shuffled*",
+            number_of_shuffled_snapshots=5,
+        )
+        for i in range(4):
+            bispectrum = np.load("Be_shuffled" + str(i) + ".in.npy")
+            ldos = np.load("Be_shuffled" + str(i) + ".out.npy")
+            assert not np.any(np.where(np.all(ldos == 0, axis=-1).squeeze()))
+            assert not np.any(
+                np.where(np.all(bispectrum == 0, axis=-1).squeeze())
+            )
