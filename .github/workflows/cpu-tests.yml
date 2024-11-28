@@ -177,6 +177,10 @@ jobs:
           # export Conda environment _with_ mala package installed in it (and extra dependencies)
           conda env export -n mala-cpu > env_after.yml
 
+          # This command is necessary because conda includes even editable
+          # packages in an export, at least in the versions we recently used.
+          # That of course leads to the diff failing, since MALA can never
+          # be there before it has been installed.
           sed -i '/materials-learning-algorithms/d' ./env_after.yml
 
           # if comparison fails, `install/mala_cpu_[base]_environment.yml` needs to be aligned with
