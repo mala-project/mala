@@ -183,7 +183,7 @@ jobs:
           then
             echo "Files env_before.yml and env_after.yml do not differ."
           else
-            diff --side-by-side --color-always env_before.yml env_after.yml
+            diff --side-by-side env_before.yml env_after.yml
           fi
 
       - name: Download test data repository from RODARE
