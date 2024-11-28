@@ -41,5 +41,5 @@ setup(
     zip_safe=False,
     install_requires=open("requirements.txt").read().splitlines(),
     extras_require=extras,
-    python_requires=">=3.10.0",
+    python_requires=">=3.10.4",
 )
