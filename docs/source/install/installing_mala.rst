@@ -4,8 +4,8 @@ Installing MALA
 Prerequisites
 **************
 
-MALA does not depend on a specific Python version. The most recent Python
-version it has been tested with successfully is Python ``3.10.4``.
+MALA supports any Python version starting from ``3.10.0``. No upper limit on
+Python versions are enforced. The most recent *tested* version is ``3.10.12``.
 
 MALA requires ``torch`` in order to function. As the installation of torch
 depends highly on the architecture you are using, ``torch`` will not
