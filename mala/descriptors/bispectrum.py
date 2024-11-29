@@ -153,6 +153,18 @@ class Bispectrum(Descriptor):
         nz = self.grid_dimensions[2]
 
         # Create LAMMPS instance.
+        if (
+            len(set(self._atoms.numbers)) > 1
+            and self.parameters.bispectrum_element_weights is None
+        ):
+            self.parameters.bispectrum_element_weights = [1] * len(
+                set(self._atoms.numbers)
+            )
+            printout(
+                "Multielement system selected without providing elemental "
+                "weights. Set weights to: ",
+                self.parameters.bispectrum_element_weights,
+            )
         lammps_dict = {
             "twojmax": self.parameters.bispectrum_twojmax,
             "rcutfac": self.parameters.bispectrum_cutoff,
