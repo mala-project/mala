@@ -170,11 +170,18 @@ jobs:
           # install mala package
           pip --no-cache-dir install -e .[opt,test] --no-build-isolation
 
+
       - name: Check if Conda environment meets the specified requirements
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
         run: |
           # export Conda environment _with_ mala package installed in it (and extra dependencies)
           conda env export -n mala-cpu > env_after.yml
+
+          # This command is necessary because conda includes even editable
+          # packages in an export, at least in the versions we recently used.
+          # That of course leads to the diff failing, since MALA can never
+          # be there before it has been installed.
+          sed -i '/materials-learning-algorithms/d' ./env_after.yml
 
           # if comparison fails, `install/mala_cpu_[base]_environment.yml` needs to be aligned with
           # `requirements.txt` and/or extra dependencies are missing in the Docker Conda environment
@@ -183,7 +190,7 @@ jobs:
           then
             echo "Files env_before.yml and env_after.yml do not differ."
           else
-            diff --side-by-side --color-always env_before.yml env_after.yml
+            diff --side-by-side env_before.yml env_after.yml
           fi
 
       - name: Download test data repository from RODARE

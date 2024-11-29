@@ -40,6 +40,7 @@ class ParametersBase(JSONSerializable):
             "openpmd_configuration": {},
             "openpmd_granularity": 1,
             "lammps": True,
+            "atomic_density_formula": False,
         }
         pass
 
@@ -87,6 +88,11 @@ class ParametersBase(JSONSerializable):
 
     def _update_lammps(self, new_lammps):
         self._configuration["lammps"] = new_lammps
+
+    def _update_atomic_density_formula(self, new_atomic_density_formula):
+        self._configuration["atomic_density_formula"] = (
+            new_atomic_density_formula
+        )
 
     @staticmethod
     def _member_to_json(member):
@@ -163,7 +169,7 @@ class ParametersBase(JSONSerializable):
     @classmethod
     def from_json(cls, json_dict):
         """
-        Read this object from a dictionary saved in a JSON file.
+        Read parameters from a dictionary saved in a JSON file.
 
         Parameters
         ----------
@@ -270,6 +276,10 @@ class ParametersNetwork(ParametersBase):
         Number of heads to be used in Multi head attention network
         This should be a divisor of input dimension
         Default: None
+
+    dropout : float
+        Dropout rate for positional encoding in transformer.
+        Default: 0.1
     """
 
     def __init__(self):
@@ -279,12 +289,12 @@ class ParametersNetwork(ParametersBase):
         self.layer_activations = ["Sigmoid"]
         self.loss_function_type = "mse"
 
-        # for LSTM/Gru + Transformer
-        self.num_hidden_layers = 1
-
         # for LSTM/Gru
         self.no_hidden_state = False
         self.bidirection = False
+
+        # for LSTM/Gru + Transformer
+        self.num_hidden_layers = 1
 
         # for transformer net
         self.dropout = 0.1
@@ -310,23 +320,52 @@ class ParametersDescriptors(ParametersBase):
         bispectrum descriptors. Default value for jmax is 5, so default value
         for twojmax is 10.
 
-    lammps_compute_file : string
-        Bispectrum calculation: LAMMPS input file that is used to calculate the
-        Bispectrum descriptors. If this string is empty, the standard LAMMPS input
-        file found in this repository will be used (recommended).
-
     descriptors_contain_xyz : bool
         Legacy option. If True, it is assumed that the first three entries of
         the descriptor vector are the xyz coordinates and they are cut from the
         descriptor vector. If False, no such cutting is peformed.
 
     atomic_density_sigma : float
-        Sigma used for the calculation of the Gaussian descriptors.
+        Sigma (=width) used for the calculation of the Gaussian descriptors.
+        Explicitly setting this value is discouraged if the atomic density is
+        used only during the total energy calculation and, e.g., bispectrum
+        descriptors are used for models. In this case, the width will
+        automatically be set correctly during inference based on model
+        parameters. This parameter mainly exists for debugging purposes.
+        If the atomic density is instead used for model training itself, this
+        parameter needs to be set.
 
-    use_atomic_density_energy_formula : bool
-        If True, Gaussian descriptors will be calculated for the
-        calculation of the Ewald sum as part of the total energy module.
-        Default is False.
+    atomic_density_cutoff : float
+        Cutoff radius used for atomic density calculation. Explicitly setting
+        this value is discouraged if the atomic density is used only during the
+        total energy calculation and, e.g., bispectrum descriptors are used
+        for models. In this case, the cutoff will automatically be set
+        correctly during inference based on model parameters. This parameter
+        mainly exists for debugging purposes. If the atomic density is instead
+        used for model training itself, this parameter needs to be set.
+
+    lammps_compute_file : str
+        Path to a LAMMPS compute file for the bispectrum descriptor
+        calculation. MALA has its own collection of compute files which are
+        used by default. Setting this parameter is thus not necessarys for
+        model training and inference, and it exists mainly for debugging
+        purposes.
+
+    minterpy_cutoff_cube_size : float
+        WILL BE DEPRECATED IN MALA v1.4.0 - size of cube for minterpy
+        descriptor calculation.
+
+    minterpy_lp_norm : int
+        WILL BE DEPRECATED IN MALA v1.4.0 - LP norm for minterpy
+        descriptor calculation.
+
+    minterpy_point_list : list
+        WILL BE DEPRECATED IN MALA v1.4.0 - list of points for minterpy
+        descriptor calculation.
+
+    minterpy_polynomial_degree : int
+        WILL BE DEPRECATED IN MALA v1.4.0 - polynomial degree for minterpy
+        descriptor calculation.
     """
 
     def __init__(self):
@@ -356,7 +395,6 @@ class ParametersDescriptors(ParametersBase):
         # atomic density may be used at the same time, if e.g. bispectrum
         # descriptors are used for a full inference, which then uses the atomic
         # density for the calculation of the Ewald sum.
-        self.use_atomic_density_energy_formula = False
         self.atomic_density_sigma = None
         self.atomic_density_cutoff = None
 
@@ -556,11 +594,6 @@ class ParametersData(ParametersBase):
 
     Attributes
     ----------
-    descriptors_contain_xyz : bool
-        Legacy option. If True, it is assumed that the first three entries of
-        the descriptor vector are the xyz coordinates and they are cut from the
-        descriptor vector. If False, no such cutting is peformed.
-
     snapshot_directories_list : list
         A list of all added snapshots.
 
@@ -573,27 +606,45 @@ class ParametersData(ParametersBase):
         Specifies how input quantities are normalized.
         Options:
 
-            - "None": No normalization is applied.
-            - "standard": Standardization (Scale to mean 0, standard
-              deviation 1)
-            - "normal": Min-Max scaling (Scale to be in range 0...1)
-            - "feature-wise-standard": Row Standardization (Scale to mean 0,
-              standard deviation 1)
-            - "feature-wise-normal": Row Min-Max scaling (Scale to be in range
-              0...1)
+            - "None": No scaling is applied.
+            - "standard": Standardization (Scale to mean 0,
+              standard deviation 1) is applied to the entire array.
+            - "minmax": Min-Max scaling (Scale to be in range 0...1) is applied
+              to the entire array.
+            - "feature-wise-standard": Standardization (Scale to mean 0,
+              standard deviation 1) is applied to each feature dimension
+              individually.
+              I.e., if your training data has dimensions (d,f), then each
+              of the f columns with d entries is scaled indiviually.
+            - "feature-wise-minmax": Min-Max scaling (Scale to be in range
+              0...1) is applied to each feature dimension individually.
+              I.e., if your training data has dimensions (d,f), then each
+              of the f columns with d entries is scaled indiviually.
+            - "normal": (DEPRECATED) Old name for "minmax".
+            - "feature-wise-normal": (DEPRECATED) Old name for
+              "feature-wise-minmax"
 
     output_rescaling_type : string
         Specifies how output quantities are normalized.
         Options:
 
-            - "None": No normalization is applied.
+            - "None": No scaling is applied.
             - "standard": Standardization (Scale to mean 0,
-              standard deviation 1)
-            - "normal": Min-Max scaling (Scale to be in range 0...1)
-            - "feature-wise-standard": Row Standardization (Scale to mean 0,
-              standard deviation 1)
-            - "feature-wise-normal": Row Min-Max scaling (Scale to be in
-              range 0...1)
+              standard deviation 1) is applied to the entire array.
+            - "minmax": Min-Max scaling (Scale to be in range 0...1) is applied
+              to the entire array.
+            - "feature-wise-standard": Standardization (Scale to mean 0,
+              standard deviation 1) is applied to each feature dimension
+              individually.
+              I.e., if your training data has dimensions (d,f), then each
+              of the f columns with d entries is scaled indiviually.
+            - "feature-wise-minmax": Min-Max scaling (Scale to be in range
+              0...1) is applied to each feature dimension individually.
+              I.e., if your training data has dimensions (d,f), then each
+              of the f columns with d entries is scaled indiviually.
+            - "normal": (DEPRECATED) Old name for "minmax".
+            - "feature-wise-normal": (DEPRECATED) Old name for
+              "feature-wise-minmax"
 
     use_lazy_loading : bool
         If True, data is lazily loaded, i.e. only the snapshots that are
@@ -693,12 +744,15 @@ class ParametersRunning(ParametersBase):
         a "by snapshot" basis.
 
     checkpoints_each_epoch : int
-        If not 0, checkpoint files will be saved after eac
+        If not 0, checkpoint files will be saved after each
         checkpoints_each_epoch epoch.
 
     checkpoint_name : string
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
+
+    run_name : string
+        Name of the run used for logging.
 
     logging_dir : string
         Name of the folder that logging files will be saved to.
@@ -708,12 +762,33 @@ class ParametersRunning(ParametersBase):
         in a subfolder of logging_dir labelled with the starting date
         of the logging, to avoid having to change input scripts often.
 
-    inference_data_grid : list
-        List holding the grid to be used for inference in the form of
-        [x,y,z].
+    logger : string
+        Name of the logger to be used.
+        Currently supported are:
 
-    use_mixed_precision : bool
-        If True, mixed precision computation (via AMP) will be used.
+            - "tensorboard": Tensorboard logger.
+            - "wandb": Weights and Biases logger.
+
+    validation_metrics : list
+        List of metrics to be used for validation. Default is ["ldos"].
+        Possible options are:
+
+            - "ldos": MSE of the LDOS.
+            - "band_energy": Band energy.
+            - "band_energy_actual_fe": Band energy computed with ground truth Fermi energy.
+            - "total_energy": Total energy.
+            - "total_energy_actual_fe": Total energy computed with ground truth Fermi energy.
+            - "fermi_energy": Fermi energy.
+            - "density": Electron density.
+            - "density_relative": Rlectron density (MAPE).
+            - "dos": Density of states.
+            - "dos_relative": Density of states (MAPE).
+
+    validate_on_training_data : bool
+        Whether to validate on the training data as well. Default is False.
+
+    validate_every_n_epochs : int
+        Determines how often validation is performed. Default is 1.
 
     training_log_interval : int
         Determines how often detailed performance info is printed during
@@ -723,23 +798,36 @@ class ParametersRunning(ParametersBase):
         List with two entries determining with which batch/iteration number
          the CUDA profiler will start and stop profiling. Please note that
          this option only holds significance if the nsys profiler is used.
+
+    inference_data_grid : list
+        Grid dimensions used during inference. Typically, these are automatically
+        determined by DFT reference data, and this parameter does not need to
+        be set. Thus, this parameter mainly exists for debugging purposes.
+
+    use_mixed_precision : bool
+        If True, mixed precision computation (via AMP) will be used.
+
+    l2_regularization : float
+        Weight decay rate for NN optimizer.
+
+    dropout : float
+        Dropout rate for positional encoding in transformer net.
     """
 
     def __init__(self):
         super(ParametersRunning, self).__init__()
         self.optimizer = "Adam"
         self.learning_rate = 10 ** (-5)
-        self.learning_rate_embedding = 10 ** (-4)
+        # self.learning_rate_embedding = 10 ** (-4)
         self.max_number_epochs = 100
-        self.verbosity = True
         self.mini_batch_size = 10
-        self.snapshots_per_epoch = -1
+        # self.snapshots_per_epoch = -1
 
-        self.l1_regularization = 0.0
+        # self.l1_regularization = 0.0
         self.l2_regularization = 0.0
         self.dropout = 0.0
-        self.batch_norm = False
-        self.input_noise = 0.0
+        # self.batch_norm = False
+        # self.input_noise = 0.0
 
         self.early_stopping_epochs = 0
         self.early_stopping_threshold = 0
@@ -748,16 +836,16 @@ class ParametersRunning(ParametersBase):
         self.learning_rate_patience = 0
         self._during_training_metric = "ldos"
         self._after_training_metric = "ldos"
-        self.use_compression = False
+        # self.use_compression = False
         self.num_workers = 0
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
-        self.checkpoint_best_so_far = False
+        # self.checkpoint_best_so_far = False
         self.checkpoint_name = "checkpoint_mala"
         self.run_name = ""
         self.logging_dir = "./mala_logging"
         self.logging_dir_append_date = True
-        self.logger = "tensorboard"
+        self.logger = None
         self.validation_metrics = ["ldos"]
         self.validate_on_training_data = False
         self.validate_every_n_epochs = 1
@@ -980,6 +1068,15 @@ class ParametersHyperparameterOptimization(ParametersBase):
         not recommended because it is file based and can lead to errors;
         With a suitable timeout it can be used somewhat stable though and
         help in HPC settings.
+
+    acsd_points : int
+        Parameter of the ACSD HyperparamterOptimization scheme. Controls
+        the number of point-pairs which are used to compute the ACSD.
+        An array of acsd_points*acsd_points will be computed, i.e., if
+        acsd_points=100, 100 points will be drawn at random, and thereafter
+        each of these 100 points will be compared with a new, random set
+        of 100 points, leading to 10000 points in total for the calculation
+        of the ACSD.
     """
 
     def __init__(self):
@@ -1004,6 +1101,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
 
         # For accelerated hyperparameter optimization.
         self.acsd_points = 100
+        self.mutual_information_points = 20000
 
     @property
     def rdb_storage_heartbeat(self):
@@ -1186,12 +1284,12 @@ class Parameters:
     hyperparameters : ParametersHyperparameterOptimization
         Parameters used for hyperparameter optimization.
 
-    debug : ParametersDebug
-        Container for all debugging parameters.
-
     manual_seed: int
         If not none, this value is used as manual seed for the neural networks.
         Can be used to make experiments comparable. Default: None.
+
+    datageneration : ParametersDataGeneration
+        Parameters used for data generation routines.
     """
 
     def __init__(self):
@@ -1220,6 +1318,7 @@ class Parameters:
         # different.
         self.openpmd_granularity = 1
         self.use_lammps = True
+        self.use_atomic_density_formula = False
 
     @property
     def openpmd_granularity(self):
@@ -1271,7 +1370,7 @@ class Parameters:
 
     @property
     def use_gpu(self):
-        """Control whether or not a GPU is used (provided there is one)."""
+        """Control whether a GPU is used (provided there is one)."""
         return self._use_gpu
 
     @use_gpu.setter
@@ -1286,6 +1385,12 @@ class Parameters:
                     "GPU requested, but no GPU found. MALA will "
                     "operate with CPU only."
                 )
+        if self._use_gpu and self.use_lammps:
+            printout(
+                "Enabling atomic density formula because LAMMPS and GPU "
+                "are used."
+            )
+            self.use_atomic_density_formula = True
 
         # Invalidate, will be updated in setter.
         self.device = None
@@ -1298,7 +1403,7 @@ class Parameters:
 
     @property
     def use_ddp(self):
-        """Control whether or not dd is used for parallel training."""
+        """Control whether ddp is used for parallel training."""
         return self._use_ddp
 
     @use_ddp.setter
@@ -1349,7 +1454,7 @@ class Parameters:
 
     @property
     def use_mpi(self):
-        """Control whether or not MPI is used for paralle inference."""
+        """Control whether MPI is used for paralle inference."""
         return self._use_mpi
 
     @use_mpi.setter
@@ -1393,18 +1498,66 @@ class Parameters:
 
     @property
     def use_lammps(self):
-        """Control whether or not to use LAMMPS for descriptor calculation."""
+        """Control whether to use LAMMPS for descriptor calculation."""
         return self._use_lammps
 
     @use_lammps.setter
     def use_lammps(self, value):
         self._use_lammps = value
+        if self.use_gpu and value:
+            printout(
+                "Enabling atomic density formula because LAMMPS and GPU "
+                "are used."
+            )
+            self.use_atomic_density_formula = True
         self.network._update_lammps(self.use_lammps)
         self.descriptors._update_lammps(self.use_lammps)
         self.targets._update_lammps(self.use_lammps)
         self.data._update_lammps(self.use_lammps)
         self.running._update_lammps(self.use_lammps)
         self.hyperparameters._update_lammps(self.use_lammps)
+
+    @property
+    def use_atomic_density_formula(self):
+        """Control whether to use the atomic density formula.
+
+        This formula uses as a Gaussian representation of the atomic density
+        to calculate the structure factor and with it, the Ewald energy
+        and parts of the exchange-correlation energy. By using it, one can
+        go from N^2 to NlogN scaling, and offloads most of the computational
+        overhead of energy calculation from QE to LAMMPS. This is beneficial
+        since LAMMPS can benefit from GPU acceleration (QE GPU acceleration
+        is not used in the portion of the QE code MALA employs). If set
+        to True, this means MALA will perform another LAMMPS calculation
+        during inference. The hyperparameters for this atomic density
+        calculation are set via the parameters.descriptors object.
+        Default is False, except for when both use_gpu and use_lammps
+        are True, in which case this value will be set to True as well.
+        """
+        return self._use_atomic_density_formula
+
+    @use_atomic_density_formula.setter
+    def use_atomic_density_formula(self, value):
+        self._use_atomic_density_formula = value
+
+        self.network._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.descriptors._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.targets._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.data._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.running._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.hyperparameters._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
 
     def show(self):
         """Print name and values of all attributes of this object."""
@@ -1598,6 +1751,18 @@ class Parameters:
                     ].from_json(json_dict[key])
                     setattr(loaded_parameters, key, sub_parameters)
 
+                    # Backwards compatability:
+                    if key == "descriptors":
+                        if (
+                            "use_atomic_density_energy_formula"
+                            in json_dict[key]
+                        ):
+                            loaded_parameters.use_atomic_density_formula = (
+                                json_dict[key][
+                                    "use_atomic_density_energy_formula"
+                                ]
+                            )
+
             # We iterate a second time, to set global values, so that they
             # are properly forwarded.
             for key in json_dict:
@@ -1611,6 +1776,13 @@ class Parameters:
                         setattr(loaded_parameters, key, json_dict[key])
             if no_snapshots is True:
                 loaded_parameters.data.snapshot_directories_list = []
+            # Backwards compatability: since the transfer of old property
+            # to new property happens _before_ all children descriptor classes
+            # are instantiated, it is not properly propagated. Thus, we
+            # simply have to set it to its own value again.
+            loaded_parameters.use_atomic_density_formula = (
+                loaded_parameters.use_atomic_density_formula
+            )
         else:
             raise Exception("Unsupported parameter save format.")
 

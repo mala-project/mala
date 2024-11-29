@@ -11,6 +11,7 @@ from .predictor import Predictor
 from .hyperparameter_oat import HyperparameterOAT
 from .hyperparameter_naswot import HyperparameterNASWOT
 from .hyperparameter_optuna import HyperparameterOptuna
-from .hyperparameter_acsd import HyperparameterACSD
+from .hyperparameter_descriptor_scoring import HyperparameterDescriptorScoring
 from .acsd_analyzer import ACSDAnalyzer
+from .mutual_information_analyzer import MutualInformationAnalyzer
 from .runner import Runner

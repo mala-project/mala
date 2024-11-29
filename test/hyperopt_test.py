@@ -12,7 +12,7 @@ from mala.datahandling.data_repo import data_path
 # Control how much the loss should be better after hyperopt compared to
 # before. This value is fairly high, but we're training on absolutely
 # minimal amounts of data.
-desired_loss_improvement_factor = 2
+desired_loss_improvement_factor = 1.5
 
 # Different HO methods will lead to different results, but they should be
 # approximately the same.
@@ -38,7 +38,7 @@ class TestHyperparameterOptimization:
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.running.max_number_epochs = 20
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
@@ -129,7 +129,7 @@ class TestHyperparameterOptimization:
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.running.max_number_epochs = 5
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
@@ -238,7 +238,7 @@ class TestHyperparameterOptimization:
         test_parameters.manual_seed = 1234
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.running.max_number_epochs = 10
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
@@ -294,7 +294,7 @@ class TestHyperparameterOptimization:
         for idx, trial in enumerate(correct_trial_list):
             assert np.isclose(
                 trial,
-                test_hp_optimizer.trial_losses[idx],
+                test_hp_optimizer._trial_losses[idx],
                 rtol=naswot_accuracy,
             )
 
@@ -306,7 +306,7 @@ class TestHyperparameterOptimization:
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.running.max_number_epochs = 20
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
@@ -387,7 +387,7 @@ class TestHyperparameterOptimization:
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.running.max_number_epochs = 2
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001

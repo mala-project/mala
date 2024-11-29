@@ -57,11 +57,6 @@ class Bispectrum(Descriptor):
         """Get a string that describes the target (for e.g. metadata)."""
         return "Bispectrum"
 
-    @property
-    def feature_size(self):
-        """Get the feature dimension of this data."""
-        return self.fingerprint_length
-
     @staticmethod
     def convert_units(array, in_units="None"):
         """
@@ -150,7 +145,7 @@ class Bispectrum(Descriptor):
         self.setup_lammps_tmp_files("bgrid", outdir)
 
         ase.io.write(
-            self.lammps_temporary_input, self.atoms, format=lammps_format
+            self._lammps_temporary_input, self._atoms, format=lammps_format
         )
 
         nx = self.grid_dimensions[0]
@@ -204,7 +199,7 @@ class Bispectrum(Descriptor):
             * (self.parameters.bispectrum_twojmax + 4)
         )
         ncoeff = ncoeff // 24  # integer division
-        self.fingerprint_length = ncols0 + ncoeff
+        self.feature_size = ncols0 + ncoeff
 
         # Extract data from LAMMPS calculation.
         # This is different for the parallel and the serial case.
@@ -224,7 +219,7 @@ class Bispectrum(Descriptor):
                 lammps_constants.LMP_STYLE_LOCAL,
                 lammps_constants.LMP_SIZE_COLS,
             )
-            if ncols_local != self.fingerprint_length + 3:
+            if ncols_local != self.feature_size + 3:
                 raise Exception("Inconsistent number of features.")
 
             snap_descriptors_np = extract_compute_np(
@@ -249,7 +244,7 @@ class Bispectrum(Descriptor):
                 "bgrid",
                 0,
                 2,
-                (nz, ny, nx, self.fingerprint_length),
+                (nz, ny, nx, self.feature_size),
                 use_fp64=use_fp64,
             )
 
@@ -317,13 +312,13 @@ class Bispectrum(Descriptor):
             * (self.parameters.bispectrum_twojmax + 4)
         )
         ncoeff = ncoeff // 24  # integer division
-        self.fingerprint_length = ncoeff + 3
+        self.feature_size = ncoeff + 3
         bispectrum_np = np.zeros(
             (
                 self.grid_dimensions[0],
                 self.grid_dimensions[1],
                 self.grid_dimensions[2],
-                self.fingerprint_length,
+                self.feature_size,
             ),
             dtype=np.float64,
         )
@@ -333,16 +328,16 @@ class Bispectrum(Descriptor):
 
         # These are technically hyperparameters. We currently simply set them
         # to set values for everything.
-        self.rmin0 = 0.0
-        self.rfac0 = 0.99363
-        self.bzero_flag = False
-        self.wselfall_flag = False
+        self._rmin0 = 0.0
+        self._rfac0 = 0.99363
+        self._bzero_flag = False
+        self._wselfall_flag = False
         # Currently not supported
-        self.bnorm_flag = False
+        self._bnorm_flag = False
         # Currently not supported
-        self.quadraticflag = False
-        self.number_elements = 1
-        self.wself = 1.0
+        self._quadraticflag = False
+        self._python_calculation_number_elements = 1
+        self._wself = 1.0
 
         # What follows is the python implementation of the
         # bispectrum descriptor calculation.
@@ -516,7 +511,7 @@ class Bispectrum(Descriptor):
         if self.parameters.descriptors_contain_xyz:
             return bispectrum_np, np.prod(self.grid_dimensions)
         else:
-            self.fingerprint_length -= 3
+            self.feature_size -= 3
             return bispectrum_np[:, :, :, 3:], np.prod(self.grid_dimensions)
 
     ########
@@ -922,10 +917,10 @@ class Bispectrum(Descriptor):
         """
         # Precompute and prepare ui stuff
         theta0 = (
-            (distances_cutoff - self.rmin0)
-            * self.rfac0
+            (distances_cutoff - self._rmin0)
+            * self._rfac0
             * np.pi
-            / (self.parameters.bispectrum_cutoff - self.rmin0)
+            / (self.parameters.bispectrum_cutoff - self._rmin0)
         )
         z0 = np.squeeze(distances_cutoff / np.tan(theta0))
 
@@ -1006,13 +1001,14 @@ class Bispectrum(Descriptor):
                 sfac += 1.0
             else:
                 rcutfac = np.pi / (
-                    self.parameters.bispectrum_cutoff - self.rmin0
+                    self.parameters.bispectrum_cutoff - self._rmin0
                 )
                 if nr_atoms > 1:
                     sfac = 0.5 * (
-                        np.cos((distances_cutoff - self.rmin0) * rcutfac) + 1.0
+                        np.cos((distances_cutoff - self._rmin0) * rcutfac)
+                        + 1.0
                     )
-                    sfac[np.where(distances_cutoff <= self.rmin0)] = 1.0
+                    sfac[np.where(distances_cutoff <= self._rmin0)] = 1.0
                     sfac[
                         np.where(
                             distances_cutoff
@@ -1020,8 +1016,8 @@ class Bispectrum(Descriptor):
                         )
                     ] = 0.0
                 else:
-                    sfac = 1.0 if distances_cutoff <= self.rmin0 else sfac
-                    sfac = 0.0 if distances_cutoff <= self.rmin0 else sfac
+                    sfac = 1.0 if distances_cutoff <= self._rmin0 else sfac
+                    sfac = 0.0 if distances_cutoff <= self._rmin0 else sfac
 
             # sfac technically has to be weighted according to the chemical
             # species. But this is a minimal implementation only for a single
@@ -1119,12 +1115,12 @@ class Bispectrum(Descriptor):
         itriple = 0
         idouble = 0
 
-        if self.bzero_flag:
+        if self._bzero_flag:
             wself = 1.0
             bzero = np.zeros(self.parameters.bispectrum_twojmax + 1)
             www = wself * wself * wself
             for j in range(self.parameters.bispectrum_twojmax + 1):
-                if self.bnorm_flag:
+                if self._bnorm_flag:
                     bzero[j] = www
                 else:
                     bzero[j] = www * (j + 1)
@@ -1178,8 +1174,8 @@ class Bispectrum(Descriptor):
                     itriple += 1
                 idouble += 1
 
-        if self.bzero_flag:
-            if not self.wselfall_flag:
+        if self._bzero_flag:
+            if not self._wselfall_flag:
                 itriple = (
                     ielem * number_elements + ielem
                 ) * number_elements + ielem
@@ -1199,9 +1195,9 @@ class Bispectrum(Descriptor):
                             itriple += 1
 
         # Untested  & Unoptimized
-        if self.quadraticflag:
+        if self._quadraticflag:
             xyz_length = 3 if self.parameters.descriptors_contain_xyz else 0
-            ncount = self.fingerprint_length - xyz_length
+            ncount = self.feature_size - xyz_length
             for icoeff in range(ncount):
                 bveci = blist[icoeff]
                 blist[3 + ncount] = 0.5 * bveci * bveci

@@ -16,7 +16,7 @@ with open("LICENSE") as f:
 
 extras = {
     "dev": ["bump2version"],
-    "opt": ["oapackage"],
+    "opt": ["oapackage", "scikit-learn"],
     "test": ["pytest", "pytest-cov"],
     "doc": open("docs/requirements.txt").read().splitlines(),
     "experimental": ["asap3", "dftpy", "minterpy"],
@@ -41,4 +41,5 @@ setup(
     zip_safe=False,
     install_requires=open("requirements.txt").read().splitlines(),
     extras_require=extras,
+    python_requires=">=3.10.4",
 )

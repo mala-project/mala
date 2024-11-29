@@ -72,7 +72,6 @@ autodoc_mock_imports = [
     "scipy",
     "oapackage",
     "matplotlib",
-    "horovod",
     "lammps",
     "total_energy",
     "pqkmeans",

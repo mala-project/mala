@@ -28,6 +28,20 @@ class DataHandlerBase(ABC):
     target_calculator : mala.targets.target.Target
         Used to do unit conversion on output data. If None, then one will
         be created by this class.
+
+    Attributes
+    ----------
+    descriptor_calculator
+        Used to do unit conversion on input data.
+
+    nr_snapshots : int
+        Number of snapshots loaded.
+
+    parameters : mala.common.parameters.ParametersData
+        MALA data handling parameters.
+
+    target_calculator
+        Used to do unit conversion on output data.
     """
 
     def __init__(
@@ -37,7 +51,7 @@ class DataHandlerBase(ABC):
         descriptor_calculator=None,
     ):
         self.parameters: ParametersData = parameters.data
-        self.use_ddp = parameters.use_ddp
+        self._use_ddp = parameters.use_ddp
 
         # Calculators used to parse data from compatible files.
         self.target_calculator = target_calculator
