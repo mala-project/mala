@@ -132,7 +132,7 @@ class Bispectrum(Descriptor):
         # general LAMMPS import.
         from lammps import constants as lammps_constants
 
-        if len(set(self.atoms.numbers)) > 2:
+        if len(set(self._atoms.numbers)) > 2:
             raise ValueError(
                 "MALA can only compute bispectrum descriptors for 1- or "
                 "2-element systems currently."
@@ -168,21 +168,21 @@ class Bispectrum(Descriptor):
                     self.parameters.lammps_compute_file = os.path.join(
                         filepath,
                         "in.bgridlocal_n{0}.python".format(
-                            len(set(self.atoms.numbers))
+                            len(set(self._atoms.numbers))
                         ),
                     )
                 else:
                     self.parameters.lammps_compute_file = os.path.join(
                         filepath,
                         "in.bgridlocal_defaultproc_n{0}.python".format(
-                            len(set(self.atoms.numbers))
+                            len(set(self._atoms.numbers))
                         ),
                     )
             else:
                 self.parameters.lammps_compute_file = os.path.join(
                     filepath,
                     "in.bgrid_n{0}.python".format(
-                        len(set(self.atoms.numbers))
+                        len(set(self._atoms.numbers))
                     ),
                 )
         # Do the LAMMPS calculation and clean up.
