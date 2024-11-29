@@ -710,7 +710,7 @@ class Trainer(Runner):
 
                                     if (
                                         self.parameters.use_graphs
-                                        and self.validation_graph is None
+                                        and self._validation_graph is None
                                     ):
                                         printout(
                                             "Capturing CUDA graph for validation.",
@@ -762,11 +762,11 @@ class Trainer(Runner):
                                         )
 
                                         # Capture graph
-                                        self.validation_graph = (
+                                        self._validation_graph = (
                                             torch.cuda.CUDAGraph()
                                         )
                                         with torch.cuda.graph(
-                                            self.validation_graph
+                                            self._validation_graph
                                         ):
                                             with torch.cuda.amp.autocast(
                                                 enabled=self.parameters.use_mixed_precision
@@ -787,10 +787,10 @@ class Trainer(Runner):
                                                         self.static_target_validation,
                                                     )
 
-                                    if self.validation_graph:
+                                    if self._validation_graph:
                                         self.static_input_validation.copy_(x)
                                         self.static_target_validation.copy_(y)
-                                        self.validation_graph.replay()
+                                        self._validation_graph.replay()
                                         validation_loss_sum += (
                                             self.static_loss_validation
                                         )
