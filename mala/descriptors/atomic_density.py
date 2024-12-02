@@ -213,6 +213,7 @@ class AtomicDensity(Descriptor):
             array_shape=(nrows_ggrid, ncols_ggrid),
             use_fp64=use_fp64,
         )
+
         self._clean_calculation(lmp, keep_logs)
 
         # In comparison to bispectrum, the atomic density always returns
@@ -241,7 +242,7 @@ class AtomicDensity(Descriptor):
                         self.grid_dimensions[2],
                         self.grid_dimensions[1],
                         self.grid_dimensions[0],
-                        7,
+                        6 + len(set(self._atoms.numbers)),
                     )
                 )
                 gaussian_descriptors_np = gaussian_descriptors_np.transpose(
