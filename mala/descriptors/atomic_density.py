@@ -150,9 +150,16 @@ class AtomicDensity(Descriptor):
 
         # Create LAMMPS instance.
         lammps_dict = {
-            "sigma": self.parameters.atomic_density_sigma,
             "rcutfac": self.parameters.atomic_density_cutoff,
         }
+        if len(set(self._atoms.numbers)) == 1:
+            lammps_dict["sigma"] = self.parameters.atomic_density_sigma
+        else:
+            for i in range(len(set(self._atoms.numbers))):
+                lammps_dict["sigma" + str(i + 1)] = (
+                    self.parameters.atomic_density_sigma
+                )
+
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # For now the file is chosen automatically, because this is used
@@ -161,15 +168,24 @@ class AtomicDensity(Descriptor):
         if self.parameters._configuration["mpi"]:
             if self.parameters.use_z_splitting:
                 self.parameters.lammps_compute_file = os.path.join(
-                    filepath, "in.ggrid.python"
+                    filepath,
+                    "in.ggrid_n{0}.python".format(
+                        len(set(self._atoms.numbers))
+                    ),
                 )
             else:
                 self.parameters.lammps_compute_file = os.path.join(
-                    filepath, "in.ggrid_defaultproc.python"
+                    filepath,
+                    "in.ggrid_defaultproc_n{0}.python".format(
+                        len(set(self._atoms.numbers))
+                    ),
                 )
         else:
             self.parameters.lammps_compute_file = os.path.join(
-                filepath, "in.ggrid_defaultproc.python"
+                filepath,
+                "in.ggrid_defaultproc_n{0}.python".format(
+                    len(set(self._atoms.numbers))
+                ),
             )
 
         # Do the LAMMPS calculation and clean up.
