@@ -368,10 +368,6 @@ class TestInterfaces:
         alphabetical ordering. We need to check whether this holds.
         It could change, and since LAMMPS itself does not name the elements
         in its data file, one would not notice.
-
-        Returns
-        -------
-
         """
         vasp_source_file = open("test_element.vasp", mode="w")
         vasp_source_file.write(

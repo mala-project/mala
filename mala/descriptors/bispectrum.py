@@ -153,22 +153,25 @@ class Bispectrum(Descriptor):
         nz = self.grid_dimensions[2]
 
         # Create LAMMPS instance.
-        if (
-            len(set(self._atoms.numbers)) > 1
-            and self.parameters.bispectrum_element_weights is None
-        ):
-            self.parameters.bispectrum_element_weights = [1] * len(
-                set(self._atoms.numbers)
-            )
-            printout(
-                "Multielement system selected without providing elemental "
-                "weights. Set weights to: ",
-                self.parameters.bispectrum_element_weights,
-            )
         lammps_dict = {
             "twojmax": self.parameters.bispectrum_twojmax,
             "rcutfac": self.parameters.bispectrum_cutoff,
         }
+        if len(set(self._atoms.numbers)) > 1:
+
+            if self.parameters.bispectrum_element_weights is None:
+                self.parameters.bispectrum_element_weights = [1] * len(
+                    set(self._atoms.numbers)
+                )
+                printout(
+                    "Multielement system selected without providing elemental "
+                    "weights. Set weights to: ",
+                    self.parameters.bispectrum_element_weights,
+                )
+            for i in range(len(self.parameters.bispectrum_element_weights)):
+                lammps_dict["wj" + str(i + 1)] = (
+                    self.parameters.bispectrum_element_weights[i]
+                )
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # An empty string means that the user wants to use the standard input.

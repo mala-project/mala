@@ -21,8 +21,8 @@ variable 	rfac0 equal 0.99363
 variable 	rmin0 equal 0
 
 #variable 	wj equal 1
-variable 	wj1 equal 1
-variable 	wj2 equal 1
+#variable 	wj1 equal 1
+#variable 	wj2 equal 1
 
 #variable 	radelem equal 0.5
 variable 	radelem1 equal 0.5

@@ -16,8 +16,8 @@ mass * 1.0
 group 		snapgroup type 1
 variable 	rfac0 equal 0.99363
 variable 	rmin0 equal 0
-variable 	wj1 equal 1
-variable 	wj2 equal 1
+# variable 	wj1 equal 1
+# variable 	wj2 equal 1
 variable 	wj1local equal ${wj1}-1.0e-15 # inject a bit of fuzz
 variable 	wj2local equal ${wj2}-1.0e-15 # inject a bit of fuzz
 variable 	radelem1 equal 0.5
