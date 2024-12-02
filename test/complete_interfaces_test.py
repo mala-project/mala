@@ -1,7 +1,7 @@
 import importlib
 import os
 
-from ase.io import read
+from ase.io import read, write
 import mala
 from mala.common.parameters import ParametersBase
 import numpy as np
@@ -357,3 +357,41 @@ class TestInterfaces:
                     new_ldos_calculator.atoms.get_positions()[i, j],
                     rtol=accuracy_fine,
                 )
+
+    def test_atoms_to_lammps_data_multielement(self):
+        """
+        Test if the atoms to LAMMPS interface gives alphabetical ordering.
+
+        If I am not misunderstanding anything than how the element ordering
+        is transferred from an atoms object to LAMMPS is not necessarily
+        well-defined. In the current interface, it seems to simply be
+        alphabetical ordering. We need to check whether this holds.
+        It could change, and since LAMMPS itself does not name the elements
+        in its data file, one would not notice.
+
+        Returns
+        -------
+
+        """
+        vasp_source_file = open("test_element.vasp", mode="w")
+        vasp_source_file.write(
+            "O  Al Te H\n 1.0000000000000000\n     6.0000000000000000    0.0000000000000000    0.0000000000000000\n     0.0000000000000000    6.0000000000000000    0.0000000000000000\n     0.0000000000000000    0.0000000000000000    6.0000000000000000\nO  Al Te H\n   1   1   1   1\nCartesian\n  0.0 0.0 1.0\n  0.0 0.0 2.0\n  0.0 0.0 3.0\n  0.0 0.0 4.0 \n"
+        )
+        vasp_source_file.close()
+        atoms = read("test_element.vasp", format="vasp")
+        write("test_element.lammps", atoms, format="lammps-data")
+
+        raw_file = open("test_element.lammps")
+        lines = raw_file.readlines()
+        found_atoms = 0
+        for idx, line in enumerate(lines):
+            if "Atoms" in line:
+                found_atoms = idx
+
+        alphabetical_order_elements = [3, 1, 4, 2]
+
+        for i in range(2, 6):
+            assert (
+                int(lines[found_atoms + i].split()[1])
+                == alphabetical_order_elements[i - 2]
+            )
