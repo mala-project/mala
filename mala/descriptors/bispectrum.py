@@ -132,10 +132,10 @@ class Bispectrum(Descriptor):
         # general LAMMPS import.
         from lammps import constants as lammps_constants
 
-        if len(set(self._atoms.numbers)) > 2:
+        if len(set(self._atoms.numbers)) > 3:
             raise ValueError(
-                "MALA can only compute bispectrum descriptors for 1- or "
-                "2-element systems currently."
+                "MALA can only compute bispectrum descriptors up to "
+                "3-element systems currently."
             )
 
         use_fp64 = kwargs.get("use_fp64", False)
