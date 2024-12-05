@@ -226,7 +226,6 @@ class LDOSAligner(DataHandlerBase):
 
             # shift the ldos
             optimal_shift = self.calc_optimal_ldos_shift(
-                e_grid,
                 ldos_mean,
                 ldos_mean_ref,
                 left_index,

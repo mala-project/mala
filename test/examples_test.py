@@ -95,14 +95,6 @@ class TestExamples:
             + "/../examples/advanced/ex06_distributed_hyperparameter_optimization.py"
         )
 
-    @pytest.mark.order(after="test_basic_ex01")
-    def test_advanced_ex09(self, tmp_path):
-        os.chdir(tmp_path)
-        runpy.run_path(
-            self.dir_path
-            + "/../examples/advanced/ex10_convert_numpy_openpmd.py"
-        )
-
     @pytest.mark.skipif(
         importlib.util.find_spec("oapackage") is None,
         reason="No OAT found on this machine, skipping this " "test.",
@@ -121,4 +113,19 @@ class TestExamples:
         runpy.run_path(
             self.dir_path
             + "/../examples/advanced/ex08_visualize_observables.py"
+        )
+
+    @pytest.mark.order(after="test_basic_ex01")
+    def test_advanced_ex09(self, tmp_path):
+        os.chdir(tmp_path)
+        runpy.run_path(
+            self.dir_path + "/../examples/advanced/ex09_align_ldos.py"
+        )
+
+    @pytest.mark.order(after="test_basic_ex01")
+    def test_advanced_ex10(self, tmp_path):
+        os.chdir(tmp_path)
+        runpy.run_path(
+            self.dir_path
+            + "/../examples/advanced/ex10_convert_numpy_openpmd.py"
         )
