@@ -288,6 +288,60 @@ class DataShuffler(DataHandlerBase):
             self.rank = 0
             self.size = 1
 
+    def __contiguous_slice_within_ndim_grid_as_blocks(
+        extent: list[int], x: list[int], y: list[int]
+    ):
+        def get_extent(from_, to_):
+            res = [upper + 1 - lower for (lower, upper) in zip(from_, to_)]
+            if any(x < 1 for x in res):
+                raise RuntimeError(
+                    f"Cannot compute block extent from {from_} to {to_}."
+                )
+            return res
+
+        # y is inclusive i have decided, there is no clear definition for what
+        # would be the next exclusive y
+        if len(extent) != len(x):
+            raise RuntimeError(
+                f"__shuffle_openpmd: Internal indexing error extent={extent} and x={x} must have the same length. This is a bug."
+            )
+        if len(extent) != len(y):
+            raise RuntimeError(
+                f"__shuffle_openpmd: Internal indexing error extent={extent} and y={y} must have the same length. This is a bug."
+            )
+
+        print(f"CALLED: {x} - {y}")
+        # Recursive bottom cases
+        # 1. No items left
+        if y < x:
+            return []
+        # 2. No distinct dimensions left
+        elif x[0:-1] == y[0:-1]:
+            return [(x.copy(), get_extent(x, y))]
+
+        front_slice = (x.copy(), [1 for _ in range(len(x))])
+        front_slice[1][-1] = extent[-1] - x[-1]
+
+        back_slice = (y.copy(), [1 for _ in range(len(y))])
+        back_slice[0][-1] = 0
+        back_slice[1][-1] = y[-1] + 1
+
+        # Strip the last (i.e. fast-running) dimension for a recursive call with
+        # one dimensionality reduced
+        recursive_x = x[0:-1]
+        recursive_x[-1] += 1
+        recursive_y = y[0:-1]
+        recursive_y[-1] -= 1
+
+        rec_res = DataShuffler.__contiguous_slice_within_ndim_grid_as_blocks(
+            extent[0:-1], recursive_x, recursive_y
+        )
+
+        # Add the last dimension again
+        rec_res = [(xx + [0], yy + [extent[-1]]) for (xx, yy) in rec_res]
+
+        return [front_slice] + rec_res + [back_slice]
+
     def __shuffle_openpmd(
         self,
         dot: __DescriptorOrTarget,
