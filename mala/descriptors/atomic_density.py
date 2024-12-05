@@ -215,14 +215,18 @@ class AtomicDensity(Descriptor):
         )
 
         self._clean_calculation(lmp, keep_logs)
-
+        # gaussian_descriptors_np_test = gaussian_descriptors_np.copy()
+        # if np.shape(gaussian_descriptors_np_test)[1] > 7:
+        #     gaussian_descriptors_np_test[:, 6] = gaussian_descriptors_np[:, 7]
+        #     gaussian_descriptors_np_test[:, 7] = gaussian_descriptors_np[:, 8]
+        #     gaussian_descriptors_np_test[:, 8] = gaussian_descriptors_np[:, 6]
         # In comparison to bispectrum, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments
         # if we operate without MPI.
         self.grid_dimensions = [nx, ny, nz]
         if self.parameters._configuration["mpi"]:
             if return_directly:
-                return gaussian_descriptors_np
+                return gaussian_descriptors_np_test
             else:
                 self.feature_size = 4
                 return gaussian_descriptors_np, nrows_ggrid
