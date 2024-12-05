@@ -310,7 +310,6 @@ class DataShuffler(DataHandlerBase):
                 f"__shuffle_openpmd: Internal indexing error extent={extent} and y={y} must have the same length. This is a bug."
             )
 
-        print(f"CALLED: {x} - {y}")
         # Recursive bottom cases
         # 1. No items left
         if y < x:
@@ -351,8 +350,6 @@ class DataShuffler(DataHandlerBase):
             strides = [current_stride] + strides
             current_stride *= ext  # sic!, the last one gets ignored
 
-        print("Strides", strides)
-
         def worker(inner_idx, inner_strides):
             if not inner_strides:
                 if inner_idx != 0:
@@ -377,11 +374,15 @@ class DataShuffler(DataHandlerBase):
                 mesh.shape, start_idx, end_idx
             )
         )
+        # print(f"\n\nLOADING {offset}\t+{extent}\tFROM {mesh.shape}")
         current_offset = 0  # offset within arr
         for nd_offset, nd_extent in blocks_to_load:
-            flat_extent = prod(nd_extent)
+            flat_extent = np.prod(nd_extent)
+            # print(
+            #     f"\t{nd_offset}\t-{nd_extent}\t->[{current_offset}:{current_offset + flat_extent}]"
+            # )
             mesh.load_chunk(
-                arr[current_offset : current_offset + nd_extent],
+                arr[current_offset : current_offset + flat_extent],
                 nd_offset,
                 nd_extent,
             )
@@ -468,23 +469,12 @@ class DataShuffler(DataHandlerBase):
         # This gets the offset and extent of the i'th such slice.
         # The extent is given as in openPMD, i.e. the size of the block
         # (not its upper coordinate).
-        def from_chunk_i(i, n, dset, slice_dimension=0):
+        def from_chunk_i(i, n, dset):
             if isinstance(dset, io.Dataset):
                 dset = dset.extent
-            dset = list(dset)
-            offset = [0 for _ in dset]
-            extent = dset
-            extent_dim_0 = dset[slice_dimension]
-            if extent_dim_0 % n != 0:
-                raise Exception(
-                    "Dataset {} cannot be split into {} chunks on dimension {}.".format(
-                        dset, n, slice_dimension
-                    )
-                )
-            single_chunk_len = extent_dim_0 // n
-            offset[slice_dimension] = i * single_chunk_len
-            extent[slice_dimension] = single_chunk_len
-            return offset, extent
+            flat_extent = np.prod(dset)
+            one_slice_extent = flat_extent // n
+            return i * one_slice_extent, one_slice_extent
 
         import json
 
@@ -545,9 +535,10 @@ class DataShuffler(DataHandlerBase):
                     i, number_of_new_snapshots, extent_in
                 )
                 to_chunk_offset = to_chunk_extent
-                to_chunk_extent = to_chunk_offset + np.prod(from_chunk_extent)
+                to_chunk_extent = to_chunk_offset + from_chunk_extent
                 for dimension in range(len(mesh_in)):
-                    mesh_in[str(dimension)].load_chunk(
+                    DataShuffler.__load_chunk_1D(
+                        mesh_in[str(dimension)],
                         new_array[dimension, to_chunk_offset:to_chunk_extent],
                         from_chunk_offset,
                         from_chunk_extent,
@@ -650,24 +641,6 @@ class DataShuffler(DataHandlerBase):
         self._data_points_to_remove = None
         if number_of_shuffled_snapshots is None:
             number_of_shuffled_snapshots = self.nr_snapshots
-
-        # Currently, the openPMD interface is not feature-complete.
-        if snapshot_type == "openpmd" and np.any(
-            np.array(
-                [
-                    snapshot.grid_dimension[0] % number_of_shuffled_snapshots
-                    for snapshot in self.parameters.snapshot_directories_list
-                ]
-            )
-            != 0
-        ):
-            raise ValueError(
-                "Shuffling from OpenPMD files currently only "
-                "supported if first dimension of all snapshots "
-                "can evenly be divided by number of snapshots. "
-                "Please select a different number of shuffled "
-                "snapshots or use the numpy interface. "
-            )
 
         shuffled_gridsizes = snapshot_size_list // number_of_shuffled_snapshots
 

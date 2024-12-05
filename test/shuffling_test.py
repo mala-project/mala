@@ -327,7 +327,9 @@ class TestDataShuffling:
         new_loss = test_trainer.final_validation_loss
         assert old_loss > new_loss
 
-    def test_arbitrary_number_snapshots(self):
+    def worker_arbitrary_number_snapshots(
+        self, ext_in, ext_out, snapshot_type
+    ):
         parameters = mala.Parameters()
 
         # This ensures reproducibility of the created data sets.
@@ -337,20 +339,46 @@ class TestDataShuffling:
 
         for i in range(5):
             data_shuffler.add_snapshot(
-                "Be_snapshot0.in.npy",
+                f"Be_snapshot0.in.{ext_in}",
                 data_path,
-                "Be_snapshot0.out.npy",
+                f"Be_snapshot0.out.{ext_in}",
                 data_path,
+                snapshot_type=snapshot_type,
             )
         data_shuffler.shuffle_snapshots(
             complete_save_path=".",
-            save_name="Be_shuffled*",
+            save_name=f"Be_shuffled*{ext_out}",
             number_of_shuffled_snapshots=5,
         )
-        for i in range(4):
+
+    def test_arbitrary_number_snapshots(self):
+        self.worker_arbitrary_number_snapshots("npy", "", "numpy")
+        for i in range(5):
             bispectrum = np.load("Be_shuffled" + str(i) + ".in.npy")
             ldos = np.load("Be_shuffled" + str(i) + ".out.npy")
             assert not np.any(np.where(np.all(ldos == 0, axis=-1).squeeze()))
             assert not np.any(
                 np.where(np.all(bispectrum == 0, axis=-1).squeeze())
             )
+        self.worker_arbitrary_number_snapshots("h5", ".h5", "openpmd")
+        import openpmd_api as opmd
+
+        bispectrum_series = opmd.Series(
+            "Be_shuffled%T.in.h5", opmd.Access.read_only
+        )
+        ldos_series = opmd.Series(
+            "Be_shuffled%T.out.h5", opmd.Access.read_only
+        )
+        for i in range(5):
+            for name, series in [("Bispectrum", bispectrum_series), ("LDOS", ldos_series)]:
+                loaded_array = [
+                    component.load_chunk().squeeze()
+                    for _, component in series.iterations[i]
+                    .meshes[name]
+                    .items()
+                ]
+                series.flush()
+                loaded_array = np.array(loaded_array)
+                assert not np.any(
+                    np.where(np.all(loaded_array == 0, axis=0).squeeze())
+                )
