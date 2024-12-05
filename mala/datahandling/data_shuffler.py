@@ -342,6 +342,51 @@ class DataShuffler(DataHandlerBase):
 
         return [front_slice] + rec_res + [back_slice]
 
+    def __resolve_flattened_index_into_ndim(idx: int, ndim_extent: list[int]):
+        if not ndim_extent:
+            raise RuntimeError("Cannot index into a zero-dimensional array.")
+        strides = []
+        current_stride = 1
+        for ext in reversed(ndim_extent):
+            strides = [current_stride] + strides
+            current_stride *= ext  # sic!, the last one gets ignored
+
+        print("Strides", strides)
+
+        def worker(inner_idx, inner_strides):
+            if not inner_strides:
+                if inner_idx != 0:
+                    raise RuntimeError("Bug")
+                else:
+                    return []
+            div, mod = divmod(inner_idx, inner_strides[0])
+            return [div] + worker(mod, inner_strides[1:])
+
+        return worker(idx, strides)
+
+    def __load_chunk_1D(mesh, arr, offset, extent):
+        start_idx = DataShuffler.__resolve_flattened_index_into_ndim(
+            offset, mesh.shape
+        )
+        # inclusive end
+        end_idx = DataShuffler.__resolve_flattened_index_into_ndim(
+            offset + extent - 1, mesh.shape
+        )
+        blocks_to_load = (
+            DataShuffler.__contiguous_slice_within_ndim_grid_as_blocks(
+                mesh.shape, start_idx, end_idx
+            )
+        )
+        current_offset = 0  # offset within arr
+        for nd_offset, nd_extent in blocks_to_load:
+            flat_extent = prod(nd_extent)
+            mesh.load_chunk(
+                arr[current_offset : current_offset + nd_extent],
+                nd_offset,
+                nd_extent,
+            )
+            current_offset += flat_extent
+
     def __shuffle_openpmd(
         self,
         dot: __DescriptorOrTarget,
