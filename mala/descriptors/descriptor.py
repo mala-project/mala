@@ -1,14 +1,26 @@
 """Base class for all descriptor calculators."""
+
 from abc import abstractmethod
+from functools import cached_property
 import os
+import tempfile
 
 import ase
 from ase.units import m
+from ase.neighborlist import NeighborList, NewPrimitiveNeighborList
 import numpy as np
+from skspatial.objects import Plane
 
 from mala.common.parameters import ParametersDescriptors, Parameters
-from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
-    barrier, parallel_warn, set_lammps_instance
+from mala.common.parallelizer import (
+    get_comm,
+    printout,
+    get_rank,
+    get_size,
+    barrier,
+    parallel_warn,
+    set_lammps_instance,
+)
 from mala.common.physical_data import PhysicalData
 from mala.descriptors.lammps_utils import set_cmdlinevars
 
@@ -24,13 +36,17 @@ class Descriptor(PhysicalData):
     parameters : mala.common.parameters.Parameters
         Parameters object used to create this object.
 
+    Attributes
+    ----------
+    parameters: mala.common.parameters.ParametersDescriptors
+        MALA descriptor calculation parameters.
     """
 
     ##############################
     # Constructors
     ##############################
 
-    def __new__(cls, params: Parameters=None):
+    def __new__(cls, params: Parameters = None):
         """
         Create a Descriptor instance.
 
@@ -47,28 +63,26 @@ class Descriptor(PhysicalData):
         # Check if we're accessing through base class.
         # If not, we need to return the correct object directly.
         if cls == Descriptor:
-            if params.descriptors.descriptor_type == 'SNAP':
+            if params.descriptors.descriptor_type == "Bispectrum":
                 from mala.descriptors.bispectrum import Bispectrum
-                parallel_warn(
-                    "Using 'SNAP' as descriptors will be deprecated "
-                    "starting in MALA v1.3.0. Please use 'Bispectrum' "
-                    "instead.",  min_verbosity=0, category=FutureWarning)
-                descriptors = super(Descriptor, Bispectrum).__new__(Bispectrum)
 
-            if params.descriptors.descriptor_type == 'Bispectrum':
-                from mala.descriptors.bispectrum import Bispectrum
                 descriptors = super(Descriptor, Bispectrum).__new__(Bispectrum)
 
             if params.descriptors.descriptor_type == "AtomicDensity":
                 from mala.descriptors.atomic_density import AtomicDensity
-                descriptors = super(Descriptor, AtomicDensity).\
-                    __new__(AtomicDensity)
+
+                descriptors = super(Descriptor, AtomicDensity).__new__(
+                    AtomicDensity
+                )
 
             if params.descriptors.descriptor_type == "MinterpyDescriptors":
-                from mala.descriptors.minterpy_descriptors import \
+                from mala.descriptors.minterpy_descriptors import (
+                    MinterpyDescriptors,
+                )
+
+                descriptors = super(Descriptor, MinterpyDescriptors).__new__(
                     MinterpyDescriptors
-                descriptors = super(Descriptor, MinterpyDescriptors).\
-                    __new__(MinterpyDescriptors)
+                )
 
             if descriptors is None:
                 raise Exception("Unsupported descriptor calculator.")
@@ -91,15 +105,21 @@ class Descriptor(PhysicalData):
         params : mala.Parameters
             The parameters object with which this object was created.
         """
-        return self.params_arg,
+        return (self.params_arg,)
 
     def __init__(self, parameters):
         super(Descriptor, self).__init__(parameters)
         self.parameters: ParametersDescriptors = parameters.descriptors
-        self.fingerprint_length = 0  # so iterations will fail
-        self.verbosity = parameters.verbosity
-        self.in_format_ase = ""
-        self.atoms = None
+        self.feature_size = 0  # so iterations will fail
+        self._in_format_ase = ""
+        self._atoms = None
+        self._voxel = None
+
+        # If we ever have NON LAMMPS descriptors, these parameters have no
+        # meaning anymore and should probably be moved to an intermediate
+        # DescriptorsLAMMPS class, from which the LAMMPS descriptors inherit.
+        self._lammps_temporary_input = None
+        self._lammps_temporary_log = None
 
     ##############################
     # Properties
@@ -160,8 +180,19 @@ class Descriptor(PhysicalData):
             Data in MALA units.
 
         """
-        raise Exception("No unit conversion method implemented for this"
-                        " descriptor type.")
+        raise Exception(
+            "No unit conversion method implemented for this"
+            " descriptor type."
+        )
+
+    @property
+    def feature_size(self):
+        """Get the feature dimension of this data."""
+        return self._feature_size
+
+    @feature_size.setter
+    def feature_size(self, value):
+        self._feature_size = value
 
     @staticmethod
     def backconvert_units(array, out_units):
@@ -182,8 +213,51 @@ class Descriptor(PhysicalData):
             Data in out_units.
 
         """
-        raise Exception("No unit back conversion method implemented for "
-                        "this descriptor type.")
+        raise Exception(
+            "No unit back conversion method implemented for "
+            "this descriptor type."
+        )
+
+    def setup_lammps_tmp_files(self, lammps_type, outdir):
+        """
+        Create the temporary lammps input and log files.
+
+        Parameters
+        ----------
+        lammps_type: str
+            Type of descriptor calculation (e.g. bgrid for bispectrum)
+        outdir: str
+            Directory where lammps files are kept
+
+        Returns
+        -------
+        None
+        """
+        if get_rank() == 0:
+            prefix_inp_str = "lammps_" + lammps_type + "_input"
+            prefix_log_str = "lammps_" + lammps_type + "_log"
+            lammps_tmp_input_file = tempfile.NamedTemporaryFile(
+                delete=False, prefix=prefix_inp_str, suffix="_.tmp", dir=outdir
+            )
+            self._lammps_temporary_input = lammps_tmp_input_file.name
+            lammps_tmp_input_file.close()
+
+            lammps_tmp_log_file = tempfile.NamedTemporaryFile(
+                delete=False, prefix=prefix_log_str, suffix="_.tmp", dir=outdir
+            )
+            self._lammps_temporary_log = lammps_tmp_log_file.name
+            lammps_tmp_log_file.close()
+        else:
+            self._lammps_temporary_input = None
+            self._lammps_temporary_log = None
+
+        if self.parameters._configuration["mpi"]:
+            self._lammps_temporary_input = get_comm().bcast(
+                self._lammps_temporary_input, root=0
+            )
+            self._lammps_temporary_log = get_comm().bcast(
+                self._lammps_temporary_log, root=0
+            )
 
     # Calculations
     ##############
@@ -217,16 +291,24 @@ class Descriptor(PhysicalData):
         # metric here.
         rescaled_atoms = 0
         for i in range(0, len(atoms)):
-            if False in (np.isclose(new_atoms[i].position,
-                          atoms[i].position, atol=0.001)):
+            if False in (
+                np.isclose(
+                    new_atoms[i].position, atoms[i].position, atol=0.001
+                )
+            ):
                 rescaled_atoms += 1
-        printout("Descriptor calculation: had to enforce periodic boundary "
-                 "conditions on", rescaled_atoms, "atoms before calculation.",
-                 min_verbosity=2)
+        printout(
+            "Descriptor calculation: had to enforce periodic boundary "
+            "conditions on",
+            rescaled_atoms,
+            "atoms before calculation.",
+            min_verbosity=2,
+        )
         return new_atoms
 
-    def calculate_from_qe_out(self, qe_out_file, working_directory=".",
-                              **kwargs):
+    def calculate_from_qe_out(
+        self, qe_out_file, working_directory=".", **kwargs
+    ):
         """
         Calculate the descriptors based on a Quantum Espresso outfile.
 
@@ -240,6 +322,17 @@ class Descriptor(PhysicalData):
             Usually the local directory should suffice, given that there
             are no multiple instances running in the same directory.
 
+        kwargs : dict
+            A collection of keyword arguments, that are mainly used for
+            debugging and development. Different types of descriptors
+            may support different keyword arguments. Commonly supported
+            are
+
+            - "use_fp64": To use enforce floating point 64 precision for
+              descriptors.
+            - "keep_logs": To not delete temporary files created during
+              LAMMPS calculation of descriptors.
+
         Returns
         -------
         descriptors : numpy.array
@@ -247,18 +340,17 @@ class Descriptor(PhysicalData):
             (x,y,z,descriptor_dimension)
 
         """
-        self.in_format_ase = "espresso-out"
-        printout("Calculating descriptors from", qe_out_file,
-                 min_verbosity=0)
+        self._in_format_ase = "espresso-out"
+        printout("Calculating descriptors from", qe_out_file, min_verbosity=0)
         # We get the atomic information by using ASE.
-        atoms = ase.io.read(qe_out_file, format=self.in_format_ase)
+        self._atoms = ase.io.read(qe_out_file, format=self._in_format_ase)
 
         # Enforcing / Checking PBC on the read atoms.
-        atoms = self.enforce_pbc(atoms)
+        self._atoms = self.enforce_pbc(self._atoms)
 
         # Get the grid dimensions.
         if "grid_dimensions" in kwargs.keys():
-            grid_dimensions = kwargs["grid_dimensions"]
+            self.grid_dimensions = kwargs["grid_dimensions"]
 
             # Deleting this keyword from the list to avoid conflict with
             # dict below.
@@ -266,21 +358,26 @@ class Descriptor(PhysicalData):
         else:
             qe_outfile = open(qe_out_file, "r")
             lines = qe_outfile.readlines()
-            grid_dimensions = [0, 0, 0]
+            self.grid_dimensions = [0, 0, 0]
 
             for line in lines:
                 if "FFT dimensions" in line:
                     tmp = line.split("(")[1].split(")")[0]
-                    grid_dimensions[0] = int(tmp.split(",")[0])
-                    grid_dimensions[1] = int(tmp.split(",")[1])
-                    grid_dimensions[2] = int(tmp.split(",")[2])
+                    self.grid_dimensions[0] = int(tmp.split(",")[0])
+                    self.grid_dimensions[1] = int(tmp.split(",")[1])
+                    self.grid_dimensions[2] = int(tmp.split(",")[2])
                     break
 
-        return self._calculate(atoms,
-                               working_directory, grid_dimensions, **kwargs)
+        self._voxel = self._atoms.cell.copy()
+        self._voxel[0] = self._voxel[0] / (self.grid_dimensions[0])
+        self._voxel[1] = self._voxel[1] / (self.grid_dimensions[1])
+        self._voxel[2] = self._voxel[2] / (self.grid_dimensions[2])
 
-    def calculate_from_atoms(self, atoms, grid_dimensions,
-                             working_directory=".", **kwargs):
+        return self._calculate(working_directory, **kwargs)
+
+    def calculate_from_atoms(
+        self, atoms, grid_dimensions, working_directory=".", **kwargs
+    ):
         """
         Calculate the bispectrum descriptors based on atomic configurations.
 
@@ -297,6 +394,17 @@ class Descriptor(PhysicalData):
             Usually the local directory should suffice, given that there
             are no multiple instances running in the same directory.
 
+        kwargs : dict
+            A collection of keyword arguments, that are mainly used for
+            debugging and development. Different types of descriptors
+            may support different keyword arguments. Commonly supported
+            are
+
+            - "use_fp64": To use enforce floating point 64 precision for
+              descriptors.
+            - "keep_logs": To not delete temporary files created during
+              LAMMPS calculation of descriptors.
+
         Returns
         -------
         descriptors : numpy.array
@@ -304,9 +412,13 @@ class Descriptor(PhysicalData):
             (x,y,z,descriptor_dimension)
         """
         # Enforcing / Checking PBC on the input atoms.
-        atoms = self.enforce_pbc(atoms)
-        return self._calculate(atoms, working_directory,
-                               grid_dimensions, **kwargs)
+        self._atoms = self.enforce_pbc(atoms)
+        self.grid_dimensions = grid_dimensions
+        self._voxel = self._atoms.cell.copy()
+        self._voxel[0] = self._voxel[0] / (self.grid_dimensions[0])
+        self._voxel[1] = self._voxel[1] / (self.grid_dimensions[1])
+        self._voxel[2] = self._voxel[2] / (self.grid_dimensions[2])
+        return self._calculate(working_directory, **kwargs)
 
     def gather_descriptors(self, descriptors_np, use_pickled_comm=False):
         """
@@ -340,12 +452,12 @@ class Descriptor(PhysicalData):
 
         # Gather the descriptors into a list.
         if use_pickled_comm:
-            all_descriptors_list = comm.gather(descriptors_np,
-                                               root=0)
+            all_descriptors_list = comm.gather(descriptors_np, root=0)
         else:
-            sendcounts = np.array(comm.gather(np.shape(descriptors_np)[0],
-                                              root=0))
-            raw_feature_length = self.fingerprint_length+3
+            sendcounts = np.array(
+                comm.gather(np.shape(descriptors_np)[0], root=0)
+            )
+            raw_feature_length = self.feature_size + 3
 
             if get_rank() == 0:
                 # print("sendcounts: {}, total: {}".format(sendcounts,
@@ -355,18 +467,21 @@ class Descriptor(PhysicalData):
                 all_descriptors_list = []
                 for i in range(0, get_size()):
                     all_descriptors_list.append(
-                        np.empty(sendcounts[i] * raw_feature_length,
-                                 dtype=descriptors_np.dtype))
+                        np.empty(
+                            sendcounts[i] * raw_feature_length,
+                            dtype=descriptors_np.dtype,
+                        )
+                    )
 
                 # No MPI necessary for first rank. For all the others,
                 # collect the buffers.
                 all_descriptors_list[0] = descriptors_np
                 for i in range(1, get_size()):
-                    comm.Recv(all_descriptors_list[i], source=i,
-                              tag=100+i)
-                    all_descriptors_list[i] = \
-                        np.reshape(all_descriptors_list[i],
-                                   (sendcounts[i], raw_feature_length))
+                    comm.Recv(all_descriptors_list[i], source=i, tag=100 + i)
+                    all_descriptors_list[i] = np.reshape(
+                        all_descriptors_list[i],
+                        (sendcounts[i], raw_feature_length),
+                    )
             else:
                 comm.Send(descriptors_np, dest=0, tag=get_rank() + 100)
             barrier()
@@ -387,24 +502,29 @@ class Descriptor(PhysicalData):
             nx = self.grid_dimensions[0]
             ny = self.grid_dimensions[1]
             nz = self.grid_dimensions[2]
-            descriptors_full = np.zeros(
-                [nx, ny, nz, self.fingerprint_length])
-            # Fill the full SNAP descriptors array.
+            descriptors_full = np.zeros([nx, ny, nz, self.feature_size])
+            # Fill the full bispectrum descriptors array.
             for idx, local_grid in enumerate(all_descriptors_list):
                 # We glue the individual cells back together, and transpose.
                 first_x = int(local_grid[0][0])
                 first_y = int(local_grid[0][1])
                 first_z = int(local_grid[0][2])
-                last_x = int(local_grid[-1][0])+1
-                last_y = int(local_grid[-1][1])+1
-                last_z = int(local_grid[-1][2])+1
-                descriptors_full[first_x:last_x,
-                                 first_y:last_y,
-                                 first_z:last_z] = \
-                    np.reshape(local_grid[:, 3:],
-                               [last_z-first_z, last_y-first_y, last_x-first_x,
-                                self.fingerprint_length]).\
-                    transpose([2, 1, 0, 3])
+                last_x = int(local_grid[-1][0]) + 1
+                last_y = int(local_grid[-1][1]) + 1
+                last_z = int(local_grid[-1][2]) + 1
+                descriptors_full[
+                    first_x:last_x, first_y:last_y, first_z:last_z
+                ] = np.reshape(
+                    local_grid[:, 3:],
+                    [
+                        last_z - first_z,
+                        last_y - first_y,
+                        last_x - first_x,
+                        self.feature_size,
+                    ],
+                ).transpose(
+                    [2, 1, 0, 3]
+                )
 
                 # Leaving this in here for debugging purposes.
                 # This is the slow way to reshape the descriptors.
@@ -446,40 +566,12 @@ class Descriptor(PhysicalData):
         ny = local_reach[1] - local_offset[1]
         nz = local_reach[2] - local_offset[2]
 
-        descriptors_full = np.zeros([nx, ny, nz, self.fingerprint_length])
+        descriptors_full = np.zeros([nx, ny, nz, self.feature_size])
 
-        descriptors_full[0:nx, 0:ny, 0:nz] = \
-            np.reshape(descriptors_np[:, 3:],
-                       [nz, ny, nx, self.fingerprint_length]).\
-                transpose([2, 1, 0, 3])
+        descriptors_full[0:nx, 0:ny, 0:nz] = np.reshape(
+            descriptors_np[:, 3:], [nz, ny, nx, self.feature_size]
+        ).transpose([2, 1, 0, 3])
         return descriptors_full, local_offset, local_reach
-
-    def get_acsd(self, descriptor_data, ldos_data):
-        """
-        Calculate the ACSD for given descriptors and LDOS data.
-
-        ACSD stands for average cosine similarity distance and is a metric
-        of how well the descriptors capture the local environment to a
-        degree where similar vectors result in simlar LDOS vectors.
-
-        Parameters
-        ----------
-        descriptor_data : numpy.ndarray
-            Array containing the descriptors.
-
-        ldos_data : numpy.ndarray
-            Array containing the LDOS.
-
-        Returns
-        -------
-        acsd : float
-            The average cosine similarity distance.
-
-        """
-        return self._calculate_acsd(descriptor_data, ldos_data,
-                                    self.parameters.acsd_points,
-                                    descriptor_vectors_contain_xyz=
-                                    self.descriptors_contain_xyz)
 
     # Private methods
     #################
@@ -489,27 +581,31 @@ class Descriptor(PhysicalData):
 
     def _process_loaded_dimensions(self, array_dimensions):
         if self.descriptors_contain_xyz:
-            return (array_dimensions[0], array_dimensions[1],
-                    array_dimensions[2], array_dimensions[3]-3)
+            return (
+                array_dimensions[0],
+                array_dimensions[1],
+                array_dimensions[2],
+                array_dimensions[3] - 3,
+            )
         else:
             return array_dimensions
 
     def _set_geometry_info(self, mesh):
         # Geometry: Save the cell parameters and angles of the grid.
-        if self.atoms is not None:
+        if self._atoms is not None:
             import openpmd_api as io
 
-            voxel = self.atoms.cell.copy()
-            voxel[0] = voxel[0] / (self.grid_dimensions[0])
-            voxel[1] = voxel[1] / (self.grid_dimensions[1])
-            voxel[2] = voxel[2] / (self.grid_dimensions[2])
+            self._voxel = self._atoms.cell.copy()
+            self._voxel[0] = self._voxel[0] / (self.grid_dimensions[0])
+            self._voxel[1] = self._voxel[1] / (self.grid_dimensions[1])
+            self._voxel[2] = self._voxel[2] / (self.grid_dimensions[2])
 
             mesh.geometry = io.Geometry.cartesian
-            mesh.grid_spacing = voxel.cellpar()[0:3]
-            mesh.set_attribute("angles", voxel.cellpar()[3:])
+            mesh.grid_spacing = self._voxel.cellpar()[0:3]
+            mesh.set_attribute("angles", self._voxel.cellpar()[3:])
 
     def _get_atoms(self):
-        return self.atoms
+        return self._atoms
 
     def _feature_mask(self):
         if self.descriptors_contain_xyz:
@@ -517,8 +613,7 @@ class Descriptor(PhysicalData):
         else:
             return 0
 
-    def _setup_lammps(self, nx, ny, nz, outdir, lammps_dict,
-                      log_file_name="lammps_log.tmp"):
+    def _setup_lammps(self, nx, ny, nz, lammps_dict):
         """
         Set up the lammps processor grid.
 
@@ -526,15 +621,14 @@ class Descriptor(PhysicalData):
         """
         from lammps import lammps
 
-        if self.parameters._configuration["mpi"] and \
-           self.parameters._configuration["gpu"]:
-            raise Exception("LAMMPS can currently only work with multiple "
-                            "ranks or GPU on one rank - but not multiple GPUs "
-                            "across ranks.")
-
         # Build LAMMPS arguments from the data we read.
-        lmp_cmdargs = ["-screen", "none", "-log",
-                       os.path.join(outdir, log_file_name)]
+        lmp_cmdargs = [
+            "-screen",
+            "none",
+            "-log",
+            self._lammps_temporary_log,
+        ]
+        lammps_dict["atom_config_fname"] = self._lammps_temporary_input
 
         if self.parameters._configuration["mpi"]:
             size = get_size()
@@ -562,67 +656,73 @@ class Descriptor(PhysicalData):
                 # number of z processors is equal to total processors/nyfft is
                 # nyfft is used else zprocs = size
                 if size % yprocs == 0:
-                    zprocs = int(size/yprocs)
+                    zprocs = int(size / yprocs)
                 else:
-                    raise ValueError("Cannot evenly divide z-planes "
-                                     "in y-direction")
+                    raise ValueError(
+                        "Cannot evenly divide z-planes in y-direction"
+                    )
 
                 # check if total number of processors is greater than number of
                 # grid sections produce error if number of processors is
                 # greater than grid partions - will cause mismatch later in QE
-                mpi_grid_sections = yprocs*zprocs
+                mpi_grid_sections = yprocs * zprocs
                 if mpi_grid_sections < size:
-                    raise ValueError("More processors than grid sections. "
-                                     "This will cause a crash further in the "
-                                     "calculation. Choose a total number of "
-                                     "processors equal to or less than the "
-                                     "total number of grid sections requsted "
-                                     "for the calculation (nyfft*nz).")
+                    raise ValueError(
+                        "More processors than grid sections. "
+                        "This will cause a crash further in the "
+                        "calculation. Choose a total number of "
+                        "processors equal to or less than the "
+                        "total number of grid sections requsted "
+                        "for the calculation (nyfft*nz)."
+                    )
                 # TODO not sure what happens when size/nyfft is not integer -
                 #  further testing required
 
                 # set the mpi processor grid for lammps
                 lammps_procs = f"1 {yprocs} {zprocs}"
-                printout("mpi grid with nyfft: ", lammps_procs,
-                         min_verbosity=2)
+                printout(
+                    "mpi grid with nyfft: ", lammps_procs, min_verbosity=2
+                )
 
                 # prepare y plane cuts for balance command in lammps if not
                 # integer value
                 if int(ny / yprocs) == (ny / yprocs):
-                    ycut = 1/yprocs
-                    yint = ''
-                    for i in range(0, yprocs-1):
-                        yvals = ((i+1)*ycut)-0.00000001
+                    ycut = 1 / yprocs
+                    yint = ""
+                    for i in range(0, yprocs - 1):
+                        yvals = ((i + 1) * ycut) - 0.00000001
                         yint += format(yvals, ".8f")
-                        yint += ' '
+                        yint += " "
                 else:
                     # account for remainder with uneven number of
                     # planes/processors
-                    ycut = 1/yprocs
-                    yrem = ny - (yprocs*int(ny/yprocs))
-                    yint = ''
+                    ycut = 1 / yprocs
+                    yrem = ny - (yprocs * int(ny / yprocs))
+                    yint = ""
                     for i in range(0, yrem):
-                        yvals = (((i+1)*2)*ycut)-0.00000001
+                        yvals = (((i + 1) * 2) * ycut) - 0.00000001
                         yint += format(yvals, ".8f")
-                        yint += ' '
-                    for i in range(yrem, yprocs-1):
-                        yvals = ((i+1+yrem)*ycut)-0.00000001
+                        yint += " "
+                    for i in range(yrem, yprocs - 1):
+                        yvals = ((i + 1 + yrem) * ycut) - 0.00000001
                         yint += format(yvals, ".8f")
-                        yint += ' '
+                        yint += " "
                 # prepare z plane cuts for balance command in lammps
                 if int(nz / zprocs) == (nz / zprocs):
-                    zcut = 1/nz
-                    zint = ''
-                    for i in range(0, zprocs-1):
+                    zcut = 1 / nz
+                    zint = ""
+                    for i in range(0, zprocs - 1):
                         zvals = ((i + 1) * (nz / zprocs) * zcut) - 0.00000001
                         zint += format(zvals, ".8f")
-                        zint += ' '
+                        zint += " "
                 else:
                     # account for remainder with uneven number of
                     # planes/processors
-                    raise ValueError("Cannot divide z-planes on processors"
-                                     " without remainder. "
-                                     "This is currently unsupported.")
+                    raise ValueError(
+                        "Cannot divide z-planes on processors"
+                        " without remainder. "
+                        "This is currently unsupported."
+                    )
 
                     # zcut = 1/nz
                     # zrem = nz - (zprocs*int(nz/zprocs))
@@ -635,8 +735,9 @@ class Descriptor(PhysicalData):
                     #     zvals = ((i+1+zrem)*zcut)-0.00000001
                     #     zint += format(zvals, ".8f")
                     #     zint += ' '
-                lammps_dict["lammps_procs"] = f"processors {lammps_procs} " \
-                                              f"map xyz"
+                lammps_dict["lammps_procs"] = (
+                    f"processors {lammps_procs} " f"map xyz"
+                )
                 lammps_dict["zbal"] = f"balance 1.0 y {yint} z {zint}"
                 lammps_dict["ngridx"] = nx
                 lammps_dict["ngridy"] = ny
@@ -652,13 +753,15 @@ class Descriptor(PhysicalData):
                     # processors. If more processors than planes calculation
                     # efficiency decreases
                     if nz < size:
-                        raise ValueError("More processors than grid sections. "
-                                         "This will cause a crash further in "
-                                         "the calculation. Choose a total "
-                                         "number of processors equal to or "
-                                         "less than the total number of grid "
-                                         "sections requsted for the "
-                                         "calculation (nz).")
+                        raise ValueError(
+                            "More processors than grid sections. "
+                            "This will cause a crash further in "
+                            "the calculation. Choose a total "
+                            "number of processors equal to or "
+                            "less than the total number of grid "
+                            "sections requsted for the "
+                            "calculation (nz)."
+                        )
 
                     # match lammps mpi grid to be 1x1x{zprocs}
                     lammps_procs = f"1 1 {zprocs}"
@@ -667,61 +770,69 @@ class Descriptor(PhysicalData):
                     # prepare z plane cuts for balance command in lammps
                     if int(nz / zprocs) == (nz / zprocs):
                         printout("No remainder in z")
-                        zcut = 1/nz
-                        zint = ''
-                        for i in range(0, zprocs-1):
-                            zvals = ((i+1)*(nz/zprocs)*zcut)-0.00000001
+                        zcut = 1 / nz
+                        zint = ""
+                        for i in range(0, zprocs - 1):
+                            zvals = (
+                                (i + 1) * (nz / zprocs) * zcut
+                            ) - 0.00000001
                             zint += format(zvals, ".8f")
-                            zint += ' '
+                            zint += " "
                     else:
-                        #raise ValueError("Cannot divide z-planes on processors"
+                        # raise ValueError("Cannot divide z-planes on processors"
                         #                 " without remainder. "
                         #                 "This is currently unsupported.")
-                        zcut = 1/nz
-                        zrem = nz - (zprocs*int(nz/zprocs))
-                        zint = ''
+                        zcut = 1 / nz
+                        zrem = nz - (zprocs * int(nz / zprocs))
+                        zint = ""
                         for i in range(0, zrem):
-                            zvals = (((i+1)*(int(nz/zprocs)+1))*zcut)-0.00000001
+                            zvals = (
+                                ((i + 1) * (int(nz / zprocs) + 1)) * zcut
+                            ) - 0.00000001
                             zint += format(zvals, ".8f")
-                            zint += ' '
-                        for i in range(zrem, zprocs-1):
-                            zvals = (((i+1)*int(nz/zprocs)+zrem)*zcut)-0.00000001
+                            zint += " "
+                        for i in range(zrem, zprocs - 1):
+                            zvals = (
+                                ((i + 1) * int(nz / zprocs) + zrem) * zcut
+                            ) - 0.00000001
                             zint += format(zvals, ".8f")
-                            zint += ' '
+                            zint += " "
 
                     lammps_dict["lammps_procs"] = f"processors {lammps_procs}"
                     lammps_dict["zbal"] = f"balance 1.0 z {zint}"
                     lammps_dict["ngridx"] = nx
                     lammps_dict["ngridy"] = ny
                     lammps_dict["ngridz"] = nz
-                    lammps_dict[
-                        "switch"] = self.parameters.bispectrum_switchflag
+                    lammps_dict["switch"] = (
+                        self.parameters.bispectrum_switchflag
+                    )
 
                 else:
                     lammps_dict["ngridx"] = nx
                     lammps_dict["ngridy"] = ny
                     lammps_dict["ngridz"] = nz
-                    lammps_dict[
-                        "switch"] = self.parameters.bispectrum_switchflag
+                    lammps_dict["switch"] = (
+                        self.parameters.bispectrum_switchflag
+                    )
 
         else:
+            size = 1
             lammps_dict["ngridx"] = nx
             lammps_dict["ngridy"] = ny
             lammps_dict["ngridz"] = nz
-            lammps_dict[
-                "switch"] = self.parameters.bispectrum_switchflag
-            if self.parameters._configuration["gpu"]:
-                # Tell Kokkos to use one GPU.
-                lmp_cmdargs.append("-k")
-                lmp_cmdargs.append("on")
-                lmp_cmdargs.append("g")
-                lmp_cmdargs.append("1")
+            lammps_dict["switch"] = self.parameters.bispectrum_switchflag
+        if self.parameters._configuration["gpu"]:
+            # Tell Kokkos to use one GPU.
+            lmp_cmdargs.append("-k")
+            lmp_cmdargs.append("on")
+            lmp_cmdargs.append("g")
+            lmp_cmdargs.append(str(size))
 
-                # Tell LAMMPS to use Kokkos versions of those commands for
-                # which a Kokkos version exists.
-                lmp_cmdargs.append("-sf")
-                lmp_cmdargs.append("kk")
-                pass
+            # Tell LAMMPS to use Kokkos versions of those commands for
+            # which a Kokkos version exists.
+            lmp_cmdargs.append("-sf")
+            lmp_cmdargs.append("kk")
+            pass
 
         lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
 
@@ -730,9 +841,185 @@ class Descriptor(PhysicalData):
 
         return lmp
 
+    def _clean_calculation(self, lmp, keep_logs):
+        lmp.close()
+        if not keep_logs:
+            if get_rank() == 0:
+                os.remove(self._lammps_temporary_log)
+                os.remove(self._lammps_temporary_input)
+
+    def _setup_atom_list(self):
+        """
+        Set up a list of atoms potentially relevant for descriptor calculation.
+
+        If periodic boundary conditions are used, which is usually the case
+        for MALA simulation, one has to compute descriptors by also
+        incorporating atoms from neighboring cells.
+
+        FURTHER OPTIMIZATION: Probably not that much, this mostly already uses
+        optimized python functions.
+        """
+        if np.any(self._atoms.pbc):
+
+            # To determine the list of relevant atoms we first take the edges
+            # of the simulation cell and use them to determine all cells
+            # which hold atoms that _may_ be relevant for the calculation.
+            edges = list(
+                np.array(
+                    [
+                        [0, 0, 0],
+                        [1, 0, 0],
+                        [0, 1, 0],
+                        [0, 0, 1],
+                        [1, 1, 1],
+                        [0, 1, 1],
+                        [1, 0, 1],
+                        [1, 1, 0],
+                    ]
+                )
+                * np.array(self.grid_dimensions)
+            )
+            all_cells_list = None
+
+            # For each edge point create a neighborhoodlist to all cells
+            # given by the cutoff radius.
+            for edge in edges:
+                edge_point = self._grid_to_coord(edge)
+                neighborlist = NeighborList(
+                    np.zeros(len(self._atoms) + 1)
+                    + [self.parameters.atomic_density_cutoff],
+                    bothways=True,
+                    self_interaction=False,
+                    primitive=NewPrimitiveNeighborList,
+                )
+
+                atoms_with_grid_point = self._atoms.copy()
+
+                # Construct a ghost atom representing the grid point.
+                atoms_with_grid_point.append(ase.Atom("H", edge_point))
+                neighborlist.update(atoms_with_grid_point)
+                indices, offsets = neighborlist.get_neighbors(len(self._atoms))
+
+                # Incrementally fill the list containing all cells to be
+                # considered.
+                if all_cells_list is None:
+                    all_cells_list = np.unique(offsets, axis=0)
+                else:
+                    all_cells_list = np.concatenate(
+                        (all_cells_list, np.unique(offsets, axis=0))
+                    )
+
+            # Delete the original cell from the list of all cells.
+            # This is to avoid double checking of atoms below.
+            all_cells = np.unique(all_cells_list, axis=0)
+            idx = 0
+            for a in range(0, len(all_cells)):
+                if (all_cells[a, :] == np.array([0, 0, 0])).all():
+                    break
+                idx += 1
+            all_cells = np.delete(all_cells, idx, axis=0)
+
+            # Create an object to hold all relevant atoms.
+            # First, instantiate it by filling it will all atoms from all
+            # potentiall relevant cells, as identified above.
+            all_atoms = None
+            for a in range(0, len(self._atoms)):
+                if all_atoms is None:
+                    all_atoms = (
+                        self._atoms.positions[a]
+                        + all_cells @ self._atoms.get_cell()
+                    )
+                else:
+                    all_atoms = np.concatenate(
+                        (
+                            all_atoms,
+                            self._atoms.positions[a]
+                            + all_cells @ self._atoms.get_cell(),
+                        )
+                    )
+
+            # Next, construct the planes forming the unit cell.
+            # Atoms from neighboring cells are only included in the list of
+            # all relevant atoms, if they have a distance to any of these
+            # planes smaller than the cutoff radius. Elsewise, they would
+            # not be included in the eventual calculation anyhow.
+            planes = [
+                [[0, 1, 0], [0, 0, 1], [0, 0, 0]],
+                [
+                    [self.grid_dimensions[0], 1, 0],
+                    [self.grid_dimensions[0], 0, 1],
+                    self.grid_dimensions,
+                ],
+                [[1, 0, 0], [0, 0, 1], [0, 0, 0]],
+                [
+                    [1, self.grid_dimensions[1], 0],
+                    [0, self.grid_dimensions[1], 1],
+                    self.grid_dimensions,
+                ],
+                [[1, 0, 0], [0, 1, 0], [0, 0, 0]],
+                [
+                    [1, 0, self.grid_dimensions[2]],
+                    [0, 1, self.grid_dimensions[2]],
+                    self.grid_dimensions,
+                ],
+            ]
+            all_distances = []
+            for plane in planes:
+                curplane = Plane.from_points(
+                    self._grid_to_coord(plane[0]),
+                    self._grid_to_coord(plane[1]),
+                    self._grid_to_coord(plane[2]),
+                )
+                distances = []
+
+                # TODO: This may be optimized, and formulated in an array
+                # operation.
+                for a in range(np.shape(all_atoms)[0]):
+                    distances.append(curplane.distance_point(all_atoms[a]))
+                all_distances.append(distances)
+            all_distances = np.array(all_distances)
+            all_distances = np.min(all_distances, axis=0)
+            all_atoms = np.squeeze(
+                all_atoms[
+                    np.argwhere(
+                        all_distances < self.parameters.atomic_density_cutoff
+                    ),
+                    :,
+                ]
+            )
+            return np.concatenate((all_atoms, self._atoms.positions))
+
+        else:
+            # If no PBC are used, only consider a single cell.
+            return self._atoms.positions
+
+    def _grid_to_coord(self, gridpoint):
+        # Convert grid indices to real space grid point.
+        i = gridpoint[0]
+        j = gridpoint[1]
+        k = gridpoint[2]
+        # Orthorhombic cells and triclinic ones have
+        # to be treated differently, see domain.cpp
+
+        if self._atoms.cell.orthorhombic:
+            return np.diag(self._voxel) * [i, j, k]
+        else:
+            ret = [0, 0, 0]
+            ret[0] = (
+                i / self.grid_dimensions[0] * self._atoms.cell[0, 0]
+                + j / self.grid_dimensions[1] * self._atoms.cell[1, 0]
+                + k / self.grid_dimensions[2] * self._atoms.cell[2, 0]
+            )
+            ret[1] = (
+                j / self.grid_dimensions[1] * self._atoms.cell[1, 1]
+                + k / self.grid_dimensions[2] * self._atoms.cell[1, 2]
+            )
+            ret[2] = k / self.grid_dimensions[2] * self._atoms.cell[2, 2]
+            return np.array(ret)
+
     @abstractmethod
-    def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
+    def _calculate(self, outdir, **kwargs):
         pass
 
     def _set_feature_size_from_array(self, array):
-        self.fingerprint_length = np.shape(array)[-1]
+        self.feature_size = np.shape(array)[-1]

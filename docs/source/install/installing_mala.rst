@@ -4,8 +4,8 @@ Installing MALA
 Prerequisites
 **************
 
-MALA does not depend on a specific Python version. The most recent Python
-version it has been tested with successfully is Python ``3.10.4``.
+MALA supports any Python version starting from ``3.10.4``. No upper limit on
+Python versions are enforced. The most recent *tested* version is ``3.10.12``.
 
 MALA requires ``torch`` in order to function. As the installation of torch
 depends highly on the architecture you are using, ``torch`` will not
@@ -37,17 +37,13 @@ The examples and tests need additional data to run. The MALA team provides a
 to check out the correct tag for the data repository, since the data repository
 itself is subject to ongoing development as well.
 
-Also make sure to have the `Git LFS <https://git-lfs.com/>`_ installed on your
-machine, since the data repository operates using Git LFS to handle large
-binary files for example training data. 
-
 * Download data repository and check out correct tag:
 
 .. code-block:: bash
 
     git clone https://github.com/mala-project/test-data ~/path/to/data/repo
     cd ~/path/to/data/repo
-    git checkout v1.7.0
+    git checkout v1.8.1
 
 * Export the path to that repo by ``export MALA_DATA_REPO=~/path/to/data/repo``
 

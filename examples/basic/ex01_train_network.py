@@ -2,15 +2,13 @@ import os
 
 import mala
 
-from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 """
 This example shows how a neural network can be trained on material
 data using this framework. It uses preprocessed data, that is read in
 from *.npy files.
 """
-
 
 ####################
 # 1. PARAMETERS
@@ -22,7 +20,7 @@ parameters = mala.Parameters()
 # Specify the data scaling. For regular bispectrum and LDOS data,
 # these have proven successful.
 parameters.data.input_rescaling_type = "feature-wise-standard"
-parameters.data.output_rescaling_type = "normal"
+parameters.data.output_rescaling_type = "minmax"
 # Specify the used activation function.
 parameters.network.layer_activations = ["ReLU"]
 # Specify the training parameters.
@@ -30,7 +28,7 @@ parameters.network.layer_activations = ["ReLU"]
 parameters.running.max_number_epochs = 100
 parameters.running.mini_batch_size = 40
 parameters.running.learning_rate = 0.00001
-parameters.running.trainingtype = "Adam"
+parameters.running.optimizer = "Adam"
 # These parameters characterize how the LDOS and bispectrum descriptors
 # were calculated. They are _technically_ not needed to train a simple
 # network. However, it is useful to define them prior to training. Then,
@@ -54,10 +52,12 @@ parameters.descriptors.bispectrum_cutoff = 4.67637
 
 data_handler = mala.DataHandler(parameters)
 # Add a snapshot we want to use in to the list.
-data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                          "Be_snapshot0.out.npy", data_path, "tr")
-data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                          "Be_snapshot1.out.npy", data_path, "va")
+data_handler.add_snapshot(
+    "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path, "tr"
+)
+data_handler.add_snapshot(
+    "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path, "va"
+)
 data_handler.prepare_data()
 
 ####################
@@ -69,9 +69,11 @@ data_handler.prepare_data()
 # class can be used to correctly define input and output layer of the NN.
 ####################
 
-parameters.network.layer_sizes = [data_handler.input_dimension,
-                                  100,
-                                  data_handler.output_dimension]
+parameters.network.layer_sizes = [
+    data_handler.input_dimension,
+    100,
+    data_handler.output_dimension,
+]
 test_network = mala.Network(parameters)
 
 ####################
@@ -87,5 +89,6 @@ test_network = mala.Network(parameters)
 test_trainer = mala.Trainer(parameters, test_network, data_handler)
 test_trainer.train_network()
 additional_calculation_data = os.path.join(data_path, "Be_snapshot0.out")
-test_trainer.save_run("be_model",
-                      additional_calculation_data=additional_calculation_data)
+test_trainer.save_run(
+    "Be_model", additional_calculation_data=additional_calculation_data
+)

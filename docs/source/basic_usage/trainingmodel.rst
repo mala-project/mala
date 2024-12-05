@@ -28,14 +28,14 @@ options to train a simple network with example data, namely
             parameters = mala.Parameters()
 
             parameters.data.input_rescaling_type = "feature-wise-standard"
-            parameters.data.output_rescaling_type = "normal"
+            parameters.data.output_rescaling_type = "minmax"
 
             parameters.network.layer_activations = ["ReLU"]
 
             parameters.running.max_number_epochs = 100
             parameters.running.mini_batch_size = 40
             parameters.running.learning_rate = 0.00001
-            parameters.running.trainingtype = "Adam"
+            parameters.running.optimizer = "Adam"
             parameters.verbosity = 1 # level of output; 1 is standard, 0 is low, 2 is debug.
 
 Here, we can see that the ``Parameters`` object contains multiple
@@ -43,15 +43,18 @@ sub-objects dealing with the individual aspects of the workflow. In the first
 two lines, which data scaling MALA should employ. Scaling data greatly
 improves the performance of NN based ML models. Options are
 
-* ``None``: No normalization is applied.
+* ``None``: No scaling is applied.
 
-* ``standard``: Standardization (Scale to mean 0, standard deviation 1)
+* ``standard``: Standardization (Scale to mean 0, standard deviation 1) is
+  applied to the entire array.
 
-* ``normal``: Min-Max scaling (Scale to be in range 0...1)
+* ``minmax``: Min-Max scaling (Scale to be in range 0...1) is applied to the entire array.
 
-* ``feature-wise-standard``: Row Standardization (Scale to mean 0, standard deviation 1)
+* ``feature-wise-standard``: Standardization (Scale to mean 0, standard
+  deviation 1) is applied to each feature dimension individually.
 
-* ``feature-wise-normal``: Row Min-Max scaling (Scale to be in range 0...1)
+* ``feature-wise-minmax``: Min-Max scaling (Scale to be in range 0...1) is
+  applied to each feature dimension individually.
 
 Here, we specify that MALA should standardize the input (=descriptors)
 by feature (i.e., each entry of the vector separately on the grid) and

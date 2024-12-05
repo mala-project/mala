@@ -1,4 +1,5 @@
 """Hyperparameter optimizer using optuna."""
+
 import pickle
 
 import optuna
@@ -24,19 +25,32 @@ class HyperOptOptuna(HyperOpt):
 
     use_pkl_checkpoints : bool
         If true, .pkl checkpoints will be created.
+
+    Attributes
+    ----------
+    params : mala.common.parameters.Parameters
+        MALA Parameters object.
+
+    objective : mala.network.objective_base.ObjectiveBase
+        MALA objective to be optimized, i.e., a MALA NN model training.
+
+    study : optuna.study.Study
+        An Optuna study used to collect the results of the hyperparameter
+        optimization.
     """
 
     def __init__(self, params, data, use_pkl_checkpoints=False):
-        super(HyperOptOptuna, self).__init__(params, data,
-                                             use_pkl_checkpoints=
-                                             use_pkl_checkpoints)
+        super(HyperOptOptuna, self).__init__(
+            params, data, use_pkl_checkpoints=use_pkl_checkpoints
+        )
         self.params = params
 
         # Make the sample behave in a reproducible way, if so specified by
         # the user.
-        sampler = optuna.samplers.TPESampler(seed=params.manual_seed,
-                                             multivariate=params.
-                                             hyperparameters.use_multivariate)
+        sampler = optuna.samplers.TPESampler(
+            seed=params.manual_seed,
+            multivariate=params.hyperparameters.use_multivariate,
+        )
 
         # See if the user specified a pruner.
         pruner = None
@@ -47,44 +61,51 @@ class HyperOptOptuna(HyperOpt):
                 if self.params.hyperparameters.number_training_per_trial > 1:
                     pruner = MultiTrainingPruner(self.params)
                 else:
-                    printout("MultiTrainingPruner requested, but only one "
-                             "training"
-                             "per trial specified; Skipping pruner creation.")
+                    printout(
+                        "MultiTrainingPruner requested, but only one "
+                        "training"
+                        "per trial specified; Skipping pruner creation."
+                    )
             else:
                 raise Exception("Invalid pruner type selected.")
 
         # Create the study.
         if self.params.hyperparameters.rdb_storage is None:
-            self.study = optuna.\
-                create_study(direction=self.params.hyperparameters.direction,
-                             sampler=sampler,
-                             study_name=self.params.hyperparameters.
-                             study_name,
-                             pruner=pruner)
+            self.study = optuna.create_study(
+                direction=self.params.hyperparameters.direction,
+                sampler=sampler,
+                study_name=self.params.hyperparameters.study_name,
+                pruner=pruner,
+            )
         else:
             if self.params.hyperparameters.study_name is None:
-                raise Exception("If RDB storage is used, a name for the study "
-                                "has to be provided.")
+                raise Exception(
+                    "If RDB storage is used, a name for the study "
+                    "has to be provided."
+                )
             if "sqlite" in self.params.hyperparameters.rdb_storage:
-                engine_kwargs = {"connect_args": {"timeout": self.params.
-                                 hyperparameters.sqlite_timeout}}
+                engine_kwargs = {
+                    "connect_args": {
+                        "timeout": self.params.hyperparameters.sqlite_timeout
+                    }
+                }
             else:
                 engine_kwargs = None
             rdb_storage = optuna.storages.RDBStorage(
-                    url=self.params.hyperparameters.rdb_storage,
-                    heartbeat_interval=self.params.hyperparameters.
-                    rdb_storage_heartbeat,
-                    engine_kwargs=engine_kwargs)
+                url=self.params.hyperparameters.rdb_storage,
+                heartbeat_interval=self.params.hyperparameters.rdb_storage_heartbeat,
+                engine_kwargs=engine_kwargs,
+            )
 
-            self.study = optuna.\
-                create_study(direction=self.params.hyperparameters.direction,
-                             sampler=sampler,
-                             study_name=self.params.hyperparameters.
-                             study_name,
-                             storage=rdb_storage,
-                             load_if_exists=True,
-                             pruner=pruner)
-        self.checkpoint_counter = 0
+            self.study = optuna.create_study(
+                direction=self.params.hyperparameters.direction,
+                sampler=sampler,
+                study_name=self.params.hyperparameters.study_name,
+                storage=rdb_storage,
+                load_if_exists=True,
+                pruner=pruner,
+            )
+        self._checkpoint_counter = 0
 
     def perform_study(self):
         """
@@ -92,18 +113,23 @@ class HyperOptOptuna(HyperOpt):
 
         This is done by sampling a certain subset of network architectures.
         In this case, optuna is used.
+
+        Returns
+        -------
+        best_trial_loss : float
+            Loss of the best trial.
         """
         # The parameters could have changed.
-        self.objective = ObjectiveBase(self.params, self.data_handler)
+        self.objective = ObjectiveBase(self.params, self._data_handler)
 
         # Fill callback list based on user checkpoint wishes.
         callback_list = [self.__check_stopping]
         if self.params.hyperparameters.checkpoints_each_trial != 0:
             callback_list.append(self.__create_checkpointing)
 
-        self.study.optimize(self.objective,
-                            n_trials=None,
-                            callbacks=callback_list)
+        self.study.optimize(
+            self.objective, n_trials=None, callbacks=callback_list
+        )
 
         # Return the best lost value we could achieve.
         return self.study.best_value
@@ -122,13 +148,16 @@ class HyperOptOptuna(HyperOpt):
         """
         Return the trials from the last study.
 
+        Only returns completed trials.
+
         Returns
         -------
         last_trials: list
             A list of optuna.FrozenTrial objects.
         """
-        return self.study.get_trials(states=(optuna.trial.
-                                             TrialState.COMPLETE, ))
+        return self.study.get_trials(
+            states=(optuna.trial.TrialState.COMPLETE,)
+        )
 
     @staticmethod
     def requeue_zombie_trials(study_name, rdb_storage):
@@ -154,24 +183,41 @@ class HyperOptOptuna(HyperOpt):
         study_name : string
             Name of the study in the storage. Same as the checkpoint name.
         """
-        study_to_clean = optuna.load_study(study_name=study_name,
-                                           storage=rdb_storage)
-        parallel_warn("WARNING: Your about to clean/requeue a study."
-                      " This operation should not be done to an already"
-                      " running study.")
+        study_to_clean = optuna.load_study(
+            study_name=study_name, storage=rdb_storage
+        )
+        parallel_warn(
+            "WARNING: Your about to clean/requeue a study."
+            " This operation should not be done to an already"
+            " running study."
+        )
         trials = study_to_clean.get_trials()
         cleaned_trials = []
         for trial in trials:
             if trial.state == optuna.trial.TrialState.RUNNING:
-                study_to_clean._storage.set_trial_state(trial._trial_id,
-                                                        optuna.trial.
-                                                        TrialState.WAITING)
+                kwds = dict(
+                    trial_id=trial._trial_id,
+                    state=optuna.trial.TrialState.WAITING,
+                )
+                if hasattr(study_to_clean._storage, "set_trial_state"):
+                    # Optuna 2.x
+                    study_to_clean._storage.set_trial_state(**kwds)
+                else:
+                    # Optuna 3.x
+                    study_to_clean._storage.set_trial_state_values(
+                        values=None, **kwds
+                    )
                 cleaned_trials.append(trial.number)
         printout("Cleaned trials: ", cleaned_trials, min_verbosity=0)
 
     @classmethod
-    def resume_checkpoint(cls, checkpoint_name, alternative_storage_path=None,
-                          no_data=False, use_pkl_checkpoints=False):
+    def resume_checkpoint(
+        cls,
+        checkpoint_name,
+        alternative_storage_path=None,
+        no_data=False,
+        use_pkl_checkpoints=False,
+    ):
         """
         Prepare resumption of hyperparameter optimization from a checkpoint.
 
@@ -208,15 +254,20 @@ class HyperOptOptuna(HyperOpt):
         new_hyperopt : HyperOptOptuna
             The hyperparameter optimizer reconstructed from the checkpoint.
         """
-        loaded_params, new_datahandler, optimizer_name = \
-            cls._resume_checkpoint(checkpoint_name, no_data=no_data,
-                                   use_pkl_checkpoints=use_pkl_checkpoints)
+        loaded_params, new_datahandler, optimizer_name = (
+            cls._resume_checkpoint(
+                checkpoint_name,
+                no_data=no_data,
+                use_pkl_checkpoints=use_pkl_checkpoints,
+            )
+        )
         if alternative_storage_path is not None:
-            loaded_params.hyperparameters.rdb_storage = \
+            loaded_params.hyperparameters.rdb_storage = (
                 alternative_storage_path
-        new_hyperopt = HyperOptOptuna.load_from_file(loaded_params,
-                                                     optimizer_name,
-                                                     new_datahandler)
+            )
+        new_hyperopt = HyperOptOptuna.load_from_file(
+            loaded_params, optimizer_name, new_datahandler
+        )
 
         return loaded_params, new_datahandler, new_hyperopt
 
@@ -245,7 +296,7 @@ class HyperOptOptuna(HyperOpt):
         """
         # First, load the checkpoint.
         if params.hyperparameters.rdb_storage is None:
-            with open(file_path, 'rb') as handle:
+            with open(file_path, "rb") as handle:
                 loaded_study = pickle.load(handle)
 
             # Now, create the Trainer class with it.
@@ -265,15 +316,22 @@ class HyperOptOptuna(HyperOpt):
         # then RUNNING trials might be Zombie trials.
         # See
         if self.params.hyperparameters.rdb_storage_heartbeat is None:
-            return len([t for t in study.trials if
-                        t.state == optuna.trial.
-                        TrialState.COMPLETE])
+            return len(
+                [
+                    t
+                    for t in study.trials
+                    if t.state == optuna.trial.TrialState.COMPLETE
+                ]
+            )
         else:
-            return len([t for t in study.trials if
-                        t.state == optuna.trial.
-                        TrialState.COMPLETE or
-                        t.state == optuna.trial.
-                        TrialState.RUNNING])
+            return len(
+                [
+                    t
+                    for t in study.trials
+                    if t.state == optuna.trial.TrialState.COMPLETE
+                    or t.state == optuna.trial.TrialState.RUNNING
+                ]
+            )
 
     def __check_stopping(self, study, trial):
         """Check if this trial was already the maximum number of trials."""
@@ -292,53 +350,64 @@ class HyperOptOptuna(HyperOpt):
 
         # Only check if there are trials to be checked.
         if completed_trials > 0:
-            if self.params.hyperparameters.number_bad_trials_before_stopping is \
-                    not None and self.params.hyperparameters.\
-                    number_bad_trials_before_stopping > 0:
-                if trial.number - self.study.best_trial.number >= \
-                        self.params.hyperparameters.\
-                        number_bad_trials_before_stopping:
-                    printout("No new best trial found in",
-                             self.params.hyperparameters.
-                             number_bad_trials_before_stopping,
-                             "attempts, stopping the study.")
+            if (
+                self.params.hyperparameters.number_bad_trials_before_stopping
+                is not None
+                and self.params.hyperparameters.number_bad_trials_before_stopping
+                > 0
+            ):
+                if (
+                    trial.number - self.study.best_trial.number
+                    >= self.params.hyperparameters.number_bad_trials_before_stopping
+                ):
+                    printout(
+                        "No new best trial found in",
+                        self.params.hyperparameters.number_bad_trials_before_stopping,
+                        "attempts, stopping the study.",
+                    )
                     self.study.stop()
 
     def __create_checkpointing(self, study, trial):
         """Create a checkpoint of optuna study, if necessary."""
-        self.checkpoint_counter += 1
+        self._checkpoint_counter += 1
         need_to_checkpoint = False
 
-        if self.checkpoint_counter >= self.params.hyperparameters.\
-                checkpoints_each_trial and self.params.hyperparameters.\
-                checkpoints_each_trial > 0:
+        if (
+            self._checkpoint_counter
+            >= self.params.hyperparameters.checkpoints_each_trial
+            and self.params.hyperparameters.checkpoints_each_trial > 0
+        ):
             need_to_checkpoint = True
-            printout(str(self.params.hyperparameters.
-                     checkpoints_each_trial)+" trials have passed, creating a "
-                                             "checkpoint for hyperparameter "
-                                             "optimization.", min_verbosity=0)
-        if self.params.hyperparameters.checkpoints_each_trial < 0 and \
-           self.__get_number_of_completed_trials(study) > 0:
-                if trial.number == study.best_trial.number:
-                    need_to_checkpoint = True
-                    printout("Best trial is "+str(trial.number)+", creating a "
-                             "checkpoint for it.", min_verbosity=0)
+            printout(
+                str(self.params.hyperparameters.checkpoints_each_trial)
+                + " trials have passed, creating a "
+                "checkpoint for hyperparameter "
+                "optimization.",
+                min_verbosity=0,
+            )
+        if (
+            self.params.hyperparameters.checkpoints_each_trial < 0
+            and self.__get_number_of_completed_trials(study) > 0
+        ):
+            if trial.number == study.best_trial.number:
+                need_to_checkpoint = True
+                printout(
+                    "Best trial is " + str(trial.number) + ", creating a "
+                    "checkpoint for it.",
+                    min_verbosity=0,
+                )
 
         if need_to_checkpoint is True:
             # We need to create a checkpoint!
-            self.checkpoint_counter = 0
+            self._checkpoint_counter = 0
 
             self._save_params_and_scaler()
 
-            # Next, we save all the other objects.
-            # Here some horovod stuff would have to go.
-            # But so far, the optuna implementation is not horovod-ready...
-            # if self.params.use_horovod:
-            #     if hvd.rank() != 0:
-            #         return
             # The study only has to be saved if the no RDB storage is used.
             if self.params.hyperparameters.rdb_storage is None:
-                hyperopt_name = self.params.hyperparameters.checkpoint_name \
-                            + "_hyperopt.pth"
-                with open(hyperopt_name, 'wb') as handle:
+                hyperopt_name = (
+                    self.params.hyperparameters.checkpoint_name
+                    + "_hyperopt.pth"
+                )
+                with open(hyperopt_name, "wb") as handle:
                     pickle.dump(self.study, handle, protocol=4)

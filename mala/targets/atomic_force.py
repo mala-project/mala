@@ -1,7 +1,9 @@
 """Electronic density calculation class."""
+
 from ase.units import Rydberg, Bohr
 
 from .target import Target
+from mala.common.parallelizer import parallel_warn
 
 
 class AtomicForce(Target):
@@ -23,6 +25,10 @@ class AtomicForce(Target):
             Parameters used to create this TargetBase object.
 
         """
+        parallel_warn(
+            "The AtomicForce class is currently be developed and"
+            " not feature-complete."
+        )
         super(AtomicForce, self).__init__(params)
 
     def get_feature_size(self):
@@ -55,6 +61,6 @@ class AtomicForce(Target):
         if in_units == "eV/Ang":
             return array
         elif in_units == "Ry/Bohr":
-            return array * (Rydberg/Bohr)
+            return array * (Rydberg / Bohr)
         else:
             raise Exception("Unsupported unit for atomic forces.")

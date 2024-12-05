@@ -8,6 +8,11 @@ Predictions at scale in principle work just like the predictions shown
 in the basic guide. One has to set a few additional parameters to make
 optimal use of the hardware at hand.
 
+As a general remark please be reminded that if you have not used LAMMPS
+for your first steps in MALA, and instead used the python-based descriptor
+calculation methods, we highly advise switching to LAMMPS for advanced/more
+involved examples (see  :ref:`installation instructions for LAMMPS <lammpsinstallation>`).
+
 MALA ML-DFT models can be used for predictions at system sizes and temperatures
 larger resp. different from the ones they were trained on. If you want to make
 a prediction at a larger length scale then the ML-DFT model was trained on,
@@ -21,7 +26,7 @@ You can manually specify the inference grid if you wish via
             # ASE calculator
             calculator.mala_parameters.running.inference_data_grid = ...
 
-Where you have to specify a list with three entries ``[x,y,z]``. As matter
+Here you have to specify a list with three entries ``[x,y,z]``. As matter
 of principle, stretching simulation cells in either direction should be
 reflected by the grid.
 
@@ -35,7 +40,9 @@ Likewise, you can adjust the inference temperature via
             calculator.data_handler.target_calculator.temperature = ...
 
 
-Predictions on GPU
+.. _production_gpu:
+
+Predictions on GPUs
 *******************
 
 MALA predictions can be run entirely on a GPU. For the NN part of the workflow,
@@ -49,37 +56,62 @@ with
 
 prior to an ASE calculator calculation or usage of the ``Predictor`` class,
 all computationally heavy parts of the MALA inference, will be offloaded
-to the GPU.
-
-Please note that this requires LAMMPS to be installed with GPU, i.e., Kokkos
-support. A current limitation of this implementation is that only a *single*
-GPU can be used for inference. This puts an upper limit on the number of atoms
-which can be simulated, depending on the hardware you have access to.
-Usual numbers observed by MALA team put this limit at a few thousand atoms, for
-which the electronic structure can be predicted in 1-2 minutes. Currently,
-multi-GPU inference is being implemented.
-
-Parallel predictions on CPUs
-****************************
-
-Since GPU usage is currently limited to one GPU at a time, predictions
-for ten- to hundreds of thousands of atoms rely on the usage of a large number
-of CPUs. Just like with GPU acceleration, nothing about the general inference
-workflow has to be changed. Simply enable MPI usage in MALA
+to the GPU. Please note that this requires LAMMPS to be installed with GPU, i.e., Kokkos
+support. Multiple GPUs can be used during inference by first enabling
+parallelization via
 
       .. code-block:: python
 
             parameters.use_mpi = True
 
-Please be aware that GPU and MPI usage are mutually exclusive for inference
-at the moment. Once MPI is activated, you can start the MPI aware Python script
-with a large number of CPUs to simulate materials at large length scales.
+and then invoking the MALA instance through ``mpirun``, ``srun`` or whichever
+MPI wrapper is used on your machine. Details on parallelization
+are provided :ref:`below <production_parallel>`.
 
-By default, MALA can only operate with a number of CPUs by which the
+.. note::
+
+    To use GPU acceleration for total energy calculation, an additional
+    setting has to be used.
+
+Currently, there is no direct GPU acceleration for the total energy
+calculation. For smaller calculations, this is unproblematic, but it can become
+an issue for systems of even moderate size. To alleviate this problem, MALA
+provides an optimized total energy calculation routine which utilizes a
+Gaussian representation of atomic positions. In this algorithm, most of the
+computational overhead of the total energy calculation is offloaded to the
+computation of this Gaussian representation. This calculation is realized via
+LAMMPS and can therefore be GPU accelerated (parallelized) in the same fashion
+as the bispectrum descriptor calculation. If a GPU is activated (and LAMMPS
+is available), this option will be used by default. It can also manually be
+activated via
+
+    .. code-block:: python
+
+        parameters.use_atomic_density_formula = True
+
+The Gaussian representation algorithm is describe in
+the publication `Predicting electronic structures at any length scale with machine learning <doi.org/10.1038/s41524-023-01070-z>`_.
+
+.. _production_parallel:
+
+Parallel predictions
+********************
+
+MALA predictions may be run on a large number of processing units, either
+CPU or GPU. To do so, simply enable MPI usage in MALA
+
+      .. code-block:: python
+
+            parameters.use_mpi = True
+
+Once MPI is activated, you can start the MPI aware Python script using
+``mpirun``, ``srun`` or whichever MPI wrapper is used on your machine.
+
+By default, MALA can only operate with a number of processes by which the
 z-dimension of the inference grid can be evenly divided, since the Quantum
 ESPRESSO backend of MALA by default only divides data along the z-dimension.
 If you, e.g., have an inference grid of ``[200,200,200]`` points, you can use
-a maximum of 200 CPUs. Using, e.g., 224 CPUs will lead to an error.
+a maximum of 200 ranks. Using, e.g., 224 CPUs will lead to an error.
 
 Parallelization can further be made more efficient by also enabling splitting
 in the y-dimension. This is done by setting the parameter
@@ -91,8 +123,9 @@ in the y-dimension. This is done by setting the parameter
 to an integer value ``ysplit`` (default: 0). If ``ysplit`` is not zero,
 each z-plane will be divided ``ysplit`` times for the parallelization.
 If you, e.g., have an inference grid of ``[200,200,200]``, you could use
-400 CPUs and ``ysplit`` of 2. Then, the grid will be sliced into 200 z-planes,
-and each z-plane will be sliced twice, allowing even faster inference.
+400 processes and ``ysplit`` of 2. Then, the grid will be sliced into 200
+z-planes, and each z-plane will be sliced twice, allowing even faster
+inference.
 
 Visualizing observables
 ************************
@@ -132,4 +165,3 @@ With the exception of the electronic density, which is saved into the ``.cube``
 format for visualization with regular electronic structure visualization
 software, all of these observables can be plotted with Python based
 visualization libraries such as ``matplotlib``.
-

@@ -7,7 +7,8 @@ RUN apt-get --allow-releaseinfo-change update && apt-get upgrade -y && \
     build-essential \
     libz-dev \
     swig \
-    git-lfs \
+    unzip \
+    wget \
     cmake && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -19,8 +20,8 @@ RUN conda env create -f mala_${DEVICE}_environment.yml && rm -rf /opt/conda/pkgs
 # Install optional MALA dependencies into Conda environment with pip
 RUN /opt/conda/envs/mala-${DEVICE}/bin/pip install --no-input --no-cache-dir \
     pytest \
+    pytest-cov \
     oapackage==2.6.8 \
-    openpmd-api==0.15.1 \
     pqkmeans
 
 RUN echo "source activate mala-${DEVICE}" > ~/.bashrc

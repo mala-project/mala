@@ -6,9 +6,9 @@ This is a very basic test of the GPU functionalities of MALA (i.e. pytorch,
 which MALA relies on). Two things are tested:
 
 1. Whether or not your system has GPU support.
-2. Whether or not the GPU does what it is supposed to. For this, 
+2. Whether or not the GPU does what it is supposed to. For this,
 a training is performed. It is measured whether or not the utilization
-of the GPU results in a speed up. 
+of the GPU results in a speed up.
 """
 import os
 import time
@@ -19,8 +19,7 @@ import numpy as np
 import pytest
 import torch
 
-from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 test_checkpoint_name = "test"
 
@@ -36,8 +35,10 @@ class TestGPUExecution:
 
     Tests whether a GPU is available and then the execution on it.
     """
-    @pytest.mark.skipif(torch.cuda.is_available() is False,
-                        reason="No GPU detected.")
+
+    @pytest.mark.skipif(
+        torch.cuda.is_available() is False, reason="No GPU detected."
+    )
     def test_gpu_performance(self):
         """
         Test whether GPU training brings performance improvements.
@@ -81,7 +82,7 @@ class TestGPUExecution:
 
         # Specify the data scaling.
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
 
         # Specify the used activation function.
         test_parameters.network.layer_activations = ["ReLU"]
@@ -90,7 +91,7 @@ class TestGPUExecution:
         test_parameters.running.max_number_epochs = 100
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.manual_seed = 1002
         test_parameters.running.use_shuffling_for_samplers = False
         test_parameters.use_gpu = use_gpu
@@ -104,12 +105,27 @@ class TestGPUExecution:
 
         # Add a snapshot we want to use in to the list.
         for i in range(0, 6):
-            data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                                      "Be_snapshot0.out.npy", data_path, "tr")
-        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                  "Be_snapshot1.out.npy", data_path, "va")
-        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                  "Be_snapshot2.out.npy", data_path, "te")
+            data_handler.add_snapshot(
+                "Be_snapshot0.in.npy",
+                data_path,
+                "Be_snapshot0.out.npy",
+                data_path,
+                "tr",
+            )
+        data_handler.add_snapshot(
+            "Be_snapshot1.in.npy",
+            data_path,
+            "Be_snapshot1.out.npy",
+            data_path,
+            "va",
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot2.in.npy",
+            data_path,
+            "Be_snapshot2.out.npy",
+            data_path,
+            "te",
+        )
         data_handler.prepare_data()
         printout("Read data: DONE.", min_verbosity=0)
 
@@ -120,17 +136,18 @@ class TestGPUExecution:
         # but it is safer this way.
         ####################
 
-        test_parameters.network.layer_sizes = [data_handler.
-                                               input_dimension,
-                                               100,
-                                               data_handler.
-                                               output_dimension]
+        test_parameters.network.layer_sizes = [
+            data_handler.input_dimension,
+            100,
+            data_handler.output_dimension,
+        ]
 
         # Setup network and trainer.
         test_network = mala.Network(test_parameters)
-        test_trainer = mala.Trainer(test_parameters, test_network,
-                                    data_handler)
+        test_trainer = mala.Trainer(
+            test_parameters, test_network, data_handler
+        )
         starttime = time.time()
         test_trainer.train_network()
 
-        return test_trainer.final_test_loss, time.time() - starttime
+        return test_trainer.final_validation_loss, time.time() - starttime

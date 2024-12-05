@@ -1,13 +1,11 @@
 import os
 
 import mala
-import numpy as np
-from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 """
 Shows how MALA can be used to optimize descriptor
-parameters based on the ACSD analysis (see hyperparameter paper in the 
+parameters based on the ACSD analysis (see hyperparameter paper in the
 documentation for mathematical details).
 """
 
@@ -29,12 +27,20 @@ hyperoptimizer.add_hyperparameter("bispectrum_cutoff", [1.0, 2.0])
 # When adding data for the ACSD analysis, add preprocessed LDOS data for
 # and a calculation output for the descriptor calculation.
 ####################
-hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path, "Be_snapshot1.out"),
-                            "numpy", os.path.join(data_path, "Be_snapshot1.out.npy"),
-                            target_units="1/(Ry*Bohr^3)")
-hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path, "Be_snapshot2.out"),
-                            "numpy", os.path.join(data_path, "Be_snapshot2.out.npy"),
-                            target_units="1/(Ry*Bohr^3)")
+hyperoptimizer.add_snapshot(
+    "espresso-out",
+    os.path.join(data_path, "Be_snapshot1.out"),
+    "numpy",
+    os.path.join(data_path, "Be_snapshot1.out.npy"),
+    target_units="1/(Ry*Bohr^3)",
+)
+hyperoptimizer.add_snapshot(
+    "espresso-out",
+    os.path.join(data_path, "Be_snapshot2.out"),
+    "numpy",
+    os.path.join(data_path, "Be_snapshot2.out.npy"),
+    target_units="1/(Ry*Bohr^3)",
+)
 
 # If you plan to plot the results (recommended for exploratory searches),
 # the optimizer can return the necessary quantities to plot.

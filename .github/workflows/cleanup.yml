@@ -1,0 +1,15 @@
+name: Delete Untagged Container Versions
+
+on:
+  workflow_dispatch:
+
+jobs:
+  delete-untagged-containers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: mala_conda_cpu
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: 'mala_conda_cpu'
+          package-type: 'container'
+          delete-only-untagged-versions: 'true'

@@ -3,6 +3,11 @@
 Improved data conversion
 ========================
 
+As a general remark please be reminded that if you have not used LAMMPS
+for your first steps in MALA, and instead used the python-based descriptor
+calculation methods, we highly advise switching to LAMMPS for advanced/more
+involved examples (see  :ref:`installation instructions for LAMMPS <lammpsinstallation>`).
+
 Tuning descriptors
 ******************
 

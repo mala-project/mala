@@ -1,15 +1,13 @@
 """Functions for operating MALA in parallel."""
+
 from collections import defaultdict
 import platform
+import os
 import warnings
 
-try:
-    import horovod.torch as hvd
-except ModuleNotFoundError:
-    pass
-import torch
+import torch.distributed as dist
 
-use_horovod = False
+use_ddp = False
 use_mpi = False
 comm = None
 local_mpi_rank = None
@@ -32,42 +30,44 @@ def set_current_verbosity(new_value):
     current_verbosity = new_value
 
 
-def set_horovod_status(new_value):
+def set_ddp_status(new_value):
     """
-    Set the horovod status.
+    Set the ddp status.
 
-    By setting the horovod status via this function it can be ensured that
+    By setting the ddp status via this function it can be ensured that
     printing works in parallel. The Parameters class does that for the user.
 
     Parameters
     ----------
     new_value : bool
-        Value the horovod status has.
+        Value the ddp status has.
 
     """
     if use_mpi is True and new_value is True:
-        raise Exception("Cannot use horovod and inference-level MPI at "
-                        "the same time yet.")
-    global use_horovod
-    use_horovod = new_value
+        raise Exception(
+            "Cannot use ddp and inference-level MPI at " "the same time yet."
+        )
+    global use_ddp
+    use_ddp = new_value
 
 
 def set_mpi_status(new_value):
     """
     Set the MPI status.
 
-    By setting the horovod status via this function it can be ensured that
+    By setting the MPI status via this function it can be ensured that
     printing works in parallel. The Parameters class does that for the user.
 
     Parameters
     ----------
     new_value : bool
-        Value the horovod status has.
+        Value the MPI status has.
 
     """
-    if use_horovod is True and new_value is True:
-        raise Exception("Cannot use horovod and inference-level MPI at "
-                        "the same time yet.")
+    if use_ddp is True and new_value is True:
+        raise Exception(
+            "Cannot use ddp and inference-level MPI at " "the same time yet."
+        )
     global use_mpi
     use_mpi = new_value
     if use_mpi:
@@ -96,6 +96,7 @@ def set_lammps_instance(new_instance):
 
     """
     import lammps
+
     global lammps_instance
     if isinstance(new_instance, lammps.core.lammps):
         lammps_instance = new_instance
@@ -113,8 +114,8 @@ def get_rank():
         The rank of the current thread.
 
     """
-    if use_horovod:
-        return hvd.rank()
+    if use_ddp:
+        return dist.get_rank()
     if use_mpi:
         return comm.Get_rank()
     return 0
@@ -152,9 +153,14 @@ def get_local_rank():
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
+
+    Returns
+    -------
+    local_rank : int
+        The local rank of the current thread.
     """
-    if use_horovod:
-        return hvd.local_rank()
+    if use_ddp:
+        return int(os.environ.get("LOCAL_RANK"))
     if use_mpi:
         global local_mpi_rank
         if local_mpi_rank is None:
@@ -162,7 +168,7 @@ def get_local_rank():
             ranks_nodes = comm.allgather((comm.Get_rank(), this_node))
             node2rankssofar = defaultdict(int)
             local_rank = None
-            for (rank, node) in ranks_nodes:
+            for rank, node in ranks_nodes:
                 if rank == comm.Get_rank():
                     local_rank = node2rankssofar[node]
                 node2rankssofar[node] += 1
@@ -181,13 +187,12 @@ def get_size():
     size : int
         The number of ranks.
     """
-    if use_horovod:
-        return hvd.size()
+    if use_ddp:
+        return dist.get_world_size()
     if use_mpi:
         return comm.Get_size()
 
 
-# TODO: This is hacky, improve it.
 def get_comm():
     """
     Return the MPI communicator, if MPI is being used.
@@ -195,7 +200,7 @@ def get_comm():
     Returns
     -------
     comm : MPI.COMM_WORLD
-        A MPI communicator.
+        An MPI communicator.
 
     """
     return comm
@@ -203,14 +208,14 @@ def get_comm():
 
 def barrier():
     """General interface for a barrier."""
-    if use_horovod:
-        hvd.allreduce(torch.tensor(0), name='barrier')
+    if use_ddp:
+        dist.barrier()
     if use_mpi:
         comm.Barrier()
     return
 
 
-def printout(*values, sep=' ', min_verbosity=0):
+def printout(*values, sep=" ", min_verbosity=0):
     """
     Interface to built-in "print" for parallel runs. Can be used like print.
 
@@ -219,7 +224,7 @@ def printout(*values, sep=' ', min_verbosity=0):
 
     Parameters
     ----------
-    values
+    values : object
         Values to be printed.
 
     sep : string
@@ -243,7 +248,7 @@ def parallel_warn(warning, min_verbosity=0, category=UserWarning):
 
     Parameters
     ----------
-    warning
+    warning : str
         Warning to be printed.
     min_verbosity : int
         Minimum number of verbosity for this output to still be printed.

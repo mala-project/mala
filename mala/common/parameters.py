@@ -1,4 +1,5 @@
 """Collection of all parameter related classes and functions."""
+
 import importlib
 import inspect
 import json
@@ -6,18 +7,19 @@ import os
 import pickle
 from time import sleep
 
-horovod_available = False
-try:
-    import horovod.torch as hvd
-    horovod_available = True
-except ModuleNotFoundError:
-    pass
 import numpy as np
 import torch
+import torch.distributed as dist
 
-from mala.common.parallelizer import printout, set_horovod_status, \
-    set_mpi_status, get_rank, get_local_rank, set_current_verbosity, \
-    parallel_warn
+from mala.common.parallelizer import (
+    printout,
+    set_ddp_status,
+    set_mpi_status,
+    get_rank,
+    get_local_rank,
+    set_current_verbosity,
+    parallel_warn,
+)
 from mala.common.json_serializable import JSONSerializable
 
 DEFAULT_NP_DATA_DTYPE = np.float32
@@ -26,11 +28,20 @@ DEFAULT_NP_DATA_DTYPE = np.float32
 class ParametersBase(JSONSerializable):
     """Base parameter class for MALA."""
 
-    def __init__(self,):
+    def __init__(
+        self,
+    ):
         super(ParametersBase, self).__init__()
-        self._configuration = {"gpu": False, "horovod": False, "mpi": False,
-                               "device": "cpu", "openpmd_configuration": {},
-                               "openpmd_granularity": 1}
+        self._configuration = {
+            "gpu": False,
+            "ddp": False,
+            "mpi": False,
+            "device": "cpu",
+            "openpmd_configuration": {},
+            "openpmd_granularity": 1,
+            "lammps": True,
+            "atomic_density_formula": False,
+        }
         pass
 
     def show(self, indent=""):
@@ -47,17 +58,21 @@ class ParametersBase(JSONSerializable):
         for v in vars(self):
             if v != "_configuration":
                 if v[0] == "_":
-                    printout(indent + '%-15s: %s' % (v[1:], getattr(self, v)),
-                             min_verbosity=0)
+                    printout(
+                        indent + "%-15s: %s" % (v[1:], getattr(self, v)),
+                        min_verbosity=0,
+                    )
                 else:
-                    printout(indent + '%-15s: %s' % (v, getattr(self, v)),
-                             min_verbosity=0)
+                    printout(
+                        indent + "%-15s: %s" % (v, getattr(self, v)),
+                        min_verbosity=0,
+                    )
 
     def _update_gpu(self, new_gpu):
         self._configuration["gpu"] = new_gpu
 
-    def _update_horovod(self, new_horovod):
-        self._configuration["horovod"] = new_horovod
+    def _update_ddp(self, new_ddp):
+        self._configuration["ddp"] = new_ddp
 
     def _update_mpi(self, new_mpi):
         self._configuration["mpi"] = new_mpi
@@ -70,6 +85,14 @@ class ParametersBase(JSONSerializable):
 
     def _update_openpmd_granularity(self, new_granularity):
         self._configuration["openpmd_granularity"] = new_granularity
+
+    def _update_lammps(self, new_lammps):
+        self._configuration["lammps"] = new_lammps
+
+    def _update_atomic_density_formula(self, new_atomic_density_formula):
+        self._configuration["atomic_density_formula"] = (
+            new_atomic_density_formula
+        )
 
     @staticmethod
     def _member_to_json(member):
@@ -89,8 +112,9 @@ class ParametersBase(JSONSerializable):
 
         """
         json_dict = {}
-        members = inspect.getmembers(self,
-                                     lambda a: not (inspect.isroutine(a)))
+        members = inspect.getmembers(
+            self, lambda a: not (inspect.isroutine(a))
+        )
         for member in members:
             # Filter out all private members, builtins, etc.
             if member[0][0] != "_":
@@ -138,13 +162,14 @@ class ParametersBase(JSONSerializable):
             else:
                 # If it is not an elementary builtin type AND not an object
                 # dictionary, something is definitely off.
-                raise Exception("Could not decode JSON file, error in",
-                                json_value)
+                raise Exception(
+                    "Could not decode JSON file, error in", json_value
+                )
 
     @classmethod
     def from_json(cls, json_dict):
         """
-        Read this object from a dictionary saved in a JSON file.
+        Read parameters from a dictionary saved in a JSON file.
 
         Parameters
         ----------
@@ -170,8 +195,9 @@ class ParametersBase(JSONSerializable):
                     if len(json_dict[key]) > 0:
                         _member = []
                         for m in json_dict[key]:
-                            _member.append(deserialized_object.
-                                           _json_to_member(m))
+                            _member.append(
+                                deserialized_object._json_to_member(m)
+                            )
                         setattr(deserialized_object, key, _member)
                     else:
                         setattr(deserialized_object, key, json_dict[key])
@@ -180,16 +206,20 @@ class ParametersBase(JSONSerializable):
                     if len(json_dict[key]) > 0:
                         _member = {}
                         for m in json_dict[key].keys():
-                            _member[m] = deserialized_object.\
-                                _json_to_member(json_dict[key][m])
+                            _member[m] = deserialized_object._json_to_member(
+                                json_dict[key][m]
+                            )
                         setattr(deserialized_object, key, _member)
 
                     else:
                         setattr(deserialized_object, key, json_dict[key])
 
                 else:
-                    setattr(deserialized_object, key, deserialized_object.
-                            _json_to_member(json_dict[key]))
+                    setattr(
+                        deserialized_object,
+                        key,
+                        deserialized_object._json_to_member(json_dict[key]),
+                    )
         return deserialized_object
 
 
@@ -201,18 +231,18 @@ class ParametersNetwork(ParametersBase):
     ----------
     nn_type : string
         Type of the neural network that will be used. Currently supported are
+
             - "feed_forward" (default)
             - "transformer"
             - "lstm"
             - "gru"
-
 
     layer_sizes : list
         A list of integers detailing the sizes of the layer of the neural
         network. Please note that the input layer is included therein.
         Default: [10,10,0]
 
-    layer_activations: list
+    layer_activations : list
         A list of strings detailing the activation functions to be used
         by the neural network. If the dimension of layer_activations is
         smaller than the dimension of layer_sizes-1, than the first entry
@@ -223,33 +253,33 @@ class ParametersNetwork(ParametersBase):
             - ReLU
             - LeakyReLU
 
-    loss_function_type: string
+    loss_function_type : string
         Loss function for the neural network
         Currently supported loss functions include:
 
             - mse (Mean squared error; default)
+
     no_hidden_state : bool
         If True hidden and cell state is assigned to zeros for LSTM Network.
         false will keep the hidden state active
         Default: False
 
-    bidirection: bool
+    bidirection : bool
         Sets lstm network size based on bidirectional or just one direction
         Default: False
 
-    num_hidden_layers: int
+    num_hidden_layers : int
         Number of hidden layers to be used in lstm or gru or transformer nets
         Default: None
 
-    dropout: float
-        Dropout rate for transformer net
-        0.0 ≤ dropout ≤ 1.0
-        Default: 0.0
-
-    num_heads: int
+    num_heads : int
         Number of heads to be used in Multi head attention network
         This should be a divisor of input dimension
         Default: None
+
+    dropout : float
+        Dropout rate for positional encoding in transformer.
+        Default: 0.1
     """
 
     def __init__(self):
@@ -259,12 +289,12 @@ class ParametersNetwork(ParametersBase):
         self.layer_activations = ["Sigmoid"]
         self.loss_function_type = "mse"
 
-        # for LSTM/Gru + Transformer
-        self.num_hidden_layers = 1
-
         # for LSTM/Gru
         self.no_hidden_state = False
         self.bidirection = False
+
+        # for LSTM/Gru + Transformer
+        self.num_hidden_layers = 1
 
         # for transformer net
         self.dropout = 0.1
@@ -286,14 +316,9 @@ class ParametersDescriptors(ParametersBase):
                                 descriptors.
 
     bispectrum_twojmax : int
-        Bispectrum calculation: 2*jmax-parameter used for calculation of SNAP
-        descriptors. Default value for jmax is 5, so default value for
-        twojmax is 10.
-
-    lammps_compute_file: string
-        Bispectrum calculation: LAMMPS input file that is used to calculate the
-        Bispectrum descriptors. If this string is empty, the standard LAMMPS input
-        file found in this repository will be used (recommended).
+        Bispectrum calculation: 2*jmax-parameter used for calculation of
+        bispectrum descriptors. Default value for jmax is 5, so default value
+        for twojmax is 10.
 
     descriptors_contain_xyz : bool
         Legacy option. If True, it is assumed that the first three entries of
@@ -301,7 +326,46 @@ class ParametersDescriptors(ParametersBase):
         descriptor vector. If False, no such cutting is peformed.
 
     atomic_density_sigma : float
-        Sigma used for the calculation of the Gaussian descriptors.
+        Sigma (=width) used for the calculation of the Gaussian descriptors.
+        Explicitly setting this value is discouraged if the atomic density is
+        used only during the total energy calculation and, e.g., bispectrum
+        descriptors are used for models. In this case, the width will
+        automatically be set correctly during inference based on model
+        parameters. This parameter mainly exists for debugging purposes.
+        If the atomic density is instead used for model training itself, this
+        parameter needs to be set.
+
+    atomic_density_cutoff : float
+        Cutoff radius used for atomic density calculation. Explicitly setting
+        this value is discouraged if the atomic density is used only during the
+        total energy calculation and, e.g., bispectrum descriptors are used
+        for models. In this case, the cutoff will automatically be set
+        correctly during inference based on model parameters. This parameter
+        mainly exists for debugging purposes. If the atomic density is instead
+        used for model training itself, this parameter needs to be set.
+
+    lammps_compute_file : str
+        Path to a LAMMPS compute file for the bispectrum descriptor
+        calculation. MALA has its own collection of compute files which are
+        used by default. Setting this parameter is thus not necessarys for
+        model training and inference, and it exists mainly for debugging
+        purposes.
+
+    minterpy_cutoff_cube_size : float
+        WILL BE DEPRECATED IN MALA v1.4.0 - size of cube for minterpy
+        descriptor calculation.
+
+    minterpy_lp_norm : int
+        WILL BE DEPRECATED IN MALA v1.4.0 - LP norm for minterpy
+        descriptor calculation.
+
+    minterpy_point_list : list
+        WILL BE DEPRECATED IN MALA v1.4.0 - list of points for minterpy
+        descriptor calculation.
+
+    minterpy_polynomial_degree : int
+        WILL BE DEPRECATED IN MALA v1.4.0 - polynomial degree for minterpy
+        descriptor calculation.
     """
 
     def __init__(self):
@@ -331,7 +395,6 @@ class ParametersDescriptors(ParametersBase):
         # atomic density may be used at the same time, if e.g. bispectrum
         # descriptors are used for a full inference, which then uses the atomic
         # density for the calculation of the Ewald sum.
-        self.use_atomic_density_energy_formula = False
         self.atomic_density_sigma = None
         self.atomic_density_cutoff = None
 
@@ -428,7 +491,7 @@ class ParametersTargets(ParametersBase):
         Number of points in the energy grid that is used to calculate the
         (L)DOS.
 
-    ldos_gridsize : float
+    ldos_gridsize : int
         Gridsize of the LDOS.
 
     ldos_gridspacing_ev: float
@@ -485,6 +548,13 @@ class ParametersTargets(ParametersBase):
 
         kMax : float
             Maximum wave vector up to which to calculate the SSF.
+
+    assume_two_dimensional : bool
+        If True, the total energy calculations will be performed without
+        periodic boundary conditions in z-direction, i.e., the cell will
+        be truncated in the z-direction. NOTE: This parameter may be
+        moved up to a global parameter, depending on whether descriptor
+        calculation may benefit from it.
     """
 
     def __init__(self):
@@ -498,6 +568,7 @@ class ParametersTargets(ParametersBase):
         self.rdf_parameters = {"number_of_bins": 500, "rMax": "mic"}
         self.tpcf_parameters = {"number_of_bins": 20, "rMax": "mic"}
         self.ssf_parameters = {"number_of_bins": 100, "kMax": 12.0}
+        self.assume_two_dimensional = False
 
     @property
     def restrict_targets(self):
@@ -523,11 +594,6 @@ class ParametersData(ParametersBase):
 
     Attributes
     ----------
-    descriptors_contain_xyz : bool
-        Legacy option. If True, it is assumed that the first three entries of
-        the descriptor vector are the xyz coordinates and they are cut from the
-        descriptor vector. If False, no such cutting is peformed.
-
     snapshot_directories_list : list
         A list of all added snapshots.
 
@@ -540,27 +606,45 @@ class ParametersData(ParametersBase):
         Specifies how input quantities are normalized.
         Options:
 
-            - "None": No normalization is applied.
-            - "standard": Standardization (Scale to mean 0, standard
-              deviation 1)
-            - "normal": Min-Max scaling (Scale to be in range 0...1)
-            - "feature-wise-standard": Row Standardization (Scale to mean 0,
-              standard deviation 1)
-            - "feature-wise-normal": Row Min-Max scaling (Scale to be in range
-              0...1)
+            - "None": No scaling is applied.
+            - "standard": Standardization (Scale to mean 0,
+              standard deviation 1) is applied to the entire array.
+            - "minmax": Min-Max scaling (Scale to be in range 0...1) is applied
+              to the entire array.
+            - "feature-wise-standard": Standardization (Scale to mean 0,
+              standard deviation 1) is applied to each feature dimension
+              individually.
+              I.e., if your training data has dimensions (d,f), then each
+              of the f columns with d entries is scaled indiviually.
+            - "feature-wise-minmax": Min-Max scaling (Scale to be in range
+              0...1) is applied to each feature dimension individually.
+              I.e., if your training data has dimensions (d,f), then each
+              of the f columns with d entries is scaled indiviually.
+            - "normal": (DEPRECATED) Old name for "minmax".
+            - "feature-wise-normal": (DEPRECATED) Old name for
+              "feature-wise-minmax"
 
     output_rescaling_type : string
         Specifies how output quantities are normalized.
         Options:
 
-            - "None": No normalization is applied.
+            - "None": No scaling is applied.
             - "standard": Standardization (Scale to mean 0,
-              standard deviation 1)
-            - "normal": Min-Max scaling (Scale to be in range 0...1)
-            - "feature-wise-standard": Row Standardization (Scale to mean 0,
-              standard deviation 1)
-            - "feature-wise-normal": Row Min-Max scaling (Scale to be in
-              range 0...1)
+              standard deviation 1) is applied to the entire array.
+            - "minmax": Min-Max scaling (Scale to be in range 0...1) is applied
+              to the entire array.
+            - "feature-wise-standard": Standardization (Scale to mean 0,
+              standard deviation 1) is applied to each feature dimension
+              individually.
+              I.e., if your training data has dimensions (d,f), then each
+              of the f columns with d entries is scaled indiviually.
+            - "feature-wise-minmax": Min-Max scaling (Scale to be in range
+              0...1) is applied to each feature dimension individually.
+              I.e., if your training data has dimensions (d,f), then each
+              of the f columns with d entries is scaled indiviually.
+            - "normal": (DEPRECATED) Old name for "minmax".
+            - "feature-wise-normal": (DEPRECATED) Old name for
+              "feature-wise-minmax"
 
     use_lazy_loading : bool
         If True, data is lazily loaded, i.e. only the snapshots that are
@@ -601,9 +685,8 @@ class ParametersRunning(ParametersBase):
 
     Attributes
     ----------
-    trainingtype : string
-        Training type to be used. Supported options at the moment:
-
+    optimizer : string
+        Optimizer to be used. Supported options at the moment:
             - SGD: Stochastic gradient descent.
             - Adam: Adam Optimization Algorithm
 
@@ -615,10 +698,6 @@ class ParametersRunning(ParametersBase):
 
     mini_batch_size : int
         Size of the mini batch for the optimization algorihm. Default: 10.
-
-    weight_decay : float
-        Weight decay for regularization. Always refers to L2 regularization.
-        Default: 0.
 
     early_stopping_epochs : int
         Number of epochs the validation accuracy is allowed to not improve by
@@ -656,10 +735,6 @@ class ParametersRunning(ParametersBase):
         validation loss has to plateau before the schedule takes effect).
         Default: 0.
 
-    use_compression : bool
-        If True and horovod is used, horovod compression will be used for
-        allreduce communication. This can improve performance.
-
     num_workers : int
         Number of workers to be used for data loading.
 
@@ -669,35 +744,53 @@ class ParametersRunning(ParametersBase):
         a "by snapshot" basis.
 
     checkpoints_each_epoch : int
-        If not 0, checkpoint files will be saved after eac
+        If not 0, checkpoint files will be saved after each
         checkpoints_each_epoch epoch.
 
     checkpoint_name : string
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
 
-    visualisation : int
-        If True then Tensorboard is activated for visualisation
-        case 0: No tensorboard activated
-        case 1: tensorboard activated with Loss and learning rate
-        case 2; additonally weights and biases and gradient
+    run_name : string
+        Name of the run used for logging.
 
-    visualisation_dir : string
-        Name of the folder that visualization files will be saved to.
+    logging_dir : string
+        Name of the folder that logging files will be saved to.
 
-    visualisation_dir_append_date : bool
-        If True, then upon creating visualization files, these will be saved
-        in a subfolder of visualisation_dir labelled with the starting date
-        of the visualization, to avoid having to change input scripts often.
+    logging_dir_append_date : bool
+        If True, then upon creating logging files, these will be saved
+        in a subfolder of logging_dir labelled with the starting date
+        of the logging, to avoid having to change input scripts often.
 
-    inference_data_grid : list
-        List holding the grid to be used for inference in the form of
-        [x,y,z].
+    logger : string
+        Name of the logger to be used.
+        Currently supported are:
 
-    use_mixed_precision : bool
-        If True, mixed precision computation (via AMP) will be used.
+            - "tensorboard": Tensorboard logger.
+            - "wandb": Weights and Biases logger.
 
-    training_report_frequency : int
+    validation_metrics : list
+        List of metrics to be used for validation. Default is ["ldos"].
+        Possible options are:
+
+            - "ldos": MSE of the LDOS.
+            - "band_energy": Band energy.
+            - "band_energy_actual_fe": Band energy computed with ground truth Fermi energy.
+            - "total_energy": Total energy.
+            - "total_energy_actual_fe": Total energy computed with ground truth Fermi energy.
+            - "fermi_energy": Fermi energy.
+            - "density": Electron density.
+            - "density_relative": Rlectron density (MAPE).
+            - "dos": Density of states.
+            - "dos_relative": Density of states (MAPE).
+
+    validate_on_training_data : bool
+        Whether to validate on the training data as well. Default is False.
+
+    validate_every_n_epochs : int
+        Determines how often validation is performed. Default is 1.
+
+    training_log_interval : int
         Determines how often detailed performance info is printed during
         training (only has an effect if the verbosity is high enough).
 
@@ -705,41 +798,67 @@ class ParametersRunning(ParametersBase):
         List with two entries determining with which batch/iteration number
          the CUDA profiler will start and stop profiling. Please note that
          this option only holds significance if the nsys profiler is used.
+
+    inference_data_grid : list
+        Grid dimensions used during inference. Typically, these are automatically
+        determined by DFT reference data, and this parameter does not need to
+        be set. Thus, this parameter mainly exists for debugging purposes.
+
+    use_mixed_precision : bool
+        If True, mixed precision computation (via AMP) will be used.
+
+    l2_regularization : float
+        Weight decay rate for NN optimizer.
+
+    dropout : float
+        Dropout rate for positional encoding in transformer net.
     """
 
     def __init__(self):
         super(ParametersRunning, self).__init__()
-        self.trainingtype = "SGD"
-        self.learning_rate = 0.5
+        self.optimizer = "Adam"
+        self.learning_rate = 10 ** (-5)
+        # self.learning_rate_embedding = 10 ** (-4)
         self.max_number_epochs = 100
-        self.verbosity = True
         self.mini_batch_size = 10
-        self.weight_decay = 0
+        # self.snapshots_per_epoch = -1
+
+        # self.l1_regularization = 0.0
+        self.l2_regularization = 0.0
+        self.dropout = 0.0
+        # self.batch_norm = False
+        # self.input_noise = 0.0
+
         self.early_stopping_epochs = 0
         self.early_stopping_threshold = 0
         self.learning_rate_scheduler = None
         self.learning_rate_decay = 0.1
         self.learning_rate_patience = 0
-        self.use_compression = False
+        self._during_training_metric = "ldos"
+        self._after_training_metric = "ldos"
+        # self.use_compression = False
         self.num_workers = 0
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
+        # self.checkpoint_best_so_far = False
         self.checkpoint_name = "checkpoint_mala"
-        self.visualisation = 0
-        self.visualisation_dir = os.path.join(".", "mala_logging")
-        self.visualisation_dir_append_date = True
-        self.during_training_metric = "ldos"
-        self.after_before_training_metric = "ldos"
+        self.run_name = ""
+        self.logging_dir = "./mala_logging"
+        self.logging_dir_append_date = True
+        self.logger = None
+        self.validation_metrics = ["ldos"]
+        self.validate_on_training_data = False
+        self.validate_every_n_epochs = 1
         self.inference_data_grid = [0, 0, 0]
         self.use_mixed_precision = False
         self.use_graphs = False
-        self.training_report_frequency = 1000
-        self.profiler_range = None #[1000, 2000]
+        self.training_log_interval = 1000
+        self.profiler_range = [1000, 2000]
 
-    def _update_horovod(self, new_horovod):
-        super(ParametersRunning, self)._update_horovod(new_horovod)
+    def _update_ddp(self, new_ddp):
+        super(ParametersRunning, self)._update_ddp(new_ddp)
         self.during_training_metric = self.during_training_metric
-        self.after_before_training_metric = self.after_before_training_metric
+        self.after_training_metric = self.after_training_metric
 
     @property
     def during_training_metric(self):
@@ -759,13 +878,17 @@ class ParametersRunning(ParametersBase):
     @during_training_metric.setter
     def during_training_metric(self, value):
         if value != "ldos":
-            if self._configuration["horovod"]:
-                raise Exception("Currently, MALA can only operate with the "
-                                "\"ldos\" metric for horovod runs.")
+            if self._configuration["ddp"]:
+                raise Exception(
+                    "Currently, MALA can only operate with the "
+                    '"ldos" metric for ddp runs.'
+                )
+            if value not in self.validation_metrics:
+                self.validation_metrics.append(value)
         self._during_training_metric = value
 
     @property
-    def after_before_training_metric(self):
+    def after_training_metric(self):
         """
         Get the metric used during training.
 
@@ -777,23 +900,17 @@ class ParametersRunning(ParametersBase):
         DFT results. Of these, the mean average error in eV/atom will be
         calculated.
         """
-        return self._after_before_training_metric
+        return self._after_training_metric
 
-    @after_before_training_metric.setter
-    def after_before_training_metric(self, value):
+    @after_training_metric.setter
+    def after_training_metric(self, value):
         if value != "ldos":
-            if self._configuration["horovod"]:
-                raise Exception("Currently, MALA can only operate with the "
-                                "\"ldos\" metric for horovod runs.")
-        self._after_before_training_metric = value
-
-    @during_training_metric.setter
-    def during_training_metric(self, value):
-        if value != "ldos":
-            if self._configuration["horovod"]:
-                raise Exception("Currently, MALA can only operate with the "
-                                "\"ldos\" metric for horovod runs.")
-        self._during_training_metric = value
+            if self._configuration["ddp"]:
+                raise Exception(
+                    "Currently, MALA can only operate with the "
+                    '"ldos" metric for ddp runs.'
+                )
+        self._after_training_metric = value
 
     @property
     def use_graphs(self):
@@ -808,14 +925,18 @@ class ParametersRunning(ParametersBase):
     @use_graphs.setter
     def use_graphs(self, value):
         if value is True:
-            if self._configuration["gpu"] is False or \
-                    torch.version.cuda is None:
+            if (
+                self._configuration["gpu"] is False
+                or torch.version.cuda is None
+            ):
                 parallel_warn("No CUDA or GPU found, cannot use CUDA graphs.")
                 value = False
             else:
                 if float(torch.version.cuda) < 11.0:
-                    raise Exception("Cannot use CUDA graphs with a CUDA"
-                                    " version below 11.0")
+                    raise Exception(
+                        "Cannot use CUDA graphs with a CUDA"
+                        " version below 11.0"
+                    )
         self._use_graphs = value
 
 
@@ -947,11 +1068,20 @@ class ParametersHyperparameterOptimization(ParametersBase):
         not recommended because it is file based and can lead to errors;
         With a suitable timeout it can be used somewhat stable though and
         help in HPC settings.
+
+    acsd_points : int
+        Parameter of the ACSD HyperparamterOptimization scheme. Controls
+        the number of point-pairs which are used to compute the ACSD.
+        An array of acsd_points*acsd_points will be computed, i.e., if
+        acsd_points=100, 100 points will be drawn at random, and thereafter
+        each of these 100 points will be compared with a new, random set
+        of 100 points, leading to 10000 points in total for the calculation
+        of the ACSD.
     """
 
     def __init__(self):
         super(ParametersHyperparameterOptimization, self).__init__()
-        self.direction = 'minimize'
+        self.direction = "minimize"
         self.n_trials = 100
         self.hlist = []
         self.hyper_opt_method = "optuna"
@@ -971,6 +1101,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
 
         # For accelerated hyperparameter optimization.
         self.acsd_points = 100
+        self.mutual_information_points = 20000
 
     @property
     def rdb_storage_heartbeat(self):
@@ -1031,18 +1162,24 @@ class ParametersHyperparameterOptimization(ParametersBase):
             if v != "_configuration":
                 if v != "hlist":
                     if v[0] == "_":
-                        printout(indent + '%-15s: %s' %
-                                 (v[1:], getattr(self, v)), min_verbosity=0)
+                        printout(
+                            indent + "%-15s: %s" % (v[1:], getattr(self, v)),
+                            min_verbosity=0,
+                        )
                     else:
                         printout(
-                            indent + '%-15s: %s' % (v, getattr(self, v)),
-                            min_verbosity=0)
+                            indent + "%-15s: %s" % (v, getattr(self, v)),
+                            min_verbosity=0,
+                        )
                 if v == "hlist":
                     i = 0
                     for hyp in self.hlist:
-                        printout(indent + '%-15s: %s' %
-                                 ("hyperparameter #"+str(i), hyp.name),
-                                 min_verbosity=0)
+                        printout(
+                            indent
+                            + "%-15s: %s"
+                            % ("hyperparameter #" + str(i), hyp.name),
+                            min_verbosity=0,
+                        )
                         i += 1
 
 
@@ -1147,12 +1284,12 @@ class Parameters:
     hyperparameters : ParametersHyperparameterOptimization
         Parameters used for hyperparameter optimization.
 
-    debug : ParametersDebug
-        Container for all debugging parameters.
-
     manual_seed: int
         If not none, this value is used as manual seed for the neural networks.
         Can be used to make experiments comparable. Default: None.
+
+    datageneration : ParametersDataGeneration
+        Parameters used for data generation routines.
     """
 
     def __init__(self):
@@ -1172,7 +1309,7 @@ class Parameters:
 
         # Properties
         self.use_gpu = False
-        self.use_horovod = False
+        self.use_ddp = False
         self.use_mpi = False
         self.verbosity = 1
         self.device = "cpu"
@@ -1180,6 +1317,8 @@ class Parameters:
         # TODO: Maybe as a percentage? Feature dimensions can be quite
         # different.
         self.openpmd_granularity = 1
+        self.use_lammps = True
+        self.use_atomic_density_formula = False
 
     @property
     def openpmd_granularity(self):
@@ -1205,7 +1344,9 @@ class Parameters:
         self.targets._update_openpmd_granularity(self._openpmd_granularity)
         self.data._update_openpmd_granularity(self._openpmd_granularity)
         self.running._update_openpmd_granularity(self._openpmd_granularity)
-        self.hyperparameters._update_openpmd_granularity(self._openpmd_granularity)
+        self.hyperparameters._update_openpmd_granularity(
+            self._openpmd_granularity
+        )
 
     @property
     def verbosity(self):
@@ -1229,7 +1370,7 @@ class Parameters:
 
     @property
     def use_gpu(self):
-        """Control whether or not a GPU is used (provided there is one)."""
+        """Control whether a GPU is used (provided there is one)."""
         return self._use_gpu
 
     @use_gpu.setter
@@ -1240,8 +1381,16 @@ class Parameters:
             if torch.cuda.is_available():
                 self._use_gpu = True
             else:
-                parallel_warn("GPU requested, but no GPU found. MALA will "
-                              "operate with CPU only.")
+                parallel_warn(
+                    "GPU requested, but no GPU found. MALA will "
+                    "operate with CPU only."
+                )
+        if self._use_gpu and self.use_lammps:
+            printout(
+                "Enabling atomic density formula because LAMMPS and GPU "
+                "are used."
+            )
+            self.use_atomic_density_formula = True
 
         # Invalidate, will be updated in setter.
         self.device = None
@@ -1253,31 +1402,36 @@ class Parameters:
         self.hyperparameters._update_gpu(self.use_gpu)
 
     @property
-    def use_horovod(self):
-        """Control whether or not horovod is used for parallel training."""
-        return self._use_horovod
+    def use_ddp(self):
+        """Control whether ddp is used for parallel training."""
+        return self._use_ddp
 
-    @use_horovod.setter
-    def use_horovod(self, value):
-        if value is False:
-            self._use_horovod = False
-        else:
-            if horovod_available:
-                hvd.init()
-                # Invalidate, will be updated in setter.
-                set_horovod_status(value)
-                self.device = None
-                self._use_horovod = value
-                self.network._update_horovod(self.use_horovod)
-                self.descriptors._update_horovod(self.use_horovod)
-                self.targets._update_horovod(self.use_horovod)
-                self.data._update_horovod(self.use_horovod)
-                self.running._update_horovod(self.use_horovod)
-                self.hyperparameters._update_horovod(self.use_horovod)
-            else:
-                parallel_warn("Horovod requested, but not installed found. "
-                              "MALA will operate without horovod only.")
+    @use_ddp.setter
+    def use_ddp(self, value):
+        if value:
+            if self.verbosity > 1:
+                print("Initializing torch.distributed.")
+            # JOSHR:
+            # We start up torch distributed here. As is fairly standard
+            # convention, we get the rank and world size arguments via
+            # environment variables (RANK, WORLD_SIZE). In addition to
+            # those variables, LOCAL_RANK, MASTER_ADDR and MASTER_PORT
+            # should be set.
+            rank = int(os.environ.get("RANK"))
+            world_size = int(os.environ.get("WORLD_SIZE"))
 
+            dist.init_process_group("nccl", rank=rank, world_size=world_size)
+
+        set_ddp_status(value)
+        # Invalidate, will be updated in setter.
+        self.device = None
+        self._use_ddp = value
+        self.network._update_ddp(self.use_ddp)
+        self.descriptors._update_ddp(self.use_ddp)
+        self.targets._update_ddp(self.use_ddp)
+        self.data._update_ddp(self.use_ddp)
+        self.running._update_ddp(self.use_ddp)
+        self.hyperparameters._update_ddp(self.use_ddp)
 
     @property
     def device(self):
@@ -1288,8 +1442,7 @@ class Parameters:
     def device(self, value):
         device_id = get_local_rank()
         if self.use_gpu:
-            self._device = "cuda:"\
-                           f"{device_id}"
+            self._device = "cuda:" f"{device_id}"
         else:
             self._device = "cpu"
         self.network._update_device(self._device)
@@ -1301,12 +1454,13 @@ class Parameters:
 
     @property
     def use_mpi(self):
-        """Control whether or not horovod is used for parallel training."""
+        """Control whether MPI is used for paralle inference."""
         return self._use_mpi
 
     @use_mpi.setter
     def use_mpi(self, value):
         set_mpi_status(value)
+
         # Invalidate, will be updated in setter.
         self.device = None
         self._use_mpi = value
@@ -1331,19 +1485,85 @@ class Parameters:
     @openpmd_configuration.setter
     def openpmd_configuration(self, value):
         self._openpmd_configuration = value
-
-        # Invalidate, will be updated in setter.
         self.network._update_openpmd_configuration(self.openpmd_configuration)
-        self.descriptors._update_openpmd_configuration(self.openpmd_configuration)
+        self.descriptors._update_openpmd_configuration(
+            self.openpmd_configuration
+        )
         self.targets._update_openpmd_configuration(self.openpmd_configuration)
         self.data._update_openpmd_configuration(self.openpmd_configuration)
         self.running._update_openpmd_configuration(self.openpmd_configuration)
-        self.hyperparameters._update_openpmd_configuration(self.openpmd_configuration)
+        self.hyperparameters._update_openpmd_configuration(
+            self.openpmd_configuration
+        )
+
+    @property
+    def use_lammps(self):
+        """Control whether to use LAMMPS for descriptor calculation."""
+        return self._use_lammps
+
+    @use_lammps.setter
+    def use_lammps(self, value):
+        self._use_lammps = value
+        if self.use_gpu and value:
+            printout(
+                "Enabling atomic density formula because LAMMPS and GPU "
+                "are used."
+            )
+            self.use_atomic_density_formula = True
+        self.network._update_lammps(self.use_lammps)
+        self.descriptors._update_lammps(self.use_lammps)
+        self.targets._update_lammps(self.use_lammps)
+        self.data._update_lammps(self.use_lammps)
+        self.running._update_lammps(self.use_lammps)
+        self.hyperparameters._update_lammps(self.use_lammps)
+
+    @property
+    def use_atomic_density_formula(self):
+        """Control whether to use the atomic density formula.
+
+        This formula uses as a Gaussian representation of the atomic density
+        to calculate the structure factor and with it, the Ewald energy
+        and parts of the exchange-correlation energy. By using it, one can
+        go from N^2 to NlogN scaling, and offloads most of the computational
+        overhead of energy calculation from QE to LAMMPS. This is beneficial
+        since LAMMPS can benefit from GPU acceleration (QE GPU acceleration
+        is not used in the portion of the QE code MALA employs). If set
+        to True, this means MALA will perform another LAMMPS calculation
+        during inference. The hyperparameters for this atomic density
+        calculation are set via the parameters.descriptors object.
+        Default is False, except for when both use_gpu and use_lammps
+        are True, in which case this value will be set to True as well.
+        """
+        return self._use_atomic_density_formula
+
+    @use_atomic_density_formula.setter
+    def use_atomic_density_formula(self, value):
+        self._use_atomic_density_formula = value
+
+        self.network._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.descriptors._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.targets._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.data._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.running._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
+        self.hyperparameters._update_atomic_density_formula(
+            self.use_atomic_density_formula
+        )
 
     def show(self):
         """Print name and values of all attributes of this object."""
-        printout("--- " + self.__doc__.split("\n")[1] + " ---",
-                 min_verbosity=0)
+        printout(
+            "--- " + self.__doc__.split("\n")[1] + " ---", min_verbosity=0
+        )
 
         # Two for-statements so that global parameters are shown on top.
         for v in vars(self):
@@ -1351,16 +1571,21 @@ class Parameters:
                 pass
             else:
                 if v[0] == "_":
-                    printout('%-15s: %s' % (v[1:], getattr(self, v)),
-                             min_verbosity=0)
+                    printout(
+                        "%-15s: %s" % (v[1:], getattr(self, v)),
+                        min_verbosity=0,
+                    )
                 else:
-                    printout('%-15s: %s' % (v, getattr(self, v)),
-                             min_verbosity=0)
+                    printout(
+                        "%-15s: %s" % (v, getattr(self, v)), min_verbosity=0
+                    )
         for v in vars(self):
             if isinstance(getattr(self, v), ParametersBase):
                 parobject = getattr(self, v)
-                printout("--- " + parobject.__doc__.split("\n")[1] + " ---",
-                         min_verbosity=0)
+                printout(
+                    "--- " + parobject.__doc__.split("\n")[1] + " ---",
+                    min_verbosity=0,
+                )
                 parobject.show("\t")
 
     def save(self, filename, save_format="json"):
@@ -1383,14 +1608,15 @@ class Parameters:
         if save_format == "pickle":
             if filename[-3:] != "pkl":
                 filename += ".pkl"
-            with open(filename, 'wb') as handle:
+            with open(filename, "wb") as handle:
                 pickle.dump(self, handle, protocol=4)
         elif save_format == "json":
             if filename[-4:] != "json":
                 filename += ".json"
             json_dict = {}
-            members = inspect.getmembers(self,
-                                         lambda a: not (inspect.isroutine(a)))
+            members = inspect.getmembers(
+                self, lambda a: not (inspect.isroutine(a))
+            )
 
             # Two for loops so global properties enter the dict first.
             for member in members:
@@ -1405,7 +1631,7 @@ class Parameters:
                 if member[0][0] != "_":
                     if isinstance(member[1], ParametersBase):
                         # All the subclasses have to provide this function.
-                        member[1]: ParametersBase
+                        member[1]: ParametersBase  # type: ignore
                         json_dict[member[0]] = member[1].to_json()
             with open(filename, "w", encoding="utf-8") as f:
                 json.dump(json_dict, f, ensure_ascii=False, indent=4)
@@ -1462,7 +1688,7 @@ class Parameters:
         self.use_gpu = True
         self.use_mpi = True
         device_temp = self.device
-        sleep(get_rank()*wait_time)
+        sleep(get_rank() * wait_time)
 
         # Now we can turn of MPI and set the device manually.
         self.use_mpi = False
@@ -1475,8 +1701,9 @@ class Parameters:
         self.hyperparameters._update_device(device_temp)
 
     @classmethod
-    def load_from_file(cls, file, save_format="json",
-                       no_snapshots=False):
+    def load_from_file(
+        cls, file, save_format="json", no_snapshots=False, force_no_ddp=False
+    ):
         """
         Load a Parameters object from a file.
 
@@ -1501,7 +1728,7 @@ class Parameters:
         """
         if save_format == "pickle":
             if isinstance(file, str):
-                loaded_parameters = pickle.load(open(file, 'rb'))
+                loaded_parameters = pickle.load(open(file, "rb"))
             else:
                 loaded_parameters = pickle.load(file)
             if no_snapshots is True:
@@ -1514,22 +1741,48 @@ class Parameters:
 
             loaded_parameters = cls()
             for key in json_dict:
-                if isinstance(json_dict[key], dict) and key \
-                        != "openpmd_configuration":
+                if (
+                    isinstance(json_dict[key], dict)
+                    and key != "openpmd_configuration"
+                ):
                     # These are the other parameter classes.
-                    sub_parameters =\
-                        globals()[json_dict[key]["_parameters_type"]].\
-                        from_json(json_dict[key])
+                    sub_parameters = globals()[
+                        json_dict[key]["_parameters_type"]
+                    ].from_json(json_dict[key])
                     setattr(loaded_parameters, key, sub_parameters)
+
+                    # Backwards compatability:
+                    if key == "descriptors":
+                        if (
+                            "use_atomic_density_energy_formula"
+                            in json_dict[key]
+                        ):
+                            loaded_parameters.use_atomic_density_formula = (
+                                json_dict[key][
+                                    "use_atomic_density_energy_formula"
+                                ]
+                            )
 
             # We iterate a second time, to set global values, so that they
             # are properly forwarded.
             for key in json_dict:
-                if not isinstance(json_dict[key], dict) or key == \
-                        "openpmd_configuration":
-                    setattr(loaded_parameters, key, json_dict[key])
+                if (
+                    not isinstance(json_dict[key], dict)
+                    or key == "openpmd_configuration"
+                ):
+                    if key == "use_ddp" and force_no_ddp is True:
+                        setattr(loaded_parameters, key, False)
+                    else:
+                        setattr(loaded_parameters, key, json_dict[key])
             if no_snapshots is True:
                 loaded_parameters.data.snapshot_directories_list = []
+            # Backwards compatability: since the transfer of old property
+            # to new property happens _before_ all children descriptor classes
+            # are instantiated, it is not properly propagated. Thus, we
+            # simply have to set it to its own value again.
+            loaded_parameters.use_atomic_density_formula = (
+                loaded_parameters.use_atomic_density_formula
+            )
         else:
             raise Exception("Unsupported parameter save format.")
 
@@ -1555,11 +1808,12 @@ class Parameters:
             The loaded Parameters object.
 
         """
-        return Parameters.load_from_file(file, save_format="pickle",
-                                         no_snapshots=no_snapshots)
+        return Parameters.load_from_file(
+            file, save_format="pickle", no_snapshots=no_snapshots
+        )
 
     @classmethod
-    def load_from_json(cls, file, no_snapshots=False):
+    def load_from_json(cls, file, no_snapshots=False, force_no_ddp=False):
         """
         Load a Parameters object from a json file.
 
@@ -1578,5 +1832,9 @@ class Parameters:
             The loaded Parameters object.
 
         """
-        return Parameters.load_from_file(file, save_format="json",
-                                         no_snapshots=no_snapshots)
+        return Parameters.load_from_file(
+            file,
+            save_format="json",
+            no_snapshots=no_snapshots,
+            force_no_ddp=force_no_ddp,
+        )

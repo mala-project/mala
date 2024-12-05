@@ -1,10 +1,9 @@
 """Hyperparameter to use with optuna."""
-from optuna.trial import Trial
 
 from mala.network.hyperparameter import Hyperparameter
 
 
-class HyperparameterACSD(Hyperparameter):
+class HyperparameterDescriptorScoring(Hyperparameter):
     """Represents an optuna parameter.
 
     Parameters
@@ -36,12 +35,18 @@ class HyperparameterACSD(Hyperparameter):
         List of possible choices (for categorical parameter).
     """
 
-    def __init__(self, hotype=None, opttype="float", name="", low=0, high=0, choices=None):
-        super(HyperparameterACSD, self).__init__(opttype=opttype,
-                                                 name=name,
-                                                 low=low,
-                                                 high=high,
-                                                 choices=choices)
+    def __init__(
+        self,
+        hotype=None,
+        opttype="float",
+        name="",
+        low=0,
+        high=0,
+        choices=None,
+    ):
+        super(HyperparameterDescriptorScoring, self).__init__(
+            opttype=opttype, name=name, low=low, high=high, choices=choices
+        )
 
         # For now, only three types of hyperparameters are allowed:
         # Lists, floats and ints.

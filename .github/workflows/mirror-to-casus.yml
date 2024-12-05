@@ -1,4 +1,4 @@
-name: mirror
+name: Mirror to CASUS
 
 on: [push, delete]
 
@@ -6,13 +6,14 @@ jobs:
   mirror-to-CASUS:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - name: mirror-repository
-      uses: spyoungtech/mirror-action@v0.6.0
-      with:
-        REMOTE: 'ssh://git@github.com/casus/mala.git'
-        GIT_SSH_PRIVATE_KEY: ${{ secrets.GIT_SSH_KEY }}
-        GIT_SSH_NO_VERIFY_HOST: "true"
-        DEBUG: "true"
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: mirror-repository
+        uses: spyoungtech/mirror-action@v0.6.0
+        with:
+          REMOTE: 'ssh://git@github.com/casus/mala.git'
+          GIT_SSH_PRIVATE_KEY: ${{ secrets.GIT_SSH_KEY }}
+          GIT_SSH_NO_VERIFY_HOST: "true"
+          DEBUG: "true"
