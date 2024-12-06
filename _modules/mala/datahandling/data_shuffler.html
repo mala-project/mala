@@ -376,6 +376,187 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="mi">1</span>
 
+    <span class="c1"># Takes the `extent` of an n-dimensional grid, the coordinates of a start</span>
+    <span class="c1"># point `x` and of an end point `y`.</span>
+    <span class="c1"># Interpreting the grid as a row-major n-dimensional array yields a</span>
+    <span class="c1"># contiguous slice from `x` to `y`.</span>
+    <span class="c1"># !!! Both `x` and `y` are **inclusive** ends as the semantics of what would</span>
+    <span class="c1"># be the next exclusive upper limit are unnecessarily complex in</span>
+    <span class="c1"># n dimensions, especially since the function recurses over the number of</span>
+    <span class="c1"># dimensions. !!!</span>
+    <span class="c1"># This slice is not in general an n-dimensional cuboid within the grid, but</span>
+    <span class="c1"># may be a non-convex form composed of multiple cuboid chunks.</span>
+    <span class="c1">#</span>
+    <span class="c1"># This function returns a list of cuboid sub-chunks of the n-dimensional</span>
+    <span class="c1"># grid such that:</span>
+    <span class="c1">#</span>
+    <span class="c1"># 1. The union of those chunks is equal to the contiguous slice spanned</span>
+    <span class="c1">#    between `x` and `y`, both ends inclusive.</span>
+    <span class="c1"># 2. The chunks do not overlap.</span>
+    <span class="c1"># 3. Each single chunk is a contiguous slice within the row-major grid.</span>
+    <span class="c1"># 4. The chunks are sorted in ascending order of their position within the</span>
+    <span class="c1">#    row-major grid.</span>
+    <span class="c1">#</span>
+    <span class="c1"># Row-major within the context of this function means that the indexes go</span>
+    <span class="c1"># from the slowest-running dimension at the left end to the fastest-running</span>
+    <span class="c1"># dimension at the right end.</span>
+    <span class="c1">#</span>
+    <span class="c1"># The output is a list of chunks as defined in openPMD, i.e. a start offset</span>
+    <span class="c1"># and the extent, counted from this offset (not from the grid origin!).</span>
+    <span class="c1">#</span>
+    <span class="c1"># Example: From the below 2D grid with extent [8, 10], the slice marked by</span>
+    <span class="c1"># the X-es should be loaded. The slice is defined by its first item</span>
+    <span class="c1"># at [2, 3] and its last item at [6, 6].</span>
+    <span class="c1"># The result would be a list of three chunks:</span>
+    <span class="c1">#</span>
+    <span class="c1"># 1. ([2, 3], [1,  7])</span>
+    <span class="c1"># 2. ([3, 0], [3, 10])</span>
+    <span class="c1"># 3. ([6, 0], [1,  7])</span>
+    <span class="c1">#</span>
+    <span class="c1"># OOOOOOOOOO</span>
+    <span class="c1"># OOOOOOOOOO</span>
+    <span class="c1"># OOOXXXXXXX</span>
+    <span class="c1"># XXXXXXXXXX</span>
+    <span class="c1"># XXXXXXXXXX</span>
+    <span class="c1"># XXXXXXXXXX</span>
+    <span class="c1"># XXXXXXXOOO</span>
+    <span class="c1"># OOOOOOOOOO</span>
+
+    <span class="k">def</span> <span class="nf">__contiguous_slice_within_ndim_grid_as_blocks</span><span class="p">(</span>
+        <span class="n">extent</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">y</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="c1"># Used for converting a block defined by inclusive lower and upper</span>
+        <span class="c1"># coordinate to a chunk as defined by openPMD.</span>
+        <span class="c1"># The openPMD extent is defined by (to-from)+1 (to make up for the</span>
+        <span class="c1"># inclusive upper end).</span>
+        <span class="k">def</span> <span class="nf">get_extent</span><span class="p">(</span><span class="n">from_</span><span class="p">,</span> <span class="n">to_</span><span class="p">):</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="n">upper</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">lower</span> <span class="k">for</span> <span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">from_</span><span class="p">,</span> <span class="n">to_</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">res</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Cannot compute block extent from </span><span class="si">{</span><span class="n">from_</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">to_</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">res</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">extent</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;__shuffle_openpmd: Internal indexing error extent=</span><span class="si">{</span><span class="n">extent</span><span class="si">}</span><span class="s2"> and x=</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2"> must have the same length. This is a bug.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">extent</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;__shuffle_openpmd: Internal indexing error extent=</span><span class="si">{</span><span class="n">extent</span><span class="si">}</span><span class="s2"> and y=</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2"> must have the same length. This is a bug.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Recursive bottom cases</span>
+        <span class="c1"># 1. No items left</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">x</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="c1"># 2. No distinct dimensions left</span>
+        <span class="k">elif</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="p">[(</span><span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">get_extent</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))]</span>
+
+        <span class="c1"># Take the frontside and backside one-dimensional slices with extent</span>
+        <span class="c1"># defined by the last dimension, process the remainder recursively.</span>
+
+        <span class="c1"># The offset of the front slice is equal to x.</span>
+        <span class="n">front_slice</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="p">[</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))])</span>
+        <span class="c1"># The chunk extent in the last dimension is the distance from the x</span>
+        <span class="c1"># coordinate to the grid extent in the last dimension.</span>
+        <span class="c1"># As the slice is one-dimensional, the extent is 1 in all other</span>
+        <span class="c1"># dimensions.</span>
+        <span class="n">front_slice</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">extent</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Similar for the back slice.</span>
+        <span class="c1"># The offset of the back slice is 0 in the last dimension, equal to y</span>
+        <span class="c1"># in all other dimensions.</span>
+        <span class="n">back_slice</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="p">[</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))])</span>
+        <span class="n">back_slice</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># The extent is equal to the coordinate of y+1 (to convert inclusive to</span>
+        <span class="c1"># exclusive upper end) in the last dimension, 1 otherwise.</span>
+        <span class="n">back_slice</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c1"># Strip the last (i.e. fast-running) dimension for a recursive call with</span>
+        <span class="c1"># one dimensionality reduced.</span>
+        <span class="n">recursive_x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">recursive_y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Since the first and last row are dealt with above, those rows are now</span>
+        <span class="c1"># stripped from the second-to-last dimension for the recursive call</span>
+        <span class="c1"># (in which they will be the last dimension)</span>
+        <span class="n">recursive_x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">recursive_y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+
+        <span class="n">rec_res</span> <span class="o">=</span> <span class="n">DataShuffler</span><span class="o">.</span><span class="n">__contiguous_slice_within_ndim_grid_as_blocks</span><span class="p">(</span>
+            <span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">recursive_x</span><span class="p">,</span> <span class="n">recursive_y</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Add the last dimension again. The last dimension is covered from start</span>
+        <span class="c1"># to end since the leftovers have been dealt with by the front and back</span>
+        <span class="c1"># slice.</span>
+        <span class="n">rec_res</span> <span class="o">=</span> <span class="p">[(</span><span class="n">xx</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">yy</span> <span class="o">+</span> <span class="p">[</span><span class="n">extent</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span> <span class="k">for</span> <span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">)</span> <span class="ow">in</span> <span class="n">rec_res</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">front_slice</span><span class="p">]</span> <span class="o">+</span> <span class="n">rec_res</span> <span class="o">+</span> <span class="p">[</span><span class="n">back_slice</span><span class="p">]</span>
+
+    <span class="c1"># Interpreting `ndim_extent` as the extents of an n-dimensional grid,</span>
+    <span class="c1"># returns the n-dimensional coordinate of the `idx`th item in the row-major</span>
+    <span class="c1"># representation of the grid.</span>
+    <span class="k">def</span> <span class="nf">__resolve_flattened_index_into_ndim</span><span class="p">(</span><span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ndim_extent</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ndim_extent</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Cannot index into a zero-dimensional array.&quot;</span><span class="p">)</span>
+        <span class="n">strides</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">current_stride</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">ndim_extent</span><span class="p">):</span>
+            <span class="n">strides</span> <span class="o">=</span> <span class="p">[</span><span class="n">current_stride</span><span class="p">]</span> <span class="o">+</span> <span class="n">strides</span>
+            <span class="c1"># sic!, the last stride is ignored, as it&#39;s just the entire grid</span>
+            <span class="c1"># extent</span>
+            <span class="n">current_stride</span> <span class="o">*=</span> <span class="n">ext</span>
+
+        <span class="k">def</span> <span class="nf">worker</span><span class="p">(</span><span class="n">inner_idx</span><span class="p">,</span> <span class="n">inner_strides</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">inner_strides</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">inner_idx</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                        <span class="s2">&quot;This cannot happen. There is bug somewhere.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">[]</span>
+            <span class="n">div</span><span class="p">,</span> <span class="n">mod</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">inner_idx</span><span class="p">,</span> <span class="n">inner_strides</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">div</span><span class="p">]</span> <span class="o">+</span> <span class="n">worker</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">inner_strides</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+        <span class="k">return</span> <span class="n">worker</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">strides</span><span class="p">)</span>
+
+    <span class="c1"># Load a chunk from the openPMD `record` into the buffer at `arr`.</span>
+    <span class="c1"># The indexes `offset` and `extent` are scalar 1-dimensional coordinates,</span>
+    <span class="c1"># and apply to the n-dimensional record by reinterpreting (reshaped) it as</span>
+    <span class="c1"># a one-dimensional array.</span>
+    <span class="c1"># The function deals internally with splitting the 1-dimensional slice into</span>
+    <span class="c1"># a sequence of n-dimensional block load operations.</span>
+    <span class="k">def</span> <span class="nf">__load_chunk_1D</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">extent</span><span class="p">):</span>
+        <span class="n">start_idx</span> <span class="o">=</span> <span class="n">DataShuffler</span><span class="o">.</span><span class="n">__resolve_flattened_index_into_ndim</span><span class="p">(</span>
+            <span class="n">offset</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">shape</span>
+        <span class="p">)</span>
+        <span class="c1"># Inclusive upper end. See the documentation in</span>
+        <span class="c1"># __contiguous_slice_within_ndim_grid_as_blocks() for the reason why</span>
+        <span class="c1"># we work with inclusive upper ends.</span>
+        <span class="n">end_idx</span> <span class="o">=</span> <span class="n">DataShuffler</span><span class="o">.</span><span class="n">__resolve_flattened_index_into_ndim</span><span class="p">(</span>
+            <span class="n">offset</span> <span class="o">+</span> <span class="n">extent</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">shape</span>
+        <span class="p">)</span>
+        <span class="n">blocks_to_load</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">DataShuffler</span><span class="o">.</span><span class="n">__contiguous_slice_within_ndim_grid_as_blocks</span><span class="p">(</span>
+                <span class="n">mesh</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">start_idx</span><span class="p">,</span> <span class="n">end_idx</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># print(f&quot;\n\nLOADING {offset}\t+{extent}\tFROM {mesh.shape}&quot;)</span>
+        <span class="n">current_offset</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># offset within arr</span>
+        <span class="k">for</span> <span class="n">nd_offset</span><span class="p">,</span> <span class="n">nd_extent</span> <span class="ow">in</span> <span class="n">blocks_to_load</span><span class="p">:</span>
+            <span class="n">flat_extent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">nd_extent</span><span class="p">)</span>
+            <span class="c1"># print(</span>
+            <span class="c1">#     f&quot;\t{nd_offset}\t-{nd_extent}\t-&gt;[{current_offset}:{current_offset + flat_extent}]&quot;</span>
+            <span class="c1"># )</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">load_chunk</span><span class="p">(</span>
+                <span class="n">arr</span><span class="p">[</span><span class="n">current_offset</span> <span class="p">:</span> <span class="n">current_offset</span> <span class="o">+</span> <span class="n">flat_extent</span><span class="p">],</span>
+                <span class="n">nd_offset</span><span class="p">,</span>
+                <span class="n">nd_extent</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">current_offset</span> <span class="o">+=</span> <span class="n">flat_extent</span>
+
     <span class="k">def</span> <span class="nf">__shuffle_openpmd</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dot</span><span class="p">:</span> <span class="n">__DescriptorOrTarget</span><span class="p">,</span>
@@ -457,23 +638,12 @@
         <span class="c1"># This gets the offset and extent of the i&#39;th such slice.</span>
         <span class="c1"># The extent is given as in openPMD, i.e. the size of the block</span>
         <span class="c1"># (not its upper coordinate).</span>
-        <span class="k">def</span> <span class="nf">from_chunk_i</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">dset</span><span class="p">,</span> <span class="n">slice_dimension</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">from_chunk_i</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">dset</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dset</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
                 <span class="n">dset</span> <span class="o">=</span> <span class="n">dset</span><span class="o">.</span><span class="n">extent</span>
-            <span class="n">dset</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dset</span><span class="p">)</span>
-            <span class="n">offset</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">dset</span><span class="p">]</span>
-            <span class="n">extent</span> <span class="o">=</span> <span class="n">dset</span>
-            <span class="n">extent_dim_0</span> <span class="o">=</span> <span class="n">dset</span><span class="p">[</span><span class="n">slice_dimension</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">extent_dim_0</span> <span class="o">%</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                    <span class="s2">&quot;Dataset </span><span class="si">{}</span><span class="s2"> cannot be split into </span><span class="si">{}</span><span class="s2"> chunks on dimension </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="n">dset</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">slice_dimension</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="n">single_chunk_len</span> <span class="o">=</span> <span class="n">extent_dim_0</span> <span class="o">//</span> <span class="n">n</span>
-            <span class="n">offset</span><span class="p">[</span><span class="n">slice_dimension</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">single_chunk_len</span>
-            <span class="n">extent</span><span class="p">[</span><span class="n">slice_dimension</span><span class="p">]</span> <span class="o">=</span> <span class="n">single_chunk_len</span>
-            <span class="k">return</span> <span class="n">offset</span><span class="p">,</span> <span class="n">extent</span>
+            <span class="n">flat_extent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">dset</span><span class="p">)</span>
+            <span class="n">one_slice_extent</span> <span class="o">=</span> <span class="n">flat_extent</span> <span class="o">//</span> <span class="n">n</span>
+            <span class="k">return</span> <span class="n">i</span> <span class="o">*</span> <span class="n">one_slice_extent</span><span class="p">,</span> <span class="n">one_slice_extent</span>
 
         <span class="kn">import</span> <span class="nn">json</span>
 
@@ -534,9 +704,10 @@
                     <span class="n">i</span><span class="p">,</span> <span class="n">number_of_new_snapshots</span><span class="p">,</span> <span class="n">extent_in</span>
                 <span class="p">)</span>
                 <span class="n">to_chunk_offset</span> <span class="o">=</span> <span class="n">to_chunk_extent</span>
-                <span class="n">to_chunk_extent</span> <span class="o">=</span> <span class="n">to_chunk_offset</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">from_chunk_extent</span><span class="p">)</span>
+                <span class="n">to_chunk_extent</span> <span class="o">=</span> <span class="n">to_chunk_offset</span> <span class="o">+</span> <span class="n">from_chunk_extent</span>
                 <span class="k">for</span> <span class="n">dimension</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mesh_in</span><span class="p">)):</span>
-                    <span class="n">mesh_in</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">dimension</span><span class="p">)]</span><span class="o">.</span><span class="n">load_chunk</span><span class="p">(</span>
+                    <span class="n">DataShuffler</span><span class="o">.</span><span class="n">__load_chunk_1D</span><span class="p">(</span>
+                        <span class="n">mesh_in</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">dimension</span><span class="p">)],</span>
                         <span class="n">new_array</span><span class="p">[</span><span class="n">dimension</span><span class="p">,</span> <span class="n">to_chunk_offset</span><span class="p">:</span><span class="n">to_chunk_extent</span><span class="p">],</span>
                         <span class="n">from_chunk_offset</span><span class="p">,</span>
                         <span class="n">from_chunk_extent</span><span class="p">,</span>
@@ -641,24 +812,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_points_to_remove</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">number_of_shuffled_snapshots</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">number_of_shuffled_snapshots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_snapshots</span>
-
-        <span class="c1"># Currently, the openPMD interface is not feature-complete.</span>
-        <span class="k">if</span> <span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="n">number_of_shuffled_snapshots</span>
-                    <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span>
-                <span class="p">]</span>
-            <span class="p">)</span>
-            <span class="o">!=</span> <span class="mi">0</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Shuffling from OpenPMD files currently only &quot;</span>
-                <span class="s2">&quot;supported if first dimension of all snapshots &quot;</span>
-                <span class="s2">&quot;can evenly be divided by number of snapshots. &quot;</span>
-                <span class="s2">&quot;Please select a different number of shuffled &quot;</span>
-                <span class="s2">&quot;snapshots or use the numpy interface. &quot;</span>
-            <span class="p">)</span>
 
         <span class="n">shuffled_gridsizes</span> <span class="o">=</span> <span class="n">snapshot_size_list</span> <span class="o">//</span> <span class="n">number_of_shuffled_snapshots</span>
 
