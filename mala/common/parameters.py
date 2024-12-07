@@ -389,6 +389,7 @@ class ParametersDescriptors(ParametersBase):
         self.bispectrum_twojmax = 10
         self.bispectrum_cutoff = 4.67637
         self.bispectrum_switchflag = 1
+        self.bispectrum_element_weights = None
 
         # Everything pertaining to the atomic density.
         # Seperate cutoff given here because bispectrum descriptors and
@@ -472,6 +473,30 @@ class ParametersDescriptors(ParametersBase):
             self._snap_switchflag = value
         if _int_value > 0:
             self._snap_switchflag = 1
+
+    @property
+    def bispectrum_element_weights(self):
+        """
+        Element species weights for the bispectrum calculation.
+
+        They are provided as an ordered list, and will be assigned to the
+        elements alphabetically, i.e., the first entry will go to the element
+        coming first in the alphabet and so on. Weights are always relative, so
+        the list will be rescaled such that the largest value is 1 and all
+        the other ones are scaled accordingly.
+        """
+        return self._bispectrum_element_weights
+
+    @bispectrum_element_weights.setter
+    def bispectrum_element_weights(self, value):
+        if not isinstance(value, list) and value is not None:
+            raise ValueError("Bispectrum element weights must be list.")
+        if value is not None:
+            if np.max(value) != 1.0:
+                max = np.max(value)
+                for element in range(len(value)):
+                    value[element] /= max
+        self._bispectrum_element_weights = value
 
     def _update_mpi(self, new_mpi):
         self._configuration["mpi"] = new_mpi
