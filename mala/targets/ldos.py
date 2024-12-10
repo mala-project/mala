@@ -1609,7 +1609,14 @@ class LDOS(Target):
 
         for i in range(start_index, end_index):
             tmp_file_name = path_scheme
-            tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
+            if digits < 4:
+                tmp_file_name = tmp_file_name.replace(
+                    "*", str(i).zfill(digits)
+                )
+            else:
+                # For some reason, there are no leading zeros above 3 digits
+                # in QE.
+                tmp_file_name = tmp_file_name.replace("*", str(i).zfill(3))
 
             # Open the cube file
             if file_type == ".cube":
