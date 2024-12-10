@@ -214,8 +214,8 @@ class AtomicDensity(Descriptor):
             use_fp64=use_fp64,
         )
 
-        self._clean_calculation(lmp, keep_logs)
-        # gaussian_descriptors_np_test = gaussian_descriptors_np.copy()
+        # self._clean_calculation(lmp, keep_logs)
+        gaussian_descriptors_np_test = gaussian_descriptors_np.copy()
         # if np.shape(gaussian_descriptors_np_test)[1] > 7:
         #     gaussian_descriptors_np_test[:, 6] = gaussian_descriptors_np[:, 7]
         #     gaussian_descriptors_np_test[:, 7] = gaussian_descriptors_np[:, 8]
@@ -226,7 +226,7 @@ class AtomicDensity(Descriptor):
         self.grid_dimensions = [nx, ny, nz]
         if self.parameters._configuration["mpi"]:
             if return_directly:
-                return gaussian_descriptors_np_test
+                return gaussian_descriptors_np
             else:
                 self.feature_size = 4
                 return gaussian_descriptors_np, nrows_ggrid
@@ -236,7 +236,7 @@ class AtomicDensity(Descriptor):
             # the descriptors, even in serial mode, without any further
             # reordering.
             if return_directly:
-                return gaussian_descriptors_np
+                return gaussian_descriptors_np_test
             else:
                 # Here, we want to do something else with the atomic density,
                 # and thus have to properly reorder it.

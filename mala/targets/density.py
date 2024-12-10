@@ -1014,8 +1014,8 @@ class Density(Target):
             barrier()
 
             # Right after setup we can delete the file.
-            if get_rank() == 0:
-                os.remove(tem_input_name)
+            # if get_rank() == 0:
+            #     os.remove(tem_input_name)
 
             printout(
                 "Total energy module: Time used by total energy initialization: {:.8f}s".format(
