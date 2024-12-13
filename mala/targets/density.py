@@ -1014,8 +1014,8 @@ class Density(Target):
             barrier()
 
             # Right after setup we can delete the file.
-            # if get_rank() == 0:
-            #     os.remove(tem_input_name)
+            if get_rank() == 0:
+                os.remove(tem_input_name)
 
             printout(
                 "Total energy module: Time used by total energy initialization: {:.8f}s".format(
@@ -1047,9 +1047,9 @@ class Density(Target):
                     "Number of atoms is inconsistent between MALA "
                     "and Quantum Espresso."
                 )
-        # test_positions = te.get_positions(
-        #     atoms_Angstrom.get_global_number_of_atoms()
-        # )
+        test_positions = te.get_positions(
+            atoms_Angstrom.get_global_number_of_atoms()
+        )
 
         # We need to find out if the grid dimensions are consistent.
         # That depends on the form of the density data we received.

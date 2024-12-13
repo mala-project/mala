@@ -214,12 +214,20 @@ class AtomicDensity(Descriptor):
             use_fp64=use_fp64,
         )
 
-        # self._clean_calculation(lmp, keep_logs)
+        self._clean_calculation(lmp, keep_logs)
         gaussian_descriptors_np_test = gaussian_descriptors_np.copy()
-        # if np.shape(gaussian_descriptors_np_test)[1] > 7:
-        #     gaussian_descriptors_np_test[:, 6] = gaussian_descriptors_np[:, 7]
-        #     gaussian_descriptors_np_test[:, 7] = gaussian_descriptors_np[:, 8]
-        #     gaussian_descriptors_np_test[:, 8] = gaussian_descriptors_np[:, 6]
+
+        if (
+            isinstance(self.parameters.minterpy_lp_norm, list)
+            and np.shape(gaussian_descriptors_np_test)[1] > 7
+        ):
+            for index in range(len(self.parameters.minterpy_lp_norm)):
+                gaussian_descriptors_np_test[:, 6 + index] = (
+                    gaussian_descriptors_np[
+                        :, self.parameters.minterpy_lp_norm[index] + 6
+                    ]
+                )
+
         # In comparison to bispectrum, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments
         # if we operate without MPI.
