@@ -1760,7 +1760,14 @@
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_index</span><span class="p">,</span> <span class="n">end_index</span><span class="p">):</span>
             <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">path_scheme</span>
-            <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">tmp_file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">digits</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">digits</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">tmp_file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                    <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">digits</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># For some reason, there are no leading zeros above 3 digits</span>
+                <span class="c1"># in QE.</span>
+                <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">tmp_file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
 
             <span class="c1"># Open the cube file</span>
             <span class="k">if</span> <span class="n">file_type</span> <span class="o">==</span> <span class="s2">&quot;.cube&quot;</span><span class="p">:</span>
