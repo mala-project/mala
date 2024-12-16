@@ -663,8 +663,9 @@ SUBROUTINE set_positions_gauss(verbose, gaussian_descriptors,reference_gaussian_
   CALL mp_barrier( intra_image_comm )
   CALL start_clock( 'structure_factors' )
   ALLOCATE(rgd_of_g(ngm,1), rhon(ngm))
-
-  CALL rho_r2g(dfftp, gaussian_descriptors, strf)
+  DO isp = 1, nsp
+     CALL rho_r2g(dfftp, gaussian_descriptors(:, isp:isp), strf(:,isp:isp))
+  ENDDO
 
   CALL rho_r2g(dfftp, reference_gaussian_descriptors, rgd_of_g)
 
@@ -807,6 +808,8 @@ SUBROUTINE set_rho_of_r(rho_of_r,nnr_in,nspin_in)
   USE cell_base,     ONLY : omega
   USE mp,            ONLY : mp_sum
   USE mp_bands,      ONLY : intra_bgrp_comm
+  USE vlocal,        ONLY : strf
+  USE ions_base,            ONLY : nsp
 
   IMPLICIT NONE
   INTEGER,     INTENT(IN)  :: nnr_in, nspin_in
@@ -815,6 +818,7 @@ SUBROUTINE set_rho_of_r(rho_of_r,nnr_in,nspin_in)
   REAL(DP) :: charge
   REAL(DP) :: etotefield
   INTEGER :: ir
+  INTEGER :: isp
 
   ! Check consistency of dimensions
   IF (nnr_in /= dfftp%nnr) STOP "*** nnr provided to set_rho_of_r() does not match dfftp%nnr"
