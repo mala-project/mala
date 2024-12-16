@@ -1047,9 +1047,6 @@ class Density(Target):
                     "Number of atoms is inconsistent between MALA "
                     "and Quantum Espresso."
                 )
-        test_positions = te.get_positions(
-            atoms_Angstrom.get_global_number_of_atoms()
-        )
 
         # We need to find out if the grid dimensions are consistent.
         # That depends on the form of the density data we received.
@@ -1105,7 +1102,8 @@ class Density(Target):
                 "Using 1D density to calculate the total energy"
                 " requires reshaping of this data. "
                 "This is unproblematic, as long as you provided t"
-                "he correct grid_dimensions."
+                "he correct grid_dimensions.",
+                min_verbosity=2,
             )
             density_for_qe = self.get_density(
                 density_data, convert_to_threedimensional=True

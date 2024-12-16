@@ -664,12 +664,9 @@ SUBROUTINE set_positions_gauss(verbose, gaussian_descriptors,reference_gaussian_
   CALL start_clock( 'structure_factors' )
   ALLOCATE(rgd_of_g(ngm,1), rhon(ngm))
   DO isp = 1, nsp
-    PRINT *, SHAPE(gaussian_descriptors(:, isp:isp)), SHAPE(strf(:,isp:isp))
      CALL rho_r2g(dfftp, gaussian_descriptors(:, isp:isp), strf(:,isp:isp))
   ENDDO
 
-!  CALL rho_r2g(dfftp, gaussian_descriptors, strf)
-!
   CALL rho_r2g(dfftp, reference_gaussian_descriptors, rgd_of_g)
 
   DO isp = 1, nsp
@@ -868,10 +865,6 @@ SUBROUTINE set_rho_of_r(rho_of_r,nnr_in,nspin_in)
   !
   CALL mp_sum( deband, intra_bgrp_comm )
   !
-  DO isp = 1, nsp
-     print *, strf(1:10,isp)
-  ENDDO
-
 
   RETURN
 

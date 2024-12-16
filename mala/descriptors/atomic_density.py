@@ -8,7 +8,7 @@ from importlib.util import find_spec
 import numpy as np
 from scipy.spatial import distance
 
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, parallel_warn
 from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
 
@@ -215,18 +215,24 @@ class AtomicDensity(Descriptor):
         )
 
         self._clean_calculation(lmp, keep_logs)
-        gaussian_descriptors_np_test = gaussian_descriptors_np.copy()
 
-        if (
-            isinstance(self.parameters.minterpy_lp_norm, list)
-            and np.shape(gaussian_descriptors_np_test)[1] > 7
-        ):
-            for index in range(len(self.parameters.minterpy_lp_norm)):
-                gaussian_descriptors_np_test[:, 6 + index] = (
-                    gaussian_descriptors_np[
-                        :, self.parameters.minterpy_lp_norm[index] + 6
-                    ]
-                )
+        if len(set(self._atoms.numbers)) > 1:
+            parallel_warn(
+                "Atomic density formula and multielement system detected: "
+                "Quantum ESPRESSO has a different internal order "
+                "for structure factors and atomic positions. "
+                "MALA recovers the correct ordering for multielement "
+                "systems, but the algorithm to do so is still "
+                "experimental. Please test on a small system before "
+                "using the atomic density formula at scale."
+            )
+            symbols, indices = np.unique(
+                [atom.symbol for atom in self._atoms], return_index=True
+            )
+            permutation = np.concatenate(
+                ([0, 1, 2, 3, 4, 5], np.argsort(indices) + 6)
+            )
+            gaussian_descriptors_np = gaussian_descriptors_np[:, permutation]
 
         # In comparison to bispectrum, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments
@@ -244,7 +250,7 @@ class AtomicDensity(Descriptor):
             # the descriptors, even in serial mode, without any further
             # reordering.
             if return_directly:
-                return gaussian_descriptors_np_test
+                return gaussian_descriptors_np
             else:
                 # Here, we want to do something else with the atomic density,
                 # and thus have to properly reorder it.
