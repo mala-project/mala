@@ -30,7 +30,7 @@ class TestLazyLoading:
         ####################
         test_parameters = Parameters()
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.descriptors.bispectrum_twojmax = 11
         test_parameters.targets.ldos_gridsize = 10
@@ -53,9 +53,9 @@ class TestLazyLoading:
         training_tester = []
         for scalingtype in [
             "standard",
-            "normal",
+            "minmax",
             "feature-wise-standard",
-            "feature-wise-normal",
+            "feature-wise-minmax",
         ]:
             comparison = [scalingtype]
             for ll_type in [True, False]:
@@ -125,7 +125,7 @@ class TestLazyLoading:
                         data_handler.output_data_scaler.total_std
                         / data_handler.nr_training_data
                     )
-                elif scalingtype == "normal":
+                elif scalingtype == "minmax":
                     torch.manual_seed(2002)
                     this_result.append(
                         data_handler.input_data_scaler.total_max
@@ -188,7 +188,7 @@ class TestLazyLoading:
                             0
                         ].grid_size
                     )
-                elif scalingtype == "feature-wise-normal":
+                elif scalingtype == "feature-wise-minmax":
                     this_result.append(
                         torch.mean(data_handler.input_data_scaler.maxs)
                     )
@@ -250,148 +250,12 @@ class TestLazyLoading:
         )
         assert with_prefetching < without_prefetching
 
-    @pytest.mark.skipif(
-        importlib.util.find_spec("horovod") is None,
-        reason="Horovod is currently not part of the pipeline",
-    )
-    def test_performance_horovod(self):
-
-        ####################
-        # PARAMETERS
-        ####################
-        test_parameters = Parameters()
-        test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
-        test_parameters.data.data_splitting_type = "by_snapshot"
-        test_parameters.network.layer_activations = ["LeakyReLU"]
-        test_parameters.running.max_number_epochs = 20
-        test_parameters.running.mini_batch_size = 500
-        test_parameters.running.optimizer = "Adam"
-        test_parameters.comment = "Horovod / lazy loading benchmark."
-        test_parameters.network.nn_type = "feed-forward"
-        test_parameters.manual_seed = 2021
-
-        ####################
-        # DATA
-        ####################
-        results = []
-        for hvduse in [False, True]:
-            for ll in [True, False]:
-                start_time = time.time()
-                test_parameters.running.learning_rate = 0.00001
-                test_parameters.data.use_lazy_loading = ll
-                test_parameters.use_horovod = hvduse
-                data_handler = DataHandler(test_parameters)
-                data_handler.add_snapshot(
-                    "Al_debug_2k_nr0.in.npy",
-                    data_path,
-                    "Al_debug_2k_nr0.out.npy",
-                    data_path,
-                    add_snapshot_as="tr",
-                    output_units="1/(Ry*Bohr^3)",
-                )
-                data_handler.add_snapshot(
-                    "Al_debug_2k_nr1.in.npy",
-                    data_path,
-                    "Al_debug_2k_nr1.out.npy",
-                    data_path,
-                    add_snapshot_as="tr",
-                    output_units="1/(Ry*Bohr^3)",
-                )
-                data_handler.add_snapshot(
-                    "Al_debug_2k_nr2.in.npy",
-                    data_path,
-                    "Al_debug_2k_nr2.out.npy",
-                    data_path,
-                    add_snapshot_as="tr",
-                    output_units="1/(Ry*Bohr^3)",
-                )
-                data_handler.add_snapshot(
-                    "Al_debug_2k_nr1.in.npy",
-                    data_path,
-                    "Al_debug_2k_nr1.out.npy",
-                    data_path,
-                    add_snapshot_as="va",
-                    output_units="1/(Ry*Bohr^3)",
-                )
-                data_handler.add_snapshot(
-                    "Al_debug_2k_nr2.in.npy",
-                    data_path,
-                    "Al_debug_2k_nr2.out.npy",
-                    data_path,
-                    add_snapshot_as="te",
-                    output_units="1/(Ry*Bohr^3)",
-                )
-
-                data_handler.prepare_data()
-                test_parameters.network.layer_sizes = [
-                    data_handler.input_dimension,
-                    100,
-                    data_handler.output_dimension,
-                ]
-
-                # Setup network and trainer.
-                test_network = Network(test_parameters)
-                test_trainer = Trainer(
-                    test_parameters, test_network, data_handler
-                )
-                test_trainer.train_network()
-
-                hvdstring = "no horovod"
-                if hvduse:
-                    hvdstring = "horovod"
-
-                llstring = "data in RAM"
-                if ll:
-                    llstring = "using lazy loading"
-
-                results.append(
-                    [
-                        hvdstring,
-                        llstring,
-                        test_trainer.initial_validation_loss,
-                        test_trainer.final_validation_loss,
-                        time.time() - start_time,
-                    ]
-                )
-
-        diff = []
-        # For 4 local processes I get:
-        # Test:  no horovod ,  using lazy loading
-        # Initial loss:  0.1342976689338684
-        # Final loss:  0.10587086156010628
-        # Time:  3.743736743927002
-        # Test:  no horovod ,  data in RAM
-        # Initial loss:  0.13430887088179588
-        # Final loss:  0.10572846792638302
-        # Time:  1.825883388519287
-        # Test:  horovod ,  using lazy loading
-        # Initial loss:  0.1342976726591587
-        # Final loss:  0.10554153844714165
-        # Time:  4.513132572174072
-        # Test:  horovod ,  data in RAM
-        # Initial loss:  0.13430887088179588
-        # Final loss:  0.1053303349763155
-        # Time:  3.2193074226379395
-
-        for r in results:
-            printout("Test: ", r[0], ", ", r[1], min_verbosity=0)
-            printout("Initial loss: ", r[2], min_verbosity=0)
-            printout("Final loss: ", r[3], min_verbosity=0)
-            printout("Time: ", r[4], min_verbosity=0)
-            diff.append(r[3] - r[2])
-
-        diff = np.array(diff)
-
-        # The loss improvements should be comparable.
-        assert np.std(diff) < accuracy_coarse
-
     @staticmethod
     def _train_lazy_loading(prefetching):
         test_parameters = Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.network.layer_activations = ["ReLU"]
         test_parameters.manual_seed = 1234
         test_parameters.running.max_number_epochs = 100

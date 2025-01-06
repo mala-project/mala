@@ -1,4 +1,4 @@
-"""Gaussian descriptor class."""
+"""Minterpy descriptor class."""
 
 import os
 
@@ -10,10 +10,14 @@ import numpy as np
 from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
 from mala.descriptors.atomic_density import AtomicDensity
+from mala.common.parallelizer import parallel_warn
 
 
 class MinterpyDescriptors(Descriptor):
-    """Class for calculation and parsing of Gaussian descriptors.
+    """
+    Class for calculation and parsing of Minterpy descriptors.
+
+    Marked for deprecation.
 
     Parameters
     ----------
@@ -23,17 +27,15 @@ class MinterpyDescriptors(Descriptor):
 
     def __init__(self, parameters):
         super(MinterpyDescriptors, self).__init__(parameters)
-        self.verbosity = parameters.verbosity
+        parallel_warn(
+            "Minterpy descriptors will be deprecated starting with MALA v1.4.0",
+            category=FutureWarning,
+        )
 
     @property
     def data_name(self):
         """Get a string that describes the target (for e.g. metadata)."""
         return "Minterpy"
-
-    @property
-    def feature_size(self):
-        """Get the feature dimension of this data."""
-        return self.fingerprint_length
 
     @staticmethod
     def convert_units(array, in_units="None"):
@@ -149,11 +151,11 @@ class MinterpyDescriptors(Descriptor):
             ],
             dtype=np.float64,
         )
-        self.fingerprint_length = (
+        self.feature_size = (
             len(self.parameters.minterpy_point_list) + coord_length
         )
 
-        self.fingerprint_length = len(self.parameters.minterpy_point_list)
+        self.feature_size = len(self.parameters.minterpy_point_list)
         # Perform one LAMMPS call for each point in the Minterpy point list.
         for idx, point in enumerate(self.parameters.minterpy_point_list):
             # Shift the atoms in negative direction of the point(s) we actually
@@ -166,7 +168,7 @@ class MinterpyDescriptors(Descriptor):
             self.setup_lammps_tmp_files("minterpy", outdir)
 
             ase.io.write(
-                self.lammps_temporary_input, self.atoms, format=lammps_format
+                self._lammps_temporary_input, self._atoms, format=lammps_format
             )
 
             # Create LAMMPS instance.

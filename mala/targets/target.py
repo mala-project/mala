@@ -4,6 +4,7 @@ from abc import abstractmethod
 import itertools
 import json
 import os
+import tempfile
 
 from ase.neighborlist import NeighborList
 from ase.units import Rydberg, kB
@@ -14,25 +15,100 @@ from scipy.spatial import distance
 from scipy.integrate import simpson
 
 from mala.common.parameters import Parameters, ParametersTargets
-from mala.common.parallelizer import printout, parallel_warn, get_rank
+from mala.common.parallelizer import (
+    printout,
+    parallel_warn,
+    get_rank,
+    get_comm,
+)
 from mala.targets.calculation_helpers import fermi_function
 from mala.common.physical_data import PhysicalData
 from mala.descriptors.atomic_density import AtomicDensity
 
 
 class Target(PhysicalData):
-    """
+    r"""
     Base class for all target quantity parser.
 
     Target parsers read the target quantity
     (i.e. the quantity the NN will learn to predict) from a specified file
     format and performs postprocessing calculations on the quantity.
 
+    Target parsers often read DFT reference information.
+
     Parameters
     ----------
     params : mala.common.parameters.Parameters or
     mala.common.parameters.ParametersTargets
         Parameters used to create this Target object.
+
+    Attributes
+    ----------
+    atomic_forces_dft : numpy.ndarray
+        Atomic forces as per DFT reference file.
+
+    atoms : ase.Atoms
+        ASE atoms object used for calculations.
+
+    band_energy_dft_calculation
+        Band energy as per DFT reference file.
+
+    electrons_per_atom : int
+        Electrons per atom, usually determined by DFT reference file.
+
+    entropy_contribution_dft_calculation : float
+        Electronic entropy contribution as per DFT reference file.
+
+    fermi_energy_dft : float
+        Fermi energy as per DFT reference file.
+
+    kpoints : list
+        k-grid used for MALA calculations. Managed internally.
+
+    local_grid : list
+        Size of local grid (in MPI mode).
+
+    number_of_electrons_exact
+        Exact number of electrons, usually given via DFT reference file.
+
+    number_of_electrons_from_eigenvals : float
+        Number of electrons as calculated from DFT reference eigenvalues.
+
+    parameters : mala.common.parameters.ParametersTarget
+        MALA target calculation parameters.
+
+    qe_pseudopotentials : list
+        List of Quantum ESPRESSO pseudopotentials, read from DFT reference file
+         and used for the total energy module.
+
+    save_target_data : bool
+        Control whether target data will be saved. Can be important for I/O
+        applications. Managed internally, default is True.
+
+    temperature : float
+        Temperature used for all computations. By default read from DFT
+        reference file, but can freely be changed from the outside.
+
+    total_energy_contributions_dft_calculation : dict
+        Dictionary holding contributions to total free energy not given
+        as individual properties, as read from the DFT reference file.
+        Contains:
+
+            - "one_electron_contribution", :math:`n\,V_\mathrm{xc}` plus band
+              energy
+            - "hartree_contribution", :math:`E_\mathrm{H}`
+            - "xc_contribution", :math:`E_\mathrm{xc}`
+            - "ewald_contribution", :math:`E_\mathrm{Ewald}`
+
+    total_energy_dft_calculation : float
+        Total free energy as read from DFT reference file.
+    voxel : ase.cell.Cell
+        Voxel to be used for grid intergation. Reflects the
+        symmetry of the simulation cell. Calculated from DFT reference data.
+
+    y_planes : int
+        Number of y_planes used for Quantum ESPRESSO parallelization. Handled
+        internally.
     """
 
     ##############################
@@ -92,7 +168,6 @@ class Target(PhysicalData):
         Get the necessary arguments to call __new__.
 
         Used for pickling.
-
 
         Returns
         -------
@@ -786,7 +861,14 @@ class Target(PhysicalData):
         raise Exception("No method implement to calculate an energy grid.")
 
     def get_real_space_grid(self):
-        """Get the real space grid."""
+        """
+        Get the real space grid.
+
+        Returns
+        -------
+        grid3D : numpy.ndarray
+            Numpy array holding the entire grid.
+        """
         grid3D = np.zeros(
             (
                 self.grid_dimensions[0],
@@ -1333,6 +1415,8 @@ class Target(PhysicalData):
         qe_pseudopotentials,
         grid_dimensions,
         kpoints,
+        mpi_communicator,
+        mpi_rank,
     ):
         """
         Write a QE-style input file for the total energy module.
@@ -1360,6 +1444,13 @@ class Target(PhysicalData):
 
         kpoints : dict
             k-grid used, usually None or (1,1,1) for TEM calculations.
+
+        mpi_communicator : MPI.COMM_WORLD
+            An MPI comminucator. If no MPI is enabled, this will simply be
+            None.
+
+        mpi_rank : int
+            Rank within MPI.
         """
         # Specify grid dimensions, if any are given.
         if (
@@ -1379,14 +1470,24 @@ class Target(PhysicalData):
         # the DFT calculation. If symmetry is then on in here, that
         # leads to errors.
         # qe_input_data["nosym"] = False
+        if mpi_rank == 0:
+            tem_input_file = tempfile.NamedTemporaryFile(
+                delete=False, prefix="mala.pw.scf.", suffix=".in", dir="./"
+            ).name
+        else:
+            tem_input_file = None
+
+        if mpi_communicator is not None:
+            tem_input_file = mpi_communicator.bcast(tem_input_file, root=0)
         ase.io.write(
-            "mala.pw.scf.in",
+            tem_input_file,
             atoms_Angstrom,
             "espresso-in",
             input_data=qe_input_data,
             pseudopotentials=qe_pseudopotentials,
             kpts=kpoints,
         )
+        return tem_input_file
 
     def restrict_data(self, array):
         """
@@ -1582,7 +1683,7 @@ class Target(PhysicalData):
             "electrons_per_atom",
             default_value=self.electrons_per_atom,
         )
-        self.number_of_electrons_from_eigenval = (
+        self.number_of_electrons_from_eigenvals = (
             self._get_attribute_if_attribute_exists(
                 iteration,
                 "number_of_electrons_from_eigenvals",
@@ -1673,6 +1774,8 @@ class Target(PhysicalData):
         if "angles" in mesh.attributes:
             angles = mesh.get_attribute("angles")
             self.voxel = ase.cell.Cell.new(cell=spacing + angles)
+        else:
+            self.voxel = None
 
     def _get_atoms(self):
         return self.atoms

@@ -24,6 +24,11 @@ class HyperOpt(ABC):
 
     use_pkl_checkpoints : bool
         If true, .pkl checkpoints will be created.
+
+    Attributes
+    ----------
+    params : mala.common.parametes.Parameters
+        MALA Parameters object.
     """
 
     def __new__(cls, params: Parameters, data=None, use_pkl_checkpoints=False):
@@ -73,9 +78,9 @@ class HyperOpt(ABC):
         self, params: Parameters, data=None, use_pkl_checkpoints=False
     ):
         self.params: Parameters = params
-        self.data_handler = data
-        self.objective = ObjectiveBase(self.params, self.data_handler)
-        self.use_pkl_checkpoints = use_pkl_checkpoints
+        self._data_handler = data
+        self._objective = ObjectiveBase(self.params, self._data_handler)
+        self._use_pkl_checkpoints = use_pkl_checkpoints
 
     def add_hyperparameter(
         self, opttype="float", name="", low=0, high=0, choices=None
@@ -153,7 +158,7 @@ class HyperOpt(ABC):
         The parameters will be written to the parameter object with which the
         hyperparameter optimizer was created.
         """
-        self.objective.parse_trial(trial)
+        self._objective.parse_trial(trial)
 
     def _save_params_and_scaler(self):
         # Saving the Scalers is straight forward.
@@ -163,12 +168,12 @@ class HyperOpt(ABC):
         oscaler_name = (
             self.params.hyperparameters.checkpoint_name + "_oscaler.pkl"
         )
-        self.data_handler.input_data_scaler.save(iscaler_name)
-        self.data_handler.output_data_scaler.save(oscaler_name)
+        self._data_handler.input_data_scaler.save(iscaler_name)
+        self._data_handler.output_data_scaler.save(oscaler_name)
 
         # For the parameters we have to make sure we choose the correct
         # format.
-        if self.use_pkl_checkpoints:
+        if self._use_pkl_checkpoints:
             param_name = (
                 self.params.hyperparameters.checkpoint_name + "_params.pkl"
             )
@@ -198,7 +203,6 @@ class HyperOpt(ABC):
         -------
         checkpoint_exists : bool
             True if the checkpoint exists, False otherwise.
-
         """
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"

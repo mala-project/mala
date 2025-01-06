@@ -99,7 +99,7 @@ class LDOS(Target):
 
     @classmethod
     def from_cube_file(
-        cls, params, path_name_scheme, units="1/(eV*A^3)", use_memmap=None
+        cls, params, path_name_scheme, units="1/(Ry*Bohr^3)", use_memmap=None
     ):
         """
         Create an LDOS calculator from multiple cube files.
@@ -239,6 +239,12 @@ class LDOS(Target):
 
         This is the generic interface for cached target quantities.
         It should work for all implemented targets.
+
+        Returns
+        -------
+        local_density_of_states : numpy.ndarray
+            Electronic local density of states as a volumetric array.
+            May be 4D- or 2D depending on workflow.
         """
         return self.local_density_of_states
 
@@ -463,7 +469,7 @@ class LDOS(Target):
             raise Exception("Unsupported unit for LDOS.")
 
     def read_from_cube(
-        self, path_scheme, units="1/(eV*A^3)", use_memmap=None, **kwargs
+        self, path_scheme, units="1/(Ry*Bohr^3)", use_memmap=None, **kwargs
     ):
         """
         Read the LDOS data from multiple cube files.
@@ -495,6 +501,15 @@ class LDOS(Target):
         # tmp.pp003ELEMENT_ldos.cube
         # ...
         # tmp.pp100ELEMENT_ldos.cube
+        # automatically convert units if they are None since cube files take atomic units
+        if units is None:
+            units = "1/(Ry*Bohr^3)"
+        if units != "1/(Ry*Bohr^3)":
+            printout(
+                "The expected units for the LDOS from cube files are 1/(Ry*Bohr^3)\n"
+                f"Proceeding with specified units of {units}\n"
+                "We recommend to check and change the requested units"
+            )
         return self._read_from_qe_files(
             path_scheme, units, use_memmap, ".cube", **kwargs
         )
@@ -588,8 +603,6 @@ class LDOS(Target):
 
         If neither LDOS nor DOS+Density data is provided, the cached LDOS will
         be attempted to be used for the calculation.
-
-
 
         Parameters
         ----------
@@ -1596,7 +1609,14 @@ class LDOS(Target):
 
         for i in range(start_index, end_index):
             tmp_file_name = path_scheme
-            tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
+            if digits < 4:
+                tmp_file_name = tmp_file_name.replace(
+                    "*", str(i).zfill(digits)
+                )
+            else:
+                # For some reason, there are no leading zeros above 3 digits
+                # in QE.
+                tmp_file_name = tmp_file_name.replace("*", str(i).zfill(3))
 
             # Open the cube file
             if file_type == ".cube":

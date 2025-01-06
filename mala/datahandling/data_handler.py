@@ -18,10 +18,10 @@ from mala.datahandling.fast_tensor_dataset import FastTensorDataset
 
 class DataHandler(DataHandlerBase):
     """
-    Loads and scales data. Can only process numpy arrays at the moment.
+    Loads and scales data. Can load from numpy or OpenPMD files.
 
-    Data that is not in a numpy array can be converted using the DataConverter
-    class.
+    Data that is not saved as numpy or OpenPMD file can be converted using the
+    DataConverter class.
 
     Parameters
     ----------
@@ -47,6 +47,41 @@ class DataHandler(DataHandlerBase):
     clear_data : bool
         If true (default), the data list will be cleared upon creation of
         the object.
+
+    Attributes
+    ----------
+    input_data_scaler : mala.datahandling.data_scaler.DataScaler
+        Used to scale the input data.
+
+    nr_test_data : int
+        Number of test data points.
+
+    nr_test_snapshots : int
+        Number of test snapshots.
+
+    nr_training_data : int
+        Number of training data points.
+
+    nr_training_snapshots : int
+        Number of training snapshots.
+
+    nr_validation_data : int
+        Number of validation data points.
+
+    nr_validation_snapshots : int
+        Number of validation snapshots.
+
+    output_data_scaler : mala.datahandling.data_scaler.DataScaler
+        Used to scale the output data.
+
+    test_data_sets : list
+        List containing torch data sets for test data.
+
+    training_data_sets : list
+        List containing torch data sets for training data.
+
+    validation_data_sets : list
+        List containing torch data sets for validation data.
     """
 
     ##############################
@@ -72,14 +107,14 @@ class DataHandler(DataHandlerBase):
         if self.input_data_scaler is None:
             self.input_data_scaler = DataScaler(
                 self.parameters.input_rescaling_type,
-                use_ddp=self.use_ddp,
+                use_ddp=self._use_ddp,
             )
 
         self.output_data_scaler = output_data_scaler
         if self.output_data_scaler is None:
             self.output_data_scaler = DataScaler(
                 self.parameters.output_rescaling_type,
-                use_ddp=self.use_ddp,
+                use_ddp=self._use_ddp,
             )
 
         # Actual data points in the different categories.
@@ -93,18 +128,18 @@ class DataHandler(DataHandlerBase):
         self.nr_validation_snapshots = 0
 
         # Arrays and data sets containing the actual data.
-        self.training_data_inputs = torch.empty(0)
-        self.validation_data_inputs = torch.empty(0)
-        self.test_data_inputs = torch.empty(0)
-        self.training_data_outputs = torch.empty(0)
-        self.validation_data_outputs = torch.empty(0)
-        self.test_data_outputs = torch.empty(0)
+        self._training_data_inputs = torch.empty(0)
+        self._validation_data_inputs = torch.empty(0)
+        self._test_data_inputs = torch.empty(0)
+        self._training_data_outputs = torch.empty(0)
+        self._validation_data_outputs = torch.empty(0)
+        self._test_data_outputs = torch.empty(0)
         self.training_data_sets = []
         self.validation_data_sets = []
         self.test_data_sets = []
 
         # Needed for the fast tensor data sets.
-        self.mini_batch_size = parameters.running.mini_batch_size
+        self._mini_batch_size = parameters.running.mini_batch_size
         if clear_data:
             self.clear_data()
 
@@ -130,6 +165,8 @@ class DataHandler(DataHandlerBase):
         self.nr_training_snapshots = 0
         self.nr_test_snapshots = 0
         self.nr_validation_snapshots = 0
+        self.input_data_scaler.reset()
+        self.output_data_scaler.reset()
         super(DataHandler, self).clear_data()
 
     # Preparing data
@@ -415,7 +452,7 @@ class DataHandler(DataHandlerBase):
 
         Returns
         -------
-        torch.Tensor
+        gradient : torch.Tensor
             Tensor holding the gradient.
 
         """
@@ -431,7 +468,7 @@ class DataHandler(DataHandlerBase):
                 )
             return self.test_data_sets[0].input_data.grad
         else:
-            return self.test_data_inputs.grad[
+            return self._test_data_inputs.grad[
                 snapshot.grid_size
                 * snapshot_number : snapshot.grid_size
                 * (snapshot_number + 1)
@@ -460,7 +497,10 @@ class DataHandler(DataHandlerBase):
     ######################
 
     def raw_numpy_to_converted_scaled_tensor(
-        self, numpy_array, data_type, units, convert3Dto1D=False
+        self,
+        numpy_array,
+        data_type,
+        units,
     ):
         """
         Transform a raw numpy array into a scaled torch tensor.
@@ -472,14 +512,13 @@ class DataHandler(DataHandlerBase):
         ----------
         numpy_array : np.array
             Array that is to be converted.
+
         data_type : string
             Either "in" or "out", depending if input or output data is
+
             processed.
         units : string
             Units of the data that is processed.
-        convert3Dto1D : bool
-            If True (default: False), then a (x,y,z,dim) array is transformed
-            into a (x*y*z,dim) array.
 
         Returns
         -------
@@ -498,12 +537,12 @@ class DataHandler(DataHandlerBase):
         )
 
         # If desired, the dimensions can be changed.
-        if convert3Dto1D:
+        if len(np.shape(numpy_array)) == 4:
             if data_type == "in":
                 data_dimension = self.input_dimension
             else:
                 data_dimension = self.output_dimension
-            grid_size = np.prod(numpy_array[0:3])
+            grid_size = np.prod(np.shape(numpy_array)[0:3])
             desired_dimensions = [grid_size, data_dimension]
         else:
             desired_dimensions = None
@@ -637,31 +676,31 @@ class DataHandler(DataHandlerBase):
 
     def __allocate_arrays(self):
         if self.nr_training_data > 0:
-            self.training_data_inputs = np.zeros(
+            self._training_data_inputs = np.zeros(
                 (self.nr_training_data, self.input_dimension),
                 dtype=DEFAULT_NP_DATA_DTYPE,
             )
-            self.training_data_outputs = np.zeros(
+            self._training_data_outputs = np.zeros(
                 (self.nr_training_data, self.output_dimension),
                 dtype=DEFAULT_NP_DATA_DTYPE,
             )
 
         if self.nr_validation_data > 0:
-            self.validation_data_inputs = np.zeros(
+            self._validation_data_inputs = np.zeros(
                 (self.nr_validation_data, self.input_dimension),
                 dtype=DEFAULT_NP_DATA_DTYPE,
             )
-            self.validation_data_outputs = np.zeros(
+            self._validation_data_outputs = np.zeros(
                 (self.nr_validation_data, self.output_dimension),
                 dtype=DEFAULT_NP_DATA_DTYPE,
             )
 
         if self.nr_test_data > 0:
-            self.test_data_inputs = np.zeros(
+            self._test_data_inputs = np.zeros(
                 (self.nr_test_data, self.input_dimension),
                 dtype=DEFAULT_NP_DATA_DTYPE,
             )
-            self.test_data_outputs = np.zeros(
+            self._test_data_outputs = np.zeros(
                 (self.nr_test_data, self.output_dimension),
                 dtype=DEFAULT_NP_DATA_DTYPE,
             )
@@ -689,7 +728,7 @@ class DataHandler(DataHandlerBase):
             raise Exception("Unknown data type detected.")
 
         # Extracting all the information pertaining to the data set.
-        array = function + "_data_" + data_type
+        array = "_" + function + "_data_" + data_type
         if data_type == "inputs":
             calculator = self.descriptor_calculator
         else:
@@ -806,34 +845,34 @@ class DataHandler(DataHandlerBase):
         # all ears.
         if data_type == "inputs":
             if function == "training":
-                self.training_data_inputs = torch.from_numpy(
-                    self.training_data_inputs
+                self._training_data_inputs = torch.from_numpy(
+                    self._training_data_inputs
                 ).float()
 
             if function == "validation":
-                self.validation_data_inputs = torch.from_numpy(
-                    self.validation_data_inputs
+                self._validation_data_inputs = torch.from_numpy(
+                    self._validation_data_inputs
                 ).float()
 
             if function == "test":
-                self.test_data_inputs = torch.from_numpy(
-                    self.test_data_inputs
+                self._test_data_inputs = torch.from_numpy(
+                    self._test_data_inputs
                 ).float()
 
         if data_type == "outputs":
             if function == "training":
-                self.training_data_outputs = torch.from_numpy(
-                    self.training_data_outputs
+                self._training_data_outputs = torch.from_numpy(
+                    self._training_data_outputs
                 ).float()
 
             if function == "validation":
-                self.validation_data_outputs = torch.from_numpy(
-                    self.validation_data_outputs
+                self._validation_data_outputs = torch.from_numpy(
+                    self._validation_data_outputs
                 ).float()
 
             if function == "test":
-                self.test_data_outputs = torch.from_numpy(
-                    self.test_data_outputs
+                self._test_data_outputs = torch.from_numpy(
+                    self._test_data_outputs
                 ).float()
 
     def __build_datasets(self, from_arrays_dict=None):
@@ -852,7 +891,7 @@ class DataHandler(DataHandlerBase):
                     self.output_data_scaler,
                     self.descriptor_calculator,
                     self.target_calculator,
-                    self.use_ddp,
+                    self._use_ddp,
                     self.parameters._configuration["device"],
                 )
             )
@@ -864,7 +903,7 @@ class DataHandler(DataHandlerBase):
                     self.output_data_scaler,
                     self.descriptor_calculator,
                     self.target_calculator,
-                    self.use_ddp,
+                    self._use_ddp,
                     self.parameters._configuration["device"],
                 )
             )
@@ -878,7 +917,7 @@ class DataHandler(DataHandlerBase):
                         self.output_data_scaler,
                         self.descriptor_calculator,
                         self.target_calculator,
-                        self.use_ddp,
+                        self._use_ddp,
                         self.parameters._configuration["device"],
                         input_requires_grad=True,
                     )
@@ -914,7 +953,7 @@ class DataHandler(DataHandlerBase):
                 if snapshot.snapshot_function == "tr":
                     self.training_data_sets.append(
                         LazyLoadDatasetSingle(
-                            self.mini_batch_size,
+                            self._mini_batch_size,
                             snapshot,
                             self.input_dimension,
                             self.output_dimension,
@@ -922,13 +961,13 @@ class DataHandler(DataHandlerBase):
                             self.output_data_scaler,
                             self.descriptor_calculator,
                             self.target_calculator,
-                            self.use_ddp,
+                            self._use_ddp,
                         )
                     )
                 if snapshot.snapshot_function == "va":
                     self.validation_data_sets.append(
                         LazyLoadDatasetSingle(
-                            self.mini_batch_size,
+                            self._mini_batch_size,
                             snapshot,
                             self.input_dimension,
                             self.output_dimension,
@@ -936,13 +975,13 @@ class DataHandler(DataHandlerBase):
                             self.output_data_scaler,
                             self.descriptor_calculator,
                             self.target_calculator,
-                            self.use_ddp,
+                            self._use_ddp,
                         )
                     )
                 if snapshot.snapshot_function == "te":
                     self.test_data_sets.append(
                         LazyLoadDatasetSingle(
-                            self.mini_batch_size,
+                            self._mini_batch_size,
                             snapshot,
                             self.input_dimension,
                             self.output_dimension,
@@ -950,69 +989,67 @@ class DataHandler(DataHandlerBase):
                             self.output_data_scaler,
                             self.descriptor_calculator,
                             self.target_calculator,
-                            self.use_ddp,
+                            self._use_ddp,
                             input_requires_grad=True,
                         )
                     )
 
         else:
             if self.nr_training_data != 0:
-                self.input_data_scaler.transform(self.training_data_inputs)
-                self.output_data_scaler.transform(self.training_data_outputs)
+                self.input_data_scaler.transform(self._training_data_inputs)
+                self.output_data_scaler.transform(self._training_data_outputs)
                 if self.parameters.use_fast_tensor_data_set:
                     printout("Using FastTensorDataset.", min_verbosity=2)
                     self.training_data_sets.append(
                         FastTensorDataset(
-                            self.mini_batch_size,
-                            self.training_data_inputs,
-                            self.training_data_outputs,
+                            self._mini_batch_size,
+                            self._training_data_inputs,
+                            self._training_data_outputs,
                         )
                     )
                 else:
                     self.training_data_sets.append(
                         TensorDataset(
-                            self.training_data_inputs,
-                            self.training_data_outputs,
+                            self._training_data_inputs,
+                            self._training_data_outputs,
                         )
                     )
 
             if self.nr_validation_data != 0:
-                self.__load_data(
-                    "validation", "inputs", from_arrays_dict=from_arrays_dict
-                )
-                self.input_data_scaler.transform(self.validation_data_inputs)
+                self.__load_data("validation", "inputs", from_arrays_dict=from_arrays_dict)
+                self.input_data_scaler.transform(self._validation_data_inputs)
 
-                self.__load_data(
-                    "validation", "outputs", from_arrays_dict=from_arrays_dict
+                self.__load_data("validation", "outputs", from_arrays_dict=from_arrays_dict)
+                self.output_data_scaler.transform(
+                    self._validation_data_outputs
                 )
-                self.output_data_scaler.transform(self.validation_data_outputs)
                 if self.parameters.use_fast_tensor_data_set:
                     printout("Using FastTensorDataset.", min_verbosity=2)
                     self.validation_data_sets.append(
                         FastTensorDataset(
-                            self.mini_batch_size,
-                            self.validation_data_inputs,
-                            self.validation_data_outputs,
+                            self._mini_batch_size,
+                            self._validation_data_inputs,
+                            self._validation_data_outputs,
                         )
                     )
                 else:
                     self.validation_data_sets.append(
                         TensorDataset(
-                            self.validation_data_inputs,
-                            self.validation_data_outputs,
+                            self._validation_data_inputs,
+                            self._validation_data_outputs,
                         )
                     )
 
             if self.nr_test_data != 0:
                 self.__load_data("test", "inputs")
-                self.input_data_scaler.transform(self.test_data_inputs)
-                self.test_data_inputs.requires_grad = True
+                self.input_data_scaler.transform(self._test_data_inputs)
+                self._test_data_inputs.requires_grad = True
 
                 self.__load_data("test", "outputs")
-                self.output_data_scaler.transform(self.test_data_outputs)
+                self.output_data_scaler.transform(self._test_data_outputs)
                 self.test_data_sets.append(
                     TensorDataset(
-                        self.test_data_inputs, self.test_data_outputs
+                        self._test_data_inputs, self._test_data_outputs
                     )
                 )
 
@@ -1032,7 +1069,6 @@ class DataHandler(DataHandlerBase):
         # scaling. This should save some performance.
 
         if self.parameters.use_lazy_loading:
-            self.input_data_scaler.start_incremental_fitting()
             # We need to perform the data scaling over the entirety of the
             # training data.
             for snapshot in self.parameters.snapshot_directories_list:
@@ -1071,15 +1107,11 @@ class DataHandler(DataHandlerBase):
                         [snapshot.grid_size, self.input_dimension]
                     )
                     tmp = torch.from_numpy(tmp).float()
-                    self.input_data_scaler.incremental_fit(tmp)
-
-            self.input_data_scaler.finish_incremental_fitting()
+                    self.input_data_scaler.partial_fit(tmp)
 
         else:
-            self.__load_data(
-                "training", "inputs", from_arrays_dict=from_arrays_dict
-            )
-            self.input_data_scaler.fit(self.training_data_inputs)
+            self.__load_data("training", "inputs", from_arrays_dict=from_arrays_dict)
+            self.input_data_scaler.fit(self._training_data_inputs)
 
         printout("Input scaler parametrized.", min_verbosity=1)
 
@@ -1096,7 +1128,6 @@ class DataHandler(DataHandlerBase):
 
         if self.parameters.use_lazy_loading:
             i = 0
-            self.output_data_scaler.start_incremental_fitting()
             # We need to perform the data scaling over the entirety of the
             # training data.
             for snapshot in self.parameters.snapshot_directories_list:
@@ -1136,15 +1167,13 @@ class DataHandler(DataHandlerBase):
                         [snapshot.grid_size, self.output_dimension]
                     )
                     tmp = torch.from_numpy(tmp).float()
-                    self.output_data_scaler.incremental_fit(tmp)
+                    self.output_data_scaler.partial_fit(tmp)
                 i += 1
-            self.output_data_scaler.finish_incremental_fitting()
 
         else:
-            self.__load_data(
-                "training", "outputs", from_arrays_dict=from_arrays_dict
-            )
-            self.output_data_scaler.fit(self.training_data_outputs)
+            self.__load_data("training", "outputs", from_arrays_dict=from_arrays_dict
+            ))
+            self.output_data_scaler.fit(self._training_data_outputs)
 
         printout("Output scaler parametrized.", min_verbosity=1)
 

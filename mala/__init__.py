@@ -40,9 +40,10 @@ from .network import (
     HyperparameterOAT,
     HyperparameterNASWOT,
     HyperparameterOptuna,
-    HyperparameterACSD,
+    HyperparameterDescriptorScoring,
     ACSDAnalyzer,
     Runner,
+    MutualInformationAnalyzer,
 )
 from .targets import LDOS, DOS, Density, fermi_function, AtomicForce, Target
 from .interfaces import MALA

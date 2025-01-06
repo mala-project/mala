@@ -1,5 +1,6 @@
 """Electronic density calculation class."""
 
+import os.path
 import time
 
 from ase.units import Rydberg, Bohr, m
@@ -16,6 +17,8 @@ from mala.common.parallelizer import (
     parallel_warn,
     barrier,
     get_size,
+    get_comm,
+    get_rank,
 )
 from mala.targets.target import Target
 from mala.targets.cube_parser import read_cube, write_cube
@@ -26,7 +29,8 @@ from mala.descriptors.atomic_density import AtomicDensity
 
 
 class Density(Target):
-    """Postprocessing / parsing functions for the electronic density.
+    """
+    Postprocessing / parsing functions for the electronic density.
 
     Parameters
     ----------
@@ -37,7 +41,10 @@ class Density(Target):
     ##############################
     # Class attributes
     ##############################
-
+    """
+    Total energy module mutual exclusion token used to make sure there
+    the total energy module is not initialized twice.
+    """
     te_mutex = False
 
     ##############################
@@ -102,7 +109,7 @@ class Density(Target):
         return return_dos
 
     @classmethod
-    def from_cube_file(cls, params, path, units="1/A^3"):
+    def from_cube_file(cls, params, path, units="1/Bohr^3"):
         """
         Create a Density calculator from a cube file.
 
@@ -275,6 +282,12 @@ class Density(Target):
 
         This is the generic interface for cached target quantities.
         It should work for all implemented targets.
+
+        Returns
+        -------
+        density : numpy.ndarray
+            Electronic charge density as a volumetric array. May be 4D or 2D
+            depending on workflow.
         """
         return self.density
 
@@ -391,7 +404,7 @@ class Density(Target):
         else:
             raise Exception("Unsupported unit for density.")
 
-    def read_from_cube(self, path, units="1/A^3", **kwargs):
+    def read_from_cube(self, path, units="1/Bohr^3", **kwargs):
         """
         Read the density data from a cube file.
 
@@ -404,7 +417,18 @@ class Density(Target):
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file ", path, min_verbosity=0)
+        # automatically convert units if they are None since cube files take
+        # atomic units
+        if units is None:
+            units = "1/Bohr^3"
+        if units != "1/Bohr^3":
+            printout(
+                "The expected units for the density from cube files are 1/Bohr^3\n"
+                f"Proceeding with specified units of {units}\n"
+                "We recommend to check and change the requested units"
+            )
         data, meta = read_cube(path)
+        data = np.expand_dims(data, -1)
         data *= self.convert_units(1, in_units=units)
         self.density = data
         self.grid_dimensions = list(np.shape(data)[0:3])
@@ -569,7 +593,7 @@ class Density(Target):
 
         voxel : ase.cell.Cell
             Voxel to be used for grid intergation. Needs to reflect the
-            symmetry of the simulation cell. In Bohr.
+            symmetry of the simulation cell.
 
         integration_method : str
             Integration method used to integrate density on the grid.
@@ -935,7 +959,7 @@ class Density(Target):
         qe_input_data=None,
         qe_pseudopotentials=None,
     ):
-        if create_file:
+        if create_file and Density.te_mutex is False:
             # If not otherwise specified, use values as read in.
             if qe_input_data is None:
                 qe_input_data = self.qe_input_data
@@ -951,12 +975,14 @@ class Density(Target):
             else:
                 kpoints = self.kpoints
 
-            self.write_tem_input_file(
+            tem_input_name = self.write_tem_input_file(
                 atoms_Angstrom,
                 qe_input_data,
                 qe_pseudopotentials,
                 self.grid_dimensions,
                 kpoints,
+                get_comm(),
+                get_rank(),
             )
 
         # initialize the total energy module.
@@ -975,8 +1001,22 @@ class Density(Target):
             )
             barrier()
             t0 = time.perf_counter()
-            te.initialize(self.y_planes)
+
+            # We have to make sure we have the correct format for the file.
+            # QE expects the file without a path, and with a fixed length.
+            # I chose 256 for this length, simply to have some space in case
+            # we need it at some point (i.e., the tempfile format changes).
+            tem_input_name_qe = os.path.basename(tem_input_name)
+            tem_input_name_qe = tem_input_name_qe + " " * (
+                256 - len(tem_input_name_qe)
+            )
+            te.initialize(tem_input_name_qe, self.y_planes)
             barrier()
+
+            # Right after setup we can delete the file.
+            if get_rank() == 0:
+                os.remove(tem_input_name)
+
             printout(
                 "Total energy module: Time used by total energy initialization: {:.8f}s".format(
                     time.perf_counter() - t0
@@ -1089,7 +1129,7 @@ class Density(Target):
         # instantiate the process with the file.
         positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
 
-        if self._parameters_full.descriptors.use_atomic_density_energy_formula:
+        if self.parameters._configuration["atomic_density_formula"]:
             # Calculate the Gaussian descriptors for the calculation of the
             # structure factors.
             barrier()
@@ -1158,8 +1198,8 @@ class Density(Target):
         te.set_positions(
             np.transpose(positions_for_qe),
             number_of_atoms,
-            self._parameters_full.descriptors.use_atomic_density_energy_formula,
-            self._parameters_full.descriptors.use_atomic_density_energy_formula,
+            self.parameters._configuration["atomic_density_formula"],
+            self.parameters._configuration["atomic_density_formula"],
         )
         barrier()
         printout(
@@ -1170,7 +1210,7 @@ class Density(Target):
         )
         barrier()
 
-        if self._parameters_full.descriptors.use_atomic_density_energy_formula:
+        if self.parameters._configuration["atomic_density_formula"]:
             t0 = time.perf_counter()
             gaussian_descriptors = np.reshape(
                 gaussian_descriptors,

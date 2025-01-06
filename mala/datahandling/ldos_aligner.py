@@ -33,6 +33,11 @@ class LDOSAligner(DataHandlerBase):
     target_calculator : mala.targets.target.Target
         Used to do unit conversion on output data. If None, then one will
         be created by this class.
+
+    Attributes
+    ----------
+    ldos_parameters : mala.common.parameters.ParametersTargets
+        MALA target calculation parameters.
     """
 
     def __init__(
@@ -85,8 +90,6 @@ class LDOSAligner(DataHandlerBase):
 
     def align_ldos_to_ref(
         self,
-        save_path=None,
-        save_name=None,
         save_path_ext="aligned/",
         reference_index=0,
         zero_tol=1e-5,
@@ -96,35 +99,34 @@ class LDOSAligner(DataHandlerBase):
         n_shift_mse=None,
     ):
         """
-        Add a snapshot to the data pipeline.
+        Align LDOS to reference.
 
         Parameters
         ----------
-        save_path : string
-            path to save the aligned LDOS vectors
-        save_name : string
-            naming convention for the aligned LDOS vectors
         save_path_ext : string
-            additional path for the LDOS vectors (useful if
-            save_path is left as default None)
+            Extra path to be added to the input path before saving.
+            By default, new snapshot files are saved into exactly the
+            same directory they were read from with exactly the same name.
+
         reference_index : int
             the snapshot number (in the snapshot directory list)
             to which all other LDOS vectors are aligned
+
         zero_tol : float
             the "zero" value for alignment / left side truncation
             always scaled by norm of reference LDOS mean
+
         left_truncate : bool
             whether to truncate the zero values on the LHS
+
         right_truncate_value : float
             right-hand energy value (based on reference LDOS vector)
             to which truncate LDOS vectors
             if None, no right-side truncation
-        egrid_spacing_ev : float
-            spacing of energy grid
-        egrid_offset_ev : float
-           original offset of energy grid
+
         number_of_electrons : float / int
             if not None, computes the energy shift relative to QE energies
+
         n_shift_mse : int
             how many energy grid points to consider when aligning LDOS
             vectors based on mean-squared error
@@ -224,7 +226,6 @@ class LDOSAligner(DataHandlerBase):
 
             # shift the ldos
             optimal_shift = self.calc_optimal_ldos_shift(
-                e_grid,
                 ldos_mean,
                 ldos_mean_ref,
                 left_index,
@@ -304,10 +305,9 @@ class LDOSAligner(DataHandlerBase):
                 json.dump(ldos_shift_info, f, indent=2)
 
         barrier()
-    
+
     @staticmethod
     def calc_optimal_ldos_shift(
-        e_grid,
         ldos_mean,
         ldos_mean_ref,
         left_index,
@@ -322,8 +322,6 @@ class LDOSAligner(DataHandlerBase):
 
         Parameters
         ----------
-        e_grid : array_like
-            energy grid
         ldos_mean : array_like
             mean of LDOS vector for shifting
         ldos_mean_ref : array_like

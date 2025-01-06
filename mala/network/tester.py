@@ -45,6 +45,32 @@ class Tester(Runner):
         Can be "list" or "mae". If "list", then a list of results across all
         snapshots is returned. If "mae", then the MAE across all snapshots
         will be calculated and returned.
+
+    Attributes
+    ----------
+    target_calculator : mala.targets.target.Target
+        Target calculator used for predictions. Can be used for further
+        processing.
+
+    observables_to_test : list
+        List of observables to test. Supported are:
+
+            - "ldos": Calculate the MSE loss of the LDOS.
+            - "band_energy": Band energy error
+            - "band_energy_full": Band energy absolute values (only works with
+              list, as both actual and predicted are returned)
+            - "total_energy": Total energy error
+            - "total_energy_full": Total energy absolute values (only works
+              with list, as both actual and predicted are returned)
+            - "number_of_electrons": Number of electrons (Fermi energy is not
+              determined dynamically for this quantity.
+            - "density": MAPE of the density prediction
+            - "dos": MAPE of the DOS prediction
+
+    output_format : string
+        Can be "list" or "mae". If "list", then a list of results across all
+        snapshots is returned. If "mae", then the MAE across all snapshots
+        will be calculated and returned.
     """
 
     def __init__(
@@ -57,8 +83,8 @@ class Tester(Runner):
     ):
         # copy the parameters into the class.
         super(Tester, self).__init__(params, network, data)
-        self.test_data_loader = None
-        self.number_of_batches_per_snapshot = 0
+        self._test_data_loader = None
+        self._number_of_batches_per_snapshot = 0
         self.observables_to_test = observables_to_test
         self.output_format = output_format
         if self.output_format != "list" and self.output_format != "mae":
@@ -124,8 +150,10 @@ class Tester(Runner):
             snapshot_number,
         )
         return results
-    
-    def get_energy_targets_and_predictions(self, snapshot_number, data_type="te"):
+
+    def get_energy_targets_and_predictions(
+        self, snapshot_number, data_type="te"
+    ):
         """
         Get the energy targets and predictions for a single snapshot.
 
@@ -145,8 +173,10 @@ class Tester(Runner):
         actual_outputs, predicted_outputs = self.predict_targets(
             snapshot_number, data_type=data_type
         )
-        
-        energy_metrics = [metric for metric in self.observables_to_test if "energy" in metric]
+
+        energy_metrics = [
+            metric for metric in self.observables_to_test if "energy" in metric
+        ]
         targets, predictions = self._calculate_energy_targets_and_predictions(
             actual_outputs,
             predicted_outputs,
@@ -201,7 +231,7 @@ class Tester(Runner):
             offset_snapshots + snapshot_number,
             data_set,
             data_type,
-            self.number_of_batches_per_snapshot,
+            self._number_of_batches_per_snapshot,
             self.parameters.mini_batch_size,
         )
 
@@ -219,7 +249,7 @@ class Tester(Runner):
                     break
                 test_snapshot += 1
 
-        optimal_batch_size = self._correct_batch_size_for_testing(
+        optimal_batch_size = self._correct_batch_size(
             grid_size, self.parameters.mini_batch_size
         )
         if optimal_batch_size != self.parameters.mini_batch_size:
@@ -231,6 +261,6 @@ class Tester(Runner):
                 min_verbosity=0,
             )
             self.parameters.mini_batch_size = optimal_batch_size
-        self.number_of_batches_per_snapshot = int(
+        self._number_of_batches_per_snapshot = int(
             grid_size / self.parameters.mini_batch_size
         )

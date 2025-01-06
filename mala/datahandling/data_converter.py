@@ -10,8 +10,8 @@ from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
 from mala.version import __version__ as mala_version
 
-descriptor_input_types = ["espresso-out"]
-target_input_types = [".cube", ".xsf"]
+descriptor_input_types = ["espresso-out", "openpmd", "numpy"]
+target_input_types = [".cube", ".xsf", "openpmd", "numpy"]
 additional_info_input_types = ["espresso-out"]
 
 
@@ -43,6 +43,13 @@ class DataConverter:
 
     target_calculator : mala.targets.target.Target
         Target calculator used for parsing/converting target data.
+
+    parameters : mala.common.parameters.ParametersData
+        MALA data handling parameters object.
+
+    parameters_full : mala.common.parameters.Parameters
+        MALA parameters object. The full object is necessary for some data
+        handling tasks.
     """
 
     def __init__(
@@ -69,9 +76,9 @@ class DataConverter:
         self.__snapshot_units = []
 
         # Keep track of what has to be done by this data converter.
-        self.process_descriptors = False
-        self.process_targets = False
-        self.process_additional_info = False
+        self.__process_descriptors = False
+        self.__process_targets = False
+        self.__process_additional_info = False
 
     def add_snapshot(
         self,
@@ -143,7 +150,7 @@ class DataConverter:
                 )
             if descriptor_input_type not in descriptor_input_types:
                 raise Exception("Cannot process this type of descriptor data.")
-            self.process_descriptors = True
+            self.__process_descriptors = True
 
         if target_input_type is not None:
             if target_input_path is None:
@@ -152,7 +159,7 @@ class DataConverter:
                 )
             if target_input_type not in target_input_types:
                 raise Exception("Cannot process this type of target data.")
-            self.process_targets = True
+            self.__process_targets = True
 
         if additional_info_input_type is not None:
             metadata_input_type = additional_info_input_type
@@ -165,7 +172,7 @@ class DataConverter:
                 raise Exception(
                     "Cannot process this type of additional info data."
                 )
-            self.process_additional_info = True
+            self.__process_additional_info = True
 
             metadata_input_path = additional_info_input_path
 
@@ -299,19 +306,19 @@ class DataConverter:
             target_save_path = complete_save_path
             additional_info_save_path = complete_save_path
         else:
-            if self.process_targets is True and target_save_path is None:
+            if self.__process_targets is True and target_save_path is None:
                 raise Exception(
                     "No target path specified, cannot process data."
                 )
             if (
-                self.process_descriptors is True
+                self.__process_descriptors is True
                 and descriptor_save_path is None
             ):
                 raise Exception(
                     "No descriptor path specified, cannot process data."
                 )
             if (
-                self.process_additional_info is True
+                self.__process_additional_info is True
                 and additional_info_save_path is None
             ):
                 raise Exception(
@@ -323,7 +330,7 @@ class DataConverter:
             snapshot_name = naming_scheme
             series_name = snapshot_name.replace("*", str("%01T"))
 
-            if self.process_descriptors:
+            if self.__process_descriptors:
                 if self.parameters._configuration["mpi"]:
                     input_series = io.Series(
                         os.path.join(
@@ -351,7 +358,7 @@ class DataConverter:
                 input_series.set_software(name="MALA", version="x.x.x")
                 input_series.author = "..."
 
-            if self.process_targets:
+            if self.__process_targets:
                 if self.parameters._configuration["mpi"]:
                     output_series = io.Series(
                         os.path.join(
@@ -386,7 +393,7 @@ class DataConverter:
             snapshot_name = snapshot_name.replace("*", str(snapshot_number))
 
             # Create the paths as needed.
-            if self.process_additional_info:
+            if self.__process_additional_info:
                 info_path = os.path.join(
                     additional_info_save_path, snapshot_name + ".info.json"
                 )
@@ -397,7 +404,7 @@ class DataConverter:
 
             if file_ending == "npy":
                 # Create the actual paths, if needed.
-                if self.process_descriptors:
+                if self.__process_descriptors:
                     descriptor_path = os.path.join(
                         descriptor_save_path,
                         snapshot_name + ".in." + file_ending,
@@ -406,7 +413,7 @@ class DataConverter:
                     descriptor_path = None
 
                 memmap = None
-                if self.process_targets:
+                if self.__process_targets:
                     target_path = os.path.join(
                         target_save_path,
                         snapshot_name + ".out." + file_ending,
@@ -425,13 +432,13 @@ class DataConverter:
                 descriptor_path = None
                 target_path = None
                 memmap = None
-                if self.process_descriptors:
+                if self.__process_descriptors:
                     input_iteration = input_series.write_iterations()[
                         i + starts_at
                     ]
                     input_iteration.dt = i + starts_at
                     input_iteration.time = 0
-                if self.process_targets:
+                if self.__process_targets:
                     output_iteration = output_series.write_iterations()[
                         i + starts_at
                     ]
@@ -460,9 +467,9 @@ class DataConverter:
 
         # Properly close series
         if file_ending != "npy":
-            if self.process_descriptors:
+            if self.__process_descriptors:
                 del input_series
-            if self.process_targets:
+            if self.__process_targets:
                 del output_series
 
     def __convert_single_snapshot(
@@ -499,9 +506,6 @@ class DataConverter:
 
         output_path : string
             If not None, outputs will be saved in this file.
-
-        return_data : bool
-            If True, inputs and outputs will be returned directly.
 
         target_calculator_kwargs : dict
             Dictionary with additional keyword arguments for the calculation
@@ -545,6 +549,20 @@ class DataConverter:
                 self.descriptor_calculator.calculate_from_qe_out(
                     snapshot["input"], **descriptor_calculation_kwargs
                 )
+            )
+
+        elif description["input"] == "openpmd":
+            if self.parameters_full.descriptors.descriptors_contain_xyz:
+                printout(
+                    "[Warning] parameters.descriptors.descriptors_contain_xyz is True, will be ignored since this mode is unimplemented for openPMD data."
+                )
+            self.descriptor_calculator._feature_mask = lambda: 0
+            tmp_input = self.descriptor_calculator.read_from_openpmd_file(
+                snapshot["input"], units=original_units["input"]
+            )
+        elif description["input"] == "numpy":
+            tmp_input = self.descriptor_calculator.read_from_numpy_file(
+                snapshot["input"], units=original_units["input"]
             )
 
         elif description["input"] is None:
@@ -617,6 +635,15 @@ class DataConverter:
                         snapshot["output"], **target_calculator_kwargs
                     )
 
+                elif description["output"] == "openpmd":
+                    tmp_output = self.target_calculator.read_from_openpmd_file(
+                        snapshot["output"], units=original_units["output"]
+                    )
+                elif description["output"] == "numpy":
+                    tmp_output = self.target_calculator.read_from_numpy_file(
+                        snapshot["output"], units=original_units["output"]
+                    )
+
                 elif description["output"] is None:
                     # In this case, only the input is processed.
                     pass
@@ -655,6 +682,15 @@ class DataConverter:
                     # If no units are provided we just assume standard units.
                     tmp_output = self.target_calculator.read_from_xsf(
                         snapshot["output"], **target_calculator_kwargs
+                    )
+
+                elif description["output"] == "openpmd":
+                    tmp_output = self.target_calculator.read_from_openpmd_file(
+                        snapshot["output"], units=original_units["output"]
+                    )
+                elif description["output"] == "numpy":
+                    tmp_output = self.target_calculator.read_from_numpy_file(
+                        snapshot["output"]
                     )
 
                 elif description["output"] is None:

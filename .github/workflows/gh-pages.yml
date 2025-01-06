@@ -26,7 +26,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.10.4'
 
       - name: Upgrade pip
         run: python3 -m pip install --upgrade pip
@@ -36,7 +36,7 @@ jobs:
 
       - name: Check docstrings
          # Ignoring the cached_properties because pydocstyle (sometimes?) treats them as functions.
-        run: pydocstyle --convention=numpy --ignore-decorators=[cached_property,property] mala
+        run: pydocstyle --convention=numpy mala
 
   build-and-deploy-pages:
     needs: test-docstrings
@@ -50,7 +50,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.10.4'
 
       - name: Upgrade pip
         run: python3 -m pip install --upgrade pip

@@ -20,6 +20,7 @@ RUN conda env create -f mala_${DEVICE}_environment.yml && rm -rf /opt/conda/pkgs
 # Install optional MALA dependencies into Conda environment with pip
 RUN /opt/conda/envs/mala-${DEVICE}/bin/pip install --no-input --no-cache-dir \
     pytest \
+    pytest-cov \
     oapackage==2.6.8 \
     pqkmeans
 
