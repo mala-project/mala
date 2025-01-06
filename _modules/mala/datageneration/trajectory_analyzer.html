@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.datageneration.trajectory_analyzer &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,23 +83,23 @@
   <h1>Source code for mala.datageneration.trajectory_analyzer</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Tools for analyzing a trajectory.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn</span>
 
-<span class="kn">from</span> <span class="nn">ase.io.trajectory</span> <span class="kn">import</span> <span class="n">TrajectoryReader</span><span class="p">,</span> <span class="n">Trajectory</span><span class="p">,</span> <span class="n">TrajectoryWriter</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">distance</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.io.trajectory</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrajectoryReader</span><span class="p">,</span> <span class="n">Trajectory</span><span class="p">,</span> <span class="n">TrajectoryWriter</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">distance</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">ParametersDataGeneration</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
-<span class="kn">from</span> <span class="nn">mala.targets</span> <span class="kn">import</span> <span class="n">Target</span>
-<span class="kn">from</span> <span class="nn">mala.descriptors.descriptor</span> <span class="kn">import</span> <span class="n">Descriptor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParametersDataGeneration</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets</span><span class="w"> </span><span class="kn">import</span> <span class="n">Target</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.descriptor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Descriptor</span>
 
 
 <div class="viewcode-block" id="TrajectoryAnalyzer">
 <a class="viewcode-back" href="../../../api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer">[docs]</a>
-<span class="k">class</span> <span class="nc">TrajectoryAnalyzer</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TrajectoryAnalyzer</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides useful functions to analyze a trajectory.</span>
 
@@ -154,7 +154,7 @@
 <span class="sd">        Target calculator used for computing RDFs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">,</span>
         <span class="n">trajectory</span><span class="p">,</span>
@@ -214,21 +214,21 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">rdf_parameters</span><span class="p">[</span><span class="s2">&quot;rMax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;2mic&quot;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Trajectory to be analyzed.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trajectory</span>
 
     <span class="nd">@trajectory</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_trajectory</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_trajectory</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_trajectory</span> <span class="o">=</span> <span class="n">new_trajectory</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">uncache_properties</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_is_property_cached</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_property_cached</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 
 <div class="viewcode-block" id="TrajectoryAnalyzer.uncache_properties">
 <a class="viewcode-back" href="../../../api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.uncache_properties">[docs]</a>
-    <span class="k">def</span> <span class="nf">uncache_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">uncache_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Uncache all cached properties of this calculator.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;first_snapshot&quot;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_snapshot</span>
@@ -237,18 +237,18 @@
 
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">first_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">first_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;First equilibrated snapshot.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_first_snapshot</span><span class="p">()</span>
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">snapshot_correlation_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">snapshot_correlation_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Cutoff for the snapshot correlation analysis.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_snapshot_correlation_cutoff</span><span class="p">()</span>
 
 <div class="viewcode-block" id="TrajectoryAnalyzer.get_first_snapshot">
 <a class="viewcode-back" href="../../../api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_first_snapshot">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_first_snapshot</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_first_snapshot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">equilibrated_snapshot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">distance_threshold</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -353,7 +353,7 @@
 
 <div class="viewcode-block" id="TrajectoryAnalyzer.get_snapshot_correlation_cutoff">
 <a class="viewcode-back" href="../../../api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_snapshot_correlation_cutoff">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_snapshot_correlation_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_snapshot_correlation_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Determine the cutoff for the distance metric.</span>
 
@@ -383,7 +383,7 @@
 
 <div class="viewcode-block" id="TrajectoryAnalyzer.get_uncorrelated_snapshots">
 <a class="viewcode-back" href="../../../api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_uncorrelated_snapshots">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_uncorrelated_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename_uncorrelated_snapshots</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_uncorrelated_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename_uncorrelated_snapshots</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate a set of uncorrelated configurations from a trajectory.</span>
 
@@ -439,7 +439,7 @@
         <span class="n">printout</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="s2">&quot;possible snapshots found in MD trajectory.&quot;</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_analyze_distance_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_analyze_distance_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">):</span>
         <span class="c1"># distance metric usefdfor the snapshot parsing (realspace similarity</span>
         <span class="c1"># of the snapshot), we first find the center of the equilibrated part</span>
         <span class="c1"># of the trajectory and calculate the differences w.r.t to to it.</span>
@@ -479,7 +479,7 @@
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Distance metric cutoff is&quot;</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cutoff</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_distance_between_snapshots</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_distance_between_snapshots</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">snapshot1</span><span class="p">,</span>
         <span class="n">snapshot2</span><span class="p">,</span>
@@ -538,7 +538,7 @@
 
         <span class="k">return</span> <span class="n">result</span>
 
-    <span class="k">def</span> <span class="nf">__denoise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__denoise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">):</span>
         <span class="n">denoised_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span>
             <span class="n">signal</span><span class="p">,</span>
             <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span><span class="p">)</span>
@@ -547,7 +547,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">denoised_signal</span>
 
-    <span class="k">def</span> <span class="nf">__check_if_snapshot_is_valid</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__check_if_snapshot_is_valid</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">snapshot_to_test</span><span class="p">,</span>
         <span class="n">temp_to_test</span><span class="p">,</span>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.network.trainer &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,33 +83,33 @@
   <h1>Source code for mala.network.trainer</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Trainer class for training a network.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">packaging</span><span class="w"> </span><span class="kn">import</span> <span class="n">version</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">torch.distributed</span> <span class="k">as</span> <span class="nn">dist</span>
-<span class="kn">from</span> <span class="nn">torch.nn.parallel</span> <span class="kn">import</span> <span class="n">DistributedDataParallel</span> <span class="k">as</span> <span class="n">DDP</span>
-<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">optim</span>
-<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
-<span class="kn">from</span> <span class="nn">torch.utils.tensorboard</span> <span class="kn">import</span> <span class="n">SummaryWriter</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dist</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn.parallel</span><span class="w"> </span><span class="kn">import</span> <span class="n">DistributedDataParallel</span> <span class="k">as</span> <span class="n">DDP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">optim</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.tensorboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">printout</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_local_rank</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.fast_tensor_dataset</span> <span class="kn">import</span> <span class="n">FastTensorDataset</span>
-<span class="kn">from</span> <span class="nn">mala.network.runner</span> <span class="kn">import</span> <span class="n">Runner</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.lazy_load_dataset_single</span> <span class="kn">import</span> <span class="n">LazyLoadDatasetSingle</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.multi_lazy_load_data_loader</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_local_rank</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.fast_tensor_dataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastTensorDataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.network.runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">Runner</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.lazy_load_dataset_single</span><span class="w"> </span><span class="kn">import</span> <span class="n">LazyLoadDatasetSingle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.multi_lazy_load_data_loader</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">MultiLazyLoadDataLoader</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">trange</span><span class="p">,</span> <span class="n">tqdm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.auto</span><span class="w"> </span><span class="kn">import</span> <span class="n">trange</span><span class="p">,</span> <span class="n">tqdm</span>
 
 
 <div class="viewcode-block" id="Trainer">
 <a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer">[docs]</a>
-<span class="k">class</span> <span class="nc">Trainer</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Trainer</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for training a neural network.</span>
 
 <span class="sd">    Parameters</span>
@@ -138,7 +138,7 @@
 <span class="sd">        Full path to training logs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">_optimizer_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">_optimizer_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># copy the parameters into the class.</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Trainer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
@@ -185,7 +185,7 @@
 
             <span class="c1"># Set the path to log files</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">logger</span> <span class="o">==</span> <span class="s2">&quot;wandb&quot;</span><span class="p">:</span>
-                <span class="kn">import</span> <span class="nn">wandb</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">wandb</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">wandb</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">logger</span> <span class="o">==</span> <span class="s2">&quot;tensorboard&quot;</span><span class="p">:</span>
@@ -211,7 +211,7 @@
 <div class="viewcode-block" id="Trainer.run_exists">
 <a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer.run_exists">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">run_exists</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">run_name</span><span class="p">,</span> <span class="n">params_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">zip_run</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_exists</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">run_name</span><span class="p">,</span> <span class="n">params_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">zip_run</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if a hyperparameter optimization checkpoint exists.</span>
 
@@ -256,7 +256,7 @@
 <div class="viewcode-block" id="Trainer.load_run">
 <a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer.load_run">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">load_run</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_run</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">run_name</span><span class="p">,</span>
         <span class="n">path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
@@ -320,7 +320,7 @@
 
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_load_from_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_from_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a trainer from a file.</span>
 
@@ -360,7 +360,7 @@
 
 <div class="viewcode-block" id="Trainer.train_network">
 <a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer.train_network">[docs]</a>
-    <span class="k">def</span> <span class="nf">train_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">train_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Train a network using data given by a DataHandler.&quot;&quot;&quot;</span>
         <span class="c1">############################</span>
         <span class="c1"># CALCULATE INITIAL METRICS</span>
@@ -696,7 +696,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_validation_data_loaders</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_validate_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_set_fractions</span><span class="p">,</span> <span class="n">metrics</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_set_fractions</span><span class="p">,</span> <span class="n">metrics</span><span class="p">):</span>
         <span class="c1"># &quot;&quot;&quot;Validate a network, using train or validation data.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
         <span class="n">errors</span> <span class="o">=</span> <span class="p">{}</span>
@@ -827,7 +827,7 @@
                                 <span class="p">)</span>
         <span class="k">return</span> <span class="n">errors</span>
 
-    <span class="k">def</span> <span class="nf">__calculate_validation_error_ldos_only</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_loaders</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__calculate_validation_error_ldos_only</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_loaders</span><span class="p">):</span>
         <span class="n">validation_loss_sum</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
             <span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
         <span class="p">)</span>
@@ -971,7 +971,7 @@
 
         <span class="k">return</span> <span class="n">validation_loss_sum</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> <span class="n">batchid</span>
 
-    <span class="k">def</span> <span class="nf">__prepare_to_train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer_dict</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__prepare_to_train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare everything for training.&quot;&quot;&quot;</span>
         <span class="c1"># Configure keyword arguments for DataSampler.</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
@@ -1164,7 +1164,7 @@
                     <span class="p">)</span>
                 <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__process_mini_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">input_data</span><span class="p">,</span> <span class="n">target_data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__process_mini_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">input_data</span><span class="p">,</span> <span class="n">target_data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process a mini batch.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_graphs</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_graph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1297,7 +1297,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">loss</span>
 
-    <span class="k">def</span> <span class="nf">__create_training_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__create_training_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a checkpoint during training.</span>
 
@@ -1339,7 +1339,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">save_run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">save_runner</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__average_validation</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__average_validation</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Average validation over multiple parallel processes.&quot;&quot;&quot;</span>
         <span class="n">tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
         <span class="n">dist</span><span class="o">.</span><span class="n">all_reduce</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>

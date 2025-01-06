@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.targets.cube_parser &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -140,7 +140,7 @@
 <span class="sd">------------------------------------------------------------------------------</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">DEBUGMODE</span> <span class="o">=</span> <span class="kc">True</span>
@@ -148,7 +148,7 @@
     <span class="n">DEBUGMODE</span> <span class="o">=</span> <span class="kc">False</span>
 
 
-<span class="k">def</span> <span class="nf">_debug</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_debug</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">DEBUGMODE</span>
 
 
@@ -158,7 +158,7 @@
 
 <div class="viewcode-block" id="CubeFile">
 <a class="viewcode-back" href="../../../api/mala.targets.cube_parser.html#mala.targets.cube_parser.CubeFile">[docs]</a>
-<span class="k">class</span> <span class="nc">CubeFile</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CubeFile</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Object which mimics a cube file opened as a file object.</span>
 
@@ -178,7 +178,7 @@
 <span class="sd">        numeric value to return instead of volumetric data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcname</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcname</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">const</span> <span class="o">=</span> <span class="n">const</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">src</span> <span class="o">=</span> <span class="n">src</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">srcname</span><span class="p">)</span>
@@ -205,13 +205,13 @@
                 <span class="s2">&quot;</span><span class="si">{0:^ 8d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{0:&lt; 12.6f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Close Cube file.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <div class="viewcode-block" id="CubeFile.readline">
 <a class="viewcode-back" href="../../../api/mala.targets.cube_parser.html#mala.targets.cube_parser.CubeFile.readline">[docs]</a>
-    <span class="k">def</span> <span class="nf">readline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">readline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read next line.</span>
 
@@ -242,7 +242,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read a line from cube file.</span>
 
@@ -262,7 +262,7 @@
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
 
 
-<span class="k">def</span> <span class="nf">_putline</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_putline</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a line to be written to a cube file.</span>
 
@@ -285,7 +285,7 @@
 
 <div class="viewcode-block" id="read_cube">
 <a class="viewcode-back" href="../../../api/mala.targets.cube_parser.html#mala.targets.cube_parser.read_cube">[docs]</a>
-<span class="k">def</span> <span class="nf">read_cube</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_cube</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read cube file into numpy array.</span>
 
@@ -325,7 +325,7 @@
 
 <div class="viewcode-block" id="read_imcube">
 <a class="viewcode-back" href="../../../api/mala.targets.cube_parser.html#mala.targets.cube_parser.read_imcube">[docs]</a>
-<span class="k">def</span> <span class="nf">read_imcube</span><span class="p">(</span><span class="n">rfname</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_imcube</span><span class="p">(</span><span class="n">rfname</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read in two cube files at once.</span>
 
@@ -366,7 +366,7 @@
 
 <div class="viewcode-block" id="write_cube">
 <a class="viewcode-back" href="../../../api/mala.targets.cube_parser.html#mala.targets.cube_parser.write_cube">[docs]</a>
-<span class="k">def</span> <span class="nf">write_cube</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_cube</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Write volumetric data to cube file.</span>
 
@@ -407,7 +407,7 @@
 
 <div class="viewcode-block" id="write_imcube">
 <a class="viewcode-back" href="../../../api/mala.targets.cube_parser.html#mala.targets.cube_parser.write_imcube">[docs]</a>
-<span class="k">def</span> <span class="nf">write_imcube</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">rfname</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_imcube</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">rfname</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Write two cube files from compley valued volumetric data.</span>
 

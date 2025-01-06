@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.network.mutual_information_analyzer &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,18 +83,18 @@
   <h1>Source code for mala.network.mutual_information_analyzer</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Class for performing a full mutual information analysis.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">parallel_warn</span>
-<span class="kn">from</span> <span class="nn">mala.network.descriptor_scoring_optimizer</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">parallel_warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.network.descriptor_scoring_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DescriptorScoringOptimizer</span><span class="p">,</span>
 <span class="p">)</span>
 
 
 <div class="viewcode-block" id="MutualInformationAnalyzer">
 <a class="viewcode-back" href="../../../api/mala.network.mutual_information_analyzer.html#mala.network.mutual_information_analyzer.MutualInformationAnalyzer">[docs]</a>
-<span class="k">class</span> <span class="nc">MutualInformationAnalyzer</span><span class="p">(</span><span class="n">DescriptorScoringOptimizer</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MutualInformationAnalyzer</span><span class="p">(</span><span class="n">DescriptorScoringOptimizer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Analyzer based on mutual information analysis.</span>
 
@@ -114,7 +114,7 @@
 <span class="sd">        parameters provided. Default: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">descriptor_calculator</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
         <span class="n">parallel_warn</span><span class="p">(</span>
@@ -130,11 +130,11 @@
             <span class="n">descriptor_calculator</span><span class="o">=</span><span class="n">descriptor_calculator</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_get_best_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_best_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine the best trial as given by this study.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
 
-    <span class="k">def</span> <span class="nf">_update_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="o">=</span> <span class="n">score</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">best_trial_index</span> <span class="o">=</span> <span class="n">index</span>
@@ -142,7 +142,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="o">=</span> <span class="n">score</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">best_trial_index</span> <span class="o">=</span> <span class="n">index</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_mutual_information</span><span class="p">(</span>
             <span class="n">descriptor</span><span class="p">,</span>
             <span class="n">target</span><span class="p">,</span>
@@ -151,7 +151,7 @@
         <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_calculate_mutual_information</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_mutual_information</span><span class="p">(</span>
         <span class="n">descriptor_data</span><span class="p">,</span>
         <span class="n">ldos_data</span><span class="p">,</span>
         <span class="n">n_samples</span><span class="p">,</span>
@@ -216,7 +216,7 @@
         <span class="k">return</span> <span class="n">mi</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_normalize</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_normalize</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">std_nonzero</span> <span class="o">=</span> <span class="n">std</span> <span class="o">&gt;</span> <span class="mf">1e-6</span>
@@ -227,7 +227,7 @@
         <span class="k">return</span> <span class="n">data</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_mutual_information</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_mutual_information</span><span class="p">(</span>
         <span class="n">X</span><span class="p">,</span>
         <span class="n">Y</span><span class="p">,</span>
         <span class="n">n_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -236,8 +236,8 @@
         <span class="n">covariance_type</span><span class="o">=</span><span class="s2">&quot;diag&quot;</span><span class="p">,</span>
         <span class="n">normalize_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="kn">import</span> <span class="nn">sklearn.mixture</span>
-        <span class="kn">import</span> <span class="nn">sklearn.covariance</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">sklearn.mixture</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">sklearn.covariance</span>
 
         <span class="k">assert</span> <span class="p">(</span>
             <span class="n">covariance_type</span> <span class="o">==</span> <span class="s2">&quot;diag&quot;</span>

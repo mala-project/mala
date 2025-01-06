@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.datahandling.data_scaler &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,13 +83,13 @@
   <h1>Source code for mala.datahandling.data_scaler</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;DataScaler class for scaling DFT data.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">torch.distributed</span> <span class="k">as</span> <span class="nn">dist</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dist</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">printout</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">parallel_warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">parallel_warn</span>
 
 
 <span class="c1"># IMPORTANT: If you change the docstrings, make sure to also change them</span>
@@ -97,7 +97,7 @@
 <span class="c1"># with this class directly.</span>
 <div class="viewcode-block" id="DataScaler">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler">[docs]</a>
-<span class="k">class</span> <span class="nc">DataScaler</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DataScaler</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Scales input and output data.</span>
 
 <span class="sd">    Sort of emulates the functionality of the scikit-learn library, but by</span>
@@ -181,7 +181,7 @@
 <span class="sd">        (Managed internally, not set to private due to legacy issues)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">typestring</span><span class="p">,</span> <span class="n">use_ddp</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">typestring</span><span class="p">,</span> <span class="n">use_ddp</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span> <span class="o">=</span> <span class="n">use_ddp</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">typestring</span> <span class="o">=</span> <span class="n">typestring</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="o">=</span> <span class="kc">False</span>
@@ -201,7 +201,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="nf">__parse_typestring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__parse_typestring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse the typestring to class attributes.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span> <span class="o">=</span> <span class="kc">False</span>
@@ -231,7 +231,7 @@
 
 <div class="viewcode-block" id="DataScaler.reset">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.reset">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Start the incremental calculation of scaling parameters.</span>
 
@@ -242,7 +242,7 @@
 
 <div class="viewcode-block" id="DataScaler.partial_fit">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.partial_fit">[docs]</a>
-    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unscaled</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unscaled</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add data to the incremental calculation of scaling parameters.</span>
 
@@ -388,7 +388,7 @@
 
 <div class="viewcode-block" id="DataScaler.fit">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.fit">[docs]</a>
-    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unscaled</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unscaled</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the quantities necessary for scaling.</span>
 
@@ -443,7 +443,7 @@
 
 <div class="viewcode-block" id="DataScaler.transform">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.transform">[docs]</a>
-    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unscaled</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unscaled</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transform data from unscaled to scaled.</span>
 
@@ -524,7 +524,7 @@
 
 <div class="viewcode-block" id="DataScaler.inverse_transform">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.inverse_transform">[docs]</a>
-    <span class="k">def</span> <span class="nf">inverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaled</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">as_numpy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaled</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">as_numpy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transform data from scaled to unscaled.</span>
 
@@ -615,7 +615,7 @@
 
 <div class="viewcode-block" id="DataScaler.save">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.save">[docs]</a>
-    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the Scaler object so that it can be accessed again later.</span>
 
@@ -641,7 +641,7 @@
 <div class="viewcode-block" id="DataScaler.load_from_file">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.load_from_file">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a saved Scaler object.</span>
 

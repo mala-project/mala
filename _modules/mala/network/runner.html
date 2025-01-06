@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.network.runner &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,33 +83,33 @@
   <h1>Source code for mala.network.runner</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Runner class for running networks.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">zipfile</span> <span class="kn">import</span> <span class="n">ZipFile</span><span class="p">,</span> <span class="n">ZIP_STORED</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">zipfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZipFile</span><span class="p">,</span> <span class="n">ZIP_STORED</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">torch.distributed</span> <span class="k">as</span> <span class="nn">dist</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dist</span>
 
-<span class="kn">import</span> <span class="nn">mala</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_rank</span>
-<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">ParametersRunning</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.fast_tensor_dataset</span> <span class="kn">import</span> <span class="n">FastTensorDataset</span>
-<span class="kn">from</span> <span class="nn">mala.network.network</span> <span class="kn">import</span> <span class="n">Network</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.data_scaler</span> <span class="kn">import</span> <span class="n">DataScaler</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.data_handler</span> <span class="kn">import</span> <span class="n">DataHandler</span>
-<span class="kn">from</span> <span class="nn">mala</span> <span class="kn">import</span> <span class="n">Parameters</span>
-<span class="kn">from</span> <span class="nn">mala.targets.ldos</span> <span class="kn">import</span> <span class="n">LDOS</span>
-<span class="kn">from</span> <span class="nn">mala.targets.dos</span> <span class="kn">import</span> <span class="n">DOS</span>
-<span class="kn">from</span> <span class="nn">mala.targets.density</span> <span class="kn">import</span> <span class="n">Density</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mala</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_rank</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParametersRunning</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.fast_tensor_dataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastTensorDataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.network.network</span><span class="w"> </span><span class="kn">import</span> <span class="n">Network</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.data_scaler</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.data_handler</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataHandler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameters</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.ldos</span><span class="w"> </span><span class="kn">import</span> <span class="n">LDOS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.dos</span><span class="w"> </span><span class="kn">import</span> <span class="n">DOS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.density</span><span class="w"> </span><span class="kn">import</span> <span class="n">Density</span>
 
-<span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span><span class="p">,</span> <span class="n">trange</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.auto</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span><span class="p">,</span> <span class="n">trange</span>
 
 
 <div class="viewcode-block" id="Runner">
 <a class="viewcode-back" href="../../../api/mala.network.runner.html#mala.network.runner.Runner">[docs]</a>
-<span class="k">class</span> <span class="nc">Runner</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Runner</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parent class for all classes that in some sense &quot;run&quot; the network.</span>
 
@@ -141,14 +141,14 @@
 <span class="sd">        DataHandler holding the data for the run.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">runner_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">runner_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="p">:</span> <span class="n">Parameters</span> <span class="o">=</span> <span class="n">params</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span> <span class="n">ParametersRunning</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">running</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="n">DataHandler</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__prepare_to_run</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_errors</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_errors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">actual_outputs</span><span class="p">,</span> <span class="n">predicted_outputs</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">snapshot_number</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -302,7 +302,7 @@
                 <span class="n">errors</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">errors</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_energy_errors</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_energy_errors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">actual_outputs</span><span class="p">,</span> <span class="n">predicted_outputs</span><span class="p">,</span> <span class="n">energy_types</span><span class="p">,</span> <span class="n">snapshot_number</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -456,7 +456,7 @@
                 <span class="p">)</span>
         <span class="k">return</span> <span class="n">errors</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_energy_targets_and_predictions</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_energy_targets_and_predictions</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">actual_outputs</span><span class="p">,</span> <span class="n">predicted_outputs</span><span class="p">,</span> <span class="n">energy_types</span><span class="p">,</span> <span class="n">snapshot_number</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -626,7 +626,7 @@
 
 <div class="viewcode-block" id="Runner.save_run">
 <a class="viewcode-back" href="../../../api/mala.network.runner.html#mala.network.runner.Runner.save_run">[docs]</a>
-    <span class="k">def</span> <span class="nf">save_run</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_run</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">run_name</span><span class="p">,</span>
         <span class="n">path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
@@ -716,7 +716,7 @@
 <div class="viewcode-block" id="Runner.load_run">
 <a class="viewcode-back" href="../../../api/mala.network.runner.html#mala.network.runner.Runner.load_run">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">load_run</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_run</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">run_name</span><span class="p">,</span>
         <span class="n">path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
@@ -880,7 +880,7 @@
 <div class="viewcode-block" id="Runner.run_exists">
 <a class="viewcode-back" href="../../../api/mala.network.runner.html#mala.network.runner.Runner.run_exists">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">run_exists</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">run_name</span><span class="p">,</span> <span class="n">params_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">zip_run</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_exists</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">run_name</span><span class="p">,</span> <span class="n">params_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">zip_run</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if a run exists.</span>
 
@@ -918,13 +918,13 @@
 
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_load_from_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_from_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># Simply create a new runner. If the child classes have to implement</span>
         <span class="c1"># it theirselves.</span>
         <span class="n">loaded_runner</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">loaded_runner</span>
 
-    <span class="k">def</span> <span class="nf">_forward_entire_snapshot</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_forward_entire_snapshot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">snapshot_number</span><span class="p">,</span>
         <span class="n">data_set</span><span class="p">,</span>
@@ -1040,7 +1040,7 @@
         <span class="k">return</span> <span class="n">actual_outputs</span><span class="p">,</span> <span class="n">predicted_outputs</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_correct_batch_size</span><span class="p">(</span><span class="n">datasize</span><span class="p">,</span> <span class="n">batchsize</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_correct_batch_size</span><span class="p">(</span><span class="n">datasize</span><span class="p">,</span> <span class="n">batchsize</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the correct batch size for testing.</span>
 
@@ -1054,7 +1054,7 @@
                 <span class="n">new_batch_size</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">new_batch_size</span>
 
-    <span class="k">def</span> <span class="nf">__prepare_to_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__prepare_to_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prepare the Runner to run the Network.</span>
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.datahandling.multi_lazy_load_data_loader &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,18 +83,18 @@
   <h1>Source code for mala.datahandling.multi_lazy_load_data_loader</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Class for loading multiple data sets with pre-fetching.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
 
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">shared_memory</span>
-<span class="kn">import</span> <span class="nn">concurrent.futures</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">shared_memory</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">concurrent.futures</span>
 
 
 <div class="viewcode-block" id="MultiLazyLoadDataLoader">
 <a class="viewcode-back" href="../../../api/mala.datahandling.multi_lazy_load_data_loader.html#mala.datahandling.multi_lazy_load_data_loader.MultiLazyLoadDataLoader">[docs]</a>
-<span class="k">class</span> <span class="nc">MultiLazyLoadDataLoader</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MultiLazyLoadDataLoader</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for loading multiple data sets with pre-fetching.</span>
 
@@ -104,7 +104,7 @@
 <span class="sd">        A list of data sets to be used in this class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_datasets</span> <span class="o">=</span> <span class="n">datasets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_loaders</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">:</span>
@@ -130,7 +130,7 @@
             <span class="n">dset</span><span class="o">.</span><span class="n">output_shm_name</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Access number of datasets/snapshots contained within this loader.</span>
 
@@ -141,7 +141,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loaders</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate an iterator.</span>
 
@@ -154,7 +154,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Access the next data loader.</span>
 
@@ -199,7 +199,7 @@
     <span class="c1"># enough? I am not sure where the memory leak is coming from.</span>
 <div class="viewcode-block" id="MultiLazyLoadDataLoader.cleanup">
 <a class="viewcode-back" href="../../../api/mala.datahandling.multi_lazy_load_data_loader.html#mala.datahandling.multi_lazy_load_data_loader.MultiLazyLoadDataLoader.cleanup">[docs]</a>
-    <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Deallocate arrays still left in memory.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">dset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasets</span><span class="p">:</span>
             <span class="n">dset</span><span class="o">.</span><span class="n">deallocate_shared_mem</span><span class="p">()</span>
@@ -211,7 +211,7 @@
 <div class="viewcode-block" id="MultiLazyLoadDataLoader.load_snapshot_to_shm">
 <a class="viewcode-back" href="../../../api/mala.datahandling.multi_lazy_load_data_loader.html#mala.datahandling.multi_lazy_load_data_loader.MultiLazyLoadDataLoader.load_snapshot_to_shm">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">load_snapshot_to_shm</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_snapshot_to_shm</span><span class="p">(</span>
         <span class="n">snapshot</span><span class="p">,</span>
         <span class="n">descriptor_calculator</span><span class="p">,</span>
         <span class="n">target_calculator</span><span class="p">,</span>

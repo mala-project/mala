@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.targets.ldos &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,36 +83,36 @@
   <h1>Source code for mala.targets.ldos</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;LDOS calculation class.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
 
-<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">Bohr</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">m</span>
-<span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">Bohr</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">m</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">integrate</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_comm</span><span class="p">,</span>
     <span class="n">printout</span><span class="p">,</span>
     <span class="n">get_rank</span><span class="p">,</span>
     <span class="n">get_size</span><span class="p">,</span>
     <span class="n">barrier</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span>
-<span class="kn">from</span> <span class="nn">mala.targets.cube_parser</span> <span class="kn">import</span> <span class="n">read_cube</span>
-<span class="kn">from</span> <span class="nn">mala.targets.xsf_parser</span> <span class="kn">import</span> <span class="n">read_xsf</span>
-<span class="kn">from</span> <span class="nn">mala.targets.target</span> <span class="kn">import</span> <span class="n">Target</span>
-<span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.cube_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_cube</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.xsf_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_xsf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.target</span><span class="w"> </span><span class="kn">import</span> <span class="n">Target</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.calculation_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">fermi_function</span><span class="p">,</span>
     <span class="n">analytical_integration</span><span class="p">,</span>
     <span class="n">integrate_values_on_spacing</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mala.targets.dos</span> <span class="kn">import</span> <span class="n">DOS</span>
-<span class="kn">from</span> <span class="nn">mala.targets.density</span> <span class="kn">import</span> <span class="n">Density</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.dos</span><span class="w"> </span><span class="kn">import</span> <span class="n">DOS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.density</span><span class="w"> </span><span class="kn">import</span> <span class="n">Density</span>
 
 
 <div class="viewcode-block" id="LDOS">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS">[docs]</a>
-<span class="k">class</span> <span class="nc">LDOS</span><span class="p">(</span><span class="n">Target</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LDOS</span><span class="p">(</span><span class="n">Target</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Postprocessing / parsing functions for the local density of states.</span>
 
 <span class="sd">    Parameters</span>
@@ -125,14 +125,14 @@
     <span class="c1"># Constructors</span>
     <span class="c1">##############################</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">LDOS</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="LDOS.from_numpy_file">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_numpy_file">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_numpy_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_numpy_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an LDOS calculator from a numpy array saved in a file.</span>
 
@@ -160,7 +160,7 @@
 <div class="viewcode-block" id="LDOS.from_numpy_array">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_numpy_array">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_numpy_array</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_numpy_array</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an LDOS calculator from a numpy array in memory.</span>
 
@@ -191,7 +191,7 @@
 <div class="viewcode-block" id="LDOS.from_cube_file">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_cube_file">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_cube_file</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_cube_file</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path_name_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(Ry*Bohr^3)&quot;</span><span class="p">,</span> <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -227,7 +227,7 @@
 <div class="viewcode-block" id="LDOS.from_xsf_file">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_xsf_file">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_xsf_file</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_xsf_file</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path_name_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span> <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -263,7 +263,7 @@
 <div class="viewcode-block" id="LDOS.from_openpmd_file">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_openpmd_file">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_openpmd_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_openpmd_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an LDOS calculator from an OpenPMD file.</span>
 
@@ -292,17 +292,17 @@
     <span class="c1">##############################</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">data_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a string that describes the target (for e.g. metadata).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;LDOS&quot;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">si_unit_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">si_unit_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numeric value of the conversion from MALA (ASE) units to SI.</span>
 
@@ -311,9 +311,9 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">m</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">J</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">si_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">si_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dictionary containing the SI unit dimensions in OpenPMD format.&quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">openpmd_api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">io</span>
 
         <span class="k">return</span> <span class="p">{</span>
             <span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">M</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
@@ -322,12 +322,12 @@
         <span class="p">}</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">local_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">local_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Local density of states as 1D or 3D array.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_density_of_states</span>
 
     <span class="nd">@local_density_of_states</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">local_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ldos</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">local_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ldos</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_local_density_of_states</span> <span class="o">=</span> <span class="n">new_ldos</span>
         <span class="c1"># Setting a new LDOS means we have to uncache priorly cached</span>
         <span class="c1"># properties.</span>
@@ -335,7 +335,7 @@
 
 <div class="viewcode-block" id="LDOS.get_target">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_target">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the target quantity.</span>
 
@@ -353,7 +353,7 @@
 
 <div class="viewcode-block" id="LDOS.invalidate_target">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.invalidate_target">[docs]</a>
-    <span class="k">def</span> <span class="nf">invalidate_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">invalidate_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Invalidates the saved target wuantity.</span>
 
@@ -365,7 +365,7 @@
 
 <div class="viewcode-block" id="LDOS.uncache_properties">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.uncache_properties">[docs]</a>
-    <span class="k">def</span> <span class="nf">uncache_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">uncache_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Uncache all cached properties of this calculator.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;number_of_electrons&quot;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons</span>
@@ -390,12 +390,12 @@
 
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Energy grid on which the LDOS is expressed.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">total_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">total_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Total energy of the system, calculated via cached LDOS.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_energy</span><span class="p">()</span>
@@ -405,7 +405,7 @@
             <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Band energy of the system, calculated via cached LDOS.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">()</span>
@@ -415,7 +415,7 @@
             <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">entropy_contribution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">entropy_contribution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Band energy of the system, calculated via cached LDOS.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_entropy_contribution</span><span class="p">()</span>
@@ -425,7 +425,7 @@
             <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of electrons in the system, calculated via cached LDOS.</span>
 
@@ -440,7 +440,7 @@
             <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">fermi_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fermi_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;Self-consistent&quot; Fermi energy of the system.</span>
 
@@ -465,7 +465,7 @@
             <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Electronic density as calculated by the cached LDOS.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density</span><span class="p">()</span>
@@ -475,7 +475,7 @@
             <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;DOS as calculated by the cached LDOS.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">()</span>
@@ -485,7 +485,7 @@
             <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">_density_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_density_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">Density</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -494,7 +494,7 @@
             <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">_density_of_states_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_density_of_states_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -512,7 +512,7 @@
 <div class="viewcode-block" id="LDOS.convert_units">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.convert_units">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array into the MALA units.</span>
 
@@ -549,7 +549,7 @@
 <div class="viewcode-block" id="LDOS.backconvert_units">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.backconvert_units">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array from MALA units into desired units.</span>
 
@@ -585,7 +585,7 @@
 
 <div class="viewcode-block" id="LDOS.read_from_cube">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_cube">[docs]</a>
-    <span class="k">def</span> <span class="nf">read_from_cube</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_from_cube</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(Ry*Bohr^3)&quot;</span><span class="p">,</span> <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -634,7 +634,7 @@
 
 <div class="viewcode-block" id="LDOS.read_from_xsf">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_xsf">[docs]</a>
-    <span class="k">def</span> <span class="nf">read_from_xsf</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_from_xsf</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span> <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -666,7 +666,7 @@
 
 <div class="viewcode-block" id="LDOS.read_from_array">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_array">[docs]</a>
-    <span class="k">def</span> <span class="nf">read_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the LDOS data from a numpy array.</span>
 
@@ -688,7 +688,7 @@
 
 <div class="viewcode-block" id="LDOS.get_energy_grid">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_energy_grid">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get energy grid.</span>
 
@@ -711,7 +711,7 @@
 
 <div class="viewcode-block" id="LDOS.get_total_energy">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_total_energy">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_total_energy</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_total_energy</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -927,7 +927,7 @@
 
 <div class="viewcode-block" id="LDOS.get_band_energy">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_band_energy">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_band_energy</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1006,7 +1006,7 @@
 
 <div class="viewcode-block" id="LDOS.get_entropy_contribution">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_entropy_contribution">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_entropy_contribution</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_entropy_contribution</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1085,7 +1085,7 @@
 
 <div class="viewcode-block" id="LDOS.get_number_of_electrons">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_number_of_electrons">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_number_of_electrons</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1163,7 +1163,7 @@
 
 <div class="viewcode-block" id="LDOS.get_self_consistent_fermi_energy">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_self_consistent_fermi_energy">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_self_consistent_fermi_energy</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_self_consistent_fermi_energy</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1240,7 +1240,7 @@
 
 <div class="viewcode-block" id="LDOS.get_density">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_density</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_density</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1411,7 +1411,7 @@
 
 <div class="viewcode-block" id="LDOS.get_density_of_states">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density_of_states">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_density_of_states</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_density_of_states</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1543,7 +1543,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">gather_dos</span><span class="p">:</span>
             <span class="c1"># I think we should refrain from top-level MPI imports; the first</span>
             <span class="c1"># import triggers an MPI init, which can take quite long.</span>
-            <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">mpi4py</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPI</span>
 
             <span class="n">comm</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span>
             <span class="n">comm</span><span class="o">.</span><span class="n">Barrier</span><span class="p">()</span>
@@ -1561,7 +1561,7 @@
 
 <div class="viewcode-block" id="LDOS.get_atomic_forces">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_atomic_forces">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_atomic_forces</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_atomic_forces</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">dE_dd</span><span class="p">,</span> <span class="n">used_data_handler</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="o">=</span><span class="mi">0</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -1606,15 +1606,15 @@
     <span class="c1"># Private methods</span>
     <span class="c1">#################</span>
 
-    <span class="k">def</span> <span class="nf">_process_loaded_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process_loaded_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">array</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_target_data</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="o">=</span> <span class="n">array</span>
 
-    <span class="k">def</span> <span class="nf">_set_feature_size_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_feature_size_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">array</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">_gather_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density_values</span><span class="p">,</span> <span class="n">use_pickled_comm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_gather_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density_values</span><span class="p">,</span> <span class="n">use_pickled_comm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gathers the density on rank 0 and sorts it.</span>
 
@@ -1702,7 +1702,7 @@
 
         <span class="k">return</span> <span class="n">full_density</span>
 
-    <span class="k">def</span> <span class="nf">_read_from_qe_files</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_from_qe_files</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">use_memmap</span><span class="p">,</span> <span class="n">file_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

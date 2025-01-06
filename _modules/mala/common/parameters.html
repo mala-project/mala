@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.common.parameters &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,18 +83,18 @@
   <h1>Source code for mala.common.parameters</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Collection of all parameter related classes and functions.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">importlib</span>
-<span class="kn">import</span> <span class="nn">inspect</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">sleep</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">torch.distributed</span> <span class="k">as</span> <span class="nn">dist</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dist</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">printout</span><span class="p">,</span>
     <span class="n">set_ddp_status</span><span class="p">,</span>
     <span class="n">set_mpi_status</span><span class="p">,</span>
@@ -103,17 +103,17 @@
     <span class="n">set_current_verbosity</span><span class="p">,</span>
     <span class="n">parallel_warn</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mala.common.json_serializable</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.json_serializable</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONSerializable</span>
 
 <span class="n">DEFAULT_NP_DATA_DTYPE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
 
 
 <div class="viewcode-block" id="ParametersBase">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersBase">[docs]</a>
-<span class="k">class</span> <span class="nc">ParametersBase</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParametersBase</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base parameter class for MALA.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -131,7 +131,7 @@
 
 <div class="viewcode-block" id="ParametersBase.show">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersBase.show">[docs]</a>
-    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print name and values of all attributes of this object.</span>
 
@@ -156,34 +156,34 @@
                     <span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_update_gpu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_gpu</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_gpu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_gpu</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_gpu</span>
 
-    <span class="k">def</span> <span class="nf">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ddp</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ddp</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;ddp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_ddp</span>
 
-    <span class="k">def</span> <span class="nf">_update_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_mpi</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_mpi</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_mpi</span>
 
-    <span class="k">def</span> <span class="nf">_update_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_device</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_device</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_device</span>
 
-    <span class="k">def</span> <span class="nf">_update_openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_openpmd</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_openpmd</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_openpmd</span>
 
-    <span class="k">def</span> <span class="nf">_update_openpmd_granularity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_granularity</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_openpmd_granularity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_granularity</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_granularity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_granularity</span>
 
-    <span class="k">def</span> <span class="nf">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_lammps</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_lammps</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;lammps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_lammps</span>
 
-    <span class="k">def</span> <span class="nf">_update_atomic_density_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_atomic_density_formula</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_atomic_density_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_atomic_density_formula</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;atomic_density_formula&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">new_atomic_density_formula</span>
         <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_member_to_json</span><span class="p">(</span><span class="n">member</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_member_to_json</span><span class="p">(</span><span class="n">member</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">member</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="nb">str</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">member</span>
         <span class="k">else</span><span class="p">:</span>
@@ -191,7 +191,7 @@
 
 <div class="viewcode-block" id="ParametersBase.to_json">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersBase.to_json">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert this object to a dictionary that can be saved in a JSON file.</span>
 
@@ -237,7 +237,7 @@
 
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_json_to_member</span><span class="p">(</span><span class="n">json_value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_json_to_member</span><span class="p">(</span><span class="n">json_value</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="nb">str</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">json_value</span>
         <span class="k">else</span><span class="p">:</span>
@@ -260,7 +260,7 @@
 <div class="viewcode-block" id="ParametersBase.from_json">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersBase.from_json">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read parameters from a dictionary saved in a JSON file.</span>
 
@@ -320,7 +320,7 @@
 
 <div class="viewcode-block" id="ParametersNetwork">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersNetwork">[docs]</a>
-<span class="k">class</span> <span class="nc">ParametersNetwork</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParametersNetwork</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters necessary for constructing a neural network.</span>
 
@@ -379,7 +379,7 @@
 <span class="sd">        Default: 0.1</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersNetwork</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nn_type</span> <span class="o">=</span> <span class="s2">&quot;feed-forward&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layer_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
@@ -401,7 +401,7 @@
 
 <div class="viewcode-block" id="ParametersDescriptors">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersDescriptors">[docs]</a>
-<span class="k">class</span> <span class="nc">ParametersDescriptors</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParametersDescriptors</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters necessary for calculating/parsing input descriptors.</span>
 
@@ -468,7 +468,7 @@
 <span class="sd">        descriptor calculation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersDescriptors</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">=</span> <span class="s2">&quot;Bispectrum&quot;</span>
 
@@ -505,7 +505,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">minterpy_lp_norm</span> <span class="o">=</span> <span class="mi">2</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">use_z_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_z_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Control whether splitting across the z-axis is used.</span>
 
@@ -517,13 +517,13 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_z_splitting</span>
 
     <span class="nd">@use_z_splitting</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">use_z_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_z_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">use_y_splitting</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_use_z_splitting</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">use_y_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_y_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Control whether a splitting in y-axis is used.</span>
 
@@ -534,7 +534,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_number_y_planes</span>
 
     <span class="nd">@use_y_splitting</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">use_y_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_y_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_z_splitting</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_number_y_planes</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">else</span><span class="p">:</span>
@@ -544,17 +544,17 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_number_y_planes</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">bispectrum_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bispectrum_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Cut off radius for bispectrum calculation.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rcutfac</span>
 
     <span class="nd">@bispectrum_cutoff</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">bispectrum_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bispectrum_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rcutfac</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atomic_density_cutoff</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">bispectrum_switchflag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bispectrum_switchflag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Switchflag for the bispectrum calculation.</span>
 
@@ -566,14 +566,14 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_snap_switchflag</span>
 
     <span class="nd">@bispectrum_switchflag</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">bispectrum_switchflag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bispectrum_switchflag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="n">_int_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">_int_value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_snap_switchflag</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">if</span> <span class="n">_int_value</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_snap_switchflag</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="k">def</span> <span class="nf">_update_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_mpi</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_mpi</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_mpi</span>
 
         <span class="c1"># There may have been a serial or parallel run before that is now</span>
@@ -584,7 +584,7 @@
 
 <div class="viewcode-block" id="ParametersTargets">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersTargets">[docs]</a>
-<span class="k">class</span> <span class="nc">ParametersTargets</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParametersTargets</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters necessary for calculating/parsing output quantites.</span>
 
@@ -660,7 +660,7 @@
 <span class="sd">        calculation may benefit from it.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersTargets</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_type</span> <span class="o">=</span> <span class="s2">&quot;LDOS&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">=</span> <span class="mi">0</span>
@@ -674,7 +674,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assume_two_dimensional</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">restrict_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">restrict_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Control if and how targets are restricted to physical values.</span>
 
@@ -684,7 +684,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_restrict_targets</span>
 
     <span class="nd">@restrict_targets</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">restrict_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">restrict_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;zero_out_negative&quot;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;absolute_values&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_restrict_targets</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
@@ -694,7 +694,7 @@
 
 <div class="viewcode-block" id="ParametersData">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersData">[docs]</a>
-<span class="k">class</span> <span class="nc">ParametersData</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParametersData</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters necessary for loading and preprocessing data.</span>
 
@@ -770,7 +770,7 @@
 <span class="sd">        in the DataShuffler class deterministic.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersData</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_directories_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_splitting_type</span> <span class="o">=</span> <span class="s2">&quot;by_snapshot&quot;</span>
@@ -785,7 +785,7 @@
 
 <div class="viewcode-block" id="ParametersRunning">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersRunning">[docs]</a>
-<span class="k">class</span> <span class="nc">ParametersRunning</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParametersRunning</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters needed for network runs (train, test or inference).</span>
 
@@ -923,7 +923,7 @@
 <span class="sd">        Dropout rate for positional encoding in transformer net.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersRunning</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="s2">&quot;Adam&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>
@@ -964,13 +964,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">training_log_interval</span> <span class="o">=</span> <span class="mi">1000</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">profiler_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ddp</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ddp</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersRunning</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_update_ddp</span><span class="p">(</span><span class="n">new_ddp</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">during_training_metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">during_training_metric</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">after_training_metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">after_training_metric</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">during_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">during_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Control the metric used during training.</span>
 
@@ -985,7 +985,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_during_training_metric</span>
 
     <span class="nd">@during_training_metric</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">during_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">during_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;ldos&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;ddp&quot;</span><span class="p">]:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
@@ -997,7 +997,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_during_training_metric</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">after_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">after_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the metric used during training.</span>
 
@@ -1012,7 +1012,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_after_training_metric</span>
 
     <span class="nd">@after_training_metric</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">after_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">after_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;ldos&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;ddp&quot;</span><span class="p">]:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
@@ -1022,7 +1022,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_after_training_metric</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">use_graphs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_graphs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Decide whether CUDA graphs are used during training.</span>
 
@@ -1032,7 +1032,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_graphs</span>
 
     <span class="nd">@use_graphs</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">use_graphs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_graphs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span>
@@ -1052,7 +1052,7 @@
 
 <div class="viewcode-block" id="ParametersHyperparameterOptimization">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization">[docs]</a>
-<span class="k">class</span> <span class="nc">ParametersHyperparameterOptimization</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParametersHyperparameterOptimization</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hyperparameter optimization parameters.</span>
 
@@ -1191,7 +1191,7 @@
 <span class="sd">        of the ACSD.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersHyperparameterOptimization</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="s2">&quot;minimize&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="mi">100</span>
@@ -1216,31 +1216,31 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mutual_information_points</span> <span class="o">=</span> <span class="mi">20000</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">rdb_storage_heartbeat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rdb_storage_heartbeat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether a heartbeat is used for distributed optuna runs.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rdb_storage_heartbeat</span>
 
     <span class="nd">@rdb_storage_heartbeat</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">rdb_storage_heartbeat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rdb_storage_heartbeat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_rdb_storage_heartbeat</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_rdb_storage_heartbeat</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">number_training_per_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">number_training_per_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Control how many trainings are run per optuna trial.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_number_training_per_trial</span>
 
     <span class="nd">@number_training_per_trial</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">number_training_per_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">number_training_per_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_number_training_per_trial</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_number_training_per_trial</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">trial_ensemble_evaluation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trial_ensemble_evaluation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Control how multiple trainings performed during a trial are evaluated.</span>
 
@@ -1253,7 +1253,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trial_ensemble_evaluation</span>
 
     <span class="nd">@trial_ensemble_evaluation</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">trial_ensemble_evaluation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trial_ensemble_evaluation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;mean&quot;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;mean_std&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_trial_ensemble_evaluation</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1261,7 +1261,7 @@
 
 <div class="viewcode-block" id="ParametersHyperparameterOptimization.show">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization.show">[docs]</a>
-    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print name and values of all attributes of this object.</span>
 
@@ -1301,7 +1301,7 @@
 
 <div class="viewcode-block" id="ParametersDataGeneration">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration">[docs]</a>
-<span class="k">class</span> <span class="nc">ParametersDataGeneration</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParametersDataGeneration</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    All parameters to help with data generation.</span>
 
@@ -1358,7 +1358,7 @@
 <span class="sd">        Friction to be added for the Langevin dynamics in the OF-DFT-MD run.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersDataGeneration</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span> <span class="o">=</span> <span class="mi">100</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_analysis_below_average_counter</span> <span class="o">=</span> <span class="mi">50</span>
@@ -1377,7 +1377,7 @@
 
 <div class="viewcode-block" id="Parameters">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters">[docs]</a>
-<span class="k">class</span> <span class="nc">Parameters</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Parameters</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    All parameter MALA needs to perform its various tasks.</span>
 
@@ -1413,7 +1413,7 @@
 <span class="sd">        Parameters used for data generation routines.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
         <span class="c1"># Parameters subobjects.</span>
@@ -1442,7 +1442,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">use_atomic_density_formula</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">openpmd_granularity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">openpmd_granularity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adjust the memory overhead of the OpenPMD interface.</span>
 
@@ -1456,7 +1456,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_openpmd_granularity</span>
 
     <span class="nd">@openpmd_granularity</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">openpmd_granularity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">openpmd_granularity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_openpmd_granularity</span> <span class="o">=</span> <span class="n">value</span>
@@ -1470,7 +1470,7 @@
         <span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">verbosity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">verbosity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Control the level of output for MALA.</span>
 
@@ -1485,17 +1485,17 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbosity</span>
 
     <span class="nd">@verbosity</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">verbosity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">verbosity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_verbosity</span> <span class="o">=</span> <span class="n">value</span>
         <span class="n">set_current_verbosity</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">use_gpu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_gpu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether a GPU is used (provided there is one).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_gpu</span>
 
     <span class="nd">@use_gpu</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">use_gpu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_gpu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_use_gpu</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1523,12 +1523,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_gpu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_gpu</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">use_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether ddp is used for parallel training.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_ddp</span>
 
     <span class="nd">@use_ddp</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">use_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Initializing torch.distributed.&quot;</span><span class="p">)</span>
@@ -1555,12 +1555,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the device used by MALA. Read-only.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_device</span>
 
     <span class="nd">@device</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="n">device_id</span> <span class="o">=</span> <span class="n">get_local_rank</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_gpu</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_device</span> <span class="o">=</span> <span class="s2">&quot;cuda:&quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_id</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -1574,12 +1574,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">use_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether MPI is used for paralle inference.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_mpi</span>
 
     <span class="nd">@use_mpi</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">use_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="n">set_mpi_status</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
         <span class="c1"># Invalidate, will be updated in setter.</span>
@@ -1593,7 +1593,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_mpi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Provide a .toml or .json formatted string to configure OpenPMD.</span>
 
@@ -1604,7 +1604,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_openpmd_configuration</span>
 
     <span class="nd">@openpmd_configuration</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_openpmd_configuration</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">_update_openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openpmd_configuration</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_update_openpmd_configuration</span><span class="p">(</span>
@@ -1618,12 +1618,12 @@
         <span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">use_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether to use LAMMPS for descriptor calculation.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_lammps</span>
 
     <span class="nd">@use_lammps</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">use_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_use_lammps</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_gpu</span> <span class="ow">and</span> <span class="n">value</span><span class="p">:</span>
             <span class="n">printout</span><span class="p">(</span>
@@ -1639,7 +1639,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_lammps</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">use_atomic_density_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_atomic_density_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether to use the atomic density formula.</span>
 
 <span class="sd">        This formula uses as a Gaussian representation of the atomic density</span>
@@ -1658,7 +1658,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_atomic_density_formula</span>
 
     <span class="nd">@use_atomic_density_formula</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">use_atomic_density_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_atomic_density_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_use_atomic_density_formula</span> <span class="o">=</span> <span class="n">value</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">_update_atomic_density_formula</span><span class="p">(</span>
@@ -1682,7 +1682,7 @@
 
 <div class="viewcode-block" id="Parameters.show">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.show">[docs]</a>
-    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Print name and values of all attributes of this object.&quot;&quot;&quot;</span>
         <span class="n">printout</span><span class="p">(</span>
             <span class="s2">&quot;--- &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; ---&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span>
@@ -1714,7 +1714,7 @@
 
 <div class="viewcode-block" id="Parameters.save">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.save">[docs]</a>
-    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the Parameters object to a file.</span>
 
@@ -1768,7 +1768,7 @@
 
 <div class="viewcode-block" id="Parameters.save_as_pickle">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.save_as_pickle">[docs]</a>
-    <span class="k">def</span> <span class="nf">save_as_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_as_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the Parameters object to a pickle file.</span>
 
@@ -1783,7 +1783,7 @@
 
 <div class="viewcode-block" id="Parameters.save_as_json">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.save_as_json">[docs]</a>
-    <span class="k">def</span> <span class="nf">save_as_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_as_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the Parameters object to a json file.</span>
 
@@ -1798,7 +1798,7 @@
 
 <div class="viewcode-block" id="Parameters.optuna_singlenode_setup">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.optuna_singlenode_setup">[docs]</a>
-    <span class="k">def</span> <span class="nf">optuna_singlenode_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wait_time</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">optuna_singlenode_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wait_time</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set up device and parallelization parameters for Optuna+MPI.</span>
 
@@ -1839,7 +1839,7 @@
 <div class="viewcode-block" id="Parameters.load_from_file">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_file">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_from_file</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_no_ddp</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1930,7 +1930,7 @@
 <div class="viewcode-block" id="Parameters.load_from_pickle">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_pickle">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">load_from_pickle</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_from_pickle</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a Parameters object from a pickle file.</span>
 
@@ -1957,7 +1957,7 @@
 <div class="viewcode-block" id="Parameters.load_from_json">
 <a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_json">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">load_from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_no_ddp</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_no_ddp</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a Parameters object from a json file.</span>
 

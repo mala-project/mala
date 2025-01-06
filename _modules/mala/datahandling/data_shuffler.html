@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.datahandling.data_shuffler &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,23 +83,23 @@
   <h1>Source code for mala.datahandling.data_shuffler</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Mixes data between snapshots for improved lazy-loading training.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Parameters</span><span class="p">,</span>
     <span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
-<span class="kn">from</span> <span class="nn">mala.common.physical_data</span> <span class="kn">import</span> <span class="n">PhysicalData</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.data_handler_base</span> <span class="kn">import</span> <span class="n">DataHandlerBase</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.physical_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhysicalData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.data_handler_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataHandlerBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_comm</span>
 
 
 <div class="viewcode-block" id="DataShuffler">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler">[docs]</a>
-<span class="k">class</span> <span class="nc">DataShuffler</span><span class="p">(</span><span class="n">DataHandlerBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DataShuffler</span><span class="p">(</span><span class="n">DataHandlerBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mixes data between snapshots for improved lazy-loading training.</span>
 
@@ -119,7 +119,7 @@
 <span class="sd">        be created by this class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span>
         <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -142,7 +142,7 @@
 
 <div class="viewcode-block" id="DataShuffler.add_snapshot">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler.add_snapshot">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_snapshot</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_snapshot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_file</span><span class="p">,</span>
         <span class="n">input_directory</span><span class="p">,</span>
@@ -184,7 +184,7 @@
         <span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">__shuffle_numpy</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__shuffle_numpy</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">number_of_new_snapshots</span><span class="p">,</span>
         <span class="n">shuffle_dimensions</span><span class="p">,</span>
@@ -354,8 +354,8 @@
     <span class="c1"># target data.</span>
     <span class="c1"># It will be executed one after another for both of them.</span>
     <span class="c1"># Use this class to parameterize which of both should be shuffled.</span>
-    <span class="k">class</span> <span class="nc">__DescriptorOrTarget</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">__DescriptorOrTarget</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">save_path</span><span class="p">,</span>
             <span class="n">npy_directory</span><span class="p">,</span>
@@ -371,8 +371,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">name_infix</span> <span class="o">=</span> <span class="n">name_infix</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">dimension</span>
 
-    <span class="k">class</span> <span class="nc">__MockedMPIComm</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">__MockedMPIComm</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="mi">1</span>
 
@@ -422,14 +422,14 @@
     <span class="c1"># XXXXXXXOOO</span>
     <span class="c1"># OOOOOOOOOO</span>
 
-    <span class="k">def</span> <span class="nf">__contiguous_slice_within_ndim_grid_as_blocks</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__contiguous_slice_within_ndim_grid_as_blocks</span><span class="p">(</span>
         <span class="n">extent</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">y</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
     <span class="p">):</span>
         <span class="c1"># Used for converting a block defined by inclusive lower and upper</span>
         <span class="c1"># coordinate to a chunk as defined by openPMD.</span>
         <span class="c1"># The openPMD extent is defined by (to-from)+1 (to make up for the</span>
         <span class="c1"># inclusive upper end).</span>
-        <span class="k">def</span> <span class="nf">get_extent</span><span class="p">(</span><span class="n">from_</span><span class="p">,</span> <span class="n">to_</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_extent</span><span class="p">(</span><span class="n">from_</span><span class="p">,</span> <span class="n">to_</span><span class="p">):</span>
             <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="n">upper</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">lower</span> <span class="k">for</span> <span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">from_</span><span class="p">,</span> <span class="n">to_</span><span class="p">)]</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">res</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
@@ -499,7 +499,7 @@
     <span class="c1"># Interpreting `ndim_extent` as the extents of an n-dimensional grid,</span>
     <span class="c1"># returns the n-dimensional coordinate of the `idx`th item in the row-major</span>
     <span class="c1"># representation of the grid.</span>
-    <span class="k">def</span> <span class="nf">__resolve_flattened_index_into_ndim</span><span class="p">(</span><span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ndim_extent</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__resolve_flattened_index_into_ndim</span><span class="p">(</span><span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ndim_extent</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ndim_extent</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Cannot index into a zero-dimensional array.&quot;</span><span class="p">)</span>
         <span class="n">strides</span> <span class="o">=</span> <span class="p">[]</span>
@@ -510,7 +510,7 @@
             <span class="c1"># extent</span>
             <span class="n">current_stride</span> <span class="o">*=</span> <span class="n">ext</span>
 
-        <span class="k">def</span> <span class="nf">worker</span><span class="p">(</span><span class="n">inner_idx</span><span class="p">,</span> <span class="n">inner_strides</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">worker</span><span class="p">(</span><span class="n">inner_idx</span><span class="p">,</span> <span class="n">inner_strides</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">inner_strides</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">inner_idx</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
@@ -528,7 +528,7 @@
     <span class="c1"># a one-dimensional array.</span>
     <span class="c1"># The function deals internally with splitting the 1-dimensional slice into</span>
     <span class="c1"># a sequence of n-dimensional block load operations.</span>
-    <span class="k">def</span> <span class="nf">__load_chunk_1D</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">extent</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__load_chunk_1D</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">extent</span><span class="p">):</span>
         <span class="n">start_idx</span> <span class="o">=</span> <span class="n">DataShuffler</span><span class="o">.</span><span class="n">__resolve_flattened_index_into_ndim</span><span class="p">(</span>
             <span class="n">offset</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">shape</span>
         <span class="p">)</span>
@@ -557,7 +557,7 @@
             <span class="p">)</span>
             <span class="n">current_offset</span> <span class="o">+=</span> <span class="n">flat_extent</span>
 
-    <span class="k">def</span> <span class="nf">__shuffle_openpmd</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__shuffle_openpmd</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dot</span><span class="p">:</span> <span class="n">__DescriptorOrTarget</span><span class="p">,</span>
         <span class="n">number_of_new_snapshots</span><span class="p">,</span>
@@ -566,14 +566,14 @@
         <span class="n">permutations</span><span class="p">,</span>
         <span class="n">file_ending</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">openpmd_api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">io</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
             <span class="n">comm</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">comm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MockedMPIComm</span><span class="p">()</span>
 
-        <span class="kn">import</span> <span class="nn">math</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 
         <span class="n">items_per_process</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">number_of_new_snapshots</span> <span class="o">/</span> <span class="n">comm</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
         <span class="n">my_items_start</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">*</span> <span class="n">items_per_process</span>
@@ -638,14 +638,14 @@
         <span class="c1"># This gets the offset and extent of the i&#39;th such slice.</span>
         <span class="c1"># The extent is given as in openPMD, i.e. the size of the block</span>
         <span class="c1"># (not its upper coordinate).</span>
-        <span class="k">def</span> <span class="nf">from_chunk_i</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">dset</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">from_chunk_i</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">dset</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dset</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
                 <span class="n">dset</span> <span class="o">=</span> <span class="n">dset</span><span class="o">.</span><span class="n">extent</span>
             <span class="n">flat_extent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">dset</span><span class="p">)</span>
             <span class="n">one_slice_extent</span> <span class="o">=</span> <span class="n">flat_extent</span> <span class="o">//</span> <span class="n">n</span>
             <span class="k">return</span> <span class="n">i</span> <span class="o">*</span> <span class="n">one_slice_extent</span><span class="p">,</span> <span class="n">one_slice_extent</span>
 
-        <span class="kn">import</span> <span class="nn">json</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
         <span class="c1"># Do the actual shuffling.</span>
         <span class="n">name_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dot</span><span class="o">.</span><span class="n">save_path</span><span class="p">,</span> <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;%T&quot;</span><span class="p">))</span>
@@ -728,7 +728,7 @@
 
 <div class="viewcode-block" id="DataShuffler.shuffle_snapshots">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler.shuffle_snapshots">[docs]</a>
-    <span class="k">def</span> <span class="nf">shuffle_snapshots</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shuffle_snapshots</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">complete_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">descriptor_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -775,7 +775,7 @@
             <span class="n">file_ending</span> <span class="o">=</span> <span class="n">save_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">save_name</span> <span class="o">=</span> <span class="n">save_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">file_ending</span> <span class="o">!=</span> <span class="s2">&quot;npy&quot;</span><span class="p">:</span>
-                <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">openpmd_api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">io</span>
 
                 <span class="k">if</span> <span class="n">file_ending</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">io</span><span class="o">.</span><span class="n">file_extensions</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>

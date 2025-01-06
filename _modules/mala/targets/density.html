@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.targets.density &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,19 +83,19 @@
   <h1>Source code for mala.targets.density</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Electronic density calculation class.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os.path</span>
-<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os.path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 
-<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">Bohr</span><span class="p">,</span> <span class="n">m</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">Bohr</span><span class="p">,</span> <span class="n">m</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">total_energy</span> <span class="k">as</span> <span class="nn">te</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">total_energy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">te</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="k">pass</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">printout</span><span class="p">,</span>
     <span class="n">parallel_warn</span><span class="p">,</span>
     <span class="n">barrier</span><span class="p">,</span>
@@ -103,17 +103,17 @@
     <span class="n">get_comm</span><span class="p">,</span>
     <span class="n">get_rank</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mala.targets.target</span> <span class="kn">import</span> <span class="n">Target</span>
-<span class="kn">from</span> <span class="nn">mala.targets.cube_parser</span> <span class="kn">import</span> <span class="n">read_cube</span><span class="p">,</span> <span class="n">write_cube</span>
-<span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="n">integrate_values_on_spacing</span>
-<span class="kn">from</span> <span class="nn">mala.targets.xsf_parser</span> <span class="kn">import</span> <span class="n">read_xsf</span>
-<span class="kn">from</span> <span class="nn">mala.targets.atomic_force</span> <span class="kn">import</span> <span class="n">AtomicForce</span>
-<span class="kn">from</span> <span class="nn">mala.descriptors.atomic_density</span> <span class="kn">import</span> <span class="n">AtomicDensity</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.target</span><span class="w"> </span><span class="kn">import</span> <span class="n">Target</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.cube_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_cube</span><span class="p">,</span> <span class="n">write_cube</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.calculation_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">integrate_values_on_spacing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.xsf_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_xsf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.atomic_force</span><span class="w"> </span><span class="kn">import</span> <span class="n">AtomicForce</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.atomic_density</span><span class="w"> </span><span class="kn">import</span> <span class="n">AtomicDensity</span>
 
 
 <div class="viewcode-block" id="Density">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density">[docs]</a>
-<span class="k">class</span> <span class="nc">Density</span><span class="p">(</span><span class="n">Target</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Density</span><span class="p">(</span><span class="n">Target</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Postprocessing / parsing functions for the electronic density.</span>
 
@@ -136,14 +136,14 @@
     <span class="c1"># Constructors</span>
     <span class="c1">##############################</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Density</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="Density.from_numpy_file">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.from_numpy_file">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_numpy_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_numpy_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Density calculator from a numpy array saved in a file.</span>
 
@@ -171,7 +171,7 @@
 <div class="viewcode-block" id="Density.from_numpy_array">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.from_numpy_array">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_numpy_array</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_numpy_array</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Density calculator from a numpy array in memory.</span>
 
@@ -202,7 +202,7 @@
 <div class="viewcode-block" id="Density.from_cube_file">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.from_cube_file">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_cube_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/Bohr^3&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_cube_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/Bohr^3&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Density calculator from a cube file.</span>
 
@@ -230,7 +230,7 @@
 <div class="viewcode-block" id="Density.from_xsf_file">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.from_xsf_file">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_xsf_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_xsf_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Density calculator from a xsf file.</span>
 
@@ -258,7 +258,7 @@
 <div class="viewcode-block" id="Density.from_openpmd_file">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.from_openpmd_file">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_openpmd_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_openpmd_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an Density calculator from an OpenPMD file.</span>
 
@@ -285,7 +285,7 @@
 <div class="viewcode-block" id="Density.from_ldos_calculator">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.from_ldos_calculator">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_ldos_calculator</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ldos_object</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_ldos_calculator</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ldos_object</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Density calculator from an LDOS object.</span>
 
@@ -342,17 +342,17 @@
     <span class="c1">##############################</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">1</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">data_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a string that describes the target (for e.g. metadata).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;Density&quot;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">si_unit_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">si_unit_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numeric value of the conversion from MALA (ASE) units to SI.</span>
 
@@ -361,19 +361,19 @@
         <span class="k">return</span> <span class="n">m</span><span class="o">**</span><span class="mi">3</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">si_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">si_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dictionary containing the SI unit dimensions in OpenPMD format.&quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">openpmd_api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">io</span>
 
         <span class="k">return</span> <span class="p">{</span><span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">L</span><span class="p">:</span> <span class="o">-</span><span class="mi">3</span><span class="p">}</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Electronic density.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density</span>
 
     <span class="nd">@density</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_density</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_density</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_density</span> <span class="o">=</span> <span class="n">new_density</span>
         <span class="c1"># Setting a new density means we have to uncache priorly cached</span>
         <span class="c1"># properties.</span>
@@ -381,7 +381,7 @@
 
 <div class="viewcode-block" id="Density.get_target">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_target">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the target quantity.</span>
 
@@ -399,7 +399,7 @@
 
 <div class="viewcode-block" id="Density.invalidate_target">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.invalidate_target">[docs]</a>
-    <span class="k">def</span> <span class="nf">invalidate_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">invalidate_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Invalidates the saved target wuantity.</span>
 
@@ -410,7 +410,7 @@
 
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of electrons in the system, calculated via cached Density.</span>
 
@@ -425,7 +425,7 @@
             <span class="p">)</span>
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">total_energy_contributions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">total_energy_contributions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        All density based contributions to the total energy.</span>
 
@@ -440,7 +440,7 @@
 
 <div class="viewcode-block" id="Density.uncache_properties">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.uncache_properties">[docs]</a>
-    <span class="k">def</span> <span class="nf">uncache_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">uncache_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Uncache all cached properties of this calculator.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;number_of_electrons&quot;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons</span>
@@ -459,7 +459,7 @@
 <div class="viewcode-block" id="Density.convert_units">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.convert_units">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array into the MALA units.</span>
 
@@ -492,7 +492,7 @@
 <div class="viewcode-block" id="Density.backconvert_units">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.backconvert_units">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array from MALA units into desired units.</span>
 
@@ -524,7 +524,7 @@
 
 <div class="viewcode-block" id="Density.read_from_cube">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.read_from_cube">[docs]</a>
-    <span class="k">def</span> <span class="nf">read_from_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/Bohr^3&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_from_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/Bohr^3&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the density data from a cube file.</span>
 
@@ -557,7 +557,7 @@
 
 <div class="viewcode-block" id="Density.read_from_xsf">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.read_from_xsf">[docs]</a>
-    <span class="k">def</span> <span class="nf">read_from_xsf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_from_xsf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the density data from an xsf file.</span>
 
@@ -577,7 +577,7 @@
 
 <div class="viewcode-block" id="Density.read_from_array">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.read_from_array">[docs]</a>
-    <span class="k">def</span> <span class="nf">read_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the density data from a numpy array.</span>
 
@@ -596,7 +596,7 @@
 
 <div class="viewcode-block" id="Density.write_to_openpmd_file">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.write_to_openpmd_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_to_openpmd_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">path</span><span class="p">,</span>
         <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -646,7 +646,7 @@
 
 <div class="viewcode-block" id="Density.write_to_cube">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.write_to_cube">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_to_cube</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_to_cube</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -712,7 +712,7 @@
 
 <div class="viewcode-block" id="Density.get_number_of_electrons">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_number_of_electrons">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_number_of_electrons</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -829,7 +829,7 @@
 
 <div class="viewcode-block" id="Density.get_density">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_density">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_density</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_density</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">convert_to_threedimensional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -902,7 +902,7 @@
 
 <div class="viewcode-block" id="Density.get_energy_contributions">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_energy_contributions">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_energy_contributions</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_energy_contributions</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">create_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -980,7 +980,7 @@
 
 <div class="viewcode-block" id="Density.get_atomic_forces">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_atomic_forces">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_atomic_forces</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_atomic_forces</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">create_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -1062,7 +1062,7 @@
 <div class="viewcode-block" id="Density.get_scaled_positions_for_qe">
 <a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_scaled_positions_for_qe">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_scaled_positions_for_qe</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_scaled_positions_for_qe</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the positions correctly scaled for QE.</span>
 
@@ -1090,16 +1090,16 @@
     <span class="c1"># Private methods</span>
     <span class="c1">#################</span>
 
-    <span class="k">def</span> <span class="nf">_process_loaded_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process_loaded_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">array</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_target_data</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="n">array</span>
 
-    <span class="k">def</span> <span class="nf">_set_feature_size_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_feature_size_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
         <span class="c1"># Feature size is always 1 in this case, no need to do anything.</span>
         <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="nf">__setup_total_energy_module</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__setup_total_energy_module</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">density_data</span><span class="p">,</span>
         <span class="n">atoms_Angstrom</span><span class="p">,</span>
@@ -1416,7 +1416,7 @@
 
         <span class="k">return</span> <span class="n">atoms_Angstrom</span>
 
-    <span class="k">def</span> <span class="nf">_get_gaussian_descriptors_for_structure_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_gaussian_descriptors_for_structure_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
         <span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">AtomicDensity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="p">)</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;return_directly&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;use_fp64&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
         <span class="k">return</span> <span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">calculate_from_atoms</span><span class="p">(</span>

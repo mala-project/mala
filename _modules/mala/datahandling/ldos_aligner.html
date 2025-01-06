@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.datahandling.ldos_aligner &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,24 +83,24 @@
   <h1>Source code for mala.datahandling.ldos_aligner</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Align LDOS vectors to a reference.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Parameters</span><span class="p">,</span>
     <span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">barrier</span>
-<span class="kn">from</span> <span class="nn">mala.common.physical_data</span> <span class="kn">import</span> <span class="n">PhysicalData</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.data_handler_base</span> <span class="kn">import</span> <span class="n">DataHandlerBase</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">barrier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.physical_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhysicalData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.data_handler_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataHandlerBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_comm</span>
 
 
 <div class="viewcode-block" id="LDOSAligner">
 <a class="viewcode-back" href="../../../api/mala.datahandling.ldos_aligner.html#mala.datahandling.ldos_aligner.LDOSAligner">[docs]</a>
-<span class="k">class</span> <span class="nc">LDOSAligner</span><span class="p">(</span><span class="n">DataHandlerBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LDOSAligner</span><span class="p">(</span><span class="n">DataHandlerBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Align LDOS vectors based on when they first become non-zero.</span>
 
@@ -125,7 +125,7 @@
 <span class="sd">        MALA target calculation parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span>
         <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -140,7 +140,7 @@
 
 <div class="viewcode-block" id="LDOSAligner.add_snapshot">
 <a class="viewcode-back" href="../../../api/mala.datahandling.ldos_aligner.html#mala.datahandling.ldos_aligner.LDOSAligner.add_snapshot">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_snapshot</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_snapshot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">output_file</span><span class="p">,</span>
         <span class="n">output_directory</span><span class="p">,</span>
@@ -178,7 +178,7 @@
 
 <div class="viewcode-block" id="LDOSAligner.align_ldos_to_ref">
 <a class="viewcode-back" href="../../../api/mala.datahandling.ldos_aligner.html#mala.datahandling.ldos_aligner.LDOSAligner.align_ldos_to_ref">[docs]</a>
-    <span class="k">def</span> <span class="nf">align_ldos_to_ref</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">align_ldos_to_ref</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">save_path_ext</span><span class="o">=</span><span class="s2">&quot;aligned/&quot;</span><span class="p">,</span>
         <span class="n">reference_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -400,7 +400,7 @@
 <div class="viewcode-block" id="LDOSAligner.calc_optimal_ldos_shift">
 <a class="viewcode-back" href="../../../api/mala.datahandling.ldos_aligner.html#mala.datahandling.ldos_aligner.LDOSAligner.calc_optimal_ldos_shift">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">calc_optimal_ldos_shift</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calc_optimal_ldos_shift</span><span class="p">(</span>
         <span class="n">ldos_mean</span><span class="p">,</span>
         <span class="n">ldos_mean_ref</span><span class="p">,</span>
         <span class="n">left_index</span><span class="p">,</span>

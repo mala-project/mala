@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.network.hyperparameter_optuna &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,14 +83,14 @@
   <h1>Source code for mala.network.hyperparameter_optuna</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Hyperparameter to use with optuna.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">optuna.trial</span> <span class="kn">import</span> <span class="n">Trial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">optuna.trial</span><span class="w"> </span><span class="kn">import</span> <span class="n">Trial</span>
 
-<span class="kn">from</span> <span class="nn">mala.network.hyperparameter</span> <span class="kn">import</span> <span class="n">Hyperparameter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.network.hyperparameter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hyperparameter</span>
 
 
 <div class="viewcode-block" id="HyperparameterOptuna">
 <a class="viewcode-back" href="../../../api/mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna">[docs]</a>
-<span class="k">class</span> <span class="nc">HyperparameterOptuna</span><span class="p">(</span><span class="n">Hyperparameter</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HyperparameterOptuna</span><span class="p">(</span><span class="n">Hyperparameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents an optuna parameter.</span>
 
 <span class="sd">    Parameters</span>
@@ -122,7 +122,7 @@
 <span class="sd">        List of possible choices (for categorical parameter).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">hotype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span>
@@ -146,7 +146,7 @@
 
 <div class="viewcode-block" id="HyperparameterOptuna.get_parameter">
 <a class="viewcode-back" href="../../../api/mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_parameter">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract current value of hyperparameter from an optuna Trial.</span>
 
@@ -172,7 +172,7 @@
 
 <div class="viewcode-block" id="HyperparameterOptuna.get_float">
 <a class="viewcode-back" href="../../../api/mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_float">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_float</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_float</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract float hyperparameter from an optuna Trial.</span>
 
@@ -195,7 +195,7 @@
 
 <div class="viewcode-block" id="HyperparameterOptuna.get_int">
 <a class="viewcode-back" href="../../../api/mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_int">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_int</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_int</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract integer hyperparameter from an optuna Trial.</span>
 
@@ -218,7 +218,7 @@
 
 <div class="viewcode-block" id="HyperparameterOptuna.get_categorical">
 <a class="viewcode-back" href="../../../api/mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_categorical">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_categorical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_categorical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract categorical (string) hyperparameter from an optuna Trial.</span>
 

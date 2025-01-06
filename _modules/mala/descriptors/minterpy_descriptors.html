@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.descriptors.minterpy_descriptors &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,22 +83,22 @@
   <h1>Source code for mala.descriptors.minterpy_descriptors</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Minterpy descriptor class.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="kn">import</span> <span class="nn">ase</span>
-<span class="kn">import</span> <span class="nn">ase.io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ase</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ase.io</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mala.descriptors.lammps_utils</span> <span class="kn">import</span> <span class="n">extract_compute_np</span>
-<span class="kn">from</span> <span class="nn">mala.descriptors.descriptor</span> <span class="kn">import</span> <span class="n">Descriptor</span>
-<span class="kn">from</span> <span class="nn">mala.descriptors.atomic_density</span> <span class="kn">import</span> <span class="n">AtomicDensity</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">parallel_warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.lammps_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_compute_np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.descriptor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Descriptor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.atomic_density</span><span class="w"> </span><span class="kn">import</span> <span class="n">AtomicDensity</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">parallel_warn</span>
 
 
 <div class="viewcode-block" id="MinterpyDescriptors">
 <a class="viewcode-back" href="../../../api/mala.descriptors.minterpy_descriptors.html#mala.descriptors.minterpy_descriptors.MinterpyDescriptors">[docs]</a>
-<span class="k">class</span> <span class="nc">MinterpyDescriptors</span><span class="p">(</span><span class="n">Descriptor</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MinterpyDescriptors</span><span class="p">(</span><span class="n">Descriptor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for calculation and parsing of Minterpy descriptors.</span>
 
@@ -110,7 +110,7 @@
 <span class="sd">        Parameters object used to create this object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MinterpyDescriptors</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
         <span class="n">parallel_warn</span><span class="p">(</span>
             <span class="s2">&quot;Minterpy descriptors will be deprecated starting with MALA v1.4.0&quot;</span><span class="p">,</span>
@@ -118,14 +118,14 @@
         <span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">data_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a string that describes the target (for e.g. metadata).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;Minterpy&quot;</span>
 
 <div class="viewcode-block" id="MinterpyDescriptors.convert_units">
 <a class="viewcode-back" href="../../../api/mala.descriptors.minterpy_descriptors.html#mala.descriptors.minterpy_descriptors.MinterpyDescriptors.convert_units">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of a Gaussian descriptor.</span>
 
@@ -153,7 +153,7 @@
 <div class="viewcode-block" id="MinterpyDescriptors.backconvert_units">
 <a class="viewcode-back" href="../../../api/mala.descriptors.minterpy_descriptors.html#mala.descriptors.minterpy_descriptors.MinterpyDescriptors.backconvert_units">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of a Gaussian descriptor.</span>
 
@@ -178,11 +178,11 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for Minterpy descriptors.&quot;</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># For version compatibility; older lammps versions (the serial version</span>
         <span class="c1"># we still use on some machines) have these constants as part of the</span>
         <span class="c1"># general LAMMPS import.</span>
-        <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">lammps_constants</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">lammps</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">lammps_constants</span>
 
         <span class="n">keep_logs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;keep_logs&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
@@ -335,7 +335,7 @@
 
         <span class="k">return</span> <span class="n">minterpy_descriptors_np</span><span class="p">,</span> <span class="n">nx</span> <span class="o">*</span> <span class="n">ny</span> <span class="o">*</span> <span class="n">nz</span>
 
-    <span class="k">def</span> <span class="nf">_build_unisolvent_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_unisolvent_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build the unisolvent nodes.</span>
 
@@ -349,7 +349,7 @@
 <span class="sd">        nodes : numpy.array</span>
 <span class="sd">            Two-dimensional array containing the nodes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">minterpy</span> <span class="k">as</span> <span class="nn">mp</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">minterpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mp</span>
 
         <span class="c1"># Calculate the unisolvent nodes.</span>
         <span class="n">mi</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">MultiIndexSet</span><span class="o">.</span><span class="n">from_degree</span><span class="p">(</span>

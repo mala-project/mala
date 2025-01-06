@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Using ML-DFT models for predictions &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
@@ -112,7 +112,7 @@ no further parameters have to be set here. You have to load the
 model and acquire atomic positions (e.g., from a previous molecular dynamics
 simulation or other source) via</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ase</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ase</span>
 
 <span class="n">parameters</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data_handler</span><span class="p">,</span> <span class="n">predictor</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Predictor</span><span class="o">.</span>\
     <span class="n">load_run</span><span class="p">(</span><span class="s2">&quot;be_model&quot;</span><span class="p">)</span>

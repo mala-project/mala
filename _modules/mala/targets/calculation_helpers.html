@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.targets.calculation_helpers &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,15 +83,15 @@
   <h1>Source code for mala.targets.calculation_helpers</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Helper functions for several calculation tasks (such as integration).&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">kB</span>
-<span class="kn">import</span> <span class="nn">mpmath</span> <span class="k">as</span> <span class="nn">mp</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">kB</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mpmath</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">integrate</span>
 
 
 <div class="viewcode-block" id="integrate_values_on_spacing">
 <a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.integrate_values_on_spacing">[docs]</a>
-<span class="k">def</span> <span class="nf">integrate_values_on_spacing</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">spacing</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">integrate_values_on_spacing</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">spacing</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Integrate values assuming a uniform grid with a provided spacing.</span>
 
@@ -127,7 +127,7 @@
 
 <div class="viewcode-block" id="fermi_function">
 <a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.fermi_function">[docs]</a>
-<span class="k">def</span> <span class="nf">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the Fermi function.</span>
 
@@ -184,7 +184,7 @@
 
 <div class="viewcode-block" id="entropy_multiplicator">
 <a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.entropy_multiplicator">[docs]</a>
-<span class="k">def</span> <span class="nf">entropy_multiplicator</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">entropy_multiplicator</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the multiplicator function for the entropy integral.</span>
 
@@ -245,7 +245,7 @@
 
 <div class="viewcode-block" id="get_beta">
 <a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.get_beta">[docs]</a>
-<span class="k">def</span> <span class="nf">get_beta</span><span class="p">(</span><span class="n">temperature</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_beta</span><span class="p">(</span><span class="n">temperature</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate :math:`\beta = {(k_\mathrm{B}T)}^{-1}`.</span>
 
@@ -265,7 +265,7 @@
 
 <div class="viewcode-block" id="get_f0_value">
 <a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.get_f0_value">[docs]</a>
-<span class="k">def</span> <span class="nf">get_f0_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_f0_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the F0 value for the analytic integration formula.</span>
 
@@ -289,7 +289,7 @@
 
 <div class="viewcode-block" id="get_f1_value">
 <a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.get_f1_value">[docs]</a>
-<span class="k">def</span> <span class="nf">get_f1_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_f1_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the F1 value for the analytic integration formula.</span>
 
@@ -317,7 +317,7 @@
 
 <div class="viewcode-block" id="get_f2_value">
 <a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.get_f2_value">[docs]</a>
-<span class="k">def</span> <span class="nf">get_f2_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_f2_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the F2 value for the analytic integration formula.</span>
 
@@ -346,7 +346,7 @@
 
 <div class="viewcode-block" id="get_s0_value">
 <a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.get_s0_value">[docs]</a>
-<span class="k">def</span> <span class="nf">get_s0_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_s0_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the S0 value for the analytic integration formula.</span>
 
@@ -373,7 +373,7 @@
 
 <div class="viewcode-block" id="get_s1_value">
 <a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.get_s1_value">[docs]</a>
-<span class="k">def</span> <span class="nf">get_s1_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_s1_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the S1 value for the analytic integration formula.</span>
 
@@ -401,7 +401,7 @@
 
 <div class="viewcode-block" id="analytical_integration">
 <a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.analytical_integration">[docs]</a>
-<span class="k">def</span> <span class="nf">analytical_integration</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">I0</span><span class="p">,</span> <span class="n">I1</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">analytical_integration</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">I0</span><span class="p">,</span> <span class="n">I1</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform analytical integration following the outline given by [1].</span>
 
@@ -515,7 +515,7 @@
 <span class="c1"># Define Gaussian</span>
 <div class="viewcode-block" id="gaussians">
 <a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.gaussians">[docs]</a>
-<span class="k">def</span> <span class="nf">gaussians</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">gaussians</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate multiple gaussians on the same grid, but with different centers.</span>
 

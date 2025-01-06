@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.network.hyperparameter_oat &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,12 +83,12 @@
   <h1>Source code for mala.network.hyperparameter_oat</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Hyperparameter to use with OAT.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">mala.network.hyperparameter</span> <span class="kn">import</span> <span class="n">Hyperparameter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.network.hyperparameter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hyperparameter</span>
 
 
 <div class="viewcode-block" id="HyperparameterOAT">
 <a class="viewcode-back" href="../../../api/mala.network.hyperparameter_oat.html#mala.network.hyperparameter_oat.HyperparameterOAT">[docs]</a>
-<span class="k">class</span> <span class="nc">HyperparameterOAT</span><span class="p">(</span><span class="n">Hyperparameter</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HyperparameterOAT</span><span class="p">(</span><span class="n">Hyperparameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a hyperparameter for OAT.</span>
 
 <span class="sd">    Parameters</span>
@@ -114,7 +114,7 @@
 <span class="sd">        List of possible choices (for categorical parameter).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">hotype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;categorical&quot;</span><span class="p">,</span>
@@ -131,17 +131,17 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported Hyperparameter type.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_choices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_choices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of choices for this hyperparameter.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">choices</span><span class="p">)</span>
 
     <span class="nd">@num_choices</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">num_choices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_choices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">pass</span>
 
 <div class="viewcode-block" id="HyperparameterOAT.get_parameter">
 <a class="viewcode-back" href="../../../api/mala.network.hyperparameter_oat.html#mala.network.hyperparameter_oat.HyperparameterOAT.get_parameter">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract current value of hyperparameter from an orthogonal array.</span>
 
@@ -166,7 +166,7 @@
 
 <div class="viewcode-block" id="HyperparameterOAT.get_categorical">
 <a class="viewcode-back" href="../../../api/mala.network.hyperparameter_oat.html#mala.network.hyperparameter_oat.HyperparameterOAT.get_categorical">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_categorical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_categorical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract categorical (string) hyperparameter from an optuna Trial.</span>
 

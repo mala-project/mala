@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.network.hyper_opt_naswot &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,13 +83,13 @@
   <h1>Source code for mala.network.hyper_opt_naswot</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Hyperparameter optimizer working without training.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
 
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">optuna</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">optuna</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">printout</span><span class="p">,</span>
     <span class="n">get_rank</span><span class="p">,</span>
     <span class="n">get_size</span><span class="p">,</span>
@@ -97,13 +97,13 @@
     <span class="n">barrier</span><span class="p">,</span>
     <span class="n">parallel_warn</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mala.network.hyper_opt</span> <span class="kn">import</span> <span class="n">HyperOpt</span>
-<span class="kn">from</span> <span class="nn">mala.network.objective_naswot</span> <span class="kn">import</span> <span class="n">ObjectiveNASWOT</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.network.hyper_opt</span><span class="w"> </span><span class="kn">import</span> <span class="n">HyperOpt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.network.objective_naswot</span><span class="w"> </span><span class="kn">import</span> <span class="n">ObjectiveNASWOT</span>
 
 
 <div class="viewcode-block" id="HyperOptNASWOT">
 <a class="viewcode-back" href="../../../api/mala.network.hyper_opt_naswot.html#mala.network.hyper_opt_naswot.HyperOptNASWOT">[docs]</a>
-<span class="k">class</span> <span class="nc">HyperOptNASWOT</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HyperOptNASWOT</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hyperparameter optimizer that does not require training networks.</span>
 
@@ -118,7 +118,7 @@
 <span class="sd">        DataHandler holding the data for the hyperparameter optimization.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">HyperOptNASWOT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_objective</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_trial_losses</span> <span class="o">=</span> <span class="kc">None</span>
@@ -137,7 +137,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_last_trial</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">best_trial_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">best_trial_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the index and loss of best trial determined in this NASWOT run.</span>
 
@@ -174,11 +174,11 @@
             <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trial_losses</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trial_losses</span><span class="p">)]</span>
 
     <span class="nd">@best_trial_index</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">best_trial_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">best_trial_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">pass</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">best_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">best_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the best trial determined in this NASWOT run.</span>
 
@@ -193,12 +193,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trial_list</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">best_trial_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
 
     <span class="nd">@best_trial</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">best_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">best_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">pass</span>
 
 <div class="viewcode-block" id="HyperOptNASWOT.perform_study">
 <a class="viewcode-back" href="../../../api/mala.network.hyper_opt_naswot.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.perform_study">[docs]</a>
-    <span class="k">def</span> <span class="nf">perform_study</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">perform_study</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform the study, i.e. the optimization.</span>
 
@@ -318,7 +318,7 @@
 
 <div class="viewcode-block" id="HyperOptNASWOT.set_optimal_parameters">
 <a class="viewcode-back" href="../../../api/mala.network.hyper_opt_naswot.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.set_optimal_parameters">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_optimal_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_optimal_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the optimal parameters found in the present study.</span>
 
@@ -328,7 +328,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_objective</span><span class="o">.</span><span class="n">parse_trial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_trial</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">__all_combinations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__all_combinations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># First, remove all the hyperparameters we don&#39;t actually need.</span>
         <span class="n">indices_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">par</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">):</span>

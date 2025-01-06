@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.network.predictor &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,18 +83,18 @@
   <h1>Source code for mala.network.predictor</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Predictor class.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">perf_counter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">perf_counter</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">barrier</span>
-<span class="kn">from</span> <span class="nn">mala.network.runner</span> <span class="kn">import</span> <span class="n">Runner</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">barrier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.network.runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">Runner</span>
 
 
 <div class="viewcode-block" id="Predictor">
 <a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor">[docs]</a>
-<span class="k">class</span> <span class="nc">Predictor</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Predictor</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class for running predictions using a neural network.</span>
 
@@ -119,7 +119,7 @@
 <span class="sd">        processing.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="c1"># copy the parameters into the class.</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Predictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inference_data_grid</span>
@@ -134,7 +134,7 @@
 
 <div class="viewcode-block" id="Predictor.predict_from_qeout">
 <a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor.predict_from_qeout">[docs]</a>
-    <span class="k">def</span> <span class="nf">predict_from_qeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict_from_qeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get predicted LDOS for the atomic configuration of a QE.out file.</span>
 
@@ -164,7 +164,7 @@
 
 <div class="viewcode-block" id="Predictor.predict_for_atoms">
 <a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor.predict_for_atoms">[docs]</a>
-    <span class="k">def</span> <span class="nf">predict_for_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict_for_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get predicted LDOS for an atomic configuration.</span>
 
@@ -293,7 +293,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_snap_descriptors</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_forward_snap_descriptors</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_forward_snap_descriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">snap_descriptors</span><span class="p">,</span> <span class="n">local_data_size</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward a scaled tensor of descriptors through the NN.&quot;&quot;&quot;</span>

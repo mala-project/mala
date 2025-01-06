@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.targets.target &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,35 +83,35 @@
   <h1>Source code for mala.targets.target</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Base class for all target calculators.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
-<span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
 
-<span class="kn">from</span> <span class="nn">ase.neighborlist</span> <span class="kn">import</span> <span class="n">NeighborList</span>
-<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">kB</span>
-<span class="kn">from</span> <span class="nn">ase.cell</span> <span class="kn">import</span> <span class="n">Cell</span>
-<span class="kn">import</span> <span class="nn">ase.io</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">distance</span>
-<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">simpson</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.neighborlist</span><span class="w"> </span><span class="kn">import</span> <span class="n">NeighborList</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">kB</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.cell</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cell</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ase.io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">distance</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.integrate</span><span class="w"> </span><span class="kn">import</span> <span class="n">simpson</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">ParametersTargets</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">ParametersTargets</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">printout</span><span class="p">,</span>
     <span class="n">parallel_warn</span><span class="p">,</span>
     <span class="n">get_rank</span><span class="p">,</span>
     <span class="n">get_comm</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="n">fermi_function</span>
-<span class="kn">from</span> <span class="nn">mala.common.physical_data</span> <span class="kn">import</span> <span class="n">PhysicalData</span>
-<span class="kn">from</span> <span class="nn">mala.descriptors.atomic_density</span> <span class="kn">import</span> <span class="n">AtomicDensity</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.calculation_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">fermi_function</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.physical_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhysicalData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.atomic_density</span><span class="w"> </span><span class="kn">import</span> <span class="n">AtomicDensity</span>
 
 
 <div class="viewcode-block" id="Target">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target">[docs]</a>
-<span class="k">class</span> <span class="nc">Target</span><span class="p">(</span><span class="n">PhysicalData</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Target</span><span class="p">(</span><span class="n">PhysicalData</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for all target quantity parser.</span>
 
@@ -200,7 +200,7 @@
     <span class="c1"># Constructors</span>
     <span class="c1">##############################</span>
 
-    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Target instance.</span>
 
@@ -226,15 +226,15 @@
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Wrong type of parameters for Targets class.&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">targettype</span> <span class="o">==</span> <span class="s2">&quot;LDOS&quot;</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">mala.targets.ldos</span> <span class="kn">import</span> <span class="n">LDOS</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.ldos</span><span class="w"> </span><span class="kn">import</span> <span class="n">LDOS</span>
 
                 <span class="n">target</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="n">LDOS</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">LDOS</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">targettype</span> <span class="o">==</span> <span class="s2">&quot;DOS&quot;</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">mala.targets.dos</span> <span class="kn">import</span> <span class="n">DOS</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.dos</span><span class="w"> </span><span class="kn">import</span> <span class="n">DOS</span>
 
                 <span class="n">target</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="n">DOS</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">DOS</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">targettype</span> <span class="o">==</span> <span class="s2">&quot;Density&quot;</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">mala.targets.density</span> <span class="kn">import</span> <span class="n">Density</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">mala.targets.density</span><span class="w"> </span><span class="kn">import</span> <span class="n">Density</span>
 
                 <span class="n">target</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="n">Density</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">Density</span><span class="p">)</span>
 
@@ -248,7 +248,7 @@
         <span class="k">return</span> <span class="n">target</span>
 
     <span class="c1"># For pickling</span>
-    <span class="k">def</span> <span class="nf">__getnewargs__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__getnewargs__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the necessary arguments to call __new__.</span>
 
@@ -261,7 +261,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params_arg</span><span class="p">,)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">):</span>
@@ -330,13 +330,13 @@
 
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">si_unit_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">si_unit_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numeric value of the conversion from MALA (ASE) units to SI.</span>
 
@@ -346,7 +346,7 @@
 
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">si_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">si_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dictionary containing the SI unit dimensions in OpenPMD format.</span>
 
@@ -355,7 +355,7 @@
         <span class="k">pass</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">qe_input_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">qe_input_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Input data for QE TEM calls.&quot;&quot;&quot;</span>
         <span class="c1"># Update the pseudopotential path from Parameters.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_qe_input_data</span><span class="p">[</span><span class="s2">&quot;pseudo_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
@@ -364,10 +364,10 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qe_input_data</span>
 
     <span class="nd">@qe_input_data</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">qe_input_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">qe_input_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_qe_input_data</span> <span class="o">=</span> <span class="n">value</span>
 
-    <span class="k">def</span> <span class="nf">_is_property_cached</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_property_cached</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 
     <span class="c1">##############################</span>
@@ -381,7 +381,7 @@
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.convert_units">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;eV&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;eV&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array into the MALA units.</span>
 
@@ -408,7 +408,7 @@
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.backconvert_units">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array from MALA units into desired units.</span>
 
@@ -434,7 +434,7 @@
 
 <div class="viewcode-block" id="Target.read_additional_calculation_data">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.read_additional_calculation_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">read_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read in additional input about a calculation.</span>
 
@@ -784,7 +784,7 @@
 
 <div class="viewcode-block" id="Target.write_additional_calculation_data">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.write_additional_calculation_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">return_string</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">return_string</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write additional information about a calculation to a .json file.</span>
 
@@ -867,7 +867,7 @@
 
 <div class="viewcode-block" id="Target.write_to_numpy_file">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.write_to_numpy_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_to_numpy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">target_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_to_numpy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">target_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write data to a numpy file.</span>
 
@@ -888,7 +888,7 @@
 
 <div class="viewcode-block" id="Target.write_to_openpmd_file">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.write_to_openpmd_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_to_openpmd_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">path</span><span class="p">,</span>
         <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -939,7 +939,7 @@
 <div class="viewcode-block" id="Target.get_target">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_target">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the target quantity.</span>
 
@@ -952,7 +952,7 @@
 <div class="viewcode-block" id="Target.invalidate_target">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.invalidate_target">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">invalidate_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">invalidate_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Invalidates the saved target quantity.</span>
 
@@ -967,14 +967,14 @@
 
 <div class="viewcode-block" id="Target.get_energy_grid">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_energy_grid">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get energy grid.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No method implement to calculate an energy grid.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Target.get_real_space_grid">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_real_space_grid">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_real_space_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_real_space_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the real space grid.</span>
 
@@ -1002,7 +1002,7 @@
 <div class="viewcode-block" id="Target.radial_distribution_function_from_atoms">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.radial_distribution_function_from_atoms">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">radial_distribution_function_from_atoms</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">radial_distribution_function_from_atoms</span><span class="p">(</span>
         <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="p">,</span> <span class="n">rMax</span><span class="o">=</span><span class="s2">&quot;mic&quot;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mala&quot;</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1121,7 +1121,7 @@
         <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;asap3&quot;</span><span class="p">:</span>
             <span class="c1"># ASAP3 loads MPI which takes a long time to import, so</span>
             <span class="c1"># we&#39;ll only do that when absolutely needed.</span>
-            <span class="kn">from</span> <span class="nn">asap3.analysis.rdf</span> <span class="kn">import</span> <span class="n">RadialDistributionFunction</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">asap3.analysis.rdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">RadialDistributionFunction</span>
 
             <span class="n">rdf</span> <span class="o">=</span> <span class="n">RadialDistributionFunction</span><span class="p">(</span>
                 <span class="n">atoms</span><span class="p">,</span> <span class="n">_rMax</span><span class="p">,</span> <span class="n">number_of_bins</span>
@@ -1138,7 +1138,7 @@
 <div class="viewcode-block" id="Target.three_particle_correlation_function_from_atoms">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.three_particle_correlation_function_from_atoms">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">three_particle_correlation_function_from_atoms</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">three_particle_correlation_function_from_atoms</span><span class="p">(</span>
         <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="p">,</span> <span class="n">rMax</span><span class="o">=</span><span class="s2">&quot;mic&quot;</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1286,7 +1286,7 @@
 <div class="viewcode-block" id="Target.static_structure_factor_from_atoms">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.static_structure_factor_from_atoms">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">static_structure_factor_from_atoms</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">static_structure_factor_from_atoms</span><span class="p">(</span>
         <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span>
         <span class="n">number_of_bins</span><span class="p">,</span>
         <span class="n">kMax</span><span class="p">,</span>
@@ -1441,7 +1441,7 @@
 
 <div class="viewcode-block" id="Target.get_radial_distribution_function">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_radial_distribution_function">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_radial_distribution_function</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_radial_distribution_function</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mala&quot;</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1485,7 +1485,7 @@
 
 <div class="viewcode-block" id="Target.get_three_particle_correlation_function">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_three_particle_correlation_function">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_three_particle_correlation_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_three_particle_correlation_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the three particle correlation function (TPCF).</span>
 
@@ -1514,7 +1514,7 @@
 
 <div class="viewcode-block" id="Target.get_static_structure_factor">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_static_structure_factor">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_static_structure_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_static_structure_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the static structure factor (SSF).</span>
 
@@ -1544,7 +1544,7 @@
 <div class="viewcode-block" id="Target.write_tem_input_file">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.write_tem_input_file">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">write_tem_input_file</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_tem_input_file</span><span class="p">(</span>
         <span class="n">atoms_Angstrom</span><span class="p">,</span>
         <span class="n">qe_input_data</span><span class="p">,</span>
         <span class="n">qe_pseudopotentials</span><span class="p">,</span>
@@ -1627,7 +1627,7 @@
 
 <div class="viewcode-block" id="Target.restrict_data">
 <a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.restrict_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">restrict_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">restrict_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Restrict target data to only contain physically meaningful values.</span>
 
@@ -1659,16 +1659,16 @@
     <span class="c1"># Private methods</span>
     <span class="c1">#################</span>
 
-    <span class="k">def</span> <span class="nf">_process_loaded_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array_dimensions</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process_loaded_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array_dimensions</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">array_dimensions</span>
 
-    <span class="k">def</span> <span class="nf">_process_additional_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">additional_metadata</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process_additional_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">additional_metadata</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
             <span class="n">additional_metadata</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">additional_metadata</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_set_openpmd_attribtues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
-        <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_openpmd_attribtues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">openpmd_api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">io</span>
 
         <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_set_openpmd_attribtues</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
 
@@ -1735,7 +1735,7 @@
                         <span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
                     <span class="p">]</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="mf">1.0e-10</span>
 
-    <span class="k">def</span> <span class="nf">_process_openpmd_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process_openpmd_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_process_openpmd_attributes</span><span class="p">(</span>
             <span class="n">series</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span>
         <span class="p">)</span>
@@ -1899,16 +1899,16 @@
             <span class="p">],</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_set_geometry_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_geometry_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
         <span class="c1"># Geometry: Save the cell parameters and angles of the grid.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">openpmd_api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">io</span>
 
             <span class="n">mesh</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Geometry</span><span class="o">.</span><span class="n">cartesian</span>
             <span class="n">mesh</span><span class="o">.</span><span class="n">grid_spacing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
             <span class="n">mesh</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;angles&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">3</span><span class="p">:])</span>
 
-    <span class="k">def</span> <span class="nf">_process_geometry_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process_geometry_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
         <span class="n">spacing</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">grid_spacing</span>
         <span class="k">if</span> <span class="s2">&quot;angles&quot;</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
             <span class="n">angles</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;angles&quot;</span><span class="p">)</span>
@@ -1916,11 +1916,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">_get_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mic&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mic&quot;</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;mic&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;2mic&quot;</span><span class="p">:</span>

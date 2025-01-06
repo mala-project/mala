@@ -20,8 +20,8 @@ be used with MALA. For a full overview of how to build LAMMPS, please refer to
 the `official instructions <https://docs.lammps.org/Build.html>`_.
 The MALA team recommends to build LAMMPS with ``cmake``. To do so
 
-* Checkout https://github.com/mala-project/lammps/tree/mala
-* Make sure the ``mala`` tree is checked out locally via ``git branch``!
+* Checkout https://github.com/mala-project/lammps/tree/mala_v130
+* Make sure the ``mala_v130`` branch is checked out locally via ``git branch``!
 * Inside the LAMMPS folder create a build folder (named, e.g., ``build``)
 * In the ``build`` folder, configure your ``cmake`` build:
   ``cmake ../cmake -D OPTION1 -D OPTION2 ...``; Options for a typical LAMMPS

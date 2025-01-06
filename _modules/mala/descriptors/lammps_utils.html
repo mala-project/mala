@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.descriptors.lammps_utils &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,16 +83,16 @@
   <h1>Source code for mala.descriptors.lammps_utils</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Collection of useful functions for working with LAMMPS.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">ctypes</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ctypes</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span>
 
 
 <div class="viewcode-block" id="set_cmdlinevars">
 <a class="viewcode-back" href="../../../api/mala.descriptors.lammps_utils.html#mala.descriptors.lammps_utils.set_cmdlinevars">[docs]</a>
-<span class="k">def</span> <span class="nf">set_cmdlinevars</span><span class="p">(</span><span class="n">cmdargs</span><span class="p">,</span> <span class="n">argdict</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_cmdlinevars</span><span class="p">(</span><span class="n">cmdargs</span><span class="p">,</span> <span class="n">argdict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add a dicitionary of LAMMPS arguments in a command line argument string.</span>
 
@@ -121,7 +121,7 @@
 
 <div class="viewcode-block" id="extract_compute_np">
 <a class="viewcode-back" href="../../../api/mala.descriptors.lammps_utils.html#mala.descriptors.lammps_utils.extract_compute_np">[docs]</a>
-<span class="k">def</span> <span class="nf">extract_compute_np</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_compute_np</span><span class="p">(</span>
     <span class="n">lmp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">compute_type</span><span class="p">,</span> <span class="n">result_type</span><span class="p">,</span> <span class="n">array_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_fp64</span><span class="o">=</span><span class="kc">False</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>

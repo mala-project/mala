@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mala.datahandling.data_handler &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=33f2f6c7" />
@@ -83,25 +83,25 @@
   <h1>Source code for mala.datahandling.data_handler</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;DataHandler class that loads and scales data.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">TensorDataset</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">TensorDataset</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">barrier</span>
-<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.data_handler_base</span> <span class="kn">import</span> <span class="n">DataHandlerBase</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.data_scaler</span> <span class="kn">import</span> <span class="n">DataScaler</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.snapshot</span> <span class="kn">import</span> <span class="n">Snapshot</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.lazy_load_dataset</span> <span class="kn">import</span> <span class="n">LazyLoadDataset</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.lazy_load_dataset_single</span> <span class="kn">import</span> <span class="n">LazyLoadDatasetSingle</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.fast_tensor_dataset</span> <span class="kn">import</span> <span class="n">FastTensorDataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">barrier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.data_handler_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataHandlerBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.data_scaler</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.snapshot</span><span class="w"> </span><span class="kn">import</span> <span class="n">Snapshot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.lazy_load_dataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">LazyLoadDataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.lazy_load_dataset_single</span><span class="w"> </span><span class="kn">import</span> <span class="n">LazyLoadDatasetSingle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.fast_tensor_dataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastTensorDataset</span>
 
 
 <div class="viewcode-block" id="DataHandler">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler">[docs]</a>
-<span class="k">class</span> <span class="nc">DataHandler</span><span class="p">(</span><span class="n">DataHandlerBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DataHandler</span><span class="p">(</span><span class="n">DataHandlerBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Loads and scales data. Can load from numpy or OpenPMD files.</span>
 
@@ -173,7 +173,7 @@
     <span class="c1"># Constructors</span>
     <span class="c1">##############################</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span>
         <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -237,7 +237,7 @@
 
 <div class="viewcode-block" id="DataHandler.clear_data">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.clear_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reset the entire data pipeline.</span>
 
@@ -262,7 +262,7 @@
 
 <div class="viewcode-block" id="DataHandler.prepare_data">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.prepare_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">prepare_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reparametrize_scaler</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepare_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reparametrize_scaler</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prepare the data to be used in a training process.</span>
 
@@ -346,7 +346,7 @@
 
 <div class="viewcode-block" id="DataHandler.prepare_for_testing">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.prepare_for_testing">[docs]</a>
-    <span class="k">def</span> <span class="nf">prepare_for_testing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepare_for_testing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prepare DataHandler for usage within Tester class.</span>
 
@@ -362,7 +362,7 @@
 
 <div class="viewcode-block" id="DataHandler.mix_datasets">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.mix_datasets">[docs]</a>
-    <span class="k">def</span> <span class="nf">mix_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mix_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        For lazily-loaded data sets, the snapshot ordering is (re-)mixed.</span>
 
@@ -376,7 +376,7 @@
 
 <div class="viewcode-block" id="DataHandler.get_test_input_gradient">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.get_test_input_gradient">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_test_input_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_test_input_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the gradient of the test inputs for an entire snapshot.</span>
 
@@ -419,7 +419,7 @@
 
 <div class="viewcode-block" id="DataHandler.get_snapshot_calculation_output">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_snapshot_calculation_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_snapshot_calculation_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the path to the output file for a specific snapshot.</span>
 
@@ -444,7 +444,7 @@
 
 <div class="viewcode-block" id="DataHandler.raw_numpy_to_converted_scaled_tensor">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.raw_numpy_to_converted_scaled_tensor">[docs]</a>
-    <span class="k">def</span> <span class="nf">raw_numpy_to_converted_scaled_tensor</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">raw_numpy_to_converted_scaled_tensor</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">numpy_array</span><span class="p">,</span>
         <span class="n">data_type</span><span class="p">,</span>
@@ -504,7 +504,7 @@
 
 <div class="viewcode-block" id="DataHandler.resize_snapshots_for_debugging">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.resize_snapshots_for_debugging">[docs]</a>
-    <span class="k">def</span> <span class="nf">resize_snapshots_for_debugging</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resize_snapshots_for_debugging</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">directory</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
         <span class="n">naming_scheme_input</span><span class="o">=</span><span class="s2">&quot;test_Al_debug_2k_nr*.in&quot;</span><span class="p">,</span>
@@ -557,7 +557,7 @@
     <span class="c1"># Loading data</span>
     <span class="c1">######################</span>
 
-    <span class="k">def</span> <span class="nf">_check_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check the snapshots for consistency.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">DataHandler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_check_snapshots</span><span class="p">()</span>
 
@@ -625,7 +625,7 @@
             <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">snapshot_order</span><span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">snapshot_function</span><span class="p">]</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__allocate_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__allocate_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_training_data_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">),</span>
@@ -656,7 +656,7 @@
                 <span class="n">dtype</span><span class="o">=</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">,</span>
             <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load data into the appropriate arrays.</span>
 
@@ -771,7 +771,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_test_data_outputs</span>
                 <span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">__build_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__build_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Build the DataSets that are used during training.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span>
@@ -952,7 +952,7 @@
     <span class="c1"># Scaling</span>
     <span class="c1">######################</span>
 
-    <span class="k">def</span> <span class="nf">__parametrize_scalers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__parametrize_scalers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Use the training data to parametrize the DataScalers.&quot;&quot;&quot;</span>
         <span class="c1">##################</span>
         <span class="c1"># Inputs.</span>
@@ -1067,7 +1067,7 @@
 
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Output scaler parametrized.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__raw_numpy_to_converted_numpy</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__raw_numpy_to_converted_numpy</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">numpy_array</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a raw numpy array containing into the correct units.&quot;&quot;&quot;</span>
@@ -1091,7 +1091,7 @@
                 <span class="s1">&#39;Please choose either &quot;in&quot; or &quot;out&quot; for &#39;</span> <span class="s2">&quot;this function.&quot;</span>
             <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__converted_numpy_to_scaled_tensor</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__converted_numpy_to_scaled_tensor</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">numpy_array</span><span class="p">,</span> <span class="n">desired_dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;in&quot;</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
