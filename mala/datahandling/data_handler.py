@@ -1016,10 +1016,14 @@ class DataHandler(DataHandlerBase):
                     )
 
             if self.nr_validation_data != 0:
-                self.__load_data("validation", "inputs", from_arrays_dict=from_arrays_dict)
+                self.__load_data(
+                    "validation", "inputs", from_arrays_dict=from_arrays_dict
+                )
                 self.input_data_scaler.transform(self._validation_data_inputs)
 
-                self.__load_data("validation", "outputs", from_arrays_dict=from_arrays_dict)
+                self.__load_data(
+                    "validation", "outputs", from_arrays_dict=from_arrays_dict
+                )
                 self.output_data_scaler.transform(
                     self._validation_data_outputs
                 )
@@ -1110,7 +1114,9 @@ class DataHandler(DataHandlerBase):
                     self.input_data_scaler.partial_fit(tmp)
 
         else:
-            self.__load_data("training", "inputs", from_arrays_dict=from_arrays_dict)
+            self.__load_data(
+                "training", "inputs", from_arrays_dict=from_arrays_dict
+            )
             self.input_data_scaler.fit(self._training_data_inputs)
 
         printout("Input scaler parametrized.", min_verbosity=1)
@@ -1171,8 +1177,9 @@ class DataHandler(DataHandlerBase):
                 i += 1
 
         else:
-            self.__load_data("training", "outputs", from_arrays_dict=from_arrays_dict
-            ))
+            self.__load_data(
+                "training", "outputs", from_arrays_dict=from_arrays_dict
+            )
             self.output_data_scaler.fit(self._training_data_outputs)
 
         printout("Output scaler parametrized.", min_verbosity=1)
