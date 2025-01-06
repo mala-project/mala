@@ -1,6 +1,7 @@
 """DataHandler class that loads and scales data."""
 
 import os
+import tempfile
 
 import numpy as np
 import torch
@@ -168,6 +169,19 @@ class DataHandler(DataHandlerBase):
         self.input_data_scaler.reset()
         self.output_data_scaler.reset()
         super(DataHandler, self).clear_data()
+
+    def delete_temporary_data(self):
+        """
+        Delete temporary data files.
+
+        These may have been created during a training or testing process
+        when using atomic positions for on-the-fly calculation of descriptors
+        rather than precomputed data files.
+        """
+        for snapshot in self.parameters.snapshot_directories_list:
+            if snapshot.temporary_input_file is not None:
+                if os.path.isfile(snapshot.temporary_input_file):
+                    os.remove(snapshot.temporary_input_file)
 
     # Preparing data
     ######################
@@ -595,6 +609,26 @@ class DataHandler(DataHandlerBase):
                         snapshot.input_npy_directory, snapshot.input_npy_file
                     )
                     units = snapshot.input_units
+
+                    # If the input for the descriptors is actually a JSON
+                    # file then we need to calculate the descriptors.
+                    if snapshot.snapshot_type == "json+numpy":
+                        snapshot.temporary_input_file = (
+                            tempfile.NamedTemporaryFile(
+                                delete=False,
+                                prefix=snapshot.input_npy_file.split(".")[0],
+                                suffix=".in.npy",
+                                dir=snapshot.input_npy_directory,
+                            ).name
+                        )
+                        descriptors, grid = (
+                            self.descriptor_calculator.calculate_from_json(
+                                file
+                            )
+                        )
+                        np.save(snapshot.temporary_input_file, descriptors)
+                        file = snapshot.temporary_input_file
+
                 else:
                     file = os.path.join(
                         snapshot.output_npy_directory,
@@ -602,7 +636,10 @@ class DataHandler(DataHandlerBase):
                     )
                     units = snapshot.output_units
 
-                if snapshot.snapshot_type == "numpy":
+                if (
+                    snapshot.snapshot_type == "numpy"
+                    or snapshot.snapshot_type == "json+numpy"
+                ):
                     calculator.read_from_numpy_file(
                         file,
                         units=units,

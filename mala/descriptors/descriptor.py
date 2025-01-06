@@ -1,11 +1,12 @@
 """Base class for all descriptor calculators."""
 
 from abc import abstractmethod
-from functools import cached_property
+import json
 import os
 import tempfile
 
 import ase
+from ase.cell import Cell
 from ase.units import m
 from ase.neighborlist import NeighborList, NewPrimitiveNeighborList
 import numpy as np
@@ -375,6 +376,16 @@ class Descriptor(PhysicalData):
 
         return self._calculate(working_directory, **kwargs)
 
+    def calculate_from_json(self, json_file, working_directory=".", **kwargs):
+        if isinstance(json_file, str):
+            json_dict = json.load(open(json_file, encoding="utf-8"))
+        else:
+            json_dict = json.load(json_file)
+        self.grid_dimensions = json_dict["grid_dimensions"]
+        self._atoms = ase.Atoms.fromdict(json_dict["atoms"])
+        self._voxel = Cell(json_dict["voxel"]["array"])
+        return self._calculate(working_directory, **kwargs)
+
     def calculate_from_atoms(
         self, atoms, grid_dimensions, working_directory=".", **kwargs
     ):
@@ -572,6 +583,16 @@ class Descriptor(PhysicalData):
             descriptors_np[:, 3:], [nz, ny, nx, self.feature_size]
         ).transpose([2, 1, 0, 3])
         return descriptors_full, local_offset, local_reach
+
+    def read_dimensions_from_json(self, json_file):
+        if isinstance(json_file, str):
+            json_dict = json.load(open(json_file, encoding="utf-8"))
+        else:
+            json_dict = json.load(json_file)
+        grid_dimensions = json_dict["grid_dimensions"] + [
+            self._read_feature_dimension_from_json(json_dict)
+        ]
+        return grid_dimensions
 
     # Private methods
     #################
@@ -1019,6 +1040,10 @@ class Descriptor(PhysicalData):
 
     @abstractmethod
     def _calculate(self, outdir, **kwargs):
+        pass
+
+    @abstractmethod
+    def _read_feature_dimension_from_json(self, json_dict):
         pass
 
     def _set_feature_size_from_array(self, array):

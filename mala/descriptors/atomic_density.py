@@ -119,6 +119,10 @@ class AtomicDensity(Descriptor):
         else:
             return self.__calculate_python(**kwargs)
 
+    def _read_feature_dimension_from_json(self, json_dict):
+        # For now, has to be adapted in the multielement case.
+        return 4
+
     def __calculate_lammps(self, outdir, **kwargs):
         """Perform actual Gaussian descriptor calculation."""
         # For version compatibility; older lammps versions (the serial version

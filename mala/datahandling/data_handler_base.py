@@ -207,6 +207,15 @@ class DataHandlerBase(ABC):
                     ),
                     comm=comm,
                 )
+            elif snapshot.snapshot_type == "json+numpy":
+                tmp_dimension = (
+                    self.descriptor_calculator.read_dimensions_from_json(
+                        os.path.join(
+                            snapshot.input_npy_directory,
+                            snapshot.input_npy_file,
+                        )
+                    )
+                )
             else:
                 raise Exception("Unknown snapshot file type.")
 
@@ -235,7 +244,10 @@ class DataHandlerBase(ABC):
                 snapshot.output_npy_directory,
                 min_verbosity=1,
             )
-            if snapshot.snapshot_type == "numpy":
+            if (
+                snapshot.snapshot_type == "numpy"
+                or snapshot.snapshot_type == "json+numpy"
+            ):
                 tmp_dimension = (
                     self.target_calculator.read_dimensions_from_numpy_file(
                         os.path.join(

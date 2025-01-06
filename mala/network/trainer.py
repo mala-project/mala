@@ -597,6 +597,9 @@ class Trainer(Runner):
                 )
             self.final_validation_loss = vloss
 
+        # Cleaning up temporary data files.
+        self.data.delete_temporary_data()
+
         # Clean-up for pre-fetching lazy loading.
         if self.data.parameters.use_lazy_loading_prefetch:
             self._training_data_loaders.cleanup()
