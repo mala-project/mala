@@ -5,7 +5,7 @@ import os
 
 import json
 import numpy as np
-from mala.common.parallelizer import get_comm, get_rank
+from mala.common.parallelizer import get_comm, get_rank, printout
 
 from mala.version import __version__ as mala_version
 
@@ -86,7 +86,7 @@ class PhysicalData(ABC):
     ##############################
 
     def read_from_numpy_file(
-        self, path, units=None, array=None, reshape=False
+        self, path, units=None, array=None, reshape=False, selection_mask=None
     ):
         """
         Read the data from a numpy file.
@@ -103,6 +103,11 @@ class PhysicalData(ABC):
             If not None, the array to save the data into.
             The array has to be 4-dimensional.
 
+        selection_mask : None or [boolean]
+            If None, entire snapshot is loaded, else it is used as a
+            mask to select which examples are loaded
+
+
         reshape : bool
             If True, the loaded 4D array will be reshaped into a 2D array.
 
@@ -117,17 +122,42 @@ class PhysicalData(ABC):
         if array is None:
             loaded_array = np.load(path)[:, :, :, self._feature_mask() :]
             self._process_loaded_array(loaded_array, units=units)
-            return loaded_array
+
+            # Select portion of array if mask provided
+            if selection_mask is not None:
+                original_dims = loaded_array.shape
+
+                # Pseudo-flatten to apply mask without causing dimensionality mismatch later on
+                loaded_array = loaded_array.reshape(
+                    (-1, 1, 1, original_dims[-1])
+                )[selection_mask]
+                return loaded_array
+            else:
+                return loaded_array
         else:
             if reshape:
                 array_dims = np.shape(array)
-                array[:, :] = np.load(path)[
-                    :, :, :, self._feature_mask() :
-                ].reshape(array_dims)
+                if selection_mask is not None:
+                    array[:, :] = np.load(path)[
+                        :, :, :, self._feature_mask() :
+                    ].reshape((len(selection_mask), -1))[selection_mask]
+                else:
+                    array[:, :] = np.load(path)[
+                        :, :, :, self._feature_mask() :
+                    ].reshape(array_dims)
             else:
+                array_dims = np.shape(array)
                 array[:, :, :, :] = np.load(path)[
                     :, :, :, self._feature_mask() :
                 ]
+
+                # Select portion of array if mask provided
+                if selection_mask is not None:
+                    # Pseudo-flatten to apply mask without causing
+                    # dimensionality mismatch later on
+                    array = array.reshape((-1, 1, 1, array_dims[-1]))[
+                        selection_mask
+                    ]
             self._process_loaded_array(array, units=units)
 
     def read_from_openpmd_file(self, path, units=None, array=None):
@@ -272,7 +302,9 @@ class PhysicalData(ABC):
         else:
             self._process_loaded_array(array, units=units)
 
-    def read_dimensions_from_numpy_file(self, path, read_dtype=False):
+    def read_dimensions_from_numpy_file(
+        self, path, read_dtype=False, selection_mask=None
+    ):
         """
         Read only the dimensions from a numpy file.
 
@@ -293,6 +325,11 @@ class PhysicalData(ABC):
             be returned.
         """
         loaded_array = np.load(path, mmap_mode="r")
+        if selection_mask is not None:
+            original_dims = loaded_array.shape
+            loaded_array = loaded_array.reshape((-1, 1, 1, original_dims[-1]))[
+                selection_mask
+            ]
         if read_dtype:
             return (
                 self._process_loaded_dimensions(np.shape(loaded_array)),

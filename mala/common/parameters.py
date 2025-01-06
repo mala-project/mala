@@ -1709,7 +1709,7 @@ class Parameters:
 
         Parameters
         ----------
-        file : string or ZipExtFile
+        file : string or ZipExtFile or dict
             File to which the parameters will be saved to.
 
         save_format : string
@@ -1738,54 +1738,61 @@ class Parameters:
                 json_dict = json.load(open(file, encoding="utf-8"))
             else:
                 json_dict = json.load(file)
-
-            loaded_parameters = cls()
-            for key in json_dict:
-                if (
-                    isinstance(json_dict[key], dict)
-                    and key != "openpmd_configuration"
-                ):
-                    # These are the other parameter classes.
-                    sub_parameters = globals()[
-                        json_dict[key]["_parameters_type"]
-                    ].from_json(json_dict[key])
-                    setattr(loaded_parameters, key, sub_parameters)
-
-                    # Backwards compatability:
-                    if key == "descriptors":
-                        if (
-                            "use_atomic_density_energy_formula"
-                            in json_dict[key]
-                        ):
-                            loaded_parameters.use_atomic_density_formula = (
-                                json_dict[key][
-                                    "use_atomic_density_energy_formula"
-                                ]
-                            )
-
-            # We iterate a second time, to set global values, so that they
-            # are properly forwarded.
-            for key in json_dict:
-                if (
-                    not isinstance(json_dict[key], dict)
-                    or key == "openpmd_configuration"
-                ):
-                    if key == "use_ddp" and force_no_ddp is True:
-                        setattr(loaded_parameters, key, False)
-                    else:
-                        setattr(loaded_parameters, key, json_dict[key])
-            if no_snapshots is True:
-                loaded_parameters.data.snapshot_directories_list = []
-            # Backwards compatability: since the transfer of old property
-            # to new property happens _before_ all children descriptor classes
-            # are instantiated, it is not properly propagated. Thus, we
-            # simply have to set it to its own value again.
-            loaded_parameters.use_atomic_density_formula = (
-                loaded_parameters.use_atomic_density_formula
+            loaded_parameters = cls._process_loaded_dict(
+                json_dict, no_snapshots, force_no_ddp
             )
+
+        elif save_format == "dict":
+            loaded_parameters = cls._process_loaded_dict(
+                file, no_snapshots, force_no_ddp
+            )
+
         else:
             raise Exception("Unsupported parameter save format.")
 
+        return loaded_parameters
+
+    @classmethod
+    def _process_loaded_dict(cls, json_dict, no_snapshots, force_no_ddp):
+        loaded_parameters = cls()
+        for key in json_dict:
+            if (
+                isinstance(json_dict[key], dict)
+                and key != "openpmd_configuration"
+            ):
+                # These are the other parameter classes.
+                sub_parameters = globals()[
+                    json_dict[key]["_parameters_type"]
+                ].from_json(json_dict[key])
+                setattr(loaded_parameters, key, sub_parameters)
+
+                # Backwards compatability:
+                if key == "descriptors":
+                    if "use_atomic_density_energy_formula" in json_dict[key]:
+                        loaded_parameters.use_atomic_density_formula = (
+                            json_dict[key]["use_atomic_density_energy_formula"]
+                        )
+
+        # We iterate a second time, to set global values, so that they
+        # are properly forwarded.
+        for key in json_dict:
+            if (
+                not isinstance(json_dict[key], dict)
+                or key == "openpmd_configuration"
+            ):
+                if key == "use_ddp" and force_no_ddp is True:
+                    setattr(loaded_parameters, key, False)
+                else:
+                    setattr(loaded_parameters, key, json_dict[key])
+        if no_snapshots is True:
+            loaded_parameters.data.snapshot_directories_list = []
+        # Backwards compatability: since the transfer of old property
+        # to new property happens _before_ all children descriptor classes
+        # are instantiated, it is not properly propagated. Thus, we
+        # simply have to set it to its own value again.
+        loaded_parameters.use_atomic_density_formula = (
+            loaded_parameters.use_atomic_density_formula
+        )
         return loaded_parameters
 
     @classmethod
@@ -1835,6 +1842,35 @@ class Parameters:
         return Parameters.load_from_file(
             file,
             save_format="json",
+            no_snapshots=no_snapshots,
+            force_no_ddp=force_no_ddp,
+        )
+
+    @classmethod
+    def load_from_dict(
+        cls, param_dict, no_snapshots=False, force_no_ddp=False
+    ):
+        """
+        Load a Parameters object from a file.
+
+        Parameters
+        ----------
+        param_dict : dictionary
+            Dictionary containing parameters to be loaded
+
+        no_snapshots : bool
+            If True, than the snapshot list will be emptied. Useful when
+            performing inference/testing after training a network.
+
+        Returns
+        -------
+        loaded_parameters : Parameters
+            The loaded Parameters object.
+
+        """
+        return Parameters.load_from_file(
+            param_dict,
+            save_format="dict",
             no_snapshots=no_snapshots,
             force_no_ddp=force_no_ddp,
         )
