@@ -163,6 +163,18 @@ class LazyLoadDataset(Dataset):
                 ),
                 units=self._snapshot_list[file_index].output_units,
             )
+        elif self._snapshot_list[file_index].snapshot_type == "json+numpy":
+            self.input_data = self._descriptor_calculator.read_from_numpy_file(
+                self._snapshot_list[file_index].temporary_input_file,
+                units=self._snapshot_list[file_index].input_units,
+            )
+            self.output_data = self._target_calculator.read_from_numpy_file(
+                os.path.join(
+                    self._snapshot_list[file_index].output_npy_directory,
+                    self._snapshot_list[file_index].output_npy_file,
+                ),
+                units=self._snapshot_list[file_index].output_units,
+            )
 
         elif self._snapshot_list[file_index].snapshot_type == "openpmd":
             self.input_data = (

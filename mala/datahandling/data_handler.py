@@ -350,6 +350,21 @@ class DataHandler(DataHandlerBase):
             snapshot_number
         ].calculation_output
 
+    def calculate_temporary_inputs(self, snapshot: Snapshot):
+        snapshot.temporary_input_file = tempfile.NamedTemporaryFile(
+            delete=False,
+            prefix=snapshot.input_npy_file.split(".")[0],
+            suffix=".in.npy",
+            dir=snapshot.input_npy_directory,
+        ).name
+        tmp, grid = self.descriptor_calculator.calculate_from_json(
+            os.path.join(
+                snapshot.input_npy_directory,
+                snapshot.input_npy_file,
+            )
+        )
+        np.save(snapshot.temporary_input_file, tmp)
+
     # Debugging
     ######################
 
@@ -613,22 +628,8 @@ class DataHandler(DataHandlerBase):
                     # If the input for the descriptors is actually a JSON
                     # file then we need to calculate the descriptors.
                     if snapshot.snapshot_type == "json+numpy":
-                        snapshot.temporary_input_file = (
-                            tempfile.NamedTemporaryFile(
-                                delete=False,
-                                prefix=snapshot.input_npy_file.split(".")[0],
-                                suffix=".in.npy",
-                                dir=snapshot.input_npy_directory,
-                            ).name
-                        )
-                        descriptors, grid = (
-                            self.descriptor_calculator.calculate_from_json(
-                                file
-                            )
-                        )
-                        np.save(snapshot.temporary_input_file, descriptors)
+                        self.calculate_temporary_inputs(snapshot)
                         file = snapshot.temporary_input_file
-
                 else:
                     file = os.path.join(
                         snapshot.output_npy_directory,
@@ -753,11 +754,20 @@ class DataHandler(DataHandlerBase):
                     self.training_data_sets[0].add_snapshot_to_dataset(
                         snapshot
                     )
+                # For training snapshots, temporary files (if needed) have
+                # already been built during parametrization, for all other
+                # snapshot types, this has to be done here.
                 if snapshot.snapshot_function == "va":
+                    if snapshot.snapshot_type == "json+numpy":
+                        self.calculate_temporary_inputs(snapshot)
+
                     self.validation_data_sets[0].add_snapshot_to_dataset(
                         snapshot
                     )
                 if snapshot.snapshot_function == "te":
+                    if snapshot.snapshot_type == "json+numpy":
+                        self.calculate_temporary_inputs(snapshot)
+
                     self.test_data_sets[0].add_snapshot_to_dataset(snapshot)
 
             # I don't think we need to mix them here. We can use the standard
@@ -915,6 +925,12 @@ class DataHandler(DataHandlerBase):
                                 )
                             )
                         )
+                    elif snapshot.snapshot_type == "json+numpy":
+                        self.calculate_temporary_inputs(snapshot)
+                        tmp = self.descriptor_calculator.read_from_numpy_file(
+                            snapshot.temporary_input_file,
+                            units=snapshot.input_units,
+                        )
                     else:
                         raise Exception("Unknown snapshot file type.")
 
@@ -956,7 +972,10 @@ class DataHandler(DataHandlerBase):
             for snapshot in self.parameters.snapshot_directories_list:
                 # Data scaling is only performed on the training data sets.
                 if snapshot.snapshot_function == "tr":
-                    if snapshot.snapshot_type == "numpy":
+                    if (
+                        snapshot.snapshot_type == "numpy"
+                        or snapshot.snapshot_type == "json+numpy"
+                    ):
                         tmp = self.target_calculator.read_from_numpy_file(
                             os.path.join(
                                 snapshot.output_npy_directory,
