@@ -110,6 +110,8 @@ class Tester(Runner):
             for observable in self.observables_to_test:
                 results[observable].append(snapshot_result[observable])
 
+        self.data.delete_temporary_data()
+
         if self.output_format == "list":
             return results
 

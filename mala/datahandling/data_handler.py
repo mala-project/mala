@@ -170,7 +170,7 @@ class DataHandler(DataHandlerBase):
         self.output_data_scaler.reset()
         super(DataHandler, self).clear_data()
 
-    def _delete_temporary_data(self):
+    def delete_temporary_data(self):
         """
         Delete temporary data files.
 
@@ -264,7 +264,7 @@ class DataHandler(DataHandlerBase):
         # In the RAM case, there is no reason not to delete all temporary files
         # now.
         if self.parameters.use_lazy_loading is False:
-            self._delete_temporary_data()
+            self.delete_temporary_data()
 
     def prepare_for_testing(self):
         """
