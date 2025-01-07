@@ -423,7 +423,7 @@
     <span class="c1"># OOOOOOOOOO</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__contiguous_slice_within_ndim_grid_as_blocks</span><span class="p">(</span>
-        <span class="n">extent</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">y</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+        <span class="n">extent</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
     <span class="p">):</span>
         <span class="c1"># Used for converting a block defined by inclusive lower and upper</span>
         <span class="c1"># coordinate to a chunk as defined by openPMD.</span>
@@ -499,7 +499,7 @@
     <span class="c1"># Interpreting `ndim_extent` as the extents of an n-dimensional grid,</span>
     <span class="c1"># returns the n-dimensional coordinate of the `idx`th item in the row-major</span>
     <span class="c1"># representation of the grid.</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">__resolve_flattened_index_into_ndim</span><span class="p">(</span><span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ndim_extent</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__resolve_flattened_index_into_ndim</span><span class="p">(</span><span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ndim_extent</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ndim_extent</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Cannot index into a zero-dimensional array.&quot;</span><span class="p">)</span>
         <span class="n">strides</span> <span class="o">=</span> <span class="p">[]</span>
