@@ -7,7 +7,7 @@ import numpy as np
 import torch
 from torch.utils.data import TensorDataset
 
-from mala.common.parallelizer import printout, barrier
+from mala.common.parallelizer import printout, barrier, get_rank
 from mala.common.parameters import Parameters, DEFAULT_NP_DATA_DTYPE
 from mala.datahandling.data_handler_base import DataHandlerBase
 from mala.datahandling.data_scaler import DataScaler
@@ -170,7 +170,7 @@ class DataHandler(DataHandlerBase):
         self.output_data_scaler.reset()
         super(DataHandler, self).clear_data()
 
-    def delete_temporary_data(self):
+    def _delete_temporary_data(self):
         """
         Delete temporary data files.
 
@@ -178,10 +178,12 @@ class DataHandler(DataHandlerBase):
         when using atomic positions for on-the-fly calculation of descriptors
         rather than precomputed data files.
         """
-        for snapshot in self.parameters.snapshot_directories_list:
-            if snapshot.temporary_input_file is not None:
-                if os.path.isfile(snapshot.temporary_input_file):
-                    os.remove(snapshot.temporary_input_file)
+        if get_rank() == 0:
+            for snapshot in self.parameters.snapshot_directories_list:
+                if snapshot.temporary_input_file is not None:
+                    if os.path.isfile(snapshot.temporary_input_file):
+                        os.remove(snapshot.temporary_input_file)
+        barrier()
 
     # Preparing data
     ######################
@@ -241,16 +243,8 @@ class DataHandler(DataHandlerBase):
             printout("Initializing the data scalers.", min_verbosity=1)
             self.__parametrize_scalers()
             printout("Data scalers initialized.", min_verbosity=0)
-        elif (
-            self.parameters.use_lazy_loading is False
-            and self.nr_training_data != 0
-        ):
-            printout(
-                "Data scalers already initilized, loading data to RAM.",
-                min_verbosity=0,
-            )
-            self.__load_data("training", "inputs")
-            self.__load_data("training", "outputs")
+        elif self.nr_training_data != 0:
+            self.__parametrized_load_training_data()
 
         # Build Datasets.
         printout("Build datasets.", min_verbosity=1)
@@ -266,6 +260,11 @@ class DataHandler(DataHandlerBase):
         # an elongated wait time at this barrier, check that your file system
         # allows for parallel I/O.
         barrier()
+
+        # In the RAM case, there is no reason not to delete all temporary files
+        # now.
+        if self.parameters.use_lazy_loading is False:
+            self._delete_temporary_data()
 
     def prepare_for_testing(self):
         """
@@ -351,19 +350,24 @@ class DataHandler(DataHandlerBase):
         ].calculation_output
 
     def calculate_temporary_inputs(self, snapshot: Snapshot):
-        snapshot.temporary_input_file = tempfile.NamedTemporaryFile(
-            delete=False,
-            prefix=snapshot.input_npy_file.split(".")[0],
-            suffix=".in.npy",
-            dir=snapshot.input_npy_directory,
-        ).name
-        tmp, grid = self.descriptor_calculator.calculate_from_json(
-            os.path.join(
-                snapshot.input_npy_directory,
-                snapshot.input_npy_file,
+        if snapshot.temporary_input_file is not None:
+            if not os.path.isfile(snapshot.temporary_input_file):
+                snapshot.temporary_input_file = None
+
+        if snapshot.temporary_input_file is None:
+            snapshot.temporary_input_file = tempfile.NamedTemporaryFile(
+                delete=False,
+                prefix=snapshot.input_npy_file.split(".")[0],
+                suffix=".in.npy",
+                dir=snapshot.input_npy_directory,
+            ).name
+            tmp, grid = self.descriptor_calculator.calculate_from_json(
+                os.path.join(
+                    snapshot.input_npy_directory,
+                    snapshot.input_npy_file,
+                )
             )
-        )
-        np.save(snapshot.temporary_input_file, tmp)
+            np.save(snapshot.temporary_input_file, tmp)
 
     # Debugging
     ######################
@@ -1013,6 +1017,27 @@ class DataHandler(DataHandlerBase):
             self.output_data_scaler.fit(self._training_data_outputs)
 
         printout("Output scaler parametrized.", min_verbosity=1)
+
+    def __parametrized_load_training_data(self):
+        if self.parameters.use_lazy_loading:
+            printout(
+                "Data scalers already initilized, preparing input data.",
+                min_verbosity=0,
+            )
+            for snapshot in self.parameters.snapshot_directories_list:
+                # Data scaling is only performed on the training data sets.
+                if (
+                    snapshot.snapshot_function == "tr"
+                    and snapshot.snapshot_type == "json+numpy"
+                ):
+                    self.calculate_temporary_inputs(snapshot)
+        else:
+            printout(
+                "Data scalers already initilized, loading data to RAM.",
+                min_verbosity=0,
+            )
+            self.__load_data("training", "inputs")
+            self.__load_data("training", "outputs")
 
     def __raw_numpy_to_converted_numpy(
         self, numpy_array, data_type="in", units=None
