@@ -349,7 +349,7 @@ class DataHandler(DataHandlerBase):
             snapshot_number
         ].calculation_output
 
-    def calculate_temporary_inputs(self, snapshot: Snapshot):
+    def __calculate_temporary_inputs(self, snapshot: Snapshot):
         if snapshot.temporary_input_file is not None:
             if not os.path.isfile(snapshot.temporary_input_file):
                 snapshot.temporary_input_file = None
@@ -632,7 +632,7 @@ class DataHandler(DataHandlerBase):
                     # If the input for the descriptors is actually a JSON
                     # file then we need to calculate the descriptors.
                     if snapshot.snapshot_type == "json+numpy":
-                        self.calculate_temporary_inputs(snapshot)
+                        self.__calculate_temporary_inputs(snapshot)
                         file = snapshot.temporary_input_file
                 else:
                     file = os.path.join(
@@ -763,14 +763,14 @@ class DataHandler(DataHandlerBase):
                 # snapshot types, this has to be done here.
                 if snapshot.snapshot_function == "va":
                     if snapshot.snapshot_type == "json+numpy":
-                        self.calculate_temporary_inputs(snapshot)
+                        self.__calculate_temporary_inputs(snapshot)
 
                     self.validation_data_sets[0].add_snapshot_to_dataset(
                         snapshot
                     )
                 if snapshot.snapshot_function == "te":
                     if snapshot.snapshot_type == "json+numpy":
-                        self.calculate_temporary_inputs(snapshot)
+                        self.__calculate_temporary_inputs(snapshot)
 
                     self.test_data_sets[0].add_snapshot_to_dataset(snapshot)
 
@@ -930,7 +930,7 @@ class DataHandler(DataHandlerBase):
                             )
                         )
                     elif snapshot.snapshot_type == "json+numpy":
-                        self.calculate_temporary_inputs(snapshot)
+                        self.__calculate_temporary_inputs(snapshot)
                         tmp = self.descriptor_calculator.read_from_numpy_file(
                             snapshot.temporary_input_file,
                             units=snapshot.input_units,
@@ -1030,7 +1030,7 @@ class DataHandler(DataHandlerBase):
                     snapshot.snapshot_function == "tr"
                     and snapshot.snapshot_type == "json+numpy"
                 ):
-                    self.calculate_temporary_inputs(snapshot)
+                    self.__calculate_temporary_inputs(snapshot)
         else:
             printout(
                 "Data scalers already initilized, loading data to RAM.",
