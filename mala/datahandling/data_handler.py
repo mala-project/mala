@@ -170,7 +170,7 @@ class DataHandler(DataHandlerBase):
         self.output_data_scaler.reset()
         super(DataHandler, self).clear_data()
 
-    def delete_temporary_data(self):
+    def delete_temporary_inputs(self):
         """
         Delete temporary data files.
 
@@ -264,7 +264,7 @@ class DataHandler(DataHandlerBase):
         # In the RAM case, there is no reason not to delete all temporary files
         # now.
         if self.parameters.use_lazy_loading is False:
-            self.delete_temporary_data()
+            self.delete_temporary_inputs()
 
     def prepare_for_testing(self):
         """
@@ -367,7 +367,12 @@ class DataHandler(DataHandlerBase):
                     snapshot.input_npy_file,
                 )
             )
-            np.save(snapshot.temporary_input_file, tmp)
+            if self.parameters._configuration["mpi"]:
+                tmp = self.descriptor_calculator.gather_descriptors(tmp)
+
+            if get_rank() == 0:
+                np.save(snapshot.temporary_input_file, tmp)
+            barrier()
 
     # Debugging
     ######################
