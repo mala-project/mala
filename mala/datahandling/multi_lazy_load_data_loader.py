@@ -192,6 +192,24 @@ class MultiLazyLoadDataLoader:
                     read_dtype=True,
                 )
             )
+        elif snapshot.snapshot_type == "json+numpy":
+            input_shape = descriptor_calculator.read_dimensions_from_json(
+                os.path.join(
+                    snapshot.input_npy_directory,
+                    snapshot.input_npy_file,
+                ),
+            )
+            input_dtype = np.dtype(np.float32)
+
+            output_shape, output_dtype = (
+                target_calculator.read_dimensions_from_numpy_file(
+                    os.path.join(
+                        snapshot.output_npy_directory,
+                        snapshot.output_npy_file,
+                    ),
+                    read_dtype=True,
+                )
+            )
         else:
             raise Exception("Invalid snapshot type selected.")
 
@@ -219,7 +237,22 @@ class MultiLazyLoadDataLoader:
                 units=snapshot.output_units,
                 array=output_data,
             )
-        else:
+
+        elif snapshot.snapshot_type == "json+numpy":
+            descriptor_calculator.read_from_numpy_file(
+                snapshot.temporary_input_file,
+                units=snapshot.input_units,
+                array=input_data,
+            )
+            target_calculator.read_from_numpy_file(
+                os.path.join(
+                    snapshot.output_npy_directory, snapshot.output_npy_file
+                ),
+                units=snapshot.output_units,
+                array=output_data,
+            )
+
+        elif snapshot.snapshot_type == "openpmd":
             descriptor_calculator.read_from_openpmd_file(
                 os.path.join(
                     snapshot.input_npy_directory, snapshot.input_npy_file
@@ -234,6 +267,8 @@ class MultiLazyLoadDataLoader:
                 units=snapshot.output_units,
                 array=output_data,
             )
+        else:
+            raise Exception("Invalid snapshot type selected.")
 
         # This function only loads the numpy data with scaling. Remaining data
         # preprocessing occurs in __getitem__ of LazyLoadDatasetSingle

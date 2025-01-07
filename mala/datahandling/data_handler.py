@@ -816,6 +816,9 @@ class DataHandler(DataHandlerBase):
                             self._use_ddp,
                         )
                     )
+                    if snapshot.snapshot_type == "json+numpy":
+                        self.__calculate_temporary_inputs(snapshot)
+
                 if snapshot.snapshot_function == "te":
                     self.test_data_sets.append(
                         LazyLoadDatasetSingle(
@@ -831,6 +834,8 @@ class DataHandler(DataHandlerBase):
                             input_requires_grad=True,
                         )
                     )
+                    if snapshot.snapshot_type == "json+numpy":
+                        self.__calculate_temporary_inputs(snapshot)
 
         else:
             if self.nr_training_data != 0:
