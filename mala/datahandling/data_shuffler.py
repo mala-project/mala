@@ -335,7 +335,7 @@ class DataShuffler(DataHandlerBase):
     # OOOOOOOOOO
 
     def __contiguous_slice_within_ndim_grid_as_blocks(
-        extent: list[int], x: list[int], y: list[int]
+        extent, x, y
     ):
         # Used for converting a block defined by inclusive lower and upper
         # coordinate to a chunk as defined by openPMD.
@@ -411,7 +411,7 @@ class DataShuffler(DataHandlerBase):
     # Interpreting `ndim_extent` as the extents of an n-dimensional grid,
     # returns the n-dimensional coordinate of the `idx`th item in the row-major
     # representation of the grid.
-    def __resolve_flattened_index_into_ndim(idx: int, ndim_extent: list[int]):
+    def __resolve_flattened_index_into_ndim(idx: int, ndim_extent):
         if not ndim_extent:
             raise RuntimeError("Cannot index into a zero-dimensional array.")
         strides = []
