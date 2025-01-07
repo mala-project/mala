@@ -334,9 +334,7 @@ class DataShuffler(DataHandlerBase):
     # XXXXXXXOOO
     # OOOOOOOOOO
 
-    def __contiguous_slice_within_ndim_grid_as_blocks(
-        extent, x, y
-    ):
+    def __contiguous_slice_within_ndim_grid_as_blocks(extent, x, y):
         # Used for converting a block defined by inclusive lower and upper
         # coordinate to a chunk as defined by openPMD.
         # The openPMD extent is defined by (to-from)+1 (to make up for the
@@ -426,7 +424,8 @@ class DataShuffler(DataHandlerBase):
             if not inner_strides:
                 if inner_idx != 0:
                     raise RuntimeError(
-                        "This cannot happen. There is bug somewhere.")
+                        "This cannot happen. There is bug somewhere."
+                    )
                 else:
                     return []
             div, mod = divmod(inner_idx, inner_strides[0])
@@ -655,8 +654,7 @@ class DataShuffler(DataHandlerBase):
         ----------
         complete_save_path : string
             If not None: the directory in which all snapshots will be saved.
-            Overwrites descriptor_save_path, target_save_path and
-            additional_info_save_path if set.
+            Overwrites descriptor_save_path and target_save_path if set.
 
         descriptor_save_path : string
             Directory in which to save descriptor data.

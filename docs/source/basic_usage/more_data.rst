@@ -99,8 +99,8 @@ and fill it with data, e.g., by
                                         descriptor_input_path=outfile,
                                         target_input_type=".cube",
                                         target_input_path=ldosfile,
-                                        additional_info_input_type="espresso-out",
-                                        additional_info_input_path=outfile,
+                                        simulation_output_type="espresso-out",
+                                        simulation_output_path=outfile,
                                         target_units="1/(Ry*Bohr^3)")
 
 The ``add_snapshot`` function can be called multiple times to add
@@ -108,7 +108,7 @@ multiple snapshots to MALA.
 For regular Quantum ESPRESSO calculations, the ``descriptor_input_type``
 and ``target_input_type`` will always be ``"espresso-out"`` and ``".cube"``,
 respectively, and the ``target_units`` will always be ``"1/(Ry*Bohr^3)"``.
-The paths have to be modified accordingly. ``additional_info_input_*`` refers
+The paths have to be modified accordingly. ``simulation_output_*`` refers
 to the calculation output file - MALA provides an interface to condense
 the entire, verbose simulation output to ``.json`` files for further
 processing. In the preceding section, we had to specify calculation output
@@ -121,7 +121,7 @@ Once data is provided, the conversion itself is simple.
 
             data_converter.convert_snapshots(descriptor_save_path="./",
                                              target_save_path="./",
-                                             additional_info_save_path="./",
+                                             simulation_output_save_path="./",
                                              naming_scheme="Be_snapshot*.npy",
                                              descriptor_calculation_kwargs=
                                              {"working_directory": data_path})
