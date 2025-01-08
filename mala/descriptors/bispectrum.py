@@ -9,7 +9,7 @@ from importlib.util import find_spec
 import numpy as np
 from scipy.spatial import distance
 
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, get_rank, barrier
 from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
 
@@ -156,9 +156,14 @@ class Bispectrum(Descriptor):
         lammps_format = "lammps-data"
         self.setup_lammps_tmp_files("bgrid", outdir)
 
-        ase.io.write(
-            self._lammps_temporary_input, self._atoms, format=lammps_format
-        )
+        if get_rank() == 0:
+            ase.io.write(
+                self._lammps_temporary_input,
+                self._atoms,
+                format=lammps_format,
+                parallel=False,
+            )
+        barrier()
 
         nx = self.grid_dimensions[0]
         ny = self.grid_dimensions[1]
