@@ -305,10 +305,12 @@ class DataScaler:
                 if self.scale_standard:
                     unscaled -= self.means
                     unscaled /= self.stds
+                    unscaled.nan_to_num_(nan = 0.0) #account for possible 0 valued ACE descriptors
 
                 if self.scale_normal:
                     unscaled -= self.mins
                     unscaled /= self.maxs - self.mins
+                    unscaled.nan_to_num_(nan = 0.0) #account for possible 0 valued ACE descriptors
 
             else:
 
@@ -319,10 +321,12 @@ class DataScaler:
                 if self.scale_standard:
                     unscaled -= self.total_mean
                     unscaled /= self.total_std
+                    unscaled.nan_to_num_(nan = 0.0) #account for possible 0 valued ACE descriptors
 
                 if self.scale_normal:
                     unscaled -= self.total_min
                     unscaled /= self.total_max - self.total_min
+                    unscaled.nan_to_num_(nan = 0.0) #account for possible 0 valued ACE descriptors
 
     def inverse_transform(self, scaled, as_numpy=False):
         """
