@@ -939,6 +939,13 @@ class DataShuffler(DataHandlerBase):
         self.clear_data()
 
     def delete_temporary_shuffled_snapshots(self):
+        """
+        Delete temporary files creating during shuffling of data.
+
+        If shuffling has been done with the option "shuffle_to_temporary",
+        shuffled data will be saved to temporary files which can safely be
+        deleted with this function.
+        """
         for snapshot in self.temporary_shuffled_snapshots:
             input_file = os.path.join(
                 snapshot.input_npy_directory, snapshot.input_npy_file
