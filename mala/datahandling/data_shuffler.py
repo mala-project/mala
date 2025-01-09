@@ -45,14 +45,6 @@ class DataShuffler(DataHandlerBase):
             target_calculator=target_calculator,
             descriptor_calculator=descriptor_calculator,
         )
-        if self.descriptor_calculator.parameters.descriptors_contain_xyz:
-            printout(
-                "Disabling XYZ-cutting from descriptor data for "
-                "shuffling. If needed, please re-enable afterwards."
-            )
-            self.descriptor_calculator.parameters.descriptors_contain_xyz = (
-                False
-            )
         self._data_points_to_remove = None
 
     def add_snapshot(
@@ -112,15 +104,29 @@ class DataShuffler(DataHandlerBase):
         for idx, snapshot in enumerate(
             self.parameters.snapshot_directories_list
         ):
-            # TODO: Use descriptor and target calculator for this.
-            descriptor_data.append(
-                np.load(
-                    os.path.join(
-                        snapshot.input_npy_directory, snapshot.input_npy_file
-                    ),
-                    mmap_mode="r",
+            if snapshot.snapshot_type == "numpy":
+                # TODO: Use descriptor and target calculator for this.
+                descriptor_data.append(
+                    np.load(
+                        os.path.join(
+                            snapshot.input_npy_directory,
+                            snapshot.input_npy_file,
+                        ),
+                        mmap_mode="r",
+                    )
                 )
-            )
+            elif snapshot.snapshot_type == "json+numpy":
+                descriptor_data.append(
+                    np.load(
+                        snapshot.temporary_input_file,
+                        mmap_mode="r",
+                    )
+                )
+            else:
+                raise Exception(
+                    "Invalid snapshot for numpy shuffling " "selected."
+                )
+
             target_data.append(
                 np.load(
                     os.path.join(
@@ -261,6 +267,8 @@ class DataShuffler(DataHandlerBase):
                     },
                     internal_iteration_number=i,
                 )
+
+        self.delete_temporary_inputs()
 
     # The function __shuffle_openpmd can be used to shuffle descriptor data and
     # target data.
@@ -692,11 +700,13 @@ class DataShuffler(DataHandlerBase):
         else:
             file_ending = "npy"
 
+        old_xyz = self.descriptor_calculator.parameters.descriptors_contain_xyz
+        self.descriptor_calculator.parameters.descriptors_contain_xyz = False
         if self.parameters._configuration["mpi"]:
             self._check_snapshots(comm=get_comm())
         else:
             self._check_snapshots()
-
+        self.descriptor_calculator.parameters.descriptors_contain_xyz = old_xyz
         snapshot_types = {
             snapshot.snapshot_type
             for snapshot in self.parameters.snapshot_directories_list
@@ -776,6 +786,18 @@ class DataShuffler(DataHandlerBase):
             )
 
         if snapshot_type == "numpy":
+            self.__shuffle_numpy(
+                number_of_shuffled_snapshots,
+                shuffle_dimensions,
+                descriptor_save_path,
+                save_name,
+                target_save_path,
+                permutations,
+                file_ending,
+            )
+        elif snapshot_type == "json+numpy":
+            for snapshot in self.parameters.snapshot_directories_list:
+                self._calculate_temporary_inputs(snapshot)
             self.__shuffle_numpy(
                 number_of_shuffled_snapshots,
                 shuffle_dimensions,

@@ -2,11 +2,12 @@
 
 from abc import ABC
 import os
+import tempfile
 
 import numpy as np
 
 from mala.common.parameters import ParametersData, Parameters
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, get_rank, barrier
 from mala.targets.target import Target
 from mala.descriptors.descriptor import Descriptor
 from mala.datahandling.snapshot import Snapshot
@@ -166,6 +167,21 @@ class DataHandlerBase(ABC):
         """
         self.parameters.snapshot_directories_list = []
 
+    def delete_temporary_inputs(self):
+        """
+        Delete temporary data files.
+
+        These may have been created during a training or testing process
+        when using atomic positions for on-the-fly calculation of descriptors
+        rather than precomputed data files.
+        """
+        if get_rank() == 0:
+            for snapshot in self.parameters.snapshot_directories_list:
+                if snapshot.temporary_input_file is not None:
+                    if os.path.isfile(snapshot.temporary_input_file):
+                        os.remove(snapshot.temporary_input_file)
+        barrier()
+
     ##############################
     # Private methods
     ##############################
@@ -286,3 +302,28 @@ class DataHandlerBase(ABC):
 
             if firstsnapshot:
                 firstsnapshot = False
+
+    def _calculate_temporary_inputs(self, snapshot: Snapshot):
+        if snapshot.temporary_input_file is not None:
+            if not os.path.isfile(snapshot.temporary_input_file):
+                snapshot.temporary_input_file = None
+
+        if snapshot.temporary_input_file is None:
+            snapshot.temporary_input_file = tempfile.NamedTemporaryFile(
+                delete=False,
+                prefix=snapshot.input_npy_file.split(".")[0],
+                suffix=".in.npy",
+                dir=snapshot.input_npy_directory,
+            ).name
+            tmp, grid = self.descriptor_calculator.calculate_from_json(
+                os.path.join(
+                    snapshot.input_npy_directory,
+                    snapshot.input_npy_file,
+                )
+            )
+            if self.parameters._configuration["mpi"]:
+                tmp = self.descriptor_calculator.gather_descriptors(tmp)
+
+            if get_rank() == 0:
+                np.save(snapshot.temporary_input_file, tmp)
+            barrier()
