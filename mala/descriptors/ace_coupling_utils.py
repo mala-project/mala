@@ -3,7 +3,8 @@
 import itertools
 
 import numpy as np
-
+from mala.descriptors.pa_lib import *
+from mala.descriptors.pa_gen import *
 
 def get_ms(l, M_R=0):
     # retrieves the set of m_i combinations obeying \sum_i m_i = M_R for an arbitrary l vector
