@@ -67,7 +67,7 @@ class DataShuffler(DataHandlerBase):
         input_directory,
         output_file,
         output_directory,
-        snapshot_type="numpy",
+        snapshot_type=None,
     ):
         """
         Add a snapshot to the data pipeline.

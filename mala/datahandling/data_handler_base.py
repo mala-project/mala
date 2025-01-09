@@ -106,7 +106,7 @@ class DataHandlerBase(ABC):
         output_units="1/(eV*A^3)",
         input_units="None",
         calculation_output_file="",
-        snapshot_type="numpy",
+        snapshot_type=None,
     ):
         """
         Add a snapshot to the data pipeline.
@@ -146,6 +146,25 @@ class DataHandlerBase(ABC):
             Either "numpy" or "openpmd" based on what kind of files you
             want to operate on.
         """
+        # Try to guess snapshot type if no information was provided.
+        if snapshot_type is None:
+            input_file_ending = input_file.split(".")[-1]
+            output_file_ending = output_file.split(".")[-1]
+
+            if input_file_ending == "npy" and output_file_ending == "npy":
+                snapshot_type = "numpy"
+
+            elif input_file_ending == "json" and output_file_ending == "npy":
+                snapshot_type = "json+numpy"
+            else:
+                import openpmd_api as io
+
+                if (
+                    input_file_ending in io.file_extensions
+                    and output_file_ending in io.file_extensions
+                ):
+                    snapshot_type = "openpmd"
+
         snapshot = Snapshot(
             input_file,
             input_directory,
