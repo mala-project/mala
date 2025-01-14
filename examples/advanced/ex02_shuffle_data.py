@@ -24,7 +24,9 @@ parameters.verbosity = 1
 parameters.data.input_rescaling_type = "feature-wise-standard"
 parameters.data.output_rescaling_type = "minmax"
 parameters.network.layer_activations = ["ReLU"]
-parameters.running.max_number_epochs = 100
+
+# No real training, just showing how shuffling directly before training works.
+parameters.running.max_number_epochs = 5
 parameters.running.mini_batch_size = 40
 parameters.running.learning_rate = 0.00001
 parameters.running.optimizer = "Adam"
