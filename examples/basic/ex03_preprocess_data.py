@@ -49,7 +49,7 @@ parameters.targets.ldos_gridoffset_ev = -5
 # Further, via the simulation_output_input_* keywords, calculation output
 # can be processed from the original simulation *.out output files into
 # more convenient *.json files that can be used in their stead. This saves
-# on disk space.
+# on disk space and makes the process more reproducible.
 # To only process parts of the data, omit/add descriptor_input*, target_input_*
 # and simulation_output_* at your leisure.
 # Make sure to set the correct units - for QE, this should always be
