@@ -51,7 +51,9 @@ parameters.targets.ldos_gridoffset_ev = -5
 # more convenient *.json files that can be used in their stead. This saves
 # on disk space and makes the process more reproducible.
 # To only process parts of the data, omit/add descriptor_input*, target_input_*
-# and simulation_output_* at your leisure.
+# and simulation_output_* at your leisure. This is especially useful if you,
+# e.g., do not need to convert the descriptor data, since it will be
+# calculated on-the-fly during training.
 # Make sure to set the correct units - for QE, this should always be
 # 1/(Ry*Bohr^3).
 ####################
@@ -60,6 +62,7 @@ data_converter = mala.DataConverter(parameters)
 outfile = os.path.join(data_path, "Be_snapshot0.out")
 ldosfile = os.path.join(data_path, "cubes/tmp.pp*Be_ldos.cube")
 
+# Converting a snapshot for training on precomputed descriptor data.
 data_converter.add_snapshot(
     descriptor_input_type="espresso-out",
     descriptor_input_path=outfile,
@@ -69,6 +72,16 @@ data_converter.add_snapshot(
     simulation_output_path=outfile,
     target_units="1/(Ry*Bohr^3)",
 )
+
+# Converting a snapshot for training with on-the-fly descriptor calculation.
+# data_converter.add_snapshot(
+#     target_input_type=".cube",
+#     target_input_path=ldosfile,
+#     simulation_output_type="espresso-out",
+#     simulation_output_path=outfile,
+#     target_units="1/(Ry*Bohr^3)",
+# )
+
 
 ####################
 # 3. Converting the data
@@ -82,9 +95,11 @@ data_converter.add_snapshot(
 ####################
 
 data_converter.convert_snapshots(
-    descriptor_save_path="./",
     target_save_path="./",
     simulation_output_save_path="./",
+    # The next line should be omitted, if the descriptor data is to be
+    # calculated on-the-fly during training.
+    descriptor_save_path="./",
     naming_scheme="Be_snapshot*.npy",
     descriptor_calculation_kwargs={"working_directory": data_path},
 )

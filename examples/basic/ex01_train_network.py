@@ -65,15 +65,25 @@ data_handler = mala.DataHandler(parameters)
 data_handler.add_snapshot(
     "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path, "tr"
 )
+data_handler.add_snapshot(
+    "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path, "va"
+)
 # Add snapshots with "raw" (=MALA formatted) JSON, computation of descriptors
 # will be performed "on-the-fly".
-data_handler.add_snapshot(
-    "Be_snapshot1.info.json",
-    data_path,
-    "Be_snapshot1.out.npy",
-    data_path,
-    "va",
-)
+# data_handler.add_snapshot(
+#     "Be_snapshot0.info.json",
+#     data_path,
+#     "Be_snapshot0.out.npy",
+#     data_path,
+#     "tr",
+# )
+# data_handler.add_snapshot(
+#     "Be_snapshot1.info.json",
+#     data_path,
+#     "Be_snapshot1.out.npy",
+#     data_path,
+#     "va",
+# )
 
 data_handler.prepare_data()
 

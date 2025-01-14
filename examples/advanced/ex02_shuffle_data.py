@@ -53,6 +53,14 @@ data_shuffler.add_snapshot(
     "Be_snapshot1.out.npy",
     data_path,
 )
+# On-the-fly snapshots can be added as well.
+# data_shuffler.add_snapshot(
+#     "Be_snapshot2.info.json",
+#     data_path,
+#     "Be_snapshot2.out.npy",
+#     data_path,
+# )
+
 
 # Shuffle the snapshots using the "shuffle_to_temporary" option.
 data_shuffler.shuffle_snapshots(
