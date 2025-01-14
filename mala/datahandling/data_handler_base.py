@@ -164,6 +164,11 @@ class DataHandlerBase(ABC):
                     and output_file_ending in io.file_extensions
                 ):
                     snapshot_type = "openpmd"
+                if (
+                    input_file_ending == "json"
+                    and output_file_ending in io.file_extensions
+                ):
+                    snapshot_type = "json+openpmd"
 
         snapshot = Snapshot(
             input_file,
@@ -242,7 +247,10 @@ class DataHandlerBase(ABC):
                     ),
                     comm=comm,
                 )
-            elif snapshot.snapshot_type == "json+numpy":
+            elif (
+                snapshot.snapshot_type == "json+numpy"
+                or snapshot.snapshot_type == "json+openpmd"
+            ):
                 tmp_dimension = (
                     self.descriptor_calculator.read_dimensions_from_json(
                         os.path.join(
@@ -291,7 +299,10 @@ class DataHandlerBase(ABC):
                         )
                     )
                 )
-            elif snapshot.snapshot_type == "openpmd":
+            elif (
+                snapshot.snapshot_type == "openpmd"
+                or snapshot.snapshot_type == "json+openpmd"
+            ):
                 tmp_dimension = (
                     self.target_calculator.read_dimensions_from_openpmd_file(
                         os.path.join(

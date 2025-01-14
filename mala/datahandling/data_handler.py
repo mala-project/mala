@@ -595,7 +595,10 @@ class DataHandler(DataHandlerBase):
 
                     # If the input for the descriptors is actually a JSON
                     # file then we need to calculate the descriptors.
-                    if snapshot.snapshot_type == "json+numpy":
+                    if (
+                        snapshot.snapshot_type == "json+numpy"
+                        or snapshot.snapshot_type == "json+openpmd"
+                    ):
                         self._calculate_temporary_inputs(snapshot)
                         file = snapshot.temporary_input_file
                 else:
@@ -623,6 +626,22 @@ class DataHandler(DataHandlerBase):
                             file, units=units
                         ).reshape([gs_new, feature_dimension])
                     )
+                elif snapshot.snapshot_type == "json+openpmd":
+                    if data_type == "inputs":
+                        calculator.read_from_numpy_file(
+                            file,
+                            units=units,
+                            array=getattr(self, array)[
+                                gs_old : gs_old + gs_new, :
+                            ],
+                            reshape=True,
+                        )
+                    else:
+                        getattr(self, array)[gs_old : gs_old + gs_new] = (
+                            calculator.read_from_openpmd_file(
+                                file, units=units
+                            ).reshape([gs_new, feature_dimension])
+                        )
                 else:
                     raise Exception("Unknown snapshot file type.")
                 snapshot_counter += 1
@@ -726,14 +745,20 @@ class DataHandler(DataHandlerBase):
                 # already been built during parametrization, for all other
                 # snapshot types, this has to be done here.
                 if snapshot.snapshot_function == "va":
-                    if snapshot.snapshot_type == "json+numpy":
+                    if (
+                        snapshot.snapshot_type == "json+numpy"
+                        or snapshot.snapshot_type == "json+openpmd"
+                    ):
                         self._calculate_temporary_inputs(snapshot)
 
                     self.validation_data_sets[0].add_snapshot_to_dataset(
                         snapshot
                     )
                 if snapshot.snapshot_function == "te":
-                    if snapshot.snapshot_type == "json+numpy":
+                    if (
+                        snapshot.snapshot_type == "json+numpy"
+                        or snapshot.snapshot_type == "json+openpmd"
+                    ):
                         self._calculate_temporary_inputs(snapshot)
 
                     self.test_data_sets[0].add_snapshot_to_dataset(snapshot)
@@ -780,7 +805,10 @@ class DataHandler(DataHandlerBase):
                             self._use_ddp,
                         )
                     )
-                    if snapshot.snapshot_type == "json+numpy":
+                    if (
+                        snapshot.snapshot_type == "json+numpy"
+                        or snapshot.snapshot_type == "json+openpmd"
+                    ):
                         self._calculate_temporary_inputs(snapshot)
 
                 if snapshot.snapshot_function == "te":
@@ -798,7 +826,10 @@ class DataHandler(DataHandlerBase):
                             input_requires_grad=True,
                         )
                     )
-                    if snapshot.snapshot_type == "json+numpy":
+                    if (
+                        snapshot.snapshot_type == "json+numpy"
+                        or snapshot.snapshot_type == "json+openpmd"
+                    ):
                         self._calculate_temporary_inputs(snapshot)
 
         else:
@@ -898,7 +929,10 @@ class DataHandler(DataHandlerBase):
                                 )
                             )
                         )
-                    elif snapshot.snapshot_type == "json+numpy":
+                    elif (
+                        snapshot.snapshot_type == "json+numpy"
+                        or snapshot.snapshot_type == "json+openpmd"
+                    ):
                         self._calculate_temporary_inputs(snapshot)
                         tmp = self.descriptor_calculator.read_from_numpy_file(
                             snapshot.temporary_input_file,
@@ -956,7 +990,10 @@ class DataHandler(DataHandlerBase):
                             ),
                             units=snapshot.output_units,
                         )
-                    elif snapshot.snapshot_type == "openpmd":
+                    elif (
+                        snapshot.snapshot_type == "openpmd"
+                        or snapshot.snapshot_type == "json+openpmd"
+                    ):
                         tmp = self.target_calculator.read_from_openpmd_file(
                             os.path.join(
                                 snapshot.output_npy_directory,
@@ -995,9 +1032,9 @@ class DataHandler(DataHandlerBase):
             )
             for snapshot in self.parameters.snapshot_directories_list:
                 # Data scaling is only performed on the training data sets.
-                if (
-                    snapshot.snapshot_function == "tr"
-                    and snapshot.snapshot_type == "json+numpy"
+                if snapshot.snapshot_function == "tr" and (
+                    snapshot.snapshot_type == "json+numpy"
+                    or snapshot.snapshot_type == "json+openpmd"
                 ):
                     self._calculate_temporary_inputs(snapshot)
         else:

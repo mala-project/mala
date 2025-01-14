@@ -928,6 +928,11 @@ class DataShuffler(DataHandlerBase):
                 permutations,
                 file_ending,
             )
+        elif snapshot_type == "json+openpmd":
+            raise Exception(
+                "Shuffling from JSON files and OpenPMD is "
+                "currently not supported."
+            )
         else:
             raise Exception("Unknown snapshot type: {}".format(snapshot_type))
 
