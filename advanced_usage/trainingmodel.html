@@ -256,10 +256,11 @@ Currently, this method requires additional disk space, since the randomized
 data sets have to be saved - in-memory implementations are currently developed.
 To use the data shuffling (also shown in example
 <code class="docutils literal notranslate"><span class="pre">advanced/ex02_shuffle_data.py</span></code>), you can use the <code class="docutils literal notranslate"><span class="pre">DataShuffler</span></code> class.</p>
-<p>The syntax is very easy, you create a <code class="docutils literal notranslate"><span class="pre">DataShufller</span></code> object,
+<p>The syntax is very easy, you create a <code class="docutils literal notranslate"><span class="pre">DataShuffler</span></code> object,
 which provides the same <code class="docutils literal notranslate"><span class="pre">add_snapshot</span></code> functionalities as the <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code>
-object, and shuffle the data once you have added all snapshots in question,
-i.e.,</p>
+object, and shuffle the data once you have added all snapshots in question.
+Just as with the <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> class, on-the-fly calculation of bispectrum
+descriptors is supported.</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shuffling_seed</span> <span class="o">=</span> <span class="mi">1234</span>
 
@@ -273,6 +274,13 @@ i.e.,</p>
 </pre></div>
 </div>
 </div></blockquote>
+<p>By using the <code class="docutils literal notranslate"><span class="pre">shuffle_to_temporary</span></code> keyword, you can shuffle the data to
+temporary files, which will can deleted after the training run. This is useful
+if you want to shuffle the data right before training and do not plan to re-use
+shuffled data files for multiple training runs. As detailed in
+<code class="docutils literal notranslate"><span class="pre">advanced/ex02_shuffle_data.py</span></code>, access to temporary files is provided via
+<code class="docutils literal notranslate"><span class="pre">data_shuffler.temporary_shuffled_snapshots[...]</span></code>, which is a list containing
+<code class="docutils literal notranslate"><span class="pre">mala.Snapshot</span></code> objects.</p>
 <p>The seed <code class="docutils literal notranslate"><span class="pre">parameters.data.shuffling_seed</span></code> ensures reproducibility of data
 sets. The <code class="docutils literal notranslate"><span class="pre">shuffle_snapshots</span></code> function has a path handling ability akin to
 the <code class="docutils literal notranslate"><span class="pre">DataConverter</span></code> class. Further, via the <code class="docutils literal notranslate"><span class="pre">number_of_shuffled_snapshots</span></code>

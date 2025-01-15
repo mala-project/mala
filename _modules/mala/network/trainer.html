@@ -690,6 +690,9 @@
                 <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">final_validation_loss</span> <span class="o">=</span> <span class="n">vloss</span>
 
+        <span class="c1"># Cleaning up temporary data files.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">delete_temporary_inputs</span><span class="p">()</span>
+
         <span class="c1"># Clean-up for pre-fetching lazy loading.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading_prefetch</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_training_data_loaders</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>

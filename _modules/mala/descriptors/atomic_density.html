@@ -213,6 +213,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_python</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_feature_dimension_from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">):</span>
+        <span class="c1"># For now, has to be adapted in the multielement case.</span>
+        <span class="k">return</span> <span class="mi">4</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">__calculate_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform actual Gaussian descriptor calculation.&quot;&quot;&quot;</span>
         <span class="c1"># For version compatibility; older lammps versions (the serial version</span>

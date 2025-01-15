@@ -86,12 +86,14 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">mala</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Parameters</span><span class="p">,</span>
     <span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">parallel_warn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.physical_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhysicalData</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.data_handler_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataHandlerBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_comm</span>
@@ -117,6 +119,17 @@
 <span class="sd">    target_calculator : mala.targets.target.Target</span>
 <span class="sd">        Used to do unit conversion on output data. If None, then one will</span>
 <span class="sd">        be created by this class.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    temporary_shuffled_snapshots : list</span>
+<span class="sd">        A list containing snapshot objects of temporary, snapshot-like</span>
+<span class="sd">        shuffled data files. By default, this list is empty. If the</span>
+<span class="sd">        function &quot;shuffle_snapshots_temporary&quot; is used, it will be populated</span>
+<span class="sd">        with temporary files saved to hard drive, which can be deleted</span>
+<span class="sd">        after model training. Please note that the &quot;snapshot_function&quot;,</span>
+<span class="sd">        &quot;input_units&quot;, &quot;output_units&quot; and &quot;calculation_output&quot; fields of the</span>
+<span class="sd">        snapshots within this list</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -130,15 +143,8 @@
             <span class="n">target_calculator</span><span class="o">=</span><span class="n">target_calculator</span><span class="p">,</span>
             <span class="n">descriptor_calculator</span><span class="o">=</span><span class="n">descriptor_calculator</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
-            <span class="n">printout</span><span class="p">(</span>
-                <span class="s2">&quot;Disabling XYZ-cutting from descriptor data for &quot;</span>
-                <span class="s2">&quot;shuffling. If needed, please re-enable afterwards.&quot;</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="kc">False</span>
-            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_points_to_remove</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temporary_shuffled_snapshots</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="DataShuffler.add_snapshot">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler.add_snapshot">[docs]</a>
@@ -148,7 +154,7 @@
         <span class="n">input_directory</span><span class="p">,</span>
         <span class="n">output_file</span><span class="p">,</span>
         <span class="n">output_directory</span><span class="p">,</span>
-        <span class="n">snapshot_type</span><span class="o">=</span><span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
+        <span class="n">snapshot_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a snapshot to the data pipeline.</span>
@@ -193,6 +199,7 @@
         <span class="n">target_save_path</span><span class="p">,</span>
         <span class="n">permutations</span><span class="p">,</span>
         <span class="n">file_ending</span><span class="p">,</span>
+        <span class="n">temporary</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="c1"># Load the data (via memmap).</span>
         <span class="n">descriptor_data</span> <span class="o">=</span> <span class="p">[]</span>
@@ -200,15 +207,29 @@
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span>
         <span class="p">):</span>
-            <span class="c1"># TODO: Use descriptor and target calculator for this.</span>
-            <span class="n">descriptor_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                        <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span>
-                    <span class="p">),</span>
-                    <span class="n">mmap_mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
+            <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
+                <span class="c1"># TODO: Use descriptor and target calculator for this.</span>
+                <span class="n">descriptor_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
+                            <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="n">mmap_mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+numpy&quot;</span><span class="p">:</span>
+                <span class="n">descriptor_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">temporary_input_file</span><span class="p">,</span>
+                        <span class="n">mmap_mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Invalid snapshot for numpy shuffling &quot;</span> <span class="s2">&quot;selected.&quot;</span>
+                <span class="p">)</span>
+
             <span class="n">target_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
@@ -250,12 +271,6 @@
                 <span class="n">target_data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_target</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
 
         <span class="c1"># Do the actual shuffling.</span>
-        <span class="n">target_name_openpmd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">target_save_path</span><span class="p">,</span> <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;%T&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="n">descriptor_name_openpmd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">descriptor_save_path</span><span class="p">,</span> <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;%T&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_new_snapshots</span><span class="p">):</span>
             <span class="n">new_descriptors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
                 <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">shuffle_dimensions</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">),</span>
@@ -266,12 +281,73 @@
                 <span class="n">dtype</span><span class="o">=</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">last_start</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">descriptor_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="n">descriptor_save_path</span><span class="p">,</span> <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-            <span class="p">)</span>
-            <span class="n">target_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="n">target_save_path</span><span class="p">,</span> <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-            <span class="p">)</span>
+
+            <span class="c1"># Figure out where to save / how to name things.</span>
+            <span class="c1"># TODO: This could probably be shortened.</span>
+            <span class="k">if</span> <span class="n">temporary</span><span class="p">:</span>
+
+                <span class="c1"># Adding &quot;snapshot numbers&quot; here is technically not necessary</span>
+                <span class="c1"># I think, but it also doesn&#39;t hurt.</span>
+                <span class="k">if</span> <span class="n">file_ending</span> <span class="o">==</span> <span class="s2">&quot;npy&quot;</span><span class="p">:</span>
+                    <span class="n">descriptor_name</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span>
+                        <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">prefix</span><span class="o">=</span><span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
+                        <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.in.npy&quot;</span><span class="p">,</span>
+                        <span class="nb">dir</span><span class="o">=</span><span class="n">descriptor_save_path</span><span class="p">,</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">target_name</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span>
+                        <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">prefix</span><span class="o">=</span><span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
+                        <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.out.npy&quot;</span><span class="p">,</span>
+                        <span class="nb">dir</span><span class="o">=</span><span class="n">target_save_path</span><span class="p">,</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">snapshot_type</span> <span class="o">=</span> <span class="s2">&quot;numpy&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">descriptor_name</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span>
+                        <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">prefix</span><span class="o">=</span><span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;%T&quot;</span><span class="p">),</span>
+                        <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.in.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">,</span>
+                        <span class="nb">dir</span><span class="o">=</span><span class="n">descriptor_save_path</span><span class="p">,</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">target_name</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span>
+                        <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">prefix</span><span class="o">=</span><span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;%T&quot;</span><span class="p">),</span>
+                        <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.out.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">,</span>
+                        <span class="nb">dir</span><span class="o">=</span><span class="n">target_save_path</span><span class="p">,</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">snapshot_type</span> <span class="o">=</span> <span class="s2">&quot;openpmd&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">temporary_shuffled_snapshots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">mala</span><span class="o">.</span><span class="n">Snapshot</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">descriptor_name</span><span class="p">),</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">descriptor_name</span><span class="p">),</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">target_name</span><span class="p">),</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">target_name</span><span class="p">),</span>
+                        <span class="n">snapshot_function</span><span class="o">=</span><span class="s2">&quot;te&quot;</span><span class="p">,</span>
+                        <span class="n">output_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+                        <span class="n">input_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+                        <span class="n">calculation_output</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="n">snapshot_type</span><span class="o">=</span><span class="n">snapshot_type</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">file_ending</span> <span class="o">==</span> <span class="s2">&quot;npy&quot;</span><span class="p">:</span>
+                    <span class="n">descriptor_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">descriptor_save_path</span><span class="p">,</span>
+                        <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;.in.npy&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">target_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">target_save_path</span><span class="p">,</span>
+                        <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;.out.npy&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">descriptor_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">descriptor_save_path</span><span class="p">,</span>
+                        <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;%T&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.in.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">target_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">target_save_path</span><span class="p">,</span>
+                        <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;%T&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.out.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">,</span>
+                    <span class="p">)</span>
 
             <span class="c1"># Each new snapshot gets an number_of_new_snapshots-th from each</span>
             <span class="c1"># snapshot.</span>
@@ -316,10 +392,10 @@
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">file_ending</span> <span class="o">==</span> <span class="s2">&quot;npy&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">write_to_numpy_file</span><span class="p">(</span>
-                    <span class="n">descriptor_name</span> <span class="o">+</span> <span class="s2">&quot;.in.npy&quot;</span><span class="p">,</span> <span class="n">new_descriptors</span>
+                    <span class="n">descriptor_name</span><span class="p">,</span> <span class="n">new_descriptors</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">write_to_numpy_file</span><span class="p">(</span>
-                    <span class="n">target_name</span> <span class="o">+</span> <span class="s2">&quot;.out.npy&quot;</span><span class="p">,</span> <span class="n">new_targets</span>
+                    <span class="n">target_name</span><span class="p">,</span> <span class="n">new_targets</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># We check above that in the non-numpy case, OpenPMD will work.</span>
@@ -330,7 +406,7 @@
                     <span class="n">shuffle_dimensions</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">write_to_openpmd_file</span><span class="p">(</span>
-                    <span class="n">descriptor_name_openpmd</span> <span class="o">+</span> <span class="s2">&quot;.in.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">,</span>
+                    <span class="n">descriptor_name</span><span class="p">,</span>
                     <span class="n">new_descriptors</span><span class="p">,</span>
                     <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{</span>
                         <span class="s2">&quot;global_shuffling_seed&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">,</span>
@@ -340,7 +416,7 @@
                     <span class="n">internal_iteration_number</span><span class="o">=</span><span class="n">i</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">write_to_openpmd_file</span><span class="p">(</span>
-                    <span class="n">target_name_openpmd</span> <span class="o">+</span> <span class="s2">&quot;.out.&quot;</span> <span class="o">+</span> <span class="n">file_ending</span><span class="p">,</span>
+                    <span class="n">target_name</span><span class="p">,</span>
                     <span class="n">array</span><span class="o">=</span><span class="n">new_targets</span><span class="p">,</span>
                     <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{</span>
                         <span class="s2">&quot;global_shuffling_seed&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">,</span>
@@ -422,9 +498,7 @@
     <span class="c1"># XXXXXXXOOO</span>
     <span class="c1"># OOOOOOOOOO</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__contiguous_slice_within_ndim_grid_as_blocks</span><span class="p">(</span>
-        <span class="n">extent</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
-    <span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__contiguous_slice_within_ndim_grid_as_blocks</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="c1"># Used for converting a block defined by inclusive lower and upper</span>
         <span class="c1"># coordinate to a chunk as defined by openPMD.</span>
         <span class="c1"># The openPMD extent is defined by (to-from)+1 (to make up for the</span>
@@ -514,7 +588,8 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">inner_strides</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">inner_idx</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                        <span class="s2">&quot;This cannot happen. There is bug somewhere.&quot;</span><span class="p">)</span>
+                        <span class="s2">&quot;This cannot happen. There is bug somewhere.&quot;</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">return</span> <span class="p">[]</span>
             <span class="n">div</span><span class="p">,</span> <span class="n">mod</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">inner_idx</span><span class="p">,</span> <span class="n">inner_strides</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -735,6 +810,7 @@
         <span class="n">target_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">save_name</span><span class="o">=</span><span class="s2">&quot;mala_shuffled_snapshot*&quot;</span><span class="p">,</span>
         <span class="n">number_of_shuffled_snapshots</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">shuffle_to_temporary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Shuffle the snapshots into new snapshots.</span>
@@ -745,8 +821,7 @@
 <span class="sd">        ----------</span>
 <span class="sd">        complete_save_path : string</span>
 <span class="sd">            If not None: the directory in which all snapshots will be saved.</span>
-<span class="sd">            Overwrites descriptor_save_path, target_save_path and</span>
-<span class="sd">            additional_info_save_path if set.</span>
+<span class="sd">            Overwrites descriptor_save_path and target_save_path if set.</span>
 
 <span class="sd">        descriptor_save_path : string</span>
 <span class="sd">            Directory in which to save descriptor data.</span>
@@ -761,6 +836,12 @@
 <span class="sd">            If not None, this class will attempt to redistribute the data</span>
 <span class="sd">            to this amount of snapshots. If None, then the same number of</span>
 <span class="sd">            snapshots provided will be used.</span>
+
+<span class="sd">        shuffle_to_temporary : bool</span>
+<span class="sd">            If True, shuffled files will be writen to temporary data files.</span>
+<span class="sd">            Which paths are used is consistent with non-temporary usage of this</span>
+<span class="sd">            class. The path and names of these temporary files can then be</span>
+<span class="sd">            found in the class attribute temporary_shuffled_snapshots.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Check the paths.</span>
         <span class="k">if</span> <span class="n">complete_save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -775,20 +856,33 @@
             <span class="n">file_ending</span> <span class="o">=</span> <span class="n">save_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">save_name</span> <span class="o">=</span> <span class="n">save_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">file_ending</span> <span class="o">!=</span> <span class="s2">&quot;npy&quot;</span><span class="p">:</span>
-                <span class="kn">import</span><span class="w"> </span><span class="nn">openpmd_api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">io</span>
-
-                <span class="k">if</span> <span class="n">file_ending</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">io</span><span class="o">.</span><span class="n">file_extensions</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                        <span class="s2">&quot;Invalid file ending selected: &quot;</span> <span class="o">+</span> <span class="n">file_ending</span>
+                <span class="k">if</span> <span class="n">shuffle_to_temporary</span><span class="p">:</span>
+                    <span class="n">parallel_warn</span><span class="p">(</span>
+                        <span class="s2">&quot;Shuffling to temporary files currently&quot;</span>
+                        <span class="s2">&quot; only works with numpy as an enginge for &quot;</span>
+                        <span class="s2">&quot;intermediate files. You have selected both&quot;</span>
+                        <span class="s2">&quot; openpmd and the temporary file option. &quot;</span>
+                        <span class="s2">&quot;Will proceed with numpy instead of &quot;</span>
+                        <span class="s2">&quot;openpmd.&quot;</span>
                     <span class="p">)</span>
+                    <span class="n">file_ending</span> <span class="o">=</span> <span class="s2">&quot;npy&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="kn">import</span><span class="w"> </span><span class="nn">openpmd_api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">io</span>
+
+                    <span class="k">if</span> <span class="n">file_ending</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">io</span><span class="o">.</span><span class="n">file_extensions</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                            <span class="s2">&quot;Invalid file ending selected: &quot;</span> <span class="o">+</span> <span class="n">file_ending</span>
+                        <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">file_ending</span> <span class="o">=</span> <span class="s2">&quot;npy&quot;</span>
 
+        <span class="n">old_xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_check_snapshots</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="n">get_comm</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_check_snapshots</span><span class="p">()</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="n">old_xyz</span>
         <span class="n">snapshot_types</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span>
             <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span>
@@ -876,6 +970,20 @@
                 <span class="n">target_save_path</span><span class="p">,</span>
                 <span class="n">permutations</span><span class="p">,</span>
                 <span class="n">file_ending</span><span class="p">,</span>
+                <span class="n">shuffle_to_temporary</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+numpy&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_temporary_inputs</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__shuffle_numpy</span><span class="p">(</span>
+                <span class="n">number_of_shuffled_snapshots</span><span class="p">,</span>
+                <span class="n">shuffle_dimensions</span><span class="p">,</span>
+                <span class="n">descriptor_save_path</span><span class="p">,</span>
+                <span class="n">save_name</span><span class="p">,</span>
+                <span class="n">target_save_path</span><span class="p">,</span>
+                <span class="n">permutations</span><span class="p">,</span>
+                <span class="n">file_ending</span><span class="p">,</span>
+                <span class="n">shuffle_to_temporary</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span><span class="p">:</span>
             <span class="n">descriptor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__DescriptorOrTarget</span><span class="p">(</span>
@@ -910,12 +1018,44 @@
                 <span class="n">permutations</span><span class="p">,</span>
                 <span class="n">file_ending</span><span class="p">,</span>
             <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+openpmd&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Shuffling from JSON files and OpenPMD is &quot;</span>
+                <span class="s2">&quot;currently not supported.&quot;</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown snapshot type: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">snapshot_type</span><span class="p">))</span>
+
+        <span class="c1"># Deleting temporary files that may have been created.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete_temporary_inputs</span><span class="p">()</span>
 
         <span class="c1"># Since no training will be done with this class, we should always</span>
         <span class="c1"># clear the data at the end.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clear_data</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DataShuffler.delete_temporary_shuffled_snapshots">
+<a class="viewcode-back" href="../../../api/mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler.delete_temporary_shuffled_snapshots">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delete_temporary_shuffled_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Delete temporary files creating during shuffling of data.</span>
+
+<span class="sd">        If shuffling has been done with the option &quot;shuffle_to_temporary&quot;,</span>
+<span class="sd">        shuffled data will be saved to temporary files which can safely be</span>
+<span class="sd">        deleted with this function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporary_shuffled_snapshots</span><span class="p">:</span>
+            <span class="n">input_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">input_file</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+            <span class="n">output_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">output_file</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temporary_shuffled_snapshots</span> <span class="o">=</span> <span class="p">[]</span></div>
 </div>
 
 </pre></div>

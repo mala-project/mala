@@ -211,6 +211,24 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_python</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_feature_dimension_from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_feature_size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_feature_size</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__get_feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ncols0</span> <span class="o">=</span> <span class="mi">3</span>
+
+        <span class="c1"># Analytical relation for fingerprint length</span>
+        <span class="n">ncoeff</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">ncoeff</span> <span class="o">=</span> <span class="n">ncoeff</span> <span class="o">//</span> <span class="mi">24</span>  <span class="c1"># integer division</span>
+        <span class="k">return</span> <span class="n">ncols0</span> <span class="o">+</span> <span class="n">ncoeff</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">__calculate_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform bispectrum calculation using LAMMPS.</span>
@@ -264,19 +282,7 @@
 
         <span class="c1"># Do the LAMMPS calculation and clean up.</span>
         <span class="n">lmp</span><span class="o">.</span><span class="n">file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span><span class="p">)</span>
-
-        <span class="c1"># Set things not accessible from LAMMPS</span>
-        <span class="c1"># First 3 cols are x, y, z, coords</span>
-        <span class="n">ncols0</span> <span class="o">=</span> <span class="mi">3</span>
-
-        <span class="c1"># Analytical relation for fingerprint length</span>
-        <span class="n">ncoeff</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span>
-            <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="n">ncoeff</span> <span class="o">=</span> <span class="n">ncoeff</span> <span class="o">//</span> <span class="mi">24</span>  <span class="c1"># integer division</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">=</span> <span class="n">ncols0</span> <span class="o">+</span> <span class="n">ncoeff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_feature_size</span><span class="p">()</span>
 
         <span class="c1"># Extract data from LAMMPS calculation.</span>
         <span class="c1"># This is different for the parallel and the serial case.</span>

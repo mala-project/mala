@@ -178,6 +178,12 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for Minterpy descriptors.&quot;</span><span class="p">)</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_feature_dimension_from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="s2">&quot;This feature has not been implemented for Minterpy &quot;</span>
+            <span class="s2">&quot;descriptors.&quot;</span>
+        <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># For version compatibility; older lammps versions (the serial version</span>
         <span class="c1"># we still use on some machines) have these constants as part of the</span>

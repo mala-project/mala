@@ -175,10 +175,14 @@ use the values consistent with the example data.</p>
 <p>As with any ML library, MALA is a data-driven framework. So before we can
 train a model, we need to add data. The central object to manage data for any
 MALA workflow is the <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> class.</p>
-<p>MALA manages data “per snapshot”. One snapshot is one atomic configuration,
-for which volumetric input and output data has been calculated. Data has to
-be added to the <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> object per snapshot, pointing to the
-where the volumetric data files are saved on disk. This is done via</p>
+<p>MALA manages data “per snapshot”. One snapshot is an atomic configuration with
+associated volumetric data. Snapshots have to be added to the <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code>
+object. There are two ways to provide snapshot data, which are selected by
+providing the respective types of data files.</p>
+<ol class="arabic">
+<li><p>Precomputed descriptors: The LDOS is sampled and the volumetric descriptor
+data is precomputed into either OpenPMD or numpy files
+(as described <a class="reference internal" href="more_data.html"><span class="doc">here</span></a>), and both can be loaded for training.</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">DataHandler</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
 <span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot0.in.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span>
@@ -188,12 +192,36 @@ where the volumetric data files are saved on disk. This is done via</p>
 </pre></div>
 </div>
 </div></blockquote>
+</li>
+<li><p>On-the-fly descriptors: The LDOS is sampled into either OpenPMD or numpy
+files, while the volumetric descriptor data is computed on-the-fly during
+training or shuffling. Starting point for the descriptor calculation in this
+case is the simulation output saved in a JSON file. This mode is only
+recommended if a GPU-enabled LAMMPS version is available. If this route is
+used, then descriptor calculation hyperparamters need to be set before
+adding snapshots, see <a class="reference internal" href="more_data.html"><span class="doc">data conversion manual</span></a> for details.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Bispectrum parameters.</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">=</span> <span class="s2">&quot;Bispectrum&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_cutoff</span> <span class="o">=</span> <span class="mf">4.67637</span>
+
+<span class="n">data_handler</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">DataHandler</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+<span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot0.info.json&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span>
+                          <span class="s2">&quot;Be_snapshot0.out.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;tr&quot;</span><span class="p">)</span>
+<span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot1.info.json&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span>
+                          <span class="s2">&quot;Be_snapshot1.out.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;va&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
 <p>The <code class="docutils literal notranslate"><span class="pre">&quot;tr&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;va&quot;</span></code> flag signal that the respective snapshots are added as
 training and validation data, respectively. Training data is data the model
 is directly tuned on; validation data is data used to verify the model
 performance during the run time and make sure that no overfitting occurs.
 After data has been added to the <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code>, it has to be actually loaded
-and scaled via</p>
+(or in the case of on-the-fly usage, computed) and scaled via</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_handler</span><span class="o">.</span><span class="n">prepare_data</span><span class="p">()</span>
 </pre></div>

@@ -89,7 +89,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">TensorDataset</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">barrier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">barrier</span><span class="p">,</span> <span class="n">get_rank</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.data_handler_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataHandlerBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mala.datahandling.data_scaler</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataScaler</span>
@@ -317,16 +317,8 @@
             <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Initializing the data scalers.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__parametrize_scalers</span><span class="p">()</span>
             <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Data scalers initialized.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span> <span class="ow">is</span> <span class="kc">False</span>
-            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span> <span class="o">!=</span> <span class="mi">0</span>
-        <span class="p">):</span>
-            <span class="n">printout</span><span class="p">(</span>
-                <span class="s2">&quot;Data scalers already initilized, loading data to RAM.&quot;</span><span class="p">,</span>
-                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__load_data</span><span class="p">(</span><span class="s2">&quot;training&quot;</span><span class="p">,</span> <span class="s2">&quot;inputs&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__load_data</span><span class="p">(</span><span class="s2">&quot;training&quot;</span><span class="p">,</span> <span class="s2">&quot;outputs&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__parametrized_load_training_data</span><span class="p">()</span>
 
         <span class="c1"># Build Datasets.</span>
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Build datasets.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -341,7 +333,12 @@
         <span class="c1"># data preparation by a small amount of minutes. If you notice</span>
         <span class="c1"># an elongated wait time at this barrier, check that your file system</span>
         <span class="c1"># allows for parallel I/O.</span>
-        <span class="n">barrier</span><span class="p">()</span></div>
+        <span class="n">barrier</span><span class="p">()</span>
+
+        <span class="c1"># In the RAM case, there is no reason not to delete all temporary files</span>
+        <span class="c1"># now.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">delete_temporary_inputs</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="DataHandler.prepare_for_testing">
@@ -704,6 +701,15 @@
                         <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span>
                     <span class="p">)</span>
                     <span class="n">units</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">input_units</span>
+
+                    <span class="c1"># If the input for the descriptors is actually a JSON</span>
+                    <span class="c1"># file then we need to calculate the descriptors.</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+numpy&quot;</span>
+                        <span class="ow">or</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+openpmd&quot;</span>
+                    <span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_temporary_inputs</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
+                        <span class="n">file</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">temporary_input_file</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                         <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
@@ -711,7 +717,10 @@
                     <span class="p">)</span>
                     <span class="n">units</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">output_units</span>
 
-                <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span>
+                    <span class="ow">or</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+numpy&quot;</span>
+                <span class="p">):</span>
                     <span class="n">calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
                         <span class="n">file</span><span class="p">,</span>
                         <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span>
@@ -726,6 +735,22 @@
                             <span class="n">file</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span>
                         <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">gs_new</span><span class="p">,</span> <span class="n">feature_dimension</span><span class="p">])</span>
                     <span class="p">)</span>
+                <span class="k">elif</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+openpmd&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;inputs&quot;</span><span class="p">:</span>
+                        <span class="n">calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
+                            <span class="n">file</span><span class="p">,</span>
+                            <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span>
+                            <span class="n">array</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">)[</span>
+                                <span class="n">gs_old</span> <span class="p">:</span> <span class="n">gs_old</span> <span class="o">+</span> <span class="n">gs_new</span><span class="p">,</span> <span class="p">:</span>
+                            <span class="p">],</span>
+                            <span class="n">reshape</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">)[</span><span class="n">gs_old</span> <span class="p">:</span> <span class="n">gs_old</span> <span class="o">+</span> <span class="n">gs_new</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">calculator</span><span class="o">.</span><span class="n">read_from_openpmd_file</span><span class="p">(</span>
+                                <span class="n">file</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span>
+                            <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">gs_new</span><span class="p">,</span> <span class="n">feature_dimension</span><span class="p">])</span>
+                        <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown snapshot file type.&quot;</span><span class="p">)</span>
                 <span class="n">snapshot_counter</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -825,11 +850,26 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">training_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">add_snapshot_to_dataset</span><span class="p">(</span>
                         <span class="n">snapshot</span>
                     <span class="p">)</span>
+                <span class="c1"># For training snapshots, temporary files (if needed) have</span>
+                <span class="c1"># already been built during parametrization, for all other</span>
+                <span class="c1"># snapshot types, this has to be done here.</span>
                 <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;va&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+numpy&quot;</span>
+                        <span class="ow">or</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+openpmd&quot;</span>
+                    <span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_temporary_inputs</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
+
                     <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">add_snapshot_to_dataset</span><span class="p">(</span>
                         <span class="n">snapshot</span>
                     <span class="p">)</span>
                 <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;te&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+numpy&quot;</span>
+                        <span class="ow">or</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+openpmd&quot;</span>
+                    <span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_temporary_inputs</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
+
                     <span class="bp">self</span><span class="o">.</span><span class="n">test_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">add_snapshot_to_dataset</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
 
             <span class="c1"># I don&#39;t think we need to mix them here. We can use the standard</span>
@@ -874,6 +914,12 @@
                             <span class="bp">self</span><span class="o">.</span><span class="n">_use_ddp</span><span class="p">,</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+numpy&quot;</span>
+                        <span class="ow">or</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+openpmd&quot;</span>
+                    <span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_temporary_inputs</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
+
                 <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;te&quot;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">test_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="n">LazyLoadDatasetSingle</span><span class="p">(</span>
@@ -889,6 +935,11 @@
                             <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+numpy&quot;</span>
+                        <span class="ow">or</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+openpmd&quot;</span>
+                    <span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_temporary_inputs</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
@@ -987,6 +1038,15 @@
                                 <span class="p">)</span>
                             <span class="p">)</span>
                         <span class="p">)</span>
+                    <span class="k">elif</span> <span class="p">(</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+numpy&quot;</span>
+                        <span class="ow">or</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+openpmd&quot;</span>
+                    <span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_temporary_inputs</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
+                        <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
+                            <span class="n">snapshot</span><span class="o">.</span><span class="n">temporary_input_file</span><span class="p">,</span>
+                            <span class="n">units</span><span class="o">=</span><span class="n">snapshot</span><span class="o">.</span><span class="n">input_units</span><span class="p">,</span>
+                        <span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown snapshot file type.&quot;</span><span class="p">)</span>
 
@@ -1028,7 +1088,10 @@
             <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">:</span>
                 <span class="c1"># Data scaling is only performed on the training data sets.</span>
                 <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;tr&quot;</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span>
+                        <span class="ow">or</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+numpy&quot;</span>
+                    <span class="p">):</span>
                         <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
                             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                                 <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
@@ -1036,7 +1099,10 @@
                             <span class="p">),</span>
                             <span class="n">units</span><span class="o">=</span><span class="n">snapshot</span><span class="o">.</span><span class="n">output_units</span><span class="p">,</span>
                         <span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="p">(</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span>
+                        <span class="ow">or</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+openpmd&quot;</span>
+                    <span class="p">):</span>
                         <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_openpmd_file</span><span class="p">(</span>
                             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                                 <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
@@ -1066,6 +1132,27 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_training_data_outputs</span><span class="p">)</span>
 
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Output scaler parametrized.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__parametrized_load_training_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span><span class="p">:</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;Data scalers already initilized, preparing input data.&quot;</span><span class="p">,</span>
+                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">:</span>
+                <span class="c1"># Data scaling is only performed on the training data sets.</span>
+                <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;tr&quot;</span> <span class="ow">and</span> <span class="p">(</span>
+                    <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+numpy&quot;</span>
+                    <span class="ow">or</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;json+openpmd&quot;</span>
+                <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_temporary_inputs</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;Data scalers already initilized, loading data to RAM.&quot;</span><span class="p">,</span>
+                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__load_data</span><span class="p">(</span><span class="s2">&quot;training&quot;</span><span class="p">,</span> <span class="s2">&quot;inputs&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__load_data</span><span class="p">(</span><span class="s2">&quot;training&quot;</span><span class="p">,</span> <span class="s2">&quot;outputs&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__raw_numpy_to_converted_numpy</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">numpy_array</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span>

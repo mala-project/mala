@@ -197,6 +197,8 @@
             <span class="k">for</span> <span class="n">observable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observables_to_test</span><span class="p">:</span>
                 <span class="n">results</span><span class="p">[</span><span class="n">observable</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">snapshot_result</span><span class="p">[</span><span class="n">observable</span><span class="p">])</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">delete_temporary_inputs</span><span class="p">()</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_format</span> <span class="o">==</span> <span class="s2">&quot;list&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">results</span>
 

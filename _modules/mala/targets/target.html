@@ -746,7 +746,7 @@
             <span class="p">}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atomic_forces_dft</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">entropy_contribution_dft_calculation</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;grid_dimensions&quot;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">json_dict</span><span class="p">:</span>

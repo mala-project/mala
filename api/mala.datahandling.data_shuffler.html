@@ -133,9 +133,26 @@ be created by this class.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.datahandling.data_shuffler.DataShuffler.temporary_shuffled_snapshots">
+<span class="sig-name descname"><span class="pre">temporary_shuffled_snapshots</span></span><a class="headerlink" href="#mala.datahandling.data_shuffler.DataShuffler.temporary_shuffled_snapshots" title="Link to this definition"></a></dt>
+<dd><p>A list containing snapshot objects of temporary, snapshot-like
+shuffled data files. By default, this list is empty. If the
+function “shuffle_snapshots_temporary” is used, it will be populated
+with temporary files saved to hard drive, which can be deleted
+after model training. Please note that the “snapshot_function”,
+“input_units”, “output_units” and “calculation_output” fields of the
+snapshots within this list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.data_shuffler.DataShuffler.add_snapshot">
-<span class="sig-name descname"><span class="pre">add_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapshot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'numpy'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_shuffler.html#DataShuffler.add_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_shuffler.DataShuffler.add_snapshot" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapshot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_shuffler.html#DataShuffler.add_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_shuffler.DataShuffler.add_snapshot" title="Link to this definition"></a></dt>
 <dd><p>Add a snapshot to the data pipeline.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -152,22 +169,34 @@ want to operate on.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mala.datahandling.data_shuffler.DataShuffler.delete_temporary_shuffled_snapshots">
+<span class="sig-name descname"><span class="pre">delete_temporary_shuffled_snapshots</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_shuffler.html#DataShuffler.delete_temporary_shuffled_snapshots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_shuffler.DataShuffler.delete_temporary_shuffled_snapshots" title="Link to this definition"></a></dt>
+<dd><p>Delete temporary files creating during shuffling of data.</p>
+<p>If shuffling has been done with the option “shuffle_to_temporary”,
+shuffled data will be saved to temporary files which can safely be
+deleted with this function.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.data_shuffler.DataShuffler.shuffle_snapshots">
-<span class="sig-name descname"><span class="pre">shuffle_snapshots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">complete_save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mala_shuffled_snapshot*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_shuffled_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_shuffler.html#DataShuffler.shuffle_snapshots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_shuffler.DataShuffler.shuffle_snapshots" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">shuffle_snapshots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">complete_save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mala_shuffled_snapshot*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_shuffled_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle_to_temporary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_shuffler.html#DataShuffler.shuffle_snapshots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_shuffler.DataShuffler.shuffle_snapshots" title="Link to this definition"></a></dt>
 <dd><p>Shuffle the snapshots into new snapshots.</p>
 <p>This saves them to file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>complete_save_path</strong> (<em>string</em>) – If not None: the directory in which all snapshots will be saved.
-Overwrites descriptor_save_path, target_save_path and
-additional_info_save_path if set.</p></li>
+Overwrites descriptor_save_path and target_save_path if set.</p></li>
 <li><p><strong>descriptor_save_path</strong> (<em>string</em>) – Directory in which to save descriptor data.</p></li>
 <li><p><strong>target_save_path</strong> (<em>string</em>) – Directory in which to save target data.</p></li>
 <li><p><strong>save_name</strong> (<em>string</em>) – Name of the snapshots to be shuffled.</p></li>
 <li><p><strong>number_of_shuffled_snapshots</strong> (<em>int</em>) – If not None, this class will attempt to redistribute the data
 to this amount of snapshots. If None, then the same number of
 snapshots provided will be used.</p></li>
+<li><p><strong>shuffle_to_temporary</strong> (<em>bool</em>) – If True, shuffled files will be writen to temporary data files.
+Which paths are used is consistent with non-temporary usage of this
+class. The path and names of these temporary files can then be
+found in the class attribute temporary_shuffled_snapshots.</p></li>
 </ul>
 </dd>
 </dl>
