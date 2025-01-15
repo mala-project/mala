@@ -133,6 +133,9 @@ class Snapshot(JSONSerializable):
         self.input_dimension = None
         self.output_dimension = None
 
+        # Temporary descriptor files, which may be needed.
+        self.temporary_input_file = None
+
     @classmethod
     def from_json(cls, json_dict):
         """

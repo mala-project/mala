@@ -87,6 +87,12 @@ class MinterpyDescriptors(Descriptor):
         else:
             raise Exception("Unsupported unit for Minterpy descriptors.")
 
+    def _read_feature_dimension_from_json(self, json_dict):
+        raise Exception(
+            "This feature has not been implemented for Minterpy "
+            "descriptors."
+        )
+
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         # For version compatibility; older lammps versions (the serial version
         # we still use on some machines) have these constants as part of the

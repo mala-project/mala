@@ -3,12 +3,14 @@
 import os
 
 import numpy as np
+import tempfile
 
+import mala
 from mala.common.parameters import (
     Parameters,
     DEFAULT_NP_DATA_DTYPE,
 )
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, parallel_warn
 from mala.common.physical_data import PhysicalData
 from mala.datahandling.data_handler_base import DataHandlerBase
 from mala.common.parallelizer import get_comm
@@ -32,6 +34,17 @@ class DataShuffler(DataHandlerBase):
     target_calculator : mala.targets.target.Target
         Used to do unit conversion on output data. If None, then one will
         be created by this class.
+
+    Attributes
+    ----------
+    temporary_shuffled_snapshots : list
+        A list containing snapshot objects of temporary, snapshot-like
+        shuffled data files. By default, this list is empty. If the
+        function "shuffle_snapshots_temporary" is used, it will be populated
+        with temporary files saved to hard drive, which can be deleted
+        after model training. Please note that the "snapshot_function",
+        "input_units", "output_units" and "calculation_output" fields of the
+        snapshots within this list
     """
 
     def __init__(
@@ -45,15 +58,8 @@ class DataShuffler(DataHandlerBase):
             target_calculator=target_calculator,
             descriptor_calculator=descriptor_calculator,
         )
-        if self.descriptor_calculator.parameters.descriptors_contain_xyz:
-            printout(
-                "Disabling XYZ-cutting from descriptor data for "
-                "shuffling. If needed, please re-enable afterwards."
-            )
-            self.descriptor_calculator.parameters.descriptors_contain_xyz = (
-                False
-            )
         self._data_points_to_remove = None
+        self.temporary_shuffled_snapshots = []
 
     def add_snapshot(
         self,
@@ -61,7 +67,7 @@ class DataShuffler(DataHandlerBase):
         input_directory,
         output_file,
         output_directory,
-        snapshot_type="numpy",
+        snapshot_type=None,
     ):
         """
         Add a snapshot to the data pipeline.
@@ -105,6 +111,7 @@ class DataShuffler(DataHandlerBase):
         target_save_path,
         permutations,
         file_ending,
+        temporary,
     ):
         # Load the data (via memmap).
         descriptor_data = []
@@ -112,15 +119,29 @@ class DataShuffler(DataHandlerBase):
         for idx, snapshot in enumerate(
             self.parameters.snapshot_directories_list
         ):
-            # TODO: Use descriptor and target calculator for this.
-            descriptor_data.append(
-                np.load(
-                    os.path.join(
-                        snapshot.input_npy_directory, snapshot.input_npy_file
-                    ),
-                    mmap_mode="r",
+            if snapshot.snapshot_type == "numpy":
+                # TODO: Use descriptor and target calculator for this.
+                descriptor_data.append(
+                    np.load(
+                        os.path.join(
+                            snapshot.input_npy_directory,
+                            snapshot.input_npy_file,
+                        ),
+                        mmap_mode="r",
+                    )
                 )
-            )
+            elif snapshot.snapshot_type == "json+numpy":
+                descriptor_data.append(
+                    np.load(
+                        snapshot.temporary_input_file,
+                        mmap_mode="r",
+                    )
+                )
+            else:
+                raise Exception(
+                    "Invalid snapshot for numpy shuffling " "selected."
+                )
+
             target_data.append(
                 np.load(
                     os.path.join(
@@ -162,12 +183,6 @@ class DataShuffler(DataHandlerBase):
                 target_data[idx] = current_target[indices]
 
         # Do the actual shuffling.
-        target_name_openpmd = os.path.join(
-            target_save_path, save_name.replace("*", "%T")
-        )
-        descriptor_name_openpmd = os.path.join(
-            descriptor_save_path, save_name.replace("*", "%T")
-        )
         for i in range(0, number_of_new_snapshots):
             new_descriptors = np.zeros(
                 (int(np.prod(shuffle_dimensions)), self.input_dimension),
@@ -178,12 +193,73 @@ class DataShuffler(DataHandlerBase):
                 dtype=DEFAULT_NP_DATA_DTYPE,
             )
             last_start = 0
-            descriptor_name = os.path.join(
-                descriptor_save_path, save_name.replace("*", str(i))
-            )
-            target_name = os.path.join(
-                target_save_path, save_name.replace("*", str(i))
-            )
+
+            # Figure out where to save / how to name things.
+            # TODO: This could probably be shortened.
+            if temporary:
+
+                # Adding "snapshot numbers" here is technically not necessary
+                # I think, but it also doesn't hurt.
+                if file_ending == "npy":
+                    descriptor_name = tempfile.NamedTemporaryFile(
+                        delete=False,
+                        prefix=save_name.replace("*", str(i)),
+                        suffix=".in.npy",
+                        dir=descriptor_save_path,
+                    ).name
+                    target_name = tempfile.NamedTemporaryFile(
+                        delete=False,
+                        prefix=save_name.replace("*", str(i)),
+                        suffix=".out.npy",
+                        dir=target_save_path,
+                    ).name
+                    snapshot_type = "numpy"
+                else:
+                    descriptor_name = tempfile.NamedTemporaryFile(
+                        delete=False,
+                        prefix=save_name.replace("*", "%T"),
+                        suffix=".in." + file_ending,
+                        dir=descriptor_save_path,
+                    ).name
+                    target_name = tempfile.NamedTemporaryFile(
+                        delete=False,
+                        prefix=save_name.replace("*", "%T"),
+                        suffix=".out." + file_ending,
+                        dir=target_save_path,
+                    ).name
+                    snapshot_type = "openpmd"
+                self.temporary_shuffled_snapshots.append(
+                    mala.Snapshot(
+                        os.path.basename(descriptor_name),
+                        os.path.dirname(descriptor_name),
+                        os.path.basename(target_name),
+                        os.path.dirname(target_name),
+                        snapshot_function="te",
+                        output_units="None",
+                        input_units="None",
+                        calculation_output="",
+                        snapshot_type=snapshot_type,
+                    )
+                )
+            else:
+                if file_ending == "npy":
+                    descriptor_name = os.path.join(
+                        descriptor_save_path,
+                        save_name.replace("*", str(i)) + ".in.npy",
+                    )
+                    target_name = os.path.join(
+                        target_save_path,
+                        save_name.replace("*", str(i)) + ".out.npy",
+                    )
+                else:
+                    descriptor_name = os.path.join(
+                        descriptor_save_path,
+                        save_name.replace("*", "%T") + ".in." + file_ending,
+                    )
+                    target_name = os.path.join(
+                        target_save_path,
+                        save_name.replace("*", "%T") + ".out." + file_ending,
+                    )
 
             # Each new snapshot gets an number_of_new_snapshots-th from each
             # snapshot.
@@ -228,10 +304,10 @@ class DataShuffler(DataHandlerBase):
             )
             if file_ending == "npy":
                 self.descriptor_calculator.write_to_numpy_file(
-                    descriptor_name + ".in.npy", new_descriptors
+                    descriptor_name, new_descriptors
                 )
                 self.target_calculator.write_to_numpy_file(
-                    target_name + ".out.npy", new_targets
+                    target_name, new_targets
                 )
             else:
                 # We check above that in the non-numpy case, OpenPMD will work.
@@ -242,7 +318,7 @@ class DataShuffler(DataHandlerBase):
                     shuffle_dimensions
                 )
                 self.descriptor_calculator.write_to_openpmd_file(
-                    descriptor_name_openpmd + ".in." + file_ending,
+                    descriptor_name,
                     new_descriptors,
                     additional_attributes={
                         "global_shuffling_seed": self.parameters.shuffling_seed,
@@ -252,7 +328,7 @@ class DataShuffler(DataHandlerBase):
                     internal_iteration_number=i,
                 )
                 self.target_calculator.write_to_openpmd_file(
-                    target_name_openpmd + ".out." + file_ending,
+                    target_name,
                     array=new_targets,
                     additional_attributes={
                         "global_shuffling_seed": self.parameters.shuffling_seed,
@@ -334,9 +410,7 @@ class DataShuffler(DataHandlerBase):
     # XXXXXXXOOO
     # OOOOOOOOOO
 
-    def __contiguous_slice_within_ndim_grid_as_blocks(
-        extent, x, y
-    ):
+    def __contiguous_slice_within_ndim_grid_as_blocks(extent, x, y):
         # Used for converting a block defined by inclusive lower and upper
         # coordinate to a chunk as defined by openPMD.
         # The openPMD extent is defined by (to-from)+1 (to make up for the
@@ -426,7 +500,8 @@ class DataShuffler(DataHandlerBase):
             if not inner_strides:
                 if inner_idx != 0:
                     raise RuntimeError(
-                        "This cannot happen. There is bug somewhere.")
+                        "This cannot happen. There is bug somewhere."
+                    )
                 else:
                     return []
             div, mod = divmod(inner_idx, inner_strides[0])
@@ -645,6 +720,7 @@ class DataShuffler(DataHandlerBase):
         target_save_path=None,
         save_name="mala_shuffled_snapshot*",
         number_of_shuffled_snapshots=None,
+        shuffle_to_temporary=False,
     ):
         """
         Shuffle the snapshots into new snapshots.
@@ -655,8 +731,7 @@ class DataShuffler(DataHandlerBase):
         ----------
         complete_save_path : string
             If not None: the directory in which all snapshots will be saved.
-            Overwrites descriptor_save_path, target_save_path and
-            additional_info_save_path if set.
+            Overwrites descriptor_save_path and target_save_path if set.
 
         descriptor_save_path : string
             Directory in which to save descriptor data.
@@ -671,6 +746,12 @@ class DataShuffler(DataHandlerBase):
             If not None, this class will attempt to redistribute the data
             to this amount of snapshots. If None, then the same number of
             snapshots provided will be used.
+
+        shuffle_to_temporary : bool
+            If True, shuffled files will be writen to temporary data files.
+            Which paths are used is consistent with non-temporary usage of this
+            class. The path and names of these temporary files can then be
+            found in the class attribute temporary_shuffled_snapshots.
         """
         # Check the paths.
         if complete_save_path is not None:
@@ -685,20 +766,33 @@ class DataShuffler(DataHandlerBase):
             file_ending = save_name.split(".")[-1]
             save_name = save_name.split(".")[0]
             if file_ending != "npy":
-                import openpmd_api as io
-
-                if file_ending not in io.file_extensions:
-                    raise Exception(
-                        "Invalid file ending selected: " + file_ending
+                if shuffle_to_temporary:
+                    parallel_warn(
+                        "Shuffling to temporary files currently"
+                        " only works with numpy as an enginge for "
+                        "intermediate files. You have selected both"
+                        " openpmd and the temporary file option. "
+                        "Will proceed with numpy instead of "
+                        "openpmd."
                     )
+                    file_ending = "npy"
+                else:
+                    import openpmd_api as io
+
+                    if file_ending not in io.file_extensions:
+                        raise Exception(
+                            "Invalid file ending selected: " + file_ending
+                        )
         else:
             file_ending = "npy"
 
+        old_xyz = self.descriptor_calculator.parameters.descriptors_contain_xyz
+        self.descriptor_calculator.parameters.descriptors_contain_xyz = False
         if self.parameters._configuration["mpi"]:
             self._check_snapshots(comm=get_comm())
         else:
             self._check_snapshots()
-
+        self.descriptor_calculator.parameters.descriptors_contain_xyz = old_xyz
         snapshot_types = {
             snapshot.snapshot_type
             for snapshot in self.parameters.snapshot_directories_list
@@ -786,6 +880,20 @@ class DataShuffler(DataHandlerBase):
                 target_save_path,
                 permutations,
                 file_ending,
+                shuffle_to_temporary,
+            )
+        elif snapshot_type == "json+numpy":
+            for snapshot in self.parameters.snapshot_directories_list:
+                self._calculate_temporary_inputs(snapshot)
+            self.__shuffle_numpy(
+                number_of_shuffled_snapshots,
+                shuffle_dimensions,
+                descriptor_save_path,
+                save_name,
+                target_save_path,
+                permutations,
+                file_ending,
+                shuffle_to_temporary,
             )
         elif snapshot_type == "openpmd":
             descriptor = self.__DescriptorOrTarget(
@@ -820,9 +928,38 @@ class DataShuffler(DataHandlerBase):
                 permutations,
                 file_ending,
             )
+        elif snapshot_type == "json+openpmd":
+            raise Exception(
+                "Shuffling from JSON files and OpenPMD is "
+                "currently not supported."
+            )
         else:
             raise Exception("Unknown snapshot type: {}".format(snapshot_type))
+
+        # Deleting temporary files that may have been created.
+        self.delete_temporary_inputs()
 
         # Since no training will be done with this class, we should always
         # clear the data at the end.
         self.clear_data()
+
+    def delete_temporary_shuffled_snapshots(self):
+        """
+        Delete temporary files creating during shuffling of data.
+
+        If shuffling has been done with the option "shuffle_to_temporary",
+        shuffled data will be saved to temporary files which can safely be
+        deleted with this function.
+        """
+        for snapshot in self.temporary_shuffled_snapshots:
+            input_file = os.path.join(
+                snapshot.input_npy_directory, snapshot.input_npy_file
+            )
+            if os.path.isfile(input_file):
+                os.remove(input_file)
+            output_file = os.path.join(
+                snapshot.output_npy_directory, snapshot.output_npy_file
+            )
+            if os.path.isfile(output_file):
+                os.remove(output_file)
+        self.temporary_shuffled_snapshots = []

@@ -170,10 +170,11 @@ data sets have to be saved - in-memory implementations are currently developed.
 To use the data shuffling (also shown in example
 ``advanced/ex02_shuffle_data.py``), you can use the ``DataShuffler`` class.
 
-The syntax is very easy, you create a ``DataShufller`` object,
+The syntax is very easy, you create a ``DataShuffler`` object,
 which provides the same ``add_snapshot`` functionalities as the ``DataHandler``
-object, and shuffle the data once you have added all snapshots in question,
-i.e.,
+object, and shuffle the data once you have added all snapshots in question.
+Just as with the ``DataHandler`` class, on-the-fly calculation of bispectrum
+descriptors is supported.
 
       .. code-block:: python
 
@@ -186,6 +187,14 @@ i.e.,
                                        "Be_snapshot1.out.npy", data_path)
             data_shuffler.shuffle_snapshots(complete_save_path="../",
                                             save_name="Be_shuffled*")
+
+By using the ``shuffle_to_temporary`` keyword, you can shuffle the data to
+temporary files, which will can deleted after the training run. This is useful
+if you want to shuffle the data right before training and do not plan to re-use
+shuffled data files for multiple training runs. As detailed in
+``advanced/ex02_shuffle_data.py``, access to temporary files is provided via
+``data_shuffler.temporary_shuffled_snapshots[...]``, which is a list containing
+``mala.Snapshot`` objects.
 
 The seed ``parameters.data.shuffling_seed`` ensures reproducibility of data
 sets. The ``shuffle_snapshots`` function has a path handling ability akin to

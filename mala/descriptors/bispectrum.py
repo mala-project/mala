@@ -120,6 +120,24 @@ class Bispectrum(Descriptor):
         else:
             return self.__calculate_python(**kwargs)
 
+    def _read_feature_dimension_from_json(self, json_dict):
+        if self.parameters.descriptors_contain_xyz:
+            return self.__get_feature_size() - 3
+        else:
+            return self.__get_feature_size()
+
+    def __get_feature_size(self):
+        ncols0 = 3
+
+        # Analytical relation for fingerprint length
+        ncoeff = (
+            (self.parameters.bispectrum_twojmax + 2)
+            * (self.parameters.bispectrum_twojmax + 3)
+            * (self.parameters.bispectrum_twojmax + 4)
+        )
+        ncoeff = ncoeff // 24  # integer division
+        return ncols0 + ncoeff
+
     def __calculate_lammps(self, outdir, **kwargs):
         """
         Perform bispectrum calculation using LAMMPS.
@@ -173,19 +191,7 @@ class Bispectrum(Descriptor):
 
         # Do the LAMMPS calculation and clean up.
         lmp.file(self.parameters.lammps_compute_file)
-
-        # Set things not accessible from LAMMPS
-        # First 3 cols are x, y, z, coords
-        ncols0 = 3
-
-        # Analytical relation for fingerprint length
-        ncoeff = (
-            (self.parameters.bispectrum_twojmax + 2)
-            * (self.parameters.bispectrum_twojmax + 3)
-            * (self.parameters.bispectrum_twojmax + 4)
-        )
-        ncoeff = ncoeff // 24  # integer division
-        self.feature_size = ncols0 + ncoeff
+        self.feature_size = self.__get_feature_size()
 
         # Extract data from LAMMPS calculation.
         # This is different for the parallel and the serial case.

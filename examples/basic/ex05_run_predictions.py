@@ -11,7 +11,7 @@ Show how a prediction can be made using MALA, based on only a trained network an
 configurations. Either execute ex01 before executing this one or download the
 appropriate model from the provided test data repo.
 
-REQUIRES LAMMPS (and potentiall the total energy module).
+REQUIRES LAMMPS (and potentially the total energy module).
 """
 
 model_name = "Be_model"

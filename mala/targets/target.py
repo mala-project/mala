@@ -653,7 +653,7 @@ class Target(PhysicalData):
             }
             self.atomic_forces_dft = None
             self.entropy_contribution_dft_calculation = None
-            self.grid_dimensions = [0, 0, 0]
+            self.grid_dimensions = json_dict["grid_dimensions"]
             self.atoms = None
 
             for key in json_dict:
