@@ -20,7 +20,6 @@ class TestOnTheFly:
     @staticmethod
     def __setup_training(lazy_loading, checkpoint_name=None):
         test_parameters = mala.Parameters()
-        test_parameters.use_lammps = False
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "minmax"
@@ -177,4 +176,5 @@ class TestOnTheFly:
             test_parameters, test_network, data_handler
         )
         test_trainer.train_network()
+        data_shuffler.delete_temporary_shuffled_snapshots()
         assert test_trainer.final_validation_loss < np.inf
