@@ -108,6 +108,8 @@ class Network(nn.Module):
         # initialize the loss function
         if self.params.loss_function_type == "mse":
             self.loss_func = functional.mse_loss
+        elif self.params.loss_function_type == "cross_entropy":
+            self.loss_func = functional.cross_entropy
         else:
             raise Exception("Unsupported loss function.")
 
