@@ -472,7 +472,7 @@ class Trainer(Runner):
                     self.parameters._configuration["device"],
                 )
             if self.parameters_full.verbosity > 1:
-                printout("Errors:", errors, min_verbosity=2)
+                printout(f"Epoch {epoch} errors:", errors, min_verbosity=2)
             else:
                 printout(
                     f"Epoch {epoch}: validation data loss: {vloss:.3e}",

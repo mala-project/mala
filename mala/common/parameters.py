@@ -288,6 +288,7 @@ class ParametersNetwork(ParametersBase):
         self.layer_sizes = [10, 10, 10]
         self.layer_activations = ["Sigmoid"]
         self.loss_function_type = "mse"
+        self.loss_reference = []
 
         # for LSTM/Gru
         self.no_hidden_state = False
