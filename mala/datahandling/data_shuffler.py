@@ -113,6 +113,41 @@ class DataShuffler(DataHandlerBase):
         file_ending,
         temporary,
     ):
+        """
+        Shuffle the data in the numpy format.
+
+        This means shuffling from numpy to numpy OR openPMD.
+
+        Parameters
+        ----------
+        number_of_new_snapshots : int
+            The number of new shuffled snapshot-like to create.
+
+        shuffle_dimensions : list
+            The dimensions of the shuffled snapshots.
+
+        descriptor_save_path : string
+            Directory in which to save descriptor data.
+
+        save_name : string
+            Name of the snapshot-like objects which to shuffle into.
+
+        target_save_path : string
+            Directory in which to save target data.
+
+        permutations : list
+            The permutations to apply to the data. These are shared among
+            ranks.
+
+        file_ending : string
+            The file ending of the shuffled snapshots.
+
+        temporary : bool
+            If True, shuffled files will be writen to temporary data files.
+            Usage of these files is consistent with non-temporary usage of this
+            class. The path and names of these temporary files can then be
+            found in the class attribute temporary_shuffled_snapshots.
+        """
         # Load the data (via memmap).
         descriptor_data = []
         target_data = []
@@ -411,10 +446,29 @@ class DataShuffler(DataHandlerBase):
     # OOOOOOOOOO
 
     def __contiguous_slice_within_ndim_grid_as_blocks(extent, x, y):
-        # Used for converting a block defined by inclusive lower and upper
-        # coordinate to a chunk as defined by openPMD.
-        # The openPMD extent is defined by (to-from)+1 (to make up for the
-        # inclusive upper end).
+        """
+        Convert a contiguous slice into an openPMD chunk.
+
+        Used for converting a block defined by inclusive lower and upper
+        coordinate to a chunk as defined by openPMD.
+        The openPMD extent is defined by (to-from)+1 (to make up for the
+        inclusive upper end).
+
+        Parameters
+        ----------
+        x : list
+            The lower coordinate of the block.
+
+        y : list
+            The upper coordinate of the block.
+
+        Returns
+        -------
+        openpmd_block : list
+            A list of tuples, each containing the offset and extent of a
+            block in openPMD format.
+        """
+
         def get_extent(from_, to_):
             res = [upper + 1 - lower for (lower, upper) in zip(from_, to_)]
             if any(x < 1 for x in res):
@@ -482,10 +536,24 @@ class DataShuffler(DataHandlerBase):
 
         return [front_slice] + rec_res + [back_slice]
 
-    # Interpreting `ndim_extent` as the extents of an n-dimensional grid,
-    # returns the n-dimensional coordinate of the `idx`th item in the row-major
-    # representation of the grid.
     def __resolve_flattened_index_into_ndim(idx: int, ndim_extent):
+        """
+        Return the n-dimensional coordinate of the `idx`th item of the grid.
+
+        Interpreting `ndim_extent` as the extents of an n-dimensional grid,
+        returns the n-dimensional coordinate of the `idx`th item in the row-major
+        representation of the grid.
+
+        Parameters
+        ----------
+        ndim_extent : list
+            The extents of the n-dimensional grid.
+
+        Returns
+        -------
+        coord : int
+            The n-dimensional coordinate of the `idx`th item in the grid.
+        """
         if not ndim_extent:
             raise RuntimeError("Cannot index into a zero-dimensional array.")
         strides = []
@@ -509,13 +577,27 @@ class DataShuffler(DataHandlerBase):
 
         return worker(idx, strides)
 
-    # Load a chunk from the openPMD `record` into the buffer at `arr`.
-    # The indexes `offset` and `extent` are scalar 1-dimensional coordinates,
-    # and apply to the n-dimensional record by reinterpreting (reshaped) it as
-    # a one-dimensional array.
-    # The function deals internally with splitting the 1-dimensional slice into
-    # a sequence of n-dimensional block load operations.
     def __load_chunk_1D(mesh, arr, offset, extent):
+        """
+        Load a chunk from the openPMD `record` into the buffer at `arr`.
+
+        The indexes `offset` and `extent` are scalar 1-dimensional coordinates,
+        and apply to the n-dimensional record by reinterpreting (reshaped) it as
+        a one-dimensional array.
+        The function deals internally with splitting the 1-dimensional slice into
+        a sequence of n-dimensional block load operations.
+
+        Parameters
+        ----------
+        arr : np.ndarray
+            The buffer to load the chunk into.
+
+        offset : int
+            The offset of the chunk within the record.
+
+        extent : int
+            The extent of the chunk within the record.
+        """
         start_idx = DataShuffler.__resolve_flattened_index_into_ndim(
             offset, mesh.shape
         )
@@ -553,6 +635,32 @@ class DataShuffler(DataHandlerBase):
         permutations,
         file_ending,
     ):
+        """
+        Shuffle the data in the openPMD format.
+
+        This means shuffling from openPMD to openPMD.
+
+        Parameters
+        ----------
+        dot : __DescriptorOrTarget
+            An auxilary object for representing target or descriptor data.
+
+        number_of_new_snapshots : int
+            The number of new shuffled snapshot-like to create.
+
+        shuffle_dimensions : list
+            The dimensions of the shuffled snapshots.
+
+        save_name : string
+            The name of the shuffled snapshots.
+
+        permutations : list
+            The permutations to apply to the data. These are shared among
+            ranks.
+
+        file_ending : string
+            The file ending of the shuffled snapshots.
+        """
         import openpmd_api as io
 
         if self.parameters._configuration["mpi"]:
