@@ -139,6 +139,19 @@ class TrajectoryAnalyzer:
         self.uncache_properties()
 
     def _is_property_cached(self, property_name):
+        """
+        Check if a property is cached.
+
+        Parameters
+        ----------
+        property_name : str
+            Name of the property to check.
+
+        Returns
+        -------
+        is_cached : bool
+            True if the property is cached, False otherwise.
+        """
         return property_name in self.__dict__.keys()
 
     def uncache_properties(self):
@@ -343,9 +356,25 @@ class TrajectoryAnalyzer:
         printout(j, "possible snapshots found in MD trajectory.")
 
     def _analyze_distance_metric(self, trajectory):
-        # distance metric usefdfor the snapshot parsing (realspace similarity
-        # of the snapshot), we first find the center of the equilibrated part
-        # of the trajectory and calculate the differences w.r.t to to it.
+        """
+        Find threshold for realspace distance trajectory analysis.
+
+        To do that, first the center of the equilibrated part of the trajectory
+        is determined, and then the minimum Euclidean distances between this
+        snapshot and all snapshots in an appropriate window around it are
+        calculated. Based on mean and standard deviation of these distances,
+        the threshold is determined.
+
+        Parameters
+        ----------
+        trajectory : ase.io.Trajectory
+            Trajectory to be analyzed.
+
+        Returns
+        -------
+        threshold : float
+            Threshold for the distance (realspace minimum Euclidean distance).
+        """
         center = (
             int(
                 (
@@ -390,6 +419,39 @@ class TrajectoryAnalyzer:
         reduction,
         save_rdf1=False,
     ):
+        """
+        Calculate the distance between two snapshots.
+
+        Different metrics and reductions are possible.
+
+        Parameters
+        ----------
+        snapshot1 : ase.Atoms
+            First snapshot to be compared.
+
+        snapshot2 : ase.Atoms
+            Second snapshot to be compared.
+
+        distance_metric : string
+            Distance metric to be used. Can be "realspace" or "rdf".
+            This metric determines _what_ is compared, i.e., atomic positions
+            directly or the RDF as representation of them.
+
+        reduction : string
+            Reduction to be used. Can be "minimal_distance" or
+            "cosine_distance". This metric determines _how_ the representation
+            of snapshots are compared.
+
+        save_rdf1 : bool
+            If True, the RDF of the first snapshot will be saved for later
+            use. This is useful when multiple snapshots are compared to the
+            same reference snapshot.
+
+        Returns
+        -------
+        result : float
+            Distance between the two snapshots
+        """
         if distance_metric == "realspace":
             positions1 = snapshot1.get_positions()
             positions2 = snapshot2.get_positions()
@@ -442,6 +504,21 @@ class TrajectoryAnalyzer:
         return result
 
     def __denoise(self, signal):
+        """
+        Denoise a signal.
+
+        Denoising is performed by a simple moving average.
+
+        Parameters
+        ----------
+        signal : numpy.ndarray
+            Signal to be denoised.
+
+        Returns
+        -------
+        denoised_signal : numpy.ndarray
+            Denoised signal.
+        """
         denoised_signal = np.convolve(
             signal,
             np.ones(self.parameters.trajectory_analysis_denoising_width)
@@ -459,6 +536,38 @@ class TrajectoryAnalyzer:
         distance_metric,
         allowed_temp_diff,
     ):
+        """
+        Check if a snapshot is valid to be sampled.
+
+        To be valid, the distance to the last sampled snapshot needs to be
+        over a predetermined threshold AND the temperature needs to be
+        within a certain window around the target temperature.
+
+        Parameters
+        ----------
+        snapshot_to_test : ase.Atoms
+            Snapshot to check for validity.
+
+        temp_to_test : float
+            Temperature of the snapshot to check.
+
+        reference_snapshot : ase.Atoms
+            Reference snapshot to compare to (last sampled snapshot).
+
+        reference_temp : float
+            Temperature of the reference snapshot (last sampled snapshot).
+
+        distance_metric : float
+            Threshold for the distance between the two snapshots.
+
+        allowed_temp_diff : float
+            Allowed temperature difference between the two snapshots.
+
+        Returns
+        -------
+        is_valid : bool
+            True if the snapshot is valid, False otherwise.
+        """
         distance = self._calculate_distance_between_snapshots(
             snapshot_to_test,
             reference_snapshot,
