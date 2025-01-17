@@ -736,26 +736,105 @@ match the array dimensions (extent {} in the feature dimension)""".format(
 
     @abstractmethod
     def _process_loaded_array(self, array, units=None):
+        """
+        Process loaded array (i.e., unit change, reshaping, etc.).
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Array to process.
+
+        units : string
+            Units of input array.
+        """
         pass
 
     @abstractmethod
     def _process_loaded_dimensions(self, array_dimensions):
+        """
+        Process loaded dimensions.
+
+        E.g., this could include cutting feature dimensions reserved for
+        coordinate data in descriptor data.
+
+        Parameters
+        ----------
+        array_dimensions : tuple
+            Raw dimensions of the array.
+        """
         pass
 
     @abstractmethod
     def _set_feature_size_from_array(self, array):
+        """
+        Set the feature size from the array.
+
+        Feature sizes are saved in different ways for different physical data
+        classes.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+        """
         pass
 
     def _process_additional_metadata(self, additional_metadata):
+        """
+        Process additional metadata.
+
+        If additional metadata is provided, and saving is performed via
+        openpmd, then this function process the metadata dictionary in a way
+        it can be saved by openpmd.
+
+        Parameters
+        ----------
+        additional_metadata : dict
+            Dictionary containing additional metadata.
+        """
         pass
 
     def _feature_mask(self):
+        """
+        Return a mask for features that are not part of the feature dimension.
+
+        The mask assumes that the features which do not belong to the feature
+        dimension are at the beginning of the array.
+
+        Returns
+        -------
+        mask : int
+            Starting index after which the actual feature dimension starts.
+        """
         return 0
 
     def _set_geometry_info(self, mesh):
+        """
+        Set geometry information to openPMD mesh.
+
+        This has to be done as part of the openPMD saving process.
+
+        Parameters
+        ----------
+        mesh : openpmd_api.Mesh
+            OpenPMD mesh for which to set geometry information.
+        """
         pass
 
     def _set_openpmd_attribtues(self, iteration, mesh):
+        """
+        Set openPMD attributes.
+
+        This has to be done as part of the openPMD saving process. It saves
+        metadata related to the saved data to make data more reproducible.
+
+        Parameters
+        ----------
+        iteration : openpmd_api.Iteration
+            OpenPMD iteration for which to set attributes.
+
+        mesh : openpmd_api.Mesh
+            OpenPMD mesh for which to set attributes.
+        """
         mesh.unit_dimension = self.si_dimension
         mesh.axis_labels = ["x", "y", "z"]
         mesh.grid_global_offset = [0, 0, 0]
@@ -771,20 +850,84 @@ match the array dimensions (extent {} in the feature dimension)""".format(
         self._set_geometry_info(mesh)
 
     def _process_openpmd_attributes(self, series, iteration, mesh):
+        """
+        Process loaded openPMD attributes.
+
+        This is done during loading from OpenPMD data. OpenPMD can save
+        metadata not contained in the data itself, but in the file. With this
+        function, this information can be loaded to relevant MALA classes.
+
+        Parameters
+        ----------
+        series : openpmd_api.Series
+            OpenPMD series from which to load an iteration.
+
+        iteration : openpmd_api.Iteration
+            OpenPMD iteration from which to load.
+
+        mesh : openpmd_api.Mesh
+            OpenPMD mesh used during loading.
+        """
         self._process_geometry_info(mesh)
 
     def _process_geometry_info(self, mesh):
+        """
+        Process loaded openPMD geometry information.
+
+        Information on geometry is one of the pieces of metadata that can be
+        saved in OpenPMD files. This function processes this information upon
+        loading, and saves it to the correct place in the respective MALA
+        class.
+
+        Parameters
+        ----------
+        mesh : openpmd_api.Mesh
+            OpenPMD mesh used during loading.
+        """
         pass
 
     # Currently all data we have is atom based.
     # That may not always be the case.
     def _get_atoms(self):
+        """
+        Access atoms saved in PhysicalData-derived class.
+
+        For any derived class which is atom based (currently, all are), this
+        function returns the atoms, which may not be directly accessible as
+        an attribute for a variety of reasons.
+
+        Returns
+        -------
+        atoms : ase.Atoms
+            An ASE atoms object holding the associated atoms of this object.
+        """
         return None
 
     @staticmethod
     def _get_attribute_if_attribute_exists(
         iteration, attribute, default_value=None
     ):
+        """
+        Access an attribute from an openPMD iteration safely.
+
+        If the attribute does not exist, a default values is returned.
+
+        Parameters
+        ----------
+        iteration : openpmd_api.Iteration
+            OpenPMD iteration from which to load an attribute.
+
+        attribute : string
+            Name of the attribute to load.
+
+        default_value : any
+            Default value to return if the attribute does not exist.
+
+        Returns
+        -------
+        value : any
+            Value of the attribute if it exists, else the default value.
+        """
         if attribute in iteration.attributes:
             return iteration.get_attribute(attribute)
         else:
