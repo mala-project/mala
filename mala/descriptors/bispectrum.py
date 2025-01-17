@@ -108,6 +108,27 @@ class Bispectrum(Descriptor):
             raise Exception("Unsupported unit for bispectrum descriptors.")
 
     def _calculate(self, outdir, **kwargs):
+        """
+        Perform Bispectrum descriptor calculation.
+
+        This function is the main entry point for the calculation of the
+        bispectrum descriptors. It will decide whether to use LAMMPS or
+        a python implementation based on the availability of LAMMPS (and
+        user specifications).
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        bispectrum_descriptors_np : numpy.array
+            The calculated bispectrum descriptors.
+        """
         if self.parameters._configuration["lammps"]:
             if find_spec("lammps") is None:
                 printout(
@@ -121,12 +142,34 @@ class Bispectrum(Descriptor):
             return self.__calculate_python(**kwargs)
 
     def _read_feature_dimension_from_json(self, json_dict):
+        """
+        Read the feature dimension from a saved JSON file.
+
+        For bispectrum descriptors, the feature dimension does not change with
+        the number of species or atoms. It is solely dependent on the
+        hyperparameter 2Jmax, and is computed here.
+
+        Parameters
+        ----------
+        json_dict : dict
+            Dictionary containing info loaded from the JSON file.
+        """
         if self.parameters.descriptors_contain_xyz:
             return self.__get_feature_size() - 3
         else:
             return self.__get_feature_size()
 
     def __get_feature_size(self):
+        """
+        Compute the feature size of the bispectrum descriptors
+
+        This is done using the hyperparameter 2Jmax.
+
+        Returns
+        -------
+        ncols0 : int
+            The feature dimension of the bispectrum descriptors.
+        """
         ncols0 = 3
 
         # Analytical relation for fingerprint length
@@ -144,6 +187,19 @@ class Bispectrum(Descriptor):
 
         Creates a LAMMPS instance with appropriate call parameters and uses
         it for the calculation.
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        bispectrum_descriptors_np : numpy.array
+            The calculated bispectrum descriptors.
         """
         # For version compatibility; older lammps versions (the serial version
         # we still use on some machines) have these constants as part of the
@@ -273,6 +329,16 @@ class Bispectrum(Descriptor):
         Some options are hardcoded in the same manner the LAMMPS implementation
         hard codes them. Compared to the LAMMPS implementation, some
         essentially never used options are not maintained/optimized.
+
+        Parameters
+        ----------
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        bispectrum_descriptors_np : numpy.array
+            The calculated bispectrum descriptors.
         """
         printout(
             "Using python for descriptor calculation. "

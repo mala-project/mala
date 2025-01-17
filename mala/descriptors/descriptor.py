@@ -1097,6 +1097,17 @@ class Descriptor(PhysicalData):
 
     @abstractmethod
     def _read_feature_dimension_from_json(self, json_dict):
+        """
+        Read the feature dimension from a saved JSON file.
+
+        This process may also involve reading additional information from the
+        Parameters object.
+
+        Parameters
+        ----------
+        json_dict : dict
+            Dictionary containing info loaded from the JSON file.
+        """
         pass
 
     def _set_feature_size_from_array(self, array):
