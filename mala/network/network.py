@@ -12,49 +12,6 @@ from mala.common.parameters import Parameters
 from mala.common.parallelizer import printout, parallel_warn
 
 
-def weighted_mse_loss(
-    input,
-    target,
-    ref_mean_dos,
-    ref_mean,
-    ref_std,
-    reg_factor,
-):
-
-    expanded_input, expanded_target = torch.broadcast_tensors(input, target)
-    with torch.no_grad():
-        #     old_sum = torch.sum(expanded_input)
-        reference_mean_dos = torch.from_numpy(ref_mean_dos).to(input.device)
-        dos_work = expanded_target.detach().clone()
-        maxdos = torch.max(dos_work)
-        dos_work /= maxdos
-        diff = dos_work - reference_mean_dos
-        diff /= ref_mean + ref_std
-
-        # To amplify differences
-        diff = diff**3
-
-        # Scaling back.
-        diff *= maxdos
-        diff = torch.abs(diff)
-
-        # Keep dimension for broadcasting
-        maximum = torch.max(diff, dim=1, keepdim=True)[0]
-
-        # Broadcasting ensures proper scaling along the rows
-        diff *= 1 / maximum
-
-        # Adjust weights so we don't get funny business in unweighted
-        # regions.
-        weights = (1 - reg_factor) + diff * reg_factor
-
-    loss = (((expanded_input - expanded_target) ** 2) * weights).sum()
-    return loss
-
-    # # Using diff like weights.
-    # return functional.mse_loss(input, target) * diff
-
-
 class Network(nn.Module):
     """
     Central network class for this framework, based on pytorch.nn.Module.
@@ -149,13 +106,34 @@ class Network(nn.Module):
         # initialize the layers
         self.number_of_layers = len(self.params.layer_sizes) - 1
 
+        # Initialize everything for the weighted loss, if necessary.
+        if (
+            self.params.loss_reference_across_data_set is not None
+            and self.params.loss_reference_example is not None
+        ):
+
+            self.weighted_loss_dataset_reference = np.float32(
+                np.load(params.network.loss_reference_across_data_set)
+            )
+            example = np.float32(
+                np.load(params.network.loss_reference_example)
+            )
+
+            diff = example - self.weighted_loss_dataset_reference
+            self.weighted_loss_mean_reference = np.mean(diff)
+            self.weighted_loss_std_reference = np.std(diff)
+        elif self.params.loss_function_type == "weighted_mse":
+            raise Exception(
+                "Cannot perform weighted MSE without data set" "average."
+            )
+
         # initialize the loss function
         if self.params.loss_function_type == "mse":
             self.loss_func = functional.mse_loss
         elif self.params.loss_function_type == "cross_entropy":
             self.loss_func = functional.cross_entropy
         elif self.params.loss_function_type == "weighted_mse":
-            self.loss_func = weighted_mse_loss
+            self.loss_func = self.weighted_mse_loss
         else:
             raise Exception("Unsupported loss function.")
 
@@ -213,17 +191,51 @@ class Network(nn.Module):
             Loss value for output and target.
 
         """
-        if self.params.loss_function_type != "weighted_mse":
-            return self.loss_func(output, target)
-        else:
-            return self.loss_func(
-                output,
-                target,
-                self.params.loss_reference[0],
-                self.params.loss_reference[1],
-                self.params.loss_reference[2],
-                self.params.loss_reference[3],
+        return self.loss_func(output, target)
+
+    def weighted_mse_loss(
+        self,
+        input,
+        target,
+    ):
+
+        expanded_input, expanded_target = torch.broadcast_tensors(
+            input, target
+        )
+        with torch.no_grad():
+            reference_mean_dos = torch.from_numpy(
+                self.weighted_loss_dataset_reference
+            ).to(input.device)
+            dos_work = expanded_target.detach().clone()
+            maxdos = torch.max(dos_work)
+            dos_work /= maxdos
+            diff = dos_work - reference_mean_dos
+            diff /= (
+                self.weighted_loss_mean_reference
+                + self.weighted_loss_std_reference
             )
+
+            # To amplify differences
+            diff = diff**3
+
+            # Scaling back.
+            diff *= maxdos
+            diff = torch.abs(diff)
+
+            # Keep dimension for broadcasting
+            maximum = torch.max(diff, dim=1, keepdim=True)[0]
+
+            # Broadcasting ensures proper scaling along the rows
+            diff *= 1 / maximum
+
+            # Adjust weights so we don't get funny business in unweighted
+            # regions.
+            weights = (
+                1 - self.params.loss_reference_weight_factor
+            ) + diff * self.params.loss_reference_weight_factor
+
+        loss = (((expanded_input - expanded_target) ** 2) * weights).sum()
+        return loss
 
     def save_network(self, path_to_file):
         """

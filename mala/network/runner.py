@@ -102,119 +102,146 @@ class Runner:
         else:
             errors = {}
         for metric in non_energy_metrics:
-            try:
-                if metric == "ldos":
-                    error = np.mean((predicted_outputs - actual_outputs) ** 2)
-                    errors[metric] = error
+            # try:
+            if metric == "ldos":
+                error = np.mean((predicted_outputs - actual_outputs) ** 2)
+                errors[metric] = error
 
-                elif metric == "density":
-                    target_calculator = self.data.target_calculator
-                    if not isinstance(
-                        target_calculator, LDOS
-                    ) and not isinstance(target_calculator, Density):
-                        raise Exception(
-                            "Cannot calculate density from this " "observable."
-                        )
-                    target_calculator.read_additional_calculation_data(
-                        self.data.get_snapshot_calculation_output(
-                            snapshot_number
-                        )
-                    )
-
-                    target_calculator.read_from_array(actual_outputs)
-                    actual = target_calculator.density
-
-                    target_calculator.read_from_array(predicted_outputs)
-                    predicted = target_calculator.density
-                    errors[metric] = np.mean(np.abs(actual - predicted))
-
-                elif metric == "density_relative":
-                    target_calculator = self.data.target_calculator
-                    if not isinstance(
-                        target_calculator, LDOS
-                    ) and not isinstance(target_calculator, Density):
-                        raise Exception(
-                            "Cannot calculate the density from this "
-                            "observable."
-                        )
-                    target_calculator.read_additional_calculation_data(
-                        self.data.get_snapshot_calculation_output(
-                            snapshot_number
-                        )
-                    )
-
-                    target_calculator.read_from_array(actual_outputs)
-                    actual = target_calculator.density
-
-                    target_calculator.read_from_array(predicted_outputs)
-                    predicted = target_calculator.density
-                    errors[metric] = (
-                        np.mean(np.abs((actual - predicted) / actual)) * 100
-                    )
-
-                elif metric == "dos":
-                    target_calculator = self.data.target_calculator
-                    if not isinstance(
-                        target_calculator, LDOS
-                    ) and not isinstance(target_calculator, DOS):
-                        raise Exception(
-                            "Cannot calculate the DOS from this " "observable."
-                        )
-                    target_calculator.read_additional_calculation_data(
-                        self.data.get_snapshot_calculation_output(
-                            snapshot_number
-                        )
-                    )
-
-                    target_calculator.read_from_array(actual_outputs)
-                    actual = target_calculator.density_of_states
-
-                    target_calculator.read_from_array(predicted_outputs)
-                    predicted = target_calculator.density_of_states
-
-                    errors[metric] = np.abs(actual - predicted).mean()
-
-                elif metric == "dos_relative":
-                    target_calculator = self.data.target_calculator
-                    if not isinstance(
-                        target_calculator, LDOS
-                    ) and not isinstance(target_calculator, DOS):
-                        raise Exception(
-                            "Cannot calculate the relative DOS from this "
-                            "observable."
-                        )
-                    target_calculator.read_additional_calculation_data(
-                        self.data.get_snapshot_calculation_output(
-                            snapshot_number
-                        )
-                    )
-
-                    # We shift both the actual and predicted DOS by 1.0 to overcome
-                    # numerical issues with the DOS having values equal to zero.
-                    target_calculator.read_from_array(actual_outputs)
-                    actual = target_calculator.density_of_states + 1.0
-
-                    target_calculator.read_from_array(predicted_outputs)
-                    predicted = target_calculator.density_of_states + 1.0
-
-                    errors[metric] = (
-                        np.ma.masked_invalid(
-                            np.abs(
-                                (actual - predicted)
-                                / (np.abs(actual) + np.abs(predicted))
-                            )
-                        ).mean()
-                        * 100
-                    )
-                else:
-                    raise Exception(f"Invalid metric ({metric}) requested.")
-            except ValueError as e:
-                printout(
-                    f"Error calculating observable: {metric} for snapshot {snapshot_number}",
-                    min_verbosity=0,
+            elif metric == "weighted_ldos":
+                maxdos = np.max(actual_outputs, axis=1)
+                actual_outputs /= maxdos[:, np.newaxis]
+                diff = (
+                    actual_outputs
+                    - self.network.weighted_loss_dataset_reference
                 )
-                printout(e, min_verbosity=2)
-                errors[metric] = float("inf")
+                diff /= (
+                    self.network.weighted_loss_mean_reference
+                    + self.network.weighted_loss_std_reference
+                )
+
+                # To amplify differences
+                diff = diff**3
+
+                # Scaling back.
+                diff *= maxdos[:, np.newaxis]
+                diff = np.abs(diff)
+
+                # Keep dimension for broadcasting
+                maximum = np.max(diff, axis=1, keepdims=True)
+
+                # Broadcasting ensures proper scaling along the rows
+                diff *= 1 / maximum
+
+                # Adjust weights so we don't get funny business in unweighted
+                # regions.
+                weights = (
+                    1 - self.network.params.loss_reference_weight_factor
+                ) + diff * self.network.params.loss_reference_weight_factor
+
+                error = np.mean(
+                    ((predicted_outputs - actual_outputs) ** 2) * weights
+                )
+                errors[metric] = error
+
+            elif metric == "density":
+                target_calculator = self.data.target_calculator
+                if not isinstance(target_calculator, LDOS) and not isinstance(
+                    target_calculator, Density
+                ):
+                    raise Exception(
+                        "Cannot calculate density from this " "observable."
+                    )
+                target_calculator.read_additional_calculation_data(
+                    self.data.get_snapshot_calculation_output(snapshot_number)
+                )
+
+                target_calculator.read_from_array(actual_outputs)
+                actual = target_calculator.density
+
+                target_calculator.read_from_array(predicted_outputs)
+                predicted = target_calculator.density
+                errors[metric] = np.mean(np.abs(actual - predicted))
+
+            elif metric == "density_relative":
+                target_calculator = self.data.target_calculator
+                if not isinstance(target_calculator, LDOS) and not isinstance(
+                    target_calculator, Density
+                ):
+                    raise Exception(
+                        "Cannot calculate the density from this " "observable."
+                    )
+                target_calculator.read_additional_calculation_data(
+                    self.data.get_snapshot_calculation_output(snapshot_number)
+                )
+
+                target_calculator.read_from_array(actual_outputs)
+                actual = target_calculator.density
+
+                target_calculator.read_from_array(predicted_outputs)
+                predicted = target_calculator.density
+                errors[metric] = (
+                    np.mean(np.abs((actual - predicted) / actual)) * 100
+                )
+
+            elif metric == "dos":
+                target_calculator = self.data.target_calculator
+                if not isinstance(target_calculator, LDOS) and not isinstance(
+                    target_calculator, DOS
+                ):
+                    raise Exception(
+                        "Cannot calculate the DOS from this " "observable."
+                    )
+                target_calculator.read_additional_calculation_data(
+                    self.data.get_snapshot_calculation_output(snapshot_number)
+                )
+
+                target_calculator.read_from_array(actual_outputs)
+                actual = target_calculator.density_of_states
+
+                target_calculator.read_from_array(predicted_outputs)
+                predicted = target_calculator.density_of_states
+
+                errors[metric] = np.abs(actual - predicted).mean()
+
+            elif metric == "dos_relative":
+                target_calculator = self.data.target_calculator
+                if not isinstance(target_calculator, LDOS) and not isinstance(
+                    target_calculator, DOS
+                ):
+                    raise Exception(
+                        "Cannot calculate the relative DOS from this "
+                        "observable."
+                    )
+                target_calculator.read_additional_calculation_data(
+                    self.data.get_snapshot_calculation_output(snapshot_number)
+                )
+
+                # We shift both the actual and predicted DOS by 1.0 to overcome
+                # numerical issues with the DOS having values equal to zero.
+                target_calculator.read_from_array(actual_outputs)
+                actual = target_calculator.density_of_states + 1.0
+
+                target_calculator.read_from_array(predicted_outputs)
+                predicted = target_calculator.density_of_states + 1.0
+
+                errors[metric] = (
+                    np.ma.masked_invalid(
+                        np.abs(
+                            (actual - predicted)
+                            / (np.abs(actual) + np.abs(predicted))
+                        )
+                    ).mean()
+                    * 100
+                )
+            else:
+                raise Exception(f"Invalid metric ({metric}) requested.")
+            # except ValueError as e:
+            #     printout(
+            #         f"Error calculating observable: {metric} for snapshot {snapshot_number}",
+            #         min_verbosity=0,
+            #     )
+            #     printout(e, min_verbosity=2)
+            #     errors[metric] = float("inf")
         return errors
 
     def _calculate_energy_errors(
