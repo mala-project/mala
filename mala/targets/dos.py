@@ -1141,7 +1141,6 @@ class DOS(Target):
         entropy_contribution : float
             Entropy contribution in eV.
         """
-
         # Calculate the entropy contribution to the energy.
         if integration_method == "trapezoid":
             multiplicator = entropy_multiplicator(

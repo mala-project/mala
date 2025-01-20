@@ -134,7 +134,6 @@ class ParametersBase(JSONSerializable):
         new_granularity : int
             New openPMD granularity.
         """
-
         self._configuration["openpmd_granularity"] = new_granularity
 
     def _update_lammps(self, new_lammps):

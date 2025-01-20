@@ -161,7 +161,7 @@ class Bispectrum(Descriptor):
 
     def __get_feature_size(self):
         """
-        Compute the feature size of the bispectrum descriptors
+        Compute the feature size of the bispectrum descriptors.
 
         This is done using the hyperparameter 2Jmax.
 
