@@ -66,7 +66,7 @@ class Bispectrum(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -74,7 +74,7 @@ class Bispectrum(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in MALA units.
         """
         if in_units == "None" or in_units is None:
@@ -91,7 +91,7 @@ class Bispectrum(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in MALA units.
 
         out_units : string
@@ -99,7 +99,7 @@ class Bispectrum(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
         """
         if out_units == "None" or out_units is None:
@@ -126,7 +126,7 @@ class Bispectrum(Descriptor):
 
         Returns
         -------
-        bispectrum_descriptors_np : numpy.array
+        bispectrum_descriptors_np : numpy.ndarray
             The calculated bispectrum descriptors.
         """
         if self.parameters._configuration["lammps"]:
@@ -198,7 +198,7 @@ class Bispectrum(Descriptor):
 
         Returns
         -------
-        bispectrum_descriptors_np : numpy.array
+        bispectrum_descriptors_np : numpy.ndarray
             The calculated bispectrum descriptors.
         """
         # For version compatibility; older lammps versions (the serial version
@@ -337,7 +337,7 @@ class Bispectrum(Descriptor):
 
         Returns
         -------
-        bispectrum_descriptors_np : numpy.array
+        bispectrum_descriptors_np : numpy.ndarray
             The calculated bispectrum descriptors.
         """
         printout(

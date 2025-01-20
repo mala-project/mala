@@ -169,7 +169,7 @@ class Descriptor(PhysicalData):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -177,7 +177,7 @@ class Descriptor(PhysicalData):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in MALA units.
 
         """
@@ -202,7 +202,7 @@ class Descriptor(PhysicalData):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in MALA units.
 
         out_units : string
@@ -210,7 +210,7 @@ class Descriptor(PhysicalData):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
 
         """
@@ -336,7 +336,7 @@ class Descriptor(PhysicalData):
 
         Returns
         -------
-        descriptors : numpy.array
+        descriptors : numpy.ndarray
             Numpy array containing the descriptors with the dimension
             (x,y,z,descriptor_dimension)
 
@@ -406,7 +406,7 @@ class Descriptor(PhysicalData):
 
         Returns
         -------
-        descriptors : numpy.array
+        descriptors : numpy.ndarray
             Numpy array containing the descriptors with the dimension
             (x,y,z,descriptor_dimension)
 
@@ -452,7 +452,7 @@ class Descriptor(PhysicalData):
 
         Returns
         -------
-        descriptors : numpy.array
+        descriptors : numpy.ndarray
             Numpy array containing the descriptors with the dimension
             (x,y,z,descriptor_dimension)
         """
@@ -478,7 +478,7 @@ class Descriptor(PhysicalData):
 
         Parameters
         ----------
-        descriptors_np : numpy.array
+        descriptors_np : numpy.ndarray
             Numpy array with the descriptors of this ranks local grid.
 
         use_pickled_comm : bool
@@ -596,7 +596,7 @@ class Descriptor(PhysicalData):
 
         Parameters
         ----------
-        descriptors_np : numpy.array
+        descriptors_np : numpy.ndarray
             Numpy array with the descriptors of this ranks local grid.
         """
         local_offset = [None, None, None]
@@ -1023,7 +1023,7 @@ class Descriptor(PhysicalData):
 
         Returns
         -------
-        all_atoms : numpy.array
+        all_atoms : numpy.ndarray
             Numpy array containing the positions of all atoms potentially
             relevant for the descriptor calculation.
         """
@@ -1172,7 +1172,7 @@ class Descriptor(PhysicalData):
 
         Returns
         -------
-        coord : numpy.array
+        coord : numpy.ndarray
             Real space coordinate corresponding to the grid point.
         """
         # Convert grid indices to real space grid point.

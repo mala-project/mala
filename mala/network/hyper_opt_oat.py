@@ -215,7 +215,7 @@ class HyperOptOAT(HyperOpt):
 
         Returns
         -------
-        orthogonal_array : np.array
+        orthogonal_array : numpy.ndarray
             The orthogonal array used for hyperparameter optimization.
         """
         self.__check_factor_levels()

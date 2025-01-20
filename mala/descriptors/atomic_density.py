@@ -46,7 +46,7 @@ class AtomicDensity(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -54,7 +54,7 @@ class AtomicDensity(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in MALA units.
         """
         if in_units == "None" or in_units is None:
@@ -71,7 +71,7 @@ class AtomicDensity(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in MALA units.
 
         out_units : string
@@ -79,7 +79,7 @@ class AtomicDensity(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
         """
         if out_units == "None":
@@ -125,7 +125,7 @@ class AtomicDensity(Descriptor):
 
         Returns
         -------
-        gaussian_descriptors_np : numpy.array
+        gaussian_descriptors_np : numpy.ndarray
             The calculated Gaussian descriptors.
         """
         if self.parameters._configuration["lammps"]:
@@ -171,7 +171,7 @@ class AtomicDensity(Descriptor):
 
         Returns
         -------
-        gaussian_descriptors_np : numpy.array
+        gaussian_descriptors_np : numpy.ndarray
             The calculated Gaussian descriptors.
 
         """
@@ -316,7 +316,7 @@ class AtomicDensity(Descriptor):
 
         Returns
         -------
-        gaussian_descriptors_np : numpy.array
+        gaussian_descriptors_np : numpy.ndarray
             The calculated Gaussian descriptors.
         """
         printout(

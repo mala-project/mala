@@ -359,7 +359,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -370,7 +370,7 @@ class DOS(Target):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in 1/eV.
         """
         if in_units == "1/eV" or in_units is None:
@@ -389,7 +389,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in 1/eV.
 
         out_units : string
@@ -397,7 +397,7 @@ class DOS(Target):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
         """
         if out_units == "1/eV":
@@ -554,7 +554,7 @@ class DOS(Target):
 
         Returns
         -------
-        e_grid : numpy.array
+        e_grid : numpy.ndarray
             Energy grid on which the DOS is defined.
         """
         emin = self.parameters.ldos_gridoffset_ev
@@ -581,7 +581,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        dos_data : numpy.array
+        dos_data : numpy.ndarray
             DOS data with dimension [energygrid]. If None, then the cached
             DOS will be used for the calculation.
 
@@ -678,7 +678,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        dos_data : numpy.array
+        dos_data : numpy.ndarray
             DOS data with dimension [energygrid]. If None, then the cached
             DOS will be used for the calculation.
 
@@ -746,7 +746,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        dos_data : numpy.array
+        dos_data : numpy.ndarray
             DOS data with dimension [energygrid]. If None, then the cached
             DOS will be used for the calculation.
 
@@ -839,7 +839,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        dos_data : numpy.array
+        dos_data : numpy.ndarray
             DOS data with dimension [energygrid]. If None, then the cached
             DOS will be used for the calculation.
 
@@ -972,10 +972,10 @@ class DOS(Target):
 
         Parameters
         ----------
-        dos_data : numpy.array
+        dos_data : numpy.ndarray
             DOS data (1D).
 
-        energy_grid : numpy.array
+        energy_grid : numpy.ndarray
             Energy grid on which the DOS is defined.
 
         fermi_energy : float
@@ -1040,10 +1040,10 @@ class DOS(Target):
 
         Parameters
         ----------
-        dos_data : numpy.array
+        dos_data : numpy.ndarray
             DOS data (1D).
 
-        energy_grid : numpy.array
+        energy_grid : numpy.ndarray
             Energy grid on which the DOS is defined.
 
         fermi_energy : float
@@ -1117,10 +1117,10 @@ class DOS(Target):
 
         Parameters
         ----------
-        dos_data : numpy.array
+        dos_data : numpy.ndarray
             DOS data (1D).
 
-        energy_grid : numpy.array
+        energy_grid : numpy.ndarray
             Energy grid on which the DOS is defined.
 
         fermi_energy : float

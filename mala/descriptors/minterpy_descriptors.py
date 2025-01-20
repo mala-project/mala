@@ -46,7 +46,7 @@ class MinterpyDescriptors(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -54,7 +54,7 @@ class MinterpyDescriptors(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in MALA units.
         """
         if in_units == "None" or in_units is None:
@@ -71,7 +71,7 @@ class MinterpyDescriptors(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in MALA units.
 
         out_units : string
@@ -79,7 +79,7 @@ class MinterpyDescriptors(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
         """
         if out_units == "None":
@@ -261,7 +261,7 @@ class MinterpyDescriptors(Descriptor):
 
         Returns
         -------
-        nodes : numpy.array
+        nodes : numpy.ndarray
             Two-dimensional array containing the nodes.
         """
         import minterpy as mp

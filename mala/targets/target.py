@@ -300,7 +300,7 @@ class Target(PhysicalData):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -308,7 +308,7 @@ class Target(PhysicalData):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in MALA units.
 
         """
@@ -324,7 +324,7 @@ class Target(PhysicalData):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in MALA units.
 
         out_units : string
@@ -332,7 +332,7 @@ class Target(PhysicalData):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
 
         """
@@ -1498,12 +1498,12 @@ class Target(PhysicalData):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Numpy array, for which the restrictions are to be applied.
 
         Returns
         -------
-        array : numpy.array
+        array : numpy.ndarray
             The same array, with restrictions enforced.
         """
         if self.parameters.restrict_targets == "zero_out_negative":

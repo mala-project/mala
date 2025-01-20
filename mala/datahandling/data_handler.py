@@ -350,7 +350,7 @@ class DataHandler(DataHandlerBase):
 
         Parameters
         ----------
-        numpy_array : np.array
+        numpy_array : numpy.ndarray
             Array that is to be converted.
 
         data_type : string
@@ -1064,7 +1064,7 @@ class DataHandler(DataHandlerBase):
 
         Parameters
         ----------
-        numpy_array : np.array
+        numpy_array : numpy.ndarray
             Array that is to be converted.
 
         data_type : string
@@ -1076,7 +1076,7 @@ class DataHandler(DataHandlerBase):
 
         Returns
         -------
-        converted_numpy_array: np.array
+        converted_numpy_array: numpy.ndarray
             The fully converted numpy array.
         """
         if data_type == "in":
@@ -1110,7 +1110,7 @@ class DataHandler(DataHandlerBase):
 
         Parameters
         ----------
-        numpy_array : np.array
+        numpy_array : numpy.ndarray
             Array that is to be converted.
 
         desired_dimensions : tuple

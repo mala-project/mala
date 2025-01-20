@@ -64,7 +64,7 @@ class Predictor(Runner):
 
         Returns
         -------
-        predicted_ldos : numpy.array
+        predicted_ldos : numpy.ndarray
             Precicted LDOS for these atomic positions.
         """
         self.data.target_calculator.read_additional_calculation_data(
@@ -97,7 +97,7 @@ class Predictor(Runner):
 
         Returns
         -------
-        predicted_ldos : numpy.array
+        predicted_ldos : numpy.ndarray
             Precicted LDOS for these atomic positions.
         """
         # If there is no inference data grid, we will try to get the grid
@@ -223,7 +223,7 @@ class Predictor(Runner):
 
         Returns
         -------
-        predicted_outputs : numpy.array
+        predicted_outputs : numpy.ndarray
             The output of the forward pass as a numpy array. This is already
             correctly re-scaled. The shape is (local_data_size, feature_size).
         """
