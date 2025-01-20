@@ -205,7 +205,28 @@ class Predictor(Runner):
     def _forward_snap_descriptors(
         self, snap_descriptors, local_data_size=None
     ):
-        """Forward a scaled tensor of descriptors through the NN."""
+        """
+        Forward a scaled tensor of descriptors through the neural network.
+
+        Returns the output of this forward pass as a numpy array.
+
+        Parameters
+        ----------
+        snap_descriptors : torch.Tensor
+            Tensor of descriptors to forward through the network.
+
+        local_data_size : int
+            The number of grid points on the current rank. If None, the
+            total grid size is used (the default for serial execution).
+            Is automatically set by calling functions in the parallel
+            case.
+
+        Returns
+        -------
+        predicted_outputs : numpy.array
+            The output of the forward pass as a numpy array. This is already
+            correctly re-scaled. The shape is (local_data_size, feature_size).
+        """
         # Ensure the Network is on the correct device.
         # This line is necessary because GPU acceleration may have been
         # activated AFTER loading a model.

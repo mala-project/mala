@@ -143,6 +143,11 @@ class ObjectiveNASWOT(ObjectiveBase):
         Calculate the correlation coefficient of an array.
 
         Pytorch implementation of np.corrcoef.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input array. May be on CPU or GPU.
         """
         mean_x = torch.mean(x, 1, True)
         xm = x.sub(mean_x.expand_as(x))
@@ -163,7 +168,16 @@ class ObjectiveNASWOT(ObjectiveBase):
 
     @staticmethod
     def __calc_score(jacobian: Tensor):
-        """Calculate the score for a Jacobian."""
+        """
+        Calculate the NASWOT score for a Jacobian.
+
+        For details, see original NASWOT publication.
+
+        Parameters
+        ----------
+        jacobian : torch.Tensor
+            Jacobian matrix to calculate the score for.
+        """
         correlations = ObjectiveNASWOT.__corrcoef(jacobian)
         eigen_values, _ = torch.linalg.eig(correlations)
         # Only consider the real valued part, imaginary part is rounding

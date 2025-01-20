@@ -43,6 +43,17 @@ class ACSDAnalyzer(DescriptorScoringOptimizer):
         )
 
     def _update_logging(self, score, index):
+        """
+        Update logging information with current score and index.
+
+        Parameters
+        ----------
+        score : float
+            The score of the current trial.
+
+        index :
+            The index of the current trial.
+        """
         if self.best_score is None:
             self.best_score = score
             self.best_trial_index = index
@@ -140,6 +151,22 @@ class ACSDAnalyzer(DescriptorScoringOptimizer):
         return np.array(similarity_array)
 
     def _calculate_score(self, descriptor, target):
+        """
+        Calculate score of a descriptor/target pair.
+
+        Parameters
+        ----------
+        descriptor : numpy.ndarray
+            The descriptor data.
+
+        target : numpy.ndarray
+            The target data.
+
+        Returns
+        -------
+        score : float
+            The score of this descriptor/target pair.
+        """
         return self._calculate_acsd(
             descriptor,
             target,
@@ -199,6 +226,28 @@ class ACSDAnalyzer(DescriptorScoringOptimizer):
 
     @staticmethod
     def __calc_cosine_similarity(vector1, vector2, norm=2):
+        """
+        Calculate the cosine similarity between two vectors.
+
+        The type of norm which is used can be adapted. Cosine similarity
+        always lies between 0 (not similar) and 1 (similar).
+
+        Parameters
+        ----------
+        vector1 : numpy.ndarray
+            The first vector.
+
+        vector2 : numpy.ndarray
+            The second vector.
+
+        norm : int
+            The order of the norm to be used. Default is 2.
+
+        Returns
+        -------
+        similarity : float
+            The cosine similarity between the two vectors.
+        """
         if np.shape(vector1)[0] != np.shape(vector2)[0]:
             raise Exception(
                 "Cannot calculate similarity between vectors "

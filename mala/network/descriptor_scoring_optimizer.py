@@ -369,6 +369,12 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
         pass
 
     def _construct_hyperparam_list(self):
+        """
+        Construct the hyperparameter list for the descriptor scoring analysis.
+
+        Based on a list of choices for descriptor hyperparameters, this
+        function creates a list of trials to be tested.
+        """
         if isinstance(self._descriptor_calculator, Bispectrum):
             if (
                 list(
@@ -467,6 +473,28 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
             )
 
     def _calculate_descriptors(self, snapshot, description, original_units):
+        """
+        Calculate descriptors from a dictionary with snapshot information.
+
+        Internally uses the DescriptorCalculator class.
+
+        Parameters
+        ----------
+        snapshot : dict
+            Dictionary containing information on "input" and "output" files.
+
+        description : dict
+            Dictionary containing information on "input" and "output"
+            file types.
+
+        original_units : dict
+            Dictionary containing information on "input" and "output" units.
+
+        Returns
+        -------
+        descriptor_data : numpy.ndarray
+            Array containing the descriptor data.
+        """
         descriptor_calculation_kwargs = {}
         tmp_input = None
         if description["input"] == "espresso-out":
@@ -495,6 +523,34 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
     def _load_target(
         self, snapshot, description, original_units, file_based_communication
     ):
+        """
+        Load target data from a dictionary with snapshot information.
+
+        Internally uses the TargetCalculator class.
+
+        Parameters
+        ----------
+        snapshot : dict
+            Dictionary containing information on "input" and "output" files.
+
+        description : dict
+            Dictionary containing information on "input" and "output"
+            file types.
+
+        original_units : dict
+            Dictionary containing information on "input" and "output" units.
+
+        file_based_communication : bool
+            If True, file-based communication is used for MPI. This means that
+            a temporary file is used to collect target components across
+            ranks rather than MPI communication directly. This can help
+            with memory issues when the target data is large.
+
+        Returns
+        -------
+        target_data : numpy.ndarray
+            Array containing the target data.
+        """
         memmap = None
         if (
             self.params.descriptors._configuration["mpi"]
@@ -547,8 +603,35 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
 
     @abstractmethod
     def _update_logging(self, score, index):
+        """
+        Update logging information with current score and index.
+
+        Parameters
+        ----------
+        score : float
+            The score of the current trial.
+
+        index :
+            The index of the current trial.
+        """
         pass
 
     @abstractmethod
     def _calculate_score(self, descriptor, target):
+        """
+        Calculate score of a descriptor/target pair.
+
+        Parameters
+        ----------
+        descriptor : numpy.ndarray
+            The descriptor data.
+
+        target : numpy.ndarray
+            The target data.
+
+        Returns
+        -------
+        score : float
+            The score of this descriptor/target pair.
+        """
         pass

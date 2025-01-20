@@ -212,6 +212,11 @@ class HyperOptOAT(HyperOpt):
         Generate the best OA used for optimal hyperparameter sampling.
 
         This is function is taken from the example notebook of OApackage.
+
+        Returns
+        -------
+        orthogonal_array : np.array
+            The orthogonal array used for hyperparameter optimization.
         """
         self.__check_factor_levels()
         print("Sorted factor levels:", self._sorted_num_choices)
@@ -274,6 +279,11 @@ class HyperOptOAT(HyperOpt):
         Based on the factor levels and the strength of the array requested.
         See also here:
         https://oapackage.readthedocs.io/en/latest/examples/example_minimal_number_of_runs_oa.html
+
+        Returns
+        -------
+        number_of_runs : int
+            The number of runs required to sample the orthogonal array.
         """
         runs = [
             np.prod(tt)

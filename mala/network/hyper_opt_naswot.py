@@ -238,6 +238,18 @@ class HyperOptNASWOT(HyperOpt):
         self._objective.parse_trial(self.best_trial)
 
     def __all_combinations(self):
+        """
+        Create a list of all possible combinations of hyperparameters.
+
+        Since NASWOT does not require training, we can simply create all
+        possible combinations of hyperparameters and return them as a list
+        of FixedTrials, which are then tested.
+
+        Returns
+        -------
+        trial_list : list
+            A list containing all possible combinations of hyperparameters.
+        """
         # First, remove all the hyperparameters we don't actually need.
         indices_to_remove = []
         for idx, par in enumerate(self.params.hyperparameters.hlist):
