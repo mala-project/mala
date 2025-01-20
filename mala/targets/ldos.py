@@ -1456,11 +1456,36 @@ class LDOS(Target):
     #################
 
     def _process_loaded_array(self, array, units=None):
+        """
+        Process loaded array (i.e., unit change, reshaping, etc.).
+
+        Saves array to internal variable if class attribute save_target_data
+        is True.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Array to process.
+
+        units : string
+            Units of input array.
+        """
         array *= self.convert_units(1, in_units=units)
         if self.save_target_data:
             self.local_density_of_states = array
 
     def _set_feature_size_from_array(self, array):
+        """
+        Set the feature size from the array.
+
+        Feature sizes are saved in different ways for different physical data
+        classes.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Array to extract the feature size from.
+        """
         self.parameters.ldos_gridsize = np.shape(array)[-1]
 
     def _gather_density(self, density_values, use_pickled_comm=False):
@@ -1481,6 +1506,12 @@ class LDOS(Target):
             However, for large grids, one CANNOT use the pickled route;
             too large python objects will break it. Therefore, I am setting
             the Recv/Sendv route as default.
+
+        Returns
+        -------
+        density : numpy.array
+            The gathered, full density.
+
         """
         # Barrier to make sure all ranks have descriptors..
         comm = get_comm()
@@ -1574,6 +1605,23 @@ class LDOS(Target):
             gather the LDOS. Only has an effect in MPI parallel mode.
             Usage will reduce RAM footprint while SIGNIFICANTLY
             impacting disk usage and
+
+        file_type : string
+            Type of the QE data file. Currently supported are .cube and .xsf.
+
+        kwargs : dict
+            Additional keyword arguments. Currently supported are:
+
+                - use_fp64 : bool
+                    If True, the LDOS will be read in double precision.
+                - return_local : bool
+                    If True, the local LDOS will be returned. Only has an
+                    effect in MPI parallel mode.
+
+        Returns
+        -------
+        ldos_data : numpy.array
+            The local density of states as read from file(s).
         """
         use_fp64 = kwargs.get("use_fp64", False)
         return_local = kwargs.get("return_local", False)

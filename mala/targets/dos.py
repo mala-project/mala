@@ -931,18 +931,71 @@ class DOS(Target):
     #################
 
     def _process_loaded_array(self, array, units=None):
+        """
+        Process loaded array (i.e., unit change, reshaping, etc.).
+
+        Saves array to internal variable if class attribute save_target_data
+        is True.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Array to process.
+
+        units : string
+            Units of input array.
+        """
         array *= self.convert_units(1, in_units=units)
         if self.save_target_data:
             self.density_of_states = array
 
     def _set_feature_size_from_array(self, array):
+        """
+        Set the feature size from the array.
+
+        Feature sizes are saved in different ways for different physical data
+        classes.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Array to extract the feature size from.
+        """
         self.parameters.ldos_gridsize = np.shape(array)[-1]
 
     @staticmethod
     def __number_of_electrons_from_dos(
         dos_data, energy_grid, fermi_energy, temperature, integration_method
     ):
-        """Calculate the number of electrons from DOS data."""
+        """
+        Calculate the number of electrons from DOS data.
+
+        Parameters
+        ----------
+        dos_data : numpy.array
+            DOS data (1D).
+
+        energy_grid : numpy.array
+            Energy grid on which the DOS is defined.
+
+        fermi_energy : float
+            Fermi energy level in eV.
+
+        temperature : float
+            Temperature in K.
+
+        integration_method : string
+            Integration method to be used. Currently supported:
+
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
+                - "analytical" for analytical integration. Recommended.
+
+        Returns
+        -------
+        number_of_electrons : float
+            Number of electrons.
+        """
         # Calculate the energy levels and the Fermi function.
 
         fermi_vals = fermi_function(
@@ -982,7 +1035,35 @@ class DOS(Target):
     def __band_energy_from_dos(
         dos_data, energy_grid, fermi_energy, temperature, integration_method
     ):
-        """Calculate the band energy from DOS data."""
+        """
+        Calculate the band energy from DOS data.
+
+        Parameters
+        ----------
+        dos_data : numpy.array
+            DOS data (1D).
+
+        energy_grid : numpy.array
+            Energy grid on which the DOS is defined.
+
+        fermi_energy : float
+            Fermi energy level in eV.
+
+        temperature : float
+            Temperature in K.
+
+        integration_method : string
+            Integration method to be used. Currently supported:
+
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
+                - "analytical" for analytical integration. Recommended.
+
+        Returns
+        -------
+        band_energy : float
+            Band energy in eV.
+        """
         # Calculate the energy levels and the Fermi function.
         fermi_vals = fermi_function(
             energy_grid, fermi_energy, temperature, suppress_overflow=True
@@ -1033,7 +1114,34 @@ class DOS(Target):
         Calculate the entropy contribution to the total energy from DOS data.
 
         More specifically, this gives -\beta^-1*S_S
+
+        Parameters
+        ----------
+        dos_data : numpy.array
+            DOS data (1D).
+
+        energy_grid : numpy.array
+            Energy grid on which the DOS is defined.
+
+        fermi_energy : float
+            Fermi energy level in eV.
+
+        temperature : float
+            Temperature in K.
+
+        integration_method : string
+            Integration method to be used. Currently supported:
+
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
+                - "analytical" for analytical integration. Recommended.
+
+        Returns
+        -------
+        entropy_contribution : float
+            Entropy contribution in eV.
         """
+
         # Calculate the entropy contribution to the energy.
         if integration_method == "trapezoid":
             multiplicator = entropy_multiplicator(
