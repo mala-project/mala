@@ -228,6 +228,11 @@
 <span class="sd">        Calculate the correlation coefficient of an array.</span>
 
 <span class="sd">        Pytorch implementation of np.corrcoef.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : torch.Tensor</span>
+<span class="sd">            Input array. May be on CPU or GPU.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">mean_x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="n">xm</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">mean_x</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
@@ -248,7 +253,16 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__calc_score</span><span class="p">(</span><span class="n">jacobian</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the score for a Jacobian.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the NASWOT score for a Jacobian.</span>
+
+<span class="sd">        For details, see original NASWOT publication.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        jacobian : torch.Tensor</span>
+<span class="sd">            Jacobian matrix to calculate the score for.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">correlations</span> <span class="o">=</span> <span class="n">ObjectiveNASWOT</span><span class="o">.</span><span class="n">__corrcoef</span><span class="p">(</span><span class="n">jacobian</span><span class="p">)</span>
         <span class="n">eigen_values</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">correlations</span><span class="p">)</span>
         <span class="c1"># Only consider the real valued part, imaginary part is rounding</span>

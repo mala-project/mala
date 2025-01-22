@@ -224,6 +224,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">uncache_properties</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_is_property_cached</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if a property is cached.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        property_name : str</span>
+<span class="sd">            Name of the property to check.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        is_cached : bool</span>
+<span class="sd">            True if the property is cached, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 
 <div class="viewcode-block" id="TrajectoryAnalyzer.uncache_properties">
@@ -440,9 +453,25 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_analyze_distance_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">):</span>
-        <span class="c1"># distance metric usefdfor the snapshot parsing (realspace similarity</span>
-        <span class="c1"># of the snapshot), we first find the center of the equilibrated part</span>
-        <span class="c1"># of the trajectory and calculate the differences w.r.t to to it.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find threshold for realspace distance trajectory analysis.</span>
+
+<span class="sd">        To do that, first the center of the equilibrated part of the trajectory</span>
+<span class="sd">        is determined, and then the minimum Euclidean distances between this</span>
+<span class="sd">        snapshot and all snapshots in an appropriate window around it are</span>
+<span class="sd">        calculated. Based on mean and standard deviation of these distances,</span>
+<span class="sd">        the threshold is determined.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        trajectory : ase.io.Trajectory</span>
+<span class="sd">            Trajectory to be analyzed.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        threshold : float</span>
+<span class="sd">            Threshold for the distance (realspace minimum Euclidean distance).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">center</span> <span class="o">=</span> <span class="p">(</span>
             <span class="nb">int</span><span class="p">(</span>
                 <span class="p">(</span>
@@ -487,6 +516,39 @@
         <span class="n">reduction</span><span class="p">,</span>
         <span class="n">save_rdf1</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the distance between two snapshots.</span>
+
+<span class="sd">        Different metrics and reductions are possible.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        snapshot1 : ase.Atoms</span>
+<span class="sd">            First snapshot to be compared.</span>
+
+<span class="sd">        snapshot2 : ase.Atoms</span>
+<span class="sd">            Second snapshot to be compared.</span>
+
+<span class="sd">        distance_metric : string</span>
+<span class="sd">            Distance metric to be used. Can be &quot;realspace&quot; or &quot;rdf&quot;.</span>
+<span class="sd">            This metric determines _what_ is compared, i.e., atomic positions</span>
+<span class="sd">            directly or the RDF as representation of them.</span>
+
+<span class="sd">        reduction : string</span>
+<span class="sd">            Reduction to be used. Can be &quot;minimal_distance&quot; or</span>
+<span class="sd">            &quot;cosine_distance&quot;. This metric determines _how_ the representation</span>
+<span class="sd">            of snapshots are compared.</span>
+
+<span class="sd">        save_rdf1 : bool</span>
+<span class="sd">            If True, the RDF of the first snapshot will be saved for later</span>
+<span class="sd">            use. This is useful when multiple snapshots are compared to the</span>
+<span class="sd">            same reference snapshot.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : float</span>
+<span class="sd">            Distance between the two snapshots</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">distance_metric</span> <span class="o">==</span> <span class="s2">&quot;realspace&quot;</span><span class="p">:</span>
             <span class="n">positions1</span> <span class="o">=</span> <span class="n">snapshot1</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
             <span class="n">positions2</span> <span class="o">=</span> <span class="n">snapshot2</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
@@ -539,6 +601,21 @@
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__denoise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Denoise a signal.</span>
+
+<span class="sd">        Denoising is performed by a simple moving average.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        signal : numpy.ndarray</span>
+<span class="sd">            Signal to be denoised.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        denoised_signal : numpy.ndarray</span>
+<span class="sd">            Denoised signal.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">denoised_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span>
             <span class="n">signal</span><span class="p">,</span>
             <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span><span class="p">)</span>
@@ -556,6 +633,38 @@
         <span class="n">distance_metric</span><span class="p">,</span>
         <span class="n">allowed_temp_diff</span><span class="p">,</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if a snapshot is valid to be sampled.</span>
+
+<span class="sd">        To be valid, the distance to the last sampled snapshot needs to be</span>
+<span class="sd">        over a predetermined threshold AND the temperature needs to be</span>
+<span class="sd">        within a certain window around the target temperature.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        snapshot_to_test : ase.Atoms</span>
+<span class="sd">            Snapshot to check for validity.</span>
+
+<span class="sd">        temp_to_test : float</span>
+<span class="sd">            Temperature of the snapshot to check.</span>
+
+<span class="sd">        reference_snapshot : ase.Atoms</span>
+<span class="sd">            Reference snapshot to compare to (last sampled snapshot).</span>
+
+<span class="sd">        reference_temp : float</span>
+<span class="sd">            Temperature of the reference snapshot (last sampled snapshot).</span>
+
+<span class="sd">        distance_metric : float</span>
+<span class="sd">            Threshold for the distance between the two snapshots.</span>
+
+<span class="sd">        allowed_temp_diff : float</span>
+<span class="sd">            Allowed temperature difference between the two snapshots.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        is_valid : bool</span>
+<span class="sd">            True if the snapshot is valid, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_distance_between_snapshots</span><span class="p">(</span>
             <span class="n">snapshot_to_test</span><span class="p">,</span>
             <span class="n">reference_snapshot</span><span class="p">,</span>

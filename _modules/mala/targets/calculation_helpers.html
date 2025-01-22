@@ -99,7 +99,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    values : numpy.array</span>
+<span class="sd">    values : numpy.ndarray</span>
 <span class="sd">        Values to be integrated.</span>
 <span class="sd">    spacing : int</span>
 <span class="sd">        Spacing of the grid on which the integration is performed.</span>
@@ -137,7 +137,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    energy : float or numpy.array</span>
+<span class="sd">    energy : float or numpy.ndarray</span>
 <span class="sd">        Energy for which the Fermi function is supposed to be calculated in</span>
 <span class="sd">        energy_units.</span>
 
@@ -194,7 +194,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    energy : float or numpy.array</span>
+<span class="sd">    energy : float or numpy.ndarray</span>
 <span class="sd">        Energy for which the Fermi function is supposed to be calculated in</span>
 <span class="sd">        energy_units.</span>
 
@@ -410,7 +410,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    D : numpy.array or float</span>
+<span class="sd">    D : numpy.ndarray or float</span>
 <span class="sd">        Either LDOS or DOS data.</span>
 
 <span class="sd">    I0 : string</span>
@@ -436,7 +436,7 @@
 <span class="sd">    fermi_energy : float</span>
 <span class="sd">        The fermi energy in eV.</span>
 
-<span class="sd">    energy_grid : numpy.array</span>
+<span class="sd">    energy_grid : numpy.ndarray</span>
 <span class="sd">        Energy grid on which the integration should be performed.</span>
 
 <span class="sd">    temperature : float</span>
@@ -444,7 +444,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    integration_value : numpy.array or float</span>
+<span class="sd">    integration_value : numpy.ndarray or float</span>
 <span class="sd">        Value of the integral.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Mappings for the functions further down.</span>
@@ -525,10 +525,10 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    grid : np.array</span>
+<span class="sd">    grid : numpy.ndarray</span>
 <span class="sd">        Grid on which this Gaussian is defined.</span>
 
-<span class="sd">    centers : np.array</span>
+<span class="sd">    centers : numpy.ndarray</span>
 <span class="sd">        Array of centers for the Gaussians</span>
 
 <span class="sd">    sigma : float</span>
@@ -536,7 +536,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    multiple_gaussians : np.array</span>
+<span class="sd">    multiple_gaussians : numpy.ndarray</span>
 <span class="sd">        multiple gaussians on the same grid, but with different centers.</span>
 
 

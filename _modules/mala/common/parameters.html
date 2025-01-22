@@ -157,33 +157,118 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_gpu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_gpu</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Propagate new GPU setting to parameter subclasses.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_gpu : bool</span>
+<span class="sd">            New GPU setting.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_gpu</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ddp</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Propagate new DDP setting to parameter subclasses.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_ddp : bool</span>
+<span class="sd">            New DDP setting.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;ddp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_ddp</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_mpi</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Propagate new MPI setting to parameter subclasses.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_mpi : bool</span>
+<span class="sd">            New MPI setting.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_mpi</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_device</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Propagate new device setting to parameter subclasses.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_device : str</span>
+<span class="sd">            New device setting. Can be &quot;cpu&quot; or &quot;cuda:x&quot;, where x is some</span>
+<span class="sd">            integer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_device</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_openpmd</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Propagate new openPMD configuration to parameter subclasses.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_openpmd : dict</span>
+<span class="sd">            New openPMD configuration, which is a dict containing different</span>
+<span class="sd">            settings.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_openpmd</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_openpmd_granularity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_granularity</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Propagate new openPMD granularity to parameter subclasses.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_granularity : int</span>
+<span class="sd">            New openPMD granularity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_granularity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_granularity</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_lammps</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Propagate new LAMMPS setting to parameter subclasses.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_lammps : bool</span>
+<span class="sd">            New LAMMPS setting. Setting here means whether LAMMPS</span>
+<span class="sd">            will be used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;lammps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_lammps</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_atomic_density_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_atomic_density_formula</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Propagate new atomic density formula setting to parameter subclasses.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_atomic_density_formula : bool</span>
+<span class="sd">            New atomic density formula setting, i.e., whether to use this</span>
+<span class="sd">            option.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;atomic_density_formula&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">new_atomic_density_formula</span>
         <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_member_to_json</span><span class="p">(</span><span class="n">member</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a member to a JSON serializable object.</span>
+
+<span class="sd">        For a class that inherits from JSONSerializable, this will call the</span>
+<span class="sd">        to_json method of that class. Otherwise, it will return the member</span>
+<span class="sd">        itself (for basic data types)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        member : any, JSONSerializable</span>
+<span class="sd">            Member to be converted to JSON serializable object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        json_serializable : any</span>
+<span class="sd">            JSON serializable object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">member</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="nb">str</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">member</span>
         <span class="k">else</span><span class="p">:</span>
@@ -238,6 +323,24 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_json_to_member</span><span class="p">(</span><span class="n">json_value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a JSON dictionary to a member.</span>
+
+<span class="sd">        This function is used to convert a JSON dictionary to a member of this</span>
+<span class="sd">        class. If the member is a JSONSerializable object, it will call the</span>
+<span class="sd">        from_json method of that class. Otherwise, it will return the member</span>
+<span class="sd">        directly (for basic data types)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        json_value : any</span>
+<span class="sd">            JSON value/dictionary entry to be converted to a member.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        member : any</span>
+<span class="sd">            Loaded member of this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="nb">str</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">json_value</span>
         <span class="k">else</span><span class="p">:</span>
@@ -274,7 +377,6 @@
 <span class="sd">        -------</span>
 <span class="sd">        deserialized_object : JSONSerializable</span>
 <span class="sd">            The object as read from the JSON file.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">deserialized_object</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">json_dict</span><span class="p">:</span>
@@ -574,6 +676,16 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_snap_switchflag</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_mpi</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Propagate new MPI setting to parameter subclasses.</span>
+
+<span class="sd">        Also deletes old inputs files that are no longer valid.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_mpi : bool</span>
+<span class="sd">            New MPI setting.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_mpi</span>
 
         <span class="c1"># There may have been a serial or parallel run before that is now</span>
@@ -965,6 +1077,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">profiler_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_ddp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ddp</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Propagate new DDP setting to parameter subclasses.</span>
+
+<span class="sd">        Also ensures only metrics are used which work with DDP.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_ddp : bool</span>
+<span class="sd">            New DDP setting.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersRunning</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_update_ddp</span><span class="p">(</span><span class="n">new_ddp</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">during_training_metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">during_training_metric</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">after_training_metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">after_training_metric</span>

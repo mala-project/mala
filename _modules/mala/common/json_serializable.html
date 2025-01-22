@@ -138,6 +138,14 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_standard_serializer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Serialize a JSONSerializable object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        return : dict</span>
+<span class="sd">            JSON dict containing the object&#39;s data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">members</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="ow">not</span> <span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">isroutine</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
@@ -151,6 +159,21 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_standard_deserializer</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Deserialize a JSON dictionary containing a serialized object.</span>
+
+<span class="sd">        Takes in a JSON dict and returns an object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        json_dict : dict</span>
+<span class="sd">            JSON dict containing the object&#39;s data.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        deserialized_object : JSONSerializable</span>
+<span class="sd">            The object as read from the JSON file/dict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">deserialized_object</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">json_dict</span><span class="p">:</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="n">deserialized_object</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>

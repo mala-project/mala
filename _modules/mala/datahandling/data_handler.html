@@ -455,7 +455,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        numpy_array : np.array</span>
+<span class="sd">        numpy_array : numpy.ndarray</span>
 <span class="sd">            Array that is to be converted.</span>
 
 <span class="sd">        data_type : string</span>
@@ -623,6 +623,11 @@
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__allocate_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Allocate arrays for data used during training.</span>
+
+<span class="sd">        Preallocating arrays before loading reduces overall memory footprint.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_training_data_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">),</span>
@@ -663,6 +668,7 @@
 <span class="sd">        ----------</span>
 <span class="sd">        function : string</span>
 <span class="sd">            Can be &quot;tr&quot;, &quot;va&quot; or &quot;te.</span>
+
 <span class="sd">        data_type : string</span>
 <span class="sd">            Can be &quot;input&quot; or &quot;output&quot;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1134,6 +1140,11 @@
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Output scaler parametrized.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__parametrized_load_training_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load training data and scale it with the already parametrized scalers.</span>
+
+<span class="sd">        This is mostly used when resuming an interrupted training run.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span><span class="p">:</span>
             <span class="n">printout</span><span class="p">(</span>
                 <span class="s2">&quot;Data scalers already initilized, preparing input data.&quot;</span><span class="p">,</span>
@@ -1157,7 +1168,26 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">__raw_numpy_to_converted_numpy</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">numpy_array</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a raw numpy array containing into the correct units.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a raw numpy array into the correct units.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        numpy_array : numpy.ndarray</span>
+<span class="sd">            Array that is to be converted.</span>
+
+<span class="sd">        data_type : string</span>
+<span class="sd">            Can be &quot;in&quot; or &quot;out&quot;, depending if input or output data is</span>
+<span class="sd">            processed.</span>
+
+<span class="sd">        units : string</span>
+<span class="sd">            Units of the data that is processed.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        converted_numpy_array: numpy.ndarray</span>
+<span class="sd">            The fully converted numpy array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;in&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;in&quot;</span>
@@ -1186,6 +1216,24 @@
 
 <span class="sd">        This tensor that can simply be put into a MALA network.</span>
 <span class="sd">        No unit conversion is done here.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        numpy_array : numpy.ndarray</span>
+<span class="sd">            Array that is to be converted.</span>
+
+<span class="sd">        desired_dimensions : tuple</span>
+<span class="sd">            Desired dimensions of the array. If None, the array will not be</span>
+<span class="sd">            reshaped.</span>
+
+<span class="sd">        data_type : string</span>
+<span class="sd">            Can be &quot;in&quot; or &quot;out&quot;, depending if input or output data is</span>
+<span class="sd">            processed.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        converted_tensor: torch.Tensor</span>
+<span class="sd">            The converted and scaled tensor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">numpy_array</span> <span class="o">=</span> <span class="n">numpy_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">DEFAULT_NP_DATA_DTYPE</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">desired_dimensions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

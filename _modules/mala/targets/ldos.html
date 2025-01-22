@@ -520,7 +520,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        array : numpy.array</span>
+<span class="sd">        array : numpy.ndarray</span>
 <span class="sd">            Data for which the units should be converted.</span>
 
 <span class="sd">        in_units : string</span>
@@ -533,7 +533,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">        converted_array : numpy.ndarray</span>
 <span class="sd">            Data in 1/(eV*A^3).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/(eV*A^3)&quot;</span> <span class="ow">or</span> <span class="n">in_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -557,7 +557,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        array : numpy.array</span>
+<span class="sd">        array : numpy.ndarray</span>
 <span class="sd">            Data in 1/eV.</span>
 
 <span class="sd">        out_units : string</span>
@@ -570,7 +570,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">        converted_array : numpy.ndarray</span>
 <span class="sd">            Data in out_units.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">out_units</span> <span class="o">==</span> <span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">:</span>
@@ -694,7 +694,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        e_grid : numpy.array</span>
+<span class="sd">        e_grid : numpy.ndarray</span>
 <span class="sd">            Energy grid on which the LDOS is defined.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">emin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
@@ -735,15 +735,15 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        ldos_data : numpy.array</span>
+<span class="sd">        ldos_data : numpy.ndarray</span>
 <span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
 <span class="sd">            [gridx,gridy,gridz,energygrid]. If None, dos_data and density_data</span>
 <span class="sd">            cannot be None.</span>
 
-<span class="sd">        dos_data : numpy.array</span>
+<span class="sd">        dos_data : numpy.ndarray</span>
 <span class="sd">            DOS data, as [energygrid].</span>
 
-<span class="sd">        density_data : numpy.array</span>
+<span class="sd">        density_data : numpy.ndarray</span>
 <span class="sd">            Density data, either as [gridsize] or [gridx,gridy,gridz].</span>
 
 <span class="sd">        fermi_energy : float</span>
@@ -941,7 +941,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        ldos_data : numpy.array</span>
+<span class="sd">        ldos_data : numpy.ndarray</span>
 <span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
 <span class="sd">            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS</span>
 <span class="sd">            will be used for the calculation.</span>
@@ -1020,7 +1020,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        ldos_data : numpy.array</span>
+<span class="sd">        ldos_data : numpy.ndarray</span>
 <span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
 <span class="sd">            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS</span>
 <span class="sd">            will be used for the calculation.</span>
@@ -1099,7 +1099,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        ldos_data : numpy.array</span>
+<span class="sd">        ldos_data : numpy.ndarray</span>
 <span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
 <span class="sd">            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS</span>
 <span class="sd">            will be used for the calculation.</span>
@@ -1181,7 +1181,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        ldos_data : numpy.array</span>
+<span class="sd">        ldos_data : numpy.ndarray</span>
 <span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
 <span class="sd">            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS</span>
 <span class="sd">            will be used for the calculation.</span>
@@ -1274,7 +1274,7 @@
 <span class="sd">                - &quot;simpson&quot; for Simpson method.</span>
 <span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
 
-<span class="sd">        ldos_data : numpy.array</span>
+<span class="sd">        ldos_data : numpy.ndarray</span>
 <span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
 <span class="sd">            [gridx,gridy,gridz,energygrid].</span>
 
@@ -1294,7 +1294,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        density_data : numpy.array</span>
+<span class="sd">        density_data : numpy.ndarray</span>
 <span class="sd">            Density data, dimensions depend on conserve_dimensions and LDOS</span>
 <span class="sd">            dimensions.</span>
 
@@ -1423,7 +1423,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        ldos_data : numpy.array</span>
+<span class="sd">        ldos_data : numpy.ndarray</span>
 <span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
 <span class="sd">            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS</span>
 <span class="sd">            will be used for the calculation.</span>
@@ -1449,7 +1449,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        dos_values : np.array</span>
+<span class="sd">        dos_values : numpy.ndarray</span>
 <span class="sd">            The DOS.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1576,7 +1576,7 @@
 <span class="sd">            Scaled (!) torch tensor holding the LDOS data for the snapshot</span>
 <span class="sd">            for which the atomic force should be calculated.</span>
 
-<span class="sd">        dE_dd: np.array</span>
+<span class="sd">        dE_dd: numpy.ndarray</span>
 <span class="sd">            (WIP) Derivative of the total energy w.r.t the LDOS.</span>
 <span class="sd">            Later on, this will be evaluated within this subroutine. For now</span>
 <span class="sd">            it is provided from outside.</span>
@@ -1607,11 +1607,36 @@
     <span class="c1">#################</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_loaded_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process loaded array (i.e., unit change, reshaping, etc.).</span>
+
+<span class="sd">        Saves array to internal variable if class attribute save_target_data</span>
+<span class="sd">        is True.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.ndarray</span>
+<span class="sd">            Array to process.</span>
+
+<span class="sd">        units : string</span>
+<span class="sd">            Units of input array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">array</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_target_data</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="o">=</span> <span class="n">array</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_feature_size_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the feature size from the array.</span>
+
+<span class="sd">        Feature sizes are saved in different ways for different physical data</span>
+<span class="sd">        classes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.ndarray</span>
+<span class="sd">            Array to extract the feature size from.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">array</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_gather_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density_values</span><span class="p">,</span> <span class="n">use_pickled_comm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -1620,7 +1645,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        density_values : numpy.array</span>
+<span class="sd">        density_values : numpy.ndarray</span>
 <span class="sd">            Numpy array with the density slice of this ranks local grid.</span>
 
 <span class="sd">        use_pickled_comm : bool</span>
@@ -1632,6 +1657,12 @@
 <span class="sd">            However, for large grids, one CANNOT use the pickled route;</span>
 <span class="sd">            too large python objects will break it. Therefore, I am setting</span>
 <span class="sd">            the Recv/Sendv route as default.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        density : numpy.ndarray</span>
+<span class="sd">            The gathered, full density.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Barrier to make sure all ranks have descriptors..</span>
         <span class="n">comm</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span>
@@ -1725,6 +1756,23 @@
 <span class="sd">            gather the LDOS. Only has an effect in MPI parallel mode.</span>
 <span class="sd">            Usage will reduce RAM footprint while SIGNIFICANTLY</span>
 <span class="sd">            impacting disk usage and</span>
+
+<span class="sd">        file_type : string</span>
+<span class="sd">            Type of the QE data file. Currently supported are .cube and .xsf.</span>
+
+<span class="sd">        kwargs : dict</span>
+<span class="sd">            Additional keyword arguments. Currently supported are:</span>
+
+<span class="sd">                - use_fp64 : bool</span>
+<span class="sd">                    If True, the LDOS will be read in double precision.</span>
+<span class="sd">                - return_local : bool</span>
+<span class="sd">                    If True, the local LDOS will be returned. Only has an</span>
+<span class="sd">                    effect in MPI parallel mode.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ldos_data : numpy.ndarray</span>
+<span class="sd">            The local density of states as read from file(s).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">use_fp64</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_fp64&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="n">return_local</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;return_local&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>

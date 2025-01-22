@@ -201,6 +201,41 @@
         <span class="n">file_ending</span><span class="p">,</span>
         <span class="n">temporary</span><span class="p">,</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shuffle the data in the numpy format.</span>
+
+<span class="sd">        This means shuffling from numpy to numpy OR openPMD.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        number_of_new_snapshots : int</span>
+<span class="sd">            The number of new shuffled snapshot-like to create.</span>
+
+<span class="sd">        shuffle_dimensions : list</span>
+<span class="sd">            The dimensions of the shuffled snapshots.</span>
+
+<span class="sd">        descriptor_save_path : string</span>
+<span class="sd">            Directory in which to save descriptor data.</span>
+
+<span class="sd">        save_name : string</span>
+<span class="sd">            Name of the snapshot-like objects which to shuffle into.</span>
+
+<span class="sd">        target_save_path : string</span>
+<span class="sd">            Directory in which to save target data.</span>
+
+<span class="sd">        permutations : list</span>
+<span class="sd">            The permutations to apply to the data. These are shared among</span>
+<span class="sd">            ranks.</span>
+
+<span class="sd">        file_ending : string</span>
+<span class="sd">            The file ending of the shuffled snapshots.</span>
+
+<span class="sd">        temporary : bool</span>
+<span class="sd">            If True, shuffled files will be writen to temporary data files.</span>
+<span class="sd">            Usage of these files is consistent with non-temporary usage of this</span>
+<span class="sd">            class. The path and names of these temporary files can then be</span>
+<span class="sd">            found in the class attribute temporary_shuffled_snapshots.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Load the data (via memmap).</span>
         <span class="n">descriptor_data</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">target_data</span> <span class="o">=</span> <span class="p">[]</span>
@@ -499,10 +534,29 @@
     <span class="c1"># OOOOOOOOOO</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__contiguous_slice_within_ndim_grid_as_blocks</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="c1"># Used for converting a block defined by inclusive lower and upper</span>
-        <span class="c1"># coordinate to a chunk as defined by openPMD.</span>
-        <span class="c1"># The openPMD extent is defined by (to-from)+1 (to make up for the</span>
-        <span class="c1"># inclusive upper end).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a contiguous slice into an openPMD chunk.</span>
+
+<span class="sd">        Used for converting a block defined by inclusive lower and upper</span>
+<span class="sd">        coordinate to a chunk as defined by openPMD.</span>
+<span class="sd">        The openPMD extent is defined by (to-from)+1 (to make up for the</span>
+<span class="sd">        inclusive upper end).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : list</span>
+<span class="sd">            The lower coordinate of the block.</span>
+
+<span class="sd">        y : list</span>
+<span class="sd">            The upper coordinate of the block.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        openpmd_block : list</span>
+<span class="sd">            A list of tuples, each containing the offset and extent of a</span>
+<span class="sd">            block in openPMD format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">def</span><span class="w"> </span><span class="nf">get_extent</span><span class="p">(</span><span class="n">from_</span><span class="p">,</span> <span class="n">to_</span><span class="p">):</span>
             <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="n">upper</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">lower</span> <span class="k">for</span> <span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">from_</span><span class="p">,</span> <span class="n">to_</span><span class="p">)]</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">res</span><span class="p">):</span>
@@ -570,10 +624,24 @@
 
         <span class="k">return</span> <span class="p">[</span><span class="n">front_slice</span><span class="p">]</span> <span class="o">+</span> <span class="n">rec_res</span> <span class="o">+</span> <span class="p">[</span><span class="n">back_slice</span><span class="p">]</span>
 
-    <span class="c1"># Interpreting `ndim_extent` as the extents of an n-dimensional grid,</span>
-    <span class="c1"># returns the n-dimensional coordinate of the `idx`th item in the row-major</span>
-    <span class="c1"># representation of the grid.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__resolve_flattened_index_into_ndim</span><span class="p">(</span><span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ndim_extent</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the n-dimensional coordinate of the `idx`th item of the grid.</span>
+
+<span class="sd">        Interpreting `ndim_extent` as the extents of an n-dimensional grid,</span>
+<span class="sd">        returns the n-dimensional coordinate of the `idx`th item in the row-major</span>
+<span class="sd">        representation of the grid.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ndim_extent : list</span>
+<span class="sd">            The extents of the n-dimensional grid.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        coord : int</span>
+<span class="sd">            The n-dimensional coordinate of the `idx`th item in the grid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ndim_extent</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Cannot index into a zero-dimensional array.&quot;</span><span class="p">)</span>
         <span class="n">strides</span> <span class="o">=</span> <span class="p">[]</span>
@@ -597,13 +665,27 @@
 
         <span class="k">return</span> <span class="n">worker</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">strides</span><span class="p">)</span>
 
-    <span class="c1"># Load a chunk from the openPMD `record` into the buffer at `arr`.</span>
-    <span class="c1"># The indexes `offset` and `extent` are scalar 1-dimensional coordinates,</span>
-    <span class="c1"># and apply to the n-dimensional record by reinterpreting (reshaped) it as</span>
-    <span class="c1"># a one-dimensional array.</span>
-    <span class="c1"># The function deals internally with splitting the 1-dimensional slice into</span>
-    <span class="c1"># a sequence of n-dimensional block load operations.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__load_chunk_1D</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">extent</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a chunk from the openPMD `record` into the buffer at `arr`.</span>
+
+<span class="sd">        The indexes `offset` and `extent` are scalar 1-dimensional coordinates,</span>
+<span class="sd">        and apply to the n-dimensional record by reinterpreting (reshaped) it as</span>
+<span class="sd">        a one-dimensional array.</span>
+<span class="sd">        The function deals internally with splitting the 1-dimensional slice into</span>
+<span class="sd">        a sequence of n-dimensional block load operations.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        arr : np.ndarray</span>
+<span class="sd">            The buffer to load the chunk into.</span>
+
+<span class="sd">        offset : int</span>
+<span class="sd">            The offset of the chunk within the record.</span>
+
+<span class="sd">        extent : int</span>
+<span class="sd">            The extent of the chunk within the record.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">start_idx</span> <span class="o">=</span> <span class="n">DataShuffler</span><span class="o">.</span><span class="n">__resolve_flattened_index_into_ndim</span><span class="p">(</span>
             <span class="n">offset</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">shape</span>
         <span class="p">)</span>
@@ -641,6 +723,32 @@
         <span class="n">permutations</span><span class="p">,</span>
         <span class="n">file_ending</span><span class="p">,</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shuffle the data in the openPMD format.</span>
+
+<span class="sd">        This means shuffling from openPMD to openPMD.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dot : __DescriptorOrTarget</span>
+<span class="sd">            An auxilary object for representing target or descriptor data.</span>
+
+<span class="sd">        number_of_new_snapshots : int</span>
+<span class="sd">            The number of new shuffled snapshot-like to create.</span>
+
+<span class="sd">        shuffle_dimensions : list</span>
+<span class="sd">            The dimensions of the shuffled snapshots.</span>
+
+<span class="sd">        save_name : string</span>
+<span class="sd">            The name of the shuffled snapshots.</span>
+
+<span class="sd">        permutations : list</span>
+<span class="sd">            The permutations to apply to the data. These are shared among</span>
+<span class="sd">            ranks.</span>
+
+<span class="sd">        file_ending : string</span>
+<span class="sd">            The file ending of the shuffled snapshots.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">openpmd_api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">io</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>

@@ -128,6 +128,17 @@
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update logging information with current score and index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        score : float</span>
+<span class="sd">            The score of the current trial.</span>
+
+<span class="sd">        index :</span>
+<span class="sd">            The index of the current trial.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="o">=</span> <span class="n">score</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">best_trial_index</span> <span class="o">=</span> <span class="n">index</span>
@@ -225,6 +236,22 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">similarity_array</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate score of a descriptor/target pair.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        descriptor : numpy.ndarray</span>
+<span class="sd">            The descriptor data.</span>
+
+<span class="sd">        target : numpy.ndarray</span>
+<span class="sd">            The target data.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        score : float</span>
+<span class="sd">            The score of this descriptor/target pair.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_acsd</span><span class="p">(</span>
             <span class="n">descriptor</span><span class="p">,</span>
             <span class="n">target</span><span class="p">,</span>
@@ -284,6 +311,28 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__calc_cosine_similarity</span><span class="p">(</span><span class="n">vector1</span><span class="p">,</span> <span class="n">vector2</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the cosine similarity between two vectors.</span>
+
+<span class="sd">        The type of norm which is used can be adapted. Cosine similarity</span>
+<span class="sd">        always lies between 0 (not similar) and 1 (similar).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        vector1 : numpy.ndarray</span>
+<span class="sd">            The first vector.</span>
+
+<span class="sd">        vector2 : numpy.ndarray</span>
+<span class="sd">            The second vector.</span>
+
+<span class="sd">        norm : int</span>
+<span class="sd">            The order of the norm to be used. Default is 2.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        similarity : float</span>
+<span class="sd">            The cosine similarity between the two vectors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">vector1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">vector2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                 <span class="s2">&quot;Cannot calculate similarity between vectors &quot;</span>

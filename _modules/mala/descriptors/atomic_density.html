@@ -133,7 +133,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        array : numpy.array</span>
+<span class="sd">        array : numpy.ndarray</span>
 <span class="sd">            Data for which the units should be converted.</span>
 
 <span class="sd">        in_units : string</span>
@@ -141,7 +141,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">        converted_array : numpy.ndarray</span>
 <span class="sd">            Data in MALA units.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;None&quot;</span> <span class="ow">or</span> <span class="n">in_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -161,7 +161,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        array : numpy.array</span>
+<span class="sd">        array : numpy.ndarray</span>
 <span class="sd">            Data in MALA units.</span>
 
 <span class="sd">        out_units : string</span>
@@ -169,7 +169,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">        converted_array : numpy.ndarray</span>
 <span class="sd">            Data in out_units.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">out_units</span> <span class="o">==</span> <span class="s2">&quot;None&quot;</span><span class="p">:</span>
@@ -201,6 +201,27 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform Gaussian descriptor calculation.</span>
+
+<span class="sd">        This function is the main entry point for the calculation of the</span>
+<span class="sd">        Gaussian descriptors. It will decide whether to use LAMMPS or</span>
+<span class="sd">        a python implementation based on the availability of LAMMPS (and</span>
+<span class="sd">        user specifications).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        outdir : string</span>
+<span class="sd">            Path to the output directory.</span>
+
+<span class="sd">        kwargs : dict</span>
+<span class="sd">            Additional keyword arguments.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        gaussian_descriptors_np : numpy.ndarray</span>
+<span class="sd">            The calculated Gaussian descriptors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;lammps&quot;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;lammps&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">printout</span><span class="p">(</span>
@@ -214,11 +235,40 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_python</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_feature_dimension_from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">):</span>
-        <span class="c1"># For now, has to be adapted in the multielement case.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read the feature dimension from a saved JSON file.</span>
+
+<span class="sd">        Always returns (number of coordinate dimensions xyz = 3) +</span>
+<span class="sd">        (number of species), so for a single species system 4.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        json_dict : dict</span>
+<span class="sd">            Dictionary containing info loaded from the JSON file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">4</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__calculate_lammps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform actual Gaussian descriptor calculation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform actual Gaussian descriptor calculation using LAMMPS.</span>
+
+<span class="sd">        Creates a LAMMPS instance with appropriate call parameters and uses</span>
+<span class="sd">        it for the calculation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        outdir : string</span>
+<span class="sd">            Path to the output directory.</span>
+
+<span class="sd">        kwargs : dict</span>
+<span class="sd">            Additional keyword arguments.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        gaussian_descriptors_np : numpy.ndarray</span>
+<span class="sd">            The calculated Gaussian descriptors.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># For version compatibility; older lammps versions (the serial version</span>
         <span class="c1"># we still use on some machines) have these constants as part of the</span>
         <span class="c1"># general LAMMPS import.</span>
@@ -352,6 +402,16 @@
 <span class="sd">              and doesn&#39;t scale too great</span>
 <span class="sd">            - It only works for ONE chemical element</span>
 <span class="sd">            - It has no MPI or GPU support</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        kwargs : dict</span>
+<span class="sd">            Additional keyword arguments.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        gaussian_descriptors_np : numpy.ndarray</span>
+<span class="sd">            The calculated Gaussian descriptors.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">printout</span><span class="p">(</span>
             <span class="s2">&quot;Using python for descriptor calculation. &quot;</span>

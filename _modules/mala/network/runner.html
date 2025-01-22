@@ -919,6 +919,32 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_from_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Instantiaties a Runner (or derived) object from loaded objects.</span>
+
+<span class="sd">        This processes already load Parameters, Network and DataHandler</span>
+<span class="sd">        objects.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params : mala.common.parameters.Parameters</span>
+<span class="sd">            Parameters object from which to create the run.</span>
+
+<span class="sd">        network : mala.network.network.Network</span>
+<span class="sd">            Network object from which to create the run.</span>
+
+<span class="sd">        data : mala.datahandling.data_handler.DataHandler</span>
+<span class="sd">            DataHandler object from which to create the run.</span>
+
+<span class="sd">        file : str</span>
+<span class="sd">            File from which to load the runner. This is only used for the</span>
+<span class="sd">            Trainer class, where the optimizer is loaded from a file.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        loaded_runner : cls</span>
+<span class="sd">            The loaded runner object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Simply create a new runner. If the child classes have to implement</span>
         <span class="c1"># it theirselves.</span>
         <span class="n">loaded_runner</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -1047,6 +1073,19 @@
 <span class="sd">        For testing snapshot the batch size needs to be such that</span>
 <span class="sd">        data_per_snapshot / batch_size will result in an integer division</span>
 <span class="sd">        without any residual value.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        datasize : int</span>
+<span class="sd">            Size of the data.</span>
+
+<span class="sd">        batchsize : int</span>
+<span class="sd">            Uncorrected mini batch size.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        new_batchsize : int</span>
+<span class="sd">            Corrected mini batch size.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">new_batch_size</span> <span class="o">=</span> <span class="n">batchsize</span>
         <span class="k">if</span> <span class="n">datasize</span> <span class="o">%</span> <span class="n">new_batch_size</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>

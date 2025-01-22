@@ -411,7 +411,20 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__get_number_of_completed_trials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of maximum trials.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the number of completed trials from a study.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        study : optuna.study.Study</span>
+<span class="sd">            Study from which the number of completed trials should be</span>
+<span class="sd">            extracted.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        number_of_completed_trials : int</span>
+<span class="sd">            Number of completed trials.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># How to calculate this depends on whether or not a heartbeat was</span>
         <span class="c1"># used. If one was used, then both COMPLETE and RUNNING trials</span>
         <span class="c1"># Can be taken into account, as it can be expected that RUNNING</span>
@@ -437,7 +450,19 @@
             <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__check_stopping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if this trial was already the maximum number of trials.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if this trial was already the maximum number of trials.</span>
+
+<span class="sd">        If so, stop the study.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        study : optuna.study.Study</span>
+<span class="sd">            Study in which the trial is running.</span>
+
+<span class="sd">        trial : optuna.trial.FrozenTrial</span>
+<span class="sd">            Trial for which the stopping condition should be tested.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># How to check for this depends on whether or not a heartbeat was</span>
         <span class="c1"># used. If one was used, then both COMPLETE and RUNNING trials</span>
         <span class="c1"># Can be taken into account, as it can be expected that RUNNING</span>
@@ -471,7 +496,19 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__create_checkpointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a checkpoint of optuna study, if necessary.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a checkpoint of optuna study, if necessary.</span>
+
+<span class="sd">        This is done based on an internal checkpoint counter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        study : optuna.study.Study</span>
+<span class="sd">            Study in which the trial is running.</span>
+
+<span class="sd">        trial : optuna.trial.FrozenTrial</span>
+<span class="sd">            Trial for which the checkpoint may be created.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint_counter</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">need_to_checkpoint</span> <span class="o">=</span> <span class="kc">False</span>
 

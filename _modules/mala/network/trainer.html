@@ -322,7 +322,10 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_from_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Load a trainer from a file.</span>
+<span class="sd">        Instantiaties a Trainer object from loaded objects.</span>
+
+<span class="sd">        This processes already load Parameters, Network and DataHandler</span>
+<span class="sd">        objects.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -700,6 +703,25 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_set_fractions</span><span class="p">,</span> <span class="n">metrics</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate a network, using train or validation data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data_set_fractions : string</span>
+<span class="sd">            The data set fractions to validate on. Can be &quot;train&quot; or</span>
+<span class="sd">            &quot;validation&quot;. &quot;test&quot; is not supported.</span>
+
+<span class="sd">        metrics : list</span>
+<span class="sd">            List of metrics to calculate. Can be &quot;ldos&quot;, or a number of</span>
+<span class="sd">            error metrics (see Tester class). Most common apart from &quot;ldos&quot;</span>
+<span class="sd">            is arguably &quot;band_energy&quot;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        errors : dict</span>
+<span class="sd">            Dictionary containing the errors for the selected observables.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># &quot;&quot;&quot;Validate a network, using train or validation data.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
         <span class="n">errors</span> <span class="o">=</span> <span class="p">{}</span>
@@ -831,6 +853,25 @@
         <span class="k">return</span> <span class="n">errors</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__calculate_validation_error_ldos_only</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_loaders</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the validation error for the LDOS only.</span>
+
+<span class="sd">        This is a specialization of _validate_network that ONLY computes</span>
+<span class="sd">        one error, namely the LDOS error. It is more efficient, especially</span>
+<span class="sd">        in the distributed case, than the implementation called from</span>
+<span class="sd">        _validate_network. As such it is mostly &quot;legacy&quot; code for now, until</span>
+<span class="sd">        we adapt _validate_network.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data_loaders : torch.utils.data.DataLoader</span>
+<span class="sd">            DataLoader for the validation data.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        error : float</span>
+<span class="sd">            Validation error for the LDOS.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">validation_loss_sum</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
             <span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
         <span class="p">)</span>
@@ -975,7 +1016,14 @@
         <span class="k">return</span> <span class="n">validation_loss_sum</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> <span class="n">batchid</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__prepare_to_train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer_dict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare everything for training.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prepare everything for training.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        optimizer_dict : dict</span>
+<span class="sd">            Torch optimizer dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Configure keyword arguments for DataSampler.</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;num_workers&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
@@ -1168,7 +1216,27 @@
                 <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__process_mini_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">input_data</span><span class="p">,</span> <span class="n">target_data</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process a mini batch.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process a mini batch.</span>
+
+<span class="sd">        This includes calculating errors and updating the weights.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        network : mala.network.network.Network</span>
+<span class="sd">            Neural network used for error calculation and weight update.</span>
+
+<span class="sd">        input_data : torch.Tensor</span>
+<span class="sd">            Input data batch for the network.</span>
+
+<span class="sd">        target_data : torch.Tensor</span>
+<span class="sd">            Output data batch for the network.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        loss : torch.Tensor</span>
+<span class="sd">            Loss for the current mini batch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_graphs</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_graph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Capturing CUDA graph for training.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -1342,8 +1410,23 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">save_run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">save_runner</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">__average_validation</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Average validation over multiple parallel processes.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__average_validation</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Average validation over multiple parallel processes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        val : float</span>
+<span class="sd">            Validation loss for each rank.</span>
+
+<span class="sd">        device : str</span>
+<span class="sd">            Device to use for the calculation. Default is &quot;cpu&quot;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        avg_loss : float</span>
+<span class="sd">            Average loss over all parallel processes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
         <span class="n">dist</span><span class="o">.</span><span class="n">all_reduce</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
         <span class="n">avg_loss</span> <span class="o">=</span> <span class="n">tensor</span> <span class="o">/</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span>

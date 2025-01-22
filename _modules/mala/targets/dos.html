@@ -470,7 +470,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        array : numpy.array</span>
+<span class="sd">        array : numpy.ndarray</span>
 <span class="sd">            Data for which the units should be converted.</span>
 
 <span class="sd">        in_units : string</span>
@@ -481,7 +481,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">        converted_array : numpy.ndarray</span>
 <span class="sd">            Data in 1/eV.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/eV&quot;</span> <span class="ow">or</span> <span class="n">in_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -503,7 +503,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        array : numpy.array</span>
+<span class="sd">        array : numpy.ndarray</span>
 <span class="sd">            Data in 1/eV.</span>
 
 <span class="sd">        out_units : string</span>
@@ -511,7 +511,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">        converted_array : numpy.ndarray</span>
 <span class="sd">            Data in out_units.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">out_units</span> <span class="o">==</span> <span class="s2">&quot;1/eV&quot;</span><span class="p">:</span>
@@ -683,7 +683,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        e_grid : numpy.array</span>
+<span class="sd">        e_grid : numpy.ndarray</span>
 <span class="sd">            Energy grid on which the DOS is defined.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">emin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
@@ -713,7 +713,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        dos_data : numpy.array</span>
+<span class="sd">        dos_data : numpy.ndarray</span>
 <span class="sd">            DOS data with dimension [energygrid]. If None, then the cached</span>
 <span class="sd">            DOS will be used for the calculation.</span>
 
@@ -813,7 +813,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        dos_data : numpy.array</span>
+<span class="sd">        dos_data : numpy.ndarray</span>
 <span class="sd">            DOS data with dimension [energygrid]. If None, then the cached</span>
 <span class="sd">            DOS will be used for the calculation.</span>
 
@@ -884,7 +884,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        dos_data : numpy.array</span>
+<span class="sd">        dos_data : numpy.ndarray</span>
 <span class="sd">            DOS data with dimension [energygrid]. If None, then the cached</span>
 <span class="sd">            DOS will be used for the calculation.</span>
 
@@ -980,7 +980,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        dos_data : numpy.array</span>
+<span class="sd">        dos_data : numpy.ndarray</span>
 <span class="sd">            DOS data with dimension [energygrid]. If None, then the cached</span>
 <span class="sd">            DOS will be used for the calculation.</span>
 
@@ -1076,18 +1076,71 @@
     <span class="c1">#################</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_loaded_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process loaded array (i.e., unit change, reshaping, etc.).</span>
+
+<span class="sd">        Saves array to internal variable if class attribute save_target_data</span>
+<span class="sd">        is True.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.ndarray</span>
+<span class="sd">            Array to process.</span>
+
+<span class="sd">        units : string</span>
+<span class="sd">            Units of input array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">array</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_target_data</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="n">array</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_feature_size_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the feature size from the array.</span>
+
+<span class="sd">        Feature sizes are saved in different ways for different physical data</span>
+<span class="sd">        classes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.ndarray</span>
+<span class="sd">            Array to extract the feature size from.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">array</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__number_of_electrons_from_dos</span><span class="p">(</span>
         <span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">integration_method</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the number of electrons from DOS data.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the number of electrons from DOS data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dos_data : numpy.ndarray</span>
+<span class="sd">            DOS data (1D).</span>
+
+<span class="sd">        energy_grid : numpy.ndarray</span>
+<span class="sd">            Energy grid on which the DOS is defined.</span>
+
+<span class="sd">        fermi_energy : float</span>
+<span class="sd">            Fermi energy level in eV.</span>
+
+<span class="sd">        temperature : float</span>
+<span class="sd">            Temperature in K.</span>
+
+<span class="sd">        integration_method : string</span>
+<span class="sd">            Integration method to be used. Currently supported:</span>
+
+<span class="sd">                - &quot;trapezoid&quot; for trapezoid method</span>
+<span class="sd">                - &quot;simpson&quot; for Simpson method.</span>
+<span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        number_of_electrons : float</span>
+<span class="sd">            Number of electrons.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Calculate the energy levels and the Fermi function.</span>
 
         <span class="n">fermi_vals</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span>
@@ -1127,7 +1180,35 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">__band_energy_from_dos</span><span class="p">(</span>
         <span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">integration_method</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the band energy from DOS data.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the band energy from DOS data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dos_data : numpy.ndarray</span>
+<span class="sd">            DOS data (1D).</span>
+
+<span class="sd">        energy_grid : numpy.ndarray</span>
+<span class="sd">            Energy grid on which the DOS is defined.</span>
+
+<span class="sd">        fermi_energy : float</span>
+<span class="sd">            Fermi energy level in eV.</span>
+
+<span class="sd">        temperature : float</span>
+<span class="sd">            Temperature in K.</span>
+
+<span class="sd">        integration_method : string</span>
+<span class="sd">            Integration method to be used. Currently supported:</span>
+
+<span class="sd">                - &quot;trapezoid&quot; for trapezoid method</span>
+<span class="sd">                - &quot;simpson&quot; for Simpson method.</span>
+<span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        band_energy : float</span>
+<span class="sd">            Band energy in eV.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Calculate the energy levels and the Fermi function.</span>
         <span class="n">fermi_vals</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span>
             <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span>
@@ -1178,6 +1259,32 @@
 <span class="sd">        Calculate the entropy contribution to the total energy from DOS data.</span>
 
 <span class="sd">        More specifically, this gives -\beta^-1*S_S</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dos_data : numpy.ndarray</span>
+<span class="sd">            DOS data (1D).</span>
+
+<span class="sd">        energy_grid : numpy.ndarray</span>
+<span class="sd">            Energy grid on which the DOS is defined.</span>
+
+<span class="sd">        fermi_energy : float</span>
+<span class="sd">            Fermi energy level in eV.</span>
+
+<span class="sd">        temperature : float</span>
+<span class="sd">            Temperature in K.</span>
+
+<span class="sd">        integration_method : string</span>
+<span class="sd">            Integration method to be used. Currently supported:</span>
+
+<span class="sd">                - &quot;trapezoid&quot; for trapezoid method</span>
+<span class="sd">                - &quot;simpson&quot; for Simpson method.</span>
+<span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        entropy_contribution : float</span>
+<span class="sd">            Entropy contribution in eV.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Calculate the entropy contribution to the energy.</span>
         <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapezoid&quot;</span><span class="p">:</span>

@@ -256,7 +256,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        array : numpy.array</span>
+<span class="sd">        array : numpy.ndarray</span>
 <span class="sd">            Data for which the units should be converted.</span>
 
 <span class="sd">        in_units : string</span>
@@ -264,7 +264,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">        converted_array : numpy.ndarray</span>
 <span class="sd">            Data in MALA units.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -292,7 +292,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        array : numpy.array</span>
+<span class="sd">        array : numpy.ndarray</span>
 <span class="sd">            Data in MALA units.</span>
 
 <span class="sd">        out_units : string</span>
@@ -300,7 +300,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">        converted_array : numpy.ndarray</span>
 <span class="sd">            Data in out_units.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -435,7 +435,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        descriptors : numpy.array</span>
+<span class="sd">        descriptors : numpy.ndarray</span>
 <span class="sd">            Numpy array containing the descriptors with the dimension</span>
 <span class="sd">            (x,y,z,descriptor_dimension)</span>
 
@@ -508,7 +508,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        descriptors : numpy.array</span>
+<span class="sd">        descriptors : numpy.ndarray</span>
 <span class="sd">            Numpy array containing the descriptors with the dimension</span>
 <span class="sd">            (x,y,z,descriptor_dimension)</span>
 
@@ -557,7 +557,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        descriptors : numpy.array</span>
+<span class="sd">        descriptors : numpy.ndarray</span>
 <span class="sd">            Numpy array containing the descriptors with the dimension</span>
 <span class="sd">            (x,y,z,descriptor_dimension)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -586,7 +586,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        descriptors_np : numpy.array</span>
+<span class="sd">        descriptors_np : numpy.ndarray</span>
 <span class="sd">            Numpy array with the descriptors of this ranks local grid.</span>
 
 <span class="sd">        use_pickled_comm : bool</span>
@@ -707,7 +707,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        descriptors_np : numpy.array</span>
+<span class="sd">        descriptors_np : numpy.ndarray</span>
 <span class="sd">            Numpy array with the descriptors of this ranks local grid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">local_offset</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
@@ -766,9 +766,31 @@
     <span class="c1">#################</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_loaded_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process loaded array (i.e., unit change, reshaping, etc.).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.ndarray</span>
+<span class="sd">            Array to process.</span>
+
+<span class="sd">        units : string</span>
+<span class="sd">            Units of input array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">array</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_loaded_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array_dimensions</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process loaded dimensions.</span>
+
+<span class="sd">        In this case, cut xyz coordinates from descriptors if</span>
+<span class="sd">        descriptors_contain_xyz is set in the parameters.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array_dimensions : tuple</span>
+<span class="sd">            Raw dimensions of the array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span>
                 <span class="n">array_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
@@ -780,6 +802,16 @@
             <span class="k">return</span> <span class="n">array_dimensions</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_geometry_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set geometry information to openPMD mesh.</span>
+
+<span class="sd">        This has to be done as part of the openPMD saving process.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        mesh : openpmd_api.Mesh</span>
+<span class="sd">            OpenPMD mesh for which to set geometry information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Geometry: Save the cell parameters and angles of the grid.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="kn">import</span><span class="w"> </span><span class="nn">openpmd_api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">io</span>
@@ -794,9 +826,33 @@
             <span class="n">mesh</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;angles&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_voxel</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">3</span><span class="p">:])</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Access atoms saved in PhysicalData-derived class.</span>
+
+<span class="sd">        For any derived class which is atom based (currently, all are), this</span>
+<span class="sd">        function returns the atoms, which may not be directly accessible as</span>
+<span class="sd">        an attribute for a variety of reasons.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        atoms : ase.Atoms</span>
+<span class="sd">            An ASE atoms object holding the associated atoms of this object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_feature_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a mask for features that are not part of the feature dimension.</span>
+
+<span class="sd">        The mask assumes that the features which do not belong to the feature</span>
+<span class="sd">        dimension are at the beginning of the array. Here, return 3 if the</span>
+<span class="sd">        descriptors contain xyz coordinates, otherwise 0.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mask : int</span>
+<span class="sd">            Starting index after which the actual feature dimension starts.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">3</span>
         <span class="k">else</span><span class="p">:</span>
@@ -807,6 +863,24 @@
 <span class="sd">        Set up the lammps processor grid.</span>
 
 <span class="sd">        Takes into account y/z-splitting.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        nx : int</span>
+<span class="sd">            Number of gridpoints in x-direction.</span>
+
+<span class="sd">        ny : int</span>
+<span class="sd">            Number of gridpoints in y-direction.</span>
+<span class="sd">        nz : int</span>
+<span class="sd">            Number of gridpoints in z-direction.</span>
+
+<span class="sd">        lammps_dict : dict</span>
+<span class="sd">            Dictionary with LAMMPS options.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lmp : lammps.LAMMPS</span>
+<span class="sd">            LAMMPS instance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">lammps</span><span class="w"> </span><span class="kn">import</span> <span class="n">lammps</span>
 
@@ -1031,6 +1105,20 @@
         <span class="k">return</span> <span class="n">lmp</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_clean_calculation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lmp</span><span class="p">,</span> <span class="n">keep_logs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clean a LAMMPS calculation.</span>
+
+<span class="sd">        This function closes the LAMMPS instance and deletes the temporary</span>
+<span class="sd">        files created during the calculation, if keep_logs is False.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lmp : lammps.LAMMPS</span>
+<span class="sd">            LAMMPS instance to close.</span>
+
+<span class="sd">        keep_logs : bool</span>
+<span class="sd">            If True, the temporary files are not deleted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">lmp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_logs</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1047,6 +1135,12 @@
 
 <span class="sd">        FURTHER OPTIMIZATION: Probably not that much, this mostly already uses</span>
 <span class="sd">        optimized python functions.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        all_atoms : numpy.ndarray</span>
+<span class="sd">            Numpy array containing the positions of all atoms potentially</span>
+<span class="sd">            relevant for the descriptor calculation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">):</span>
 
@@ -1183,6 +1277,19 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">positions</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_grid_to_coord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gridpoint</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert grid indices to a real space coordinate.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        gridpoint : list</span>
+<span class="sd">            List of grid indices in the format [x, y, z].</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        coord : numpy.ndarray</span>
+<span class="sd">            Real space coordinate corresponding to the grid point.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Convert grid indices to real space grid point.</span>
         <span class="n">i</span> <span class="o">=</span> <span class="n">gridpoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">j</span> <span class="o">=</span> <span class="n">gridpoint</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -1208,13 +1315,48 @@
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform descriptor calculation.</span>
+
+<span class="sd">        Has to be implemented by inheriting classes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        outdir : string</span>
+<span class="sd">            Path to the output directory.</span>
+
+<span class="sd">        kwargs : dict</span>
+<span class="sd">            Additional keyword arguments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_feature_dimension_from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read the feature dimension from a saved JSON file.</span>
+
+<span class="sd">        This process may also involve reading additional information from the</span>
+<span class="sd">        Parameters object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        json_dict : dict</span>
+<span class="sd">            Dictionary containing info loaded from the JSON file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_feature_size_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the feature size from the array.</span>
+
+<span class="sd">        Feature sizes are saved in different ways for different physical data</span>
+<span class="sd">        classes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.ndarray</span>
+<span class="sd">            Array to extract the feature size from.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">array</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 
 </pre></div>

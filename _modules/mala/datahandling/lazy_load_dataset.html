@@ -324,6 +324,31 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_file_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">is_slice</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_start</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the file index and the index in the file.</span>
+
+<span class="sd">        These indices are determined from the index within the data set.</span>
+<span class="sd">        Also supports slices as indices.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index within the data set.</span>
+
+<span class="sd">        is_slice : bool</span>
+<span class="sd">            If True, the index is a slice.</span>
+
+<span class="sd">        is_start : bool</span>
+<span class="sd">            If True, the slice starts at the beginning of the file.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        file_index : int</span>
+<span class="sd">            Index of the file that contains the requested data.</span>
+
+<span class="sd">        index_in_file : int</span>
+<span class="sd">            Index within the file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">file_index</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">index_in_file</span> <span class="o">=</span> <span class="n">idx</span>
         <span class="k">if</span> <span class="n">is_slice</span><span class="p">:</span>

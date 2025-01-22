@@ -335,7 +335,17 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__prepare_to_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the tester class to for test run.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prepare the tester class to for test run.</span>
+
+<span class="sd">        The snapshot for which to test is required to correct the batch size</span>
+<span class="sd">        for it.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        snapshot_number : int</span>
+<span class="sd">            The number of the snapshot within the test data set to be tested.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># We will use the DataSet iterator to iterate over the test data.</span>
         <span class="c1"># But since we only want the data per snapshot,</span>
         <span class="c1"># we need to make sure the batch size is compatible with that.</span>

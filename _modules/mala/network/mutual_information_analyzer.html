@@ -135,6 +135,17 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update logging information with current score and index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        score : float</span>
+<span class="sd">            The score of the current trial.</span>
+
+<span class="sd">        index :</span>
+<span class="sd">            The index of the current trial.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="o">=</span> <span class="n">score</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">best_trial_index</span> <span class="o">=</span> <span class="n">index</span>
@@ -143,6 +154,22 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">best_trial_index</span> <span class="o">=</span> <span class="n">index</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate score of a descriptor/target pair.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        descriptor : numpy.ndarray</span>
+<span class="sd">            The descriptor data.</span>
+
+<span class="sd">        target : numpy.ndarray</span>
+<span class="sd">            The target data.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        score : float</span>
+<span class="sd">            The score of this descriptor/target pair.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_mutual_information</span><span class="p">(</span>
             <span class="n">descriptor</span><span class="p">,</span>
             <span class="n">target</span><span class="p">,</span>
@@ -217,6 +244,21 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_normalize</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Normalize the data to have zero mean and unit variance.</span>
+
+<span class="sd">        The normalization is done in-place.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : numpy.ndarray</span>
+<span class="sd">            The data to be normalized.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        data : numpy.ndarray</span>
+<span class="sd">            The normalized data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">std_nonzero</span> <span class="o">=</span> <span class="n">std</span> <span class="o">&gt;</span> <span class="mf">1e-6</span>
@@ -236,6 +278,42 @@
         <span class="n">covariance_type</span><span class="o">=</span><span class="s2">&quot;diag&quot;</span><span class="p">,</span>
         <span class="n">normalize_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the Mutual Information for given input (X) and output (Y).</span>
+
+<span class="sd">        Mutual information is calculated by fitting Gaussian mixture models to</span>
+<span class="sd">        combined and individual data distributions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : numpy.ndarray</span>
+<span class="sd">            Input data.</span>
+
+<span class="sd">        Y : numpy.ndarray</span>
+<span class="sd">            Output data.</span>
+
+<span class="sd">        n_components : int</span>
+<span class="sd">            Number of components in the Gaussian mixture model.</span>
+
+<span class="sd">        max_iter : int</span>
+<span class="sd">            Maximum number of iterations for the Gaussian mixture model.</span>
+
+<span class="sd">        n_samples : int</span>
+<span class="sd">            Number of samples to use for the calculation.</span>
+
+<span class="sd">        covariance_type : str</span>
+<span class="sd">            Type of covariance matrix to use in the Gaussian mixture model.</span>
+<span class="sd">            Currently, only &quot;diag&quot; is supported.</span>
+
+<span class="sd">        normalize_data : bool</span>
+<span class="sd">            If True, the data is normalized to have zero mean and unit</span>
+<span class="sd">            variance. This can help with robustness.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mi : float</span>
+<span class="sd">            The mutual information between the input and output data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">sklearn.mixture</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">sklearn.covariance</span>
 

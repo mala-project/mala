@@ -308,7 +308,14 @@
     <span class="c1">######################</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check the snapshots for consistency.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check the snapshots for consistency.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        comm : mpi4py.MPI.Comm</span>
+<span class="sd">            MPI communicator used for communication between ranks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nr_snapshots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">)</span>
 
         <span class="c1"># Read the snapshots using a memorymap to see if there is consistency.</span>
@@ -428,6 +435,20 @@
                 <span class="n">firstsnapshot</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_temporary_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">:</span> <span class="n">Snapshot</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate temporary input files.</span>
+
+<span class="sd">        If a MALA generated JSON file is used as input data, then the</span>
+<span class="sd">        descriptors for this snapshot have to be calculated here.</span>
+<span class="sd">        If the descriptor has already been calculated, then no computation</span>
+<span class="sd">        is performed here. This can happen during interrupted and resumed</span>
+<span class="sd">        training.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        snapshot : mala.datahandling.snapshot.Snapshot</span>
+<span class="sd">            Snapshot for which to compute temporary inputs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">temporary_input_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">temporary_input_file</span><span class="p">):</span>
                 <span class="n">snapshot</span><span class="o">.</span><span class="n">temporary_input_file</span> <span class="o">=</span> <span class="kc">None</span>

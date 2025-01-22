@@ -467,7 +467,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        array : numpy.array</span>
+<span class="sd">        array : numpy.ndarray</span>
 <span class="sd">            Data for which the units should be converted.</span>
 
 <span class="sd">        in_units : string</span>
@@ -478,7 +478,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">        converted_array : numpy.ndarray</span>
 <span class="sd">            Data in 1/A^3.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/A^3&quot;</span> <span class="ow">or</span> <span class="n">in_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -500,7 +500,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        array : numpy.array</span>
+<span class="sd">        array : numpy.ndarray</span>
 <span class="sd">            Data in 1/A^3.</span>
 
 <span class="sd">        out_units : string</span>
@@ -511,7 +511,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">        converted_array : numpy.ndarray</span>
 <span class="sd">            Data in out_units.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">out_units</span> <span class="o">==</span> <span class="s2">&quot;1/A^3&quot;</span><span class="p">:</span>
@@ -720,7 +720,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        density_data : numpy.array</span>
+<span class="sd">        density_data : numpy.ndarray</span>
 <span class="sd">            Electronic density on the given grid. Has to either be of the form</span>
 <span class="sd">            gridpoints or (gridx, gridy, gridz). If None, then the cached</span>
 <span class="sd">            density will be used for the calculation.</span>
@@ -842,7 +842,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        density_data : numpy.array</span>
+<span class="sd">        density_data : numpy.ndarray</span>
 <span class="sd">            Electronic density data, this array will be returned unchanged</span>
 <span class="sd">            depending on the other parameters. If None, then the cached</span>
 <span class="sd">            density will be used for the calculation.</span>
@@ -859,7 +859,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        density_data : numpy.array</span>
+<span class="sd">        density_data : numpy.ndarray</span>
 <span class="sd">            Electronic density data in the desired shape.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
@@ -918,7 +918,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        density_data : numpy.array</span>
+<span class="sd">        density_data : numpy.ndarray</span>
 <span class="sd">            Density data on a grid. If None, then the cached</span>
 <span class="sd">            density will be used for the calculation.</span>
 
@@ -1000,7 +1000,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        density_data : numpy.array</span>
+<span class="sd">        density_data : numpy.ndarray</span>
 <span class="sd">            Density data on a grid. If None, then the cached</span>
 <span class="sd">            density will be used for the calculation.</span>
 
@@ -1079,7 +1079,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        scaled_positions : numpy.array</span>
+<span class="sd">        scaled_positions : numpy.ndarray</span>
 <span class="sd">            The scaled positions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">principal_axis</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -1300,7 +1300,7 @@
             <span class="c1">#</span>
             <span class="c1"># from mpi4py import MPI</span>
             <span class="c1"># ggrid_sum = np.sum(gaussian_descriptors)</span>
-            <span class="c1"># full_ggrid_sum = np.array([0.0])</span>
+            <span class="c1"># full_ggrid_sum = numpy.ndarray([0.0])</span>
             <span class="c1"># comm = get_comm()</span>
             <span class="c1"># comm.Barrier()</span>
             <span class="c1"># comm.Reduce([ggrid_sum, MPI.DOUBLE],</span>
@@ -1331,7 +1331,7 @@
             <span class="c1"># Check normalization of the reference Gaussian descriptors</span>
             <span class="c1">#</span>
             <span class="c1"># reference_ggrid_sum = np.sum(reference_gaussian_descriptors)</span>
-            <span class="c1"># full_reference_ggrid_sum = np.array([0.0])</span>
+            <span class="c1"># full_reference_ggrid_sum = numpy.ndarray([0.0])</span>
             <span class="c1"># comm = get_comm()</span>
             <span class="c1"># comm.Barrier()</span>
             <span class="c1"># comm.Reduce([reference_ggrid_sum, MPI.DOUBLE],</span>

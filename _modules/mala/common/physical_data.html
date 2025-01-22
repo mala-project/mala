@@ -845,26 +845,105 @@
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_loaded_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process loaded array (i.e., unit change, reshaping, etc.).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.ndarray</span>
+<span class="sd">            Array to process.</span>
+
+<span class="sd">        units : string</span>
+<span class="sd">            Units of input array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_loaded_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array_dimensions</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process loaded dimensions.</span>
+
+<span class="sd">        E.g., this could include cutting feature dimensions reserved for</span>
+<span class="sd">        coordinate data in descriptor data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array_dimensions : tuple</span>
+<span class="sd">            Raw dimensions of the array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_feature_size_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the feature size from the array.</span>
+
+<span class="sd">        Feature sizes are saved in different ways for different physical data</span>
+<span class="sd">        classes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_additional_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">additional_metadata</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process additional metadata.</span>
+
+<span class="sd">        If additional metadata is provided, and saving is performed via</span>
+<span class="sd">        openpmd, then this function process the metadata dictionary in a way</span>
+<span class="sd">        it can be saved by openpmd.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        additional_metadata : dict</span>
+<span class="sd">            Dictionary containing additional metadata.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_feature_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a mask for features that are not part of the feature dimension.</span>
+
+<span class="sd">        The mask assumes that the features which do not belong to the feature</span>
+<span class="sd">        dimension are at the beginning of the array.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mask : int</span>
+<span class="sd">            Starting index after which the actual feature dimension starts.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">0</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_geometry_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set geometry information to openPMD mesh.</span>
+
+<span class="sd">        This has to be done as part of the openPMD saving process.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        mesh : openpmd_api.Mesh</span>
+<span class="sd">            OpenPMD mesh for which to set geometry information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_openpmd_attribtues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set openPMD attributes.</span>
+
+<span class="sd">        This has to be done as part of the openPMD saving process. It saves</span>
+<span class="sd">        metadata related to the saved data to make data more reproducible.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        iteration : openpmd_api.Iteration</span>
+<span class="sd">            OpenPMD iteration for which to set attributes.</span>
+
+<span class="sd">        mesh : openpmd_api.Mesh</span>
+<span class="sd">            OpenPMD mesh for which to set attributes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">mesh</span><span class="o">.</span><span class="n">unit_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">si_dimension</span>
         <span class="n">mesh</span><span class="o">.</span><span class="n">axis_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]</span>
         <span class="n">mesh</span><span class="o">.</span><span class="n">grid_global_offset</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
@@ -880,20 +959,84 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_geometry_info</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_openpmd_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process loaded openPMD attributes.</span>
+
+<span class="sd">        This is done during loading from OpenPMD data. OpenPMD can save</span>
+<span class="sd">        metadata not contained in the data itself, but in the file. With this</span>
+<span class="sd">        function, this information can be loaded to relevant MALA classes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        series : openpmd_api.Series</span>
+<span class="sd">            OpenPMD series from which to load an iteration.</span>
+
+<span class="sd">        iteration : openpmd_api.Iteration</span>
+<span class="sd">            OpenPMD iteration from which to load.</span>
+
+<span class="sd">        mesh : openpmd_api.Mesh</span>
+<span class="sd">            OpenPMD mesh used during loading.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_process_geometry_info</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_geometry_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process loaded openPMD geometry information.</span>
+
+<span class="sd">        Information on geometry is one of the pieces of metadata that can be</span>
+<span class="sd">        saved in OpenPMD files. This function processes this information upon</span>
+<span class="sd">        loading, and saves it to the correct place in the respective MALA</span>
+<span class="sd">        class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        mesh : openpmd_api.Mesh</span>
+<span class="sd">            OpenPMD mesh used during loading.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="c1"># Currently all data we have is atom based.</span>
     <span class="c1"># That may not always be the case.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Access atoms saved in PhysicalData-derived class.</span>
+
+<span class="sd">        For any derived class which is atom based (currently, all are), this</span>
+<span class="sd">        function returns the atoms, which may not be directly accessible as</span>
+<span class="sd">        an attribute for a variety of reasons.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        atoms : ase.Atoms</span>
+<span class="sd">            An ASE atoms object holding the associated atoms of this object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_attribute_if_attribute_exists</span><span class="p">(</span>
         <span class="n">iteration</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Access an attribute from an openPMD iteration safely.</span>
+
+<span class="sd">        If the attribute does not exist, a default values is returned.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        iteration : openpmd_api.Iteration</span>
+<span class="sd">            OpenPMD iteration from which to load an attribute.</span>
+
+<span class="sd">        attribute : string</span>
+<span class="sd">            Name of the attribute to load.</span>
+
+<span class="sd">        default_value : any</span>
+<span class="sd">            Default value to return if the attribute does not exist.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        value : any</span>
+<span class="sd">            Value of the attribute if it exists, else the default value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">iteration</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

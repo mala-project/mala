@@ -122,7 +122,7 @@ weights itself.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>D</strong> (<em>numpy.array</em><em> or </em><em>float</em>) – Either LDOS or DOS data.</p></li>
+<li><p><strong>D</strong> (<em>numpy.ndarray</em><em> or </em><em>float</em>) – Either LDOS or DOS data.</p></li>
 <li><p><strong>I0</strong> (<em>string</em>) – <p>I_0 from Eq. 33. The user only needs to provide which function should
 be used. Arguments are:</p>
 <blockquote>
@@ -148,7 +148,7 @@ be used. Arguments are:</p>
 </div></blockquote>
 </p></li>
 <li><p><strong>fermi_energy</strong> (<em>float</em>) – The fermi energy in eV.</p></li>
-<li><p><strong>energy_grid</strong> (<em>numpy.array</em>) – Energy grid on which the integration should be performed.</p></li>
+<li><p><strong>energy_grid</strong> (<em>numpy.ndarray</em>) – Energy grid on which the integration should be performed.</p></li>
 <li><p><strong>temperature</strong> (<em>float</em>) – Temperature in K.</p></li>
 </ul>
 </dd>
@@ -156,7 +156,7 @@ be used. Arguments are:</p>
 <dd class="field-even"><p><strong>integration_value</strong> – Value of the integral.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>numpy.array or float</p>
+<dd class="field-odd"><p>numpy.ndarray or float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -171,7 +171,7 @@ be used. Arguments are:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>energy</strong> (<em>float</em><em> or </em><em>numpy.array</em>) – Energy for which the Fermi function is supposed to be calculated in
+<li><p><strong>energy</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – Energy for which the Fermi function is supposed to be calculated in
 energy_units.</p></li>
 <li><p><strong>fermi_energy</strong> (<em>float</em>) – Fermi energy level in energy_units.</p></li>
 <li><p><strong>temperature</strong> (<em>float</em>) – Temperature in K.</p></li>
@@ -196,7 +196,7 @@ energy_units.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>energy</strong> (<em>float</em><em> or </em><em>numpy.array</em>) – Energy for which the Fermi function is supposed to be calculated in
+<li><p><strong>energy</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – Energy for which the Fermi function is supposed to be calculated in
 energy_units.</p></li>
 <li><p><strong>fermi_energy</strong> (<em>float</em>) – Fermi energy level in energy_units.</p></li>
 <li><p><strong>temperature</strong> (<em>float</em>) – Temperature in K.</p></li>
@@ -224,8 +224,8 @@ factor of <span class="math notranslate nohighlight">\(1/\sqrt{2}\)</span>. All 
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>grid</strong> (<em>np.array</em>) – Grid on which this Gaussian is defined.</p></li>
-<li><p><strong>centers</strong> (<em>np.array</em>) – Array of centers for the Gaussians</p></li>
+<li><p><strong>grid</strong> (<em>numpy.ndarray</em>) – Grid on which this Gaussian is defined.</p></li>
+<li><p><strong>centers</strong> (<em>numpy.ndarray</em>) – Array of centers for the Gaussians</p></li>
 <li><p><strong>sigma</strong> (<em>float</em>) – Sigma value for the Gaussian.</p></li>
 </ul>
 </dd>
@@ -233,7 +233,7 @@ factor of <span class="math notranslate nohighlight">\(1/\sqrt{2}\)</span>. All 
 <dd class="field-even"><p><strong>multiple_gaussians</strong> – multiple gaussians on the same grid, but with different centers.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.array</p>
+<dd class="field-odd"><p>numpy.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -363,7 +363,7 @@ factor of <span class="math notranslate nohighlight">\(1/\sqrt{2}\)</span>. All 
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>values</strong> (<em>numpy.array</em>) – Values to be integrated.</p></li>
+<li><p><strong>values</strong> (<em>numpy.ndarray</em>) – Values to be integrated.</p></li>
 <li><p><strong>spacing</strong> (<em>int</em>) – Spacing of the grid on which the integration is performed.</p></li>
 <li><p><strong>method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
 <blockquote>

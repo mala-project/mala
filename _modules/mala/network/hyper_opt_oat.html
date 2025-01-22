@@ -309,6 +309,11 @@
 <span class="sd">        Generate the best OA used for optimal hyperparameter sampling.</span>
 
 <span class="sd">        This is function is taken from the example notebook of OApackage.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        orthogonal_array : numpy.ndarray</span>
+<span class="sd">            The orthogonal array used for hyperparameter optimization.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__check_factor_levels</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sorted factor levels:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sorted_num_choices</span><span class="p">)</span>
@@ -371,6 +376,11 @@
 <span class="sd">        Based on the factor levels and the strength of the array requested.</span>
 <span class="sd">        See also here:</span>
 <span class="sd">        https://oapackage.readthedocs.io/en/latest/examples/example_minimal_number_of_runs_oa.html</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        number_of_runs : int</span>
+<span class="sd">            The number of runs required to sample the orthogonal array.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">runs</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span>

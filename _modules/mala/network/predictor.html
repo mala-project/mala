@@ -151,7 +151,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        predicted_ldos : numpy.array</span>
+<span class="sd">        predicted_ldos : numpy.ndarray</span>
 <span class="sd">            Precicted LDOS for these atomic positions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span>
@@ -187,7 +187,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        predicted_ldos : numpy.array</span>
+<span class="sd">        predicted_ldos : numpy.ndarray</span>
 <span class="sd">            Precicted LDOS for these atomic positions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># If there is no inference data grid, we will try to get the grid</span>
@@ -296,7 +296,28 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_forward_snap_descriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">snap_descriptors</span><span class="p">,</span> <span class="n">local_data_size</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward a scaled tensor of descriptors through the NN.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Forward a scaled tensor of descriptors through the neural network.</span>
+
+<span class="sd">        Returns the output of this forward pass as a numpy array.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        snap_descriptors : torch.Tensor</span>
+<span class="sd">            Tensor of descriptors to forward through the network.</span>
+
+<span class="sd">        local_data_size : int</span>
+<span class="sd">            The number of grid points on the current rank. If None, the</span>
+<span class="sd">            total grid size is used (the default for serial execution).</span>
+<span class="sd">            Is automatically set by calling functions in the parallel</span>
+<span class="sd">            case.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        predicted_outputs : numpy.ndarray</span>
+<span class="sd">            The output of the forward pass as a numpy array. This is already</span>
+<span class="sd">            correctly re-scaled. The shape is (local_data_size, feature_size).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Ensure the Network is on the correct device.</span>
         <span class="c1"># This line is necessary because GPU acceleration may have been</span>
         <span class="c1"># activated AFTER loading a model.</span>

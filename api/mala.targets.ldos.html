@@ -131,7 +131,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>array</strong> (<em>numpy.array</em>) – Data in 1/eV.</p></li>
+<li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Data in 1/eV.</p></li>
 <li><p><strong>out_units</strong> (<em>string</em>) – <p>Desired units of output array. Currently supported are:</p>
 <blockquote>
 <div><ul>
@@ -147,7 +147,7 @@
 <dd class="field-even"><p><strong>converted_array</strong> – Data in out_units.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>numpy.array</p>
+<dd class="field-odd"><p>numpy.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -160,7 +160,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>array</strong> (<em>numpy.array</em>) – Data for which the units should be converted.</p></li>
+<li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Data for which the units should be converted.</p></li>
 <li><p><strong>in_units</strong> (<em>string</em>) – <p>Units of array. Currently supported are:</p>
 <blockquote>
 <div><ul>
@@ -176,7 +176,7 @@
 <dd class="field-even"><p><strong>converted_array</strong> – Data in 1/(eV*A^3).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>numpy.array</p>
+<dd class="field-odd"><p>numpy.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -299,7 +299,7 @@ Will currently only give <span class="math notranslate nohighlight">\(\frac{dd}{
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ldos_data</strong> (<em>torch.Tensor</em>) – Scaled (!) torch tensor holding the LDOS data for the snapshot
 for which the atomic force should be calculated.</p></li>
-<li><p><strong>dE_dd</strong> (<em>np.array</em>) – (WIP) Derivative of the total energy w.r.t the LDOS.
+<li><p><strong>dE_dd</strong> (<em>numpy.ndarray</em>) – (WIP) Derivative of the total energy w.r.t the LDOS.
 Later on, this will be evaluated within this subroutine. For now
 it is provided from outside.</p></li>
 <li><p><strong>used_data_handler</strong> (<em>mala.data.data_handler.DataHandler</em>) – DataHandler that was used to predict the LDOS for which the
@@ -325,7 +325,7 @@ the descriptors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
+<li><p><strong>ldos_data</strong> (<em>numpy.ndarray</em>) – LDOS data, either as [gridsize, energygrid] or
 [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
 will be used for the calculation.</p></li>
 <li><p><strong>fermi_energy</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
@@ -385,7 +385,7 @@ will be used for the calculation.</p>
 </ul>
 </div></blockquote>
 </dd>
-<dt>ldos_data<span class="classifier">numpy.array</span></dt><dd><p>LDOS data, either as [gridsize, energygrid] or
+<dt>ldos_data<span class="classifier">numpy.ndarray</span></dt><dd><p>LDOS data, either as [gridsize, energygrid] or
 [gridx,gridy,gridz,energygrid].</p>
 </dd>
 <dt>integration_method<span class="classifier">string</span></dt><dd><p>Integration method to integrate LDOS on energygrid.
@@ -410,7 +410,7 @@ and only one for network pass.</p>
 dimensions.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>numpy.array</p>
+<dd class="field-even"><p>numpy.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -421,7 +421,7 @@ dimensions.</p>
 <dd><p>Calculate the density of states from given LDOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
+<dd class="field-odd"><p><strong>ldos_data</strong> (<em>numpy.ndarray</em>) – LDOS data, either as [gridsize, energygrid] or
 [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
 will be used for the calculation.</p>
 </dd>
@@ -449,7 +449,7 @@ and only one for network pass.</p>
 <dd class="field-odd"><p><strong>dos_values</strong> – The DOS.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>np.array</p>
+<dd class="field-even"><p>numpy.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -463,7 +463,7 @@ and only one for network pass.</p>
 <dd class="field-odd"><p><strong>e_grid</strong> – Energy grid on which the LDOS is defined.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>numpy.array</p>
+<dd class="field-even"><p>numpy.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -475,7 +475,7 @@ and only one for network pass.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
+<li><p><strong>ldos_data</strong> (<em>numpy.ndarray</em>) – LDOS data, either as [gridsize, energygrid] or
 [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
 will be used for the calculation.</p></li>
 <li><p><strong>fermi_energy</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
@@ -516,7 +516,7 @@ Currently supported:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
+<li><p><strong>ldos_data</strong> (<em>numpy.ndarray</em>) – LDOS data, either as [gridsize, energygrid] or
 [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
 will be used for the calculation.</p></li>
 <li><p><strong>fermi_energy</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
@@ -561,7 +561,7 @@ from how this quantity is calculated.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
+<li><p><strong>ldos_data</strong> (<em>numpy.ndarray</em>) – LDOS data, either as [gridsize, energygrid] or
 [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
 will be used for the calculation.</p></li>
 <li><p><strong>temperature</strong> (<em>float</em>) – Temperature in K.</p></li>
@@ -621,11 +621,11 @@ be attempted to be used for the calculation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
+<li><p><strong>ldos_data</strong> (<em>numpy.ndarray</em>) – LDOS data, either as [gridsize, energygrid] or
 [gridx,gridy,gridz,energygrid]. If None, dos_data and density_data
 cannot be None.</p></li>
-<li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data, as [energygrid].</p></li>
-<li><p><strong>density_data</strong> (<em>numpy.array</em>) – Density data, either as [gridsize] or [gridx,gridy,gridz].</p></li>
+<li><p><strong>dos_data</strong> (<em>numpy.ndarray</em>) – DOS data, as [energygrid].</p></li>
+<li><p><strong>density_data</strong> (<em>numpy.ndarray</em>) – Density data, either as [gridsize] or [gridx,gridy,gridz].</p></li>
 <li><p><strong>fermi_energy</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
 <li><p><strong>temperature</strong> (<em>float</em>) – Temperature in K.</p></li>
 <li><p><strong>voxel</strong> (<em>ase.cell.Cell</em>) – Voxel to be used for grid intergation. Needs to reflect the

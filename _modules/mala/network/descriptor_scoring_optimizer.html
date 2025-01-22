@@ -466,6 +466,12 @@
         <span class="k">pass</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_construct_hyperparam_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the hyperparameter list for the descriptor scoring analysis.</span>
+
+<span class="sd">        Based on a list of choices for descriptor hyperparameters, this</span>
+<span class="sd">        function creates a list of trials to be tested.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="nb">list</span><span class="p">(</span>
@@ -564,6 +570,28 @@
             <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">original_units</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate descriptors from a dictionary with snapshot information.</span>
+
+<span class="sd">        Internally uses the DescriptorCalculator class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        snapshot : dict</span>
+<span class="sd">            Dictionary containing information on &quot;input&quot; and &quot;output&quot; files.</span>
+
+<span class="sd">        description : dict</span>
+<span class="sd">            Dictionary containing information on &quot;input&quot; and &quot;output&quot;</span>
+<span class="sd">            file types.</span>
+
+<span class="sd">        original_units : dict</span>
+<span class="sd">            Dictionary containing information on &quot;input&quot; and &quot;output&quot; units.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        descriptor_data : numpy.ndarray</span>
+<span class="sd">            Array containing the descriptor data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">descriptor_calculation_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">tmp_input</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;espresso-out&quot;</span><span class="p">:</span>
@@ -592,6 +620,34 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_target</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">original_units</span><span class="p">,</span> <span class="n">file_based_communication</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load target data from a dictionary with snapshot information.</span>
+
+<span class="sd">        Internally uses the TargetCalculator class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        snapshot : dict</span>
+<span class="sd">            Dictionary containing information on &quot;input&quot; and &quot;output&quot; files.</span>
+
+<span class="sd">        description : dict</span>
+<span class="sd">            Dictionary containing information on &quot;input&quot; and &quot;output&quot;</span>
+<span class="sd">            file types.</span>
+
+<span class="sd">        original_units : dict</span>
+<span class="sd">            Dictionary containing information on &quot;input&quot; and &quot;output&quot; units.</span>
+
+<span class="sd">        file_based_communication : bool</span>
+<span class="sd">            If True, file-based communication is used for MPI. This means that</span>
+<span class="sd">            a temporary file is used to collect target components across</span>
+<span class="sd">            ranks rather than MPI communication directly. This can help</span>
+<span class="sd">            with memory issues when the target data is large.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        target_data : numpy.ndarray</span>
+<span class="sd">            Array containing the target data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">memmap</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span>
@@ -644,10 +700,37 @@
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update logging information with current score and index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        score : float</span>
+<span class="sd">            The score of the current trial.</span>
+
+<span class="sd">        index :</span>
+<span class="sd">            The index of the current trial.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate score of a descriptor/target pair.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        descriptor : numpy.ndarray</span>
+<span class="sd">            The descriptor data.</span>
+
+<span class="sd">        target : numpy.ndarray</span>
+<span class="sd">            The target data.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        score : float</span>
+<span class="sd">            The score of this descriptor/target pair.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
 </pre></div>
