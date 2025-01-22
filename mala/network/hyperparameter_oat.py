@@ -60,7 +60,7 @@ class HyperparameterOAT(Hyperparameter):
 
         Parameters
         ----------
-        trial : numpy.array
+        trial : numpy.ndarray
             Row in an orthogonal array which respresents current trial.
 
         idx : int
@@ -82,7 +82,7 @@ class HyperparameterOAT(Hyperparameter):
 
         Parameters
         ----------
-        trial : numpy.array
+        trial : numpy.ndarray
             Row in an orthogonal array which respresents current trial.
 
         idx : int

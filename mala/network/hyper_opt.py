@@ -161,6 +161,7 @@ class HyperOpt(ABC):
         self._objective.parse_trial(trial)
 
     def _save_params_and_scaler(self):
+        """Save the parameters and scalers to disk."""
         # Saving the Scalers is straight forward.
         iscaler_name = (
             self.params.hyperparameters.checkpoint_name + "_iscaler.pkl"

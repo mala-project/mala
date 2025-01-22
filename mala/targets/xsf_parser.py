@@ -19,7 +19,7 @@ def read_xsf(filename):
 
     Returns
     -------
-    data : numpy.array
+    data : numpy.ndarray
         Data from xsf file.
 
     meta : dict

@@ -214,7 +214,14 @@ class DataHandlerBase(ABC):
     ######################
 
     def _check_snapshots(self, comm=None):
-        """Check the snapshots for consistency."""
+        """
+        Check the snapshots for consistency.
+
+        Parameters
+        ----------
+        comm : mpi4py.MPI.Comm
+            MPI communicator used for communication between ranks.
+        """
         self.nr_snapshots = len(self.parameters.snapshot_directories_list)
 
         # Read the snapshots using a memorymap to see if there is consistency.
@@ -334,6 +341,20 @@ class DataHandlerBase(ABC):
                 firstsnapshot = False
 
     def _calculate_temporary_inputs(self, snapshot: Snapshot):
+        """
+        Calculate temporary input files.
+
+        If a MALA generated JSON file is used as input data, then the
+        descriptors for this snapshot have to be calculated here.
+        If the descriptor has already been calculated, then no computation
+        is performed here. This can happen during interrupted and resumed
+        training.
+
+        Parameters
+        ----------
+        snapshot : mala.datahandling.snapshot.Snapshot
+            Snapshot for which to compute temporary inputs.
+        """
         if snapshot.temporary_input_file is not None:
             if not os.path.isfile(snapshot.temporary_input_file):
                 snapshot.temporary_input_file = None

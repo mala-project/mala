@@ -238,7 +238,17 @@ class Tester(Runner):
         )
 
     def __prepare_to_test(self, snapshot_number):
-        """Prepare the tester class to for test run."""
+        """
+        Prepare the tester class to for test run.
+
+        The snapshot for which to test is required to correct the batch size
+        for it.
+
+        Parameters
+        ----------
+        snapshot_number : int
+            The number of the snapshot within the test data set to be tested.
+        """
         # We will use the DataSet iterator to iterate over the test data.
         # But since we only want the data per snapshot,
         # we need to make sure the batch size is compatible with that.

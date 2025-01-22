@@ -825,6 +825,32 @@ class Runner:
 
     @classmethod
     def _load_from_run(cls, params, network, data, file=None):
+        """
+        Instantiaties a Runner (or derived) object from loaded objects.
+
+        This processes already load Parameters, Network and DataHandler
+        objects.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters object from which to create the run.
+
+        network : mala.network.network.Network
+            Network object from which to create the run.
+
+        data : mala.datahandling.data_handler.DataHandler
+            DataHandler object from which to create the run.
+
+        file : str
+            File from which to load the runner. This is only used for the
+            Trainer class, where the optimizer is loaded from a file.
+
+        Returns
+        -------
+        loaded_runner : cls
+            The loaded runner object.
+        """
         # Simply create a new runner. If the child classes have to implement
         # it theirselves.
         loaded_runner = cls(params, network, data)
@@ -953,6 +979,19 @@ class Runner:
         For testing snapshot the batch size needs to be such that
         data_per_snapshot / batch_size will result in an integer division
         without any residual value.
+
+        Parameters
+        ----------
+        datasize : int
+            Size of the data.
+
+        batchsize : int
+            Uncorrected mini batch size.
+
+        Returns
+        -------
+        new_batchsize : int
+            Corrected mini batch size.
         """
         new_batch_size = batchsize
         if datasize % new_batch_size != 0:

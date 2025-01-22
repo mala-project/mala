@@ -69,33 +69,118 @@ class ParametersBase(JSONSerializable):
                     )
 
     def _update_gpu(self, new_gpu):
+        """
+        Propagate new GPU setting to parameter subclasses.
+
+        Parameters
+        ----------
+        new_gpu : bool
+            New GPU setting.
+        """
         self._configuration["gpu"] = new_gpu
 
     def _update_ddp(self, new_ddp):
+        """
+        Propagate new DDP setting to parameter subclasses.
+
+        Parameters
+        ----------
+        new_ddp : bool
+            New DDP setting.
+        """
         self._configuration["ddp"] = new_ddp
 
     def _update_mpi(self, new_mpi):
+        """
+        Propagate new MPI setting to parameter subclasses.
+
+        Parameters
+        ----------
+        new_mpi : bool
+            New MPI setting.
+        """
         self._configuration["mpi"] = new_mpi
 
     def _update_device(self, new_device):
+        """
+        Propagate new device setting to parameter subclasses.
+
+        Parameters
+        ----------
+        new_device : str
+            New device setting. Can be "cpu" or "cuda:x", where x is some
+            integer.
+        """
         self._configuration["device"] = new_device
 
     def _update_openpmd_configuration(self, new_openpmd):
+        """
+        Propagate new openPMD configuration to parameter subclasses.
+
+        Parameters
+        ----------
+        new_openpmd : dict
+            New openPMD configuration, which is a dict containing different
+            settings.
+        """
         self._configuration["openpmd_configuration"] = new_openpmd
 
     def _update_openpmd_granularity(self, new_granularity):
+        """
+        Propagate new openPMD granularity to parameter subclasses.
+
+        Parameters
+        ----------
+        new_granularity : int
+            New openPMD granularity.
+        """
         self._configuration["openpmd_granularity"] = new_granularity
 
     def _update_lammps(self, new_lammps):
+        """
+        Propagate new LAMMPS setting to parameter subclasses.
+
+        Parameters
+        ----------
+        new_lammps : bool
+            New LAMMPS setting. Setting here means whether LAMMPS
+            will be used.
+        """
         self._configuration["lammps"] = new_lammps
 
     def _update_atomic_density_formula(self, new_atomic_density_formula):
+        """
+        Propagate new atomic density formula setting to parameter subclasses.
+
+        Parameters
+        ----------
+        new_atomic_density_formula : bool
+            New atomic density formula setting, i.e., whether to use this
+            option.
+        """
         self._configuration["atomic_density_formula"] = (
             new_atomic_density_formula
         )
 
     @staticmethod
     def _member_to_json(member):
+        """
+        Convert a member to a JSON serializable object.
+
+        For a class that inherits from JSONSerializable, this will call the
+        to_json method of that class. Otherwise, it will return the member
+        itself (for basic data types)
+
+        Parameters
+        ----------
+        member : any, JSONSerializable
+            Member to be converted to JSON serializable object.
+
+        Returns
+        -------
+        json_serializable : any
+            JSON serializable object.
+        """
         if isinstance(member, (int, float, type(None), str)):
             return member
         else:
@@ -147,6 +232,24 @@ class ParametersBase(JSONSerializable):
 
     @staticmethod
     def _json_to_member(json_value):
+        """
+        Convert a JSON dictionary to a member.
+
+        This function is used to convert a JSON dictionary to a member of this
+        class. If the member is a JSONSerializable object, it will call the
+        from_json method of that class. Otherwise, it will return the member
+        directly (for basic data types)
+
+        Parameters
+        ----------
+        json_value : any
+            JSON value/dictionary entry to be converted to a member.
+
+        Returns
+        -------
+        member : any
+            Loaded member of this class.
+        """
         if isinstance(json_value, (int, float, type(None), str)):
             return json_value
         else:
@@ -181,7 +284,6 @@ class ParametersBase(JSONSerializable):
         -------
         deserialized_object : JSONSerializable
             The object as read from the JSON file.
-
         """
         deserialized_object = cls()
         for key in json_dict:
@@ -474,6 +576,16 @@ class ParametersDescriptors(ParametersBase):
             self._snap_switchflag = 1
 
     def _update_mpi(self, new_mpi):
+        """
+        Propagate new MPI setting to parameter subclasses.
+
+        Also deletes old inputs files that are no longer valid.
+
+        Parameters
+        ----------
+        new_mpi : bool
+            New MPI setting.
+        """
         self._configuration["mpi"] = new_mpi
 
         # There may have been a serial or parallel run before that is now
@@ -856,6 +968,16 @@ class ParametersRunning(ParametersBase):
         self.profiler_range = [1000, 2000]
 
     def _update_ddp(self, new_ddp):
+        """
+        Propagate new DDP setting to parameter subclasses.
+
+        Also ensures only metrics are used which work with DDP.
+
+        Parameters
+        ----------
+        new_ddp : bool
+            New DDP setting.
+        """
         super(ParametersRunning, self)._update_ddp(new_ddp)
         self.during_training_metric = self.during_training_metric
         self.after_training_metric = self.after_training_metric
