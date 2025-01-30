@@ -96,6 +96,16 @@
              
   <section id="installing-lammps">
 <span id="lammpsinstallation"></span><h1>Installing LAMMPS<a class="headerlink" href="#installing-lammps" title="Link to this heading"></a></h1>
+<p>Every LAMMPS release released after January 23th, 2025 contains the
+functionalities needed for descriptor calculation with MALA. If you are working
+on a high perfomance computing cluster, check if you have a LAMMPS version
+installed that may already be used with LAMMPS. Note that in order to use
+GPU acceleration, you need access to a GPU version
+(i.e., Kokkos enabled version) of LAMMPS. In the following, a brief overview
+of how to build LAMMPS is provided. The MALA team recommends to build LAMMPS
+with <code class="docutils literal notranslate"><span class="pre">cmake</span></code>.
+For a full overview of how to build LAMMPS, please refer to
+the <a class="reference external" href="https://docs.lammps.org/Build.html">official instructions</a>.</p>
 <section id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
 <p>Make sure you have <code class="docutils literal notranslate"><span class="pre">cmake</span></code> and suitable compilers (e.g. <code class="docutils literal notranslate"><span class="pre">gcc</span></code>) available.
@@ -105,14 +115,8 @@ to be installed on your machine.</p>
 </section>
 <section id="build-lammps">
 <h2>Build LAMMPS<a class="headerlink" href="#build-lammps" title="Link to this heading"></a></h2>
-<p>We provide a LAMMPS version compatible with the most recent MALA version
-<a class="reference external" href="https://github.com/mala-project/lammps/tree/mala">here</a>, which should always
-be used with MALA. For a full overview of how to build LAMMPS, please refer to
-the <a class="reference external" href="https://docs.lammps.org/Build.html">official instructions</a>.
-The MALA team recommends to build LAMMPS with <code class="docutils literal notranslate"><span class="pre">cmake</span></code>. To do so</p>
 <ul>
-<li><p>Checkout <a class="reference external" href="https://github.com/mala-project/lammps/tree/mala_v130">https://github.com/mala-project/lammps/tree/mala_v130</a></p></li>
-<li><p>Make sure the <code class="docutils literal notranslate"><span class="pre">mala_v130</span></code> branch is checked out locally via <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">branch</span></code>!</p></li>
+<li><p>Checkout LAMMPS at <a class="reference external" href="https://github.com/lammps/lammps">https://github.com/lammps/lammps</a></p></li>
 <li><p>Inside the LAMMPS folder create a build folder (named, e.g., <code class="docutils literal notranslate"><span class="pre">build</span></code>)</p></li>
 <li><p>In the <code class="docutils literal notranslate"><span class="pre">build</span></code> folder, configure your <code class="docutils literal notranslate"><span class="pre">cmake</span></code> build:
 <code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">../cmake</span> <span class="pre">-D</span> <span class="pre">OPTION1</span> <span class="pre">-D</span> <span class="pre">OPTION2</span> <span class="pre">...</span></code>; Options for a typical LAMMPS
