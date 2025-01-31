@@ -33,6 +33,9 @@ class ACE(Descriptor):
 
     def __init__(self, parameters):
         super(ACE, self).__init__(parameters)
+
+        # TODO: Can this not be replaced with ase.data.vdw_radii?
+        # Or some variation of the data in ASE.
         self.ionic_radii = {
             "H": 0.25,
             "He": 1.2,
@@ -155,6 +158,9 @@ class ACE(Descriptor):
             "G": 1.35,
         }
 
+
+        # TODO: Is there a way to access this information without hardcoding
+        # it in?
         self.metal_list = [
             "Li",
             "Be",
