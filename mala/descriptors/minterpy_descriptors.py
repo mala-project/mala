@@ -1,4 +1,4 @@
-"""Gaussian descriptor class."""
+"""Minterpy descriptor class."""
 
 import os
 
@@ -10,10 +10,14 @@ import numpy as np
 from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
 from mala.descriptors.atomic_density import AtomicDensity
+from mala.common.parallelizer import parallel_warn
 
 
 class MinterpyDescriptors(Descriptor):
-    """Class for calculation and parsing of Gaussian descriptors.
+    """
+    Class for calculation and parsing of Minterpy descriptors.
+
+    Marked for deprecation.
 
     Parameters
     ----------
@@ -23,17 +27,15 @@ class MinterpyDescriptors(Descriptor):
 
     def __init__(self, parameters):
         super(MinterpyDescriptors, self).__init__(parameters)
-        self.verbosity = parameters.verbosity
+        parallel_warn(
+            "Minterpy descriptors will be deprecated starting with MALA v1.4.0",
+            category=FutureWarning,
+        )
 
     @property
     def data_name(self):
         """Get a string that describes the target (for e.g. metadata)."""
         return "Minterpy"
-
-    @property
-    def feature_size(self):
-        """Get the feature dimension of this data."""
-        return self.fingerprint_length
 
     @staticmethod
     def convert_units(array, in_units="None"):
@@ -44,7 +46,7 @@ class MinterpyDescriptors(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -52,7 +54,7 @@ class MinterpyDescriptors(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in MALA units.
         """
         if in_units == "None" or in_units is None:
@@ -69,7 +71,7 @@ class MinterpyDescriptors(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in MALA units.
 
         out_units : string
@@ -77,13 +79,19 @@ class MinterpyDescriptors(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
         """
         if out_units == "None":
             return array
         else:
             raise Exception("Unsupported unit for Minterpy descriptors.")
+
+    def _read_feature_dimension_from_json(self, json_dict):
+        raise Exception(
+            "This feature has not been implemented for Minterpy "
+            "descriptors."
+        )
 
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         # For version compatibility; older lammps versions (the serial version
@@ -149,11 +157,11 @@ class MinterpyDescriptors(Descriptor):
             ],
             dtype=np.float64,
         )
-        self.fingerprint_length = (
+        self.feature_size = (
             len(self.parameters.minterpy_point_list) + coord_length
         )
 
-        self.fingerprint_length = len(self.parameters.minterpy_point_list)
+        self.feature_size = len(self.parameters.minterpy_point_list)
         # Perform one LAMMPS call for each point in the Minterpy point list.
         for idx, point in enumerate(self.parameters.minterpy_point_list):
             # Shift the atoms in negative direction of the point(s) we actually
@@ -163,11 +171,10 @@ class MinterpyDescriptors(Descriptor):
 
             # The rest is the stanfard LAMMPS atomic density stuff.
             lammps_format = "lammps-data"
-            self.lammps_temporary_input = os.path.join(
-                outdir, "lammps_input_" + self.calculation_timestamp + ".tmp"
-            )
+            self.setup_lammps_tmp_files("minterpy", outdir)
+
             ase.io.write(
-                self.lammps_temporary_input, self.atoms, format=lammps_format
+                self._lammps_temporary_input, self._atoms, format=lammps_format
             )
 
             # Create LAMMPS instance.
@@ -175,10 +182,6 @@ class MinterpyDescriptors(Descriptor):
                 "sigma": self.parameters.atomic_density_sigma,
                 "rcutfac": self.parameters.atomic_density_cutoff,
             }
-            self.lammps_temporary_log = os.path.join(
-                outdir,
-                "lammps_bgrid_log_" + self.calculation_timestamp + ".tmp",
-            )
             lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
             # For now the file is chosen automatically, because this is used
@@ -258,7 +261,7 @@ class MinterpyDescriptors(Descriptor):
 
         Returns
         -------
-        nodes : numpy.array
+        nodes : numpy.ndarray
             Two-dimensional array containing the nodes.
         """
         import minterpy as mp

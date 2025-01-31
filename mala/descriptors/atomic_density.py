@@ -31,17 +31,11 @@ class AtomicDensity(Descriptor):
 
     def __init__(self, parameters):
         super(AtomicDensity, self).__init__(parameters)
-        self.verbosity = parameters.verbosity
 
     @property
     def data_name(self):
         """Get a string that describes the target (for e.g. metadata)."""
         return "AtomicDensity"
-
-    @property
-    def feature_size(self):
-        """Get the feature dimension of this data."""
-        return self.fingerprint_length
 
     @staticmethod
     def convert_units(array, in_units="None"):
@@ -52,7 +46,7 @@ class AtomicDensity(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -60,7 +54,7 @@ class AtomicDensity(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in MALA units.
         """
         if in_units == "None" or in_units is None:
@@ -77,7 +71,7 @@ class AtomicDensity(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in MALA units.
 
         out_units : string
@@ -85,7 +79,7 @@ class AtomicDensity(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
         """
         if out_units == "None":
@@ -113,6 +107,27 @@ class AtomicDensity(Descriptor):
         ) * optimal_sigma_aluminium
 
     def _calculate(self, outdir, **kwargs):
+        """
+        Perform Gaussian descriptor calculation.
+
+        This function is the main entry point for the calculation of the
+        Gaussian descriptors. It will decide whether to use LAMMPS or
+        a python implementation based on the availability of LAMMPS (and
+        user specifications).
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        gaussian_descriptors_np : numpy.ndarray
+            The calculated Gaussian descriptors.
+        """
         if self.parameters._configuration["lammps"]:
             if find_spec("lammps") is None:
                 printout(
@@ -125,8 +140,41 @@ class AtomicDensity(Descriptor):
         else:
             return self.__calculate_python(**kwargs)
 
+    def _read_feature_dimension_from_json(self, json_dict):
+        """
+        Read the feature dimension from a saved JSON file.
+
+        Always returns (number of coordinate dimensions xyz = 3) +
+        (number of species), so for a single species system 4.
+
+        Parameters
+        ----------
+        json_dict : dict
+            Dictionary containing info loaded from the JSON file.
+        """
+        return 4
+
     def __calculate_lammps(self, outdir, **kwargs):
-        """Perform actual Gaussian descriptor calculation."""
+        """
+        Perform actual Gaussian descriptor calculation using LAMMPS.
+
+        Creates a LAMMPS instance with appropriate call parameters and uses
+        it for the calculation.
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        gaussian_descriptors_np : numpy.ndarray
+            The calculated Gaussian descriptors.
+
+        """
         # For version compatibility; older lammps versions (the serial version
         # we still use on some machines) have these constants as part of the
         # general LAMMPS import.
@@ -137,11 +185,10 @@ class AtomicDensity(Descriptor):
         keep_logs = kwargs.get("keep_logs", False)
 
         lammps_format = "lammps-data"
-        self.lammps_temporary_input = os.path.join(
-            outdir, "lammps_input_" + self.calculation_timestamp + ".tmp"
-        )
+        self.setup_lammps_tmp_files("ggrid", outdir)
+
         ase.io.write(
-            self.lammps_temporary_input, self.atoms, format=lammps_format
+            self._lammps_temporary_input, self._atoms, format=lammps_format
         )
 
         nx = self.grid_dimensions[0]
@@ -152,7 +199,7 @@ class AtomicDensity(Descriptor):
         if self.parameters.atomic_density_sigma is None:
             self.grid_dimensions = [nx, ny, nz]
             self.parameters.atomic_density_sigma = self.get_optimal_sigma(
-                self.voxel
+                self._voxel
             )
 
         # Create LAMMPS instance.
@@ -160,10 +207,6 @@ class AtomicDensity(Descriptor):
             "sigma": self.parameters.atomic_density_sigma,
             "rcutfac": self.parameters.atomic_density_cutoff,
         }
-        self.lammps_temporary_log = os.path.join(
-            outdir,
-            "lammps_ggrid_log_" + self.calculation_timestamp + ".tmp",
-        )
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # For now the file is chosen automatically, because this is used
@@ -210,7 +253,7 @@ class AtomicDensity(Descriptor):
         )
         self._clean_calculation(lmp, keep_logs)
 
-        # In comparison to SNAP, the atomic density always returns
+        # In comparison to bispectrum, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments
         # if we operate without MPI.
         self.grid_dimensions = [nx, ny, nz]
@@ -218,7 +261,7 @@ class AtomicDensity(Descriptor):
             if return_directly:
                 return gaussian_descriptors_np
             else:
-                self.fingerprint_length = 4
+                self.feature_size = 4
                 return gaussian_descriptors_np, nrows_ggrid
         else:
             # Since the atomic density may be directly fed back into QE
@@ -243,10 +286,10 @@ class AtomicDensity(Descriptor):
                     [2, 1, 0, 3]
                 )
                 if self.parameters.descriptors_contain_xyz:
-                    self.fingerprint_length = 4
+                    self.feature_size = 4
                     return gaussian_descriptors_np[:, :, :, 3:], nx * ny * nz
                 else:
-                    self.fingerprint_length = 1
+                    self.feature_size = 1
                     return gaussian_descriptors_np[:, :, :, 6:], nx * ny * nz
 
     def __calculate_python(self, **kwargs):
@@ -265,6 +308,16 @@ class AtomicDensity(Descriptor):
               and doesn't scale too great
             - It only works for ONE chemical element
             - It has no MPI or GPU support
+
+        Parameters
+        ----------
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        gaussian_descriptors_np : numpy.ndarray
+            The calculated Gaussian descriptors.
         """
         printout(
             "Using python for descriptor calculation. "
@@ -286,7 +339,7 @@ class AtomicDensity(Descriptor):
         # This follows the implementation in the LAMMPS code.
         if self.parameters.atomic_density_sigma is None:
             self.parameters.atomic_density_sigma = self.get_optimal_sigma(
-                self.voxel
+                self._voxel
             )
         cutoff_squared = (
             self.parameters.atomic_density_cutoff
@@ -334,10 +387,10 @@ class AtomicDensity(Descriptor):
                     )
 
         if self.parameters.descriptors_contain_xyz:
-            self.fingerprint_length = 4
+            self.feature_size = 4
             return gaussian_descriptors_np, np.prod(self.grid_dimensions)
         else:
-            self.fingerprint_length = 1
+            self.feature_size = 1
             return gaussian_descriptors_np[:, :, :, 3:], np.prod(
                 self.grid_dimensions
             )

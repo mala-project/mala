@@ -6,6 +6,12 @@ This guide follows the examples ``ex05_run_predictions.py`` and
 ``ex06_ase_calculator.py``. In the :ref:`advanced section <production>` on
 this topic, performance tweaks and extended access to observables are covered.
 
+.. note::
+    If you are working with a 2D-system, and you have explicitly calculated
+    training data as a 2D-system in Quantum ESPRESSO, make sure to set
+    ``parameters.target.assume_two_dimensional = True`` before any prediction.
+
+
 In order to get direct access to electronic structure via ML, MALA uses
 the ``Predictor`` class. Provided that the trained model was saved with
 all the necessary information on the bispectrum descriptors and the LDOS,

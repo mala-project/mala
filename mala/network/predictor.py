@@ -1,4 +1,6 @@
-"""Tester class for testing a network."""
+"""Predictor class."""
+
+from time import perf_counter
 
 import numpy as np
 import torch
@@ -24,6 +26,12 @@ class Predictor(Runner):
     data : mala.datahandling.data_handler.DataHandler
         DataHandler, in this case not directly holding data, but serving
         as an interface to Target and Descriptor objects.
+
+    Attributes
+    ----------
+    target_calculator : mala.targets.target.Target
+        Target calculator used for predictions. Can be used for further
+        processing.
     """
 
     def __init__(self, params, network, data):
@@ -35,8 +43,8 @@ class Predictor(Runner):
             * self.data.grid_dimension[1]
             * self.data.grid_dimension[2]
         )
-        self.test_data_loader = None
-        self.number_of_batches_per_snapshot = 0
+        self._test_data_loader = None
+        self._number_of_batches_per_snapshot = 0
         self.target_calculator = data.target_calculator
 
     def predict_from_qeout(self, path_to_file, gather_ldos=False):
@@ -56,16 +64,9 @@ class Predictor(Runner):
 
         Returns
         -------
-        predicted_ldos : numpy.array
+        predicted_ldos : numpy.ndarray
             Precicted LDOS for these atomic positions.
         """
-        self.data.grid_dimension = self.parameters.inference_data_grid
-        self.data.grid_size = (
-            self.data.grid_dimension[0]
-            * self.data.grid_dimension[1]
-            * self.data.grid_dimension[2]
-        )
-
         self.data.target_calculator.read_additional_calculation_data(
             path_to_file, "espresso-out"
         )
@@ -96,7 +97,7 @@ class Predictor(Runner):
 
         Returns
         -------
-        predicted_ldos : numpy.array
+        predicted_ldos : numpy.ndarray
             Precicted LDOS for these atomic positions.
         """
         # If there is no inference data grid, we will try to get the grid
@@ -127,17 +128,24 @@ class Predictor(Runner):
         self.data.target_calculator.invalidate_target()
 
         # Calculate descriptors.
+        time_before = perf_counter()
         snap_descriptors, local_size = (
             self.data.descriptor_calculator.calculate_from_atoms(
                 atoms, self.data.grid_dimension
             )
+        )
+        printout(
+            "Time for descriptor calculation: {:.8f}s".format(
+                perf_counter() - time_before
+            ),
+            min_verbosity=2,
         )
 
         # Provide info from current snapshot to target calculator.
         self.data.target_calculator.read_additional_calculation_data(
             [atoms, self.data.grid_dimension], "atoms+grid"
         )
-        feature_length = self.data.descriptor_calculator.fingerprint_length
+        feature_length = self.data.descriptor_calculator.feature_size
 
         # The actual calculation of the LDOS from the descriptors depends
         # on whether we run in parallel or serial. In the former case,
@@ -197,10 +205,32 @@ class Predictor(Runner):
     def _forward_snap_descriptors(
         self, snap_descriptors, local_data_size=None
     ):
-        """Forward a scaled tensor of descriptors through the NN."""
+        """
+        Forward a scaled tensor of descriptors through the neural network.
+
+        Returns the output of this forward pass as a numpy array.
+
+        Parameters
+        ----------
+        snap_descriptors : torch.Tensor
+            Tensor of descriptors to forward through the network.
+
+        local_data_size : int
+            The number of grid points on the current rank. If None, the
+            total grid size is used (the default for serial execution).
+            Is automatically set by calling functions in the parallel
+            case.
+
+        Returns
+        -------
+        predicted_outputs : numpy.ndarray
+            The output of the forward pass as a numpy array. This is already
+            correctly re-scaled. The shape is (local_data_size, feature_size).
+        """
         # Ensure the Network is on the correct device.
         # This line is necessary because GPU acceleration may have been
         # activated AFTER loading a model.
+        time_before = perf_counter()
         self.network.to(self.network.params._configuration["device"])
 
         if local_data_size is None:
@@ -212,7 +242,7 @@ class Predictor(Runner):
         # Only predict if there is something to predict.
         # Elsewise, we just wait at the barrier down below.
         if local_data_size > 0:
-            optimal_batch_size = self._correct_batch_size_for_testing(
+            optimal_batch_size = self._correct_batch_size(
                 local_data_size, self.parameters.mini_batch_size
             )
             if optimal_batch_size != self.parameters.mini_batch_size:
@@ -225,23 +255,22 @@ class Predictor(Runner):
                 )
                 self.parameters.mini_batch_size = optimal_batch_size
 
-            self.number_of_batches_per_snapshot = int(
+            self._number_of_batches_per_snapshot = int(
                 local_data_size / self.parameters.mini_batch_size
             )
 
-            for i in range(0, self.number_of_batches_per_snapshot):
-                inputs = snap_descriptors[
-                    i
-                    * self.parameters.mini_batch_size : (i + 1)
-                    * self.parameters.mini_batch_size
-                ]
-                inputs = inputs.to(self.parameters._configuration["device"])
-                predicted_outputs[
-                    i
-                    * self.parameters.mini_batch_size : (i + 1)
-                    * self.parameters.mini_batch_size
-                ] = self.data.output_data_scaler.inverse_transform(
-                    self.network(inputs).to("cpu"), as_numpy=True
+            for i in range(0, self._number_of_batches_per_snapshot):
+                sl = slice(
+                    i * self.parameters.mini_batch_size,
+                    (i + 1) * self.parameters.mini_batch_size,
+                )
+                inputs = snap_descriptors[sl].to(
+                    self.parameters._configuration["device"]
+                )
+                predicted_outputs[sl] = (
+                    self.data.output_data_scaler.inverse_transform(
+                        self.network(inputs).to("cpu"), as_numpy=True
+                    )
                 )
 
             # Restricting the actual quantities to physical meaningful values,
@@ -250,4 +279,10 @@ class Predictor(Runner):
                 predicted_outputs
             )
         barrier()
+        printout(
+            "Time for network pass: {:.8f}s".format(
+                perf_counter() - time_before
+            ),
+            min_verbosity=2,
+        )
         return predicted_outputs

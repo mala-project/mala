@@ -20,23 +20,23 @@ class MultiLazyLoadDataLoader:
     """
 
     def __init__(self, datasets, **kwargs):
-        self.datasets = datasets
-        self.loaders = []
+        self._datasets = datasets
+        self._loaders = []
         for d in datasets:
-            self.loaders.append(
+            self._loaders.append(
                 DataLoader(d, batch_size=None, **kwargs, shuffle=False)
             )
 
         # Create single process pool for prefetching
         # Can use ThreadPoolExecutor for debugging.
         # self.pool = concurrent.futures.ThreadPoolExecutor(1)
-        self.pool = concurrent.futures.ProcessPoolExecutor(1)
+        self._pool = concurrent.futures.ProcessPoolExecutor(1)
 
         # Allocate shared memory and commence file load for first
         # dataset in list
-        dset = self.datasets[0]
+        dset = self._datasets[0]
         dset.allocate_shared_mem()
-        self.load_future = self.pool.submit(
+        self._load_future = self._pool.submit(
             self.load_snapshot_to_shm,
             dset.snapshot,
             dset.descriptor_calculator,
@@ -54,7 +54,7 @@ class MultiLazyLoadDataLoader:
         length : int
             Number of datasets/snapshots contained within this loader.
         """
-        return len(self.loaders)
+        return len(self._loaders)
 
     def __iter__(self):
         """
@@ -66,7 +66,7 @@ class MultiLazyLoadDataLoader:
             An iterator over the individual datasets/snapshots in this
             object.
         """
-        self.count = 0
+        self._count = 0
         return self
 
     def __next__(self):
@@ -78,25 +78,25 @@ class MultiLazyLoadDataLoader:
         iterator: DataLoader
             The next data loader.
         """
-        self.count += 1
-        if self.count > len(self.loaders):
+        self._count += 1
+        if self._count > len(self._loaders):
             raise StopIteration
         else:
             # Wait on last prefetch
-            if self.count - 1 >= 0:
-                if not self.datasets[self.count - 1].loaded:
-                    self.load_future.result()
-                    self.datasets[self.count - 1].loaded = True
+            if self._count - 1 >= 0:
+                if not self._datasets[self._count - 1].loaded:
+                    self._load_future.result()
+                    self._datasets[self._count - 1].loaded = True
 
             # Delete last
-            if self.count - 2 >= 0:
-                self.datasets[self.count - 2].delete_data()
+            if self._count - 2 >= 0:
+                self._datasets[self._count - 2].delete_data()
 
             # Prefetch next file (looping around epoch boundary)
-            dset = self.datasets[self.count % len(self.loaders)]
+            dset = self._datasets[self._count % len(self._loaders)]
             if not dset.loaded:
                 dset.allocate_shared_mem()
-                self.load_future = self.pool.submit(
+                self._load_future = self._pool.submit(
                     self.load_snapshot_to_shm,
                     dset.snapshot,
                     dset.descriptor_calculator,
@@ -106,7 +106,7 @@ class MultiLazyLoadDataLoader:
                 )
 
             # Return current
-            return self.loaders[self.count - 1]
+            return self._loaders[self._count - 1]
 
     # TODO: Without this function, I get 2 times the number of snapshots
     # memory leaks after shutdown. With it, I get 1 times the number of
@@ -114,9 +114,9 @@ class MultiLazyLoadDataLoader:
     # enough? I am not sure where the memory leak is coming from.
     def cleanup(self):
         """Deallocate arrays still left in memory."""
-        for dset in self.datasets:
+        for dset in self._datasets:
             dset.deallocate_shared_mem()
-        self.pool.shutdown()
+        self._pool.shutdown()
 
     # Worker function to load data into shared memory (limited to numpy files
     # only for now)
@@ -192,6 +192,42 @@ class MultiLazyLoadDataLoader:
                     read_dtype=True,
                 )
             )
+        elif snapshot.snapshot_type == "json+openpmd":
+            input_shape = descriptor_calculator.read_dimensions_from_json(
+                os.path.join(
+                    snapshot.input_npy_directory,
+                    snapshot.input_npy_file,
+                ),
+            )
+            input_dtype = np.dtype(np.float32)
+
+            output_shape, output_dtype = (
+                target_calculator.read_dimensions_from_openpmd_file(
+                    os.path.join(
+                        snapshot.output_npy_directory,
+                        snapshot.output_npy_file,
+                    ),
+                    read_dtype=True,
+                )
+            )
+        elif snapshot.snapshot_type == "json+numpy":
+            input_shape = descriptor_calculator.read_dimensions_from_json(
+                os.path.join(
+                    snapshot.input_npy_directory,
+                    snapshot.input_npy_file,
+                ),
+            )
+            input_dtype = np.dtype(np.float32)
+
+            output_shape, output_dtype = (
+                target_calculator.read_dimensions_from_numpy_file(
+                    os.path.join(
+                        snapshot.output_npy_directory,
+                        snapshot.output_npy_file,
+                    ),
+                    read_dtype=True,
+                )
+            )
         else:
             raise Exception("Invalid snapshot type selected.")
 
@@ -219,7 +255,22 @@ class MultiLazyLoadDataLoader:
                 units=snapshot.output_units,
                 array=output_data,
             )
-        else:
+
+        elif snapshot.snapshot_type == "json+numpy":
+            descriptor_calculator.read_from_numpy_file(
+                snapshot.temporary_input_file,
+                units=snapshot.input_units,
+                array=input_data,
+            )
+            target_calculator.read_from_numpy_file(
+                os.path.join(
+                    snapshot.output_npy_directory, snapshot.output_npy_file
+                ),
+                units=snapshot.output_units,
+                array=output_data,
+            )
+
+        elif snapshot.snapshot_type == "openpmd":
             descriptor_calculator.read_from_openpmd_file(
                 os.path.join(
                     snapshot.input_npy_directory, snapshot.input_npy_file
@@ -234,6 +285,21 @@ class MultiLazyLoadDataLoader:
                 units=snapshot.output_units,
                 array=output_data,
             )
+        elif snapshot.snapshot_type == "json+openpmd":
+            descriptor_calculator.read_from_numpy_file(
+                snapshot.temporary_input_file,
+                units=snapshot.input_units,
+                array=input_data,
+            )
+            target_calculator.read_from_openpmd_file(
+                os.path.join(
+                    snapshot.output_npy_directory, snapshot.output_npy_file
+                ),
+                units=snapshot.output_units,
+                array=output_data,
+            )
+        else:
+            raise Exception("Invalid snapshot type selected.")
 
         # This function only loads the numpy data with scaling. Remaining data
         # preprocessing occurs in __getitem__ of LazyLoadDatasetSingle

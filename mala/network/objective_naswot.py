@@ -46,10 +46,10 @@ class ObjectiveNASWOT(ObjectiveBase):
         batch_size=None,
     ):
         super(ObjectiveNASWOT, self).__init__(search_parameters, data_handler)
-        self.trial_type = trial_type
-        self.batch_size = batch_size
-        if self.batch_size is None:
-            self.batch_size = search_parameters.running.mini_batch_size
+        self._trial_type = trial_type
+        self._batch_size = batch_size
+        if self._batch_size is None:
+            self._batch_size = search_parameters.running.mini_batch_size
 
     def __call__(self, trial):
         """
@@ -75,15 +75,15 @@ class ObjectiveNASWOT(ObjectiveBase):
             # Load the batchesand get the jacobian.
             do_shuffle = self.params.running.use_shuffling_for_samplers
             if (
-                self.data_handler.parameters.use_lazy_loading
+                self._data_handler.parameters.use_lazy_loading
                 or self.params.use_ddp
             ):
                 do_shuffle = False
             if self.params.running.use_shuffling_for_samplers:
-                self.data_handler.mix_datasets()
+                self._data_handler.mix_datasets()
             loader = DataLoader(
-                self.data_handler.training_data_sets[0],
-                batch_size=self.batch_size,
+                self._data_handler.training_data_sets[0],
+                batch_size=self._batch_size,
                 shuffle=do_shuffle,
             )
             jac = ObjectiveNASWOT.__get_batch_jacobian(net, loader, device)
@@ -143,6 +143,11 @@ class ObjectiveNASWOT(ObjectiveBase):
         Calculate the correlation coefficient of an array.
 
         Pytorch implementation of np.corrcoef.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input array. May be on CPU or GPU.
         """
         mean_x = torch.mean(x, 1, True)
         xm = x.sub(mean_x.expand_as(x))
@@ -163,7 +168,16 @@ class ObjectiveNASWOT(ObjectiveBase):
 
     @staticmethod
     def __calc_score(jacobian: Tensor):
-        """Calculate the score for a Jacobian."""
+        """
+        Calculate the NASWOT score for a Jacobian.
+
+        For details, see original NASWOT publication.
+
+        Parameters
+        ----------
+        jacobian : torch.Tensor
+            Jacobian matrix to calculate the score for.
+        """
         correlations = ObjectiveNASWOT.__corrcoef(jacobian)
         eigen_values, _ = torch.linalg.eig(correlations)
         # Only consider the real valued part, imaginary part is rounding

@@ -3,7 +3,7 @@
 from ase.calculators.calculator import Calculator, all_changes
 
 from mala import Parameters, Network, DataHandler, Predictor, LDOS
-from mala.common.parallelizer import barrier
+from mala.common.parallelizer import barrier, parallel_warn, get_rank, get_comm
 
 
 class MALA(Calculator):
@@ -34,9 +34,21 @@ class MALA(Calculator):
         the neural network), calculator can access all important data such as
         temperature, number of electrons, etc. that might not be known simply
         from the atomic positions.
+
+    predictor : mala.network.predictor.Predictor
+        A Predictor class object to be used for the underlying MALA
+        predictions.
+
+    Attributes
+    ----------
+    mala_parameters : mala.common.parameters.Parameters
+        MALA parameters used for predictions.
+
+    last_energy_contributions : dict
+        Contains all total energy contributions for the last prediction.
     """
 
-    implemented_properties = ["energy", "forces"]
+    implemented_properties = ["energy"]
 
     def __init__(
         self,
@@ -55,21 +67,21 @@ class MALA(Calculator):
                 "The MALA calculator currently only works with the LDOS."
             )
 
-        self.network: Network = network
-        self.data_handler: DataHandler = data
+        self._network: Network = network
+        self._data_handler: DataHandler = data
 
         # Prepare for prediction.
         if predictor is None:
-            self.predictor = Predictor(
-                self.mala_parameters, self.network, self.data_handler
+            self._predictor = Predictor(
+                self.mala_parameters, self._network, self._data_handler
             )
         else:
-            self.predictor = predictor
+            self._predictor = predictor
 
         if reference_data is not None:
             # Get critical values from a reference file (cutoff,
             # temperature, etc.)
-            self.data_handler.target_calculator.read_additional_calculation_data(
+            self._data_handler.target_calculator.read_additional_calculation_data(
                 reference_data
             )
 
@@ -78,6 +90,35 @@ class MALA(Calculator):
 
     @classmethod
     def load_model(cls, run_name, path="./"):
+        """
+        Load a model to use for the calculator (DEPRECATED).
+
+        MALA.load_model() will be deprecated in MALA v1.4.0. Please use
+        MALA.load_run() instead.
+
+        Parameters
+        ----------
+        run_name : str
+            Name under which the model is saved.
+
+        path : str
+            Path where the model is saved.
+
+        Returns
+        -------
+        calculator : mala.interfaces.calculator.Calculator
+            The calculator object.
+        """
+        parallel_warn(
+            "MALA.load_model() will be deprecated in MALA v1.4.0."
+            " Please use MALA.load_run() instead.",
+            0,
+            category=FutureWarning,
+        )
+        return MALA.load_run(run_name, path=path)
+
+    @classmethod
+    def load_run(cls, run_name, path="./"):
         """
         Load a model to use for the calculator.
 
@@ -91,6 +132,11 @@ class MALA(Calculator):
 
         path : str
             Path where the model is saved.
+
+        Returns
+        -------
+        calculator : mala.interfaces.calculator.Calculator
+            The calculator object.
         """
         loaded_params, loaded_network, new_datahandler, loaded_runner = (
             Predictor.load_run(run_name, path=path)
@@ -128,30 +174,25 @@ class MALA(Calculator):
         Calculator.calculate(self, atoms, properties, system_changes)
 
         # Get the LDOS from the NN.
-        ldos = self.predictor.predict_for_atoms(atoms)
+        ldos = self._predictor.predict_for_atoms(atoms)
 
-        # forces = np.zeros([len(atoms), 3], dtype=np.float64)
-
-        # If an MPI environment is detected, ASE will use it for writing.
-        # Therefore we have to do this before forking.
-        self.data_handler.target_calculator.write_tem_input_file(
-            atoms,
-            self.data_handler.target_calculator.qe_input_data,
-            self.data_handler.target_calculator.qe_pseudopotentials,
-            self.data_handler.target_calculator.grid_dimensions,
-            self.data_handler.target_calculator.kpoints,
-        )
-
-        ldos_calculator: LDOS = self.data_handler.target_calculator
-
+        # Use the LDOS determined DOS and density to get energy and forces.
+        ldos_calculator: LDOS = self._data_handler.target_calculator
         ldos_calculator.read_from_array(ldos)
+        self.results["energy"] = ldos_calculator.total_energy
         energy, self.last_energy_contributions = (
             ldos_calculator.get_total_energy(return_energy_contributions=True)
         )
+        self.last_energy_contributions = (
+            ldos_calculator._density_calculator.total_energy_contributions.copy()
+        )
+        self.last_energy_contributions["e_band"] = ldos_calculator.band_energy
+        self.last_energy_contributions["e_entropy_contribution"] = (
+            ldos_calculator.entropy_contribution
+        )
         barrier()
 
-        # Use the LDOS determined DOS and density to get energy and forces.
-        self.results["energy"] = energy
+        # forces = np.zeros([len(atoms), 3], dtype=np.float64)
         # if "forces" in properties:
         #     self.results["forces"] = forces
 
@@ -178,19 +219,19 @@ class MALA(Calculator):
 
         if "rdf" in properties:
             self.results["rdf"] = (
-                self.data_handler.target_calculator.get_radial_distribution_function(
+                self._data_handler.target_calculator.get_radial_distribution_function(
                     atoms
                 )
             )
         if "tpcf" in properties:
             self.results["tpcf"] = (
-                self.data_handler.target_calculator.get_three_particle_correlation_function(
+                self._data_handler.target_calculator.get_three_particle_correlation_function(
                     atoms
                 )
             )
         if "static_structure_factor" in properties:
             self.results["static_structure_factor"] = (
-                self.data_handler.target_calculator.get_static_structure_factor(
+                self._data_handler.target_calculator.get_static_structure_factor(
                     atoms
                 )
             )
@@ -199,7 +240,7 @@ class MALA(Calculator):
                 "e_ewald"
             ]
 
-    def save_calculator(self, filename, save_path="./"):
+    def save_calculator(self, filename, path="./"):
         """
         Save parameters used for this calculator.
 
@@ -210,10 +251,10 @@ class MALA(Calculator):
         filename : string
             Name of the file in which to store the calculator.
 
-        save_path : string
+        path : string
             Path where the calculator should be saved.
 
         """
-        self.predictor.save_run(
-            filename, save_path=save_path, additional_calculation_data=True
+        self._predictor.save_run(
+            filename, path=path, additional_calculation_data=True
         )

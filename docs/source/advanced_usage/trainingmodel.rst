@@ -77,7 +77,7 @@ Specifically, when setting
 
       .. code-block:: python
 
-            parameters.running.after_before_training_metric = "band_energy"
+            parameters.running.after_training_metric = "band_energy"
 
 the error in the band energy between actual and predicted LDOS will be
 calculated and printed before and after network training (in meV/atom).
@@ -170,10 +170,11 @@ data sets have to be saved - in-memory implementations are currently developed.
 To use the data shuffling (also shown in example
 ``advanced/ex02_shuffle_data.py``), you can use the ``DataShuffler`` class.
 
-The syntax is very easy, you create a ``DataShufller`` object,
+The syntax is very easy, you create a ``DataShuffler`` object,
 which provides the same ``add_snapshot`` functionalities as the ``DataHandler``
-object, and shuffle the data once you have added all snapshots in question,
-i.e.,
+object, and shuffle the data once you have added all snapshots in question.
+Just as with the ``DataHandler`` class, on-the-fly calculation of bispectrum
+descriptors is supported.
 
       .. code-block:: python
 
@@ -187,6 +188,14 @@ i.e.,
             data_shuffler.shuffle_snapshots(complete_save_path="../",
                                             save_name="Be_shuffled*")
 
+By using the ``shuffle_to_temporary`` keyword, you can shuffle the data to
+temporary files, which will can deleted after the training run. This is useful
+if you want to shuffle the data right before training and do not plan to re-use
+shuffled data files for multiple training runs. As detailed in
+``advanced/ex02_shuffle_data.py``, access to temporary files is provided via
+``data_shuffler.temporary_shuffled_snapshots[...]``, which is a list containing
+``mala.Snapshot`` objects.
+
 The seed ``parameters.data.shuffling_seed`` ensures reproducibility of data
 sets. The ``shuffle_snapshots`` function has a path handling ability akin to
 the ``DataConverter`` class. Further, via the ``number_of_shuffled_snapshots``
@@ -194,33 +203,76 @@ keyword, you can fine-tune the number of new snapshots being created.
 By default, the same number of snapshots as had been provided will be created
 (if possible).
 
-Using tensorboard
-******************
+Logging metrics during training
+*******************************
 
-Training routines in MALA can be visualized via tensorboard, as also shown
-in the file ``advanced/ex03_tensor_board``. Simply enable tensorboard
-visualization prior to training via
+Training progress in MALA can be visualized via tensorboard or wandb, as also shown
+in the file ``advanced/ex03_tensor_board``. Simply select a logger prior to training as
 
       .. code-block:: python
 
-            # 0: No visualizatuon, 1: loss and learning rate, 2: like 1,
-            # but additionally weights and biases are saved
-            parameters.running.visualisation = 1
-            parameters.running.visualisation_dir = "mala_vis"
+            parameters.running.logger = "tensorboard"
+            parameters.running.logging_dir = "mala_vis"
 
-where ``visualisation_dir`` specifies some directory in which to save the
-MALA visualization data. Afterwards, you can run the training without any
+or
+
+      .. code-block:: python
+
+            import wandb
+            wandb.init(
+                  project="mala_training",
+                  entity="your_wandb_entity"
+            )
+            parameters.running.logger = "wandb"
+            parameters.running.logging_dir = "mala_vis"
+
+where ``logging_dir`` specifies some directory in which to save the
+MALA logging data. You can also select which metrics to record via
+
+      .. code-block:: python
+
+            parameters.validation_metrics = ["ldos", "dos", "density", "total_energy"]
+
+Full list of available metrics:
+      - "ldos": MSE of the LDOS.
+      - "band_energy": Band energy.
+      - "band_energy_actual_fe": Band energy computed with ground truth Fermi energy.
+      - "total_energy": Total energy.
+      - "total_energy_actual_fe": Total energy computed with ground truth Fermi energy.
+      - "fermi_energy": Fermi energy.
+      - "density": Electron density.
+      - "density_relative": Rlectron density (Mean Absolute Percentage Error).
+      - "dos": Density of states.
+      - "dos_relative": Density of states (Mean Absolute Percentage Error).
+
+To save time and resources you can specify the logging interval via
+
+      .. code-block:: python
+
+            parameters.running.validate_every_n_epochs = 10
+
+If you want to monitor the degree to which the model overfits to the training data,
+you can use the option
+
+      .. code-block:: python
+            
+            parameters.running.validate_on_training_data = True
+
+MALA will evaluate the validation metrics on the training set as well as the validation set.
+
+Afterwards, you can run the training without any
 other modifications. Once training is finished (or during training, in case
 you want to use tensorboard to monitor progress), you can launch tensorboard
 via
 
       .. code-block:: bash
 
-            tensorboard --logdir path_to_visualization
+            tensorboard --logdir path_to_log_directory
 
-The full path for ``path_to_visualization`` can be accessed via
-``trainer.full_visualization_path``.
+The full path for ``path_to_log_directory`` can be accessed via
+``trainer.full_logging_path``.
 
+If you're using wandb, you can monitor the training progress on the wandb website.
 
 Training in parallel
 ********************

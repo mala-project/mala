@@ -1,0 +1,37 @@
+name: Cleanup caches
+on:
+  pull_request_target:
+    types:
+      - closed
+  push:
+    # Trigger on pushes to master or develop and for git tag pushes
+    branches:
+      - master
+      - develop
+    tags:
+      - v*
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cleanup caches
+        run: |
+          gh extension install actions/gh-actions-cache
+
+          echo "Fetching list of cache key"
+          cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH -L 100 | cut -f 1 )
+
+          ## Setting this to not fail the workflow while deleting cache keys.
+          set +e
+          echo "Deleting caches..."
+          for cacheKey in $cacheKeysForPR
+          do
+              echo $cacheKey
+              gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+          done
+          echo "Done"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          BRANCH: refs/pull/${{ github.event.pull_request.number }}/merge

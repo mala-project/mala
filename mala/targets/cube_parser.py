@@ -205,7 +205,7 @@ def read_cube(fname):
 
     Returns
     -------
-    data : numpy.array
+    data : numpy.ndarray
         Data from cube file.
 
     meta : dict
@@ -240,7 +240,7 @@ def read_imcube(rfname, ifname=""):
 
     params:
 
-    returns: np.array (real part + j*imag part)
+    returns: numpy.ndarray (real part + j*imag part)
 
     Parameters
     ----------
@@ -252,7 +252,7 @@ def read_imcube(rfname, ifname=""):
 
     Returns
     -------
-    data : numpy.array
+    data : numpy.ndarray
         Data from cube file.
 
     meta : dict
@@ -275,7 +275,7 @@ def write_cube(data, meta, fname):
 
     Parameters
     ----------
-    data: numpy.array
+    data: numpy.ndarray
         volumetric data consisting real values
 
     meta: dict
@@ -317,7 +317,7 @@ def write_imcube(data, meta, rfname, ifname=""):
 
     Parameters
     ----------
-    data: numpy.array
+    data: numpy.ndarray
         volumetric data consisting complex values
 
     meta: dict

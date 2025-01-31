@@ -44,6 +44,56 @@ class LazyLoadDatasetSingle(Dataset):
 
     input_requires_grad : bool
         If True, then the gradient is stored for the inputs.
+
+    Attributes
+    ----------
+    allocated : bool
+        True if dataset is allocated.
+
+    currently_loaded_file : int
+        Index of currently loaded file
+
+    descriptor_calculator : mala.descriptors.descriptor.Descriptor
+        Used to do unit conversion on input data.
+
+    input_data : torch.Tensor
+        Input data tensor.
+
+    input_dtype : numpy.dtype
+        Input data type.
+
+    input_shape : list
+        Input data dimensions
+
+    input_shm_name : str
+        Name of shared memory allocated for input data
+
+    loaded : bool
+        True if data has been loaded to shared memory.
+
+    output_data : torch.Tensor
+        Output data tensor.
+
+    output_dtype : numpy.dtype
+        Output data dtype.
+
+    output_shape : list
+        Output data dimensions.
+
+    output_shm_name : str
+        Name of shared memory allocated for output data.
+
+    return_outputs_directly : bool
+
+        Control whether outputs are actually transformed.
+        Has to be False for training. In the testing case,
+        Numerical errors are smaller if set to True.
+
+    snapshot : mala.datahandling.snapshot.Snapshot
+        Currently loaded snapshot object.
+
+    target_calculator : mala.targets.target.Target or derivative
+        Used to do unit conversion on output data.
     """
 
     def __init__(
@@ -60,27 +110,24 @@ class LazyLoadDatasetSingle(Dataset):
         input_requires_grad=False,
     ):
         self.snapshot = snapshot
-        self.input_dimension = input_dimension
-        self.output_dimension = output_dimension
-        self.input_data_scaler = input_data_scaler
-        self.output_data_scaler = output_data_scaler
+        self._input_dimension = input_dimension
+        self._output_dimension = output_dimension
+        self._input_data_scaler = input_data_scaler
+        self._output_data_scaler = output_data_scaler
         self.descriptor_calculator = descriptor_calculator
         self.target_calculator = target_calculator
-        self.number_of_snapshots = 0
-        self.total_size = 0
-        self.descriptors_contain_xyz = (
-            self.descriptor_calculator.descriptors_contain_xyz
-        )
+        self._number_of_snapshots = 0
+        self._total_size = 0
         self.currently_loaded_file = None
         self.input_data = np.empty(0)
         self.output_data = np.empty(0)
-        self.use_ddp = use_ddp
+        self._use_ddp = use_ddp
         self.return_outputs_directly = False
-        self.input_requires_grad = input_requires_grad
+        self._input_requires_grad = input_requires_grad
 
-        self.batch_size = batch_size
-        self.len = int(np.ceil(snapshot.grid_size / self.batch_size))
-        self.indices = np.arange(snapshot.grid_size)
+        self._batch_size = batch_size
+        self._len = int(np.ceil(snapshot.grid_size / self._batch_size))
+        self._indices = np.arange(snapshot.grid_size)
         self.input_shm_name = None
         self.output_shm_name = None
         self.loaded = False
@@ -126,6 +173,46 @@ class LazyLoadDatasetSingle(Dataset):
 
             self.output_shape, self.output_dtype = (
                 self.target_calculator.read_dimensions_from_openpmd_file(
+                    os.path.join(
+                        self.snapshot.output_npy_directory,
+                        self.snapshot.output_npy_file,
+                    ),
+                    read_dtype=True,
+                )
+            )
+        elif self.snapshot.snapshot_type == "json+openpmd":
+            self.input_shape = (
+                self.descriptor_calculator.read_dimensions_from_json(
+                    os.path.join(
+                        self.snapshot.input_npy_directory,
+                        self.snapshot.input_npy_file,
+                    ),
+                )
+            )
+            self.input_dtype = np.dtype(np.float32)
+
+            self.output_shape, self.output_dtype = (
+                self.target_calculator.read_dimensions_from_openpmd_file(
+                    os.path.join(
+                        self.snapshot.output_npy_directory,
+                        self.snapshot.output_npy_file,
+                    ),
+                    read_dtype=True,
+                )
+            )
+        elif self.snapshot.snapshot_type == "json+numpy":
+            self.input_shape = (
+                self.descriptor_calculator.read_dimensions_from_json(
+                    os.path.join(
+                        self.snapshot.input_npy_directory,
+                        self.snapshot.input_npy_file,
+                    ),
+                )
+            )
+            self.input_dtype = np.dtype(np.float32)
+
+            self.output_shape, self.output_dtype = (
+                self.target_calculator.read_dimensions_from_numpy_file(
                     os.path.join(
                         self.snapshot.output_npy_directory,
                         self.snapshot.output_npy_file,
@@ -197,20 +284,20 @@ class LazyLoadDatasetSingle(Dataset):
         output_shm = shared_memory.SharedMemory(name=self.output_shm_name)
 
         input_data = np.ndarray(
-            shape=[self.snapshot.grid_size, self.input_dimension],
+            shape=[self.snapshot.grid_size, self._input_dimension],
             dtype=np.float32,
             buffer=input_shm.buf,
         )
         output_data = np.ndarray(
-            shape=[self.snapshot.grid_size, self.output_dimension],
+            shape=[self.snapshot.grid_size, self._output_dimension],
             dtype=np.float32,
             buffer=output_shm.buf,
         )
-        if idx == self.len - 1:
-            batch = self.indices[idx * self.batch_size :]
+        if idx == self._len - 1:
+            batch = self._indices[idx * self._batch_size :]
         else:
-            batch = self.indices[
-                idx * self.batch_size : (idx + 1) * self.batch_size
+            batch = self._indices[
+                idx * self._batch_size : (idx + 1) * self._batch_size
             ]
         # print(batch.shape)
 
@@ -219,12 +306,12 @@ class LazyLoadDatasetSingle(Dataset):
 
         # Perform conversion to tensor and perform transforms
         input_batch = torch.from_numpy(input_batch)
-        self.input_data_scaler.transform(input_batch)
-        input_batch.requires_grad = self.input_requires_grad
+        self._input_data_scaler.transform(input_batch)
+        input_batch.requires_grad = self._input_requires_grad
 
         if self.return_outputs_directly is False:
             output_batch = torch.from_numpy(output_batch)
-            self.output_data_scaler.transform(output_batch)
+            self._output_data_scaler.transform(output_batch)
 
         input_shm.close()
         output_shm.close()
@@ -240,7 +327,7 @@ class LazyLoadDatasetSingle(Dataset):
         length : int
             Number of data points in DataSet.
         """
-        return self.len
+        return self._len
 
     def mix_datasets(self):
         """
@@ -257,4 +344,4 @@ class LazyLoadDatasetSingle(Dataset):
         avoid erroneously overwriting shared memory data in cases where a
         single dataset object is used back to back.
         """
-        np.random.shuffle(self.indices)
+        np.random.shuffle(self._indices)

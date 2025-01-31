@@ -8,9 +8,7 @@ import numpy as np
 import pytest
 
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 
 # This test checks whether MALA interfaces to other codes, mainly the ASE
@@ -92,6 +90,81 @@ class TestInterfaces:
         )
 
     @pytest.mark.skipif(
+        importlib.util.find_spec("openpmd_api") is None,
+        reason="No OpenPMD found on this machine, skipping " "test.",
+    )
+    def test_convert_numpy_openpmd(self):
+        parameters = mala.Parameters()
+        parameters.descriptors.descriptors_contain_xyz = False
+
+        data_converter = mala.DataConverter(parameters)
+        for snapshot in range(2):
+            data_converter.add_snapshot(
+                descriptor_input_type="numpy",
+                descriptor_input_path=os.path.join(
+                    data_path, "Be_snapshot{}.in.npy".format(snapshot)
+                ),
+                target_input_type="numpy",
+                target_input_path=os.path.join(
+                    data_path, "Be_snapshot{}.out.npy".format(snapshot)
+                ),
+                simulation_output_type=None,
+                simulation_output_path=None,
+                target_units=None,
+            )
+
+        data_converter.convert_snapshots(
+            descriptor_save_path="./",
+            target_save_path="./",
+            simulation_output_save_path="./",
+            naming_scheme="converted_from_numpy_*.h5",
+            descriptor_calculation_kwargs={"working_directory": "./"},
+        )
+
+        # Convert those files back to Numpy to verify the data stays the same.
+
+        data_converter = mala.DataConverter(parameters)
+
+        for snapshot in range(2):
+            data_converter.add_snapshot(
+                descriptor_input_type="openpmd",
+                descriptor_input_path="converted_from_numpy_{}.in.h5".format(
+                    snapshot
+                ),
+                target_input_type="openpmd",
+                target_input_path="converted_from_numpy_{}.out.h5".format(
+                    snapshot
+                ),
+                simulation_output_type=None,
+                simulation_output_path=None,
+                target_units=None,
+            )
+
+        data_converter.convert_snapshots(
+            descriptor_save_path="./",
+            target_save_path="./",
+            simulation_output_save_path="./",
+            naming_scheme="verify_against_original_numpy_data_*.npy",
+            descriptor_calculation_kwargs={"working_directory": "./"},
+        )
+
+        for snapshot in range(2):
+            for i_o in ["in", "out"]:
+                original = os.path.join(
+                    data_path, "Be_snapshot{}.{}.npy".format(snapshot, i_o)
+                )
+                roundtrip = (
+                    "verify_against_original_numpy_data_{}.{}.npy".format(
+                        snapshot, i_o
+                    )
+                )
+                import numpy as np
+
+                original_a = np.load(original)
+                roundtrip_a = np.load(roundtrip)
+                np.testing.assert_allclose(original_a, roundtrip_a)
+
+    @pytest.mark.skipif(
         importlib.util.find_spec("total_energy") is None
         or importlib.util.find_spec("lammps") is None,
         reason="QE and LAMMPS are currently not part of the " "pipeline.",
@@ -111,12 +184,12 @@ class TestInterfaces:
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.network.layer_activations = ["ReLU"]
         test_parameters.running.max_number_epochs = 100
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.targets.target_type = "LDOS"
         test_parameters.targets.ldos_gridsize = 11
         test_parameters.targets.ldos_gridspacing_ev = 2.5
@@ -125,9 +198,7 @@ class TestInterfaces:
         test_parameters.descriptors.descriptor_type = "Bispectrum"
         test_parameters.descriptors.bispectrum_twojmax = 10
         test_parameters.descriptors.bispectrum_cutoff = 4.67637
-        test_parameters.targets.pseudopotential_path = os.path.join(
-            data_repo_path, "Be2"
-        )
+        test_parameters.targets.pseudopotential_path = data_path
 
         ####################
         # DATA
@@ -180,7 +251,7 @@ class TestInterfaces:
             reference_data=os.path.join(data_path, "Be_snapshot1.out"),
         )
         total_energy_dft_calculation = (
-            calculator.data_handler.target_calculator.total_energy_dft_calculation
+            calculator._data_handler.target_calculator.total_energy_dft_calculation
         )
         calculator.calculate(atoms, properties=["energy"])
         assert np.isclose(

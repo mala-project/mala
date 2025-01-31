@@ -3,9 +3,7 @@ import os
 import mala
 import numpy as np
 
-from mala.datahandling.data_repo import data_repo_path
-
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
 
 # Accuracy for the shuffling test.
 accuracy = np.finfo(float).eps
@@ -121,12 +119,12 @@ class TestDataShuffling:
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.network.layer_activations = ["ReLU"]
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.verbosity = 1
         test_parameters.data.use_lazy_loading = True
 
@@ -165,12 +163,12 @@ class TestDataShuffling:
         test_parameters.data.shuffling_seed = 1234
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.network.layer_activations = ["ReLU"]
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.verbosity = 1
         test_parameters.data.use_lazy_loading = True
         data_shuffler = mala.DataShuffler(test_parameters)
@@ -217,12 +215,12 @@ class TestDataShuffling:
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.network.layer_activations = ["ReLU"]
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.verbosity = 1
         test_parameters.data.use_lazy_loading = True
 
@@ -263,12 +261,12 @@ class TestDataShuffling:
         test_parameters.data.shuffling_seed = 1234
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
         test_parameters.network.layer_activations = ["ReLU"]
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.verbosity = 1
         test_parameters.data.use_lazy_loading = True
 
@@ -328,3 +326,59 @@ class TestDataShuffling:
         test_trainer.train_network()
         new_loss = test_trainer.final_validation_loss
         assert old_loss > new_loss
+
+    def worker_arbitrary_number_snapshots(
+        self, ext_in, ext_out, snapshot_type
+    ):
+        parameters = mala.Parameters()
+
+        # This ensures reproducibility of the created data sets.
+        parameters.data.shuffling_seed = 1234
+
+        data_shuffler = mala.DataShuffler(parameters)
+
+        for i in range(5):
+            data_shuffler.add_snapshot(
+                f"Be_snapshot0.in.{ext_in}",
+                data_path,
+                f"Be_snapshot0.out.{ext_in}",
+                data_path,
+                snapshot_type=snapshot_type,
+            )
+        data_shuffler.shuffle_snapshots(
+            complete_save_path=".",
+            save_name=f"Be_shuffled*{ext_out}",
+            number_of_shuffled_snapshots=5,
+        )
+
+    def test_arbitrary_number_snapshots(self):
+        self.worker_arbitrary_number_snapshots("npy", "", "numpy")
+        for i in range(5):
+            bispectrum = np.load("Be_shuffled" + str(i) + ".in.npy")
+            ldos = np.load("Be_shuffled" + str(i) + ".out.npy")
+            assert not np.any(np.where(np.all(ldos == 0, axis=-1).squeeze()))
+            assert not np.any(
+                np.where(np.all(bispectrum == 0, axis=-1).squeeze())
+            )
+        self.worker_arbitrary_number_snapshots("h5", ".h5", "openpmd")
+        import openpmd_api as opmd
+
+        bispectrum_series = opmd.Series(
+            "Be_shuffled%T.in.h5", opmd.Access.read_only
+        )
+        ldos_series = opmd.Series(
+            "Be_shuffled%T.out.h5", opmd.Access.read_only
+        )
+        for i in range(5):
+            for name, series in [("Bispectrum", bispectrum_series), ("LDOS", ldos_series)]:
+                loaded_array = [
+                    component.load_chunk().squeeze()
+                    for _, component in series.iterations[i]
+                    .meshes[name]
+                    .items()
+                ]
+                series.flush()
+                loaded_array = np.array(loaded_array)
+                assert not np.any(
+                    np.where(np.all(loaded_array == 0, axis=0).squeeze())
+                )

@@ -28,14 +28,14 @@ options to train a simple network with example data, namely
             parameters = mala.Parameters()
 
             parameters.data.input_rescaling_type = "feature-wise-standard"
-            parameters.data.output_rescaling_type = "normal"
+            parameters.data.output_rescaling_type = "minmax"
 
             parameters.network.layer_activations = ["ReLU"]
 
             parameters.running.max_number_epochs = 100
             parameters.running.mini_batch_size = 40
             parameters.running.learning_rate = 0.00001
-            parameters.running.trainingtype = "Adam"
+            parameters.running.optimizer = "Adam"
             parameters.verbosity = 1 # level of output; 1 is standard, 0 is low, 2 is debug.
 
 Here, we can see that the ``Parameters`` object contains multiple
@@ -43,15 +43,18 @@ sub-objects dealing with the individual aspects of the workflow. In the first
 two lines, which data scaling MALA should employ. Scaling data greatly
 improves the performance of NN based ML models. Options are
 
-* ``None``: No normalization is applied.
+* ``None``: No scaling is applied.
 
-* ``standard``: Standardization (Scale to mean 0, standard deviation 1)
+* ``standard``: Standardization (Scale to mean 0, standard deviation 1) is
+  applied to the entire array.
 
-* ``normal``: Min-Max scaling (Scale to be in range 0...1)
+* ``minmax``: Min-Max scaling (Scale to be in range 0...1) is applied to the entire array.
 
-* ``feature-wise-standard``: Row Standardization (Scale to mean 0, standard deviation 1)
+* ``feature-wise-standard``: Standardization (Scale to mean 0, standard
+  deviation 1) is applied to each feature dimension individually.
 
-* ``feature-wise-normal``: Row Min-Max scaling (Scale to be in range 0...1)
+* ``feature-wise-minmax``: Min-Max scaling (Scale to be in range 0...1) is
+  applied to each feature dimension individually.
 
 Here, we specify that MALA should standardize the input (=descriptors)
 by feature (i.e., each entry of the vector separately on the grid) and
@@ -86,10 +89,14 @@ As with any ML library, MALA is a data-driven framework. So before we can
 train a model, we need to add data. The central object to manage data for any
 MALA workflow is the ``DataHandler`` class.
 
-MALA manages data "per snapshot". One snapshot is one atomic configuration,
-for which volumetric input and output data has been calculated. Data has to
-be added to the ``DataHandler`` object per snapshot, pointing to the
-where the volumetric data files are saved on disk. This is done via
+MALA manages data "per snapshot". One snapshot is an atomic configuration with
+associated volumetric data. Snapshots have to be added to the ``DataHandler``
+object. There are two ways to provide snapshot data, which are selected by
+providing the respective types of data files.
+
+1. Precomputed descriptors: The LDOS is sampled and the volumetric descriptor
+   data is precomputed into either OpenPMD or numpy files
+   (as described :doc:`here <more_data>`), and both can be loaded for training.
 
       .. code-block:: python
 
@@ -99,12 +106,33 @@ where the volumetric data files are saved on disk. This is done via
             data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
                                       "Be_snapshot1.out.npy", data_path, "va")
 
+2. On-the-fly descriptors: The LDOS is sampled into either OpenPMD or numpy
+   files, while the volumetric descriptor data is computed on-the-fly during
+   training or shuffling. Starting point for the descriptor calculation in this
+   case is the simulation output saved in a JSON file. This mode is only
+   recommended if a GPU-enabled LAMMPS version is available. If this route is
+   used, then descriptor calculation hyperparamters need to be set before
+   adding snapshots, see :doc:`data conversion manual <more_data>` for details.
+
+      .. code-block:: python
+
+            # Bispectrum parameters.
+            parameters.descriptors.descriptor_type = "Bispectrum"
+            parameters.descriptors.bispectrum_twojmax = 10
+            parameters.descriptors.bispectrum_cutoff = 4.67637
+
+            data_handler = mala.DataHandler(parameters)
+            data_handler.add_snapshot("Be_snapshot0.info.json", data_path,
+                                      "Be_snapshot0.out.npy", data_path, "tr")
+            data_handler.add_snapshot("Be_snapshot1.info.json", data_path,
+                                      "Be_snapshot1.out.npy", data_path, "va")
+
 The ``"tr"`` and ``"va"`` flag signal that the respective snapshots are added as
 training and validation data, respectively. Training data is data the model
 is directly tuned on; validation data is data used to verify the model
 performance during the run time and make sure that no overfitting occurs.
 After data has been added to the ``DataHandler``, it has to be actually loaded
-and scaled via
+(or in the case of on-the-fly usage, computed) and scaled via
 
       .. code-block:: python
 

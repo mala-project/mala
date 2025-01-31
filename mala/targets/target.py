@@ -4,6 +4,7 @@ from abc import abstractmethod
 import itertools
 import json
 import os
+import tempfile
 
 from ase.neighborlist import NeighborList
 from ase.units import Rydberg, kB
@@ -11,28 +12,103 @@ from ase.cell import Cell
 import ase.io
 import numpy as np
 from scipy.spatial import distance
-from scipy.integrate import simps
+from scipy.integrate import simpson
 
 from mala.common.parameters import Parameters, ParametersTargets
-from mala.common.parallelizer import printout, parallel_warn
+from mala.common.parallelizer import (
+    printout,
+    parallel_warn,
+    get_rank,
+    get_comm,
+)
 from mala.targets.calculation_helpers import fermi_function
 from mala.common.physical_data import PhysicalData
 from mala.descriptors.atomic_density import AtomicDensity
 
 
 class Target(PhysicalData):
-    """
+    r"""
     Base class for all target quantity parser.
 
     Target parsers read the target quantity
     (i.e. the quantity the NN will learn to predict) from a specified file
     format and performs postprocessing calculations on the quantity.
 
+    Target parsers often read DFT reference information.
+
     Parameters
     ----------
     params : mala.common.parameters.Parameters or
     mala.common.parameters.ParametersTargets
         Parameters used to create this Target object.
+
+    Attributes
+    ----------
+    atomic_forces_dft : numpy.ndarray
+        Atomic forces as per DFT reference file.
+
+    atoms : ase.Atoms
+        ASE atoms object used for calculations.
+
+    band_energy_dft_calculation
+        Band energy as per DFT reference file.
+
+    electrons_per_atom : int
+        Electrons per atom, usually determined by DFT reference file.
+
+    entropy_contribution_dft_calculation : float
+        Electronic entropy contribution as per DFT reference file.
+
+    fermi_energy_dft : float
+        Fermi energy as per DFT reference file.
+
+    kpoints : list
+        k-grid used for MALA calculations. Managed internally.
+
+    local_grid : list
+        Size of local grid (in MPI mode).
+
+    number_of_electrons_exact
+        Exact number of electrons, usually given via DFT reference file.
+
+    number_of_electrons_from_eigenvals : float
+        Number of electrons as calculated from DFT reference eigenvalues.
+
+    parameters : mala.common.parameters.ParametersTarget
+        MALA target calculation parameters.
+
+    qe_pseudopotentials : list
+        List of Quantum ESPRESSO pseudopotentials, read from DFT reference file
+         and used for the total energy module.
+
+    save_target_data : bool
+        Control whether target data will be saved. Can be important for I/O
+        applications. Managed internally, default is True.
+
+    temperature : float
+        Temperature used for all computations. By default read from DFT
+        reference file, but can freely be changed from the outside.
+
+    total_energy_contributions_dft_calculation : dict
+        Dictionary holding contributions to total free energy not given
+        as individual properties, as read from the DFT reference file.
+        Contains:
+
+            - "one_electron_contribution", :math:`n\,V_\mathrm{xc}` plus band
+              energy
+            - "hartree_contribution", :math:`E_\mathrm{H}`
+            - "xc_contribution", :math:`E_\mathrm{xc}`
+            - "ewald_contribution", :math:`E_\mathrm{Ewald}`
+
+    total_energy_dft_calculation : float
+        Total free energy as read from DFT reference file.
+    voxel : ase.cell.Cell
+        Voxel to be used for grid intergation. Reflects the
+        symmetry of the simulation cell. Calculated from DFT reference data.
+
+    y_planes : int
+        Number of y_planes used for Quantum ESPRESSO parallelization. Handled
+        internally.
     """
 
     ##############################
@@ -93,7 +169,6 @@ class Target(PhysicalData):
 
         Used for pickling.
 
-
         Returns
         -------
         params : mala.Parameters
@@ -119,6 +194,13 @@ class Target(PhysicalData):
         self.band_energy_dft_calculation = None
         self.total_energy_dft_calculation = None
         self.entropy_contribution_dft_calculation = None
+        self.total_energy_contributions_dft_calculation = {
+            "one_electron_contribution": None,
+            "hartree_contribution": None,
+            "xc_contribution": None,
+            "ewald_contribution": None,
+        }
+        self.atomic_forces_dft = None
         self.atoms = None
         self.electrons_per_atom = None
         self.qe_input_data = {
@@ -218,7 +300,7 @@ class Target(PhysicalData):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -226,7 +308,7 @@ class Target(PhysicalData):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in MALA units.
 
         """
@@ -242,7 +324,7 @@ class Target(PhysicalData):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in MALA units.
 
         out_units : string
@@ -250,7 +332,7 @@ class Target(PhysicalData):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
 
         """
@@ -319,6 +401,13 @@ class Target(PhysicalData):
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.entropy_contribution_dft_calculation = None
+            self.total_energy_contributions_dft_calculation = {
+                "one_electron_contribution": None,
+                "hartree_contribution": None,
+                "xc_contribution": None,
+                "ewald_contribution": None,
+            }
+            self.atomic_forces_dft = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms = None
 
@@ -328,12 +417,26 @@ class Target(PhysicalData):
             self.fermi_energy_dft = (
                 self.atoms.get_calculator().get_fermi_level()
             )
+            # The forces may not have been computed. If they are indeed
+            # not computed, ASE will by default throw an PropertyNotImplementedError
+            # error
+            try:
+                self.atomic_forces_dft = self.atoms.get_forces()
+            except ase.calculators.calculator.PropertyNotImplementedError:
+                pass
 
             # Parse the file for energy values.
             total_energy = None
             past_calculation_part = False
             bands_included = True
+
+            # individual energy contributions.
             entropy_contribution = None
+            one_electron_contribution = None
+            hartree_contribution = None
+            xc_contribution = None
+            ewald_contribution = None
+
             with open(data) as out:
                 pseudolinefound = False
                 lastpseudo = None
@@ -390,6 +493,32 @@ class Target(PhysicalData):
                             entropy_contribution = float(
                                 (line.split("=")[1]).split("Ry")[0]
                             )
+                    if (
+                        "one-electron contribution" in line
+                        and past_calculation_part
+                    ):
+                        if one_electron_contribution is None:
+                            one_electron_contribution = float(
+                                (line.split("=")[1]).split("Ry")[0]
+                            )
+                    if (
+                        "hartree contribution" in line
+                        and past_calculation_part
+                    ):
+                        if hartree_contribution is None:
+                            hartree_contribution = float(
+                                (line.split("=")[1]).split("Ry")[0]
+                            )
+                    if "xc contribution" in line and past_calculation_part:
+                        if xc_contribution is None:
+                            xc_contribution = float(
+                                (line.split("=")[1]).split("Ry")[0]
+                            )
+                    if "ewald contribution" in line and past_calculation_part:
+                        if ewald_contribution is None:
+                            ewald_contribution = float(
+                                (line.split("=")[1]).split("Ry")[0]
+                            )
                     if "set verbosity='high' to print them." in line:
                         bands_included = False
 
@@ -413,6 +542,25 @@ class Target(PhysicalData):
                 self.entropy_contribution_dft_calculation = (
                     entropy_contribution * Rydberg
                 )
+            if one_electron_contribution is not None:
+                self.total_energy_contributions_dft_calculation[
+                    "one_electron_contribution"
+                ] = (one_electron_contribution * Rydberg)
+
+            if hartree_contribution is not None:
+                self.total_energy_contributions_dft_calculation[
+                    "hartree_contribution"
+                ] = (hartree_contribution * Rydberg)
+
+            if xc_contribution is not None:
+                self.total_energy_contributions_dft_calculation[
+                    "xc_contribution"
+                ] = (xc_contribution * Rydberg)
+
+            if ewald_contribution is not None:
+                self.total_energy_contributions_dft_calculation[
+                    "ewald_contribution"
+                ] = (ewald_contribution * Rydberg)
 
             # Calculate band energy, if the necessary data is included in
             # the output file.
@@ -446,6 +594,13 @@ class Target(PhysicalData):
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.entropy_contribution_dft_calculation = None
+            self.total_energy_contributions_dft_calculation = {
+                "one_electron_contribution": None,
+                "hartree_contribution": None,
+                "xc_contribution": None,
+                "ewald_contribution": None,
+            }
+            self.atomic_forces_dft = None
             self.grid_dimensions = [0, 0, 0]
             self.atoms: ase.Atoms = data[0]
 
@@ -490,8 +645,15 @@ class Target(PhysicalData):
             self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
+            self.total_energy_contributions_dft_calculation = {
+                "one_electron_contribution": None,
+                "hartree_contribution": None,
+                "xc_contribution": None,
+                "ewald_contribution": None,
+            }
+            self.atomic_forces_dft = None
             self.entropy_contribution_dft_calculation = None
-            self.grid_dimensions = [0, 0, 0]
+            self.grid_dimensions = json_dict["grid_dimensions"]
             self.atoms = None
 
             for key in json_dict:
@@ -504,6 +666,24 @@ class Target(PhysicalData):
             self.qe_input_data["ecutrho"] = json_dict["ecutrho"]
             self.qe_input_data["degauss"] = json_dict["degauss"]
             self.qe_pseudopotentials = json_dict["pseudopotentials"]
+
+            energy_contribution_ids = [
+                "one_electron_contribution",
+                "hartree_contribution",
+                "xc_contribution",
+                "ewald_contribution",
+            ]
+            for key in energy_contribution_ids:
+                if key in json_dict:
+                    self.total_energy_contributions_dft_calculation[key] = (
+                        json_dict[key]
+                    )
+
+            # Not always read from DFT files.
+            if "atomic_forces_dft" in json_dict:
+                self.atomic_forces_dft = np.array(
+                    json_dict["atomic_forces_dft"]
+                )
 
         else:
             raise Exception("Unsupported auxiliary file type.")
@@ -539,6 +719,18 @@ class Target(PhysicalData):
             "degauss": self.qe_input_data["degauss"],
             "pseudopotentials": self.qe_pseudopotentials,
             "entropy_contribution_dft_calculation": self.entropy_contribution_dft_calculation,
+            "one_electron_contribution": self.total_energy_contributions_dft_calculation[
+                "one_electron_contribution"
+            ],
+            "hartree_contribution": self.total_energy_contributions_dft_calculation[
+                "hartree_contribution"
+            ],
+            "xc_contribution": self.total_energy_contributions_dft_calculation[
+                "xc_contribution"
+            ],
+            "ewald_contribution": self.total_energy_contributions_dft_calculation[
+                "ewald_contribution"
+            ],
         }
         if self.voxel is not None:
             additional_calculation_data["voxel"] = self.voxel.todict()
@@ -560,6 +752,11 @@ class Target(PhysicalData):
             additional_calculation_data["atoms"]["pbc"] = (
                 additional_calculation_data["atoms"]["pbc"].tolist()
             )
+        if self.atomic_forces_dft is not None:
+            additional_calculation_data["atomic_forces_dft"] = (
+                self.atomic_forces_dft.tolist()
+            )
+
         if return_string is False:
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(
@@ -664,7 +861,14 @@ class Target(PhysicalData):
         raise Exception("No method implement to calculate an energy grid.")
 
     def get_real_space_grid(self):
-        """Get the real space grid."""
+        """
+        Get the real space grid.
+
+        Returns
+        -------
+        grid3D : numpy.ndarray
+            Numpy array holding the entire grid.
+        """
         grid3D = np.zeros(
             (
                 self.grid_dimensions[0],
@@ -1032,7 +1236,7 @@ class Target(PhysicalData):
                 kr = np.array(radii) * kpoints[-1]
                 integrand = (rdf - 1) * radii * np.sin(kr) / kpoints[-1]
                 structure_factor[i] = 1 + (
-                    4 * np.pi * rho * simps(integrand, radii)
+                    4 * np.pi * rho * simpson(integrand, radii)
                 )
 
             return structure_factor[1:], np.array(kpoints)[1:]
@@ -1211,6 +1415,8 @@ class Target(PhysicalData):
         qe_pseudopotentials,
         grid_dimensions,
         kpoints,
+        mpi_communicator,
+        mpi_rank,
     ):
         """
         Write a QE-style input file for the total energy module.
@@ -1238,6 +1444,13 @@ class Target(PhysicalData):
 
         kpoints : dict
             k-grid used, usually None or (1,1,1) for TEM calculations.
+
+        mpi_communicator : MPI.COMM_WORLD
+            An MPI comminucator. If no MPI is enabled, this will simply be
+            None.
+
+        mpi_rank : int
+            Rank within MPI.
         """
         # Specify grid dimensions, if any are given.
         if (
@@ -1257,14 +1470,24 @@ class Target(PhysicalData):
         # the DFT calculation. If symmetry is then on in here, that
         # leads to errors.
         # qe_input_data["nosym"] = False
+        if mpi_rank == 0:
+            tem_input_file = tempfile.NamedTemporaryFile(
+                delete=False, prefix="mala.pw.scf.", suffix=".in", dir="./"
+            ).name
+        else:
+            tem_input_file = None
+
+        if mpi_communicator is not None:
+            tem_input_file = mpi_communicator.bcast(tem_input_file, root=0)
         ase.io.write(
-            "mala.pw.scf.in",
+            tem_input_file,
             atoms_Angstrom,
             "espresso-in",
             input_data=qe_input_data,
             pseudopotentials=qe_pseudopotentials,
             kpts=kpoints,
         )
+        return tem_input_file
 
     def restrict_data(self, array):
         """
@@ -1275,12 +1498,12 @@ class Target(PhysicalData):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Numpy array, for which the restrictions are to be applied.
 
         Returns
         -------
-        array : numpy.array
+        array : numpy.ndarray
             The same array, with restrictions enforced.
         """
         if self.parameters.restrict_targets == "zero_out_negative":
@@ -1298,14 +1521,55 @@ class Target(PhysicalData):
     #################
 
     def _process_loaded_dimensions(self, array_dimensions):
+        """
+        Process loaded dimensions.
+
+        For the target classes, this does not entail any actions.
+
+        Parameters
+        ----------
+        array_dimensions : tuple
+            Raw dimensions of the array.
+        """
         return array_dimensions
 
     def _process_additional_metadata(self, additional_metadata):
+        """
+        Process additional metadata.
+
+        If additional metadata is provided, and saving is performed via
+        openpmd, then this function process the metadata dictionary in a way
+        it can be saved by openpmd. Here, the additional metadata is parsed
+        by the function "read_additional_calculation_data".
+
+        Parameters
+        ----------
+        additional_metadata : dict
+            Dictionary containing additional metadata.
+        """
         self.read_additional_calculation_data(
             additional_metadata[0], additional_metadata[1]
         )
 
     def _set_openpmd_attribtues(self, iteration, mesh):
+        """
+        Set openPMD attributes.
+
+        This has to be done as part of the openPMD saving process. It saves
+        metadata related to the saved data to make data more reproducible.
+        For the Target class and subclasses, this means saving DFT simulation
+        info.
+
+        Parameters
+        ----------
+        iteration : openpmd_api.Iteration
+            OpenPMD iteration for which to set attributes.
+
+        mesh : openpmd_api.Mesh
+            OpenPMD mesh for which to set attributes.
+        """
+        import openpmd_api as io
+
         super(Target, self)._set_openpmd_attribtues(iteration, mesh)
 
         # If no atoms have been read, neither have any of the other
@@ -1321,6 +1585,7 @@ class Target(PhysicalData):
                 and key is not None
                 and key != "pseudopotentials"
                 and additional_calculation_data[key] is not None
+                and key != "atomic_forces_dft"
             ):
                 iteration.set_attribute(key, additional_calculation_data[key])
             if key == "pseudopotentials":
@@ -1334,7 +1599,62 @@ class Target(PhysicalData):
                         ],
                     )
 
+        # If the data contains atomic forces from a DFT calculation, we need
+        # to process it in much the same fashion as the atoms.
+        if "atomic_forces_dft" in additional_calculation_data:
+            atomic_forces = additional_calculation_data["atomic_forces_dft"]
+            if atomic_forces is not None:
+                # This data is equivalent across the ranks, so just write it once
+                atomic_forces_dft_openpmd = iteration.particles[
+                    "atomic_forces_dft"
+                ]
+                forces = io.Dataset(
+                    # Need bugfix https://github.com/openPMD/openPMD-api/pull/1357
+                    (
+                        np.array(atomic_forces[0]).dtype
+                        if io.__version__ >= "0.15.0"
+                        else io.Datatype.DOUBLE
+                    ),
+                    np.array(atomic_forces[0]).shape,
+                )
+                for atom in range(0, np.shape(atomic_forces)[0]):
+                    atomic_forces_dft_openpmd["force_compopnents"][
+                        str(atom)
+                    ].reset_dataset(forces)
+
+                    individual_force = atomic_forces_dft_openpmd[
+                        "force_compopnents"
+                    ][str(atom)]
+                    if get_rank() == 0:
+                        individual_force.store_chunk(
+                            np.array(atomic_forces)[atom]
+                        )
+
+                    # Positions are stored in Angstrom.
+                    atomic_forces_dft_openpmd["force_compopnents"][
+                        str(atom)
+                    ].unit_SI = 1.0e-10
+
     def _process_openpmd_attributes(self, series, iteration, mesh):
+        """
+        Process loaded openPMD attributes.
+
+        This is done during loading from OpenPMD data. OpenPMD can save
+        metadata not contained in the data itself, but in the file. For the
+        Target class and subclasses, this means reading DFT simulation
+        output info from OpenPMD.
+
+        Parameters
+        ----------
+        series : openpmd_api.Series
+            OpenPMD series from which to load an iteration.
+
+        iteration : openpmd_api.Iteration
+            OpenPMD iteration from which to load.
+
+        mesh : openpmd_api.Mesh
+            OpenPMD mesh used during loading.
+        """
         super(Target, self)._process_openpmd_attributes(
             series, iteration, mesh
         )
@@ -1374,6 +1694,20 @@ class Target(PhysicalData):
                 "periodic_boundary_conditions_z"
             )
 
+        # Forces may not necessarily have been read (and therefore written)
+
+        try:
+            atomic_forces_dft = iteration.particles["atomic_forces_dft"]
+            nr_atoms = len(atomic_forces_dft["force_compopnents"])
+            self.atomic_forces_dft = np.zeros((nr_atoms, 3))
+            for i in range(0, nr_atoms):
+                atomic_forces_dft["force_compopnents"][str(i)].load_chunk(
+                    self.atomic_forces_dft[i, :]
+                )
+            series.flush()
+        except IndexError:
+            pass
+
         # Process all the regular meta info.
         self.fermi_energy_dft = self._get_attribute_if_attribute_exists(
             iteration, "fermi_energy_dft", default_value=self.fermi_energy_dft
@@ -1407,7 +1741,7 @@ class Target(PhysicalData):
             "electrons_per_atom",
             default_value=self.electrons_per_atom,
         )
-        self.number_of_electrons_from_eigenval = (
+        self.number_of_electrons_from_eigenvals = (
             self._get_attribute_if_attribute_exists(
                 iteration,
                 "number_of_electrons_from_eigenvals",
@@ -1447,7 +1781,54 @@ class Target(PhysicalData):
                     iteration.get_attribute(attribute)
                 )
 
+        self.total_energy_contributions_dft_calculation[
+            "one_electron_contribution"
+        ] = self._get_attribute_if_attribute_exists(
+            iteration,
+            "one_electron_contribution",
+            default_value=self.total_energy_contributions_dft_calculation[
+                "one_electron_contribution"
+            ],
+        )
+        self.total_energy_contributions_dft_calculation[
+            "hartree_contribution"
+        ] = self._get_attribute_if_attribute_exists(
+            iteration,
+            "hartree_contribution",
+            default_value=self.total_energy_contributions_dft_calculation[
+                "hartree_contribution"
+            ],
+        )
+        self.total_energy_contributions_dft_calculation["xc_contribution"] = (
+            self._get_attribute_if_attribute_exists(
+                iteration,
+                "xc_contribution",
+                default_value=self.total_energy_contributions_dft_calculation[
+                    "xc_contribution"
+                ],
+            )
+        )
+        self.total_energy_contributions_dft_calculation[
+            "ewald_contribution"
+        ] = self._get_attribute_if_attribute_exists(
+            iteration,
+            "ewald_contribution",
+            default_value=self.total_energy_contributions_dft_calculation[
+                "ewald_contribution"
+            ],
+        )
+
     def _set_geometry_info(self, mesh):
+        """
+        Set geometry information to openPMD mesh.
+
+        This has to be done as part of the openPMD saving process.
+
+        Parameters
+        ----------
+        mesh : openpmd_api.Mesh
+            OpenPMD mesh for which to set geometry information.
+        """
         # Geometry: Save the cell parameters and angles of the grid.
         if self.atoms is not None:
             import openpmd_api as io
@@ -1457,16 +1838,66 @@ class Target(PhysicalData):
             mesh.set_attribute("angles", self.voxel.cellpar()[3:])
 
     def _process_geometry_info(self, mesh):
+        """
+        Process loaded openPMD geometry information.
+
+        Information on geometry is one of the pieces of metadata that can be
+        saved in OpenPMD files. This function processes this information upon
+        loading, and saves it to the correct place in the respective MALA
+        class.
+
+        Parameters
+        ----------
+        mesh : openpmd_api.Mesh
+            OpenPMD mesh used during loading.
+        """
         spacing = mesh.grid_spacing
         if "angles" in mesh.attributes:
             angles = mesh.get_attribute("angles")
             self.voxel = ase.cell.Cell.new(cell=spacing + angles)
+        else:
+            self.voxel = None
 
     def _get_atoms(self):
+        """
+        Access atoms saved in PhysicalData-derived class.
+
+        For any derived class which is atom based (currently, all are), this
+        function returns the atoms, which may not be directly accessible as
+        an attribute for a variety of reasons.
+
+        Returns
+        -------
+        atoms : ase.Atoms
+            An ASE atoms object holding the associated atoms of this object.
+        """
         return self.atoms
 
     @staticmethod
     def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):
+        """
+        Get the ideal rMax for RDF calculation.
+
+        Ideal here means following the minimum image convention, which is
+        explained in "The Minimum Image Convention in Non-Cubic MD Cells"
+        by Smith,
+        http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.57.1696
+
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            Atoms for which to calculate the rMax.
+
+        method : string
+            Can be "mic" or "2mic". The former calculates rMax according to
+            the minimum image convention, the latter doubles this value.
+
+        Returns
+        -------
+        rMax : float
+            The ideal rMax for the RDF calculation.
+        """
         if method == "mic":
             return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) / 2
         elif method == "2mic":

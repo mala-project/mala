@@ -72,7 +72,6 @@ autodoc_mock_imports = [
     "scipy",
     "oapackage",
     "matplotlib",
-    "horovod",
     "lammps",
     "total_energy",
     "pqkmeans",
@@ -80,6 +79,7 @@ autodoc_mock_imports = [
     "asap3",
     "openpmd_io",
     "skspatial",
+    "tqdm",
 ]
 
 myst_heading_anchors = 3

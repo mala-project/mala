@@ -4,9 +4,8 @@ import mala
 from mala import printout
 import numpy as np
 
-from mala.datahandling.data_repo import data_repo_path
+from mala.datahandling.data_repo import data_path
 
-data_path = os.path.join(data_repo_path, "Be2")
 test_checkpoint_name = "test"
 
 # Define the accuracy used in the tests.
@@ -21,7 +20,7 @@ class TestTrainingCheckpoint:
         # First run the entire test.
         trainer = self.__original_setup(test_checkpoint_name, 40)
         trainer.train_network()
-        original_final_test_loss = trainer.final_test_loss
+        original_final_validation_loss = trainer.final_validation_loss
 
         # Now do the same, but cut at epoch 22 and see if it recovers the
         # correct result.
@@ -29,9 +28,11 @@ class TestTrainingCheckpoint:
         trainer.train_network()
         trainer = self.__resume_checkpoint(test_checkpoint_name, 40)
         trainer.train_network()
-        new_final_test_loss = trainer.final_test_loss
+        new_final_validation_loss = trainer.final_validation_loss
         assert np.isclose(
-            original_final_test_loss, new_final_test_loss, atol=accuracy
+            original_final_validation_loss,
+            new_final_validation_loss,
+            atol=accuracy,
         )
 
     def test_learning_rate(self):
@@ -44,7 +45,7 @@ class TestTrainingCheckpoint:
             learning_rate=0.1,
         )
         trainer.train_network()
-        original_learning_rate = trainer.optimizer.param_groups[0]["lr"]
+        original_learning_rate = trainer._optimizer.param_groups[0]["lr"]
 
         # Now do the same, but cut at epoch 22 and see if it recovers the
         # correct result.
@@ -57,7 +58,7 @@ class TestTrainingCheckpoint:
         trainer.train_network()
         trainer = self.__resume_checkpoint(test_checkpoint_name, 40)
         trainer.train_network()
-        new_learning_rate = trainer.optimizer.param_groups[0]["lr"]
+        new_learning_rate = trainer._optimizer.param_groups[0]["lr"]
         assert np.isclose(
             original_learning_rate, new_learning_rate, atol=accuracy
         )
@@ -72,7 +73,7 @@ class TestTrainingCheckpoint:
             learning_rate=0.1,
         )
         trainer.train_network()
-        original_nr_epochs = trainer.last_epoch
+        original_nr_epochs = trainer._last_epoch
 
         # Now do the same, but cut at epoch 22 and see if it recovers the
         # correct result.
@@ -85,7 +86,7 @@ class TestTrainingCheckpoint:
         trainer.train_network()
         trainer = self.__resume_checkpoint(test_checkpoint_name, 40)
         trainer.train_network()
-        last_nr_epochs = trainer.last_epoch
+        last_nr_epochs = trainer._last_epoch
 
         # integer comparison!
         assert original_nr_epochs == last_nr_epochs
@@ -136,7 +137,7 @@ class TestTrainingCheckpoint:
 
         # Specify the data scaling.
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
 
         # Specify the used activation function.
         test_parameters.network.layer_activations = ["ReLU"]
@@ -145,7 +146,7 @@ class TestTrainingCheckpoint:
         test_parameters.running.max_number_epochs = maxepochs
         test_parameters.running.mini_batch_size = 38
         test_parameters.running.learning_rate = learning_rate
-        test_parameters.running.trainingtype = "Adam"
+        test_parameters.running.optimizer = "Adam"
         test_parameters.running.learning_rate_scheduler = (
             learning_rate_scheduler
         )

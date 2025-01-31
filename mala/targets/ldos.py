@@ -99,7 +99,7 @@ class LDOS(Target):
 
     @classmethod
     def from_cube_file(
-        cls, params, path_name_scheme, units="1/(eV*A^3)", use_memmap=None
+        cls, params, path_name_scheme, units="1/(Ry*Bohr^3)", use_memmap=None
     ):
         """
         Create an LDOS calculator from multiple cube files.
@@ -239,6 +239,12 @@ class LDOS(Target):
 
         This is the generic interface for cached target quantities.
         It should work for all implemented targets.
+
+        Returns
+        -------
+        local_density_of_states : numpy.ndarray
+            Electronic local density of states as a volumetric array.
+            May be 4D- or 2D depending on workflow.
         """
         return self.local_density_of_states
 
@@ -403,7 +409,7 @@ class LDOS(Target):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -416,7 +422,7 @@ class LDOS(Target):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in 1/(eV*A^3).
         """
         if in_units == "1/(eV*A^3)" or in_units is None:
@@ -437,7 +443,7 @@ class LDOS(Target):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in 1/eV.
 
         out_units : string
@@ -450,7 +456,7 @@ class LDOS(Target):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
         """
         if out_units == "1/(eV*A^3)":
@@ -463,7 +469,7 @@ class LDOS(Target):
             raise Exception("Unsupported unit for LDOS.")
 
     def read_from_cube(
-        self, path_scheme, units="1/(eV*A^3)", use_memmap=None, **kwargs
+        self, path_scheme, units="1/(Ry*Bohr^3)", use_memmap=None, **kwargs
     ):
         """
         Read the LDOS data from multiple cube files.
@@ -495,6 +501,15 @@ class LDOS(Target):
         # tmp.pp003ELEMENT_ldos.cube
         # ...
         # tmp.pp100ELEMENT_ldos.cube
+        # automatically convert units if they are None since cube files take atomic units
+        if units is None:
+            units = "1/(Ry*Bohr^3)"
+        if units != "1/(Ry*Bohr^3)":
+            printout(
+                "The expected units for the LDOS from cube files are 1/(Ry*Bohr^3)\n"
+                f"Proceeding with specified units of {units}\n"
+                "We recommend to check and change the requested units"
+            )
         return self._read_from_qe_files(
             path_scheme, units, use_memmap, ".cube", **kwargs
         )
@@ -553,7 +568,7 @@ class LDOS(Target):
 
         Returns
         -------
-        e_grid : numpy.array
+        e_grid : numpy.ndarray
             Energy grid on which the LDOS is defined.
         """
         emin = self.parameters.ldos_gridoffset_ev
@@ -589,19 +604,17 @@ class LDOS(Target):
         If neither LDOS nor DOS+Density data is provided, the cached LDOS will
         be attempted to be used for the calculation.
 
-
-
         Parameters
         ----------
-        ldos_data : numpy.array
+        ldos_data : numpy.ndarray
             LDOS data, either as [gridsize, energygrid] or
             [gridx,gridy,gridz,energygrid]. If None, dos_data and density_data
             cannot be None.
 
-        dos_data : numpy.array
+        dos_data : numpy.ndarray
             DOS data, as [energygrid].
 
-        density_data : numpy.array
+        density_data : numpy.ndarray
             Density data, either as [gridsize] or [gridx,gridy,gridz].
 
         fermi_energy : float
@@ -618,15 +631,15 @@ class LDOS(Target):
             Integration method used to integrate the density on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
             Integration method to integrate the DOS. Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
         atoms_Angstrom : ase.Atoms
@@ -796,7 +809,7 @@ class LDOS(Target):
 
         Parameters
         ----------
-        ldos_data : numpy.array
+        ldos_data : numpy.ndarray
             LDOS data, either as [gridsize, energygrid] or
             [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
             will be used for the calculation.
@@ -811,15 +824,15 @@ class LDOS(Target):
             Integration method used to integrate the LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
             Integration method to integrate the DOS. Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
         voxel : ase.cell.Cell
@@ -872,7 +885,7 @@ class LDOS(Target):
 
         Parameters
         ----------
-        ldos_data : numpy.array
+        ldos_data : numpy.ndarray
             LDOS data, either as [gridsize, energygrid] or
             [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
             will be used for the calculation.
@@ -887,15 +900,15 @@ class LDOS(Target):
             Integration method used to integrate the LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
             Integration method to integrate the DOS. Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
         voxel : ase.cell.Cell
@@ -948,7 +961,7 @@ class LDOS(Target):
 
         Parameters
         ----------
-        ldos_data : numpy.array
+        ldos_data : numpy.ndarray
             LDOS data, either as [gridsize, energygrid] or
             [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
             will be used for the calculation.
@@ -963,15 +976,15 @@ class LDOS(Target):
             Integration method used to integrate the LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
             Integration method to integrate the DOS. Currently supported:
 
                 - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
         voxel : ase.cell.Cell
@@ -1027,7 +1040,7 @@ class LDOS(Target):
 
         Parameters
         ----------
-        ldos_data : numpy.array
+        ldos_data : numpy.ndarray
             LDOS data, either as [gridsize, energygrid] or
             [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
             will be used for the calculation.
@@ -1039,15 +1052,15 @@ class LDOS(Target):
             Integration method used to integrate the LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
             Integration method to integrate the DOS. Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
         voxel : ase.cell.Cell
@@ -1113,11 +1126,11 @@ class LDOS(Target):
         integration_method : string
             Integration method to be used. Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
-        ldos_data : numpy.array
+        ldos_data : numpy.ndarray
             LDOS data, either as [gridsize, energygrid] or
             [gridx,gridy,gridz,energygrid].
 
@@ -1125,8 +1138,8 @@ class LDOS(Target):
             Integration method to integrate LDOS on energygrid.
             Currently supported:
 
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
         gather_density : bool
@@ -1137,7 +1150,7 @@ class LDOS(Target):
 
         Returns
         -------
-        density_data : numpy.array
+        density_data : numpy.ndarray
             Density data, dimensions depend on conserve_dimensions and LDOS
             dimensions.
 
@@ -1193,12 +1206,12 @@ class LDOS(Target):
         )
 
         # Calculate the number of electrons.
-        if integration_method == "trapz":
-            density_values = integrate.trapz(
+        if integration_method == "trapezoid":
+            density_values = integrate.trapezoid(
                 ldos_data_used * fermi_values, energy_grid, axis=-1
             )
-        elif integration_method == "simps":
-            density_values = integrate.simps(
+        elif integration_method == "simpson":
+            density_values = integrate.simpson(
                 ldos_data_used * fermi_values, energy_grid, axis=-1
             )
         elif integration_method == "analytical":
@@ -1263,7 +1276,7 @@ class LDOS(Target):
 
         Parameters
         ----------
-        ldos_data : numpy.array
+        ldos_data : numpy.ndarray
             LDOS data, either as [gridsize, energygrid] or
             [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
             will be used for the calculation.
@@ -1277,8 +1290,8 @@ class LDOS(Target):
             Integration method used to integrate LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         gather_dos : bool
@@ -1289,7 +1302,7 @@ class LDOS(Target):
 
         Returns
         -------
-        dos_values : np.array
+        dos_values : numpy.ndarray
             The DOS.
         """
         if ldos_data is None:
@@ -1413,7 +1426,7 @@ class LDOS(Target):
             Scaled (!) torch tensor holding the LDOS data for the snapshot
             for which the atomic force should be calculated.
 
-        dE_dd: np.array
+        dE_dd: numpy.ndarray
             (WIP) Derivative of the total energy w.r.t the LDOS.
             Later on, this will be evaluated within this subroutine. For now
             it is provided from outside.
@@ -1443,11 +1456,36 @@ class LDOS(Target):
     #################
 
     def _process_loaded_array(self, array, units=None):
+        """
+        Process loaded array (i.e., unit change, reshaping, etc.).
+
+        Saves array to internal variable if class attribute save_target_data
+        is True.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Array to process.
+
+        units : string
+            Units of input array.
+        """
         array *= self.convert_units(1, in_units=units)
         if self.save_target_data:
             self.local_density_of_states = array
 
     def _set_feature_size_from_array(self, array):
+        """
+        Set the feature size from the array.
+
+        Feature sizes are saved in different ways for different physical data
+        classes.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Array to extract the feature size from.
+        """
         self.parameters.ldos_gridsize = np.shape(array)[-1]
 
     def _gather_density(self, density_values, use_pickled_comm=False):
@@ -1456,7 +1494,7 @@ class LDOS(Target):
 
         Parameters
         ----------
-        density_values : numpy.array
+        density_values : numpy.ndarray
             Numpy array with the density slice of this ranks local grid.
 
         use_pickled_comm : bool
@@ -1468,6 +1506,12 @@ class LDOS(Target):
             However, for large grids, one CANNOT use the pickled route;
             too large python objects will break it. Therefore, I am setting
             the Recv/Sendv route as default.
+
+        Returns
+        -------
+        density : numpy.ndarray
+            The gathered, full density.
+
         """
         # Barrier to make sure all ranks have descriptors..
         comm = get_comm()
@@ -1561,6 +1605,23 @@ class LDOS(Target):
             gather the LDOS. Only has an effect in MPI parallel mode.
             Usage will reduce RAM footprint while SIGNIFICANTLY
             impacting disk usage and
+
+        file_type : string
+            Type of the QE data file. Currently supported are .cube and .xsf.
+
+        kwargs : dict
+            Additional keyword arguments. Currently supported are:
+
+                - use_fp64 : bool
+                    If True, the LDOS will be read in double precision.
+                - return_local : bool
+                    If True, the local LDOS will be returned. Only has an
+                    effect in MPI parallel mode.
+
+        Returns
+        -------
+        ldos_data : numpy.ndarray
+            The local density of states as read from file(s).
         """
         use_fp64 = kwargs.get("use_fp64", False)
         return_local = kwargs.get("return_local", False)
@@ -1596,7 +1657,14 @@ class LDOS(Target):
 
         for i in range(start_index, end_index):
             tmp_file_name = path_scheme
-            tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
+            if digits < 4:
+                tmp_file_name = tmp_file_name.replace(
+                    "*", str(i).zfill(digits)
+                )
+            else:
+                # For some reason, there are no leading zeros above 3 digits
+                # in QE.
+                tmp_file_name = tmp_file_name.replace("*", str(i).zfill(3))
 
             # Open the cube file
             if file_type == ".cube":

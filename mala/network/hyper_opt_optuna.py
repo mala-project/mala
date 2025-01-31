@@ -25,6 +25,18 @@ class HyperOptOptuna(HyperOpt):
 
     use_pkl_checkpoints : bool
         If true, .pkl checkpoints will be created.
+
+    Attributes
+    ----------
+    params : mala.common.parameters.Parameters
+        MALA Parameters object.
+
+    objective : mala.network.objective_base.ObjectiveBase
+        MALA objective to be optimized, i.e., a MALA NN model training.
+
+    study : optuna.study.Study
+        An Optuna study used to collect the results of the hyperparameter
+        optimization.
     """
 
     def __init__(self, params, data, use_pkl_checkpoints=False):
@@ -93,7 +105,7 @@ class HyperOptOptuna(HyperOpt):
                 load_if_exists=True,
                 pruner=pruner,
             )
-        self.checkpoint_counter = 0
+        self._checkpoint_counter = 0
 
     def perform_study(self):
         """
@@ -101,9 +113,14 @@ class HyperOptOptuna(HyperOpt):
 
         This is done by sampling a certain subset of network architectures.
         In this case, optuna is used.
+
+        Returns
+        -------
+        best_trial_loss : float
+            Loss of the best trial.
         """
         # The parameters could have changed.
-        self.objective = ObjectiveBase(self.params, self.data_handler)
+        self.objective = ObjectiveBase(self.params, self._data_handler)
 
         # Fill callback list based on user checkpoint wishes.
         callback_list = [self.__check_stopping]
@@ -130,6 +147,8 @@ class HyperOptOptuna(HyperOpt):
     def get_trials_from_study(self):
         """
         Return the trials from the last study.
+
+        Only returns completed trials.
 
         Returns
         -------
@@ -289,7 +308,20 @@ class HyperOptOptuna(HyperOpt):
         return loaded_hyperopt
 
     def __get_number_of_completed_trials(self, study):
-        """Get the number of maximum trials."""
+        """
+        Get the number of completed trials from a study.
+
+        Parameters
+        ----------
+        study : optuna.study.Study
+            Study from which the number of completed trials should be
+            extracted.
+
+        Returns
+        -------
+        number_of_completed_trials : int
+            Number of completed trials.
+        """
         # How to calculate this depends on whether or not a heartbeat was
         # used. If one was used, then both COMPLETE and RUNNING trials
         # Can be taken into account, as it can be expected that RUNNING
@@ -315,7 +347,19 @@ class HyperOptOptuna(HyperOpt):
             )
 
     def __check_stopping(self, study, trial):
-        """Check if this trial was already the maximum number of trials."""
+        """
+        Check if this trial was already the maximum number of trials.
+
+        If so, stop the study.
+
+        Parameters
+        ----------
+        study : optuna.study.Study
+            Study in which the trial is running.
+
+        trial : optuna.trial.FrozenTrial
+            Trial for which the stopping condition should be tested.
+        """
         # How to check for this depends on whether or not a heartbeat was
         # used. If one was used, then both COMPLETE and RUNNING trials
         # Can be taken into account, as it can be expected that RUNNING
@@ -349,12 +393,24 @@ class HyperOptOptuna(HyperOpt):
                     self.study.stop()
 
     def __create_checkpointing(self, study, trial):
-        """Create a checkpoint of optuna study, if necessary."""
-        self.checkpoint_counter += 1
+        """
+        Create a checkpoint of optuna study, if necessary.
+
+        This is done based on an internal checkpoint counter.
+
+        Parameters
+        ----------
+        study : optuna.study.Study
+            Study in which the trial is running.
+
+        trial : optuna.trial.FrozenTrial
+            Trial for which the checkpoint may be created.
+        """
+        self._checkpoint_counter += 1
         need_to_checkpoint = False
 
         if (
-            self.checkpoint_counter
+            self._checkpoint_counter
             >= self.params.hyperparameters.checkpoints_each_trial
             and self.params.hyperparameters.checkpoints_each_trial > 0
         ):
@@ -380,16 +436,10 @@ class HyperOptOptuna(HyperOpt):
 
         if need_to_checkpoint is True:
             # We need to create a checkpoint!
-            self.checkpoint_counter = 0
+            self._checkpoint_counter = 0
 
             self._save_params_and_scaler()
 
-            # Next, we save all the other objects.
-            # Here some horovod stuff would have to go.
-            # But so far, the optuna implementation is not horovod-ready...
-            # if self.params.use_horovod:
-            #     if hvd.rank() != 0:
-            #         return
             # The study only has to be saved if the no RDB storage is used.
             if self.params.hyperparameters.rdb_storage is None:
                 hyperopt_name = (
