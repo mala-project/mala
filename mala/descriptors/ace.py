@@ -158,7 +158,6 @@ class ACE(Descriptor):
             "G": 1.35,
         }
 
-
         # TODO: Is there a way to access this information without hardcoding
         # it in?
         self.metal_list = [
@@ -227,11 +226,13 @@ class ACE(Descriptor):
             "Am",
         ]
 
+        # TODO: Is there a way we can do this without working on the file level
         topfile = cg_coupling.__file__
         top_dir = topfile.split("/cg")[0]
         lib_path = "%s" % top_dir
         self.lib_path = lib_path
 
+        # TODO: Make these private
         self.Wigner_3j = self.init_wigner_3j(
             self.parameters.ace_lmax_traditional
         )
@@ -243,6 +244,8 @@ class ACE(Descriptor):
         self.ncols0 = 3
         self.couplings = None
 
+        # TODO: I am not sure what this does precisely and think we should
+        # clarify it.
         assert (
             not self.parameters.ace_types_like_snap
         ), "Using the same 'element' type for atoms and grid points is not permitted for standar d mala models"
@@ -254,6 +257,10 @@ class ACE(Descriptor):
                 "for types_like_snap = True, you must remove the separate element type for grid points"
             )
 
+        # TODO: I am not sure what this does precisely and think we should
+        # clarify it. Also, is this element list just for reference and thus
+        # only contains the grid and Al or is it supposed to contain elements
+        # we are calculating?
         if len(self.parameters.ace_elements) != len(
             self.parameters.ace_reference_ens
         ):
@@ -354,6 +361,9 @@ class ACE(Descriptor):
         nz = self.grid_dimensions[2]
 
         # TODO: Save the coupling coefficients.
+        # If I understand this piece of code correctly, we need to execute it
+        # here because the coupling coefficients are saved to file here,
+        # but it is also called further down - can we streamline this?
         if self.couplings != None:
             coupling_coeffs = self.couplings
         else:
@@ -363,6 +373,8 @@ class ACE(Descriptor):
         # saving function will go here
 
         # Create LAMMPS instance.
+        # TODO: Either rename the cutoff radius or introduce a second
+        #  parameter (I would advocate for the latter)
         if self.parameters.bispectrum_cutoff > self.maxrc:
             lammps_dict = {
                 "ace_coeff_file": "coupling_coefficients.yace",
@@ -381,6 +393,7 @@ class ACE(Descriptor):
 
         # An empty string means that the user wants to use the standard input.
         # What that is differs depending on serial/parallel execution.
+        # TODO: Can we get rid of the extra "ace_like_snap" files here?
         if self.parameters.lammps_compute_file == "":
             filepath = __file__.split("ace")[0]
             if not self.parameters.ace_types_like_snap:
@@ -420,13 +433,19 @@ class ACE(Descriptor):
         # NOTE: we handle fingerprint length later while setting the coupling_coefficients
         #       (the coupling coefficients specify wich fingerprints are evaluated
         #        in lammps directly)
-
+        # TODO: self.couplings is never used. Why do we set it here, and also
+        # above? Why do we call self.calculate_coupling_coeffs() again?
         self.couplings = self.calculate_coupling_coeffs()
+
         # Extract data from LAMMPS calculation.
         # This is different for the parallel and the serial case.
         # In the serial case we can expect to have a full bispectrum array at
         # the end of this function.
         # This is not necessarily true for the parallel case.
+
+        # TODO: This is more a LAMMPS thing, but I think it would be nicer
+        # if mygridlocal and mygrid would be called acegrid or something,
+        # agrid is fine as well, in the bispectrum case we call it bgrid.
         if self.parameters._configuration["mpi"]:
             nrows_local = extract_compute_np(
                 lmp,
@@ -481,6 +500,9 @@ class ACE(Descriptor):
                 return ace_descriptors_np[:, :, :, 3:], nx * ny * nz
 
     def calculate_coupling_coeffs(self):
+        # TODO: IIRC, then these coefficients have to be calculated only ONCE
+        # per element; so we should maybe think about a way of caching them.
+
         self.bonds = [
             p
             for p in itertools.product(
@@ -590,6 +612,8 @@ class ACE(Descriptor):
             Apot.write_pot("coupling_coefficients")
 
     def calc_limit_nus(self):
+        # TODO: Add documentation what this piece of code does.
+        # Also, maybe make it private?
         ranked_chem_nus = []
         for ind, rank in enumerate(self.parameters.ace_ranks):
             rank = int(rank)
@@ -663,6 +687,7 @@ class ACE(Descriptor):
         return nus, limit_nus
 
     def get_default_settings(self):
+        # TODO: Add documentation. Also, maybe make it private?
         rc_range = {bp: None for bp in self.bonds}
         rin_def = {bp: None for bp in self.bonds}
         rc_def = {bp: None for bp in self.bonds}
@@ -715,6 +740,7 @@ class ACE(Descriptor):
         return rc_range, rc_def_str, lmb_def_str, rcin_def_str
 
     def default_rc(self, elms):
+        # TODO: Add documentation. Also, maybe make it private?
         elms = sorted(elms)
         elm1, elm2 = tuple(elms)
         try:
@@ -769,6 +795,7 @@ class ACE(Descriptor):
         return round(returnmin, 3), round(returnmax, 3)
 
     def srt_by_attyp(self, nulst, remove_type=2):
+        # TODO: Add documentation. Also, maybe make it private?
         mu0s = []
         for nu in nulst:
             mu0 = nu.split("_")[0]
@@ -787,6 +814,7 @@ class ACE(Descriptor):
         return byattyp, byattypfiltered
 
     def wigner_3j(self, j1, m1, j2, m2, j3, m3):
+        # TODO: Add documentation. Also, maybe make it private?
         # uses relation between Clebsch-Gordann coefficients and W-3j symbols to evaluate W-3j
         # VERIFIED - wolframalpha.com
         cg = self.clebsch_gordan(j1, m1, j2, m2, j3, -m3)
@@ -797,6 +825,7 @@ class ACE(Descriptor):
         return cg * num / denom  # float(num/denom)
 
     def init_wigner_3j(self, lmax):
+        # TODO: Add documentation. Also, maybe make it private?
         # returns dictionary of all cg coefficients to be used at a given value of lmax
         try:
             with open("%s/wig.pkl" % self.lib_path, "rb") as readinwig:
@@ -825,6 +854,7 @@ class ACE(Descriptor):
         return cg
 
     def init_clebsch_gordan(self, lmax):
+        # TODO: Add documentation. Also, maybe make it private?
         # returns dictionary of all cg coefficients to be used at a given value of lmax
         try:
             with open("%s/cg.pkl" % self.lib_path, "rb") as readincg:
@@ -854,6 +884,7 @@ class ACE(Descriptor):
         return cg
 
     def clebsch_gordan(self, j1, m1, j2, m2, j3, m3):
+        # TODO: Add documentation. Also, maybe make it private?
         # Clebsch-gordan coefficient calculator based on eqs. 4-5 of:
         # https://hal.inria.fr/hal-01851097/document
 
