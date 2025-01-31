@@ -79,9 +79,7 @@ class Descriptor(PhysicalData):
             if params.descriptors.descriptor_type == "ACE":
                 from mala.descriptors.ace import ACE
 
-                descriptors = super(Descriptor, ACE).__new__(
-                    ACE
-                )
+                descriptors = super(Descriptor, ACE).__new__(ACE)
 
             if params.descriptors.descriptor_type == "MinterpyDescriptors":
                 from mala.descriptors.minterpy_descriptors import (

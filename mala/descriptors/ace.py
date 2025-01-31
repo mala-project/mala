@@ -21,6 +21,7 @@ import mala.descriptors.ace_coupling_utils as acu
 import mala.descriptors.wigner_coupling as wigner_coupling
 import mala.descriptors.cg_coupling as cg_coupling
 
+
 class ACE(Descriptor):
     """Class for calculation and parsing of bispectrum descriptors.
 
@@ -221,8 +222,8 @@ class ACE(Descriptor):
         ]
 
         topfile = cg_coupling.__file__
-        top_dir = topfile.split('/cg')[0]
-        lib_path = '%s' % top_dir
+        top_dir = topfile.split("/cg")[0]
+        lib_path = "%s" % top_dir
         self.lib_path = lib_path
 
         self.Wigner_3j = self.init_wigner_3j(
@@ -236,23 +237,28 @@ class ACE(Descriptor):
         self.ncols0 = 3
         self.couplings = None
 
-        assert not self.parameters.ace_types_like_snap, "Using the same 'element' type for atoms and grid points is not permitted for standar d mala models"
-        if self.parameters.ace_types_like_snap and "G" in self.parameters.ace_elements:
-            raise Exception("for types_like_snap = True, you must remove the separate element type for grid points")
+        assert (
+            not self.parameters.ace_types_like_snap
+        ), "Using the same 'element' type for atoms and grid points is not permitted for standar d mala models"
+        if (
+            self.parameters.ace_types_like_snap
+            and "G" in self.parameters.ace_elements
+        ):
+            raise Exception(
+                "for types_like_snap = True, you must remove the separate element type for grid points"
+            )
 
-        if len(self.parameters.ace_elements) != len(self.parameters.ace_reference_ens):
-            raise Exception("Reference ensemble must match length of element list!")
-
+        if len(self.parameters.ace_elements) != len(
+            self.parameters.ace_reference_ens
+        ):
+            raise Exception(
+                "Reference ensemble must match length of element list!"
+            )
 
     @property
     def data_name(self):
         """Get a string that describes the target (for e.g. metadata)."""
         return "ACE"
-
-    @property
-    def feature_size(self):
-        """Get the feature dimension of this data."""
-        return self.fingerprint_length
 
     @staticmethod
     def convert_units(array, in_units="None"):
@@ -331,18 +337,17 @@ class ACE(Descriptor):
         keep_logs = kwargs.get("keep_logs", True)
 
         lammps_format = "lammps-data"
-        self.lammps_temporary_input = os.path.join(
-            outdir, "lammps_input_" + self.calculation_timestamp + ".tmp"
-        )
+        self.setup_lammps_tmp_files("acegrid", outdir)
+
         ase.io.write(
-            self.lammps_temporary_input, self.atoms, format=lammps_format
+            self._lammps_temporary_input, self._atoms, format=lammps_format
         )
 
         nx = self.grid_dimensions[0]
         ny = self.grid_dimensions[1]
         nz = self.grid_dimensions[2]
 
-        # calculate the coupling coefficients
+        # TODO: Save the coupling coefficients.
         if self.couplings != None:
             coupling_coeffs = self.couplings
         else:
@@ -366,10 +371,6 @@ class ACE(Descriptor):
                 "rcutfac": self.maxrc,
             }
 
-        self.lammps_temporary_log = os.path.join(
-            outdir,
-            "lammps_acegrid_log_" + self.calculation_timestamp + ".tmp",
-        )
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # An empty string means that the user wants to use the standard input.
@@ -433,9 +434,9 @@ class ACE(Descriptor):
                 lammps_constants.LMP_STYLE_LOCAL,
                 lammps_constants.LMP_SIZE_COLS,
             )
-            if ncols_local != self.fingerprint_length + 3:
-                self.fingerprint_length = ncols_local - 3
-                #raise Exception("Inconsistent number of features.")
+            if ncols_local != self.feature_size + 3:
+                self.feature_size = ncols_local - 3
+                # raise Exception("Inconsistent number of features.")
 
             ace_descriptors_np = extract_compute_np(
                 lmp,
@@ -497,7 +498,7 @@ class ACE(Descriptor):
             lmbda
         ), "you must have rcutfac and lmbda defined for each bond type"
 
-        #printout("global max cutoff (angstrom)", max(rcutfac))
+        # printout("global max cutoff (angstrom)", max(rcutfac))
         rcinner = [0.0] * len(self.bonds)
         drcinner = [0.0] * len(self.bonds)
 
@@ -535,9 +536,13 @@ class ACE(Descriptor):
         nus, limit_nus = self.calc_limit_nus()
 
         if not self.parameters.ace_types_like_snap:
-            #NOTE to use unique ACE types for gridpoints, we must subtract off 
+            # NOTE to use unique ACE types for gridpoints, we must subtract off
             #  dummy descriptor counts (for non-grid element types)
-            self.fingerprint_length = self.ncols0 + len(limit_nus) - (len(self.parameters.ace_elements)-1)
+            self.fingerprint_length = (
+                self.ncols0
+                + len(limit_nus)
+                - (len(self.parameters.ace_elements) - 1)
+            )
             # permutation symmetry adapted ACE labels
             Apot = AcePot(
                 self.parameters.ace_elements,
@@ -558,7 +563,7 @@ class ACE(Descriptor):
             Apot.write_pot("coupling_coefficients")
 
         # add case for full basis separately
-        #NOTE that this basis evaluates grid-atom and atom-atom descriptors that are not needed in the current implementation of MALA
+        # NOTE that this basis evaluates grid-atom and atom-atom descriptors that are not needed in the current implementation of MALA
         elif self.parameters.ace_types_like_snap:
             self.fingerprint_length = self.ncols0 + len(nus)
             # permutation symmetry adapted ACE labels
@@ -577,7 +582,6 @@ class ACE(Descriptor):
                 **{"input_nus": nus, "ccs": ccs[self.parameters.ace_M_R]}
             )
             Apot.write_pot("coupling_coefficients")
-
 
     def calc_limit_nus(self):
         ranked_chem_nus = []
@@ -646,9 +650,9 @@ class ACE(Descriptor):
                 if self.parameters.ace_padfunc:
                     for muii in musins:
                         limit_nus.append(byattyp["%d" % muii][0])
-        #printout(
+        # printout(
         #    "all basis functions", len(nus), "grid subset", len(limit_nus)
-        #)
+        # )
 
         return nus, limit_nus
 
@@ -789,7 +793,7 @@ class ACE(Descriptor):
     def init_wigner_3j(self, lmax):
         # returns dictionary of all cg coefficients to be used at a given value of lmax
         try:
-            with open('%s/wig.pkl' % self.lib_path,'rb') as readinwig:
+            with open("%s/wig.pkl" % self.lib_path, "rb") as readinwig:
                 cg = pickle.load(readinwig)
         except FileNotFoundError:
             cg = {}
@@ -810,14 +814,14 @@ class ACE(Descriptor):
                                     cg[key] = self.wigner_3j(
                                         l1, m1, l2, m2, l3, m3
                                     )
-            with open('%s/wig.pkl' % self.lib_path,'wb') as writewig:
-                pickle.dump(cg,writewig)
+            with open("%s/wig.pkl" % self.lib_path, "wb") as writewig:
+                pickle.dump(cg, writewig)
         return cg
 
     def init_clebsch_gordan(self, lmax):
         # returns dictionary of all cg coefficients to be used at a given value of lmax
         try:
-            with open('%s/cg.pkl' % self.lib_path,'rb') as readincg:
+            with open("%s/cg.pkl" % self.lib_path, "rb") as readincg:
                 cg = pickle.load(readincg)
         except FileNotFoundError:
             cg = {}
@@ -838,9 +842,9 @@ class ACE(Descriptor):
                                     cg[key] = self.clebsch_gordan(
                                         l1, m1, l2, m2, l3, m3
                                     )
-            with open('%s/cg.pkl' % self.lib_path,'wb') as writecg:
+            with open("%s/cg.pkl" % self.lib_path, "wb") as writecg:
                 pickle.dump(cg, writecg)
-            #pickle.dump(cg,'cg.pkl')
+            # pickle.dump(cg,'cg.pkl')
         return cg
 
     def clebsch_gordan(self, j1, m1, j2, m2, j3, m3):
@@ -906,3 +910,11 @@ class ACE(Descriptor):
 
         else:
             return 0.0
+
+    def _read_feature_dimension_from_json(self, json_dict):
+        nus, limit_nus = self.calc_limit_nus()
+
+        if self.parameters.descriptors_contain_xyz:
+            return len(limit_nus) - (len(self.parameters.ace_elements) - 1)
+        else:
+            return len(limit_nus) - (len(self.parameters.ace_elements) - 1) + 3
