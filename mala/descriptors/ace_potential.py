@@ -5,6 +5,7 @@ import numpy as np
 
 import mala.descriptors.ace_coupling_utils as acu
 
+
 class AcePot:
     def __init__(
         self,
@@ -301,56 +302,6 @@ class AcePot:
         #   print (b,len(permu0[b]))
         self.funcs = permu0
         self.permunu = permunu
-
-    def set_betas(self, betas, has_zeros=False):
-        if type(betas) != dict:
-            if not has_zeros:
-                assert len(betas) == len(
-                    self.nus
-                ), "list of betas must be the same size as list of descriptors (0th order coefficient should NOT be included in this list"
-            elif has_zeros:
-                with_nu_inds = len(self.nus) + len(self.elements)
-                base_N_nu_per_ind = int(len(self.nus) / len(self.elements))
-                e0inds = []
-                for i in range(len(self.elements)):
-                    e0ind = (i * base_N_nu_per_ind) + i
-                    e0inds.append(e0ind)
-                e0s = [betas[e0ind] for e0ind in e0inds]
-                self.E0 = e0s
-                betas = [b for i, b in enumerate(betas) if i not in e0inds]
-
-            betas_dict = {ind: {} for ind in range(len(self.elements))}
-            for nu, beta in zip(self.nus, betas):
-                mu0, mu, n, l, L = acu.get_mu_n_l(nu, return_L=True)
-                betas_dict[mu0][nu] = beta
-            self.betas = betas_dict
-        elif type(betas) == dict:
-            self.betas = betas
-
-    def read_acecoeff(self, name, remove_0s=False):
-        f = "%s.acecoeff" % name
-        coeff_dict = process_acepot(f, self.elements)
-        e0s = []
-        beta_dict = {mu0: {} for mu0 in range(len(self.elements))}
-        remove_keys = {mu0: [] for mu0 in range(len(self.elements))}
-        for ind, element in enumerate(self.elements):
-            for key in coeff_dict.keys():
-                if key == "%d_0" % ind:
-                    e0s.append(coeff_dict[key])
-                    remove_keys[ind].append(key)
-                else:
-                    mu0, mu, n, l = acu.get_mu_n_l(key)
-                    beta_dict[mu0][key] = coeff_dict[key]
-
-        for ind, element in enumerate(self.elements):
-            for key in remove_keys[ind]:
-                try:
-                    del beta_dict[ind][key]
-                except KeyError:
-                    pass
-
-        self.E0 = e0s
-        return beta_dict
 
     def write_pot(self, name):
         srt_nus = []

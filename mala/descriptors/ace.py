@@ -632,17 +632,6 @@ class ACE(Descriptor):
                 byattypfiltered[mu0].append(nu)
         return byattyp, byattypfiltered
 
-    def wigner_3j(self, j1, m1, j2, m2, j3, m3):
-        # TODO: Add documentation. Also, maybe make it private?
-        # uses relation between Clebsch-Gordann coefficients and W-3j symbols to evaluate W-3j
-        # VERIFIED - wolframalpha.com
-        cg = self.clebsch_gordan(j1, m1, j2, m2, j3, -m3)
-
-        num = np.longdouble((-1) ** (j1 - j2 - m3))
-        denom = np.longdouble(((2 * j3) + 1) ** (1 / 2))
-
-        return cg * num / denom  # float(num/denom)
-
     def __init_wigner_3j(self, lmax):
         # TODO: Add documentation. Also, maybe make it private?
         # returns dictionary of all cg coefficients to be used at a given value of lmax
