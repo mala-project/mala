@@ -43,8 +43,6 @@ class ACE(Descriptor):
         # In the original implementation of the ACE class, these were
         # hardcoded, now we get them automatically from mendeleev.
         self.ionic_radii = element_info.to_dict()["atomic_radius"]
-        self.ionic_radii.set_index("symbol", inplace=True)
-        self.ionic_radii = self.ionic_radii.to_dict()["atomic_radius"]
         self.ionic_radii = {
             key: v / 100 for (key, v) in self.ionic_radii.items()
         }
@@ -68,18 +66,17 @@ class ACE(Descriptor):
         self.metal_list = list(set(main_groups + actininoids_lanthanoids))
         self.metal_list.remove("H")
 
-        # TODO: Is there a way we can do this without working on the file level
-        topfile = cg_coupling.__file__
-        top_dir = topfile.split("/cg")[0]
-        lib_path = "%s" % top_dir
-        self.lib_path = lib_path
-
-        # TODO: Make these private
-        self.Wigner_3j = self.init_wigner_3j(
+        # Initialize several arrays that are computed using
+        # nested for-loops but can be reused.
+        # Within these routines, these arrays are saved to pkl files
+        # in the directory where ace.py is located.
+        # If a pkl file is detected, the array is loaded from the pkl file,
+        # otherwise it is computed and saved to a pkl file.
+        self.__precomputed_wigner_3j = self.__init_wigner_3j(
             self.parameters.ace_lmax_traditional
         )
 
-        self.Clebsch_Gordan = self.init_clebsch_gordan(
+        self.__precomputed_clebsch_gordan = self.__init_clebsch_gordan(
             self.parameters.ace_lmax_traditional
         )
 
@@ -388,12 +385,12 @@ class ACE(Descriptor):
 
         if self.parameters.ace_coupling_type == "wig":
             ccs = wigner_coupling.get_coupling(
-                self.Wigner_3j, ldict, L_R=self.parameters.ace_L_R
+                self.__precomputed_wigner_3j, ldict, L_R=self.parameters.ace_L_R
             )
 
         elif self.parameters.ace_coupling_type == "cg":
             ccs = cg_coupling.get_coupling(
-                self.Clebsch_Gordan, ldict, L_R=self.parameters.ace_L_R
+                self.__precomputed_clebsch_gordan, ldict, L_R=self.parameters.ace_L_R
             )
 
         else:
@@ -666,11 +663,13 @@ class ACE(Descriptor):
 
         return cg * num / denom  # float(num/denom)
 
-    def init_wigner_3j(self, lmax):
+    def __init_wigner_3j(self, lmax):
         # TODO: Add documentation. Also, maybe make it private?
         # returns dictionary of all cg coefficients to be used at a given value of lmax
         try:
-            with open("%s/wig.pkl" % self.lib_path, "rb") as readinwig:
+            with open(
+                "%s/wig.pkl" % os.path.dirname(os.path.abspath(__file__)), "rb"
+            ) as readinwig:
                 cg = pickle.load(readinwig)
         except FileNotFoundError:
             cg = {}
@@ -688,18 +687,22 @@ class ACE(Descriptor):
                                         l3,
                                         m3,
                                     )
-                                    cg[key] = self.wigner_3j(
+                                    cg[key] = self.__precomputed_wigner_3j(
                                         l1, m1, l2, m2, l3, m3
                                     )
-            with open("%s/wig.pkl" % self.lib_path, "wb") as writewig:
+            with open(
+                "%s/wig.pkl" % os.path.dirname(os.path.abspath(__file__)), "wb"
+            ) as writewig:
                 pickle.dump(cg, writewig)
         return cg
 
-    def init_clebsch_gordan(self, lmax):
+    def __init_clebsch_gordan(self, lmax):
         # TODO: Add documentation. Also, maybe make it private?
         # returns dictionary of all cg coefficients to be used at a given value of lmax
         try:
-            with open("%s/cg.pkl" % self.lib_path, "rb") as readincg:
+            with open(
+                "%s/cg.pkl" % os.path.dirname(os.path.abspath(__file__)), "rb"
+            ) as readincg:
                 cg = pickle.load(readincg)
         except FileNotFoundError:
             cg = {}
@@ -720,7 +723,9 @@ class ACE(Descriptor):
                                     cg[key] = self.clebsch_gordan(
                                         l1, m1, l2, m2, l3, m3
                                     )
-            with open("%s/cg.pkl" % self.lib_path, "wb") as writecg:
+            with open(
+                "%s/cg.pkl" % os.path.dirname(os.path.abspath(__file__)), "wb"
+            ) as writecg:
                 pickle.dump(cg, writecg)
             # pickle.dump(cg,'cg.pkl')
         return cg
