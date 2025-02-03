@@ -55,11 +55,11 @@ class ACE(Descriptor):
             self.parameters.ace_lmax_traditional
         )
 
-        self.ncols0 = 3
-        self.couplings = None
+        self.__couplings = None
 
         # TODO: I am not sure what this does precisely and think we should
         # clarify it.
+        print(self.parameters.ace_elements)
         assert (
             not self.parameters.ace_types_like_snap
         ), "Using the same 'element' type for atoms and grid points is not permitted for standar d mala models"
@@ -178,11 +178,11 @@ class ACE(Descriptor):
         # If I understand this piece of code correctly, we need to execute it
         # here because the coupling coefficients are saved to file here,
         # but it is also called further down - can we streamline this?
-        if self.couplings != None:
-            coupling_coeffs = self.couplings
+        if self.__couplings != None:
+            coupling_coeffs = self.__couplings
         else:
-            self.couplings = self.calculate_coupling_coeffs()
-            coupling_coeffs = self.couplings
+            self.__couplings = self.calculate_coupling_coeffs()
+            coupling_coeffs = self.__couplings
         # save the coupling coefficients
         # saving function will go here
 
@@ -249,7 +249,7 @@ class ACE(Descriptor):
         #        in lammps directly)
         # TODO: self.couplings is never used. Why do we set it here, and also
         # above? Why do we call self.calculate_coupling_coeffs() again?
-        self.couplings = self.calculate_coupling_coeffs()
+        self.__couplings = self.calculate_coupling_coeffs()
 
         # Extract data from LAMMPS calculation.
         # This is different for the parallel and the serial case.
@@ -314,6 +314,7 @@ class ACE(Descriptor):
                 return ace_descriptors_np[:, :, :, 3:], nx * ny * nz
 
     def calculate_coupling_coeffs(self):
+        ncols0 = 3
         # TODO: IIRC, then these coefficients have to be calculated only ONCE
         # per element; so we should maybe think about a way of caching them.
 
@@ -385,7 +386,7 @@ class ACE(Descriptor):
             # NOTE to use unique ACE types for gridpoints, we must subtract off
             #  dummy descriptor counts (for non-grid element types)
             self.fingerprint_length = (
-                self.ncols0
+                ncols0
                 + len(limit_nus)
                 - (len(self.parameters.ace_elements) - 1)
             )
@@ -411,7 +412,7 @@ class ACE(Descriptor):
         # add case for full basis separately
         # NOTE that this basis evaluates grid-atom and atom-atom descriptors that are not needed in the current implementation of MALA
         elif self.parameters.ace_types_like_snap:
-            self.fingerprint_length = self.ncols0 + len(nus)
+            self.fingerprint_length = ncols0 + len(nus)
             # permutation symmetry adapted ACE labels
             Apot = AcePot(
                 self.parameters.ace_elements,
