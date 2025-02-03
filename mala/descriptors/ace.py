@@ -33,38 +33,12 @@ class ACE(Descriptor):
     def __init__(self, parameters):
         super(ACE, self).__init__(parameters)
 
-        # Access periodic table data from mendeleev.
-        element_info = fetch_table("elements")[
-            ["symbol", "group_id", "atomic_radius"]
-        ]
-        element_info.set_index("symbol", inplace=True)
-
-        # These ionic (actually, atomic radii) are taken from mendeleev.
-        # In the original implementation of the ACE class, these were
-        # hardcoded, now we get them automatically from mendeleev.
-        self.ionic_radii = element_info.to_dict()["atomic_radius"]
-        self.ionic_radii = {
-            key: v / 100 for (key, v) in self.ionic_radii.items()
-        }
-        self.ionic_radii["G"] = 1.35
-
-        # The metal list that was originally here only contains elements up to
-        # the 13th group (I am not sure why, e.g., Al is excluded).
-        # Additionally, only _some_ Lanthanoids and Actininoids were included,
-        # but that may be due to the list having been outdated, since the old
-        # name for Db (Ha) had been used. The code here now includes all
-        # elements up to group 13 (minus H) and all Lanthanoids and
-        # Actininoids.
-        main_groups = element_info["group_id"] < 13.0
-        actininoids_lanthanoids = element_info["group_id"].isna()
-        main_groups = main_groups.to_dict()
-        main_groups = [key for (key, v) in main_groups.items() if v]
-        actininoids_lanthanoids = actininoids_lanthanoids.to_dict()
-        actininoids_lanthanoids = [
-            key for (key, v) in actininoids_lanthanoids.items() if v
-        ]
-        self.metal_list = list(set(main_groups + actininoids_lanthanoids))
-        self.metal_list.remove("H")
+        # Initialize a dictionary with ionic radii (in Angstrom).
+        # and a list containing all elements which are considered metals.
+        # Both is done via mendeleev. The definition of metal here is
+        # "everything in groups 12 and below, including Lanthanoids and
+        # Actininoids, excluding hydrogen".
+        self.ionic_radii, self.metal_list = self.__init_element_lists()
 
         # Initialize several arrays that are computed using
         # nested for-loops but can be reused.
@@ -72,6 +46,7 @@ class ACE(Descriptor):
         # in the directory where ace.py is located.
         # If a pkl file is detected, the array is loaded from the pkl file,
         # otherwise it is computed and saved to a pkl file.
+        # The arrys are used within the ACE descriptor calculation.
         self.__precomputed_wigner_3j = self.__init_wigner_3j(
             self.parameters.ace_lmax_traditional
         )
@@ -385,12 +360,16 @@ class ACE(Descriptor):
 
         if self.parameters.ace_coupling_type == "wig":
             ccs = wigner_coupling.get_coupling(
-                self.__precomputed_wigner_3j, ldict, L_R=self.parameters.ace_L_R
+                self.__precomputed_wigner_3j,
+                ldict,
+                L_R=self.parameters.ace_L_R,
             )
 
         elif self.parameters.ace_coupling_type == "cg":
             ccs = cg_coupling.get_coupling(
-                self.__precomputed_clebsch_gordan, ldict, L_R=self.parameters.ace_L_R
+                self.__precomputed_clebsch_gordan,
+                ldict,
+                L_R=self.parameters.ace_L_R,
             )
 
         else:
@@ -729,6 +708,41 @@ class ACE(Descriptor):
                 pickle.dump(cg, writecg)
             # pickle.dump(cg,'cg.pkl')
         return cg
+
+    @staticmethod
+    def __init_element_lists():
+        # Access periodic table data from mendeleev.
+        element_info = fetch_table("elements")[
+            ["symbol", "group_id", "atomic_radius"]
+        ]
+        element_info.set_index("symbol", inplace=True)
+
+        # These ionic (actually, atomic radii) are taken from mendeleev.
+        # In the original implementation of the ACE class, these were
+        # hardcoded, now we get them automatically from mendeleev.
+        ionic_radii = element_info.to_dict()["atomic_radius"]
+        ionic_radii = {key: v / 100 for (key, v) in ionic_radii.items()}
+        ionic_radii["G"] = 1.35
+
+        # The metal list that was originally here only contains elements up to
+        # the 13th group (I am not sure why, e.g., Al is excluded).
+        # Additionally, only _some_ Lanthanoids and Actininoids were included,
+        # but that may be due to the list having been outdated, since the old
+        # name for Db (Ha) had been used. The code here now includes all
+        # elements up to group 13 (minus H) and all Lanthanoids and
+        # Actininoids.
+        main_groups = element_info["group_id"] < 13.0
+        actininoids_lanthanoids = element_info["group_id"].isna()
+        main_groups = main_groups.to_dict()
+        main_groups = [key for (key, v) in main_groups.items() if v]
+        actininoids_lanthanoids = actininoids_lanthanoids.to_dict()
+        actininoids_lanthanoids = [
+            key for (key, v) in actininoids_lanthanoids.items() if v
+        ]
+        metal_list = list(set(main_groups + actininoids_lanthanoids))
+        metal_list.remove("H")
+
+        return ionic_radii, metal_list
 
     def clebsch_gordan(self, j1, m1, j2, m2, j3, m3):
         # TODO: Add documentation. Also, maybe make it private?
