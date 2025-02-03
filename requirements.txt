@@ -11,3 +11,4 @@ tensorboard
 openpmd-api
 scikit-spatial
 tqdm
+mendeleev

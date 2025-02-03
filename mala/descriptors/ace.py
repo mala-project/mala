@@ -7,11 +7,10 @@ import pickle
 
 import ase
 import ase.io
-
 from importlib.util import find_spec
 import numpy as np
-from scipy.spatial import distance
 from scipy import special
+from mendeleev.fetch import fetch_table
 
 from mala.common.parallelizer import printout
 from mala.descriptors.lammps_utils import extract_compute_np
@@ -34,197 +33,40 @@ class ACE(Descriptor):
     def __init__(self, parameters):
         super(ACE, self).__init__(parameters)
 
-        # TODO: Can this not be replaced with ase.data.vdw_radii?
-        # Or some variation of the data in ASE.
-        self.ionic_radii = {
-            "H": 0.25,
-            "He": 1.2,
-            "Li": 1.45,
-            "Be": 1.05,
-            "B": 0.85,
-            "C": 0.7,
-            "N": 0.65,
-            "O": 0.6,
-            "F": 0.5,
-            "Ne": 1.6,
-            "Na": 1.8,
-            "Mg": 1.5,
-            "Al": 1.25,
-            "Si": 1.1,
-            "P": 1.0,
-            "S": 1.0,
-            "Cl": 1.0,
-            "Ar": 0.71,
-            "K": 2.2,
-            "Ca": 1.8,
-            "Sc": 1.6,
-            "Ti": 1.4,
-            "V": 1.35,
-            "Cr": 1.4,
-            "Mn": 1.4,
-            "Fe": 1.4,
-            "Co": 1.35,
-            "Ni": 1.35,
-            "Cu": 1.35,
-            "Zn": 1.35,
-            "Ga": 1.3,
-            "Ge": 1.25,
-            "As": 1.15,
-            "Se": 1.15,
-            "Br": 1.15,
-            "Kr": np.nan,
-            "Rb": 2.35,
-            "Sr": 2.0,
-            "Y": 1.8,
-            "Zr": 1.55,
-            "Nb": 1.45,
-            "Mo": 1.45,
-            "Tc": 1.35,
-            "Ru": 1.3,
-            "Rh": 1.35,
-            "Pd": 1.4,
-            "Ag": 1.6,
-            "Cd": 1.55,
-            "In": 1.55,
-            "Sn": 1.45,
-            "Sb": 1.45,
-            "Te": 1.4,
-            "I": 1.4,
-            "Xe": np.nan,
-            "Cs": 2.6,
-            "Ba": 2.15,
-            "La": 1.95,
-            "Ce": 1.85,
-            "Pr": 1.85,
-            "Nd": 1.85,
-            "Pm": 1.85,
-            "Sm": 1.85,
-            "Eu": 1.85,
-            "Gd": 1.8,
-            "Tb": 1.75,
-            "Dy": 1.75,
-            "Ho": 1.75,
-            "Er": 1.75,
-            "Tm": 1.75,
-            "Yb": 1.75,
-            "Lu": 1.75,
-            "Hf": 1.55,
-            "Ta": 1.45,
-            "W": 1.35,
-            "Re": 1.35,
-            "Os": 1.3,
-            "Ir": 1.35,
-            "Pt": 1.35,
-            "Au": 1.35,
-            "Hg": 1.5,
-            "Tl": 1.9,
-            "Pb": 1.8,
-            "Bi": 1.6,
-            "Po": 1.9,
-            "At": np.nan,
-            "Rn": np.nan,
-            "Fr": np.nan,
-            "Ra": 2.15,
-            "Ac": 1.95,
-            "Th": 1.8,
-            "Pa": 1.8,
-            "U": 1.75,
-            "Np": 1.75,
-            "Pu": 1.75,
-            "Am": 1.75,
-            "Cm": np.nan,
-            "Bk": np.nan,
-            "Cf": np.nan,
-            "Es": np.nan,
-            "Fm": np.nan,
-            "Md": np.nan,
-            "No": np.nan,
-            "Lr": np.nan,
-            "Rf": np.nan,
-            "Db": np.nan,
-            "Sg": np.nan,
-            "Bh": np.nan,
-            "Hs": np.nan,
-            "Mt": np.nan,
-            "Ds": np.nan,
-            "Rg": np.nan,
-            "Cn": np.nan,
-            "Nh": np.nan,
-            "Fl": np.nan,
-            "Mc": np.nan,
-            "Lv": np.nan,
-            "Ts": np.nan,
-            "Og": np.nan,
-            "G": 1.35,
-        }
-
-        # TODO: Is there a way to access this information without hardcoding
-        # it in?
-        self.metal_list = [
-            "Li",
-            "Be",
-            "Na",
-            "Mg",
-            "K",
-            "Ca",
-            "Sc",
-            "Ti",
-            "V",
-            "Cr",
-            "Mn",
-            "Fe",
-            "Co",
-            "Ni",
-            "Cu",
-            "Zn",
-            "Rb",
-            "Sr",
-            "Y",
-            "Zr",
-            "Nb",
-            "Mo",
-            "Tc",
-            "Ru",
-            "Rh",
-            "Pd",
-            "Ag",
-            "Cd",
-            "Cs",
-            "Ba",
-            "Lu",
-            "Hf",
-            "Ta",
-            "W",
-            "Re",
-            "Os",
-            "Ir",
-            "Pt",
-            "Au",
-            "Hg",
-            "Fr",
-            "Ha",
-            "La",
-            "Ce",
-            "Pr",
-            "Nd",
-            "Pm",
-            "Sm",
-            "Eu",
-            "Gd",
-            "Tb",
-            "Dy",
-            "Ho",
-            "Er",
-            "Tb",
-            "Yb",
-            "Ac",
-            "Th",
-            "Pa",
-            "U",
-            "Np",
-            "Pu",
-            "Am",
+        # Access periodic table data from mendeleev.
+        element_info = fetch_table("elements")[
+            ["symbol", "group_id", "atomic_radius"]
         ]
+        element_info.set_index("symbol", inplace=True)
+
+        # These ionic (actually, atomic radii) are taken from mendeleev.
+        # In the original implementation of the ACE class, these were
+        # hardcoded, now we get them automatically from mendeleev.
+        self.ionic_radii = element_info.to_dict()["atomic_radius"]
+        self.ionic_radii.set_index("symbol", inplace=True)
+        self.ionic_radii = self.ionic_radii.to_dict()["atomic_radius"]
+        self.ionic_radii = {
+            key: v / 100 for (key, v) in self.ionic_radii.items()
+        }
+        self.ionic_radii["G"] = 1.35
+
+        # The metal list that was originally here only contains elements up to
+        # the 13th group (I am not sure why, e.g., Al is excluded).
+        # Additionally, only _some_ Lanthanoids and Actininoids were included,
+        # but that may be due to the list having been outdated, since the old
+        # name for Db (Ha) had been used. The code here now includes all
+        # elements up to group 13 (minus H) and all Lanthanoids and
+        # Actininoids.
+        main_groups = element_info["group_id"] < 13.0
+        actininoids_lanthanoids = element_info["group_id"].isna()
+        main_groups = main_groups.to_dict()
+        main_groups = [key for (key, v) in main_groups.items() if v]
+        actininoids_lanthanoids = actininoids_lanthanoids.to_dict()
+        actininoids_lanthanoids = [
+            key for (key, v) in actininoids_lanthanoids.items() if v
+        ]
+        self.metal_list = list(set(main_groups + actininoids_lanthanoids))
+        self.metal_list.remove("H")
 
         # TODO: Is there a way we can do this without working on the file level
         topfile = cg_coupling.__file__
