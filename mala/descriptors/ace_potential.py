@@ -337,6 +337,8 @@ class AcePot:
                     mufuncstr = mufuncstr.replace('"', "")
                     writeout.write(mufuncstr)
 
+        return "%s.yace" % name
+
 
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):

@@ -55,7 +55,10 @@ class ACE(Descriptor):
             self.parameters.ace_lmax_traditional
         )
 
-        self.__couplings = None
+        # File which holds the coupling coefficients.
+        # Can be provided by users, in which case consistency will be checked.
+        # If no file is detected, a new file is computed.
+        self.couplings_yace_file = None
 
         # TODO: I am not sure what this does precisely and think we should
         # clarify it.
@@ -150,7 +153,7 @@ class ACE(Descriptor):
 
     def __calculate_lammps(self, outdir, **kwargs):
         """
-        Perform bispectrum calculation using LAMMPS.
+        Perform ACE descriptor calculation using LAMMPS.
 
         Creates a LAMMPS instance with appropriate call parameters and uses
         it for the calculation.
@@ -174,15 +177,13 @@ class ACE(Descriptor):
         ny = self.grid_dimensions[1]
         nz = self.grid_dimensions[2]
 
-        # TODO: Save the coupling coefficients.
-        # If I understand this piece of code correctly, we need to execute it
-        # here because the coupling coefficients are saved to file here,
-        # but it is also called further down - can we streamline this?
-        if self.__couplings != None:
-            coupling_coeffs = self.__couplings
-        else:
-            self.__couplings = self.calculate_coupling_coeffs()
-            coupling_coeffs = self.__couplings
+        # Calculate and store the coupling coefficients, if necessary.
+        # If coupling coefficients are provided by the user, these are
+        # first checked for consistency.
+        self.check_coupling_coeffs(self.couplings_yace_file)
+        if self.couplings_yace_file is None:
+            self.couplings_yace_file = self.calculate_coupling_coeffs()
+
         # save the coupling coefficients
         # saving function will go here
 
@@ -242,15 +243,6 @@ class ACE(Descriptor):
         lmp.file(self.parameters.lammps_compute_file)
 
         # Set things not accessible from LAMMPS
-
-        # Calculation for fingerprint length
-        # NOTE: we handle fingerprint length later while setting the coupling_coefficients
-        #       (the coupling coefficients specify wich fingerprints are evaluated
-        #        in lammps directly)
-        # TODO: self.couplings is never used. Why do we set it here, and also
-        # above? Why do we call self.calculate_coupling_coeffs() again?
-        self.__couplings = self.calculate_coupling_coeffs()
-
         # Extract data from LAMMPS calculation.
         # This is different for the parallel and the serial case.
         # In the serial case we can expect to have a full bispectrum array at
@@ -312,6 +304,23 @@ class ACE(Descriptor):
                 return ace_descriptors_np, nx * ny * nz
             else:
                 return ace_descriptors_np[:, :, :, 3:], nx * ny * nz
+
+    def check_coupling_coeffs(self, coupling_file):
+        if coupling_file is not None:
+            with open(coupling_file, "r") as readout:
+                lines = readout.readlines()
+                element_list = (
+                    lines[0]
+                    .split(":")[1]
+                    .split("[")[1]
+                    .split("]")[0]
+                    .split(",")
+                )
+                element_list = [e.strip() for e in element_list]
+                print(set(self._atoms.symbols), set(element_list[:-1]))
+                # for line in readout:
+                #     if "elements" in line:
+                #         print(line)
 
     def calculate_coupling_coeffs(self):
         ncols0 = 3
@@ -407,7 +416,7 @@ class ACE(Descriptor):
             )
 
             Apot.set_funcs(nulst=limit_nus, muflg=True, print_0s=True)
-            Apot.write_pot("coupling_coefficients")
+            return Apot.write_pot("coupling_coefficients")
 
         # add case for full basis separately
         # NOTE that this basis evaluates grid-atom and atom-atom descriptors that are not needed in the current implementation of MALA
@@ -428,7 +437,7 @@ class ACE(Descriptor):
                 lmin=self.parameters.ace_lmin,
                 **{"input_nus": nus, "ccs": ccs[self.parameters.ace_M_R]}
             )
-            Apot.write_pot("coupling_coefficients")
+            return Apot.write_pot("coupling_coefficients")
 
     def calc_limit_nus(self):
         # TODO: Add documentation what this piece of code does.
