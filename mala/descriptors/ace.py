@@ -61,20 +61,6 @@ class ACE(Descriptor):
         self.couplings_yace_file = None
 
         # TODO: I am not sure what this does precisely and think we should
-        # clarify it.
-        print(self.parameters.ace_elements)
-        assert (
-            not self.parameters.ace_types_like_snap
-        ), "Using the same 'element' type for atoms and grid points is not permitted for standar d mala models"
-        if (
-            self.parameters.ace_types_like_snap
-            and "G" in self.parameters.ace_elements
-        ):
-            raise Exception(
-                "for types_like_snap = True, you must remove the separate element type for grid points"
-            )
-
-        # TODO: I am not sure what this does precisely and think we should
         # clarify it. Also, is this element list just for reference and thus
         # only contains the grid and Al or is it supposed to contain elements
         # we are calculating?
@@ -164,7 +150,7 @@ class ACE(Descriptor):
         from lammps import constants as lammps_constants
 
         use_fp64 = kwargs.get("use_fp64", False)
-        keep_logs = kwargs.get("keep_logs", True)
+        keep_logs = kwargs.get("keep_logs", False)
 
         lammps_format = "lammps-data"
         self.setup_lammps_tmp_files("acegrid", outdir)
@@ -180,7 +166,9 @@ class ACE(Descriptor):
         # Calculate and store the coupling coefficients, if necessary.
         # If coupling coefficients are provided by the user, these are
         # first checked for consistency.
-        self.check_coupling_coeffs(self.couplings_yace_file)
+        self.couplings_yace_file = self.check_coupling_coeffs(
+            self.couplings_yace_file
+        )
         if self.couplings_yace_file is None:
             self.couplings_yace_file = self.calculate_coupling_coeffs()
 
@@ -317,22 +305,30 @@ class ACE(Descriptor):
                     .split(",")
                 )
                 element_list = [e.strip() for e in element_list]
-                print(set(self._atoms.symbols), set(element_list[:-1]))
-                # for line in readout:
-                #     if "elements" in line:
-                #         print(line)
+
+                # We cannot compare the lists as sets, because order is
+                # important.
+                # We omit "G" from the comparison, because it is not an
+                # element. It does have to be in the list for the coupling
+                # constants though.
+                if (
+                    sorted(list(set(self._atoms.symbols))) != element_list[:-1]
+                    or element_list[-1] != "G"
+                ):
+                    return None
+                else:
+                    return coupling_file
+        else:
+            return None
 
     def calculate_coupling_coeffs(self):
         ncols0 = 3
         # TODO: IIRC, then these coefficients have to be calculated only ONCE
         # per element; so we should maybe think about a way of caching them.
 
-        self.bonds = [
-            p
-            for p in itertools.product(
-                self.parameters.ace_elements, self.parameters.ace_elements
-            )
-        ]
+        element_list = sorted(list(set(self._atoms.symbols))) + ["G"]
+
+        self.bonds = [p for p in itertools.product(element_list, element_list)]
 
         (
             rc_range,
@@ -395,13 +391,11 @@ class ACE(Descriptor):
             # NOTE to use unique ACE types for gridpoints, we must subtract off
             #  dummy descriptor counts (for non-grid element types)
             self.fingerprint_length = (
-                ncols0
-                + len(limit_nus)
-                - (len(self.parameters.ace_elements) - 1)
+                ncols0 + len(limit_nus) - (len(element_list) - 1)
             )
             # permutation symmetry adapted ACE labels
             Apot = AcePot(
-                self.parameters.ace_elements,
+                element_list,
                 self.parameters.ace_reference_ens,
                 self.parameters.ace_ranks,
                 self.parameters.ace_nmax,
@@ -424,7 +418,7 @@ class ACE(Descriptor):
             self.fingerprint_length = ncols0 + len(nus)
             # permutation symmetry adapted ACE labels
             Apot = AcePot(
-                self.parameters.ace_elements,
+                element_list,
                 self.parameters.ace_reference_ens,
                 self.parameters.ace_ranks,
                 self.parameters.ace_nmax,
