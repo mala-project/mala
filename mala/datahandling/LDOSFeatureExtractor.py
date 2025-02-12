@@ -127,7 +127,7 @@ class LDOSFeatureExtractor:
 
     @staticmethod
     def __init_gaussians(n_gaussians):
-        lbound_weights = np.zeros(n_gaussians)
+        lbound_weights = np.ones(n_gaussians) * -100
         ubound_weights = np.ones(n_gaussians) * 100
 
         lbound_means = np.zeros(n_gaussians)
