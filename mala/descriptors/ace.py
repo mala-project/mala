@@ -148,7 +148,7 @@ class ACE(Descriptor):
         lammps_format = "lammps-data"
         self.setup_lammps_tmp_files("acegrid", outdir)
 
-        self.__initialize_element_arrays()
+        self.__init_element_arrays()
 
         ase.io.write(
             self._lammps_temporary_input, self._atoms, format=lammps_format
@@ -175,7 +175,7 @@ class ACE(Descriptor):
         #  parameter (I would advocate for the latter)
         if self.parameters.bispectrum_cutoff > self.maxrc:
             lammps_dict = {
-                "ace_coeff_file": "coupling_coefficients.yace",
+                "ace_coeff_file": self.couplings_yace_file,
                 "rcutfac": self.parameters.bispectrum_cutoff,
             }
         else:
@@ -316,7 +316,7 @@ class ACE(Descriptor):
         else:
             return None
 
-    def __initialize_element_arrays(self):
+    def __init_element_arrays(self):
         self._ace_mumax = len(list(set(self._atoms.symbols))) + 1
         self._ace_reference_ensemble = [0.0] * self._ace_mumax
 
@@ -409,7 +409,9 @@ class ACE(Descriptor):
             )
 
             Apot.set_funcs(nulst=limit_nus, muflg=True, print_0s=True)
-            return Apot.write_pot("coupling_coefficients")
+            return Apot.write_pot(
+                "coupling_coefficients_" + str.join("_", element_list[:-1])
+            )
 
         # add case for full basis separately
         # NOTE that this basis evaluates grid-atom and atom-atom descriptors that are not needed in the current implementation of MALA
@@ -430,7 +432,9 @@ class ACE(Descriptor):
                 lmin=self.parameters.ace_lmin,
                 **{"input_nus": nus, "ccs": ccs[self.parameters.ace_M_R]}
             )
-            return Apot.write_pot("coupling_coefficients")
+            return Apot.write_pot(
+                "coupling_coefficients_" + str.join("_", element_list[:-1])
+            )
 
     def calc_limit_nus(self):
         # TODO: Add documentation what this piece of code does.
