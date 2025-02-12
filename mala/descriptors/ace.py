@@ -60,16 +60,9 @@ class ACE(Descriptor):
         # If no file is detected, a new file is computed.
         self.couplings_yace_file = None
 
-        # TODO: I am not sure what this does precisely and think we should
-        # clarify it. Also, is this element list just for reference and thus
-        # only contains the grid and Al or is it supposed to contain elements
-        # we are calculating?
-        if len(self.parameters.ace_elements) != len(
-            self.parameters.ace_reference_ens
-        ):
-            raise Exception(
-                "Reference ensemble must match length of element list!"
-            )
+        # Will get filled once the atoms object has been loaded.
+        self._ace_mumax = None
+        self._ace_reference_ensemble = None
 
     @property
     def data_name(self):
@@ -154,6 +147,8 @@ class ACE(Descriptor):
 
         lammps_format = "lammps-data"
         self.setup_lammps_tmp_files("acegrid", outdir)
+
+        self.__initialize_element_arrays()
 
         ase.io.write(
             self._lammps_temporary_input, self._atoms, format=lammps_format
@@ -321,6 +316,10 @@ class ACE(Descriptor):
         else:
             return None
 
+    def __initialize_element_arrays(self):
+        self._ace_mumax = len(list(set(self._atoms.symbols))) + 1
+        self._ace_reference_ensemble = [0.0] * self._ace_mumax
+
     def calculate_coupling_coeffs(self):
         ncols0 = 3
         # TODO: IIRC, then these coefficients have to be calculated only ONCE
@@ -396,7 +395,7 @@ class ACE(Descriptor):
             # permutation symmetry adapted ACE labels
             Apot = AcePot(
                 element_list,
-                self.parameters.ace_reference_ens,
+                self._ace_reference_ensemble,
                 self.parameters.ace_ranks,
                 self.parameters.ace_nmax,
                 self.parameters.ace_lmax,
@@ -419,7 +418,7 @@ class ACE(Descriptor):
             # permutation symmetry adapted ACE labels
             Apot = AcePot(
                 element_list,
-                self.parameters.ace_reference_ens,
+                self._ace_reference_ensemble,
                 self.parameters.ace_ranks,
                 self.parameters.ace_nmax,
                 self.parameters.ace_lmax,
@@ -443,7 +442,7 @@ class ACE(Descriptor):
                 rank,
                 int(self.parameters.ace_nmax[ind]),
                 int(self.parameters.ace_lmax[ind]),
-                int(self.parameters.ace_mumax),
+                int(self._ace_mumax),
                 lmin=int(self.parameters.ace_lmin[ind]),
             )
             ranked_chem_nus.append(PA_lammps)
@@ -466,7 +465,7 @@ class ACE(Descriptor):
         nus.sort(key=lambda x: mu0s[nus_unsort.index(x)], reverse=False)
         nus.sort(key=lambda x: len(x), reverse=False)
         nus.sort(key=lambda x: mu0s[nus_unsort.index(x)], reverse=False)
-        musins = range(len(self.parameters.ace_elements) - 1)
+        musins = range(len(list(set(self._atoms.symbols))))
         all_funcs = {}
         if self.parameters.ace_types_like_snap:
             byattyp, byattypfiltered = self.srt_by_attyp(nus, 1)
@@ -482,12 +481,13 @@ class ACE(Descriptor):
                 limit_nus = byattyp["%d" % 0]
 
         else:
+            # +1 here because this should include the G for grid.
             byattyp, byattypfiltered = self.srt_by_attyp(
-                nus, len(self.parameters.ace_elements)
+                nus, len(list(set(self._atoms.symbols))) + 1
             )
             if self.parameters.ace_grid_filter:
                 limit_nus = byattypfiltered[
-                    "%d" % (len(self.parameters.ace_elements) - 1)
+                    "%d" % (len(list(set(self._atoms.symbols))))
                 ]
                 assert (
                     self.parameters.ace_padfunc
@@ -497,7 +497,7 @@ class ACE(Descriptor):
                         limit_nus.append(byattypfiltered["%d" % muii][0])
             elif not self.parameters.ace_grid_filter:
                 limit_nus = byattyp[
-                    "%d" % (len(self.parameters.ace_elements) - 1)
+                    "%d" % (len(list(set(self._atoms.symbols))))
                 ]
                 if self.parameters.ace_padfunc:
                     for muii in musins:
@@ -806,6 +806,6 @@ class ACE(Descriptor):
         nus, limit_nus = self.calc_limit_nus()
 
         if self.parameters.descriptors_contain_xyz:
-            return len(limit_nus) - (len(self.parameters.ace_elements) - 1)
+            return len(limit_nus) - (len(list(set(self._atoms.symbols))))
         else:
-            return len(limit_nus) - (len(self.parameters.ace_elements) - 1) + 3
+            return len(limit_nus) - (len(list(set(self._atoms.symbols)))) + 3
