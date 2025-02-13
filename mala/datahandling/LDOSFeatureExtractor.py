@@ -29,14 +29,22 @@ class LDOSFeatureExtractor:
         extracted_filename = os.path.join(path, filename, "_extracted.npy")
 
         # Load and filter the LDOS.
-        ldos = self.target_calculator.read_from_numpy_file(ldos_file)
-        ldos = ldos.reshape((-1, ldos.shape[-1]))
+        ldos = self.target_calculator.read_from_numpy_file(ldos_file)[
+            :40, :40, :80, :
+        ]
+        # TODO: The FFT changes the dimensions from 301 to 300 - this is OK
+        # for the moment since we are interested in qualitative results,
+        # but should eventually be fixed!
         ldos = self.__lowpass_filter(ldos, cutoff=cutoff)
-        gridsize = ldos.shape[-1]
-
-        # For each point within the LDOS, perform a fit to extract the
-        # features.
-        xdata = np.arange(ldos.shape[-1])
+        ldos_shape = np.shape(ldos)
+        ldos = ldos.reshape(
+            [
+                ldos_shape[0] * ldos_shape[1] * ldos_shape[2],
+                ldos_shape[3],
+            ]
+        )
+        gridsize = ldos_shape[0] * ldos_shape[1] * ldos_shape[2]
+        xdata = np.arange(ldos_shape[-1])
 
         # 5 = 2 for left linear function, 2 for right linear function, 1 for
         # position of minimum.
@@ -44,10 +52,13 @@ class LDOSFeatureExtractor:
 
         # Time for-loop.
         start_time = time.perf_counter()
+
+        # For each point within the LDOS, perform a fit to extract the
+        # features.
         for point in range(0, gridsize):
-            ydata = ldos[point]
+            ydata = ldos[point, :]
             trial_counter = 0
-            while trial_counter < 3:
+            while trial_counter < 5:
                 try:
                     features[point, :] = self.composite_fit(
                         xdata,
@@ -60,7 +71,7 @@ class LDOSFeatureExtractor:
                     break
                 except RuntimeError:
                     trial_counter += 1
-                    printout("Fit failed at point ", point, "retrying.")
+                    printout("Fit failed at point ", point, ", retrying.")
             if trial_counter == 3:
                 raise Exception("Fit failed at point ", point, "three times.")
 
@@ -68,7 +79,7 @@ class LDOSFeatureExtractor:
             initial_guess_right = features[point, 3:5]
             initial_guess_gaussian = features[point, 5:]
             if point % 100 == 0:
-                print("Point: ", point)
+                print("Point: ", point, "/", gridsize)
                 print(
                     "Time per point: ",
                     (time.perf_counter() - start_time) / (point + 1),
@@ -106,51 +117,70 @@ class LDOSFeatureExtractor:
         def gaussians_error(x, *params):
             return gaussians(x, *params) - ydata
 
-        splitting_x = np.argmin(ydata)
-        x_left = slice(0, splitting_x, 1)
-        x_right = slice(splitting_x, np.shape(ydata)[0], 1)
+        if np.sum(ydata) == 0:
+            splitting_x = int(np.shape(ydata)[0] / 2)
+            popt_left = [0, 0]
+            popt_right = [0, 0]
+            popt_2 = np.concatenate(
+                (
+                    np.zeros(n_gaussians),
+                    np.arange(
+                        np.shape(ydata)[0] / (n_gaussians + 1),
+                        np.shape(ydata)[0],
+                        step=np.shape(ydata)[0] / (n_gaussians + 1),
+                    ),
+                    np.zeros(n_gaussians) + np.sqrt(0.5),
+                )
+            )
 
-        popt_left, pcov_left = curve_fit(
-            linear,
-            xdata[x_left],
-            ydata[x_left],
-            p0=initial_guess_left,
-            # bounds=bounds,
-            maxfev=10000,
-            method="trf",
-        )
-        popt_right, pcov_right = curve_fit(
-            linear,
-            xdata[x_right],
-            ydata[x_right],
-            p0=initial_guess_right,
-            # bounds=bounds,
-            maxfev=10000,
-            method="trf",
-        )
+        else:
+            splitting_x = np.argmin(ydata)
+            x_left = slice(0, splitting_x, 1)
+            x_right = slice(splitting_x, np.shape(ydata)[0], 1)
 
-        predicted_left = linear(xdata[x_left], *popt_left)
-        predicted_right = linear(xdata[x_right], *popt_right)
-        predicted_twolinear = np.concatenate((predicted_left, predicted_right))
-        reduced = ydata - predicted_twolinear
+            popt_left, pcov_left = curve_fit(
+                linear,
+                xdata[x_left],
+                ydata[x_left],
+                p0=initial_guess_left,
+                # bounds=bounds,
+                maxfev=10000,
+                method="trf",
+            )
+            popt_right, pcov_right = curve_fit(
+                linear,
+                xdata[x_right],
+                ydata[x_right],
+                p0=initial_guess_right,
+                # bounds=bounds,
+                maxfev=10000,
+                method="trf",
+            )
 
-        popt_2, pcov_2 = curve_fit(
-            gaussians_error,
-            xdata,
-            reduced,
-            p0=initial_guess_gaussian,
-            maxfev=10000,
-            method="trf",
-        )
+            predicted_left = linear(xdata[x_left], *popt_left)
+            predicted_right = linear(xdata[x_right], *popt_right)
+            predicted_twolinear = np.concatenate(
+                (predicted_left, predicted_right)
+            )
+            reduced = ydata - predicted_twolinear
 
-        ordering = np.argsort(popt_2[n_gaussians : n_gaussians * 2])
-        popt_2[0:n_gaussians] = popt_2[0:n_gaussians][ordering]
-        popt_2[n_gaussians : n_gaussians * 2] = popt_2[
-            n_gaussians : n_gaussians * 2
-        ][ordering]
-        popt_2[n_gaussians * 2 :] = popt_2[n_gaussians * 2 :][ordering]
+            popt_2, pcov_2 = curve_fit(
+                gaussians_error,
+                xdata,
+                reduced,
+                p0=initial_guess_gaussian,
+                maxfev=10000,
+                method="trf",
+            )
 
-        # Implement error metric
+            ordering = np.argsort(popt_2[n_gaussians : n_gaussians * 2])
+            popt_2[0:n_gaussians] = popt_2[0:n_gaussians][ordering]
+            popt_2[n_gaussians : n_gaussians * 2] = popt_2[
+                n_gaussians : n_gaussians * 2
+            ][ordering]
+            popt_2[n_gaussians * 2 :] = popt_2[n_gaussians * 2 :][ordering]
+
+            # Implement error metric
 
         return np.concatenate(([splitting_x], popt_left, popt_right, popt_2))
 
