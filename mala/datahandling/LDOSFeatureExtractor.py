@@ -1,9 +1,12 @@
 import os.path
 
+from mala import printout
 from mala.targets.target import Target
 import numpy as np
 from scipy.fft import rfft, irfft
 from scipy.optimize import curve_fit
+
+import time
 
 
 class LDOSFeatureExtractor:
@@ -14,12 +17,11 @@ class LDOSFeatureExtractor:
         if self.target_calculator is None:
             self.target_calculator = Target(parameters)
 
-    def extract_features(
-        self, ldos_file, cutoff=30, poly_order=3, n_gaussians=8
-    ):
+    def extract_features(self, ldos_file, cutoff=30, n_gaussians=8):
         # Initialize everything needed for the fit.
-        p0_poly = self.__init_poly(poly_order)
-        p0_gaussian = self.__init_gaussians(n_gaussians)
+        initial_guess_left = self.__initial_guess_linear()
+        initial_guess_right = self.__initial_guess_linear()
+        initial_guess_gaussian = self.__initial_guess_gaussians(n_gaussians)
 
         # Extract the basename of the file
         path = os.path.dirname(ldos_file)
@@ -35,30 +37,58 @@ class LDOSFeatureExtractor:
         # For each point within the LDOS, perform a fit to extract the
         # features.
         xdata = np.arange(ldos.shape[-1])
-        features = np.zeros(
-            (gridsize, poly_order + 1 + 3 * n_gaussians), dtype=ldos.dtype
-        )
+
+        # 5 = 2 for left linear function, 2 for right linear function, 1 for
+        # position of minimum.
+        features = np.zeros((gridsize, 5 + 3 * n_gaussians), dtype=ldos.dtype)
+
+        # Time for-loop.
+        start_time = time.perf_counter()
         for point in range(0, gridsize):
             ydata = ldos[point]
-            features[point, :] = self.composite_fit(
-                xdata, ydata, p0_poly, p0_gaussian, poly_order, n_gaussians
-            )
+            trial_counter = 0
+            while trial_counter < 3:
+                try:
+                    features[point, :] = self.composite_fit(
+                        xdata,
+                        ydata,
+                        initial_guess_left,
+                        initial_guess_right,
+                        initial_guess_gaussian,
+                        n_gaussians,
+                    )
+                    break
+                except RuntimeError:
+                    trial_counter += 1
+                    printout("Fit failed at point ", point, "retrying.")
+            if trial_counter == 3:
+                raise Exception("Fit failed at point ", point, "three times.")
+
+            initial_guess_left = features[point, 1:3]
+            initial_guess_right = features[point, 3:5]
+            initial_guess_gaussian = features[point, 5:]
+            if point % 100 == 0:
+                print("Point: ", point)
+                print(
+                    "Time per point: ",
+                    (time.perf_counter() - start_time) / (point + 1),
+                )
 
     @staticmethod
     def composite_fit(
-        xdata, ydata, p0_poly, p0_gaussian, poly_order, n_gaussians
+        xdata,
+        ydata,
+        initial_guess_left,
+        initial_guess_right,
+        initial_guess_gaussian,
+        n_gaussians,
     ):
-        def poly(x, *params):
+        def linear(x, *params):
             params = np.array(params)
             poly_params = params
             x = x.reshape(-1, 1)
-            poly = np.sum(
-                poly_params * x ** np.arange(poly_order + 1), axis=-1
-            )
+            poly = np.sum(poly_params * x ** np.arange(2), axis=-1)
             return poly
-
-        def poly_error(x, *params):
-            return poly(x, *params) - ydata
 
         def gaussians(x, *params):
             params = np.array(params)
@@ -71,29 +101,44 @@ class LDOSFeatureExtractor:
                 weights * np.exp(-((x - means) ** 2) / (2 * sigmas**2)),
                 axis=-1,
             )
-            return gauss - ydata
+            return gauss
 
         def gaussians_error(x, *params):
             return gaussians(x, *params) - ydata
 
-        # print(xdata.shape, ydata.shape, p0.shape)
-        popt_1, pcov_1 = curve_fit(
-            poly_error,
-            xdata,
-            ydata,
-            p0=p0_poly,
+        splitting_x = np.argmin(ydata)
+        x_left = slice(0, splitting_x, 1)
+        x_right = slice(splitting_x, np.shape(ydata)[0], 1)
+
+        popt_left, pcov_left = curve_fit(
+            linear,
+            xdata[x_left],
+            ydata[x_left],
+            p0=initial_guess_left,
+            # bounds=bounds,
+            maxfev=10000,
+            method="trf",
+        )
+        popt_right, pcov_right = curve_fit(
+            linear,
+            xdata[x_right],
+            ydata[x_right],
+            p0=initial_guess_right,
+            # bounds=bounds,
             maxfev=10000,
             method="trf",
         )
 
-        predicted_poly = poly(xdata, *popt_1)
-        reduced = ydata - predicted_poly
+        predicted_left = linear(xdata[x_left], *popt_left)
+        predicted_right = linear(xdata[x_right], *popt_right)
+        predicted_twolinear = np.concatenate((predicted_left, predicted_right))
+        reduced = ydata - predicted_twolinear
 
         popt_2, pcov_2 = curve_fit(
             gaussians_error,
             xdata,
             reduced,
-            p0=p0_gaussian,
+            p0=initial_guess_gaussian,
             maxfev=10000,
             method="trf",
         )
@@ -107,7 +152,7 @@ class LDOSFeatureExtractor:
 
         # Implement error metric
 
-        return popt_1, popt_2
+        return np.concatenate(([splitting_x], popt_left, popt_right, popt_2))
 
     @staticmethod
     def __lowpass_filter(ldos, cutoff):
@@ -117,16 +162,16 @@ class LDOSFeatureExtractor:
         return ldos
 
     @staticmethod
-    def __init_poly(poly_order):
-        lbound_poly = np.ones(poly_order + 1) * -10
-        ubound_poly = np.ones(poly_order + 1) * 10
-        parameter_space_dim_poly = poly_order + 1
+    def __initial_guess_linear():
+        lbound_poly = np.ones(2) * -10
+        ubound_poly = np.ones(2) * 10
+        parameter_space_dim_poly = 2
         p0 = np.random.uniform(0, 1, parameter_space_dim_poly)
         # scale to bounds
         return lbound_poly + (ubound_poly - lbound_poly) * p0
 
     @staticmethod
-    def __init_gaussians(n_gaussians):
+    def __initial_guess_gaussians(n_gaussians):
         lbound_weights = np.ones(n_gaussians) * -100
         ubound_weights = np.ones(n_gaussians) * 100
 
