@@ -425,6 +425,7 @@ class LDOSFeatureExtractor:
             barrier()
             return ldos_data_full
         else:
+            # TODO: Test this!
             if get_rank() == 0:
                 ldos_data_full = np.memmap(
                     use_memmap,
