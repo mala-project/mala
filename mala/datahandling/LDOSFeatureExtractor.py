@@ -1,6 +1,7 @@
 import os.path
 
 from mala import printout, get_rank, get_size
+from mala.common.parallelizer import barrier, get_comm
 from mala.targets.target import Target
 import numpy as np
 from scipy.fft import rfft, irfft
@@ -48,43 +49,65 @@ class LDOSFeatureExtractor:
             # This is not a general solution, and should be replaced by one in
             # the future.
             ldos_pointer = np.load(ldos_file, mmap_mode="r")
-            ldos_shape = np.shape(ldos_pointer)
-            full_gridsize = ldos_shape[0] * ldos_shape[1] * ldos_shape[2]
-            z_size = ldos_shape[2] // get_size()
+            full_ldos_shape = np.shape(ldos_pointer)
+            full_gridsize = (
+                full_ldos_shape[0] * full_ldos_shape[1] * full_ldos_shape[2]
+            )
+            z_size = full_ldos_shape[2] // get_size()
             z_start = get_rank() * z_size
             z_end = (get_rank() + 1) * z_size
             if get_rank() == get_size() - 1:
-                z_end = ldos_shape[2]
-            ldos = ldos_pointer[:, :, z_start:z_end, :]
-            gridsize = ldos_shape[0] * ldos_shape[1] * (z_end - z_start)
+                z_end = full_ldos_shape[2]
+            ldos = ldos_pointer[:, :, z_start:z_end, :].copy()
+            gridsize = (
+                full_ldos_shape[0] * full_ldos_shape[1] * (z_end - z_start)
+            )
             ldos_shape = np.shape(ldos)
+            ldos = ldos.reshape(gridsize, ldos_shape[3])
+
+            if dry_run:
+                ldos = ldos[
+                    np.random.randint(
+                        0,
+                        gridsize,
+                        size=100,
+                    ),
+                    :,
+                ]
+                gridsize = 100
+            print(get_rank(), "Doing z portions", z_start, z_end)
         else:
             ldos = self.target_calculator.read_from_numpy_file(ldos_file)
             ldos_shape = np.shape(ldos)
             gridsize = ldos_shape[0] * ldos_shape[1] * ldos_shape[2]
 
-        ldos = ldos.reshape(
-            [
-                gridsize,
-                ldos_shape[3],
-            ]
-        )
-        if dry_run:
-            ldos = ldos[
-                np.random.randint(
-                    0, ldos_shape[0] * ldos_shape[1] * ldos_shape[2], size=100
-                ),
-                :,
-            ]
-            gridsize = 100
+            ldos = ldos.reshape(
+                [
+                    gridsize,
+                    ldos_shape[3],
+                ]
+            )
+            if dry_run:
+                ldos = ldos[
+                    np.random.randint(
+                        0,
+                        ldos_shape[0] * ldos_shape[1] * ldos_shape[2],
+                        size=100,
+                    ),
+                    :,
+                ]
+                gridsize = 100
         # TODO: The FFT changes the dimensions from 301 to 300 - this is OK
         # for the moment since we are interested in qualitative results,
         # but should eventually be fixed!
         ldos = self.__lowpass_filter(ldos, cutoff=cutoff)
-        if dry_run:
-            np.save(filtered_filename, ldos)
-        ldos *= self.rescaling_factor
         ldos_shape = np.shape(ldos)
+
+        if dry_run and not self.parameters.use_mpi:
+            np.save(filtered_filename, ldos)
+
+        print(get_rank(), "Filtered the LDOS")
+        ldos *= self.rescaling_factor
         xdata = np.arange(ldos_shape[-1])
 
         # 5 = 2 for left linear function, 2 for right linear function, 1 for
@@ -98,49 +121,67 @@ class LDOSFeatureExtractor:
 
         # For each point within the LDOS, perform a fit to extract the
         # features.
-        self.maximum_number_of_retries = 7
+        if False:
+            self.maximum_number_of_retries = 7
 
-        for point in range(0, gridsize):
-            ydata = ldos[point, :]
-            trial_counter = 0
-            while trial_counter < self.maximum_number_of_retries:
-                try:
-                    features[point, :] = self.composite_fit(
-                        xdata,
-                        ydata,
-                        initial_guess_left,
-                        initial_guess_right,
-                        initial_guess_gaussian,
+            for point in range(0, gridsize):
+                ydata = ldos[point, :]
+                trial_counter = 0
+                while trial_counter < self.maximum_number_of_retries:
+                    try:
+                        features[point, :] = self.composite_fit(
+                            xdata,
+                            ydata,
+                            initial_guess_left,
+                            initial_guess_right,
+                            initial_guess_gaussian,
+                        )
+                        break
+                    except RuntimeError:
+                        trial_counter += 1
+                        printout("Fit failed at point ", point, ", retrying.")
+
+                        # Retrying with different initial guess.
+                        initial_guess_left = self.__initial_guess_linear()
+                        initial_guess_right = self.__initial_guess_linear()
+                        initial_guess_gaussian = (
+                            self.__initial_guess_gaussians()
+                        )
+
+                if trial_counter == self.maximum_number_of_retries:
+                    printout(
+                        "Fit failed at point ",
+                        self.maximum_number_of_retries,
+                        " times. Zeroing out features.",
                     )
-                    break
-                except RuntimeError:
-                    trial_counter += 1
-                    printout("Fit failed at point ", point, ", retrying.")
+                    features[point, :] = self.__zero_out_features(ydata)
 
-                    # Retrying with different initial guess.
-                    initial_guess_left = self.__initial_guess_linear()
-                    initial_guess_right = self.__initial_guess_linear()
-                    initial_guess_gaussian = self.__initial_guess_gaussians()
+                if not dry_run:
+                    initial_guess_left = features[point, 1:3]
+                    initial_guess_right = features[point, 3:5]
+                    initial_guess_gaussian = features[point, 5:]
+                if point % 100 == 0:
+                    print("Point: ", point, "/", gridsize)
+                    print(
+                        "Time per point: ",
+                        (time.perf_counter() - start_time) / (point + 1),
+                    )
 
-            if trial_counter == self.maximum_number_of_retries:
-                printout(
-                    "Fit failed at point ",
-                    self.maximum_number_of_retries,
-                    " times. Zeroing out features.",
-                )
-                features[point, :] = self.__zero_out_features(ydata)
+        barrier()
 
-            if not dry_run:
-                initial_guess_left = features[point, 1:3]
-                initial_guess_right = features[point, 3:5]
-                initial_guess_gaussian = features[point, 5:]
-            if point % 100 == 0:
-                print("Point: ", point, "/", gridsize)
-                print(
-                    "Time per point: ",
-                    (time.perf_counter() - start_time) / (point + 1),
-                )
-        np.save(extracted_filename, features)
+        if self.parameters.use_mpi:
+            ldos = self.__gather_ldos(
+                ldos,
+                full_ldos_shape,
+                ldos_shape[1],
+                z_start,
+                z_end,
+                z_size,
+            )
+
+        if get_rank() == 0:
+            # np.save(extracted_filename, features)
+            np.save(extracted_filename, ldos)
 
     def reconstruct_ldos(
         self, ldos_features, original_dimension=300, n_gaussians=8
@@ -301,3 +342,66 @@ class LDOSFeatureExtractor:
         p0 = np.random.uniform(0, 1, parameter_space_dim_poly)
         # scale to bounds
         return lbounds + (ubounds - lbounds) * p0
+
+    def __gather_ldos(
+        self,
+        ldos,
+        full_ldos_shape,
+        feature_size,
+        z_start,
+        z_end,
+        z_size,
+    ):
+        comm = get_comm()
+        barrier()
+
+        # First get the indices from all the ranks.
+        indices = np.array(comm.gather([get_rank(), z_start, z_end], root=0))
+        if get_rank() == 0:
+            ldos_data_full = np.empty(
+                (
+                    full_ldos_shape[0],
+                    full_ldos_shape[1],
+                    full_ldos_shape[2],
+                    feature_size,
+                ),
+                dtype=ldos.dtype,
+            )
+            ldos_data_full[:, :, z_start:z_end, :] = np.reshape(
+                ldos,
+                (
+                    full_ldos_shape[0],
+                    full_ldos_shape[1],
+                    z_size,
+                    feature_size,
+                ),
+            )[:, :, :, :]
+
+            # No MPI necessary for first rank. For all the others,
+            # collect the buffers.
+            for i in range(1, get_size()):
+                local_start = indices[i][1]
+                local_end = indices[i][2]
+                local_size = local_end - local_start
+                ldos_local = np.empty(
+                    local_size
+                    * full_ldos_shape[0]
+                    * full_ldos_shape[1]
+                    * feature_size,
+                    dtype=ldos.dtype,
+                )
+                comm.Recv(ldos_local, source=i, tag=100 + i)
+                ldos_data_full[:, :, local_start:local_end, :] = np.reshape(
+                    ldos_local,
+                    (
+                        full_ldos_shape[0],
+                        full_ldos_shape[1],
+                        local_size,
+                        feature_size,
+                    ),
+                )[:, :, :, :]
+        else:
+            ldos_data_full = np.empty([1, 1, 1, 1])
+            comm.Send(ldos, dest=0, tag=get_rank() + 100)
+        barrier()
+        return ldos_data_full
