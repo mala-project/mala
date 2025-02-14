@@ -64,6 +64,12 @@ class ACE(Descriptor):
         self._ace_mumax = None
         self._ace_reference_ensemble = None
 
+        # Will get filled during calculation of coupling coefficients.
+        self.bonds = None
+        self.maximum_cutoff_factor = None
+        self.cutoff_factors = None
+        self.lambdas = None
+
     @property
     def data_name(self):
         """Get a string that describes the target (for e.g. metadata)."""
@@ -174,7 +180,7 @@ class ACE(Descriptor):
         # Create LAMMPS instance.
         # TODO: Either rename the cutoff radius or introduce a second
         #  parameter (I would advocate for the latter)
-        if self.parameters.bispectrum_cutoff > self.maxrc:
+        if self.parameters.bispectrum_cutoff > self.maximum_cutoff_factor:
             lammps_dict = {
                 "ace_coeff_file": self.couplings_yace_file,
                 "rcutfac": self.parameters.bispectrum_cutoff,
@@ -185,7 +191,7 @@ class ACE(Descriptor):
             )
             lammps_dict = {
                 "ace_coeff_file": self.couplings_yace_file,
-                "rcutfac": self.maxrc,
+                "rcutfac": self.maximum_cutoff_factor,
             }
 
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
@@ -325,13 +331,15 @@ class ACE(Descriptor):
             rcin_default,
         ) = self.get_default_settings()
 
-        rcutfac = [float(k) for k in rc_default.split()[2:]]
-        self.maxrc = np.max(
-            rcutfac
+        self.cutoff_factors = [float(k) for k in rc_default.split()[2:]]
+        self.maximum_cutoff_factor = np.max(
+            self.cutoff_factors
         )  # set radial cutoff based on automatically generated ACE cutoffs
-        lmbda = [float(k) for k in lmb_default.split()[2:]]
-        assert len(self.bonds) == len(rcutfac) and len(self.bonds) == len(
-            lmbda
+        self.lambdas = [float(k) for k in lmb_default.split()[2:]]
+        assert len(self.bonds) == len(self.cutoff_factors) and len(
+            self.bonds
+        ) == len(
+            self.lambdas
         ), "you must have rcutfac and lmbda defined for each bond type"
 
     def calculate_coupling_coeffs(self):
@@ -379,32 +387,31 @@ class ACE(Descriptor):
 
         nus, limit_nus = self.calc_limit_nus()
 
-        if not self.parameters.ace_types_like_snap:
-            # NOTE to use unique ACE types for gridpoints, we must subtract off
-            #  dummy descriptor counts (for non-grid element types)
-            self.fingerprint_length = (
-                ncols0 + len(limit_nus) - (len(element_list) - 1)
-            )
-            # permutation symmetry adapted ACE labels
-            Apot = AcePot(
-                element_list,
-                self._ace_reference_ensemble,
-                self.parameters.ace_ranks,
-                self.parameters.ace_nmax,
-                self.parameters.ace_lmax,
-                self.parameters.ace_nradbase,
-                rcutfac,
-                lmbda,
-                rcinner,
-                drcinner,
-                lmin=self.parameters.ace_lmin,
-                **{"input_nus": limit_nus, "ccs": ccs[self.parameters.ace_M_R]}
-            )
+        # NOTE to use unique ACE types for gridpoints, we must subtract off
+        #  dummy descriptor counts (for non-grid element types)
+        self.fingerprint_length = (
+            ncols0 + len(limit_nus) - (len(element_list) - 1)
+        )
+        # permutation symmetry adapted ACE labels
+        Apot = AcePot(
+            element_list,
+            self._ace_reference_ensemble,
+            self.parameters.ace_ranks,
+            self.parameters.ace_nmax,
+            self.parameters.ace_lmax,
+            self.parameters.ace_nradbase,
+            self.cutoff_factors,
+            self.lambdas,
+            rcinner,
+            drcinner,
+            lmin=self.parameters.ace_lmin,
+            **{"input_nus": limit_nus, "ccs": ccs[self.parameters.ace_M_R]}
+        )
 
-            Apot.set_funcs(nulst=limit_nus, muflg=True, print_0s=True)
-            return Apot.write_pot(
-                "coupling_coefficients_" + str.join("_", element_list[:-1])
-            )
+        Apot.set_funcs(nulst=limit_nus, muflg=True, print_0s=True)
+        return Apot.write_pot(
+            "coupling_coefficients_" + str.join("_", element_list[:-1])
+        )
 
     def calc_limit_nus(self):
         # TODO: Add documentation what this piece of code does.
