@@ -161,6 +161,7 @@ class ACE(Descriptor):
         # Calculate and store the coupling coefficients, if necessary.
         # If coupling coefficients are provided by the user, these are
         # first checked for consistency.
+        self.calculate_bonds_and_cutoff()
         self.couplings_yace_file = self.check_coupling_coeffs(
             self.couplings_yace_file
         )
@@ -183,7 +184,7 @@ class ACE(Descriptor):
                 "one or more automatically generated ACE rcutfacs is larger than the input rcutfac- updating rcutfac accordingly"
             )
             lammps_dict = {
-                "ace_coeff_file": "coupling_coefficients.yace",
+                "ace_coeff_file": self.couplings_yace_file,
                 "rcutfac": self.maxrc,
             }
 
@@ -289,7 +290,7 @@ class ACE(Descriptor):
                 return ace_descriptors_np[:, :, :, 3:], nx * ny * nz
 
     def check_coupling_coeffs(self, coupling_file):
-        if coupling_file is not None:
+        if coupling_file is not None and os.path.isfile(coupling_file):
             with open(coupling_file, "r") as readout:
                 lines = readout.readlines()
                 element_list = (
@@ -312,6 +313,7 @@ class ACE(Descriptor):
                 ):
                     return None
                 else:
+                    print("Provided coupling coefficients OK!")
                     return coupling_file
         else:
             return None
@@ -320,8 +322,9 @@ class ACE(Descriptor):
         self._ace_mumax = len(list(set(self._atoms.symbols))) + 1
         self._ace_reference_ensemble = [0.0] * self._ace_mumax
 
-    def calculate_coupling_coeffs(self):
-        ncols0 = 3
+    def calculate_bonds_and_cutoff(self):
+        """This part has to be always calculated, while
+        calculate_coupling_coeffs is only calculated sometimes."""
         # TODO: IIRC, then these coefficients have to be calculated only ONCE
         # per element; so we should maybe think about a way of caching them.
 
@@ -345,6 +348,8 @@ class ACE(Descriptor):
             lmbda
         ), "you must have rcutfac and lmbda defined for each bond type"
 
+    def calculate_coupling_coeffs(self):
+        ncols0 = 3
         # printout("global max cutoff (angstrom)", max(rcutfac))
         rcinner = [0.0] * len(self.bonds)
         drcinner = [0.0] * len(self.bonds)
