@@ -28,7 +28,13 @@ class LDOSFeatureExtractor:
         self.number_of_gaussians = number_of_gaussians
         self.maximum_number_of_retries = maximum_number_of_retries
 
-    def extract_features(self, ldos_file, cutoff=30, dry_run=False):
+    def extract_features(
+        self,
+        ldos_file,
+        cutoff=30,
+        dry_run=False,
+        file_based_communication=False,
+    ):
         # Initialize everything needed for the fit.
         initial_guess_left = self.__initial_guess_linear()
         initial_guess_right = self.__initial_guess_linear()
@@ -39,6 +45,10 @@ class LDOSFeatureExtractor:
         filename = os.path.basename(ldos_file).split(".")[0]
         extracted_filename = os.path.join(path, filename + "_extracted.npy")
         filtered_filename = os.path.join(path, filename + "_filtered.npy")
+        if file_based_communication:
+            memmap = os.path.join(path, filename + "_temp.npy_")
+        else:
+            memmap = None
 
         # Load and filter the LDOS.
         if self.parameters.use_mpi:
@@ -180,6 +190,7 @@ class LDOSFeatureExtractor:
                 5 + 3 * self.number_of_gaussians,
                 z_start,
                 z_end,
+                use_memmap=memmap,
             )
 
         if get_rank() == 0:
@@ -353,27 +364,93 @@ class LDOSFeatureExtractor:
     # refactored into a common function.
     @staticmethod
     def __gather_ldos_features(
-        ldos,
-        full_ldos_shape,
-        feature_size,
-        z_start,
-        z_end,
+        ldos, full_ldos_shape, feature_size, z_start, z_end, use_memmap=None
     ):
         comm = get_comm()
         barrier()
 
-        # First get the indices from all the ranks.
-        indices = np.array(comm.gather([get_rank(), z_start, z_end], root=0))
-        if get_rank() == 0:
-            ldos_data_full = np.empty(
-                (
-                    full_ldos_shape[0],
-                    full_ldos_shape[1],
-                    full_ldos_shape[2],
-                    feature_size,
-                ),
-                dtype=ldos.dtype,
+        if use_memmap is None:
+            # First get the indices from all the ranks.
+            indices = np.array(
+                comm.gather([get_rank(), z_start, z_end], root=0)
             )
+            if get_rank() == 0:
+                ldos_data_full = np.empty(
+                    (
+                        full_ldos_shape[0],
+                        full_ldos_shape[1],
+                        full_ldos_shape[2],
+                        feature_size,
+                    ),
+                    dtype=ldos.dtype,
+                )
+                ldos_data_full[:, :, z_start:z_end, :] = np.reshape(
+                    ldos,
+                    (
+                        full_ldos_shape[0],
+                        full_ldos_shape[1],
+                        z_end - z_start,
+                        feature_size,
+                    ),
+                )[:, :, :, :]
+
+                # No MPI necessary for first rank. For all the others,
+                # collect the buffers.
+                for i in range(1, get_size()):
+                    local_start = indices[i][1]
+                    local_end = indices[i][2]
+                    local_size = local_end - local_start
+                    ldos_local = np.empty(
+                        local_size
+                        * full_ldos_shape[0]
+                        * full_ldos_shape[1]
+                        * feature_size,
+                        dtype=ldos.dtype,
+                    )
+                    comm.Recv(ldos_local, source=i, tag=100 + i)
+                    ldos_data_full[:, :, local_start:local_end, :] = (
+                        np.reshape(
+                            ldos_local,
+                            (
+                                full_ldos_shape[0],
+                                full_ldos_shape[1],
+                                local_size,
+                                feature_size,
+                            ),
+                        )[:, :, :, :]
+                    )
+            else:
+                ldos_data_full = np.empty([1, 1, 1, 1])
+                comm.Send(ldos, dest=0, tag=get_rank() + 100)
+            barrier()
+            return ldos_data_full
+        else:
+            if get_rank() == 0:
+                ldos_data_full = np.memmap(
+                    use_memmap,
+                    shape=(
+                        full_ldos_shape[0],
+                        full_ldos_shape[1],
+                        full_ldos_shape[2],
+                        feature_size,
+                    ),
+                    mode="w+",
+                    dtype=ldos.dtype,
+                )
+            barrier()
+            if get_rank() != 0:
+                ldos_data_full = np.memmap(
+                    use_memmap,
+                    shape=(
+                        full_ldos_shape[0],
+                        full_ldos_shape[1],
+                        full_ldos_shape[2],
+                        feature_size,
+                    ),
+                    mode="r+",
+                    dtype=ldos.dtype,
+                )
+            barrier()
             ldos_data_full[:, :, z_start:z_end, :] = np.reshape(
                 ldos,
                 (
@@ -383,32 +460,4 @@ class LDOSFeatureExtractor:
                     feature_size,
                 ),
             )[:, :, :, :]
-
-            # No MPI necessary for first rank. For all the others,
-            # collect the buffers.
-            for i in range(1, get_size()):
-                local_start = indices[i][1]
-                local_end = indices[i][2]
-                local_size = local_end - local_start
-                ldos_local = np.empty(
-                    local_size
-                    * full_ldos_shape[0]
-                    * full_ldos_shape[1]
-                    * feature_size,
-                    dtype=ldos.dtype,
-                )
-                comm.Recv(ldos_local, source=i, tag=100 + i)
-                ldos_data_full[:, :, local_start:local_end, :] = np.reshape(
-                    ldos_local,
-                    (
-                        full_ldos_shape[0],
-                        full_ldos_shape[1],
-                        local_size,
-                        feature_size,
-                    ),
-                )[:, :, :, :]
-        else:
-            ldos_data_full = np.empty([1, 1, 1, 1])
-            comm.Send(ldos, dest=0, tag=get_rank() + 100)
-        barrier()
-        return ldos_data_full
+            return ldos_data_full
