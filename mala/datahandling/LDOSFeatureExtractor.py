@@ -50,20 +50,18 @@ class LDOSFeatureExtractor:
             # the future.
             ldos_pointer = np.load(ldos_file, mmap_mode="r")
             full_ldos_shape = np.shape(ldos_pointer)
-            full_gridsize = (
-                full_ldos_shape[0] * full_ldos_shape[1] * full_ldos_shape[2]
-            )
+
             z_size = full_ldos_shape[2] // get_size()
             z_start = get_rank() * z_size
             z_end = (get_rank() + 1) * z_size
+
             if get_rank() == get_size() - 1:
                 z_end = full_ldos_shape[2]
             ldos = ldos_pointer[:, :, z_start:z_end, :].copy()
             gridsize = (
                 full_ldos_shape[0] * full_ldos_shape[1] * (z_end - z_start)
             )
-            ldos_shape = np.shape(ldos)
-            ldos = ldos.reshape(gridsize, ldos_shape[3])
+            ldos = ldos.reshape(gridsize, full_ldos_shape[3])
 
             if dry_run:
                 ldos = ldos[
@@ -75,7 +73,7 @@ class LDOSFeatureExtractor:
                     :,
                 ]
                 gridsize = 100
-            print(get_rank(), "Doing z portions", z_start, z_end)
+            print("Rank", get_rank(), "Doing z portions", z_start, z_end)
         else:
             ldos = self.target_calculator.read_from_numpy_file(ldos_file)
             ldos_shape = np.shape(ldos)
@@ -106,7 +104,6 @@ class LDOSFeatureExtractor:
         if dry_run and not self.parameters.use_mpi:
             np.save(filtered_filename, ldos)
 
-        print(get_rank(), "Filtered the LDOS")
         ldos *= self.rescaling_factor
         xdata = np.arange(ldos_shape[-1])
 
@@ -121,67 +118,76 @@ class LDOSFeatureExtractor:
 
         # For each point within the LDOS, perform a fit to extract the
         # features.
-        if False:
-            self.maximum_number_of_retries = 7
+        self.maximum_number_of_retries = 7
 
-            for point in range(0, gridsize):
-                ydata = ldos[point, :]
-                trial_counter = 0
-                while trial_counter < self.maximum_number_of_retries:
-                    try:
-                        features[point, :] = self.composite_fit(
-                            xdata,
-                            ydata,
-                            initial_guess_left,
-                            initial_guess_right,
-                            initial_guess_gaussian,
-                        )
-                        break
-                    except RuntimeError:
-                        trial_counter += 1
-                        printout("Fit failed at point ", point, ", retrying.")
-
-                        # Retrying with different initial guess.
-                        initial_guess_left = self.__initial_guess_linear()
-                        initial_guess_right = self.__initial_guess_linear()
-                        initial_guess_gaussian = (
-                            self.__initial_guess_gaussians()
-                        )
-
-                if trial_counter == self.maximum_number_of_retries:
-                    printout(
-                        "Fit failed at point ",
-                        self.maximum_number_of_retries,
-                        " times. Zeroing out features.",
+        for point in range(0, gridsize):
+            ydata = ldos[point, :]
+            trial_counter = 0
+            while trial_counter < self.maximum_number_of_retries:
+                try:
+                    features[point, :] = self.composite_fit(
+                        xdata,
+                        ydata,
+                        initial_guess_left,
+                        initial_guess_right,
+                        initial_guess_gaussian,
                     )
-                    features[point, :] = self.__zero_out_features(ydata)
-
-                if not dry_run:
-                    initial_guess_left = features[point, 1:3]
-                    initial_guess_right = features[point, 3:5]
-                    initial_guess_gaussian = features[point, 5:]
-                if point % 100 == 0:
-                    print("Point: ", point, "/", gridsize)
+                    break
+                except RuntimeError:
+                    trial_counter += 1
                     print(
-                        "Time per point: ",
-                        (time.perf_counter() - start_time) / (point + 1),
+                        "Rank",
+                        get_rank(),
+                        ": Fit failed at point ",
+                        point,
+                        ", retrying.",
                     )
+
+                    # Retrying with different initial guess.
+                    initial_guess_left = self.__initial_guess_linear()
+                    initial_guess_right = self.__initial_guess_linear()
+                    initial_guess_gaussian = self.__initial_guess_gaussians()
+
+            if trial_counter == self.maximum_number_of_retries:
+                print(
+                    "Rank",
+                    get_rank(),
+                    ": Fit failed at point ",
+                    self.maximum_number_of_retries,
+                    " times. Zeroing out features.",
+                )
+                features[point, :] = self.__zero_out_features(ydata)
+
+            if not dry_run:
+                initial_guess_left = features[point, 1:3]
+                initial_guess_right = features[point, 3:5]
+                initial_guess_gaussian = features[point, 5:]
+            if point % 100 == 0:
+                print("Rank", get_rank(), "Point: ", point, "/", gridsize)
+                print(
+                    "Rank",
+                    get_rank(),
+                    ": Time per point: ",
+                    (time.perf_counter() - start_time) / (point + 1),
+                )
 
         barrier()
 
         if self.parameters.use_mpi:
-            ldos = self.__gather_ldos(
-                ldos,
+            features = self.__gather_ldos_features(
+                features,
                 full_ldos_shape,
-                ldos_shape[1],
+                5 + 3 * self.number_of_gaussians,
                 z_start,
                 z_end,
                 z_size,
             )
 
         if get_rank() == 0:
-            # np.save(extracted_filename, features)
-            np.save(extracted_filename, ldos)
+            np.save(extracted_filename, features)
+
+            # For debugging purposes
+            # np.save(extracted_filename, ldos)
 
     def reconstruct_ldos(
         self, ldos_features, original_dimension=300, n_gaussians=8
@@ -343,14 +349,16 @@ class LDOSFeatureExtractor:
         # scale to bounds
         return lbounds + (ubounds - lbounds) * p0
 
-    def __gather_ldos(
-        self,
+    # TODO:
+    # This is partially a code duplicate from the ldos.py file. It should be
+    # refactored into a common function.
+    @staticmethod
+    def __gather_ldos_features(
         ldos,
         full_ldos_shape,
         feature_size,
         z_start,
         z_end,
-        z_size,
     ):
         comm = get_comm()
         barrier()
@@ -372,7 +380,7 @@ class LDOSFeatureExtractor:
                 (
                     full_ldos_shape[0],
                     full_ldos_shape[1],
-                    z_size,
+                    z_end - z_start,
                     feature_size,
                 ),
             )[:, :, :, :]
