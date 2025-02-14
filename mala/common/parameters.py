@@ -506,8 +506,6 @@ class ParametersDescriptors(ParametersBase):
         self.minterpy_polynomial_degree = 4
         self.minterpy_lp_norm = 2
 
-        # NOTE that if types_like_snap=True, you will instead need for your ace_elements:
-        # self.ace_elements = ["Al"]
         self.ace_ranks = [1, 2, 3]
         self.ace_nmax = [6, 2, 2]
         self.ace_lmax = [0, 2, 2]

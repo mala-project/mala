@@ -266,7 +266,7 @@ class ACE(Descriptor):
                 "mygrid",
                 0,
                 2,
-                (nz, ny, nx, self.fingerprint_length),
+                (nz, ny, nx, self.feature_size),
                 use_fp64=use_fp64,
             )
             self._clean_calculation(lmp, keep_logs)
@@ -389,7 +389,7 @@ class ACE(Descriptor):
 
         # NOTE to use unique ACE types for gridpoints, we must subtract off
         #  dummy descriptor counts (for non-grid element types)
-        self.fingerprint_length = (
+        self.feature_size = (
             ncols0 + len(limit_nus) - (len(element_list) - 1)
         )
         # permutation symmetry adapted ACE labels
