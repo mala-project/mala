@@ -513,7 +513,6 @@ class ParametersDescriptors(ParametersBase):
         self.ace_lmax = [0, 2, 2]
         self.ace_nradbase = max(self.ace_nmax)
         self.ace_lmin = [0, 0, 0]
-        self.ace_reference_ens = [0.0, 0.0]
 
         self.ace_nshell = 2.0
         self.ace_apply_shift = False
@@ -530,7 +529,6 @@ class ParametersDescriptors(ParametersBase):
         # if grid_filter, types_like_snap must be False
         # if grid_filter, padfunc must be True
         self.ace_grid_filter = True
-        self.ace_types_like_snap = False
         self.ace_padfunc = True
 
     @property

@@ -4,7 +4,7 @@ import mala
 
 from mala.datahandling.data_repo import data_repo_path
 
-data_path = './'
+data_path = "./"
 
 """
 Shows how this framework can be used to preprocess
@@ -38,15 +38,13 @@ parameters = mala.Parameters()
 # ACE parameters.
 parameters.descriptors.descriptor_type = "ACE"
 parameters.descriptors.bispectrum_cutoff = 5.8
-parameters.descriptors.ace_ranks = [1,2,3]
-parameters.descriptors.ace_lmax = [0,1,1]
-parameters.descriptors.ace_nmax = [1,1,1]
-parameters.descriptors.ace_lmin = [0,0,0]
-#NOTE that the following setting should rarely be 'True'
-parameters.descriptors.ace_types_like_snap = False
-#NOTE that with ACE, you always need to specify an extra "element" for the grid
+parameters.descriptors.ace_ranks = [1, 2, 3]
+parameters.descriptors.ace_lmax = [0, 1, 1]
+parameters.descriptors.ace_nmax = [1, 1, 1]
+parameters.descriptors.ace_lmin = [0, 0, 0]
+# NOTE that with ACE, you always need to specify an extra "element" for the grid
 #  points. The "element" assigned to gridpoints should be labeled 'G'
-parameters.descriptors.ace_elements = ['Be','G']
+parameters.descriptors.ace_elements = ["Be", "G"]
 # LDOS parameters.
 parameters.targets.target_type = "LDOS"
 parameters.targets.ldos_gridsize = 11

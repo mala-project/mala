@@ -4,7 +4,7 @@ import mala
 
 from mala.datahandling.data_repo import data_repo_path
 
-data_path = './'
+data_path = "./"
 
 """
 This example shows how a neural network can be trained on material
@@ -20,7 +20,7 @@ from *.npy files.
 ####################
 
 parameters = mala.Parameters()
-# Specify the data scaling. 
+# Specify the data scaling.
 parameters.data.input_rescaling_type = "feature-wise-standard"
 parameters.data.output_rescaling_type = "normal"
 # Specify the used activation function.
@@ -43,13 +43,12 @@ parameters.targets.ldos_gridoffset_ev = -5
 # ACE parameters.
 parameters.descriptors.descriptor_type = "ACE"
 parameters.descriptors.bispectrum_cutoff = 5.8
-parameters.descriptors.ace_ranks = [1,2,3]
-parameters.descriptors.ace_lmax = [0,1,1]
-parameters.descriptors.ace_nmax = [1,1,1]
-parameters.descriptors.ace_lmin = [0,0,0]
-parameters.descriptors.ace_types_like_snap = False
-parameters.descriptors.ace_elements = ['Be','G']
-#parameters.lammps_compute_file = "/path/to/mala/mala/descriptors/in.acegrid.python"
+parameters.descriptors.ace_ranks = [1, 2, 3]
+parameters.descriptors.ace_lmax = [0, 1, 1]
+parameters.descriptors.ace_nmax = [1, 1, 1]
+parameters.descriptors.ace_lmin = [0, 0, 0]
+parameters.descriptors.ace_elements = ["Be", "G"]
+# parameters.lammps_compute_file = "/path/to/mala/mala/descriptors/in.acegrid.python"
 
 
 ####################

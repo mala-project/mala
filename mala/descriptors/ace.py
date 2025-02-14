@@ -195,34 +195,20 @@ class ACE(Descriptor):
         # TODO: Can we get rid of the extra "ace_like_snap" files here?
         if self.parameters.lammps_compute_file == "":
             filepath = __file__.split("ace")[0]
-            if not self.parameters.ace_types_like_snap:
-                if self.parameters._configuration["mpi"]:
-                    if self.parameters.use_z_splitting:
-                        self.parameters.lammps_compute_file = os.path.join(
-                            filepath, "in.acegridlocal.python"
-                        )
-                    else:
-                        self.parameters.lammps_compute_file = os.path.join(
-                            filepath, "in.acegridlocal_defaultproc.python"
-                        )
+            if self.parameters._configuration["mpi"]:
+                if self.parameters.use_z_splitting:
+                    self.parameters.lammps_compute_file = os.path.join(
+                        filepath, "in.acegridlocal.python"
+                    )
                 else:
                     self.parameters.lammps_compute_file = os.path.join(
-                        filepath, "in.acegrid.python"
+                        filepath, "in.acegridlocal_defaultproc.python"
                     )
-            if self.parameters.ace_types_like_snap:
-                if self.parameters._configuration["mpi"]:
-                    if self.parameters.use_z_splitting:
-                        self.parameters.lammps_compute_file = os.path.join(
-                            filepath, "in.acegridlocal_s.python"
-                        )
-                    else:
-                        self.parameters.lammps_compute_file = os.path.join(
-                            filepath, "in.acegridlocal_defaultproc_s.python"
-                        )
-                else:
-                    self.parameters.lammps_compute_file = os.path.join(
-                        filepath, "in.acegrid_s.python"
-                    )
+            else:
+                self.parameters.lammps_compute_file = os.path.join(
+                    filepath, "in.acegrid.python"
+                )
+
         # Do the LAMMPS calculation and clean up.
         lmp.file(self.parameters.lammps_compute_file)
 
@@ -349,6 +335,8 @@ class ACE(Descriptor):
         ), "you must have rcutfac and lmbda defined for each bond type"
 
     def calculate_coupling_coeffs(self):
+        element_list = sorted(list(set(self._atoms.symbols))) + ["G"]
+
         ncols0 = 3
         # printout("global max cutoff (angstrom)", max(rcutfac))
         rcinner = [0.0] * len(self.bonds)
@@ -418,29 +406,6 @@ class ACE(Descriptor):
                 "coupling_coefficients_" + str.join("_", element_list[:-1])
             )
 
-        # add case for full basis separately
-        # NOTE that this basis evaluates grid-atom and atom-atom descriptors that are not needed in the current implementation of MALA
-        elif self.parameters.ace_types_like_snap:
-            self.fingerprint_length = ncols0 + len(nus)
-            # permutation symmetry adapted ACE labels
-            Apot = AcePot(
-                element_list,
-                self._ace_reference_ensemble,
-                self.parameters.ace_ranks,
-                self.parameters.ace_nmax,
-                self.parameters.ace_lmax,
-                self.parameters.ace_nradbase,
-                rcutfac,
-                lmbda,
-                rcinner,
-                drcinner,
-                lmin=self.parameters.ace_lmin,
-                **{"input_nus": nus, "ccs": ccs[self.parameters.ace_M_R]}
-            )
-            return Apot.write_pot(
-                "coupling_coefficients_" + str.join("_", element_list[:-1])
-            )
-
     def calc_limit_nus(self):
         # TODO: Add documentation what this piece of code does.
         # Also, maybe make it private?
@@ -475,42 +440,26 @@ class ACE(Descriptor):
         nus.sort(key=lambda x: len(x), reverse=False)
         nus.sort(key=lambda x: mu0s[nus_unsort.index(x)], reverse=False)
         musins = range(len(list(set(self._atoms.symbols))))
-        all_funcs = {}
-        if self.parameters.ace_types_like_snap:
-            byattyp, byattypfiltered = self.srt_by_attyp(nus, 1)
-            if self.parameters.ace_grid_filter:
-                assert (
-                    self.parameters.ace_padfunc
-                ), "must pad with at least 1 other basis function for other element types to work in LAMMPS - set padfunc=True"
-                limit_nus = byattypfiltered["%d" % 0]
-                if self.parameters.ace_padfunc:
-                    for muii in musins:
-                        limit_nus.append(byattypfiltered["%d" % muii][0])
-            elif not self.parameters.ace_grid_filter:
-                limit_nus = byattyp["%d" % 0]
 
-        else:
-            # +1 here because this should include the G for grid.
-            byattyp, byattypfiltered = self.srt_by_attyp(
-                nus, len(list(set(self._atoms.symbols))) + 1
-            )
-            if self.parameters.ace_grid_filter:
-                limit_nus = byattypfiltered[
-                    "%d" % (len(list(set(self._atoms.symbols))))
-                ]
-                assert (
-                    self.parameters.ace_padfunc
-                ), "must pad with at least 1 other basis function for other element types to work in LAMMPS - set padfunc=True"
-                if self.parameters.ace_padfunc:
-                    for muii in musins:
-                        limit_nus.append(byattypfiltered["%d" % muii][0])
-            elif not self.parameters.ace_grid_filter:
-                limit_nus = byattyp[
-                    "%d" % (len(list(set(self._atoms.symbols))))
-                ]
-                if self.parameters.ace_padfunc:
-                    for muii in musins:
-                        limit_nus.append(byattyp["%d" % muii][0])
+        # +1 here because this should include the G for grid.
+        byattyp, byattypfiltered = self.srt_by_attyp(
+            nus, len(list(set(self._atoms.symbols))) + 1
+        )
+        if self.parameters.ace_grid_filter:
+            limit_nus = byattypfiltered[
+                "%d" % (len(list(set(self._atoms.symbols))))
+            ]
+            assert (
+                self.parameters.ace_padfunc
+            ), "must pad with at least 1 other basis function for other element types to work in LAMMPS - set padfunc=True"
+            if self.parameters.ace_padfunc:
+                for muii in musins:
+                    limit_nus.append(byattypfiltered["%d" % muii][0])
+        elif not self.parameters.ace_grid_filter:
+            limit_nus = byattyp["%d" % (len(list(set(self._atoms.symbols))))]
+            if self.parameters.ace_padfunc:
+                for muii in musins:
+                    limit_nus.append(byattyp["%d" % muii][0])
         # printout(
         #    "all basis functions", len(nus), "grid subset", len(limit_nus)
         # )
