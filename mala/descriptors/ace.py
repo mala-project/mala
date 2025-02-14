@@ -7,6 +7,7 @@ import pickle
 
 import ase
 import ase.io
+from ase.data import atomic_numbers, atomic_masses
 from importlib.util import find_spec
 import numpy as np
 from scipy import special
@@ -149,7 +150,7 @@ class ACE(Descriptor):
         from lammps import constants as lammps_constants
 
         use_fp64 = kwargs.get("use_fp64", False)
-        keep_logs = kwargs.get("keep_logs", False)
+        keep_logs = kwargs.get("keep_logs", True)
 
         lammps_format = "lammps-data"
         self.setup_lammps_tmp_files("acegrid", outdir)
@@ -193,6 +194,10 @@ class ACE(Descriptor):
                 "ace_coeff_file": self.couplings_yace_file,
                 "rcutfac": self.maximum_cutoff_factor,
             }
+        for idx, element in enumerate(sorted(list(set(self._atoms.numbers)))):
+            lammps_dict["mass" + str(idx) + 1] = atomic_masses[
+                atomic_numbers[element]
+            ]
 
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
@@ -212,7 +217,10 @@ class ACE(Descriptor):
                     )
             else:
                 self.parameters.lammps_compute_file = os.path.join(
-                    filepath, "in.acegrid.python"
+                    filepath,
+                    "in.acegrid_n{0}.python".format(
+                        len(set(self._atoms.numbers))
+                    ),
                 )
 
         # Do the LAMMPS calculation and clean up.
@@ -389,9 +397,7 @@ class ACE(Descriptor):
 
         # NOTE to use unique ACE types for gridpoints, we must subtract off
         #  dummy descriptor counts (for non-grid element types)
-        self.feature_size = (
-            ncols0 + len(limit_nus) - (len(element_list) - 1)
-        )
+        self.feature_size = ncols0 + len(limit_nus) - (len(element_list) - 1)
         # permutation symmetry adapted ACE labels
         Apot = AcePot(
             element_list,
