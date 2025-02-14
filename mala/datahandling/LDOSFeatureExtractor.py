@@ -128,8 +128,6 @@ class LDOSFeatureExtractor:
 
         # For each point within the LDOS, perform a fit to extract the
         # features.
-        self.maximum_number_of_retries = 7
-
         for point in range(0, gridsize):
             ydata = ldos[point, :]
             trial_counter = 0
@@ -195,6 +193,9 @@ class LDOSFeatureExtractor:
 
         if get_rank() == 0:
             np.save(extracted_filename, features)
+
+            if memmap is not None:
+                os.remove(memmap)
 
             # For debugging purposes
             # np.save(extracted_filename, ldos)
@@ -425,7 +426,6 @@ class LDOSFeatureExtractor:
             barrier()
             return ldos_data_full
         else:
-            # TODO: Test this!
             if get_rank() == 0:
                 ldos_data_full = np.memmap(
                     use_memmap,
