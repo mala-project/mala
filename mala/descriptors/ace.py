@@ -195,9 +195,7 @@ class ACE(Descriptor):
                 "rcutfac": self.maximum_cutoff_factor,
             }
         for idx, element in enumerate(sorted(list(set(self._atoms.numbers)))):
-            lammps_dict["mass" + str(idx) + 1] = atomic_masses[
-                atomic_numbers[element]
-            ]
+            lammps_dict["mass" + str(idx + 1)] = atomic_masses[element]
 
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
@@ -225,6 +223,7 @@ class ACE(Descriptor):
 
         # Do the LAMMPS calculation and clean up.
         lmp.file(self.parameters.lammps_compute_file)
+        print("Calculation done?")
 
         # Set things not accessible from LAMMPS
         # Extract data from LAMMPS calculation.

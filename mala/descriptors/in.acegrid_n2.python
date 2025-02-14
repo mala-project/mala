@@ -1,4 +1,4 @@
-in.acegrid_n1.python# Calculate SNAP bispectrum descriptors on a grid
+# Calculate SNAP bispectrum descriptors on a grid
 
 # pass in values ngridx, ngridy, ngridz, rcutfac, atom_config_fname, ace_options
 # using command-line -var option
