@@ -180,7 +180,6 @@ class LDOSFeatureExtractor:
                 5 + 3 * self.number_of_gaussians,
                 z_start,
                 z_end,
-                z_size,
             )
 
         if get_rank() == 0:
