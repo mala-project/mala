@@ -157,7 +157,7 @@ class LDOSFeatureExtractor:
 
         return (
             predicted_twolinear + predicted_gaussian
-        )  # / self.rescaling_factor
+        ) / self.rescaling_factor
 
     def __zero_out_features(self, ydata):
         splitting_x = int(np.shape(ydata)[0] / 2)
