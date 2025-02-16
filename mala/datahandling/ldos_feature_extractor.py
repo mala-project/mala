@@ -18,7 +18,7 @@ class LDOSFeatureExtractor:
         target_calculator=None,
         rescaling_factor=1000,
         number_of_gaussians=8,
-        maximum_number_of_retries=7,
+        maximum_number_of_retries=3,
     ):
         self.parameters = parameters
         self.target_calculator = target_calculator
@@ -61,12 +61,26 @@ class LDOSFeatureExtractor:
             ldos_pointer = np.load(ldos_file, mmap_mode="r")
             full_ldos_shape = np.shape(ldos_pointer)
 
-            z_size = full_ldos_shape[2] // get_size()
-            z_start = get_rank() * z_size
-            z_end = (get_rank() + 1) * z_size
+            # Every rank gets an equal number of z-planes, except for the
+            # first ranks, which share the rest.
+            z_planes_evenly_split = full_ldos_shape[2] // get_size()
+            z_planes_unevenly_split = (
+                full_ldos_shape[2] - z_planes_evenly_split * get_size()
+            )
 
-            if get_rank() == get_size() - 1:
-                z_end = full_ldos_shape[2]
+            # Assigning the rest to the first ranks.
+            # It may make more sense to assign those to the middle ranks
+            # in the case of bilayer graphene, but this should work for now.
+            if get_rank() < z_planes_unevenly_split:
+                z_start = get_rank() * (z_planes_evenly_split + 1)
+                z_end = z_start + z_planes_evenly_split + 1
+            else:
+                z_start = (
+                    get_rank() * z_planes_evenly_split
+                    + z_planes_unevenly_split
+                )
+                z_end = z_start + z_planes_evenly_split
+
             ldos = ldos_pointer[:, :, z_start:z_end, :].copy()
             gridsize = (
                 full_ldos_shape[0] * full_ldos_shape[1] * (z_end - z_start)
