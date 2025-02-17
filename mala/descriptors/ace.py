@@ -283,11 +283,14 @@ class ACE(Descriptor):
 
         Parameters
         ----------
-        coupling_file
+        coupling_file : str
+            Path to the coupling coefficients file.
 
         Returns
         -------
-
+        coupling_file : str
+            Path to the coupling coefficients file. None if the file was
+            found incompatible.
         """
 
         if coupling_file is not None and os.path.isfile(coupling_file):
@@ -313,14 +316,9 @@ class ACE(Descriptor):
                 ):
                     return None
                 else:
-                    print("Provided coupling coefficients OK!")
                     return coupling_file
         else:
             return None
-
-    def __init_element_arrays(self):
-        self._ace_mumax = len(list(set(self._atoms.symbols))) + 1
-        self._ace_reference_ensemble = [0.0] * self._ace_mumax
 
     def calculate_bonds_and_cutoff(self):
         """This part has to be always calculated, while
@@ -351,6 +349,17 @@ class ACE(Descriptor):
         ), "you must have rcutfac and lmbda defined for each bond type"
 
     def calculate_coupling_coeffs(self):
+        """
+        Calculate coupling coefficients and save them to file.
+
+        @JamesGoff: Is there a good reference for the equations implemented
+        here?
+
+        Returns
+        -------
+        coupling_file : str
+            Path to the coupling coefficients file.
+        """
         element_list = sorted(list(set(self._atoms.symbols))) + ["G"]
 
         ncols0 = 3
@@ -358,20 +367,14 @@ class ACE(Descriptor):
         rcinner = [0.0] * len(self.bonds)
         drcinner = [0.0] * len(self.bonds)
 
-        coeffs = None
         ldict = {
             ranki: li
             for ranki, li in zip(
                 self.parameters.ace_ranks, self.parameters.ace_lmax
             )
         }
-        rankstrlst = ["%s"] * len(self.parameters.ace_ranks)
-        rankstr = "".join(rankstrlst) % tuple(self.parameters.ace_ranks)
-        lstrlst = ["%s"] * len(self.parameters.ace_ranks)
-        lstr = "".join(lstrlst) % tuple(self.parameters.ace_lmax)
 
         # load or generate generalized coupling coefficients
-
         if self.parameters.ace_coupling_type == "wig":
             ccs = wigner_coupling.get_coupling(
                 self.__precomputed_wigner_3j,
@@ -408,10 +411,10 @@ class ACE(Descriptor):
             self.parameters.ace_nradbase,
             self.cutoff_factors,
             self.lambdas,
+            ccs[self.parameters.ace_M_R],
             rcinner,
             drcinner,
             lmin=self.parameters.ace_lmin,
-            **{"input_nus": limit_nus, "ccs": ccs[self.parameters.ace_M_R]}
         )
 
         Apot.set_funcs(nulst=limit_nus, muflg=True, print_0s=True)
@@ -672,6 +675,15 @@ class ACE(Descriptor):
                 pickle.dump(cg, writecg)
             # pickle.dump(cg,'cg.pkl')
         return cg
+
+    def __init_element_arrays(self):
+        """
+        Initialize reference ensemble and mumax parameter.
+
+        These depend on the number of elements.
+        """
+        self._ace_mumax = len(list(set(self._atoms.symbols))) + 1
+        self._ace_reference_ensemble = [0.0] * self._ace_mumax
 
     @staticmethod
     def __init_element_lists():

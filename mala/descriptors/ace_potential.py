@@ -17,6 +17,7 @@ class AcePot:
         nradbase,
         rcut,
         lmbda,
+        css,
         rcutinner=0.0,
         drcutinner=0.01,
         lmin=1,
@@ -24,15 +25,11 @@ class AcePot:
         manuallabs=None,
         **kwargs
     ):
-        self.ccs = None
-        if kwargs != None:
+        if kwargs is not None:
             self.__dict__.update(kwargs)
 
-        if self.ccs == None:
-            self.global_ccs = generate_ccs()
-        else:
-            self.global_ccs = self.ccs
-            self.global_ccs[1] = {"0": {tuple([]): {"0": 1.0}}}
+        self.global_ccs = css
+        self.global_ccs[1] = {"0": {tuple([]): {"0": 1.0}}}
         self.E0 = reference_ens
         self.ranks = ranks
         self.elements = elements
@@ -43,12 +40,14 @@ class AcePot:
         self.global_FSparams = [1.0, 1.0]
         self.global_rhocut = 100000
         self.global_drhocut = 250
+
         # assert the same nmax,lmax,nradbase (e.g. same basis) for each bond type
         self.radbasetype = "ChebExpCos"
         self.global_nmax = nmax
         self.global_lmax = lmax
         self.b_basis = b_basis
         assert len(nmax) == len(lmax), "nmax and lmax arrays must be same size"
+
         self.global_nradbase = nradbase
         if type(rcut) != dict and type(rcut) != list:
             self.global_rcut = rcut
@@ -62,6 +61,7 @@ class AcePot:
             self.rcutinner = rcutinner
             self.drcutinner = drcutinner
             self.lmin = lmin
+
         self.manuallabs = manuallabs
         self.set_embeddings()
         self.set_bonds()
@@ -304,6 +304,16 @@ class AcePot:
         self.permunu = permunu
 
     def write_pot(self, name):
+        class NpEncoder(json.JSONEncoder):
+            def default(self, obj):
+                if isinstance(obj, np.integer):
+                    return int(obj)
+                if isinstance(obj, np.floating):
+                    return float(obj)
+                if isinstance(obj, np.ndarray):
+                    return obj.tolist()
+                return super(NpEncoder, self).default(obj)
+
         srt_nus = []
         with open("%s.yace" % name, "w") as writeout:
             e0lst = ["%f"] * len(self.elements)
@@ -338,14 +348,3 @@ class AcePot:
                     writeout.write(mufuncstr)
 
         return "%s.yace" % name
-
-
-class NpEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.integer):
-            return int(obj)
-        if isinstance(obj, np.floating):
-            return float(obj)
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return super(NpEncoder, self).default(obj)
