@@ -66,6 +66,7 @@ def rank_1_tree(Wigner_3j, l, L_R=0, M_R=0):
                 decomposed[inter][mstr] = float(w)
     return decomposed
 
+
 def rank_2_tree(Wigner_3j, l, L_R=0, M_R=0):
     nodes, remainder = acu.tree(l)
     node = nodes[0]
@@ -97,6 +98,7 @@ def rank_2_tree(Wigner_3j, l, L_R=0, M_R=0):
 
                 decomposed[inter][mstr] = w
     return decomposed
+
 
 def rank_3_tree(Wigner_3j, l, L_R=0, M_R=0):
     full_inter_tuples = acu.tree_l_inters(l, L_R=L_R, M_R=M_R)
@@ -131,6 +133,7 @@ def rank_3_tree(Wigner_3j, l, L_R=0, M_R=0):
                     decomposed[inter][mstr] = w
     return decomposed
 
+
 def rank_4_tree(Wigner_3j, l, L_R=0, M_R=0):
     nodes, remainder = acu.tree(l)
     mstrs = acu.get_ms(l, M_R)
@@ -164,8 +167,7 @@ def rank_4_tree(Wigner_3j, l, L_R=0, M_R=0):
                             % (l[2], m_ints[2], l[3], m_ints[3], L2, -M2)
                         ]
                         w3 = Wigner_3j[
-                            "%d,%d,%d,%d,%d,%d"
-                            % (L1, M1, L2, M2, L_R, -M_R)
+                            "%d,%d,%d,%d,%d,%d" % (L1, M1, L2, M2, L_R, -M_R)
                         ]
                         phase_power = (L1 + L2) - (M1 + M2) + (L_R - M_R)
                         phase = (-1) ** phase_power

@@ -4,22 +4,23 @@ import pathlib
 
 # store CG and wigner files in fitsnap3lib/lib/sym_ACE/lib:
 from mala.descriptors import gen_labels
-topfile =gen_labels.__file__
-top_dir = topfile.split('/gen')[0]
-lib_path = '%s' % top_dir
+
+topfile = gen_labels.__file__
+top_dir = topfile.split("/gen")[0]
+lib_path = "%s" % top_dir
 
 # store CG and wigner files in current directory:
 
-#lib_path = str(pathlib.Path(__name__).parent.resolve())
+# lib_path = str(pathlib.Path(__name__).parent.resolve())
 
-#-------------------------------
+# -------------------------------
 # Coupling coefficient settings
-#-------------------------------
-ranks = range(1,6)
+# -------------------------------
+ranks = range(1, 6)
 # lmax per rank
-lmax_dict_G = {1:0 , 2:8, 3:6, 4:4, 5:2}
+lmax_dict_G = {1: 0, 2: 8, 3: 6, 4: 4, 5: 2}
 # lmax for underlying traditional wigner-3j symbols (will impose limits on lmax_dict_G)
-lmax_traditional=12
+lmax_traditional = 12
 # Flag to generate library of CG coefficients as well
 cglib = True
 # Flag to generate generalized wigner coefficients for L_R = 1 reduced reps (vector-like descriptors)

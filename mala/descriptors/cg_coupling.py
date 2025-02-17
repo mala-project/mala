@@ -2,6 +2,7 @@
 
 from mala.descriptors import ace_coupling_utils as acu
 
+
 def get_coupling(Clebsch_Gordan, ldict, L_R=0, use_permutations=True):
     M_Rs = list(range(-L_R, L_R + 1))
     # generic coupling for any L_R - support must be added to call
@@ -39,6 +40,7 @@ def get_coupling(Clebsch_Gordan, ldict, L_R=0, use_permutations=True):
                     )
     return coupling
 
+
 def rank_1_tree(Clebsch_Gordan, l, L_R=0, M_R=0):
     mstrs = acu.get_ms(l, M_R)
     full_inter_tuples = [()]
@@ -63,6 +65,7 @@ def rank_1_tree(Clebsch_Gordan, l, L_R=0, M_R=0):
 
                 decomposed[inter][mstr] = w
     return decomposed
+
 
 def rank_2_tree(Clebsch_Gordan, l, L_R=0, M_R=0):
     nodes, remainder = acu.tree(l)
@@ -95,6 +98,7 @@ def rank_2_tree(Clebsch_Gordan, l, L_R=0, M_R=0):
                 decomposed[inter][mstr] = w
     return decomposed
 
+
 def rank_3_tree(Clebsch_Gordan, l, L_R=0, M_R=0):
     full_inter_tuples = acu.tree_l_inters(l, L_R=L_R, M_R=M_R)
     mstrs = acu.get_ms(l, M_R)
@@ -126,6 +130,7 @@ def rank_3_tree(Clebsch_Gordan, l, L_R=0, M_R=0):
                     w = phase * w1 * w2
                     decomposed[inter][mstr] = w
     return decomposed
+
 
 def rank_4_tree(Clebsch_Gordan, l, L_R=0, M_R=0):
     nodes, remainder = acu.tree(l)
@@ -160,8 +165,7 @@ def rank_4_tree(Clebsch_Gordan, l, L_R=0, M_R=0):
                             % (l[2], m_ints[2], l[3], m_ints[3], L2, M2)
                         ]
                         w3 = Clebsch_Gordan[
-                            "%d,%d,%d,%d,%d,%d"
-                            % (L1, M1, L2, M2, L_R, M_R)
+                            "%d,%d,%d,%d,%d,%d" % (L1, M1, L2, M2, L_R, M_R)
                         ]
                         # phase_power = ( L1 + L2 ) - ( M1 + M2 )  + ( L_R - M_R)
                         # phase = (-1) ** phase_power
