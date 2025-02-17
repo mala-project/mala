@@ -463,16 +463,17 @@ class ACE(Descriptor):
         musins = range(len(list(set(self._atoms.symbols))))
 
         # +1 here because this should include the G for grid.
-        byattyp, byattypfiltered = self.srt_by_attyp(
+        byattyp, byattypfiltered = self.__sort_by_atom_type(
             nus, len(list(set(self._atoms.symbols))) + 1
         )
         if self.parameters.ace_grid_filter:
             limit_nus = byattypfiltered[
                 "%d" % (len(list(set(self._atoms.symbols))))
             ]
-            assert (
-                self.parameters.ace_padfunc
-            ), "must pad with at least 1 other basis function for other element types to work in LAMMPS - set padfunc=True"
+            assert self.parameters.ace_padfunc, (
+                "Must pad with at least 1 other basis function for other "
+                "element types to work in LAMMPS - set padfunc=True"
+            )
             if self.parameters.ace_padfunc:
                 for muii in musins:
                     limit_nus.append(byattypfiltered["%d" % muii][0])
@@ -585,7 +586,8 @@ class ACE(Descriptor):
         else:
             maxbond = vdwr1 + vdwr2
         midbond = (maxbond + minbond) / 2
-        # by default, return the ionic bond length * number of bonds for minimum
+        # by default, return the ionic bond length * number of bonds for
+        # minimum
         returnmin = minbond
         if self.parameters.ace_use_vdw:
             # return vdw bond length if requested
@@ -595,7 +597,8 @@ class ACE(Descriptor):
             returnmax = midbond
         return round(returnmin, 3), round(returnmax, 3)
 
-    def srt_by_attyp(self, nulst, remove_type=2):
+    @staticmethod
+    def __sort_by_atom_type(nulst, remove_type=2):
         # TODO: Add documentation. Also, maybe make it private?
         mu0s = []
         for nu in nulst:
@@ -671,7 +674,7 @@ class ACE(Descriptor):
                                         l3,
                                         m3,
                                     )
-                                    cg[key] = self.clebsch_gordan(
+                                    cg[key] = self.__clebsch_gordan(
                                         l1, m1, l2, m2, l3, m3
                                     )
             with open(
@@ -725,7 +728,8 @@ class ACE(Descriptor):
 
         return ionic_radii, metal_list
 
-    def clebsch_gordan(self, j1, m1, j2, m2, j3, m3):
+    @staticmethod
+    def __clebsch_gordan(j1, m1, j2, m2, j3, m3):
         # TODO: Add documentation. Also, maybe make it private?
         # Clebsch-gordan coefficient calculator based on eqs. 4-5 of:
         # https://hal.inria.fr/hal-01851097/document
