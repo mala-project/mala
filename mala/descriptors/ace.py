@@ -194,8 +194,8 @@ class ACE(Descriptor):
                 "ace_coeff_file": self.couplings_yace_file,
                 "rcutfac": self.maximum_cutoff_factor,
             }
-        for idx, element in enumerate(sorted(list(set(self._atoms.numbers)))):
-            lammps_dict["mass" + str(idx + 1)] = atomic_masses[element]
+        # for idx, element in enumerate(sorted(list(set(self._atoms.numbers)))):
+        #     lammps_dict["mass" + str(idx + 1)] = atomic_masses[element]
 
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
@@ -267,6 +267,16 @@ class ACE(Descriptor):
             return ace_descriptors_np, nrows_local
 
         else:
+            # Testing the number of features
+            print("Before extract")
+            ncols_local = extract_compute_np(
+                lmp,
+                "mygrid",
+                0,
+                lammps_constants.LMP_SIZE_COLS,
+            )
+            print(ncols_local)
+
             # Extract data from LAMMPS calculation.
             ace_descriptors_np = extract_compute_np(
                 lmp,
