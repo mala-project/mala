@@ -491,7 +491,7 @@ def base_automorphisms(l, subtree=False):
         if not subtree:
             all_ops = sylow_2_s8
         else:
-            all_ops = s8_subtree_syms
+            raise Exception("S8 subtree symmetries not implemented.")
     else:
         raise ValueError()
 
