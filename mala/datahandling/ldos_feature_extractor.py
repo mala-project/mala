@@ -142,6 +142,7 @@ class LDOSFeatureExtractor:
 
         # For each point within the LDOS, perform a fit to extract the
         # features.
+        old_average_time = 0
         for point in range(0, gridsize):
             ydata = ldos[point, :]
             trial_counter = 0
@@ -184,15 +185,28 @@ class LDOSFeatureExtractor:
                 initial_guess_left = features[point, 1:3]
                 initial_guess_right = features[point, 3:5]
                 initial_guess_gaussian = features[point, 5:]
-            if point % 100 == 0:
+            if point % 100 == 0 and point != 0:
                 print("Rank", get_rank(), "Point: ", point, "/", gridsize)
+                average_time = (time.perf_counter() - start_time) / point
                 print(
                     "Rank",
                     get_rank(),
                     ": Time per point: ",
-                    (time.perf_counter() - start_time) / (point + 1),
+                    average_time,
                 )
+                if point % 1000 == 0:
+                    if average_time > old_average_time:
+                        print(
+                            "Rank",
+                            get_rank(),
+                            ": Time per point increased. "
+                            "Resetting initial value.",
+                        )
+                        initial_guess_left = features[point, 1:3]
+                        initial_guess_right = features[point, 3:5]
+                        initial_guess_gaussian = features[point, 5:]
 
+                    old_average_time = average_time
         barrier()
 
         if self.parameters.use_mpi:
