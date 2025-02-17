@@ -155,7 +155,7 @@ class LDOSFeatureExtractor:
                         initial_guess_gaussian,
                     )
                     break
-                except RuntimeError:
+                except (RuntimeError, ValueError):
                     trial_counter += 1
                     print(
                         "Rank",
