@@ -7,7 +7,7 @@ units		metal
 
 read_data ${atom_config_fname}
 
-mass 1 26.981539
+mass * 1.0
 
 # define atom compute and grid compute
 

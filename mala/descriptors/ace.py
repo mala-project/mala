@@ -7,7 +7,7 @@ import pickle
 
 import ase
 import ase.io
-from ase.data import atomic_numbers, atomic_masses
+from ase.data import atomic_numbers
 from importlib.util import find_spec
 import numpy as np
 from scipy import special
@@ -150,7 +150,7 @@ class ACE(Descriptor):
         from lammps import constants as lammps_constants
 
         use_fp64 = kwargs.get("use_fp64", False)
-        keep_logs = kwargs.get("keep_logs", True)
+        keep_logs = kwargs.get("keep_logs", False)
 
         lammps_format = "lammps-data"
         self.setup_lammps_tmp_files("acegrid", outdir)
@@ -194,8 +194,6 @@ class ACE(Descriptor):
                 "ace_coeff_file": self.couplings_yace_file,
                 "rcutfac": self.maximum_cutoff_factor,
             }
-        # for idx, element in enumerate(sorted(list(set(self._atoms.numbers)))):
-        #     lammps_dict["mass" + str(idx + 1)] = atomic_masses[element]
 
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
@@ -215,10 +213,7 @@ class ACE(Descriptor):
                     )
             else:
                 self.parameters.lammps_compute_file = os.path.join(
-                    filepath,
-                    "in.acegrid_n{0}.python".format(
-                        len(set(self._atoms.numbers))
-                    ),
+                    filepath, "in.acegrid.python"
                 )
 
         # Do the LAMMPS calculation and clean up.
@@ -267,16 +262,6 @@ class ACE(Descriptor):
             return ace_descriptors_np, nrows_local
 
         else:
-            # Testing the number of features
-            print("Before extract")
-            ncols_local = extract_compute_np(
-                lmp,
-                "mygrid",
-                0,
-                lammps_constants.LMP_SIZE_COLS,
-            )
-            print(ncols_local)
-
             # Extract data from LAMMPS calculation.
             ace_descriptors_np = extract_compute_np(
                 lmp,
