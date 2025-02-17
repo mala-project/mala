@@ -142,7 +142,7 @@ class LDOSFeatureExtractor:
 
         # For each point within the LDOS, perform a fit to extract the
         # features.
-        old_average_time = 0
+        old_average_time = 100
         for point in range(0, gridsize):
             ydata = ldos[point, :]
             trial_counter = 0
