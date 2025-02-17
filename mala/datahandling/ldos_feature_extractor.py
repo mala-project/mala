@@ -195,7 +195,7 @@ class LDOSFeatureExtractor:
                     average_time,
                 )
                 if point % 1000 == 0:
-                    if average_time > old_average_time:
+                    if average_time > old_average_time * 1.5:
                         print(
                             "Rank",
                             get_rank(),
