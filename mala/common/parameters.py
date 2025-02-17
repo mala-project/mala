@@ -506,6 +506,8 @@ class ParametersDescriptors(ParametersBase):
         self.minterpy_polynomial_degree = 4
         self.minterpy_lp_norm = 2
 
+        # Everything peraining to the ACE descriptors.
+        self.ace_cutoff = None
         self.ace_ranks = [1, 2, 3]
         self.ace_nmax = [6, 2, 2]
         self.ace_lmax = [0, 2, 2]
@@ -576,6 +578,16 @@ class ParametersDescriptors(ParametersBase):
     @bispectrum_cutoff.setter
     def bispectrum_cutoff(self, value):
         self._rcutfac = value
+        self.atomic_density_cutoff = value
+
+    @property
+    def ace_cutoff(self):
+        """Cut off radius for bispectrum calculation."""
+        return self._ace_cutoff
+
+    @ace_cutoff.setter
+    def ace_cutoff(self, value):
+        self._ace_cutoff = value
         self.atomic_density_cutoff = value
 
     @property

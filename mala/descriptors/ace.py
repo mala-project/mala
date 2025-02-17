@@ -181,10 +181,10 @@ class ACE(Descriptor):
         # Create LAMMPS instance.
         # TODO: Either rename the cutoff radius or introduce a second
         #  parameter (I would advocate for the latter)
-        if self.parameters.bispectrum_cutoff > self.maximum_cutoff_factor:
+        if self.parameters.ace_cutoff > self.maximum_cutoff_factor:
             lammps_dict = {
                 "ace_coeff_file": self.couplings_yace_file,
-                "rcutfac": self.parameters.bispectrum_cutoff,
+                "rcutfac": self.parameters.ace_cutoff,
             }
         else:
             printout(
@@ -218,7 +218,6 @@ class ACE(Descriptor):
 
         # Do the LAMMPS calculation and clean up.
         lmp.file(self.parameters.lammps_compute_file)
-        print("Calculation done?")
 
         # Set things not accessible from LAMMPS
         # Extract data from LAMMPS calculation.
