@@ -7,7 +7,7 @@ units		metal
 
 read_data ${atom_config_fname}
 
-mass * 1.0
+mass 1 ${mass1}
 
 run_style verlet
 

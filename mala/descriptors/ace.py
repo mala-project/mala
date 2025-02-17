@@ -7,7 +7,7 @@ import pickle
 
 import ase
 import ase.io
-from ase.data import atomic_numbers
+from ase.data import atomic_numbers, atomic_masses
 from importlib.util import find_spec
 import numpy as np
 from scipy import special
@@ -190,6 +190,8 @@ class ACE(Descriptor):
             "ace_coeff_file": self.couplings_yace_file,
             "rcutfac": self.parameters.ace_cutoff,
         }
+        for idx, element in enumerate(sorted(list(set(self._atoms.numbers)))):
+            lammps_dict["mass" + str(idx + 1)] = atomic_masses[element]
 
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
@@ -208,7 +210,10 @@ class ACE(Descriptor):
                     )
             else:
                 self.parameters.lammps_compute_file = os.path.join(
-                    filepath, "in.acegrid.python"
+                    filepath,
+                    "in.acegrid_n{0}.python".format(
+                        len(set(self._atoms.numbers))
+                    ),
                 )
 
         # Do the LAMMPS calculation.
