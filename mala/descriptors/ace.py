@@ -214,10 +214,6 @@ class ACE(Descriptor):
         # Do the LAMMPS calculation.
         lmp.file(self.parameters.lammps_compute_file)
 
-        # TODO: This is more a LAMMPS thing, but I think it would be nicer
-        # if mygridlocal and mygrid would be called acegrid or something,
-        # agrid is fine as well, in the bispectrum case we call it bgrid.
-
         # Extract data from LAMMPS calculation.
         # This is different for the parallel and the serial case.
         # In the serial case we can expect to have a full array at
@@ -226,13 +222,13 @@ class ACE(Descriptor):
         if self.parameters._configuration["mpi"]:
             nrows_local = extract_compute_np(
                 lmp,
-                "mygridlocal",
+                "agridlocal",
                 lammps_constants.LMP_STYLE_LOCAL,
                 lammps_constants.LMP_SIZE_ROWS,
             )
             ncols_local = extract_compute_np(
                 lmp,
-                "mygridlocal",
+                "agridlocal",
                 lammps_constants.LMP_STYLE_LOCAL,
                 lammps_constants.LMP_SIZE_COLS,
             )
@@ -242,7 +238,7 @@ class ACE(Descriptor):
 
             ace_descriptors_np = extract_compute_np(
                 lmp,
-                "mygridlocal",
+                "agridlocal",
                 lammps_constants.LMP_STYLE_LOCAL,
                 2,
                 array_shape=(nrows_local, ncols_local),
@@ -258,7 +254,7 @@ class ACE(Descriptor):
             # Extract data from LAMMPS calculation.
             ace_descriptors_np = extract_compute_np(
                 lmp,
-                "mygrid",
+                "agrid",
                 0,
                 2,
                 (nz, ny, nx, self.feature_size),
@@ -277,6 +273,23 @@ class ACE(Descriptor):
                 return ace_descriptors_np[:, :, :, 3:], nx * ny * nz
 
     def check_coupling_coeffs(self, coupling_file):
+        """
+        Check the coupling coefficients for consistency.
+
+        This reads the first line of the coupling coefficients file, which
+        contains a list of the elements the coupling coefficients have been
+        computed for, and checks whether this is consistent with the
+        elements for this calculation.
+
+        Parameters
+        ----------
+        coupling_file
+
+        Returns
+        -------
+
+        """
+
         if coupling_file is not None and os.path.isfile(coupling_file):
             with open(coupling_file, "r") as readout:
                 lines = readout.readlines()
