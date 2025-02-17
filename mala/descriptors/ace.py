@@ -175,31 +175,26 @@ class ACE(Descriptor):
         if self.couplings_yace_file is None:
             self.couplings_yace_file = self.calculate_coupling_coeffs()
 
-        # save the coupling coefficients
-        # saving function will go here
+        # Check the cutoff radius.
+        if self.parameters.ace_cutoff < self.maximum_cutoff_factor:
+            printout(
+                "One or more automatically generated ACE cutoff radii is "
+                "larger than the input cutoff radius. Updating input cutoff "
+                "radius stored in parameters.descriptors.ace_cutoff "
+                "accordingly"
+            )
+            self.parameters.ace_cutoff = self.maximum_cutoff_factor
 
         # Create LAMMPS instance.
-        # TODO: Either rename the cutoff radius or introduce a second
-        #  parameter (I would advocate for the latter)
-        if self.parameters.ace_cutoff > self.maximum_cutoff_factor:
-            lammps_dict = {
-                "ace_coeff_file": self.couplings_yace_file,
-                "rcutfac": self.parameters.ace_cutoff,
-            }
-        else:
-            printout(
-                "one or more automatically generated ACE rcutfacs is larger than the input rcutfac- updating rcutfac accordingly"
-            )
-            lammps_dict = {
-                "ace_coeff_file": self.couplings_yace_file,
-                "rcutfac": self.maximum_cutoff_factor,
-            }
+        lammps_dict = {
+            "ace_coeff_file": self.couplings_yace_file,
+            "rcutfac": self.parameters.ace_cutoff,
+        }
 
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # An empty string means that the user wants to use the standard input.
         # What that is differs depending on serial/parallel execution.
-        # TODO: Can we get rid of the extra "ace_like_snap" files here?
         if self.parameters.lammps_compute_file == "":
             filepath = __file__.split("ace")[0]
             if self.parameters._configuration["mpi"]:
@@ -216,19 +211,18 @@ class ACE(Descriptor):
                     filepath, "in.acegrid.python"
                 )
 
-        # Do the LAMMPS calculation and clean up.
+        # Do the LAMMPS calculation.
         lmp.file(self.parameters.lammps_compute_file)
-
-        # Set things not accessible from LAMMPS
-        # Extract data from LAMMPS calculation.
-        # This is different for the parallel and the serial case.
-        # In the serial case we can expect to have a full bispectrum array at
-        # the end of this function.
-        # This is not necessarily true for the parallel case.
 
         # TODO: This is more a LAMMPS thing, but I think it would be nicer
         # if mygridlocal and mygrid would be called acegrid or something,
         # agrid is fine as well, in the bispectrum case we call it bgrid.
+
+        # Extract data from LAMMPS calculation.
+        # This is different for the parallel and the serial case.
+        # In the serial case we can expect to have a full array at
+        # the end of this function.
+        # This is not necessarily true for the parallel case.
         if self.parameters._configuration["mpi"]:
             nrows_local = extract_compute_np(
                 lmp,
