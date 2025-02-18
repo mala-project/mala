@@ -356,7 +356,7 @@ class Trainer(Runner):
                         torch.cuda.nvtx.range_pop()
 
                         loss = self.__process_mini_batch(
-                            self.network, inputs, outputs
+                            self.network, inputs, outputs, batchid=batchid
                         )
                         # step
                         torch.cuda.nvtx.range_pop()
@@ -440,7 +440,7 @@ class Trainer(Runner):
                             self.parameters._configuration["device"]
                         )
                         training_loss_sum += self.__process_mini_batch(
-                            self.network, inputs, outputs
+                            self.network, inputs, outputs, batchid=batchid
                         )
                         batchid += 1
                         total_batch_id += 1
@@ -1073,7 +1073,9 @@ class Trainer(Runner):
                     )
                 )
 
-    def __process_mini_batch(self, network, input_data, target_data):
+    def __process_mini_batch(
+        self, network, input_data, target_data, batchid=0
+    ):
         """Process a mini batch."""
         if self.parameters._configuration["gpu"]:
             if self.parameters.use_graphs and self._train_graph is None:
@@ -1093,6 +1095,7 @@ class Trainer(Runner):
                             enabled=self.parameters.use_mixed_precision
                         ):
                             prediction = network(input_data)
+
                             if self.parameters_full.use_ddp:
                                 # JOSHR: We have to use "module" here to access custom method of DDP wrapped model
                                 loss = network.module.calculate_loss(
@@ -1158,6 +1161,12 @@ class Trainer(Runner):
                     torch.cuda.nvtx.range_push("forward")
                     t = time.time()
                     prediction = network(input_data)
+                    # if batchid == 0:
+                    #     print("AM HERE!")
+                    #
+                    #     print(prediction[0].cpu().detach().numpy())
+                    #     print(target_data[0].cpu().detach().numpy())
+
                     dt = time.time() - t
                     printout(f"forward time: {dt}", min_verbosity=3)
                     # forward

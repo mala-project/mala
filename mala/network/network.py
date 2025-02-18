@@ -64,6 +64,11 @@ class Network(nn.Module):
             if params.network.nn_type == "feed-forward":
                 model = super(Network, FeedForwardNet).__new__(FeedForwardNet)
 
+            elif params.network.nn_type == "feed-forward-featurization":
+                model = super(Network, FeedForwardFeaturizationNet).__new__(
+                    FeedForwardFeaturizationNet
+                )
+
             elif params.network.nn_type == "transformer":
                 model = super(Network, TransformerNet).__new__(TransformerNet)
 
@@ -365,6 +370,49 @@ class FeedForwardNet(Network):
         for layer in self.layers:
             inputs = layer(inputs)
         return inputs
+
+
+class FeedForwardFeaturizationNet(FeedForwardNet):
+    def __init__(self, params):
+        # Remove the last layer in the layer sizes, since we will be doing
+        # this layer ourselves.
+        self.output_size = params.network.layer_sizes.pop()
+        self.number_of_gaussians = 8
+        self.batch_size = params.running.mini_batch_size
+        super(FeedForwardFeaturizationNet, self).__init__(params)
+
+    def forward(self, inputs):
+        inputs = super(FeedForwardFeaturizationNet, self).forward(inputs)
+        x = torch.arange(self.output_size).to(inputs.device)
+
+        linear1 = inputs[:, 0:1] * x + inputs[:, 1:2]  # shape (2, 300)
+        linear2 = inputs[:, 2:3] * x + inputs[:, 3:4]  # shape (2, 300)
+        linear_term = torch.max(linear1, linear2)
+
+        # weights = inputs[:, 4 : self.number_of_gaussians + 4]
+        # centers = inputs[
+        #     :,
+        #     self.number_of_gaussians + 4 : (2 * self.number_of_gaussians) + 4,
+        # ]
+        # # sigmas = inputs[:, (2 * self.number_of_gaussians) + 4 :]
+        #
+        # x_exp = x.view(1, 1, -1)
+        #
+        # centers_exp = centers.unsqueeze(2)
+        # # sigmas_exp = sigmas.unsqueeze(2)
+        # weights_exp = weights.unsqueeze(2)
+        #
+        # sigmas_exp = torch.ones(centers_exp.shape).to(inputs.device)
+        #
+        # # Compute each Gaussian's contribution; result is shape (batch, 8, 300)
+        # gaussians = weights_exp * torch.exp(
+        #     -((x_exp - centers_exp) ** 2) / (2 * sigmas_exp**2)
+        # )
+        # gaussians_sum = gaussians.sum(dim=1)
+
+        outputs = linear_term  # + gaussians_sum
+        # print(outputs)
+        return outputs
 
 
 class LSTM(Network):
