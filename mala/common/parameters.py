@@ -446,7 +446,7 @@ class ParametersDescriptors(ParametersBase):
         mainly exists for debugging purposes. If the atomic density is instead
         used for model training itself, this parameter needs to be set.
 
-    lammps_compute_file : str
+    custom_lammps_compute_file : str
         Path to a LAMMPS compute file for the bispectrum descriptor
         calculation. MALA has its own collection of compute files which are
         used by default. Setting this parameter is thus not necessarys for
@@ -476,7 +476,7 @@ class ParametersDescriptors(ParametersBase):
 
         # These affect all descriptors, at least as long all descriptors
         # use LAMMPS (which they currently do).
-        self.lammps_compute_file = ""
+        self.custom_lammps_compute_file = ""
         self.descriptors_contain_xyz = True
 
         # TODO: I would rather handle the parallelization info automatically
@@ -590,7 +590,7 @@ class ParametersDescriptors(ParametersBase):
 
         # There may have been a serial or parallel run before that is now
         # no longer valid.
-        self.lammps_compute_file = ""
+        self.custom_lammps_compute_file = ""
 
 
 class ParametersTargets(ParametersBase):

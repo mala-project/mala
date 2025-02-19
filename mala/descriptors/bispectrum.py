@@ -229,24 +229,26 @@ class Bispectrum(Descriptor):
 
         # An empty string means that the user wants to use the standard input.
         # What that is differs depending on serial/parallel execution.
-        if self.parameters.lammps_compute_file == "":
+        # We also have to ensure that no input files from a different
+        # descriptor calculator gets used.
+        if self.parameters.custom_lammps_compute_file != "":
+            lammps_compute_file = self.parameters.custom_lammps_compute_file
+        else:
             filepath = __file__.split("bispectrum")[0]
             if self.parameters._configuration["mpi"]:
                 if self.parameters.use_z_splitting:
-                    self.parameters.lammps_compute_file = os.path.join(
+                    lammps_compute_file = os.path.join(
                         filepath, "in.bgridlocal.python"
                     )
                 else:
-                    self.parameters.lammps_compute_file = os.path.join(
+                    lammps_compute_file = os.path.join(
                         filepath, "in.bgridlocal_defaultproc.python"
                     )
             else:
-                self.parameters.lammps_compute_file = os.path.join(
-                    filepath, "in.bgrid.python"
-                )
+                lammps_compute_file = os.path.join(filepath, "in.bgrid.python")
 
         # Do the LAMMPS calculation and clean up.
-        lmp.file(self.parameters.lammps_compute_file)
+        lmp.file(lammps_compute_file)
         self.feature_size = self.__get_feature_size()
 
         # Extract data from LAMMPS calculation.

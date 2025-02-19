@@ -186,23 +186,28 @@ class MinterpyDescriptors(Descriptor):
 
             # For now the file is chosen automatically, because this is used
             # mostly under the hood anyway.
-            filepath = __file__.split("minterpy")[0]
-            if self.parameters._configuration["mpi"]:
-                raise Exception(
-                    "Minterpy descriptors cannot be calculated "
-                    "in parallel yet."
+            if self.parameters.custom_lammps_compute_file != "":
+                lammps_compute_file = (
+                    self.parameters.custom_lammps_compute_file
                 )
-                # if self.parameters.use_z_splitting:
-                #     runfile = os.path.join(filepath, "in.ggrid.python")
-                # else:
-                #     runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
             else:
-                self.parameters.lammps_compute_file = os.path.join(
-                    filepath, "in.ggrid_defaultproc.python"
-                )
+                filepath = __file__.split("minterpy")[0]
+                if self.parameters._configuration["mpi"]:
+                    raise Exception(
+                        "Minterpy descriptors cannot be calculated "
+                        "in parallel yet."
+                    )
+                    # if self.parameters.use_z_splitting:
+                    #     runfile = os.path.join(filepath, "in.ggrid.python")
+                    # else:
+                    #     runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
+                else:
+                    lammps_compute_file = os.path.join(
+                        filepath, "in.ggrid_defaultproc.python"
+                    )
 
             # Do the LAMMPS calculation and clean up.
-            lmp.file(self.parameters.lammps_compute_file)
+            lmp.file(lammps_compute_file)
 
             # Extract the data.
             nrows_ggrid = extract_compute_np(
