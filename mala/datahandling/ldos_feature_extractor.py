@@ -216,29 +216,50 @@ class LDOSFeatureExtractor:
 
     def reconstruct_ldos(self, ldos_features, original_dimension=300):
         xdata = np.arange(original_dimension)
-        splitting_x = np.int32(ldos_features[..., 0])
-        print(ldos_features[..., 0].shape)
-        x_left = np.zeros_like(ldos_features[..., 0:2])
-        x_left[..., 0] = 0
-        x_left[..., 1] = splitting_x[..., :]
+        ldos_shape = np.shape(ldos_features)
 
-        x_right = np.zeros_like(ldos_features[..., 0:2])
-        x_right[..., 0] = splitting_x[..., :]
-        x_right[..., 1] = original_dimension
+        x_original = None
+        y_original = None
+        z_original = None
 
-        # xdata =
+        if len(ldos_shape) != 2:
+            x_original = ldos_shape[0]
+            y_original = ldos_shape[1]
+            z_original = ldos_shape[2]
+            ldos_features = ldos_features.reshape(
+                (ldos_shape[0] * ldos_shape[1] * ldos_shape[2], ldos_shape[3])
+            )
 
-        return None
+        splitting_x = np.int32(ldos_features[:, 0])
+        zeros = np.zeros(ldos_features.shape[0])
+        ends = np.zeros(ldos_features.shape[0]) + original_dimension
+        x_left = np.empty(len(zeros), dtype=object)
 
-        predicted_left = self.linear(xdata[x_left], *ldos_features[1:3])
+        for i, (start, stop) in enumerate(zip(zeros, splitting_x)):
+            x_left[i] = xdata[np.int32(np.arange(start, stop))]
+        x_right = np.empty(len(splitting_x), dtype=object)
+        for i, (start, stop) in enumerate(zip(splitting_x, ends)):
+            x_right[i] = xdata[np.int32(np.arange(start, stop))]
 
-        predicted_right = self.linear(xdata[x_right], *ldos_features[3:5])
-        predicted_twolinear = np.concatenate((predicted_left, predicted_right))
-        predicted_gaussian = self.gaussians(xdata, *ldos_features[5:])
+        predicted_left = self.linear(x_left, *ldos_features[:, 1:3])
+        predicted_right = self.linear(x_right, *ldos_features[:, 3:5])
+        full_ldos = np.zeros((ldos_features.shape[0], original_dimension))
+        for i in range(0, ldos_features.shape[0]):
+            full_ldos[i, :] = np.concatenate(
+                (predicted_left[i], predicted_right[i])
+            )
+        full_ldos += self.gaussians_vector(
+            np.broadcast_to(xdata, (ldos_features.shape[0], 300)),
+            *ldos_features[:, 5:]
+        )
 
-        return (
-            predicted_twolinear + predicted_gaussian
-        ) / self.rescaling_factor
+        full_ldos /= self.rescaling_factor
+        if x_original is not None:
+            full_ldos = full_ldos.reshape(
+                (x_original, y_original, z_original, original_dimension)
+            )
+
+        return full_ldos
 
     def __zero_out_features(self, ydata):
         splitting_x = int(np.shape(ydata)[0] / 2)
@@ -346,6 +367,24 @@ class LDOSFeatureExtractor:
         gauss = np.sum(
             weights * np.exp(-((x - means) ** 2) / (2 * sigmas**2)),
             axis=-1,
+        )
+        return gauss
+
+    def gaussians_vector(self, x, *params):
+        params = np.array(params)
+        gauss_params = params
+        weights = gauss_params[:, : self.number_of_gaussians]
+        means = gauss_params[
+            :, self.number_of_gaussians : 2 * self.number_of_gaussians
+        ]
+        sigmas = gauss_params[:, 2 * self.number_of_gaussians :]
+        gauss_before_sum = weights[:, None, :] * np.exp(
+            -((x[:, :, None] - means[:, None, :]) ** 2)
+            / (2 * sigmas[:, None, :] ** 2)
+        )
+        gauss = np.sum(
+            gauss_before_sum,
+            axis=-1,  # Sum over the data_dimension axis
         )
         return gauss
 
