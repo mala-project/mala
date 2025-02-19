@@ -211,23 +211,26 @@ class AtomicDensity(Descriptor):
 
         # For now the file is chosen automatically, because this is used
         # mostly under the hood anyway.
-        filepath = __file__.split("atomic_density")[0]
-        if self.parameters._configuration["mpi"]:
-            if self.parameters.use_z_splitting:
-                self.parameters.lammps_compute_file = os.path.join(
-                    filepath, "in.ggrid.python"
-                )
+        if self.parameters.custom_lammps_compute_file != "":
+            lammps_compute_file = self.parameters.custom_lammps_compute_file
+        else:
+            filepath = os.path.dirname(__file__)
+            if self.parameters._configuration["mpi"]:
+                if self.parameters.use_z_splitting:
+                    lammps_compute_file = os.path.join(
+                        filepath, "in.ggrid.python"
+                    )
+                else:
+                    lammps_compute_file = os.path.join(
+                        filepath, "in.ggrid_defaultproc.python"
+                    )
             else:
-                self.parameters.lammps_compute_file = os.path.join(
+                lammps_compute_file = os.path.join(
                     filepath, "in.ggrid_defaultproc.python"
                 )
-        else:
-            self.parameters.lammps_compute_file = os.path.join(
-                filepath, "in.ggrid_defaultproc.python"
-            )
 
         # Do the LAMMPS calculation and clean up.
-        lmp.file(self.parameters.lammps_compute_file)
+        lmp.file(lammps_compute_file)
 
         # Extract the data.
         nrows_ggrid = extract_compute_np(
