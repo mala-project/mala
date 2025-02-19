@@ -546,10 +546,11 @@
 <span class="sd">        mainly exists for debugging purposes. If the atomic density is instead</span>
 <span class="sd">        used for model training itself, this parameter needs to be set.</span>
 
-<span class="sd">    lammps_compute_file : str</span>
-<span class="sd">        Path to a LAMMPS compute file for the bispectrum descriptor</span>
-<span class="sd">        calculation. MALA has its own collection of compute files which are</span>
-<span class="sd">        used by default. Setting this parameter is thus not necessarys for</span>
+<span class="sd">    custom_lammps_compute_file : str</span>
+<span class="sd">        Path to a LAMMPS compute file for the descriptor calculation.</span>
+<span class="sd">        MALA has its own collection of compute files which are</span>
+<span class="sd">        used by default, i.e., when this string is empty.</span>
+<span class="sd">        Setting this parameter is thus not necessarys for</span>
 <span class="sd">        model training and inference, and it exists mainly for debugging</span>
 <span class="sd">        purposes.</span>
 
@@ -576,7 +577,7 @@
 
         <span class="c1"># These affect all descriptors, at least as long all descriptors</span>
         <span class="c1"># use LAMMPS (which they currently do).</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_lammps_compute_file</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># TODO: I would rather handle the parallelization info automatically</span>
@@ -690,7 +691,7 @@
 
         <span class="c1"># There may have been a serial or parallel run before that is now</span>
         <span class="c1"># no longer valid.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_lammps_compute_file</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
 
 
 

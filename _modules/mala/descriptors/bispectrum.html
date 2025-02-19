@@ -320,24 +320,26 @@
 
         <span class="c1"># An empty string means that the user wants to use the standard input.</span>
         <span class="c1"># What that is differs depending on serial/parallel execution.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="n">filepath</span> <span class="o">=</span> <span class="vm">__file__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;bispectrum&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># We also have to ensure that no input files from a different</span>
+        <span class="c1"># descriptor calculator gets used.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">custom_lammps_compute_file</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">custom_lammps_compute_file</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_z_splitting</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                         <span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgridlocal.python&quot;</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                         <span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgridlocal_defaultproc.python&quot;</span>
                     <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                    <span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgrid.python&quot;</span>
-                <span class="p">)</span>
+                <span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgrid.python&quot;</span><span class="p">)</span>
 
         <span class="c1"># Do the LAMMPS calculation and clean up.</span>
-        <span class="n">lmp</span><span class="o">.</span><span class="n">file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span><span class="p">)</span>
+        <span class="n">lmp</span><span class="o">.</span><span class="n">file</span><span class="p">(</span><span class="n">lammps_compute_file</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_feature_size</span><span class="p">()</span>
 
         <span class="c1"># Extract data from LAMMPS calculation.</span>
