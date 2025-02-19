@@ -1074,8 +1074,7 @@ class Trainer(Runner):
                 )
 
     def __process_mini_batch(
-        self, network, input_data, target_data, batchid=0
-    ):
+        self, network, input_data, target_data):
         """Process a mini batch."""
         if self.parameters._configuration["gpu"]:
             if self.parameters.use_graphs and self._train_graph is None:
@@ -1161,11 +1160,6 @@ class Trainer(Runner):
                     torch.cuda.nvtx.range_push("forward")
                     t = time.time()
                     prediction = network(input_data)
-                    # if batchid == 0:
-                    #     print("AM HERE!")
-                    #
-                    #     print(prediction[0].cpu().detach().numpy())
-                    #     print(target_data[0].cpu().detach().numpy())
 
                     dt = time.time() - t
                     printout(f"forward time: {dt}", min_verbosity=3)
