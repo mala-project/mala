@@ -356,7 +356,7 @@ class Trainer(Runner):
                         torch.cuda.nvtx.range_pop()
 
                         loss = self.__process_mini_batch(
-                            self.network, inputs, outputs, batchid=batchid
+                            self.network, inputs, outputs
                         )
                         # step
                         torch.cuda.nvtx.range_pop()
@@ -440,7 +440,9 @@ class Trainer(Runner):
                             self.parameters._configuration["device"]
                         )
                         training_loss_sum += self.__process_mini_batch(
-                            self.network, inputs, outputs, batchid=batchid
+                            self.network,
+                            inputs,
+                            outputs
                         )
                         batchid += 1
                         total_batch_id += 1
@@ -1073,8 +1075,7 @@ class Trainer(Runner):
                     )
                 )
 
-    def __process_mini_batch(
-        self, network, input_data, target_data):
+    def __process_mini_batch(self, network, input_data, target_data):
         """Process a mini batch."""
         if self.parameters._configuration["gpu"]:
             if self.parameters.use_graphs and self._train_graph is None:
