@@ -214,15 +214,24 @@ class LDOSFeatureExtractor:
             # For debugging purposes
             # np.save(extracted_filename, ldos)
 
-    def reconstruct_ldos(
-        self, ldos_features, original_dimension=300, n_gaussians=8
-    ):
+    def reconstruct_ldos(self, ldos_features, original_dimension=300):
         xdata = np.arange(original_dimension)
-        splitting_x = int(ldos_features[0])
-        x_left = slice(0, splitting_x, 1)
-        x_right = slice(splitting_x, original_dimension, 1)
+        splitting_x = np.int32(ldos_features[..., 0])
+        print(ldos_features[..., 0].shape)
+        x_left = np.zeros_like(ldos_features[..., 0:2])
+        x_left[..., 0] = 0
+        x_left[..., 1] = splitting_x[..., :]
+
+        x_right = np.zeros_like(ldos_features[..., 0:2])
+        x_right[..., 0] = splitting_x[..., :]
+        x_right[..., 1] = original_dimension
+
+        # xdata =
+
+        return None
 
         predicted_left = self.linear(xdata[x_left], *ldos_features[1:3])
+
         predicted_right = self.linear(xdata[x_right], *ldos_features[3:5])
         predicted_twolinear = np.concatenate((predicted_left, predicted_right))
         predicted_gaussian = self.gaussians(xdata, *ldos_features[5:])
