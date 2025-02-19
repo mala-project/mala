@@ -70,6 +70,8 @@ class ACE(Descriptor):
         self.maximum_cutoff_factor = None
         self.cutoff_factors = None
         self.lambdas = None
+        self.nus = None
+        self.limit_nus = None
 
     @property
     def data_name(self):
@@ -330,6 +332,7 @@ class ACE(Descriptor):
         calculate_coupling_coeffs is only calculated sometimes."""
         # TODO: IIRC, then these coefficients have to be calculated only ONCE
         # per element; so we should maybe think about a way of caching them.
+        ncols0 = 3
 
         element_list = sorted(list(set(self._atoms.symbols))) + ["G"]
 
@@ -352,6 +355,14 @@ class ACE(Descriptor):
         ) == len(
             self.lambdas
         ), "you must have rcutfac and lmbda defined for each bond type"
+
+        self.nus, self.limit_nus = self.calc_limit_nus()
+
+        # NOTE to use unique ACE types for gridpoints, we must subtract off
+        #  dummy descriptor counts (for non-grid element types)
+        self.feature_size = (
+            ncols0 + len(self.limit_nus) - (len(element_list) - 1)
+        )
 
     def calculate_coupling_coeffs(self):
         """
@@ -401,11 +412,6 @@ class ACE(Descriptor):
                 + " not recongised"
             )
 
-        nus, limit_nus = self.calc_limit_nus()
-
-        # NOTE to use unique ACE types for gridpoints, we must subtract off
-        #  dummy descriptor counts (for non-grid element types)
-        self.feature_size = ncols0 + len(limit_nus) - (len(element_list) - 1)
         # permutation symmetry adapted ACE labels
         Apot = AcePot(
             element_list,
@@ -422,7 +428,7 @@ class ACE(Descriptor):
             lmin=self.parameters.ace_lmin,
         )
 
-        Apot.set_funcs(nulst=limit_nus, muflg=True, print_0s=True)
+        Apot.set_funcs(nulst=self.limit_nus, muflg=True, print_0s=True)
         return Apot.write_pot(
             "coupling_coefficients_" + str.join("_", element_list[:-1])
         )
