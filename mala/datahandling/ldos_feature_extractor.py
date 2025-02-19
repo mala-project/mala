@@ -154,6 +154,13 @@ class LDOSFeatureExtractor:
                         initial_guess_right,
                         initial_guess_gaussian,
                     )
+
+                    # VERY rarely, one of the weights gets set to infinity
+                    # without the fit failing. This should not happen, but
+                    # we can catch it here. Eventually we should maybe find
+                    # out why this happens.
+                    if np.any(np.isinf(features[point, :])):
+                        self.__zero_out_features(ydata)
                     break
                 except (RuntimeError, ValueError):
                     trial_counter += 1
