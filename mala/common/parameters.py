@@ -447,9 +447,10 @@ class ParametersDescriptors(ParametersBase):
         used for model training itself, this parameter needs to be set.
 
     custom_lammps_compute_file : str
-        Path to a LAMMPS compute file for the bispectrum descriptor
-        calculation. MALA has its own collection of compute files which are
-        used by default. Setting this parameter is thus not necessarys for
+        Path to a LAMMPS compute file for the descriptor calculation.
+        MALA has its own collection of compute files which are
+        used by default, i.e., when this string is empty.
+        Setting this parameter is thus not necessarys for
         model training and inference, and it exists mainly for debugging
         purposes.
 
