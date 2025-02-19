@@ -214,33 +214,52 @@ class LDOSFeatureExtractor:
             # For debugging purposes
             # np.save(extracted_filename, ldos)
 
+    def reconstruct_single_ldos(self, ldos_features, original_dimension=300):
+        xdata = np.arange(original_dimension)
+        splitting_x = int(ldos_features[0])
+        x_left = slice(0, splitting_x, 1)
+        x_right = slice(splitting_x, original_dimension, 1)
+
+        predicted_left = self.linear(xdata[x_left], *ldos_features[1:3])
+        predicted_right = self.linear(xdata[x_right], *ldos_features[3:5])
+        predicted_twolinear = np.concatenate((predicted_left, predicted_right))
+        predicted_gaussian = self.gaussians(xdata, *ldos_features[5:])
+
+        return (
+            predicted_twolinear + predicted_gaussian
+        ) / self.rescaling_factor
+
     def reconstruct_ldos(self, ldos_features, original_dimension=300):
         xdata = np.arange(original_dimension)
         ldos_shape = np.shape(ldos_features)
 
+        # If we have 4D data, we need to reshape it to 2D.
         x_original = None
         y_original = None
         z_original = None
-
-        if len(ldos_shape) != 2:
+        if len(ldos_shape) == 4:
             x_original = ldos_shape[0]
             y_original = ldos_shape[1]
             z_original = ldos_shape[2]
             ldos_features = ldos_features.reshape(
                 (ldos_shape[0] * ldos_shape[1] * ldos_shape[2], ldos_shape[3])
             )
+        elif len(ldos_shape) != 2:
+            raise Exception("Cannot work with provided LDOS shape.")
 
+        # Initializing the arrays for the left and right side of linear fit as
+        # ragged arrays.
         splitting_x = np.int32(ldos_features[:, 0])
         zeros = np.zeros(ldos_features.shape[0])
         ends = np.zeros(ldos_features.shape[0]) + original_dimension
         x_left = np.empty(len(zeros), dtype=object)
-
         for i, (start, stop) in enumerate(zip(zeros, splitting_x)):
             x_left[i] = xdata[np.int32(np.arange(start, stop))]
         x_right = np.empty(len(splitting_x), dtype=object)
         for i, (start, stop) in enumerate(zip(splitting_x, ends)):
             x_right[i] = xdata[np.int32(np.arange(start, stop))]
 
+        # Linear prediction, using a for loop to concatenate the ragged arrays.
         predicted_left = self.linear(x_left, *ldos_features[:, 1:3])
         predicted_right = self.linear(x_right, *ldos_features[:, 3:5])
         full_ldos = np.zeros((ldos_features.shape[0], original_dimension))
@@ -248,11 +267,18 @@ class LDOSFeatureExtractor:
             full_ldos[i, :] = np.concatenate(
                 (predicted_left[i], predicted_right[i])
             )
+
+        # I haven't found a nice way yet to make the Gaussian prediction
+        # work with the same function for both arrays and single values,
+        # so for now, we will use two functions.
         full_ldos += self.gaussians_vector(
-            np.broadcast_to(xdata, (ldos_features.shape[0], 300)),
+            np.broadcast_to(
+                xdata, (ldos_features.shape[0], original_dimension)
+            ),
             *ldos_features[:, 5:]
         )
 
+        # Rescaling and reshaping, if needed.
         full_ldos /= self.rescaling_factor
         if x_original is not None:
             full_ldos = full_ldos.reshape(
