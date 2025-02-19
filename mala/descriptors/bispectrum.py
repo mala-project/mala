@@ -234,7 +234,7 @@ class Bispectrum(Descriptor):
         if self.parameters.custom_lammps_compute_file != "":
             lammps_compute_file = self.parameters.custom_lammps_compute_file
         else:
-            filepath = __file__.split("bispectrum")[0]
+            filepath = os.path.dirname(__file__)
             if self.parameters._configuration["mpi"]:
                 if self.parameters.use_z_splitting:
                     lammps_compute_file = os.path.join(
