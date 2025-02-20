@@ -35,10 +35,7 @@ class LDOSFeatureExtractor:
         dry_run=False,
         file_based_communication=False,
     ):
-        # Initialize everything needed for the fit.
-        initial_guess_left = self.__initial_guess_linear()
-        initial_guess_right = self.__initial_guess_linear()
-        initial_guess_gaussian = self.__initial_guess_gaussians()
+        dry_run_size = 100
 
         # Extract the basename of the file
         path = os.path.dirname(ldos_file)
@@ -92,11 +89,11 @@ class LDOSFeatureExtractor:
                     np.random.randint(
                         0,
                         gridsize,
-                        size=100,
+                        size=dry_run_size,
                     ),
                     :,
                 ]
-                gridsize = 100
+                gridsize = dry_run_size
             print("Rank", get_rank(), "Doing z portions", z_start, z_end)
         else:
             ldos = self.target_calculator.read_from_numpy_file(ldos_file)
@@ -114,11 +111,11 @@ class LDOSFeatureExtractor:
                     np.random.randint(
                         0,
                         ldos_shape[0] * ldos_shape[1] * ldos_shape[2],
-                        size=100,
+                        size=dry_run_size,
                     ),
                     :,
                 ]
-                gridsize = 100
+                gridsize = dry_run_size
         # TODO: The FFT changes the dimensions from 301 to 300 - this is OK
         # for the moment since we are interested in qualitative results,
         # but should eventually be fixed!
@@ -129,6 +126,12 @@ class LDOSFeatureExtractor:
             np.save(filtered_filename, ldos)
 
         ldos *= self.rescaling_factor
+
+        # Initialize everything needed for the fit.
+        self.__initialize_bound_gaussian()
+        initial_guess_left = self.__initial_guess_linear()
+        initial_guess_right = self.__initial_guess_linear()
+        initial_guess_gaussian = self.__initial_guess_gaussians()
         xdata = np.arange(ldos_shape[-1])
 
         # 5 = 2 for left linear function, 2 for right linear function, 1 for
@@ -351,6 +354,28 @@ class LDOSFeatureExtractor:
             )
             reduced = ydata - predicted_twolinear
 
+            ubound_this_point = self.ubounds.copy()
+            ubound_this_point[0 : self.number_of_gaussians] *= (
+                np.max(reduced) * 2.0
+            )
+            lbound_this_point = self.lbounds.copy()
+            lbound_this_point[0 : self.number_of_gaussians] *= (
+                np.max(reduced) * 2.0
+            )
+            # Rescaling the initial guess, IF necessary.
+            if np.any(
+                np.abs(initial_guess_gaussian[0 : self.number_of_gaussians])
+                >= ubound_this_point[0 : self.number_of_gaussians]
+            ):
+                print(
+                    "Rank", get_rank(), ": Initial guess too large, rescaling."
+                )
+                initial_guess_gaussian[0 : self.number_of_gaussians] /= np.max(
+                    initial_guess_gaussian[0 : self.number_of_gaussians]
+                )
+                initial_guess_gaussian[0 : self.number_of_gaussians] *= np.max(
+                    reduced
+                )
             popt_2, pcov_2 = curve_fit(
                 self.gaussians,
                 xdata,
@@ -358,6 +383,7 @@ class LDOSFeatureExtractor:
                 p0=initial_guess_gaussian,
                 maxfev=10000,
                 method="trf",
+                bounds=(lbound_this_point, ubound_this_point),
             )
 
             ordering = np.argsort(
@@ -437,23 +463,33 @@ class LDOSFeatureExtractor:
         # scale to bounds
         return lbound_poly + (ubound_poly - lbound_poly) * p0
 
-    def __initial_guess_gaussians(self):
-        lbound_weights = np.ones(self.number_of_gaussians) * -100
-        ubound_weights = np.ones(self.number_of_gaussians) * 100
+    def __initialize_bound_gaussian(self):
+        lbound_weights = (
+            np.ones(self.number_of_gaussians) * -1.0 * self.rescaling_factor
+        )
+        ubound_weights = (
+            np.ones(self.number_of_gaussians) * 1.0 * self.rescaling_factor
+        )
 
         lbound_means = np.zeros(self.number_of_gaussians)
-        ubound_means = np.ones(self.number_of_gaussians) * 300
+        ubound_means = np.ones(self.number_of_gaussians) * 500
 
-        lbound_sigmas = np.ones(self.number_of_gaussians) * 0.01
+        lbound_sigmas = np.ones(self.number_of_gaussians) * 0.001
         ubound_sigmas = np.ones(self.number_of_gaussians) * 100
 
-        lbounds = np.concatenate([lbound_weights, lbound_means, lbound_sigmas])
-        ubounds = np.concatenate([ubound_weights, ubound_means, ubound_sigmas])
+        self.lbounds = np.concatenate(
+            [lbound_weights, lbound_means, lbound_sigmas]
+        )
+        self.ubounds = np.concatenate(
+            [ubound_weights, ubound_means, ubound_sigmas]
+        )
+
+    def __initial_guess_gaussians(self):
 
         parameter_space_dim_poly = 3 * self.number_of_gaussians
         p0 = np.random.uniform(0, 1, parameter_space_dim_poly)
         # scale to bounds
-        return lbounds + (ubounds - lbounds) * p0
+        return self.lbounds + (self.ubounds - self.lbounds) * p0
 
     # TODO:
     # This is partially a code duplicate from the ldos.py file. It should be
