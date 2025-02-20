@@ -440,9 +440,7 @@ class Trainer(Runner):
                             self.parameters._configuration["device"]
                         )
                         training_loss_sum += self.__process_mini_batch(
-                            self.network,
-                            inputs,
-                            outputs
+                            self.network, inputs, outputs
                         )
                         batchid += 1
                         total_batch_id += 1
