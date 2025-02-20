@@ -105,7 +105,26 @@ CPU or GPU. To do so, simply enable MPI usage in MALA
             parameters.use_mpi = True
 
 Once MPI is activated, you can start the MPI aware Python script using
-``mpirun``, ``srun`` or whichever MPI wrapper is used on your machine.
+``mpirun``, ``srun`` or whichever MPI wrapper is used on your machine, for
+example with
+
+        .. code-block:: bash
+
+            #!/bin/bash
+            #SBATCH --nodes=NUMBER_OF_NODES
+            #SBATCH --ntasks-per-node=NUMBER_OF_TASKS_PER_NODE
+            #SBATCH --gres=gpu:NUMBER_OF_TASKS_PER_NODE
+            # Add more arguments as needed
+            ...
+
+            # Load more modules as needed
+            ...
+
+            # Depending on your cluster setup, you may need to use srun here
+            # rather than mpirun.
+            # Note that
+            # NUMBER_OF_RANKS = NUMBER_OF_NODES * NUMBER_OF_TASKS_PER_NODE
+            mpirun -np NUMBER_OF_RANKS python3 -u prediction.py
 
 By default, MALA can only operate with a number of processes by which the
 z-dimension of the inference grid can be evenly divided, since the Quantum
