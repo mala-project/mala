@@ -253,27 +253,27 @@ class LDOSFeatureExtractor:
             )
         elif len(ldos_shape) != 2:
             raise Exception("Cannot work with provided LDOS shape.")
+        full_ldos = np.zeros((ldos_features.shape[0], original_dimension))
 
         # Initializing the arrays for the left and right side of linear fit as
         # ragged arrays.
         splitting_x = np.int32(ldos_features[:, 0])
         zeros = np.zeros(ldos_features.shape[0])
         ends = np.zeros(ldos_features.shape[0]) + original_dimension
-        x_left = np.empty(len(zeros), dtype=object)
         for i, (start, stop) in enumerate(zip(zeros, splitting_x)):
-            x_left[i] = xdata[np.int32(np.arange(start, stop))]
-        x_right = np.empty(len(splitting_x), dtype=object)
-        for i, (start, stop) in enumerate(zip(splitting_x, ends)):
-            x_right[i] = xdata[np.int32(np.arange(start, stop))]
-
-        # Linear prediction, using a for loop to concatenate the ragged arrays.
-        predicted_left = self.linear(x_left, *ldos_features[:, 1:3])
-        predicted_right = self.linear(x_right, *ldos_features[:, 3:5])
-        full_ldos = np.zeros((ldos_features.shape[0], original_dimension))
-        for i in range(0, ldos_features.shape[0]):
-            full_ldos[i, :] = np.concatenate(
-                (predicted_left[i], predicted_right[i])
+            x_left = np.int32(np.arange(start, stop))
+            full_ldos[i, x_left] = self.linear(
+                xdata[x_left], *ldos_features[i, 1:3]
             )
+
+        for i, (start, stop) in enumerate(zip(splitting_x, ends)):
+            x_right = np.int32(np.arange(start, stop))
+            full_ldos[i, x_right] = self.linear(
+                xdata[x_right], *ldos_features[i, 3:5]
+            )
+
+        # Excplicitly freeing up memory.
+        del splitting_x, zeros, ends
 
         # I haven't found a nice way yet to make the Gaussian prediction
         # work with the same function for both arrays and single values,
