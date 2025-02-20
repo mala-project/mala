@@ -6,6 +6,7 @@ import numpy as np
 import mala.descriptors.ace_coupling_utils as acu
 
 
+# TODO: Rename class.
 class AcePot:
     def __init__(
         self,
@@ -83,6 +84,11 @@ class AcePot:
             rank: nv for rank, nv in zip(self.ranks, self.global_nmax)
         }
         mumax_dict = {rank: len(self.elements) for rank in self.ranks}
+
+        # TODO: Clean this up, e.g., if FitSNAP is to be used, we need
+        # to mention it in the requirements; also, I think we don't use it?
+        # If the default, and what we actually use, is the json-file-based
+        # workaround, we should maybe set it as an explicit default.
         if self.manuallabs != None:
             with open(self.manuallabs, "r") as readjson:
                 labdata = json.load(readjson)
@@ -185,6 +191,8 @@ class AcePot:
 
         for bondind, bondlst in enumerate(self.bondlsts):
             bstr = "[%d, %d]" % (bondlst[0], bondlst[1])
+            # TODO: Is there a way to assign this without try/except, but
+            #  rather an if-condition?
             try:
                 bonds[bstr] = {
                     "nradmax": nradmax,
@@ -238,6 +246,8 @@ class AcePot:
         self.bonds = bonds
 
     def set_funcs(self, nulst=None, muflg=True, print_0s=True):
+
+        # TODO: Simplify this.
         if nulst == None:
             if self.nus != None:
                 nulst = self.nus.copy()

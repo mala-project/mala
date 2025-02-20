@@ -2,6 +2,9 @@
 
 from mala.descriptors import ace_coupling_utils as acu
 
+# TODO: Are all of these called in the same place? Maybe this can be
+# realized as a class.
+
 
 def get_coupling(Clebsch_Gordan, ldict, L_R=0, use_permutations=True):
     M_Rs = list(range(-L_R, L_R + 1))
