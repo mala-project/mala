@@ -189,7 +189,27 @@ CPU or GPU. To do so, simply enable MPI usage in MALA</p>
 </div>
 </div></blockquote>
 <p>Once MPI is activated, you can start the MPI aware Python script using
-<code class="docutils literal notranslate"><span class="pre">mpirun</span></code>, <code class="docutils literal notranslate"><span class="pre">srun</span></code> or whichever MPI wrapper is used on your machine.</p>
+<code class="docutils literal notranslate"><span class="pre">mpirun</span></code>, <code class="docutils literal notranslate"><span class="pre">srun</span></code> or whichever MPI wrapper is used on your machine, for
+example with</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1">#SBATCH --nodes=NUMBER_OF_NODES</span>
+<span class="c1">#SBATCH --ntasks-per-node=NUMBER_OF_TASKS_PER_NODE</span>
+<span class="c1">#SBATCH --gres=gpu:NUMBER_OF_TASKS_PER_NODE</span>
+<span class="c1"># Add more arguments as needed</span>
+...
+
+<span class="c1"># Load more modules as needed</span>
+...
+
+<span class="c1"># Depending on your cluster setup, you may need to use srun here</span>
+<span class="c1"># rather than mpirun.</span>
+<span class="c1"># Note that</span>
+<span class="c1"># NUMBER_OF_RANKS = NUMBER_OF_NODES * NUMBER_OF_TASKS_PER_NODE</span>
+mpirun<span class="w"> </span>-np<span class="w"> </span>NUMBER_OF_RANKS<span class="w"> </span>python3<span class="w"> </span>-u<span class="w"> </span>prediction.py
+</pre></div>
+</div>
+</div></blockquote>
 <p>By default, MALA can only operate with a number of processes by which the
 z-dimension of the inference grid can be evenly divided, since the Quantum
 ESPRESSO backend of MALA by default only divides data along the z-dimension.
