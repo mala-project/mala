@@ -147,64 +147,6 @@ def lammps_remap(PA_labels, rank, allowed_mus=[0]):
     return fs_labs, not_compatible
 
 
-def from_tabulated_q(
-    k_mu_n, l, allowed_mus=[0], allowed_k1s=[0], tabulated_all=None
-):
-    ks, mu, n = k_mu_n
-    rank = len(l)
-    Lveclst = ["%d"] * (rank - 2, mu, n)
-    vecstrlst = ["%d"] * rank
-    unique_mun, mun_tupped = nonang_ind_combined((ks, mu, n))
-    all_labels = []
-    for mun_tup in mun_tupped:
-        mappedn, mappedl, mprev_n, mprev = get_mapped(mun_tup, l)
-        this_key = (tuple(mappedn), tuple(l))
-        this_key_str = (
-            ",".join(vecstrlst) % mappedn
-            + "_"
-            + ",".join(vecstrlst) % tuple(l)
-        )
-        these_labels = tabulated_all["labels"][this_key_str]
-        mapped_labels = []
-        # print (mappedn,this_key_str)
-        for label in these_labels:
-            radstr, lstr, Lstr = label.split("_")
-            radvec = tuple([int(v) for v in radstr.split(",")])
-            lvec = tuple([int(v) for v in lstr.split(",")])
-            Lvec = tuple([int(v) for v in Lstr.split(",")])
-            Lstr_std = "-".join(Lveclst) % Lvec
-            remapped_radvec = [mprev_n[rdv] for rdv in radvec]
-            klab = [rdv[2] for rdv in remapped_radvec]
-            mulab = [rdv[1] for rdv in remapped_radvec]
-            nlab = [rdv[0] for rdv in remapped_radvec]
-            klab = tuple(mulab)
-            mulab = tuple(mulab)
-            nlab = tuple(nlab)
-            nu = (
-                ",".join(vecstrlst) % klab
-                + ",".join(vecstrlst) % mulab
-                + ","
-                + ",".join(vecstrlst) % nlab
-                + ","
-                + ",".join(vecstrlst) % lvec
-                + "_"
-                + Lstr_std
-            )
-            # print (nu)
-            mapped_labels.append(nu)
-        all_labels.extend(mapped_labels)
-
-    chem_labels = []
-    for k1 in allowed_k1s:
-        for mu0 in allowed_mus:
-            mu0_prefix = "%d-%d_" % (k1, mu0)
-            for label in all_labels:
-                chemlabel = mu0_prefix + label
-                chem_labels.append(chemlabel)
-
-    return chem_labels
-
-
 def from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
     rank = len(l)
     Lveclst = ["%d"] * (rank - 2)
@@ -254,32 +196,6 @@ def from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
             chem_labels.append(chemlabel)
 
     return chem_labels
-
-
-def nonangind_combined(k_mu_n):
-    ks, mu, n = k_mu_n
-    mu = sorted(mu)
-    ks = sorted(ks)
-    # n = sorted(n)
-    umus = sorted(list(set(itertools.permutations(mu))))
-    uks = sorted(list(set(itertools.permutations(ks))))
-    uns = sorted(list(set(itertools.permutations(n))))
-    combos = [cmb for cmb in itertools.product(uks, umus, uns)]
-    tupped = [
-        tuple([(ni, mui, ki) for ki, mui, ni in zip(*cmb)]) for cmb in combos
-    ]
-    tupped = list(set(tupped))
-    uniques = []
-    for tupi in tupped:
-        nil = []
-        muil = []
-        kil = []
-        for tupii in tupi:
-            kil.append(tupii[2])
-            muil.append(tupii[1])
-            nil.append(tupii[0])
-        uniques.append(tuple([tuple(kil), tuple(muil), tuple(nil)]))
-    return uniques, tupped
 
 
 def muvec_nvec_combined(mu, n):
@@ -483,38 +399,6 @@ def get_k_mu_nu_rank(nu_in):
     nu = nu_in.split("_")[1]
     nu_splt = nu.split(",")
     return int(len(nu_splt) / 4)
-
-
-def sort_pair(l):
-    uniques = sorted(list(set(l)))
-    ltmp = l.copy()
-    ltmp.sort(key=lambda x: ltmp.count(x), reverse=True)
-    uniques.sort(key=lambda x: ltmp.index(x), reverse=False)
-    unique_inds = [i for i in range(len(uniques))]
-    mp = {u: ind for ind, u in enumerate(uniques)}
-    revmp = {ind: u for ind, u in enumerate(uniques)}
-    per_unique = {u: [] for u in unique_inds}
-    mapped_l = [mp[li] for li in l]
-    for li in mapped_l:
-        per_unique[li].append(li)
-    unsorted_tups = []
-    for lui in unique_inds:
-        countu = mapped_l.count(lui)
-        if countu % 2 == 0:
-            nd = int(countu / 2)
-            resid = 0
-        elif countu % 2 != 0:
-            nd = math.floor(countu / 2)
-            resid = 1
-        pairls = [tuple([lui] * 2)] * nd
-        residls = [tuple([lui])] * resid
-        unsorted_tups.append(pairls)
-        unsorted_tups.append(residls)
-    tups = sorted(flatten(unsorted_tups))
-    tups.sort(key=lambda x: len(x), reverse=True)
-    resorted = flatten(tups)
-    resorted_return = [revmp[k] for k in resorted]
-    return resorted_return
 
 
 def ind_vec(lrng, size):
@@ -913,86 +797,6 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
     return ls
 
 
-def charge_labels_raw(
-    rank,
-    nmax,
-    lmax,
-    k1max,
-    k2max,
-    mumax=1,
-    k1min=0,
-    k2min=0,
-    lmin=0,
-    L_R=0,
-    M_R=0,
-    all_perms=False,
-):
-    # rank: int  - basis function rank to evaluate nl combinations for
-    # nmax: int  - maximum value of the n quantum numbers in the nl vectors
-    # lmax: int  - maximum value of the l quantum numbers in the nl vectors
-    # NOTE: All valid intermediates L are generated
-
-    if rank >= 4:
-        print(
-            "WARNING! THIS FUNCTION ALONE DOES NOT ENSURE LINEAR DEPENDENCE BEYOND RANK 3 - NEED TO APPLY PA RULES AS WITH CHARGE INDEPENDENT BASES STILL"
-        )
-
-    munl = []
-
-    murng = range(mumax)
-    nrng = range(1, nmax + 1)
-    k2rng = range(k2min, k2max + 1)
-    k1rng = range(k1min, k1max + 1)
-    lrng = range(lmin, lmax + 1)
-
-    mus = ind_vec(murng, rank)
-    ns = ind_vec(nrng, rank)
-    k2s = ind_vec(k2rng, rank)
-    ls = generate_l_LR(lrng, rank, L_R)
-
-    linters_per_l = {
-        l: tree_l_inters([int(b) for b in l.split(",")], L_R=0) for l in ls
-    }
-
-    munllst = ["%d"] * int(rank * 4)
-    munlstr = ",".join(b for b in munllst)
-    for k1 in k1rng:
-        for mu0 in murng:
-            for cmbo in itertools.product(k2s, mus, ns, ls):
-                ks, mu, n, l = cmbo
-
-                linters = linters_per_l[l]
-                musplt = [int(k) for k in mu.split(",")]
-                nsplt = [int(k) for k in n.split(",")]
-                lsplt = [int(k) for k in l.split(",")]
-                ksplt = [int(k) for k in ks.split(",")]
-                x = [
-                    (ksplt[i], musplt[i], lsplt[i], nsplt[i])
-                    for i in range(rank)
-                ]
-                srt = sorted(x)
-                if not all_perms:
-                    conds = x == srt
-                elif all_perms:
-                    conds = tuple(lsplt) == tuple(sorted(lsplt))
-                if conds:
-                    # stmp = '%d-%d_' % (mu0,k1) +  munlstr  % tuple(ksplt+ musplt+nsplt+lsplt)
-                    stmp = "%d-%d_" % (mu0, k1) + munlstr % tuple(
-                        musplt + ksplt + nsplt + lsplt
-                    )
-                    # if stmp not in munl:
-                    for linter in linters:
-                        linter_str_lst = ["%d"] * len(linter)
-                        linter_str = (
-                            "-".join(b for b in linter_str_lst) % linter
-                        )
-                        munlL = stmp + "_" + linter_str
-                        munl.append(munlL)
-    # print ('muknl check',len(munl),len(list(set(munl))))
-    # munl = list(set(munl))
-    return munl
-
-
 def generate_nl(
     rank, nmax, lmax, mumax=1, lmin=0, L_R=0, M_R=0, all_perms=False
 ):
@@ -1054,59 +858,56 @@ def combine_label_dcts(label_dcts):
     return parent_dct
 
 
-def srt_charge_basis(nulst, mu0s=[0]):
-    by_ktyp = {ktypi: {mu0: [] for mu0 in mu0s} for ktypi in range(7)}
-    used_nus = []
-    for nu in nulst:
-        mu0ii, k1ii, muii, kii, nii, lii = get_k_mu_n_l(nu)
-        ki = k1ii
-        kjmax = max(kii)
-        kjallflag = all([kiii == kii[0] for kiii in kii])
-        kj = 999
-        if kjallflag:
-            kj = kii[0]
-        cond1 = ki == 0 and kj == 0  # charge independent
-        cond2 = (
-            ki == 0 and kj == 999
-        )  # no onsite charge, non-degenerate neighbor charge
-        cond3 = (
-            ki == 0 and kj != 999 and kj != 0
-        )  # no onsite charge, degenerate neighbor charge
-        cond4 = ki != 0 and ki == kj  # degenerate on-site and neighbor charge
-        cond5 = ki != 0 and kj == 0  # onsite charge, no neighbor charge
-        cond6 = (
-            ki != 0 and kj != 999 and kj != 0 and ki != kj
-        )  # onsite charge, degenerate neighbor charge
-        cond7 = (
-            ki != 0 and kj == 999
-        )  # nondegenerate on-site and neighbor charge
-        conds = [cond1, cond2, cond3, cond4, cond5, cond6, cond7]
-        # ---------------------------------
-        for icond in range(len(conds)):
-            if conds[icond] and nu not in used_nus:
-                by_ktyp[icond][mu0ii].append(nu)
-                used_nus.append(nu)
-    # Combine convenient subsets:
-    # 1 charge independent
-    # q_indep={**by_ktyp[0]}
-    q_indep = combine_label_dcts([by_ktyp[0]])
-    # 2 sparse charge-dependent 'a'
-    # (on-site),(neighbor + onsite [degenerate])
-    # q_dep_sparsea = {**by_ktyp[4],**by_ktyp[3]}
-    q_dep_sparsea = combine_label_dcts([by_ktyp[4], by_ktyp[3]])
-    # 2 sparse charge-dependent 'b'
-    # (on-site),(neighbor + onsite [degenerate]), (neighbor [degenerate])
-    # q_dep_sparseb = {**by_ktyp[4],**by_ktyp[3],**by_ktyp[2]}
-    q_dep_sparseb = combine_label_dcts([by_ktyp[4], by_ktyp[3], by_ktyp[2]])
-    # 3 all charge-dependent
-    q_dep_complete = combine_label_dcts(
-        [
-            by_ktyp[4],
-            by_ktyp[3],
-            by_ktyp[2],
-            by_ktyp[1],
-            by_ktyp[5],
-            by_ktyp[6],
-        ]
-    )
-    return q_indep, q_dep_sparsea, q_dep_sparseb, q_dep_complete
+def simple_parity_filt(l, inters, even=True):
+    nodes, remainder = tree(l)
+    base_ls = group_vec_by_node(l, nodes, remainder=remainder)
+    base_ls = [list(k) for k in base_ls]
+    if even:
+        assert (
+            np.sum(l) % 2
+        ) == 0, "must have \sum{l_i} = even for even parity definition"
+        if len(l) == 4:
+            inters_filt = [
+                i
+                for i in inters
+                if np.sum([i[0]] + base_ls[0]) % 2 == 0
+                and np.sum([i[1]] + base_ls[1]) % 2 == 0
+            ]
+        else:
+            if remainder == None:
+                inters_filt = [
+                    i
+                    for i in inters
+                    if all(
+                        [
+                            np.sum([i[ind]] + base_ls[ind]) % 2 == 0
+                            for ind in range(len(base_ls))
+                        ]
+                    )
+                ]
+            else:
+                inters_filt = [
+                    i
+                    for i in inters
+                    if all(
+                        [
+                            np.sum([i[ind]] + base_ls[ind]) % 2 == 0
+                            for ind in range(len(base_ls))
+                        ]
+                    )
+                ]
+
+    else:
+        assert (
+            np.sum(l) % 2
+        ) != 0, "must have \sum{l_i} = odd for odd parity definition"
+        print(
+            "WARNING! You are using an odd parity tree. Check your labels to make sure this is what you want (this is for fitting vector quantities!)"
+        )
+        if len(l) == 4:
+            inters_filt = [
+                inters[ind]
+                for ind, i in enumerate(base_ls)
+                if np.sum([inters[ind][i]] + list(i)) % 2 != 0
+            ]
+    return inters_filt

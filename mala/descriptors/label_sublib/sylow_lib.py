@@ -36,17 +36,6 @@ sylow_2_s6 = [
 ]
 
 
-def syl_map(rank):
-    if rank == 1:
-        return [filled_perm(p, rank) for p in sylow_1_s1]
-    elif rank == 2 or rank == 3:
-        return [filled_perm(p, rank) for p in sylow_2_s2]
-    elif rank == 4 or rank == 5:
-        return [filled_perm(p, rank) for p in sylow_2_s4]
-    elif rank == 6 or rank == 7:
-        return [filled_perm(p, rank) for p in sylow_2_s6]
-
-
 # add in extra conjugations for s6
 
 extras = [
@@ -520,42 +509,3 @@ def base_automorphisms(l, subtree=False):
         ]
     organized_automorphisms = {p: sorted(op_per_part[p]) for p in unique_parts}
     return organized_automorphisms
-
-
-def get_auto_part(
-    l, part, add_degen_autos=False, part_only=False, subtree=False
-):
-
-    # grows the automorphism group for a given l vector,
-    #   and returns permutation operations belonging to specific set of orbits
-    #   in the partition 'part'
-    #   add_degen_autos (logical) : flag to grow automorphism group based on degeneracy
-    #   part_only (logical) : flag to return automorphisms within one set of orbits
-
-    N = len(l)
-    G_N_per_part = base_automorphisms(l, subtree)
-    if part_only:
-        applied_perms = [
-            tuple(Permutation(filled_perm(pi, len(l)))(l))
-            for pi in G_N_per_part[part]
-        ]
-    elif not part_only:
-        applied_perms = [
-            tuple(Permutation(filled_perm(pi, len(l)))(l))
-            for pi in flatten(G_N_per_part.values())
-        ]
-    autos = []
-    if add_degen_autos:
-        perms = [p for p in itertools.permutations(range(N))]
-        for perm in perms:
-            P = Permutation(perm)
-            cyc = P.full_cyclic_form
-            cyc = tuple([tuple(k) for k in cyc])
-            this_applied = P(l)
-            if tuple(this_applied) in applied_perms:
-                autos.append(cyc)
-    if part_only:
-        return_lst = sorted(list(set(G_N_per_part[part] + autos)))
-    elif not part_only:
-        return_lst = sorted(list(set(flatten(G_N_per_part.values()) + autos)))
-    return return_lst

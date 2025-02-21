@@ -1,4 +1,4 @@
-from mala.descriptors.inter_set import *
+from mala.descriptors.gen_labels import simple_parity_filt
 from mala.descriptors.symmetric_grp_manip import *
 
 
@@ -336,7 +336,7 @@ def apply_ladder_relationships(
     degen_fam = (mappedl, ndegen_rep)
 
     all_inters = tree_l_inters(lin)
-    even_inters = simple_parity_filt(lin, all_inters, L_R)
+    even_inters = simple_parity_filt(lin, all_inters)
 
     if 0 in lin:
         funcs = combined_labs[: len(full_span)]

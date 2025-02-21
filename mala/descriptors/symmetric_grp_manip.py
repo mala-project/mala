@@ -81,13 +81,6 @@ def get_degen_orb(l):
     return part_tup, partition
 
 
-def get_young_map(partition_inds):
-    current_size_tup = tuple([len(ki) for ki in partition_inds])
-    sorted_size_tup = tuple(sorted(current_size_tup))
-    full = flatten(partition_inds)
-    full = tuple(sorted(full))
-
-
 def enforce_sorted_orbit(partition_inds):
     rank = len(flatten(partition_inds))
     couple_ref = group_vec_by_orbits(
@@ -133,32 +126,3 @@ def enforce_sorted_orbit(partition_inds):
         new_partition = tuple(list(partition_inds).copy())
     part_tup = tuple([len(ki) for ki in new_partition])
     return part_tup, tuple(new_partition)
-
-
-def get_sequential_degen_orb(l):
-    degen_ind_dict = find_degenerate_indices(l)
-    partition = []
-    for degenval, matching_inds in degen_ind_dict.items():
-        sequential_inds = sorted(
-            list(set(find_sequential_indices(matching_inds)))
-        )
-        if len(sequential_inds) != 0:
-            this_orbit = [tuple(sequential_inds)]
-        else:
-            this_orbit = [(0,)]
-        # this_orbit = [tuple(matching_inds)]
-        if len(flatten(this_orbit)) == len(matching_inds):
-            this_orbit = this_orbit
-        elif len(flatten(this_orbit)) != len(matching_inds):
-            remaining = matching_inds[len(flatten(this_orbit)) :]
-            for ii in remaining:
-                this_orbit.append((ii,))
-
-        partition.extend(this_orbit)
-    if len(flatten(partition)) != len(l):
-        remaining_inds = [
-            ri for ri in range(len(l)) if ri not in flatten(partition)
-        ]
-        partition.extend([(ri,) for ri in remaining_inds])
-
-    return tuple([len(k) for k in partition]), partition
