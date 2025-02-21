@@ -112,7 +112,7 @@ class AcePot:
         else:
             nulst_1 = []
             for rank in self.ranks:
-                PA_lammps, not_compat = acu.pa_labels_raw(
+                PA_lammps = acu.pa_labels_raw(
                     rank,
                     nradmax_dict[rank],
                     lmax_dict[rank],

@@ -342,7 +342,6 @@ class ACE(Descriptor):
             rc_range,
             rc_default,
             lmb_default,
-            rcin_default,
         ) = self.get_default_settings()
 
         self.cutoff_factors = [float(k) for k in rc_default.split()[2:]]
@@ -439,7 +438,7 @@ class ACE(Descriptor):
         ranked_chem_nus = []
         for ind, rank in enumerate(self.parameters.ace_ranks):
             rank = int(rank)
-            PA_lammps, not_compat = acu.pa_labels_raw(
+            PA_lammps = acu.pa_labels_raw(
                 rank,
                 int(self.parameters.ace_nmax[ind]),
                 int(self.parameters.ace_lmax[ind]),
@@ -542,10 +541,7 @@ class ACE(Descriptor):
             default_lmbs
         )
         rcin_def_lst = ["%1.3f"] * len(self.bonds)
-        rcin_def_str = "rcinner = " + "  ".join(
-            b for b in rcin_def_lst
-        ) % tuple(list(rin_def.values()))
-        return rc_range, rc_def_str, lmb_def_str, rcin_def_str
+        return rc_range, rc_def_str, lmb_def_str
 
     def default_rc(self, elms):
         # TODO: Add documentation. Also, maybe make it private?

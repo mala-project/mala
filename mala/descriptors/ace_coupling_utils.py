@@ -232,7 +232,7 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
         # reduced_nvecs=get_mapped_subset(nvecs)
 
         all_lammps_labs = []
-        all_not_compat = []
+        # all_not_compat = []
         possible_mus = list(range(mumax))
 
         lmax_strs = generate_l_LR(
@@ -276,7 +276,7 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
                     nus, rank=rank, allowed_mus=possible_mus
                 )
                 all_lammps_labs.extend(lammps_ready)
-                all_not_compat.extend(not_compatible)
+                # all_not_compat.extend(not_compatible)
 
                 # print ('raw PA-RPI',nus)
                 # print ('lammps ready PA-RPI',lammps_ready)
@@ -295,9 +295,9 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
             all_perms=False,
         )
         all_lammps_labs = labels
-        all_not_compat = []
+        # all_not_compat = []
 
-    return all_lammps_labs, all_not_compat
+    return all_lammps_labs
 
 
 def generate_nl(
@@ -365,15 +365,7 @@ def build_tabulated(rank, all_max_mu, all_max_n, all_max_l, L_R=0, M_R=0):
             range(0, all_max_n), rank
         )
     ]
-    muvecs = [
-        i
-        for i in itertools.combinations_with_replacement(
-            range(all_max_mu), rank
-        )
-    ]
     reduced_nvecs = get_mapped_subset(nvecs)
-    fs_labs = []
-    all_nl = []
 
     all_PA_tabulated = []
     PA_per_nlblock = {}
@@ -401,7 +393,6 @@ def build_tabulated(rank, all_max_mu, all_max_n, all_max_l, L_R=0, M_R=0):
                 parity_span_labs=max_labs,
                 full_span=original_spans[lspan_perm],
             )
-            mustrlst = ["%d"] * rank
             nstrlst = ["%d"] * rank
             lstrlst = ["%d"] * rank
             Lstrlst = ["%d"] * (rank - 2)
@@ -413,10 +404,6 @@ def build_tabulated(rank, all_max_mu, all_max_n, all_max_l, L_R=0, M_R=0):
             )
             for lab in PA_labels:
                 mu0, mu, n, l, L = get_mu_n_l(lab, return_L=True)
-                if L != None:
-                    nlL = (tuple(n), tuple(l), L)
-                else:
-                    nlL = (tuple(n), tuple(l), tuple([]))
                 simple_str = (
                     ",".join(nstrlst) % tuple(n)
                     + "_"
@@ -441,11 +428,10 @@ def from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
     rank = len(l)
     Lveclst = ["%d"] * (rank - 2)
     vecstrlst = ["%d"] * rank
-    unique_mun, mun_tupped = muvec_nvec_combined(mu, n)
+    mun_tupped = muvec_nvec_combined(mu, n)
     all_labels = []
     for mun_tup in mun_tupped:
         mappedn, mappedl, mprev_n, mprev = get_mapped(mun_tup, l)
-        this_key = (tuple(mappedn), tuple(l))
         this_key_str = (
             ",".join(vecstrlst) % mappedn
             + "_"
@@ -495,7 +481,6 @@ def get_mapped(nin, lin):
     tmp.sort(key=Counter(lin).get, reverse=True)
     uniques.sort()
     uniques.sort(key=Counter(tmp).get, reverse=True)
-    count_uniques = [lin.count(u) for u in uniques]
     mp = {uniques[i]: i for i in range(len(uniques))}
     mprev = {i: uniques[i] for i in range(len(uniques))}
     mappedl = [mp[t] for t in tmp]
@@ -505,7 +490,6 @@ def get_mapped(nin, lin):
     tmpn.sort(key=Counter(nin).get, reverse=True)
     unique_ns.sort()
     unique_ns.sort(key=Counter(nin).get, reverse=True)
-    count_unique_ns = [nin.count(u) for u in unique_ns]
     mp_n = {unique_ns[i]: i for i in range(len(unique_ns))}
     mprev_n = {i: unique_ns[i] for i in range(len(unique_ns))}
     mappedn = [mp_n[t] for t in tmpn]
@@ -525,15 +509,7 @@ def muvec_nvec_combined(mu, n):
         tuple(sorted([(ni, mui) for mui, ni in zip(*cmb)])) for cmb in combos
     ]
     tupped = list(set(tupped))
-    uniques = []
-    for tupi in tupped:
-        nil = []
-        muil = []
-        for tupii in tupi:
-            muil.append(tupii[1])
-            nil.append(tupii[0])
-        uniques.append(tuple([tuple(muil), tuple(nil)]))
-    return uniques, tupped
+    return tupped
 
 
 def ind_vec(lrng, size):
