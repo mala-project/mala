@@ -19,7 +19,7 @@ from mala.descriptors.descriptor import Descriptor
 from mala.descriptors.ace_potential import ACEPotential
 import mala.descriptors.ace_coupling_utils as acu
 import mala.descriptors.wigner_coupling as wigner_coupling
-import mala.descriptors.cg_coupling as cg_coupling
+import mala.descriptors.clebsch_gordan_coupling as cg_coupling
 
 
 class ACE(Descriptor):
@@ -49,11 +49,11 @@ class ACE(Descriptor):
         # otherwise it is computed and saved to a pkl file.
         # The arrys are used within the ACE descriptor calculation.
         self.__precomputed_wigner_3j = self.__init_wigner_3j(
-            self.parameters.ace_lmax_traditional
+            self.parameters.ace_reduction_coefficients_lmax
         )
 
         self.__precomputed_clebsch_gordan = self.__init_clebsch_gordan(
-            self.parameters.ace_lmax_traditional
+            self.parameters.ace_reduction_coefficients_lmax
         )
 
         # File which holds the coupling coefficients.
@@ -72,6 +72,23 @@ class ACE(Descriptor):
         self.lambdas = None
         self.nus = None
         self.limit_nus = None
+
+        # These used to live in the parameters subclass for the descriptors,
+        # but I have moved them here, because I think they are defaults that
+        # barely ever change. I will not be removing them outright, because
+        # they may be needed for debugging.
+        self.ace_grid_filter = True
+        self.ace_padfunc = True
+
+        # Consistency checks for the ACE settings.
+        if (
+            len(self.parameters.ace_ranks) != len(self.parameters.ace_lmax)
+            or len(self.parameters.ace_ranks) != len(self.parameters.ace_nmax)
+            or len(self.parameters.ace_ranks) != len(self.parameters.ace_lmin)
+        ):
+            raise Exception(
+                "ACE ranks, lmax, nmax, and lmin must have the same length"
+            )
 
     @property
     def data_name(self):
@@ -388,14 +405,14 @@ class ACE(Descriptor):
         }
 
         # load or generate generalized coupling coefficients
-        if self.parameters.ace_coupling_type == "wig":
+        if self.parameters.ace_coupling_type == "wigner3j":
             ccs = wigner_coupling.get_coupling(
                 self.__precomputed_wigner_3j,
                 ldict,
                 L_R=self.parameters.ace_L_R,
             )
 
-        elif self.parameters.ace_coupling_type == "cg":
+        elif self.parameters.ace_coupling_type == "clebsch_gordan":
             ccs = cg_coupling.get_coupling(
                 self.__precomputed_clebsch_gordan,
                 ldict,
@@ -403,7 +420,7 @@ class ACE(Descriptor):
             )
 
         else:
-            sys.exit(
+            raise Exception(
                 "Coupling type "
                 + str(self.parameters.ace_coupling_type)
                 + " not recongised"
@@ -416,7 +433,7 @@ class ACE(Descriptor):
             self.parameters.ace_ranks,
             self.parameters.ace_nmax,
             self.parameters.ace_lmax,
-            self.parameters.ace_nradbase,
+            max(self.parameters.ace_nmax),
             self.cutoff_factors,
             self.lambdas,
             ccs[self.parameters.ace_M_R],
@@ -468,20 +485,20 @@ class ACE(Descriptor):
         byattyp, byattypfiltered = self.__sort_by_atom_type(
             nus, len(list(set(self._atoms.symbols))) + 1
         )
-        if self.parameters.ace_grid_filter:
+        if self.ace_grid_filter:
             limit_nus = byattypfiltered[
                 "%d" % (len(list(set(self._atoms.symbols))))
             ]
-            assert self.parameters.ace_padfunc, (
+            assert self.ace_padfunc, (
                 "Must pad with at least 1 other basis function for other "
                 "element types to work in LAMMPS - set padfunc=True"
             )
-            if self.parameters.ace_padfunc:
+            if self.ace_padfunc:
                 for muii in musins:
                     limit_nus.append(byattypfiltered["%d" % muii][0])
-        elif not self.parameters.ace_grid_filter:
+        elif not self.ace_grid_filter:
             limit_nus = byattyp["%d" % (len(list(set(self._atoms.symbols))))]
-            if self.parameters.ace_padfunc:
+            if self.ace_padfunc:
                 for muii in musins:
                     limit_nus.append(byattyp["%d" % muii][0])
         # printout(
@@ -635,7 +652,7 @@ class ACE(Descriptor):
                                         l3,
                                         m3,
                                     )
-                                    cg[key] = self.__precomputed_wigner_3j(
+                                    cg[key] = self._wigner_3j(
                                         l1, m1, l2, m2, l3, m3
                                     )
             with open(
@@ -667,7 +684,7 @@ class ACE(Descriptor):
                                         l3,
                                         m3,
                                     )
-                                    cg[key] = self.__clebsch_gordan(
+                                    cg[key] = self._clebsch_gordan(
                                         l1, m1, l2, m2, l3, m3
                                     )
             with open(
@@ -722,7 +739,7 @@ class ACE(Descriptor):
         return ionic_radii, metal_list
 
     @staticmethod
-    def __clebsch_gordan(j1, m1, j2, m2, j3, m3):
+    def _clebsch_gordan(j1, m1, j2, m2, j3, m3):
         # Clebsch-gordan coefficient calculator based on eqs. 4-5 of:
         # https://hal.inria.fr/hal-01851097/document
 
@@ -785,6 +802,17 @@ class ACE(Descriptor):
 
         else:
             return 0.0
+
+    @staticmethod
+    def _wigner_3j(j1, m1, j2, m2, j3, m3):
+        # uses relation between Clebsch-Gordann coefficients and W-3j symbols to evaluate W-3j
+        # VERIFIED - wolframalpha.com
+        cg = ACE._clebsch_gordan(j1, m1, j2, m2, j3, -m3)
+
+        num = np.longdouble((-1) ** (j1 - j2 - m3))
+        denom = np.longdouble(((2 * j3) + 1) ** (1 / 2))
+
+        return cg * num / denom  # float(num/denom)
 
     def _read_feature_dimension_from_json(self, json_dict):
         nus, limit_nus = self.__calculate_limit_nus()

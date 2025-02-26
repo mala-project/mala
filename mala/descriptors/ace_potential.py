@@ -229,7 +229,6 @@ class ACEPotential:
 
     def set_funcs(self, nulst=None, muflg=True, print_0s=True):
 
-        # TODO: Simplify this.
         if nulst is None:
             if self.nus is not None:
                 nulst = self.nus.copy()

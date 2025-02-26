@@ -506,32 +506,27 @@ class ParametersDescriptors(ParametersBase):
         self.minterpy_polynomial_degree = 4
         self.minterpy_lp_norm = 2
 
-        # Everything peraining to the ACE descriptors.
+        # Everything pertaining to the ACE descriptors.
         self.ace_cutoff = None
 
-        # TODO: add a consistency check for these.
         self.ace_ranks = [1, 2, 3]
         self.ace_nmax = [6, 2, 2]
         self.ace_lmax = [0, 2, 2]
-        self.ace_nradbase = max(self.ace_nmax)
         self.ace_lmin = [0, 0, 0]
 
+        # Flavors/extra options for the ACE descriptors.
         self.ace_nshell = 2.0
         self.ace_apply_shift = False
         self.ace_metal_max = True
         self.ace_use_vdw = False
 
+        # ???
         self.ace_L_R = 0
         self.ace_M_R = 0
 
-        self.ace_coupling_type = "cg"
-        self.ace_lmax_traditional = 12
-
-        # TODO: add consistency check for these
-        # if grid_filter, types_like_snap must be False
-        # if grid_filter, padfunc must be True
-        self.ace_grid_filter = True
-        self.ace_padfunc = True
+        # Other value could be "wigner3j".
+        self.ace_coupling_type = "clebsch_gordan"
+        self.ace_reduction_coefficients_lmax = 12
 
     @property
     def use_z_splitting(self):
