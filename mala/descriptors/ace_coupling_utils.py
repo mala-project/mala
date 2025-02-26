@@ -12,13 +12,14 @@ from mala.descriptors.label_sublib.young import (
     YoungSubgroup,
     local_sigma_c_partitions,
     flatten,
+    group_vec_by_node,
 )
 from mala.descriptors.symmetric_grp_manip import (
     leaf_filter,
     get_degen_orb,
     enforce_sorted_orbit,
 )
-from mala.descriptors.tree_sorting import build_tree
+from mala.descriptors.tree_sorting import build_tree, tree
 
 
 def get_ms(l, M_R=0):
@@ -39,24 +40,6 @@ def check_triangle(l1, l2, l3):
     upper_bound = np.abs(l1 + l2)
     condition = lower_bound <= l3 <= upper_bound
     return condition
-
-
-def tree(l):
-    # quick construction of tree leaves
-    rank = len(l)
-    rngs = list(range(0, rank))
-    rngs = iter(rngs)
-    count = 0
-    tup = []
-    while count < int(rank / 2):
-        c1 = next(rngs)
-        c2 = next(rngs)
-        tup.append((c1, c2))
-        count += 1
-    remainder = None
-    if rank % 2 != 0:
-        remainder = list(range(rank))[-1]
-    return tuple(tup), remainder
 
 
 # groups a vector of l quantum numbers pairwise
@@ -409,11 +392,6 @@ def get_intermediates(l):
     return ints
 
 
-def unique_perms(vec):
-    all_perms = [p for p in itertools.permutations(vec)]
-    return sorted(list(set(all_perms)))
-
-
 # wrapper
 def get_intermediates_wrapper(l1, l2):
     l = [l1, l2]
@@ -605,20 +583,6 @@ def get_mapped_subset(ns):
     for mappedn in sorted(n_per_mapped_n.keys()):
         reduced_ns.append(tuple(n_per_mapped_n[mappedn][0]))
     return reduced_ns
-
-
-def group_vec_by_node(vec, nodes, remainder=None):
-    # vec_by_tups = [tuple([vec[node[0]],vec[node[1]]]) for node in nodes]
-    vec_by_tups = []
-    for node in nodes:
-        orbit_list = []
-        for inode in node:
-            orbit_list.append(vec[inode])
-        orbit_tup = tuple(orbit_list)
-        vec_by_tups.append(orbit_tup)
-    if remainder != None:
-        vec_by_tups = vec_by_tups + [tuple([vec[remainder]])]
-    return vec_by_tups
 
 
 def build_tabulated(

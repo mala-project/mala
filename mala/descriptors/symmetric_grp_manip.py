@@ -3,6 +3,7 @@ import numpy as np
 from mala.descriptors.label_sublib.young import (
     local_sigma_c_partitions,
     flatten,
+    group_vec_by_orbits,
 )
 
 
@@ -120,17 +121,3 @@ def enforce_sorted_orbit(partition_inds):
     # that call this function. I'll comment it out for now, in case it is
     # important for later debugging.
     return part_tup  # , tuple(new_partition)
-
-
-def group_vec_by_orbits(vec, part):
-    ind_range = np.sum(part)
-    assert len(vec) == ind_range, "vector must be able to fit in the partion"
-    count = 0
-    by_orbits = []
-    for orbit in part:
-        orbit_vec = []
-        for i in range(orbit):
-            orbit_vec.append(vec[count])
-            count += 1
-        by_orbits.append(tuple(orbit_vec))
-    return tuple(by_orbits)

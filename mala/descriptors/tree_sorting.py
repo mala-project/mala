@@ -211,3 +211,21 @@ def build_tree(l, L, L_R):
         test_leaves = root.lft.return_children_vals(depth=2)
         root.set_leaves(list(test_leaves + leaves_3))
     return root
+
+
+def tree(l):
+    # quick construction of tree leaves
+    rank = len(l)
+    rngs = list(range(0, rank))
+    rngs = iter(rngs)
+    count = 0
+    tup = []
+    while count < int(rank / 2):
+        c1 = next(rngs)
+        c2 = next(rngs)
+        tup.append((c1, c2))
+        count += 1
+    remainder = None
+    if rank % 2 != 0:
+        remainder = list(range(rank))[-1]
+    return tuple(tup), remainder

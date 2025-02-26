@@ -61,8 +61,6 @@ class ACEPotential:
         if not isinstance(self.rcut, dict) and not isinstance(self.rcut, list):
             self.global_mode = True
 
-        print(self.global_mode)
-
         self.manuallabs = manuallabs
         self.set_embeddings()
         self.set_bonds()
