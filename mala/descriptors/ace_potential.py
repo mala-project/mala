@@ -177,8 +177,6 @@ class ACEPotential:
 
         for bondind, bondlst in enumerate(self.bondlsts):
             bstr = "[%d, %d]" % (bondlst[0], bondlst[1])
-            # TODO: Is there a way to assign this without try/except, but
-            #  rather an if-condition?
             if self.global_mode:
                 bonds[bstr] = {
                     "nradmax": nradmax,
@@ -234,8 +232,8 @@ class ACEPotential:
     def set_funcs(self, nulst=None, muflg=True, print_0s=True):
 
         # TODO: Simplify this.
-        if nulst == None:
-            if self.nus != None:
+        if nulst is None:
+            if self.nus is not None:
                 nulst = self.nus.copy()
             else:
                 raise AttributeError("No list of descriptors found/specified")

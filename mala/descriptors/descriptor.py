@@ -799,8 +799,7 @@ class Descriptor(PhysicalData):
             # be 1x{ny}x{nz} need to configure separate total_energy_module
             # with nyfft enabled
             if self.parameters.use_y_splitting > 1:
-                # TODO automatically pass nyfft into QE from MALA
-                # if more processors thatn y*z grid dimensions requested
+                # If more processors thatn y*z grid dimensions requested
                 # send error. More processors than y*z grid dimensions reduces
                 # efficiency and scaling of QE.
                 nyfft = self.parameters.use_y_splitting
