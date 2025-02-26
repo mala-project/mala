@@ -22,13 +22,13 @@ class Node:
     def check_sorted(self, sort_depth=1):
         self.is_sorted = False
         if sort_depth == 1:
-            if self.lft == None and self.rght == None:
+            if self.lft is None and self.rght is None:
                 self.is_sorted = True
-            elif self.lft == None and self.rght != None:
+            elif self.lft is None and self.rght is not None:
                 self.is_sorted = False
-            elif self.lft != None and self.rght == None:
+            elif self.lft is not None and self.rght is None:
                 self.is_sorted = False
-            elif self.lft != None and self.rght != None:
+            elif self.lft is not None and self.rght is not None:
                 if self.lft.val <= self.rght.val:
                     self.is_sorted = True
                 elif self.lft.val > self.rght.val:
@@ -36,8 +36,8 @@ class Node:
             returnval = self.is_sorted
         elif sort_depth == 2:
             assert (
-                self.lft != None and self.rght != None
-            ), "must have parent nodes to compare children"
+                self.lft is not None and self.rght is not None
+            ), "Must have parent nodes to compare children"
             self.lft.current_val_tup()
             lv = self.lft.val_tup[1]
             self.rght.current_val_tup()
@@ -73,7 +73,7 @@ class Node:
                 self.lft.is_sorted and self.rght.is_sorted and self.is_sorted
             )
         else:
-            raise ValueError("cant go that deep yet")
+            raise ValueError("Cannot sort deeper than depth 2 currently.")
         return returnval
 
     def return_children_vals(self, depth=1):
@@ -85,15 +85,17 @@ class Node:
             self.rght.current_val_tup()
             rv = self.rght.val_tup[1]
             vals = lv + rv
+        else:
+            raise ValueError("Cannot sort deeper than depth 2 currently.")
         return vals
 
     def set_children(self, children, set_sorted=False, sort_depth=1):
-        if type(children) == list:
+        if isinstance(children, list):
             children = tuple(children)
         assert (
             len(children) == 2
         ), "list of children must be of length 2 for binary tree"
-        if children[0] != None and children[1] != None:
+        if children[0] is not None and children[1] is not None:
             children[0].set_parent(self)
             children[1].set_parent(self)
             self.children[0] = children[0]
@@ -148,7 +150,7 @@ class Node:
                     self.is_sorted = True
 
     def update_children(self, set_sorted=False, sort_depth=1):
-        if self.lft != None and self.rght != None:
+        if self.lft is not None and self.rght is not None:
             children = [self.lft, self.rght]
             self.set_children(children, set_sorted, sort_depth=sort_depth)
 
@@ -163,12 +165,16 @@ class Node:
 
 
 def build_tree(l, L, L_R):
-    assert type(l) == list or type(l) == tuple, "convert l to list or tuple"
-    assert type(L) == list or type(L) == tuple, "convert L to list or tuple"
+    assert isinstance(l, list) or isinstance(
+        l, tuple
+    ), "convert l to list or tuple"
+    assert isinstance(L, list) or isinstance(
+        L, tuple
+    ), "convert l to list or tuple"
     rank = len(l)
 
     def rank_2_binary(l_parent, l_left, l_right):
-        if type(l_parent) == int:
+        if isinstance(l_parent, int):
             root2 = Node(l_parent)
         else:
             root2 = l_parent

@@ -339,9 +339,10 @@ def get_mu_n_l(nu_in, return_L=False, **kwargs):
 
 def get_mu_nu_rank(nu_in):
     if len(nu_in.split("_")) > 1:
-        assert (
-            len(nu_in.split("_")) <= 3
-        ), "make sure your descriptor label is in proper format: mu0_mu1,mu2,mu3,n1,n2,n3,l1,l2,l3_L1"
+        assert len(nu_in.split("_")) <= 3, (
+            "make sure your descriptor label is in proper format: mu0_mu1,mu2,"
+            "mu3,n1,n2,n3,l1,l2,l3_L1"
+        )
         nu = nu_in.split("_")[1]
         nu_splt = nu.split(",")
         return int(len(nu_splt) / 3)
@@ -367,7 +368,7 @@ def check_triangle(l1, l2, l3):
     # checks triangle condition between |l1+l2| and l3
     lower_bound = np.abs(l1 - l2)
     upper_bound = np.abs(l1 + l2)
-    condition = l3 >= lower_bound and l3 <= upper_bound
+    condition = lower_bound <= l3 <= upper_bound
     return condition
 
 
@@ -418,12 +419,13 @@ def tree(l):
 # groups a vector of l quantum numbers pairwise
 def vec_nodes(vec, nodes, remainder=None):
     vec_by_tups = [tuple([vec[node[0]], vec[node[1]]]) for node in nodes]
-    if remainder != None:
+    if remainder is not None:
         vec_by_tups = vec_by_tups
     return vec_by_tups
 
 
-# assuming a pairwise coupling structure, build the "intermediate" angular momenta
+# assuming a pairwise coupling structure, build the "intermediate" angular
+# momenta
 def tree_l_inters(l, L_R=0, M_R=0):
     nodes, remainder = tree(l)
     rank = len(l)
@@ -540,7 +542,8 @@ def tree_l_inters(l, L_R=0, M_R=0):
             get_intermediates_w(L1L2L3L4[2], L1L2L3L4[3])
             for L1L2L3L4 in L1L2L3L4_prod
         ]  # right hand branch
-        # next_node_inters = [tuple(L5+L6) for L5,L6 in zip(next_node_inters_l, next_node_inters_r)]
+        # next_node_inters = [tuple(L5+L6) for L5,L6 in zip(next_node_inters_l,
+        # next_node_inters_r)]
         next_node_inters = [
             (L5, L6) for L5, L6 in zip(next_node_inters_l, next_node_inters_r)
         ]
@@ -572,7 +575,6 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
     if L_R % 2 != 0:
         # odd spherical harmonics are antisymmetric w.r.t. inversion
         inv_parity = False
-    lmax = max(lrng)
     ls = []
 
     llst = ["%d"] * rank
@@ -815,7 +817,7 @@ def simple_parity_filt(l, inters, even=True):
                 and np.sum([i[1]] + base_ls[1]) % 2 == 0
             ]
         else:
-            if remainder == None:
+            if remainder is None:
                 inters_filt = [
                     i
                     for i in inters
@@ -843,7 +845,9 @@ def simple_parity_filt(l, inters, even=True):
             np.sum(l) % 2
         ) != 0, "must have \sum{l_i} = odd for odd parity definition"
         print(
-            "WARNING! You are using an odd parity tree. Check your labels to make sure this is what you want (this is for fitting vector quantities!)"
+            "WARNING! You are using an odd parity tree. Check your labels to "
+            "make sure this is what you want (this is for fitting vector "
+            "quantities!)"
         )
         if len(l) == 4:
             inters_filt = [
@@ -851,4 +855,6 @@ def simple_parity_filt(l, inters, even=True):
                 for ind, i in enumerate(base_ls)
                 if np.sum([inters[ind][i]] + list(i)) % 2 != 0
             ]
+        else:
+            raise Exception("Odd parity not implemented for rank != 4")
     return inters_filt

@@ -15,15 +15,7 @@ def build_tabulated(rank, all_max_mu, all_max_n, all_max_l, L_R=0, M_R=0):
             range(0, all_max_n), rank
         )
     ]
-    muvecs = [
-        i
-        for i in itertools.combinations_with_replacement(
-            range(all_max_mu), rank
-        )
-    ]
     reduced_nvecs = get_mapped_subset(nvecs)
-    fs_labs = []
-    all_nl = []
 
     all_PA_tabulated = []
     PA_per_nlblock = {}
@@ -75,6 +67,7 @@ def build_tabulated(rank, all_max_mu, all_max_n, all_max_l, L_R=0, M_R=0):
 
     dct = {"labels": PA_per_nlblock}
     lib_path = os.path.dirname(__file__)
+    # TODO: Test this file interface.
     with open(
         "%s/all_labels_mu%d_n%d_l%d_r%d.json"
         % (lib_path, all_max_mu, all_max_n, all_max_l, rank),
@@ -89,6 +82,7 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
         all_max_n = 12
         all_max_mu = 8
         lib_path = os.path.dirname(__file__)
+        # TODO: Test this file interface.
         try:
             with open(
                 "%s/all_labels_mu%d_n%d_l%d_r%d.json"
@@ -105,13 +99,6 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
             ) as readjson:
                 data = json.load(readjson)
 
-        lmax_strs = generate_l_LR(
-            range(lmin, lmax + 1), rank, L_R=L_R, M_R=M_R
-        )
-        lvecs = [
-            tuple([int(k) for k in lmax_str.split(",")])
-            for lmax_str in lmax_strs
-        ]
         muvecs = [
             i
             for i in itertools.combinations_with_replacement(
@@ -168,7 +155,7 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
                 # print ('raw PA-RPI',nus)
                 # print ('lammps ready PA-RPI',lammps_ready)
                 # print ('not compatible with lammps (PA-RPI with a nu vector that cannot be reused)',not_compatible)
-    elif rank < 4:
+    else:
         # no symmetry reduction required for rank <= 3
         # use typical lexicographical ordering for such cases
         labels = generate_nl(

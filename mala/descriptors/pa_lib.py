@@ -23,11 +23,14 @@ def get_highest_coupling_representation(lp, lref):
 def tree_labels(nin, lin, L_R=0, M_R=0):
     rank = len(lin)
     ysgi = YoungSubgroup(rank)
-    if type(lin) != list:
+
+    if not isinstance(lin, list):
         lin = list(lin)
-    if type(nin) != list:
+    if not isinstance(nin, list):
         nin = list(nin)
-    # get possible unique l permutations based on degeneracy and coupling tree structure
+
+    # get possible unique l permutations based on degeneracy and coupling tree
+    # structure
     ysgi.subgroup_fill(
         lin,
         partitions=[local_sigma_c_partitions[rank][-1]],
@@ -122,6 +125,7 @@ def tree_labels(nin, lin, L_R=0, M_R=0):
         block: [] for block in sorted(list(block_sizes.keys()))
     }
     counts_per_block = {block: 0 for block in sorted(list(block_sizes.keys()))}
+
     # collect sorted trees only
     for block, labs in labels_per_lperm.items():
         used_ns = []
@@ -505,5 +509,7 @@ def apply_ladder_relationships(
 
         elif degen_fam == ((0, 0, 0, 1, 1), (1, 1, 1, 1, 1)):
             funcs = combined_labs[: len(full_span)]
+        else:
+            raise ValueError("No ladder relationship found!")
 
     return funcs

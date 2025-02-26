@@ -32,7 +32,8 @@ def get_coupling(Wigner_3j, ldict, L_R=0, **kwargs):
                     coupling[M_R][rnk][lstr] = decomped
                 elif rank > 4:
                     raise ValueError(
-                        "Cannot generate couplings for rank %d. symmetric L_R couplings up to rank 4 have been implemented"
+                        "Cannot generate couplings for rank %d. Symmetric L_R "
+                        "couplings have been implemented only up to rank 4."
                         % rank
                     )
     return coupling
