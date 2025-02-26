@@ -1,10 +1,24 @@
 """Utility functions for calculation of ACE coupling coefficients."""
 
+from collections import Counter
 import itertools
+import json
+import os
 
 import numpy as np
-from mala.descriptors.pa_lib import *
-from mala.descriptors.pa_gen import *
+from sympy.combinatorics import Permutation
+
+from mala.descriptors.label_sublib.young import (
+    YoungSubgroup,
+    local_sigma_c_partitions,
+    flatten,
+)
+from mala.descriptors.symmetric_grp_manip import (
+    leaf_filter,
+    get_degen_orb,
+    enforce_sorted_orbit,
+)
+from mala.descriptors.tree_sorting import build_tree
 
 
 def get_ms(l, M_R=0):
@@ -23,7 +37,7 @@ def check_triangle(l1, l2, l3):
     # checks triangle condition between |l1+l2| and l3
     lower_bound = np.abs(l1 - l2)
     upper_bound = np.abs(l1 + l2)
-    condition = l3 >= lower_bound and l3 <= upper_bound
+    condition = lower_bound <= l3 <= upper_bound
     return condition
 
 
@@ -59,7 +73,8 @@ def tree_l_inters(l, L_R=0, M_R=0):
     rank = len(l)
     if rank >= 3:
         base_node_inters = {
-            node: get_intermediates_w(l[node[0]], l[node[1]]) for node in nodes
+            node: get_intermediates_wrapper(l[node[0]], l[node[1]])
+            for node in nodes
         }
 
     full_inter_tuples = []
@@ -85,6 +100,112 @@ def tree_l_inters(l, L_R=0, M_R=0):
             if check_triangle(L1, L2, L_R):
                 good_tuple = (L1, L2)
                 full_inter_tuples.append(good_tuple)
+    elif rank == 5:
+        L1L2_prod = [
+            i
+            for i in itertools.product(
+                base_node_inters[nodes[0]], base_node_inters[nodes[1]]
+            )
+        ]
+        next_node_inters = [
+            get_intermediates_wrapper(L1L2[0], L1L2[1]) for L1L2 in L1L2_prod
+        ]
+        for L1L2, L3l in zip(L1L2_prod, next_node_inters):
+            L1L2L3s = list(itertools.product([L1L2], L3l))
+            for L1L2L3 in L1L2L3s:
+                L1L2, L3 = L1L2L3
+                L1, L2 = L1L2
+                if check_triangle(l[remainder], L3, L_R):
+                    good_tuple = (L1, L2, L3)
+                    full_inter_tuples.append(good_tuple)
+    elif rank == 6:
+        L1L2L3_prod = [
+            i
+            for i in itertools.product(
+                base_node_inters[nodes[0]],
+                base_node_inters[nodes[1]],
+                base_node_inters[nodes[2]],
+            )
+        ]
+        next_node_inters = [
+            get_intermediates_wrapper(L1L2L3[0], L1L2L3[1])
+            for L1L2L3 in L1L2L3_prod
+        ]
+        for L1L2L3, L4l in zip(L1L2L3_prod, next_node_inters):
+            L1L2L3L4s = list(itertools.product([L1L2L3], L4l))
+            for L1L2L3L4 in L1L2L3L4s:
+                L1L2L3, L4 = L1L2L3L4
+                L1, L2, L3 = L1L2L3
+                if check_triangle(L3, L4, L_R):
+                    good_tuple = (L1, L2, L3, L4)
+                    full_inter_tuples.append(good_tuple)
+    elif rank == 7:
+        L1L2L3_prod = [
+            i
+            for i in itertools.product(
+                base_node_inters[nodes[0]],
+                base_node_inters[nodes[1]],
+                base_node_inters[nodes[2]],
+            )
+        ]
+        next_node_inters_l = [
+            get_intermediates_wrapper(L1L2L3[0], L1L2L3[1])
+            for L1L2L3 in L1L2L3_prod
+        ]  # left hand branch
+        next_node_inters_r = [
+            get_intermediates_wrapper(L1L2L3[2], l[remainder])
+            for L1L2L3 in L1L2L3_prod
+        ]  # right hand branch
+        next_node_inters = [
+            (L4, L5) for L4, L5 in zip(next_node_inters_l, next_node_inters_r)
+        ]
+        for L1L2L3, L45 in zip(L1L2L3_prod, next_node_inters):
+            L1L2L3L4L5s = list(itertools.product([L1L2L3], *L45))
+            for L1L2L3L4L5 in L1L2L3L4L5s:
+                L1L2L3l, L4, L5 = L1L2L3L4L5
+                L1, L2, L3 = L1L2L3l
+                # L4 , L5 = L45l
+                if check_triangle(L4, L5, L_R):
+                    good_tuple = (L1, L2, L3, L4, L5)
+                    full_inter_tuples.append(good_tuple)
+
+    elif rank == 8:
+        L1L2L3L4_prod = [
+            i
+            for i in itertools.product(
+                base_node_inters[nodes[0]],
+                base_node_inters[nodes[1]],
+                base_node_inters[nodes[2]],
+                base_node_inters[nodes[3]],
+            )
+        ]
+        next_node_inters_l = [
+            get_intermediates_wrapper(L1L2L3L4[0], L1L2L3L4[1])
+            for L1L2L3L4 in L1L2L3L4_prod
+        ]  # left hand branch
+        next_node_inters_r = [
+            get_intermediates_wrapper(L1L2L3L4[2], L1L2L3L4[3])
+            for L1L2L3L4 in L1L2L3L4_prod
+        ]  # right hand branch
+        # next_node_inters = [tuple(L5+L6) for L5,L6 in zip(next_node_inters_l,
+        # next_node_inters_r)]
+        next_node_inters = [
+            (L5, L6) for L5, L6 in zip(next_node_inters_l, next_node_inters_r)
+        ]
+        # print('next level',next_node_inters)
+        for L1L2L3L4, L56 in zip(L1L2L3L4_prod, next_node_inters):
+            L1L2L3L4L5L6s = list(itertools.product([L1L2L3L4], *L56))
+            # print(L1L2L3L4L5L6s)
+            # L1L2L3L4L5L6s = list(itertools.product([L1L2L3L4] , [L56]))
+            for L1L2L3L4L5L6 in L1L2L3L4L5L6s:
+                # L1L2L3L4l , L56l = L1L2L3L4L5L6
+                L1L2L3L4l, L5, L6 = L1L2L3L4L5L6
+                L1, L2, L3, L4 = L1L2L3L4l
+                # L5 , L6 = L56l
+                if check_triangle(L5, L6, L_R):
+                    good_tuple = (L1, L2, L3, L4, L5, L6)
+                    full_inter_tuples.append(good_tuple)
+        # print('full inters',full_inter_tuples)
     else:
         raise ValueError("rank %d not implemented" % rank)
 
@@ -92,13 +213,13 @@ def tree_l_inters(l, L_R=0, M_R=0):
 
 
 def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
+
     if L_R % 2 == 0:
         # symmetric w.r.t. inversion
         inv_parity = True
     if L_R % 2 != 0:
         # odd spherical harmonics are antisymmetric w.r.t. inversion
         inv_parity = False
-    lmax = max(lrng)
     ls = []
 
     llst = ["%d"] * rank
@@ -170,6 +291,106 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
                         if lsub not in ls:
                             ls.append(lsub)
 
+        elif rank == 5:
+            nodes, remainder = tree(list(all_ls[0]))
+            for ltup in all_ls:
+                inters = tree_l_inters(list(ltup), L_R=L_R)
+                by_node = vec_nodes(ltup, nodes, remainder)
+                for inters_i in inters:
+                    li_flags = [
+                        check_triangle(node[0], node[1], inter)
+                        for node, inter in zip(by_node, inters_i)
+                    ]
+                    inter_flags = [
+                        check_triangle(inters_i[0], inters_i[1], inters_i[2]),
+                        check_triangle(inters_i[2], ltup[remainder], L_R),
+                    ]
+                    flags = li_flags + inter_flags
+                    if inv_parity:
+                        parity_all = np.sum(ltup) % 2 == 0
+                    elif not inv_parity:
+                        parity_all = np.sum(ltup) % 2 != 0
+                    if all(flags) and parity_all:
+                        lsub = lstr % ltup
+                        if lsub not in ls:
+                            ls.append(lsub)
+
+        elif rank == 6:
+            nodes, remainder = tree(list(all_ls[0]))
+            for ltup in all_ls:
+                inters = tree_l_inters(list(ltup), L_R=L_R)
+                by_node = vec_nodes(ltup, nodes, remainder)
+                for inters_i in inters:
+                    li_flags = [
+                        check_triangle(node[0], node[1], inter)
+                        for node, inter in zip(by_node, inters_i)
+                    ]
+                    inter_flags = [
+                        check_triangle(inters_i[0], inters_i[1], inters_i[3]),
+                        check_triangle(inters_i[2], inters_i[3], L_R),
+                    ]
+                    flags = li_flags + inter_flags
+                    if inv_parity:
+                        parity_all = np.sum(ltup) % 2 == 0
+                    elif not inv_parity:
+                        parity_all = np.sum(ltup) % 2 != 0
+                    if all(flags) and parity_all:
+                        lsub = lstr % ltup
+                        if lsub not in ls:
+                            ls.append(lsub)
+
+        elif rank == 7:
+            nodes, remainder = tree(list(all_ls[0]))
+            for ltup in all_ls:
+                inters = tree_l_inters(list(ltup), L_R=L_R)
+                by_node = vec_nodes(ltup, nodes, remainder)
+                for inters_i in inters:
+                    li_flags = [
+                        check_triangle(node[0], node[1], inter)
+                        for node, inter in zip(by_node, inters_i)
+                    ]
+                    inter_flags = [
+                        check_triangle(inters_i[0], inters_i[1], inters_i[3]),
+                        check_triangle(
+                            inters_i[2], ltup[remainder], inters_i[4]
+                        ),
+                        check_triangle(inters_i[3], inters_i[4], L_R),
+                    ]
+                    flags = li_flags + inter_flags
+                    if inv_parity:
+                        parity_all = np.sum(ltup) % 2 == 0
+                    elif not inv_parity:
+                        parity_all = np.sum(ltup) % 2 != 0
+                    if all(flags) and parity_all:
+                        lsub = lstr % ltup
+                        if lsub not in ls:
+                            ls.append(lsub)
+
+        elif rank == 8:
+            nodes, remainder = tree(list(all_ls[0]))
+            for ltup in all_ls:
+                inters = tree_l_inters(list(ltup), L_R=L_R)
+                by_node = vec_nodes(ltup, nodes, remainder)
+                for inters_i in inters:
+                    li_flags = [
+                        check_triangle(node[0], node[1], inter)
+                        for node, inter in zip(by_node, inters_i)
+                    ]
+                    inter_flags = [
+                        check_triangle(inters_i[0], inters_i[1], inters_i[4]),
+                        check_triangle(inters_i[2], inters_i[3], inters_i[5]),
+                        check_triangle(inters_i[4], inters_i[5], L_R),
+                    ]
+                    flags = li_flags + inter_flags
+                    if inv_parity:
+                        parity_all = np.sum(ltup) % 2 == 0
+                    elif not inv_parity:
+                        parity_all = np.sum(ltup) % 2 != 0
+                    if all(flags) and parity_all:
+                        lsub = lstr % ltup
+                        if lsub not in ls:
+                            ls.append(lsub)
+
     return ls
 
 
@@ -188,8 +409,13 @@ def get_intermediates(l):
     return ints
 
 
+def unique_perms(vec):
+    all_perms = [p for p in itertools.permutations(vec)]
+    return sorted(list(set(all_perms)))
+
+
 # wrapper
-def get_intermediates_w(l1, l2):
+def get_intermediates_wrapper(l1, l2):
     l = [l1, l2]
     return get_intermediates(l)
 
@@ -200,29 +426,32 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
         all_max_n = 12
         all_max_mu = 8
         # TODO: Test this file interface.
-        lib_path = os.path.dirname(__file__)
-        try:
-            with open(
-                "%s/all_labels_mu%d_n%d_l%d_r%d.json"
-                % (lib_path, all_max_mu, all_max_n, all_max_l, rank),
-                "r",
-            ) as readjson:
-                data = json.load(readjson)
-        except FileNotFoundError:
-            build_tabulated(rank, all_max_mu, all_max_n, all_max_l, L_R, M_R)
-            with open(
-                "%s/all_labels_mu%d_n%d_l%d_r%d.json"
-                % (lib_path, all_max_mu, all_max_n, all_max_l, rank),
-                "r",
-            ) as readjson:
-                data = json.load(readjson)
-        lmax_strs = generate_l_LR(
-            range(lmin, lmax + 1), rank, L_R=L_R, M_R=M_R
+        label_file = os.path.join(
+            os.path.dirname(__file__),
+            "all_labels_mu%d_n%d_l%d_r%d.json"
+            % (
+                all_max_mu,
+                all_max_n,
+                all_max_l,
+                rank,
+            ),
         )
-        lvecs = [
-            tuple([int(k) for k in lmax_str.split(",")])
-            for lmax_str in lmax_strs
-        ]
+        if not os.path.isfile(label_file):
+            build_tabulated(
+                rank, all_max_mu, all_max_n, all_max_l, label_file, L_R, M_R
+            )
+
+        with open(label_file, "r") as readjson:
+            data = json.load(readjson)
+
+        # This part does not seem to be needed at the moment.
+        # lmax_strs = generate_l_LR(
+        #     range(lmin, lmax + 1), rank, L_R=L_R, M_R=M_R
+        # )
+        # lvecs = [
+        #     tuple([int(k) for k in lmax_str.split(",")])
+        #     for lmax_str in lmax_strs
+        # ]
         # nvecs = [i for i in itertools.combinations_with_replacement(range(0,nmax),rank)]
         muvecs = [
             i
@@ -282,7 +511,7 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
                 # print ('raw PA-RPI',nus)
                 # print ('lammps ready PA-RPI',lammps_ready)
                 # print ('not compatible with lammps (PA-RPI with a nu vector that cannot be reused)',not_compatible)
-    elif rank < 4:
+    else:
         # no symmetry reduction required for rank <= 3
         # use typical lexicographical ordering for such cases
         labels = generate_nl(
@@ -353,7 +582,49 @@ def generate_nl(
     return munl
 
 
-def build_tabulated(rank, all_max_mu, all_max_n, all_max_l, L_R=0, M_R=0):
+def get_mapped_subset(ns):
+    mapped_n_per_n = {}
+    n_per_mapped_n = {}
+    for n in ns:
+        n = list(n)
+        unique_ns = list(set(n))
+        tmpn = n.copy()
+        tmpn.sort(key=Counter(n).get, reverse=True)
+        unique_ns.sort()
+        unique_ns.sort(key=Counter(n).get, reverse=True)
+        mp_n = {unique_ns[i]: i for i in range(len(unique_ns))}
+        mprev_n = {i: unique_ns[i] for i in range(len(unique_ns))}
+        mappedn = [mp_n[t] for t in tmpn]
+        mappedn = tuple(mappedn)
+        mapped_n_per_n[tuple(n)] = mappedn
+        try:
+            n_per_mapped_n[mappedn].append(n)
+        except KeyError:
+            n_per_mapped_n[mappedn] = []
+            n_per_mapped_n[mappedn].append(n)
+    reduced_ns = []
+    for mappedn in sorted(n_per_mapped_n.keys()):
+        reduced_ns.append(tuple(n_per_mapped_n[mappedn][0]))
+    return reduced_ns
+
+
+def group_vec_by_node(vec, nodes, remainder=None):
+    # vec_by_tups = [tuple([vec[node[0]],vec[node[1]]]) for node in nodes]
+    vec_by_tups = []
+    for node in nodes:
+        orbit_list = []
+        for inode in node:
+            orbit_list.append(vec[inode])
+        orbit_tup = tuple(orbit_list)
+        vec_by_tups.append(orbit_tup)
+    if remainder != None:
+        vec_by_tups = vec_by_tups + [tuple([vec[remainder]])]
+    return vec_by_tups
+
+
+def build_tabulated(
+    rank, all_max_mu, all_max_n, all_max_l, label_file, L_R=0, M_R=0
+):
     lmax_strs = generate_l_LR(
         range(0, all_max_l + 1), rank, L_R=L_R, M_R=M_R, use_permutations=False
     )
@@ -417,10 +688,8 @@ def build_tabulated(rank, all_max_mu, all_max_n, all_max_l, L_R=0, M_R=0):
             PA_per_nlblock[nlstr] = nl_simple_labs
 
     dct = {"labels": PA_per_nlblock}
-    lib_path = os.path.dirname(__file__)
     with open(
-        "%s/all_labels_mu%d_n%d_l%d_r%d.json"
-        % (lib_path, all_max_mu, all_max_n, all_max_l, rank),
+        label_file,
         "w",
     ) as writejson:
         json.dump(dct, writejson, sort_keys=False, indent=2)
@@ -506,11 +775,18 @@ def muvec_nvec_combined(mu, n):
     umus = sorted(list(set(itertools.permutations(mu))))
     uns = sorted(list(set(itertools.permutations(n))))
     combos = [cmb for cmb in itertools.product(umus, uns)]
-    tupped = [tuple([(ni, mui) for mui, ni in zip(*cmb)]) for cmb in combos]
     tupped = [
         tuple(sorted([(ni, mui) for mui, ni in zip(*cmb)])) for cmb in combos
     ]
     tupped = list(set(tupped))
+    # uniques = []
+    # for tupi in tupped:
+    #     nil = []
+    #     muil = []
+    #     for tupii in tupi:
+    #         muil.append(tupii[1])
+    #         nil.append(tupii[0])
+    #     uniques.append(tuple([tuple(muil), tuple(nil)]))
     return tupped
 
 
@@ -561,9 +837,10 @@ def get_mu_n_l(nu_in, return_L=False, **kwargs):
 
 def get_mu_nu_rank(nu_in):
     if len(nu_in.split("_")) > 1:
-        assert (
-            len(nu_in.split("_")) <= 3
-        ), "make sure your descriptor label is in proper format: mu0_mu1,mu2,mu3,n1,n2,n3,l1,l2,l3_L1"
+        assert len(nu_in.split("_")) <= 3, (
+            "make sure your descriptor label is in proper format: mu0_mu1,mu2,"
+            "mu3,n1,n2,n3,l1,l2,l3_L1"
+        )
         nu = nu_in.split("_")[1]
         nu_splt = nu.split(",")
         return int(len(nu_splt) / 3)
@@ -571,3 +848,713 @@ def get_mu_nu_rank(nu_in):
         nu = nu_in
         nu_splt = nu.split(",")
         return int(len(nu_splt) / 2)
+
+
+def filled_perm(tups, rank):
+    allinds = list(range(rank))
+    try:
+        remainders = [i for i in allinds if i not in flatten(tups)]
+        alltups = tups + tuple([tuple([k]) for k in remainders])
+    except TypeError:
+        remainders = [i for i in allinds if i not in flatten(flatten(tups))]
+        alltups = tups + tuple([tuple([k]) for k in remainders])
+    return Permutation(alltups)
+
+
+def lammps_remap(PA_labels, rank, allowed_mus=[0]):
+    # transforms_all ={ 4: [((0,1),(2,),(3,)), ((0,),(1,),(2,3)), ((0,1),(2,3)), ((0,2),(1,3)),((0,3,1,2)),((0,2,1,3)),((0,3),(1,2))]}
+    transforms_all = {
+        4: [
+            ((0, 1), (2,), (3,)),
+            ((0,), (1,), (2, 3)),
+            ((0, 1), (2, 3)),
+            ((0, 2), (1, 3)),
+            ((3, 2, 0, 1),),
+            ((2, 3, 1, 0),),
+            ((0, 3), (1, 2)),
+        ],
+        5: [
+            ((0, 1), (2,), (3,)),
+            ((0,), (1,), (2, 3)),
+            ((0, 1), (2, 3)),
+            ((0, 2), (1, 3)),
+            ((3, 2, 0, 1),),
+            ((2, 3, 1, 0),),
+            ((0, 3), (1, 2)),
+        ],
+    }  # correct for left vs right cycles in sympy
+    leaf_to_internal_map = {
+        4: {
+            ((0, 1), (2,), (3,)): ((0,), (1,)),
+            ((0,), (1,), (2, 3)): ((0,), (1,)),
+            ((0, 1), (2, 3)): ((0,), (1,)),
+            ((0, 2), (1, 3)): ((0, 1),),
+            ((3, 2, 0, 1),): ((0, 1),),
+            ((2, 3, 1, 0),): ((0, 1),),
+            ((0, 3), (1, 2)): ((0, 1),),
+        },
+        5: {
+            ((0, 1), (2,), (3,)): ((0,), (1,)),
+            ((0,), (1,), (2, 3)): ((0,), (1,)),
+            ((0, 1), (2, 3)): ((0,), (1,)),
+            ((0, 2), (1, 3)): ((0, 1),),
+            ((3, 2, 0, 1),): ((0, 1),),
+            ((2, 3, 1, 0),): ((0, 1),),
+            ((0, 3), (1, 2)): ((0, 1),),
+        },
+    }
+    transforms = transforms_all[rank]
+    as_perms = [Permutation(p) for p in transforms]
+
+    Lveclst = ["%d"] * (rank - 2)
+    vecstrlst = ["%d"] * rank
+
+    all_nl = {mu0: [] for mu0 in allowed_mus}
+    fs_labs = []
+    not_compatible = []
+    for lab in PA_labels:
+        mu0, mu, n, l, Lraw = get_mu_n_l(lab, return_L=True)
+        nl = (tuple(mu), tuple(n), tuple(l))
+        nl_tup = tuple([(mui, ni, li) for mui, ni, li in zip(mu, n, l)])
+        if nl in all_nl[mu0]:
+            nlperms = [P(nl_tup) for P in as_perms]
+            perm_source = {
+                (
+                    tuple([nli[0] for nli in nlp]),
+                    tuple([nli[1] for nli in nlp]),
+                    tuple([nli[2] for nli in nlp]),
+                ): transform
+                for nlp, transform in zip(nlperms, transforms)
+            }
+            # print ('perm source',perm_source)
+            notins = [
+                (
+                    tuple([nli[0] for nli in nlp]),
+                    tuple([nli[1] for nli in nlp]),
+                    tuple([nli[2] for nli in nlp]),
+                )
+                not in all_nl[mu0]
+                for nlp in nlperms
+            ]
+            if not any(notins):
+                print("no other possible labels for LAMMPS", lab)
+            added_count = 0
+            nlpermsitr = iter(nlperms)
+            nlp = next(nlpermsitr)
+            try:
+                while added_count < 1:
+                    # for nlp in nlperms:
+                    nlnew = (
+                        tuple([nli[0] for nli in nlp]),
+                        tuple([nli[1] for nli in nlp]),
+                        tuple([nli[2] for nli in nlp]),
+                    )
+                    if nlnew not in all_nl[mu0]:
+                        permtup = leaf_to_internal_map[rank][
+                            perm_source[nlnew]
+                        ]
+                        perm_L = Permutation(filled_perm(permtup, rank - 2))(
+                            Lraw
+                        )
+                        L = tuple(perm_L)
+                        mustr = ",".join(vecstrlst) % nlnew[0]
+                        nstr = ",".join(vecstrlst) % nlnew[1]
+                        lstr = ",".join(vecstrlst) % nlnew[2]
+                        Lstr = "-".join(Lveclst) % L
+                        nustr = "%d_%s,%s,%s_%s" % (
+                            mu0,
+                            mustr,
+                            nstr,
+                            lstr,
+                            Lstr,
+                        )
+                        all_nl[mu0].append(nlnew)
+                        fs_labs.append(nustr)
+                        added_count += 1
+                    else:
+                        nlp = next(nlpermsitr)
+                        # print ('already used new nl')
+                        # break
+                        # print ('already used nl label for:',lab)
+            except StopIteration:
+                if not any(notins):
+                    not_compatible.append(lab)
+                else:
+                    fs_labs.append(lab)
+                all_nl[mu0].append(nl)
+        else:
+            fs_labs.append(lab)
+            all_nl[mu0].append(nl)
+    return fs_labs, not_compatible
+
+
+def simple_parity_filt(l, inters, even=True):
+    nodes, remainder = tree(l)
+    base_ls = group_vec_by_node(l, nodes, remainder=remainder)
+    base_ls = [list(k) for k in base_ls]
+    if even:
+        assert (
+            np.sum(l) % 2
+        ) == 0, "must have \sum{l_i} = even for even parity definition"
+        if len(l) == 4:
+            inters_filt = [
+                i
+                for i in inters
+                if np.sum([i[0]] + base_ls[0]) % 2 == 0
+                and np.sum([i[1]] + base_ls[1]) % 2 == 0
+            ]
+        else:
+            if remainder is None:
+                inters_filt = [
+                    i
+                    for i in inters
+                    if all(
+                        [
+                            np.sum([i[ind]] + base_ls[ind]) % 2 == 0
+                            for ind in range(len(base_ls))
+                        ]
+                    )
+                ]
+            else:
+                inters_filt = [
+                    i
+                    for i in inters
+                    if all(
+                        [
+                            np.sum([i[ind]] + base_ls[ind]) % 2 == 0
+                            for ind in range(len(base_ls))
+                        ]
+                    )
+                ]
+
+    else:
+        assert (
+            np.sum(l) % 2
+        ) != 0, "must have \sum{l_i} = odd for odd parity definition"
+        print(
+            "WARNING! You are using an odd parity tree. Check your labels to "
+            "make sure this is what you want (this is for fitting vector "
+            "quantities!)"
+        )
+        if len(l) == 4:
+            inters_filt = [
+                inters[ind]
+                for ind, i in enumerate(base_ls)
+                if np.sum([inters[ind][i]] + list(i)) % 2 != 0
+            ]
+        else:
+            raise Exception("Odd parity not implemented for rank != 4")
+    return inters_filt
+
+
+def get_highest_coupling_representation(lp, lref):
+    rank = len(lp)
+    coupling_reps = local_sigma_c_partitions[rank]
+    ysgi = YoungSubgroup(rank)
+    highest_rep = tuple([1] * rank)
+    for rep in coupling_reps:
+        ysgi.subgroup_fill(
+            lref, [rep], sigma_c_symmetric=False, semistandard=False
+        )
+        test_fills = ysgi.fills.copy()
+        if lp not in test_fills:
+            pass
+        else:
+            highest_rep = rep
+            break
+    return highest_rep
+
+
+def tree_labels(nin, lin, L_R=0, M_R=0):
+    rank = len(lin)
+    ysgi = YoungSubgroup(rank)
+
+    if not isinstance(lin, list):
+        lin = list(lin)
+    if not isinstance(nin, list):
+        nin = list(nin)
+
+    # get possible unique l permutations based on degeneracy and coupling tree
+    # structure
+    ysgi.subgroup_fill(
+        lin,
+        partitions=[local_sigma_c_partitions[rank][-1]],
+        max_orbit=len(local_sigma_c_partitions[rank][-1]),
+        sigma_c_symmetric=False,
+        semistandard=False,
+    )
+    lperms = ysgi.fills.copy()
+    lperms = leaf_filter(lperms)
+    if rank not in [4, 8, 16, 32]:
+        lperms_tmp = []
+        used_hrep = []
+        for lperm in lperms:
+            hrep = get_highest_coupling_representation(
+                tuple(lperm), tuple(lperms[0])
+            )
+            if hrep not in used_hrep:
+                used_hrep.append(hrep)
+                lperms_tmp.append(lperm)
+            else:
+                pass
+        lperms = lperms_tmp
+    original_joint_span = {lp: [] for lp in lperms}
+    orb_nls = []
+
+    ls = lperms.copy()
+    nps_per_l = {}
+
+    # get n permutations per l permutation
+    # this could equivalently be done with a search over S_N
+    for lp in ls:
+        rank = len(lp)
+        original_span_SO3 = tree_l_inters(lp)  # RI basis size
+        degen_orbit, orbit_inds = get_degen_orb(lp)  # PI basis size
+        ysgi.subgroup_fill(
+            nin, [degen_orbit], sigma_c_symmetric=False, semistandard=False
+        )
+        degen_fills = ysgi.fills.copy()
+        sequential_degen_orbit = enforce_sorted_orbit(orbit_inds)
+        ysgi.subgroup_fill(
+            nin,
+            [sequential_degen_orbit],
+            sigma_c_symmetric=False,
+            semistandard=False,
+        )
+        nps_per_l[lp] = ysgi.fills.copy()
+        original_joint_span[lp] = [
+            (prd[0], lp, prd[1])
+            for prd in itertools.product(degen_fills, original_span_SO3)
+        ]
+
+    labels_per_lperm = {}
+    # build all labels (unsorted trees)
+    for l in ls:
+        l = list(l)
+        subblock = []
+        rank = len(l)
+        inters = tree_l_inters(list(l), L_R=L_R, M_R=M_R)
+        nperms = nps_per_l[tuple(l)]
+        muperms = [tuple([0] * rank)]
+        for inter in inters:
+            if rank <= 5:
+                if (
+                    np.sum([inter[0]] + l[:2]) % 2 == 0
+                    and np.sum([inter[1]] + l[2:4]) % 2 == 0
+                ):
+                    for muperm in muperms:
+                        for nperm in nperms:
+                            if rank == 5:
+                                orb_nls.append(
+                                    "0_%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d_%d-%d-%d"
+                                    % (muperm + nperm + tuple(l) + inter)
+                                )
+                                subblock.append(
+                                    "0_%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d_%d-%d-%d"
+                                    % (muperm + nperm + tuple(l) + inter)
+                                )
+                            elif rank == 4:
+                                orb_nls.append(
+                                    "0_%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d_%d-%d"
+                                    % (muperm + nperm + tuple(l) + inter)
+                                )
+                                subblock.append(
+                                    "0_%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d_%d-%d"
+                                    % (muperm + nperm + tuple(l) + inter)
+                                )
+        labels_per_lperm[tuple(l)] = subblock
+
+    block_sizes = {key: len(val) for key, val in labels_per_lperm.items()}
+    all_labs = []
+    labels_per_block = {
+        block: [] for block in sorted(list(block_sizes.keys()))
+    }
+    counts_per_block = {block: 0 for block in sorted(list(block_sizes.keys()))}
+
+    # collect sorted trees only
+    for block, labs in labels_per_lperm.items():
+        used_ns = []
+        used_ids = []
+        for nu in labs:
+            mu0, _, ntst, ltst, L = get_mu_n_l(nu, return_L=True)
+            ltree = [(li, ni) for ni, li in zip(ntst, ltst)]  # sort first on n
+            tree_i = build_tree(ltree, L, L_R)
+            tid = tree_i.tree_id
+            conds = (
+                tid not in used_ids
+            )  # sorting is ensured in construction of trees
+            if conds:
+                if tuple(ntst) not in used_ns:
+                    used_ns.append(tuple(ntst))
+                used_ids.append(tid)
+                labels_per_block[block].append(nu)
+                counts_per_block[block] += 1
+                all_labs.append(nu)
+            else:
+                pass
+
+    # collect labels per l permutation block
+    max_labs = []
+    max_count = max(list(counts_per_block.values()))
+    for block, tree_labs in labels_per_block.items():
+        if len(tree_labs) == max_count:
+            max_labs.append(tree_labs.copy())
+    max_labs = max_labs[0]
+
+    return max_labs, all_labs, labels_per_block, original_joint_span
+
+
+def combine_blocks(blocks, lin, original_spans, L_R=0):
+    # tool to recombine trees from multiple permutations of l
+    rank = len(lin)
+    ysgi = YoungSubgroup(rank)
+    lps = list(blocks.keys())
+    blockpairs = [
+        (block1, block2)
+        for block1, block2 in itertools.product(lps, lps)
+        if block1 != block2
+    ]
+    if len(blockpairs) == 0:
+        blockpairs = [
+            (block1, block2) for block1, block2 in itertools.product(lps, lps)
+        ]
+    block_map = {blockpair: None for blockpair in blockpairs}
+    all_map = {blockpair: None for blockpair in blockpairs}
+    L_map = {blockpair: None for blockpair in blockpairs}
+    raw_perms = [p for p in itertools.permutations(list(range(rank)))]
+    Ps = [Permutation(pi) for pi in raw_perms]
+    for blockpair in list(block_map.keys()):
+        l1i, l2i = blockpair
+        is_sigma0 = l1i == lps[0]
+        Pl1is = [P for P in Ps if tuple(P(list(l1i))) == l2i]
+        Pl1_maxorbit_sizes = [
+            max([len(k) for k in P.full_cyclic_form]) for P in Pl1is
+        ]
+        maxorbit_all = max(Pl1_maxorbit_sizes)
+        maxorbit_ind = Pl1_maxorbit_sizes.index(maxorbit_all)
+        if not is_sigma0:
+            block_map[blockpair] = Pl1is[maxorbit_ind]
+            all_map[blockpair] = Pl1is
+        else:
+            block_map[blockpair] = Permutation(
+                tuple([tuple([ii]) for ii in list(range(rank))])
+            )
+            all_map[blockpair] = [
+                Permutation(tuple([tuple([ii]) for ii in list(range(rank))]))
+            ]
+
+    for blockpair in list(block_map.keys()):
+        l1i, l2i = blockpair
+        inters1 = tree_l_inters(l1i, L_R)
+        is_sigma0 = tuple(l1i) == lps[0]
+        l1i = list(l1i)
+        l2i = list(l2i)
+        # intermediates hard coded for ramk 4 and 5 right now
+        inters1 = [
+            inter
+            for inter in inters1
+            if np.sum([inter[0]] + l1i[:2]) % 2 == 0
+            and np.sum([inter[1]] + l1i[2:4]) % 2 == 0
+        ]
+        inters2 = tree_l_inters(l2i, L_R)
+        inters2 = [
+            inter
+            for inter in inters2
+            if np.sum([inter[0]] + l2i[:2]) % 2 == 0
+            and np.sum([inter[1]] + l2i[2:4]) % 2 == 0
+        ]
+        if not is_sigma0:
+            L_map[blockpair] = {L1i: L2i for L1i, L2i in zip(inters1, inters2)}
+        else:
+            L_map[blockpair] = {L1i: L1i for L1i, L1i in zip(inters1, inters1)}
+    used_ids = []
+    used_nl = []
+    combined_labs = []
+    super_inters_per_nl = {}
+    for lp, nus in blocks.items():
+        rank = len(lp)
+        degen_orbit, orbit_inds = get_degen_orb(lp)
+        block_pairs = [
+            blockpair
+            for blockpair in list(block_map.keys())
+            if blockpair[0] == tuple(lp)
+        ]
+        blockpair = block_pairs[0]
+        # perm_map = block_map[block_pairs[0]]
+        if rank == 4:
+            perms_2_check = [block_map[blockpair]]
+        else:
+            perms_2_check = [block_map[blockpair]]
+            # perms_2_check = all_map[blockpair]
+        for nu in nus:
+            mu0ii, muii, nii, lii, Lii = get_mu_n_l(nu, return_L=True)
+            is_sigma0 = tuple(lii) == lps[0]
+            degen_orbit, orbit_inds = get_degen_orb(lp)
+            nlii = [(niii, liii) for niii, liii in zip(nii, lii)]
+            atrees = []
+            for perm_map in perms_2_check:
+                remapped = perm_map(nlii)
+                newnii = [nliii[0] for nliii in remapped]
+                newlii = [nliii[1] for nliii in remapped]
+                new_Lii = L_map[blockpair][Lii]
+                new_ltree = [
+                    (liii, niii) for niii, liii in zip(newnii, newlii)
+                ]
+                tree_i = build_tree(new_ltree, Lii, L_R)
+                # tree_i =  build_tree(new_ltree,new_Lii,L_R)
+                tid = tree_i.tree_id
+                atrees.append(tid)
+            cond1 = not any([tid in used_ids for tid in atrees])
+            if is_sigma0:
+                cond2 = True
+            else:
+                cond2 = True
+
+            if cond1 and cond2:
+                combined_labs.append(nu)
+                used_ids.append(tid)
+                used_nl.append((tuple(newnii), tuple(newlii)))
+                try:
+                    super_inters_per_nl[(tuple(newnii), tuple(newlii))].append(
+                        new_Lii
+                    )
+                except KeyError:
+                    super_inters_per_nl[(tuple(newnii), tuple(newlii))] = [
+                        new_Lii
+                    ]
+            else:
+                pass
+    return combined_labs
+
+
+# apply ladder relationships
+def apply_ladder_relationships(
+    lin, nin, combined_labs, parity_span, parity_span_labs, full_span, L_R=0
+):
+    N = len(lin)
+    uniques = list(set(lin))
+    tmp = list(lin).copy()
+    tmp.sort(key=Counter(lin).get, reverse=True)
+    uniques.sort()
+    uniques.sort(key=Counter(tmp).get, reverse=True)
+    mp = {uniques[i]: i for i in range(len(uniques))}
+    mappedl = [mp[t] for t in tmp]
+    ysgi = YoungSubgroup(N)
+
+    unique_ns = list(set(nin))
+    tmpn = list(nin).copy()
+    tmpn.sort(key=Counter(nin).get, reverse=True)
+    unique_ns.sort()
+    unique_ns.sort(key=Counter(nin).get, reverse=True)
+    mp_n = {unique_ns[i]: i for i in range(len(unique_ns))}
+    mappedn = [mp_n[t] for t in tmpn]
+    mappedn = tuple(mappedn)
+    mappedl = tuple(mappedl)
+
+    max_labs = parity_span_labs.copy()
+    #  based on degeneracy
+    ndegen_rep, _ = get_degen_orb(mappedn)
+    ndegen_rep = list(ndegen_rep)
+    ndegen_rep.sort(key=lambda x: x, reverse=True)
+    ndegen_rep = tuple(ndegen_rep)
+    degen_fam = (mappedl, ndegen_rep)
+
+    all_inters = tree_l_inters(lin)
+    even_inters = simple_parity_filt(lin, all_inters)
+
+    if 0 in lin:
+        funcs = combined_labs[: len(full_span)]
+
+    else:
+        if degen_fam == ((0, 0, 0, 0), (4,)):
+            funcs = parity_span_labs[
+                ::3
+            ]  # according to full degen ladder relationship
+        elif degen_fam == ((0, 0, 0, 0), (3, 1)):
+            funcs = parity_span_labs[::3]
+        elif degen_fam == ((0, 0, 0, 0), (2, 2)):
+            funcs = parity_span_labs[: len(parity_span)]
+        elif degen_fam == ((0, 0, 0, 0), (2, 1, 1)):
+            funcs = parity_span_labs[: len(parity_span)]
+        elif degen_fam == ((0, 0, 0, 0), (1, 1, 1, 1)):
+            funcs = combined_labs[: len(full_span)]
+
+        elif degen_fam == ((0, 0, 0, 1), (4,)):
+            funcs = []
+            recurmax = len(max_labs) / 2
+            count = 0
+            for lab in max_labs:
+                mu0ii, muii, nii, lii, Lii = get_mu_n_l(lab, return_L=True)
+                lidegen_rep, l_orbit_inds = get_degen_orb(lii)
+                ysgi.subgroup_fill(
+                    list(nin),
+                    [lidegen_rep],
+                    sigma_c_symmetric=False,
+                    semistandard=False,
+                )
+                degen_nfills = ysgi.fills.copy()
+                if count < recurmax and tuple(nii) in degen_nfills:
+                    funcs.append(lab)
+                    count += 1
+        elif degen_fam == ((0, 0, 0, 1), (3, 1)):
+            funcs = []
+            recurmax = len(max_labs) / 2
+            count = 0
+            for lab in max_labs:
+                mu0ii, muii, nii, lii, Lii = get_mu_n_l(lab, return_L=True)
+                lidegen_rep, l_orbit_inds = get_degen_orb(lii)
+                ysgi.subgroup_fill(
+                    list(nin),
+                    [lidegen_rep],
+                    sigma_c_symmetric=False,
+                    semistandard=False,
+                )
+                degen_nfills = ysgi.fills.copy()
+                if count < recurmax and tuple(nii) in degen_nfills:
+                    funcs.append(lab)
+                    count += 1
+        elif degen_fam == ((0, 0, 0, 1), (2, 2)):
+            funcs = parity_span_labs[: len(parity_span)]
+        elif degen_fam == ((0, 0, 0, 1), (2, 1, 1)):
+            funcs = []
+            recurmax = len(max_labs) / 2
+            count = 0
+            for lab in max_labs:
+                mu0ii, muii, nii, lii, Lii = get_mu_n_l(lab, return_L=True)
+                lidegen_rep, l_orbit_inds = get_degen_orb(lii)
+                l_sequential_degen_orbit = enforce_sorted_orbit(l_orbit_inds)
+                # switch to lower symmetry SN representation
+                ysgi.subgroup_fill(
+                    list(nin),
+                    [l_sequential_degen_orbit],
+                    sigma_c_symmetric=False,
+                    semistandard=False,
+                )
+                degen_nfills = ysgi.fills.copy()
+                if count < recurmax and tuple(nii) in degen_nfills:
+                    funcs.append(lab)
+                    count += 1
+        elif degen_fam == ((0, 0, 0, 1), (1, 1, 1, 1)):
+            funcs = combined_labs[: len(full_span)]
+
+        elif degen_fam == ((0, 0, 1, 1), (4,)):
+            funcs = parity_span_labs
+        elif degen_fam == ((0, 0, 1, 1), (3, 1)):
+            funcs = parity_span_labs
+        elif degen_fam == ((0, 0, 1, 1), (2, 2)):
+            funcs = combined_labs[: len(parity_span) + len(even_inters[1:])]
+        elif degen_fam == ((0, 0, 1, 1), (2, 1, 1)):
+            funcs = combined_labs[
+                : len(parity_span) + (2 * len(even_inters[1:]))
+            ]
+        elif degen_fam == ((0, 0, 1, 1), (1, 1, 1, 1)):
+            funcs = combined_labs[: len(full_span)]
+
+        elif degen_fam == ((0, 0, 1, 2), (4,)):
+            funcs = parity_span_labs
+        elif degen_fam == ((0, 0, 1, 2), (3, 1)):
+            funcs = combined_labs[: len(parity_span) + len(even_inters[1:])]
+        elif degen_fam == ((0, 0, 1, 2), (2, 2)):
+            funcs = combined_labs[: len(parity_span) + len(all_inters[1:])]
+        elif degen_fam == ((0, 0, 1, 2), (2, 1, 1)):
+            funcs = combined_labs[
+                : len(parity_span)
+                + ((len(all_inters) - 1) * 2)
+                + len(even_inters[1:])
+            ]
+        elif degen_fam == ((0, 0, 1, 2), (1, 1, 1, 1)):
+            funcs = combined_labs[: len(full_span)]
+
+        elif degen_fam[0] == (0, 1, 2, 3):
+            funcs = combined_labs[: len(full_span)]
+
+        elif degen_fam == ((0, 0, 0, 0, 0), (5,)):
+            combined_labs.reverse()
+            funcs = sorted(
+                combined_labs[::4]
+            )  # from rank 5 ladder relationship
+
+        elif degen_fam == ((0, 0, 0, 0, 0), (4, 1)):
+            combined_labs.reverse()
+            funcs = sorted(combined_labs[: len(parity_span) - 4])
+
+        elif degen_fam == ((0, 0, 0, 0, 0), (3, 2)):
+            funcs = sorted(combined_labs[: len(parity_span) - 3])
+
+        elif degen_fam == ((0, 0, 0, 0, 0), (3, 1, 1)):
+            combined_labs.reverse()
+            funcs = sorted(combined_labs[: len(parity_span) - 2])
+
+        elif degen_fam == ((0, 0, 0, 0, 0), (2, 2, 1)):
+            combined_labs.reverse()
+            funcs = sorted(combined_labs[: len(parity_span)])
+
+        elif degen_fam == ((0, 0, 0, 0, 0), (2, 1, 1, 1)):
+            combined_labs.reverse()
+            funcs = sorted(
+                combined_labs[: int(len(max_labs) / len(even_inters))]
+            )
+
+        elif degen_fam == ((0, 0, 0, 0, 0), (1, 1, 1, 1, 1)):
+            combined_labs.reverse()
+            funcs = sorted(
+                combined_labs[: int(len(max_labs) / len(even_inters))]
+            )
+
+        elif degen_fam == ((0, 0, 0, 0, 1), (5,)):
+            combined_labs.reverse()
+            funcs = sorted(combined_labs[: len(parity_span) - len(max_labs)])
+
+        elif degen_fam == ((0, 0, 0, 0, 1), (4, 1)):
+            combined_labs.reverse()
+            funcs = sorted(combined_labs[: int(len(parity_span) / 2)])
+
+        elif degen_fam == ((0, 0, 0, 0, 1), (3, 2)):
+            combined_labs.reverse()
+            funcs = sorted(combined_labs[: len(parity_span) - 1])
+
+        elif degen_fam == ((0, 0, 0, 0, 1), (3, 1, 1)):
+            funcs = combined_labs[: len(parity_span) - 1]
+
+        elif degen_fam == ((0, 0, 0, 0, 1), (2, 2, 1)):
+            funcs = combined_labs[
+                : len(parity_span)
+                + (2 * int(len(even_inters) / len(degen_fam[1])))
+            ]
+
+        elif degen_fam == ((0, 0, 0, 0, 1), (2, 1, 1, 1)):
+            funcs = combined_labs[: len(parity_span) + (2 * len(even_inters))]
+
+        elif degen_fam == ((0, 0, 0, 0, 1), (1, 1, 1, 1, 1)):
+            funcs = combined_labs[: len(full_span)]
+
+        elif degen_fam == ((0, 0, 0, 1, 1), (5,)):
+            funcs = []
+            for lab in parity_span_labs:
+                mu0ii, muii, nii, lii, Lii = get_mu_n_l(lab, return_L=True)
+                if 0 not in Lii:
+                    funcs.append(lab)
+
+        elif degen_fam == ((0, 0, 0, 1, 1), (4, 1)):
+            funcs = combined_labs[: int(len(parity_span)) - len(degen_fam[1])]
+
+        elif degen_fam == ((0, 0, 0, 1, 1), (3, 2)):
+            funcs = combined_labs[: len(parity_span) - 1]
+
+        elif degen_fam == ((0, 0, 0, 1, 1), (3, 1, 1)):
+            funcs = combined_labs[: int(len(full_span) / 2)]
+
+        elif degen_fam == ((0, 0, 0, 1, 1), (2, 2, 1)):
+            funcs = combined_labs[: int(len(max_labs) / 2) - len(even_inters)]
+
+        elif degen_fam == ((0, 0, 0, 1, 1), (2, 1, 1, 1)):
+            funcs = combined_labs[
+                : int(len(max_labs) / 2) - (3 * len(even_inters))
+            ]
+
+        elif degen_fam == ((0, 0, 0, 1, 1), (1, 1, 1, 1, 1)):
+            funcs = combined_labs[: len(full_span)]
+        else:
+            raise ValueError("No ladder relationship found!")
+
+    return funcs

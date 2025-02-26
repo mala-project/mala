@@ -1,6 +1,3 @@
-from mala.descriptors.label_sublib.young import *
-
-
 class Node:
     def __init__(self, i):
         self.val = i

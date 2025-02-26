@@ -508,6 +508,8 @@ class ParametersDescriptors(ParametersBase):
 
         # Everything peraining to the ACE descriptors.
         self.ace_cutoff = None
+
+        # TODO: add a consistency check for these.
         self.ace_ranks = [1, 2, 3]
         self.ace_nmax = [6, 2, 2]
         self.ace_lmax = [0, 2, 2]

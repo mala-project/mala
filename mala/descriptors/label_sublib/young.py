@@ -1,4 +1,4 @@
-from mala.descriptors.gen_labels import *
+from sympy.combinatorics import Permutation
 
 local_sigma_c_partitions = {
     1: [(1,)],
@@ -20,6 +20,14 @@ def Reverse(v):
     vtmp = v.copy()
     vtmp.reverse()
     return vtmp
+
+
+def flatten(lstoflsts):
+    try:
+        flat = [i for sublist in lstoflsts for i in sublist]
+        return flat
+    except TypeError:
+        return lstoflsts
 
 
 def filled_perm(tups, rank):

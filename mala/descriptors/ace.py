@@ -330,8 +330,6 @@ class ACE(Descriptor):
     def calculate_bonds_and_cutoff(self):
         """This part has to be always calculated, while
         calculate_coupling_coeffs is only calculated sometimes."""
-        # TODO: IIRC, then these coefficients have to be calculated only ONCE
-        # per element; so we should maybe think about a way of caching them.
         ncols0 = 3
 
         element_list = sorted(list(set(self._atoms.symbols))) + ["G"]
@@ -342,7 +340,7 @@ class ACE(Descriptor):
             rc_range,
             rc_default,
             lmb_default,
-        ) = self.get_default_settings()
+        ) = self.__default_settings()
 
         self.cutoff_factors = [float(k) for k in rc_default.split()[2:]]
         self.maximum_cutoff_factor = np.max(
@@ -355,7 +353,7 @@ class ACE(Descriptor):
             self.lambdas
         ), "you must have rcutfac and lmbda defined for each bond type"
 
-        self.nus, self.limit_nus = self.calc_limit_nus()
+        self.nus, self.limit_nus = self.__calculate_limit_nus()
 
         # NOTE to use unique ACE types for gridpoints, we must subtract off
         #  dummy descriptor counts (for non-grid element types)
@@ -432,8 +430,7 @@ class ACE(Descriptor):
             "coupling_coefficients_" + str.join("_", element_list[:-1])
         )
 
-    def calc_limit_nus(self):
-        # TODO: Add documentation what this piece of code does.
+    def __calculate_limit_nus(self):
         # Also, maybe make it private?
         ranked_chem_nus = []
         for ind, rank in enumerate(self.parameters.ace_ranks):
@@ -493,8 +490,7 @@ class ACE(Descriptor):
 
         return nus, limit_nus
 
-    def get_default_settings(self):
-        # TODO: Add documentation. Also, maybe make it private?
+    def __default_settings(self):
         rc_range = {bp: None for bp in self.bonds}
         rin_def = {bp: None for bp in self.bonds}
         rc_def = {bp: None for bp in self.bonds}
@@ -512,7 +508,7 @@ class ACE(Descriptor):
         fac_per_elem.update(fac_per_elem_sub)
 
         for bond in self.bonds:
-            rcmini, rcmaxi = self.default_rc(bond)
+            rcmini, rcmaxi = self.__default_cutoff_factors(bond)
             defaultri = (rcmaxi + rcmini) / np.sum(
                 [fac_per_elem[elem] * 2 for elem in bond]
             )
@@ -542,8 +538,7 @@ class ACE(Descriptor):
         )
         return rc_range, rc_def_str, lmb_def_str
 
-    def default_rc(self, elms):
-        # TODO: Add documentation. Also, maybe make it private?
+    def __default_cutoff_factors(self, elms):
         elms = sorted(elms)
         elm1, elm2 = tuple(elms)
         try:
@@ -600,7 +595,6 @@ class ACE(Descriptor):
 
     @staticmethod
     def __sort_by_atom_type(nulst, remove_type=2):
-        # TODO: Add documentation. Also, maybe make it private?
         mu0s = []
         for nu in nulst:
             mu0 = nu.split("_")[0]
@@ -619,7 +613,6 @@ class ACE(Descriptor):
         return byattyp, byattypfiltered
 
     def __init_wigner_3j(self, lmax):
-        # TODO: Add documentation. Also, maybe make it private?
         # returns dictionary of all cg coefficients to be used at a given value of lmax
         try:
             with open(
@@ -652,7 +645,6 @@ class ACE(Descriptor):
         return cg
 
     def __init_clebsch_gordan(self, lmax):
-        # TODO: Add documentation. Also, maybe make it private?
         # returns dictionary of all cg coefficients to be used at a given value of lmax
         try:
             with open(
@@ -731,7 +723,6 @@ class ACE(Descriptor):
 
     @staticmethod
     def __clebsch_gordan(j1, m1, j2, m2, j3, m3):
-        # TODO: Add documentation. Also, maybe make it private?
         # Clebsch-gordan coefficient calculator based on eqs. 4-5 of:
         # https://hal.inria.fr/hal-01851097/document
 
@@ -796,7 +787,7 @@ class ACE(Descriptor):
             return 0.0
 
     def _read_feature_dimension_from_json(self, json_dict):
-        nus, limit_nus = self.calc_limit_nus()
+        nus, limit_nus = self.__calculate_limit_nus()
 
         if self.parameters.descriptors_contain_xyz:
             return len(limit_nus) - (len(list(set(self._atoms.symbols))))
