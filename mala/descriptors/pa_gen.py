@@ -52,7 +52,6 @@ def build_tabulated(rank, all_max_mu, all_max_n, all_max_l, L_R=0, M_R=0):
                 parity_span_labs=max_labs,
                 full_span=original_spans[lspan_perm],
             )
-            mustrlst = ["%d"] * rank
             nstrlst = ["%d"] * rank
             lstrlst = ["%d"] * rank
             Lstrlst = ["%d"] * (rank - 2)
@@ -64,10 +63,6 @@ def build_tabulated(rank, all_max_mu, all_max_n, all_max_l, L_R=0, M_R=0):
             )
             for lab in PA_labels:
                 mu0, mu, n, l, L = get_mu_n_l(lab, return_L=True)
-                if L != None:
-                    nlL = (tuple(n), tuple(l), L)
-                else:
-                    nlL = (tuple(n), tuple(l), tuple([]))
                 simple_str = (
                     ",".join(nstrlst) % tuple(n)
                     + "_"

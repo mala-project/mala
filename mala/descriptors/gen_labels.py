@@ -151,11 +151,10 @@ def from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
     rank = len(l)
     Lveclst = ["%d"] * (rank - 2)
     vecstrlst = ["%d"] * rank
-    unique_mun, mun_tupped = muvec_nvec_combined(mu, n)
+    mun_tupped = muvec_nvec_combined(mu, n)
     all_labels = []
     for mun_tup in mun_tupped:
         mappedn, mappedl, mprev_n, mprev = get_mapped(mun_tup, l)
-        this_key = (tuple(mappedn), tuple(l))
         this_key_str = (
             ",".join(vecstrlst) % mappedn
             + "_"
@@ -204,24 +203,22 @@ def muvec_nvec_combined(mu, n):
     umus = sorted(list(set(itertools.permutations(mu))))
     uns = sorted(list(set(itertools.permutations(n))))
     combos = [cmb for cmb in itertools.product(umus, uns)]
-    tupped = [tuple([(ni, mui) for mui, ni in zip(*cmb)]) for cmb in combos]
     tupped = [
         tuple(sorted([(ni, mui) for mui, ni in zip(*cmb)])) for cmb in combos
     ]
     tupped = list(set(tupped))
-    uniques = []
-    for tupi in tupped:
-        nil = []
-        muil = []
-        for tupii in tupi:
-            muil.append(tupii[1])
-            nil.append(tupii[0])
-        uniques.append(tuple([tuple(muil), tuple(nil)]))
-    return uniques, tupped
+    # uniques = []
+    # for tupi in tupped:
+    #     nil = []
+    #     muil = []
+    #     for tupii in tupi:
+    #         muil.append(tupii[1])
+    #         nil.append(tupii[0])
+    #     uniques.append(tuple([tuple(muil), tuple(nil)]))
+    return tupped
 
 
 def get_mapped_subset(ns):
-    mapped_ns = []
     mapped_n_per_n = {}
     n_per_mapped_n = {}
     for n in ns:
@@ -231,7 +228,6 @@ def get_mapped_subset(ns):
         tmpn.sort(key=Counter(n).get, reverse=True)
         unique_ns.sort()
         unique_ns.sort(key=Counter(n).get, reverse=True)
-        count_unique_ns = [n.count(u) for u in unique_ns]
         mp_n = {unique_ns[i]: i for i in range(len(unique_ns))}
         mprev_n = {i: unique_ns[i] for i in range(len(unique_ns))}
         mappedn = [mp_n[t] for t in tmpn]
@@ -255,7 +251,6 @@ def get_mapped(nin, lin):
     tmp.sort(key=Counter(lin).get, reverse=True)
     uniques.sort()
     uniques.sort(key=Counter(tmp).get, reverse=True)
-    count_uniques = [lin.count(u) for u in uniques]
     mp = {uniques[i]: i for i in range(len(uniques))}
     mprev = {i: uniques[i] for i in range(len(uniques))}
     mappedl = [mp[t] for t in tmp]
@@ -265,7 +260,6 @@ def get_mapped(nin, lin):
     tmpn.sort(key=Counter(nin).get, reverse=True)
     unique_ns.sort()
     unique_ns.sort(key=Counter(nin).get, reverse=True)
-    count_unique_ns = [nin.count(u) for u in unique_ns]
     mp_n = {unique_ns[i]: i for i in range(len(unique_ns))}
     mprev_n = {i: unique_ns[i] for i in range(len(unique_ns))}
     mappedn = [mp_n[t] for t in tmpn]
@@ -332,41 +326,6 @@ def get_mu_n_l(nu_in, return_L=False, **kwargs):
             return mu0, mu, n, l, L
         else:
             return mu0, mu, n, l
-    # provide option to get n,l for depricated descriptor labels
-    else:
-        nu = nu_in
-        mu0 = 0
-        mu = [0] * rank
-        nusplt = [int(k) for k in nu.split(",")]
-        n = nusplt[:rank]
-        l = nusplt[rank : 2 * rank]
-        return mu0, mu, n, l
-
-
-def get_k_mu_n_l(nu_in, return_L=False, **kwargs):
-    rank = get_k_mu_nu_rank(nu_in)
-    if len(nu_in.split("_")) > 1:
-        if len(nu_in.split("_")) == 2:
-            nu = nu_in.split("_")[-1]
-            Lstr = ""
-        else:
-            nu = nu_in.split("_")[1]
-            Lstr = nu_in.split("_")[-1]
-        k1mu0str = nu_in.split("_")[0]
-        mu0, k1 = tuple([int(bki) for bki in k1mu0str.split("-")])
-        nusplt = [int(k) for k in nu.split(",")]
-        mu = nusplt[:rank]
-        ks = nusplt[rank : 2 * rank]
-        n = nusplt[2 * rank : 3 * rank]
-        l = nusplt[3 * rank :]
-        if len(Lstr) >= 1:
-            L = tuple([int(k) for k in Lstr.split("-")])
-        else:
-            L = None
-        if return_L:
-            return mu0, k1, mu, ks, n, l, L
-        else:
-            return mu0, k1, mu, ks, n, l
     # provide option to get n,l for depricated descriptor labels
     else:
         nu = nu_in
@@ -847,15 +806,6 @@ def generate_nl(
                     munl.append(munlL)
     munl = list(set(munl))
     return munl
-
-
-def combine_label_dcts(label_dcts):
-    mukeys = list(label_dcts[0].keys())
-    parent_dct = {key: [] for key in mukeys}
-    for label_dct in label_dcts:
-        for key in mukeys:
-            parent_dct[key].extend(label_dct[key])
-    return parent_dct
 
 
 def simple_parity_filt(l, inters, even=True):

@@ -5,7 +5,7 @@ from mala.descriptors.symmetric_grp_manip import *
 def get_highest_coupling_representation(lp, lref):
     rank = len(lp)
     coupling_reps = local_sigma_c_partitions[rank]
-    ysgi = Young_Subgroup(rank)
+    ysgi = YoungSubgroup(rank)
     highest_rep = tuple([1] * rank)
     for rep in coupling_reps:
         ysgi.subgroup_fill(
@@ -22,7 +22,7 @@ def get_highest_coupling_representation(lp, lref):
 
 def tree_labels(nin, lin, L_R=0, M_R=0):
     rank = len(lin)
-    ysgi = Young_Subgroup(rank)
+    ysgi = YoungSubgroup(rank)
     if type(lin) != list:
         lin = list(lin)
     if type(nin) != list:
@@ -66,8 +66,7 @@ def tree_labels(nin, lin, L_R=0, M_R=0):
             nin, [degen_orbit], sigma_c_symmetric=False, semistandard=False
         )
         degen_fills = ysgi.fills.copy()
-        maxdegen = max([len(ois) for ois in orbit_inds])
-        sequential_degen_orbit, orbit_inds_s = enforce_sorted_orbit(orbit_inds)
+        sequential_degen_orbit = enforce_sorted_orbit(orbit_inds)
         ysgi.subgroup_fill(
             nin,
             [sequential_degen_orbit],
@@ -80,7 +79,6 @@ def tree_labels(nin, lin, L_R=0, M_R=0):
             for prd in itertools.product(degen_fills, original_span_SO3)
         ]
 
-    nlabs = 0
     labels_per_lperm = {}
     # build all labels (unsorted trees)
     for l in ls:
@@ -116,7 +114,6 @@ def tree_labels(nin, lin, L_R=0, M_R=0):
                                     "0_%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d_%d-%d"
                                     % (muperm + nperm + tuple(l) + inter)
                                 )
-                            nlabs += 1
         labels_per_lperm[tuple(l)] = subblock
 
     block_sizes = {key: len(val) for key, val in labels_per_lperm.items()}
@@ -130,10 +127,9 @@ def tree_labels(nin, lin, L_R=0, M_R=0):
         used_ns = []
         used_ids = []
         for nu in labs:
-            mu0, mutst, ntst, ltst, L = get_mu_n_l(nu, return_L=True)
+            mu0, _, ntst, ltst, L = get_mu_n_l(nu, return_L=True)
             ltree = [(li, ni) for ni, li in zip(ntst, ltst)]  # sort first on n
             tree_i = build_tree(ltree, L, L_R)
-            ttup = tree_i.full_tup()
             tid = tree_i.tree_id
             conds = (
                 tid not in used_ids
@@ -162,7 +158,7 @@ def tree_labels(nin, lin, L_R=0, M_R=0):
 def combine_blocks(blocks, lin, original_spans, L_R=0):
     # tool to recombine trees from multiple permutations of l
     rank = len(lin)
-    ysgi = Young_Subgroup(rank)
+    ysgi = YoungSubgroup(rank)
     lps = list(blocks.keys())
     blockpairs = [
         (block1, block2)
@@ -229,8 +225,6 @@ def combine_blocks(blocks, lin, original_spans, L_R=0):
     for lp, nus in blocks.items():
         rank = len(lp)
         degen_orbit, orbit_inds = get_degen_orb(lp)
-        maxdegen = max([len(ois) for ois in orbit_inds])
-        sequential_degen_orbit, orbit_inds_s = enforce_sorted_orbit(orbit_inds)
         block_pairs = [
             blockpair
             for blockpair in list(block_map.keys())
@@ -247,9 +241,6 @@ def combine_blocks(blocks, lin, original_spans, L_R=0):
             mu0ii, muii, nii, lii, Lii = get_mu_n_l(nu, return_L=True)
             is_sigma0 = tuple(lii) == lps[0]
             degen_orbit, orbit_inds = get_degen_orb(lp)
-            sequential_degen_orbit, orbit_inds_s = enforce_sorted_orbit(
-                orbit_inds
-            )
             nlii = [(niii, liii) for niii, liii in zip(nii, lii)]
             atrees = []
             for perm_map in perms_2_check:
@@ -262,7 +253,6 @@ def combine_blocks(blocks, lin, original_spans, L_R=0):
                 ]
                 tree_i = build_tree(new_ltree, Lii, L_R)
                 # tree_i =  build_tree(new_ltree,new_Lii,L_R)
-                ttup = tree_i.full_tup()
                 tid = tree_i.tree_id
                 atrees.append(tid)
             cond1 = not any([tid in used_ids for tid in atrees])
@@ -288,16 +278,6 @@ def combine_blocks(blocks, lin, original_spans, L_R=0):
     return combined_labs
 
 
-seq_degen_map = {
-    ((2, 2, 1), (5,)): (4, 1),
-    ((2, 2, 1), (4, 1)): (4, 1),
-    ((2, 1, 1, 1), (4, 1)): (3, 1, 1),
-    ((2, 2, 1), (2, 3)): (2, 2, 1),
-    ((2, 1, 1, 1), (2, 3)): (2, 1, 1, 1),
-    ((1, 1, 1, 1, 1), (2, 3)): (2, 1, 1, 1),
-}
-
-
 # apply ladder relationships
 def apply_ladder_relationships(
     lin, nin, combined_labs, parity_span, parity_span_labs, full_span, L_R=0
@@ -308,28 +288,23 @@ def apply_ladder_relationships(
     tmp.sort(key=Counter(lin).get, reverse=True)
     uniques.sort()
     uniques.sort(key=Counter(tmp).get, reverse=True)
-    count_uniques = [lin.count(u) for u in uniques]
     mp = {uniques[i]: i for i in range(len(uniques))}
-    mprev = {i: uniques[i] for i in range(len(uniques))}
     mappedl = [mp[t] for t in tmp]
-    ysgi = Young_Subgroup(N)
+    ysgi = YoungSubgroup(N)
 
     unique_ns = list(set(nin))
     tmpn = list(nin).copy()
     tmpn.sort(key=Counter(nin).get, reverse=True)
     unique_ns.sort()
     unique_ns.sort(key=Counter(nin).get, reverse=True)
-    count_unique_ns = [nin.count(u) for u in unique_ns]
     mp_n = {unique_ns[i]: i for i in range(len(unique_ns))}
-    mprev_n = {i: unique_ns[i] for i in range(len(unique_ns))}
     mappedn = [mp_n[t] for t in tmpn]
     mappedn = tuple(mappedn)
     mappedl = tuple(mappedl)
 
     max_labs = parity_span_labs.copy()
     #  based on degeneracy
-    ndegen_rep, n_orbit_inds = get_degen_orb(mappedn)
-    origndegen_rep, orign_orbit_inds = get_degen_orb(nin)
+    ndegen_rep, _ = get_degen_orb(mappedn)
     ndegen_rep = list(ndegen_rep)
     ndegen_rep.sort(key=lambda x: x, reverse=True)
     ndegen_rep = tuple(ndegen_rep)
@@ -398,9 +373,7 @@ def apply_ladder_relationships(
             for lab in max_labs:
                 mu0ii, muii, nii, lii, Lii = get_mu_n_l(lab, return_L=True)
                 lidegen_rep, l_orbit_inds = get_degen_orb(lii)
-                l_sequential_degen_orbit, l_orbit_inds_s = (
-                    enforce_sorted_orbit(l_orbit_inds)
-                )
+                l_sequential_degen_orbit = enforce_sorted_orbit(l_orbit_inds)
                 # switch to lower symmetry SN representation
                 ysgi.subgroup_fill(
                     list(nin),

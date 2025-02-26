@@ -175,7 +175,7 @@ class Node:
             self.desc_rank != None
         ), "you first need to add branches/other nodes to print the tree"
 
-        ysgi = Young_Subgroup(self.desc_rank)
+        ysgi = YoungSubgroup(self.desc_rank)
         sigma_c_parts = ysgi.sigma_c_partitions(max_orbit=self.desc_rank)
         sigma_c_parts.sort(key=lambda x: x.count(2), reverse=True)
         sigma_c_parts.sort(

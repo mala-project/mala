@@ -388,8 +388,8 @@ class Bispectrum(Descriptor):
         self._bnorm_flag = False
         # Currently not supported
         self._quadraticflag = False
-        self._python_calculation_number_elements = 1
-        self._wself = 1.0
+        # self._python_calculation_number_elements = 1
+        # self._wself = 1.0
 
         # What follows is the python implementation of the
         # bispectrum descriptor calculation.

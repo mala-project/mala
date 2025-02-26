@@ -64,28 +64,27 @@ def is_row_sort(partitionfill):
 
 
 # TODO: Rename class.
-class Young_Subgroup:
+class YoungSubgroup:
     # Class for young tableau with subgroup filling options
 
     def __init__(self, rank):
         self.rank = rank
         self.partition = None
         self.fills = None
+        self.partitions_per_fill = None
+        self.nodes = None
+        self.remainder = None
 
     def sigma_c_partitions(self, max_orbit):
         # returns a list of partitions compatible with sigma_c
         nodes, remainder = tree(range(self.rank))
         self.nodes = nodes
         self.remainder = remainder
-        # max_nc2 = math.floor((max_orbit)/2)
-        # max_nc2 = math.floor(max_orbit)
+
         max_nc2 = math.floor(self.rank / 2)
         min_orbits = 1
         min_orbits += math.floor(self.rank / 4)
-        tst = max_nc2 % 2
-        # min_orbits = max_nc2 #+= tst
-        # min_orbits  += tst
-        tmp_max = math.ceil(self.rank / 2)
+
         min_nc1 = 0
         if remainder != None:
             min_nc1 = 1
@@ -150,22 +149,14 @@ class Young_Subgroup:
         fills_perpart = {tuple(partition): [] for partition in partitions}
         part_perfill = {}
         all_perms = unique_perms(inds)
-        if len(inds) % 2 == 0:
-            perms_raw = [p for p in itertools.permutations(range(len(inds)))]
-        elif len(inds) % 2 != 0:
-            # removes redundant permutations for rank 5
-            perms_raw = [
-                p
-                for p in itertools.permutations(range(len(inds)))
-                if p[-1] == range(len(inds))[-1]
-                or p[-1] == range(len(inds))[0]
-            ]
+
         # get the full automorphism group including any expansion due to degeneracy
         # G_N = get_auto_part(inds,partitions[0],add_degen_autos=True,part_only=False)
         # applied_perms = [tuple(Permutation(filled_perm(pi,len(inds)))(inds)) for pi in G_N]
-        applied_perms = []
+
         # collect a group of permutations \sigma \in S_N \notin G_N
-        idi = [tuple([ki]) for ki in range(len(inds))]
+        # idi = [tuple([ki]) for ki in range(len(inds))]
+
         # H_N = [tuple(idi) ]
         # for raw_perm in perms_raw:
         #    P = Permutation(raw_perm)
@@ -218,5 +209,5 @@ class Young_Subgroup:
             )
             pts.sort(key=lambda x: max(x), reverse=True)
             part_perfill[sgf] = pts
-        self.fills_per_partition = fills_perpart
+
         self.partitions_per_fill = part_perfill

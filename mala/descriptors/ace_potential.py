@@ -38,7 +38,6 @@ class AcePot:
         self.nus = None
         self.deltaSplineBins = 0.001
         self.global_ndensity = 1
-        self.global_FSparams = [1.0, 1.0]
         self.global_rhocut = 100000
         self.global_drhocut = 250
 
@@ -271,7 +270,6 @@ class AcePot:
                 nus_per_rank[rank].append(nu)
             except KeyError:
                 nus_per_rank[rank] = [nu]
-            bkeys = list(betas[mu0].keys())
             llst = ["%d"] * rank
             # print (nu,l,oldfmt,muflg)
             lstr = ",".join(b for b in llst) % tuple(l)
@@ -324,7 +322,6 @@ class AcePot:
                     return obj.tolist()
                 return super(NpEncoder, self).default(obj)
 
-        srt_nus = []
         with open("%s.yace" % name, "w") as writeout:
             e0lst = ["%f"] * len(self.elements)
             e0str = ", ".join(b for b in e0lst) % tuple(self.E0)

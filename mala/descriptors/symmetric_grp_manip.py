@@ -61,14 +61,10 @@ def find_sequential_indices(lst):
 
 
 def get_degen_orb(l):
-    rank = len(l)
     degen_ind_dict = find_degenerate_indices(l)
     partition = []
     inds_per_orbit = {}
     for degenval, matching_inds in degen_ind_dict.items():
-        sequential_inds = sorted(
-            list(set(find_sequential_indices(matching_inds)))
-        )
         this_orbit = tuple(matching_inds)
         partition.append(this_orbit)
         try:
@@ -98,7 +94,7 @@ def enforce_sorted_orbit(partition_inds):
         for iflag, orbit_flag in enumerate(flags):
             if not orbit_flag:
                 symmetric_sub_orbits = []
-                for oind, couple_orb in enumerate(couple_ref):
+                for couple_orb in couple_ref:
                     has_symmetric_sub_orbit = all(
                         [oo in partition_inds[iflag] for oo in couple_orb]
                     )
@@ -125,4 +121,8 @@ def enforce_sorted_orbit(partition_inds):
     else:
         new_partition = tuple(list(partition_inds).copy())
     part_tup = tuple([len(ki) for ki in new_partition])
-    return part_tup, tuple(new_partition)
+
+    # The tuple(new_partition) never seems to be used in all the functions
+    # that call this function. I'll comment it out for now, in case it is
+    # important for later debugging.
+    return part_tup  # , tuple(new_partition)
