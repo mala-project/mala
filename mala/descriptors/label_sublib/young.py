@@ -1,6 +1,3 @@
-from sympy.combinatorics import Permutation
-from mala.descriptors.label_sublib.sylow_lib import *
-import math
 from mala.descriptors.gen_labels import *
 
 local_sigma_c_partitions = {
@@ -71,7 +68,6 @@ class YoungSubgroup:
         self.rank = rank
         self.partition = None
         self.fills = None
-        self.partitions_per_fill = None
         self.nodes = None
         self.remainder = None
 
@@ -209,5 +205,3 @@ class YoungSubgroup:
             )
             pts.sort(key=lambda x: max(x), reverse=True)
             part_perfill[sgf] = pts
-
-        self.partitions_per_fill = part_perfill

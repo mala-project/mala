@@ -540,7 +540,6 @@ class ACE(Descriptor):
         lmb_def_str = "lambda = " + "  ".join(b for b in lmb_def_lst) % tuple(
             default_lmbs
         )
-        rcin_def_lst = ["%1.3f"] * len(self.bonds)
         return rc_range, rc_def_str, lmb_def_str
 
     def default_rc(self, elms):

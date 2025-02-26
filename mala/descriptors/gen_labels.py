@@ -351,15 +351,6 @@ def get_mu_nu_rank(nu_in):
         return int(len(nu_splt) / 2)
 
 
-def get_k_mu_nu_rank(nu_in):
-    assert (
-        len(nu_in.split("_")) <= 4
-    ), "make sure your descriptor label is in proper format: mu0k0_mu1,mu2,mu3,k1,k2,k3,n1,n2,n3,l1,l2,l3_L1"
-    nu = nu_in.split("_")[1]
-    nu_splt = nu.split(",")
-    return int(len(nu_splt) / 4)
-
-
 def ind_vec(lrng, size):
     uniques = []
     combs = itertools.combinations_with_replacement(lrng, size)

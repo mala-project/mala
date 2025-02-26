@@ -52,14 +52,6 @@ def check_sequential(lst):
         return True
 
 
-def find_sequential_indices(lst):
-    sequential_indices = []
-    for i in range(len(lst) - 1):
-        if lst[i] + 1 == lst[i + 1]:
-            sequential_indices.extend([i, i + 1])
-    return sequential_indices
-
-
 def get_degen_orb(l):
     degen_ind_dict = find_degenerate_indices(l)
     partition = []
