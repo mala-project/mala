@@ -68,7 +68,6 @@ def is_row_sort(partitionfill):
     return all(all_srt)
 
 
-# TODO: Rename class.
 class YoungSubgroup:
     # Class for young tableau with subgroup filling options
 
