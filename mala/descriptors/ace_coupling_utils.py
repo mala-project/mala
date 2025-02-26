@@ -425,7 +425,6 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
         all_max_l = 12
         all_max_n = 12
         all_max_mu = 8
-        # TODO: Test this file interface.
         label_file = os.path.join(
             os.path.dirname(__file__),
             "all_labels_mu%d_n%d_l%d_r%d.json"

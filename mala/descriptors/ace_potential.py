@@ -6,8 +6,7 @@ import numpy as np
 import mala.descriptors.ace_coupling_utils as acu
 
 
-# TODO: Rename class.
-class AcePot:
+class ACEPotential:
     def __init__(
         self,
         elements,
@@ -49,18 +48,20 @@ class AcePot:
         assert len(nmax) == len(lmax), "nmax and lmax arrays must be same size"
 
         self.global_nradbase = nradbase
-        if type(rcut) != dict and type(rcut) != list:
-            self.global_rcut = rcut
-            self.global_lmbda = lmbda
-            self.global_rcutinner = rcutinner
-            self.global_drcutinner = drcutinner
-            self.global_lmin = lmin
-        else:
-            self.rcut = rcut
-            self.lmbda = lmbda
-            self.rcutinner = rcutinner
-            self.drcutinner = drcutinner
-            self.lmin = lmin
+
+        # These can be global or per bond type, global_mode controls which
+        # of these settings is used.
+        self.rcut = rcut
+        self.lmbda = lmbda
+        self.rcutinner = rcutinner
+        self.drcutinner = drcutinner
+        self.lmin = lmin
+        self.global_mode = False
+
+        if not isinstance(self.rcut, dict) and not isinstance(self.rcut, list):
+            self.global_mode = True
+
+        print(self.global_mode)
 
         self.manuallabs = manuallabs
         self.set_embeddings()
@@ -84,30 +85,17 @@ class AcePot:
         }
         mumax_dict = {rank: len(self.elements) for rank in self.ranks}
 
-        # TODO: Clean this up, e.g., if FitSNAP is to be used, we need
-        # to mention it in the requirements; also, I think we don't use it?
-        # If the default, and what we actually use, is the json-file-based
-        # workaround, we should maybe set it as an explicit default.
-        if self.manuallabs != None:
+        if self.manuallabs is not None:
             with open(self.manuallabs, "r") as readjson:
                 labdata = json.load(readjson)
             nulst_1 = [list(ik) for ik in list(labdata.values())]
-        elif self.manuallabs == None and self.b_basis == "minsub":
-            from fitsnap3lib.lib.sym_ACE.rpi_lib import descriptor_labels_YSG
-
-            nulst_1 = [
-                descriptor_labels_YSG(
-                    rank,
-                    nradmax_dict[rank],
-                    lmax_dict[rank],
-                    mumax_dict[rank],
-                    lmin_dict[rank],
-                )
-                for rank in self.ranks
-            ]
-        elif self.manuallabs == None and self.b_basis == "ysg_x_so3":
-            # TODO until all are tabulated
-            nulst_1 = []
+        # If I am not mistaken, then this option is currently incomplete.
+        # I have commented it out, while also for now removing the option
+        # that relied on FitSNAP, because we do not want to ship MALA with
+        # FitSNAP as a requirement at the moment.
+        # elif self.b_basis == "ysg_x_so3":
+        #
+        #     nulst_1 = []
         else:
             nulst_1 = []
             for rank in self.ranks:
@@ -119,6 +107,7 @@ class AcePot:
                     lmin_dict[rank],
                 )
                 nulst_1.append(PA_lammps)
+
         nus_unsort = [item for sublist in nulst_1 for item in sublist]
         nus = nus_unsort.copy()
         mu0s = []
@@ -139,8 +128,6 @@ class AcePot:
         nus.sort(key=lambda x: mu0s[nus_unsort.index(x)], reverse=False)
         self.nus = nus
         self.set_funcs(nus)
-
-        return None
 
     def set_embeddings(
         self, npoti="FinnisSinclair", FSparams=[1.0, 1.0]
@@ -192,7 +179,7 @@ class AcePot:
             bstr = "[%d, %d]" % (bondlst[0], bondlst[1])
             # TODO: Is there a way to assign this without try/except, but
             #  rather an if-condition?
-            try:
+            if self.global_mode:
                 bonds[bstr] = {
                     "nradmax": nradmax,
                     "lmax": max(self.global_lmax),
@@ -201,15 +188,15 @@ class AcePot:
                     "radparameters": [self.global_lmbda],
                     "radcoefficients": crad.tolist(),
                     "prehc": 0,
-                    "lambdahc": self.global_lmbda,
-                    "rcut": self.global_rcut,
+                    "lambdahc": self.lmbda,
+                    "rcut": self.rcut,
                     "dcut": 0.01,
-                    "rcut_in": self.global_rcutinner,
-                    "dcut_in": self.global_drcutinner,
+                    "rcut_in": self.rcutinner,
+                    "dcut_in": self.drcutinner,
                     "inner_cutoff_type": "distance",
                 }
-            except AttributeError:
-                if type(self.rcut) == dict:
+            else:
+                if isinstance(self.rcut, dict):
                     bonds[bstr] = {
                         "nradmax": nradmax,
                         "lmax": max(self.global_lmax),
@@ -225,7 +212,7 @@ class AcePot:
                         "dcut_in": self.drcutinner[bstr],
                         "inner_cutoff_type": "distance",
                     }
-                elif type(self.rcut) == list:
+                elif isinstance(self.rcut, list):
                     bonds[bstr] = {
                         "nradmax": nradmax,
                         "lmax": max(self.global_lmax),

@@ -16,7 +16,7 @@ from mendeleev.fetch import fetch_table
 from mala.common.parallelizer import printout
 from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
-from mala.descriptors.ace_potential import AcePot
+from mala.descriptors.ace_potential import ACEPotential
 import mala.descriptors.ace_coupling_utils as acu
 import mala.descriptors.wigner_coupling as wigner_coupling
 import mala.descriptors.cg_coupling as cg_coupling
@@ -410,7 +410,7 @@ class ACE(Descriptor):
             )
 
         # permutation symmetry adapted ACE labels
-        Apot = AcePot(
+        Apot = ACEPotential(
             element_list,
             self._ace_reference_ensemble,
             self.parameters.ace_ranks,
