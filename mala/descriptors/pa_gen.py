@@ -1,5 +1,4 @@
 from mala.descriptors.pa_lib import *
-from mala.descriptors.sym_ACE_settings import *
 import json, os
 
 
@@ -75,6 +74,7 @@ def build_tabulated(rank, all_max_mu, all_max_n, all_max_l, L_R=0, M_R=0):
             PA_per_nlblock[nlstr] = nl_simple_labs
 
     dct = {"labels": PA_per_nlblock}
+    lib_path = os.path.dirname(__file__)
     with open(
         "%s/all_labels_mu%d_n%d_l%d_r%d.json"
         % (lib_path, all_max_mu, all_max_n, all_max_l, rank),
@@ -88,6 +88,7 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
         all_max_l = 12
         all_max_n = 12
         all_max_mu = 8
+        lib_path = os.path.dirname(__file__)
         try:
             with open(
                 "%s/all_labels_mu%d_n%d_l%d_r%d.json"
