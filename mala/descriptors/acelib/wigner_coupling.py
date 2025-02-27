@@ -4,6 +4,19 @@ from mala.descriptors.acelib import coupling_utils as ace_coupling_utils
 
 
 def get_coupling(Wigner_3j, ldict, L_R=0, **kwargs):
+    """
+
+    Parameters
+    ----------
+    Wigner_3j
+    ldict
+    L_R
+    kwargs
+
+    Returns
+    -------
+
+    """
     # for now we restrict up to rank 4 trees
     M_Rs = list(range(-L_R, L_R + 1))
     # generic coupling for any L_R - support must be added to call
@@ -40,6 +53,19 @@ def get_coupling(Wigner_3j, ldict, L_R=0, **kwargs):
 
 
 def rank_1_tree(Wigner_3j, l, L_R=0, M_R=0):
+    """
+
+    Parameters
+    ----------
+    Wigner_3j
+    l
+    L_R
+    M_R
+
+    Returns
+    -------
+
+    """
     # no nodes for rank 1
 
     mstrs = ace_coupling_utils.get_ms(l, M_R)
@@ -69,6 +95,19 @@ def rank_1_tree(Wigner_3j, l, L_R=0, M_R=0):
 
 
 def rank_2_tree(Wigner_3j, l, L_R=0, M_R=0):
+    """
+
+    Parameters
+    ----------
+    Wigner_3j
+    l
+    L_R
+    M_R
+
+    Returns
+    -------
+
+    """
     nodes, remainder = ace_coupling_utils.build_quick_tree(l)
     node = nodes[0]
     mstrs = ace_coupling_utils.get_ms(l, M_R)
@@ -102,6 +141,19 @@ def rank_2_tree(Wigner_3j, l, L_R=0, M_R=0):
 
 
 def rank_3_tree(Wigner_3j, l, L_R=0, M_R=0):
+    """
+
+    Parameters
+    ----------
+    Wigner_3j
+    l
+    L_R
+    M_R
+
+    Returns
+    -------
+
+    """
     full_inter_tuples = ace_coupling_utils.tree_l_inters(l, L_R=L_R, M_R=M_R)
     mstrs = ace_coupling_utils.get_ms(l, M_R)
     decomposed = {
@@ -136,6 +188,19 @@ def rank_3_tree(Wigner_3j, l, L_R=0, M_R=0):
 
 
 def rank_4_tree(Wigner_3j, l, L_R=0, M_R=0):
+    """
+
+    Parameters
+    ----------
+    Wigner_3j
+    l
+    L_R
+    M_R
+
+    Returns
+    -------
+
+    """
     nodes, remainder = ace_coupling_utils.build_quick_tree(l)
     mstrs = ace_coupling_utils.get_ms(l, M_R)
     full_inter_tuples = ace_coupling_utils.tree_l_inters(l, L_R=L_R, M_R=M_R)

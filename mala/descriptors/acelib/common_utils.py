@@ -3,6 +3,17 @@ from sympy.combinatorics import Permutation
 
 
 def filled_perm(tups, rank):
+    """
+
+    Parameters
+    ----------
+    tups
+    rank
+
+    Returns
+    -------
+
+    """
     allinds = list(range(rank))
     try:
         remainders = [i for i in allinds if i not in flatten(tups)]
@@ -14,6 +25,16 @@ def filled_perm(tups, rank):
 
 
 def flatten(lstoflsts):
+    """
+
+    Parameters
+    ----------
+    lstoflsts
+
+    Returns
+    -------
+
+    """
     try:
         flat = [i for sublist in lstoflsts for i in sublist]
         return flat
@@ -22,6 +43,18 @@ def flatten(lstoflsts):
 
 
 def group_vec_by_node(vec, nodes, remainder=None):
+    """
+
+    Parameters
+    ----------
+    vec
+    nodes
+    remainder
+
+    Returns
+    -------
+
+    """
     # vec_by_tups = [tuple([vec[node[0]],vec[node[1]]]) for node in nodes]
     vec_by_tups = []
     for node in nodes:
@@ -36,6 +69,17 @@ def group_vec_by_node(vec, nodes, remainder=None):
 
 
 def group_vec_by_orbits(vec, part):
+    """
+
+    Parameters
+    ----------
+    vec
+    part
+
+    Returns
+    -------
+
+    """
     ind_range = np.sum(part)
     assert len(vec) == ind_range, "vector must be able to fit in the partion"
     count = 0

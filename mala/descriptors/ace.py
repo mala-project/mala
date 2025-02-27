@@ -69,6 +69,7 @@ class ACE(Descriptor):
         self.couplings_yace_file = None
 
         # Will get filled once the atoms object has been loaded.
+        # ACE_DOCS_MISSING: What do these do?
         self.__ace_mumax = None
         self.__ace_reference_ensemble = None
 
@@ -496,13 +497,13 @@ class ACE(Descriptor):
             self._cutoff_factors,
             self.__lambdas,
             ccs[self.parameters.ace_M_R],
-            rcinner,
-            drcinner,
+            rcutinner=rcinner,
+            drcutinner=drcinner,
             lmin=self.parameters.ace_lmin,
         )
 
         # ACE_DOCS_MISSING: What does this function do?
-        Apot.set_funcs(nulst=self.__limit_nus, muflg=True, print_0s=True)
+        Apot.set_funcs(nulst=self.__limit_nus, print_0s=True)
 
         # Write the coupling coefficients to file.
         return Apot.write_pot(

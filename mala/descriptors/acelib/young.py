@@ -13,6 +13,8 @@ import itertools
 # library of functions and classes for building young diagrams and filling them
 # this includes young subgroup fillings within orbits of irreps of S_N
 class YoungSubgroup:
+    """ """
+
     # Class for young tableau with subgroup filling options
 
     def __init__(self, rank):
@@ -23,6 +25,16 @@ class YoungSubgroup:
         self.remainder = None
 
     def sigma_c_partitions(self, max_orbit):
+        """
+
+        Parameters
+        ----------
+        max_orbit
+
+        Returns
+        -------
+
+        """
         # returns a list of partitions compatible with sigma_c
         nodes, remainder = build_quick_tree(range(self.rank))
         self.nodes = nodes
@@ -59,6 +71,18 @@ class YoungSubgroup:
         return list(set(good_partitions))
 
     def check_single_fill(self, partition, inds, semistandard=True):
+        """
+
+        Parameters
+        ----------
+        partition
+        inds
+        semistandard
+
+        Returns
+        -------
+
+        """
         tmpi = sorted(inds)
         unique_tmpi = list(set(tmpi))
         ii_to_inds = {}
@@ -88,6 +112,17 @@ class YoungSubgroup:
         semistandard=True,
         lreduce=False,
     ):
+        """
+
+        Parameters
+        ----------
+        inds
+        partitions
+        max_orbit
+        sigma_c_symmetric
+        semistandard
+        lreduce
+        """
         if partitions == None:
             partitions = self.sigma_c_partitions(max_orbit)
         if len(set(inds)) == 1:
@@ -159,11 +194,32 @@ class YoungSubgroup:
 
     @staticmethod
     def unique_perms(vec):
+        """
+
+        Parameters
+        ----------
+        vec
+
+        Returns
+        -------
+
+        """
         all_perms = [p for p in itertools.permutations(vec)]
         return sorted(list(set(all_perms)))
 
     @staticmethod
     def is_column_sort(partitionfill, strict_col_sort=False):
+        """
+
+        Parameters
+        ----------
+        partitionfill
+        strict_col_sort
+
+        Returns
+        -------
+
+        """
         lens = [len(x) for x in partitionfill]
         ranges = [list(range(ln)) for ln in lens]
         cols = list(set(flatten(ranges)))
@@ -183,6 +239,16 @@ class YoungSubgroup:
 
     @staticmethod
     def is_row_sort(partitionfill):
+        """
+
+        Parameters
+        ----------
+        partitionfill
+
+        Returns
+        -------
+
+        """
         all_srt = []
         for orbit in partitionfill:
             logi = tuple(sorted(orbit)) == orbit
@@ -191,6 +257,16 @@ class YoungSubgroup:
 
     @staticmethod
     def Reverse(v):
+        """
+
+        Parameters
+        ----------
+        v
+
+        Returns
+        -------
+
+        """
         vtmp = v.copy()
         vtmp.reverse()
         return vtmp

@@ -15,6 +15,7 @@ from mala.descriptors.acelib.young import (
 from mala.descriptors.acelib.common_utils import (
     group_vec_by_node,
     local_sigma_c_partitions,
+    filled_perm,
 )
 from mala.descriptors.acelib.symmetric_group_manipulations import (
     leaf_filter,
@@ -28,6 +29,17 @@ from mala.descriptors.acelib.tree_sorting import (
 
 
 def get_ms(l, M_R=0):
+    """
+
+    Parameters
+    ----------
+    l
+    M_R
+
+    Returns
+    -------
+
+    """
     # retrieves the set of m_i combinations obeying \sum_i m_i = M_R for an arbitrary l vector
     m_ranges = {ind: range(-l[ind], l[ind] + 1) for ind in range(len(l))}
     m_range_arrays = [list(m_ranges[ind]) for ind in range(len(l))]
@@ -40,6 +52,18 @@ def get_ms(l, M_R=0):
 
 
 def check_triangle(l1, l2, l3):
+    """
+
+    Parameters
+    ----------
+    l1
+    l2
+    l3
+
+    Returns
+    -------
+
+    """
     # checks triangle condition between |l1+l2| and l3
     lower_bound = np.abs(l1 - l2)
     upper_bound = np.abs(l1 + l2)
@@ -49,6 +73,18 @@ def check_triangle(l1, l2, l3):
 
 # groups a vector of l quantum numbers pairwise
 def vec_nodes(vec, nodes, remainder=None):
+    """
+
+    Parameters
+    ----------
+    vec
+    nodes
+    remainder
+
+    Returns
+    -------
+
+    """
     vec_by_tups = [tuple([vec[node[0]], vec[node[1]]]) for node in nodes]
     if remainder != None:
         vec_by_tups = vec_by_tups
@@ -57,6 +93,18 @@ def vec_nodes(vec, nodes, remainder=None):
 
 # assuming a pairwise coupling structure, build the "intermediate" angular momenta
 def tree_l_inters(l, L_R=0, M_R=0):
+    """
+
+    Parameters
+    ----------
+    l
+    L_R
+    M_R
+
+    Returns
+    -------
+
+    """
     nodes, remainder = build_quick_tree(l)
     rank = len(l)
     if rank >= 3:
@@ -201,7 +249,20 @@ def tree_l_inters(l, L_R=0, M_R=0):
 
 
 def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
+    """
 
+    Parameters
+    ----------
+    lrng
+    rank
+    L_R
+    M_R
+    use_permutations
+
+    Returns
+    -------
+
+    """
     if L_R % 2 == 0:
         # symmetric w.r.t. inversion
         inv_parity = True
@@ -383,6 +444,16 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
 
 
 def get_intermediates(l):
+    """
+
+    Parameters
+    ----------
+    l
+
+    Returns
+    -------
+
+    """
     try:
         l = l.split(",")
         l1 = int(l[0])
@@ -399,11 +470,38 @@ def get_intermediates(l):
 
 # wrapper
 def get_intermediates_wrapper(l1, l2):
+    """
+
+    Parameters
+    ----------
+    l1
+    l2
+
+    Returns
+    -------
+
+    """
     l = [l1, l2]
     return get_intermediates(l)
 
 
 def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
+    """
+
+    Parameters
+    ----------
+    rank
+    nmax
+    lmax
+    mumax
+    lmin
+    L_R
+    M_R
+
+    Returns
+    -------
+
+    """
     if rank >= 4:
         all_max_l = 12
         all_max_n = 12
@@ -515,6 +613,23 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
 def generate_nl(
     rank, nmax, lmax, mumax=1, lmin=0, L_R=0, M_R=0, all_perms=False
 ):
+    """
+
+    Parameters
+    ----------
+    rank
+    nmax
+    lmax
+    mumax
+    lmin
+    L_R
+    M_R
+    all_perms
+
+    Returns
+    -------
+
+    """
     # rank: int  - basis function rank to evaluate nl combinations for
     # nmax: int  - maximum value of the n quantum numbers in the nl vectors
     # lmax: int  - maximum value of the l quantum numbers in the nl vectors
@@ -565,6 +680,16 @@ def generate_nl(
 
 
 def get_mapped_subset(ns):
+    """
+
+    Parameters
+    ----------
+    ns
+
+    Returns
+    -------
+
+    """
     mapped_n_per_n = {}
     n_per_mapped_n = {}
     for n in ns:
@@ -593,6 +718,18 @@ def get_mapped_subset(ns):
 def build_tabulated(
     rank, all_max_mu, all_max_n, all_max_l, label_file, L_R=0, M_R=0
 ):
+    """
+
+    Parameters
+    ----------
+    rank
+    all_max_mu
+    all_max_n
+    all_max_l
+    label_file
+    L_R
+    M_R
+    """
     lmax_strs = generate_l_LR(
         range(0, all_max_l + 1), rank, L_R=L_R, M_R=M_R, use_permutations=False
     )
@@ -664,6 +801,20 @@ def build_tabulated(
 
 
 def from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
+    """
+
+    Parameters
+    ----------
+    mu
+    n
+    l
+    allowed_mus
+    tabulated_all
+
+    Returns
+    -------
+
+    """
     rank = len(l)
     Lveclst = ["%d"] * (rank - 2)
     vecstrlst = ["%d"] * rank
@@ -714,6 +865,17 @@ def from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
 
 
 def get_mapped(nin, lin):
+    """
+
+    Parameters
+    ----------
+    nin
+    lin
+
+    Returns
+    -------
+
+    """
     N = len(lin)
     uniques = list(set(lin))
     tmp = list(lin).copy()
@@ -738,6 +900,17 @@ def get_mapped(nin, lin):
 
 
 def muvec_nvec_combined(mu, n):
+    """
+
+    Parameters
+    ----------
+    mu
+    n
+
+    Returns
+    -------
+
+    """
     mu = sorted(mu)
     # n = sorted(n)
     umus = sorted(list(set(itertools.permutations(mu))))
@@ -759,6 +932,17 @@ def muvec_nvec_combined(mu, n):
 
 
 def ind_vec(lrng, size):
+    """
+
+    Parameters
+    ----------
+    lrng
+    size
+
+    Returns
+    -------
+
+    """
     uniques = []
     combs = itertools.combinations_with_replacement(lrng, size)
     for comb in combs:
@@ -771,6 +955,18 @@ def ind_vec(lrng, size):
 
 
 def get_mu_n_l(nu_in, return_L=False, **kwargs):
+    """
+
+    Parameters
+    ----------
+    nu_in
+    return_L
+    kwargs
+
+    Returns
+    -------
+
+    """
     rank = get_mu_nu_rank(nu_in)
     if len(nu_in.split("_")) > 1:
         if len(nu_in.split("_")) == 2:
@@ -804,6 +1000,16 @@ def get_mu_n_l(nu_in, return_L=False, **kwargs):
 
 
 def get_mu_nu_rank(nu_in):
+    """
+
+    Parameters
+    ----------
+    nu_in
+
+    Returns
+    -------
+
+    """
     if len(nu_in.split("_")) > 1:
         assert len(nu_in.split("_")) <= 3, (
             "make sure your descriptor label is in proper format: mu0_mu1,mu2,"
@@ -819,6 +1025,18 @@ def get_mu_nu_rank(nu_in):
 
 
 def lammps_remap(PA_labels, rank, allowed_mus=[0]):
+    """
+
+    Parameters
+    ----------
+    PA_labels
+    rank
+    allowed_mus
+
+    Returns
+    -------
+
+    """
     # transforms_all ={ 4: [((0,1),(2,),(3,)), ((0,),(1,),(2,3)), ((0,1),(2,3)), ((0,2),(1,3)),((0,3,1,2)),((0,2,1,3)),((0,3),(1,2))]}
     transforms_all = {
         4: [
@@ -946,6 +1164,18 @@ def lammps_remap(PA_labels, rank, allowed_mus=[0]):
 
 
 def simple_parity_filt(l, inters, even=True):
+    """
+
+    Parameters
+    ----------
+    l
+    inters
+    even
+
+    Returns
+    -------
+
+    """
     nodes, remainder = build_quick_tree(l)
     base_ls = group_vec_by_node(l, nodes, remainder=remainder)
     base_ls = [list(k) for k in base_ls]
@@ -1005,6 +1235,17 @@ def simple_parity_filt(l, inters, even=True):
 
 
 def get_highest_coupling_representation(lp, lref):
+    """
+
+    Parameters
+    ----------
+    lp
+    lref
+
+    Returns
+    -------
+
+    """
     rank = len(lp)
     coupling_reps = local_sigma_c_partitions[rank]
     ysgi = YoungSubgroup(rank)
@@ -1023,6 +1264,19 @@ def get_highest_coupling_representation(lp, lref):
 
 
 def tree_labels(nin, lin, L_R=0, M_R=0):
+    """
+
+    Parameters
+    ----------
+    nin
+    lin
+    L_R
+    M_R
+
+    Returns
+    -------
+
+    """
     rank = len(lin)
     ysgi = YoungSubgroup(rank)
 
@@ -1162,6 +1416,19 @@ def tree_labels(nin, lin, L_R=0, M_R=0):
 
 
 def combine_blocks(blocks, lin, original_spans, L_R=0):
+    """
+
+    Parameters
+    ----------
+    blocks
+    lin
+    original_spans
+    L_R
+
+    Returns
+    -------
+
+    """
     # tool to recombine trees from multiple permutations of l
     rank = len(lin)
     ysgi = YoungSubgroup(rank)
@@ -1288,6 +1555,22 @@ def combine_blocks(blocks, lin, original_spans, L_R=0):
 def apply_ladder_relationships(
     lin, nin, combined_labs, parity_span, parity_span_labs, full_span, L_R=0
 ):
+    """
+
+    Parameters
+    ----------
+    lin
+    nin
+    combined_labs
+    parity_span
+    parity_span_labs
+    full_span
+    L_R
+
+    Returns
+    -------
+
+    """
     N = len(lin)
     uniques = list(set(lin))
     tmp = list(lin).copy()

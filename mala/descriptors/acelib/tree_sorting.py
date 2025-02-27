@@ -1,4 +1,6 @@
 class Node:
+    """ """
+
     def __init__(self, i):
         self.val = i
         self.val_tup = None
@@ -11,12 +13,34 @@ class Node:
         self.tree_id = None
 
     def set_parent(self, parent):
+        """
+
+        Parameters
+        ----------
+        parent
+        """
         self.parent = parent
 
     def set_leaves(self, leaves):
+        """
+
+        Parameters
+        ----------
+        leaves
+        """
         self.leaves = leaves
 
     def check_sorted(self, sort_depth=1):
+        """
+
+        Parameters
+        ----------
+        sort_depth
+
+        Returns
+        -------
+
+        """
         self.is_sorted = False
         if sort_depth == 1:
             if self.lft is None and self.rght is None:
@@ -74,6 +98,16 @@ class Node:
         return returnval
 
     def return_children_vals(self, depth=1):
+        """
+
+        Parameters
+        ----------
+        depth
+
+        Returns
+        -------
+
+        """
         if depth == 1:
             vals = (self.lft.val, self.rght.val)
         elif depth == 2:
@@ -87,6 +121,14 @@ class Node:
         return vals
 
     def set_children(self, children, set_sorted=False, sort_depth=1):
+        """
+
+        Parameters
+        ----------
+        children
+        set_sorted
+        sort_depth
+        """
         if isinstance(children, list):
             children = tuple(children)
         assert (
@@ -147,21 +189,47 @@ class Node:
                     self.is_sorted = True
 
     def update_children(self, set_sorted=False, sort_depth=1):
+        """
+
+        Parameters
+        ----------
+        set_sorted
+        sort_depth
+        """
         if self.lft is not None and self.rght is not None:
             children = [self.lft, self.rght]
             self.set_children(children, set_sorted, sort_depth=sort_depth)
 
     def current_val_tup(self):
+        """
+
+        Returns
+        -------
+
+        """
         this_tup = (self.val, ((self.children[0].val), (self.children[1].val)))
         self.val_tup = this_tup
         return this_tup
 
     def flip_children(self):
+        """ """
         self.children.reverse()
         self.set_children(self.children)
 
 
 def build_full_tree(l, L, L_R):
+    """
+
+    Parameters
+    ----------
+    l
+    L
+    L_R
+
+    Returns
+    -------
+
+    """
     assert isinstance(l, list) or isinstance(
         l, tuple
     ), "convert l to list or tuple"
@@ -171,6 +239,18 @@ def build_full_tree(l, L, L_R):
     rank = len(l)
 
     def rank_2_binary(l_parent, l_left, l_right):
+        """
+
+        Parameters
+        ----------
+        l_parent
+        l_left
+        l_right
+
+        Returns
+        -------
+
+        """
         if isinstance(l_parent, int):
             root2 = Node(l_parent)
         else:
@@ -214,6 +294,16 @@ def build_full_tree(l, L, L_R):
 
 
 def build_quick_tree(l):
+    """
+
+    Parameters
+    ----------
+    l
+
+    Returns
+    -------
+
+    """
     # quick construction of tree leaves
     rank = len(l)
     rngs = list(range(0, rank))

@@ -1,3 +1,11 @@
+"""
+ACE potential class.
+
+Computes the coupling coefficients. ACE_DOCS_MISSING: Why is this called
+"potential" - would this work as an actual ACE potential or is this just the
+expansion coefficients?
+"""
+
 import itertools
 import json
 
@@ -7,10 +15,64 @@ import mala.descriptors.acelib.coupling_utils as ace_coupling_utils
 
 
 class ACEPotential:
+    """
+    Class for calculation of ACE coupling coefficients.
+
+    ACE_DOCS_MISSING: Explain scope of class. I think we always assume PA
+    basis, but I don't know what that is.
+
+    Parameters
+    ----------
+    elements : list
+        List of elements (symbols)
+
+    reference_ens : list
+        List of floats, has same dimensions as elements. ACE_DOCS_MISSING:
+        What does it do?
+
+    ranks : list
+        ACE_DOCS_MISSING
+
+    nmax: list
+        ACE_DOCS_MISSING
+
+    lmax: list
+        ACE_DOCS_MISSING
+
+    nradbase : int
+        ACE_DOCS_MISSING
+
+    rcut : float
+        ACE_DOCS_MISSING
+
+    lmbda : float
+        ACE_DOCS_MISSING
+
+    css : dict
+        ACE_DOCS_MISSING
+
+    rcutinner : list
+        ACE_DOCS_MISSING
+
+    drcutinner : list
+        ACE_DOCS_MISSING
+
+    lmin : int
+        ACE_DOCS_MISSING
+
+    manual_labels : str
+        File for loading labels. If not None, then labels will be loaded from
+        this json file. If None, then labels will be generated using the
+        pa_labels_raw function (default).
+
+    **kwarg : dict
+        Additional keyword arguments.
+    """
+
     def __init__(
         self,
         elements,
-        reference_ens,
+        reference_ensemble,
         ranks,
         nmax,
         lmax,
@@ -21,72 +83,81 @@ class ACEPotential:
         rcutinner=0.0,
         drcutinner=0.01,
         lmin=1,
-        b_basis="pa_tabulated",  #'pa_tabulated', 'minsub', 'ysg_x_so3'
-        manuallabs=None,
+        manual_labels=None,
         **kwargs
     ):
         if kwargs is not None:
             self.__dict__.update(kwargs)
 
-        self.global_ccs = css
-        self.global_ccs[1] = {"0": {tuple([]): {"0": 1.0}}}
-        self.E0 = reference_ens
-        self.ranks = ranks
-        self.elements = elements
-        self.betas = None
-        self.nus = None
-        self.deltaSplineBins = 0.001
-        self.global_ndensity = 1
-        self.global_rhocut = 100000
-        self.global_drhocut = 250
+        # ACE_DOCS_MISSING: Explain what all these variables do, at least
+        # briefly, and give them more meaningful names.
+        self.__global_ccs = css
+        self.__global_ccs[1] = {"0": {tuple([]): {"0": 1.0}}}
+        self.__E0 = reference_ensemble
+        self.__ranks = ranks
+        self.__elements = elements
+        self.__betas = None
+        self.__nus = None
+        self.__deltaSplineBins = 0.001
+        self.__global_ndensity = 1
+        self.__global_rhocut = 100000
+        self.__global_drhocut = 250
 
-        # assert the same nmax,lmax,nradbase (e.g. same basis) for each bond type
-        self.radbasetype = "ChebExpCos"
-        self.global_nmax = nmax
-        self.global_lmax = lmax
-        self.b_basis = b_basis
+        # assert the same nmax,lmax,nradbase (e.g. same basis) for each bond
+        # type
+        self.__radbasetype = "ChebExpCos"
+        self.__global_nmax = nmax
+        self.__global_lmax = lmax
         assert len(nmax) == len(lmax), "nmax and lmax arrays must be same size"
 
-        self.global_nradbase = nradbase
+        self.__global_nradbase = nradbase
 
         # These can be global or per bond type, global_mode controls which
         # of these settings is used.
-        self.rcut = rcut
-        self.lmbda = lmbda
-        self.rcutinner = rcutinner
-        self.drcutinner = drcutinner
-        self.lmin = lmin
-        self.global_mode = False
+        self.__rcut = rcut
+        self.__lmbda = lmbda
+        self.__rcutinner = rcutinner
+        self.__drcutinner = drcutinner
+        self.__lmin = lmin
+        self.__global_mode = False
 
-        if not isinstance(self.rcut, dict) and not isinstance(self.rcut, list):
-            self.global_mode = True
+        if not isinstance(self.__rcut, dict) and not isinstance(
+            self.__rcut, list
+        ):
+            self.__global_mode = True
 
-        self.manuallabs = manuallabs
-        self.set_embeddings()
-        self.set_bonds()
-        self.set_bond_base()
+        self.__manual_labels = manual_labels
+        self.__bondlsts = None
+        self.__embeddings = None
+        self.__bonds = None
+        self.__set_embeddings()
+        self.__set_bonds()
+        self.__set_bond_base()
 
         lmax_dict = {
-            rank: lv for rank, lv in zip(self.ranks, self.global_lmax)
+            rank: lv for rank, lv in zip(self.__ranks, self.__global_lmax)
         }
         try:
-            lmin_dict = {rank: lv for rank, lv in zip(self.ranks, self.lmin)}
+            lmin_dict = {
+                rank: lv for rank, lv in zip(self.__ranks, self.__lmin)
+            }
         except AttributeError:
             lmin_dict = {
                 rank: lv
                 for rank, lv in zip(
-                    self.ranks, self.global_lmin * len(self.ranks)
+                    self.__ranks, self.global_lmin * len(self.__ranks)
                 )
             }
         nradmax_dict = {
-            rank: nv for rank, nv in zip(self.ranks, self.global_nmax)
+            rank: nv for rank, nv in zip(self.__ranks, self.__global_nmax)
         }
-        mumax_dict = {rank: len(self.elements) for rank in self.ranks}
+        mumax_dict = {rank: len(self.__elements) for rank in self.__ranks}
 
-        if self.manuallabs is not None:
-            with open(self.manuallabs, "r") as readjson:
+        if self.__manual_labels is not None:
+            with open(self.__manual_labels, "r") as readjson:
                 labdata = json.load(readjson)
             nulst_1 = [list(ik) for ik in list(labdata.values())]
+
         # If I am not mistaken, then this option is currently incomplete.
         # I have commented it out, while also for now removing the option
         # that relied on FitSNAP, because we do not want to ship MALA with
@@ -96,7 +167,7 @@ class ACEPotential:
         #     nulst_1 = []
         else:
             nulst_1 = []
-            for rank in self.ranks:
+            for rank in self.__ranks:
                 PA_lammps = ace_coupling_utils.pa_labels_raw(
                     rank,
                     nradmax_dict[rank],
@@ -124,45 +195,62 @@ class ACEPotential:
         nus.sort(key=lambda x: mu0s[nus_unsort.index(x)], reverse=False)
         nus.sort(key=lambda x: len(x), reverse=False)
         nus.sort(key=lambda x: mu0s[nus_unsort.index(x)], reverse=False)
-        self.nus = nus
+        self.__nus = nus
         self.set_funcs(nus)
-        self.nus_per_rank = None
-        self.funcs = None
-        self.permunu = None
+        self.__nus_per_rank = None
+        self.__funcs = None
+        self.__permunu = None
 
-    def set_embeddings(
-        self, npoti="FinnisSinclair", FSparams=[1.0, 1.0]
-    ):  # default for linear models in lammps PACE
+    def __set_embeddings(self, npoti="FinnisSinclair", FSparams=[1.0, 1.0]):
+        """
+        Set embeddings.
+
+        ACE_DOCS_MISSING
+
+        Parameters
+        ----------
+        npoti : str
+            ACE_DOCS_MISSING
+
+        FSparams : list
+            ACE_DOCS_MISSING
+        """
         # embeddings =dict()#OrderedDict() #{ind:None for ind in range(len(self.elements))}
-        embeddings = {ind: None for ind in range(len(self.elements))}
-        for elemind in range(len(self.elements)):
+        embeddings = {ind: None for ind in range(len(self.__elements))}
+        for elemind in range(len(self.__elements)):
             embeddings[elemind] = {
-                "ndensity": self.global_ndensity,
+                "ndensity": self.__global_ndensity,
                 "FS_parameters": FSparams,
                 "npoti": npoti,
-                "rho_core_cutoff": self.global_rhocut,
-                "drho_core_cutoff": self.global_drhocut,
+                "rho_core_cutoff": self.__global_rhocut,
+                "drho_core_cutoff": self.__global_drhocut,
             }
-        self.embeddings = embeddings
+        self.__embeddings = embeddings
 
-    def set_bonds(self):
-        bondinds = range(len(self.elements))
+    def __set_bonds(self):
+        """Define a list of bonds, as given by element list."""
+        bondinds = range(len(self.__elements))
         bond_lsts = [list(b) for b in itertools.product(bondinds, bondinds)]
-        self.bondlsts = bond_lsts
+        self.__bondlsts = bond_lsts
 
-    def set_bond_base(self):
-        bondstrs = ["[%d, %d]" % (b[0], b[1]) for b in self.bondlsts]
+    def __set_bond_base(self):
+        """
+        Set bond base ACE_DOCS_MISSING - what does that mean?
+
+        ACE_DOCS_MISSING - what does this function do?
+        """
+        bondstrs = ["[%d, %d]" % (b[0], b[1]) for b in self.__bondlsts]
         bonds = {bondstr: None for bondstr in bondstrs}
 
         # radial basis function expansion coefficients
         # saved in n,l,k shape
         # defaults to orthogonal delta function [g(n,k)] basis of drautz 2019
         try:
-            nradmax = max(self.global_nmax[:])
+            nradmax = max(self.__global_nmax[:])
         except ValueError:
-            nradmax = max(self.global_nmax)
-        lmax = max(self.global_lmax)
-        nradbase = self.global_nradbase
+            nradmax = max(self.__global_nmax)
+        lmax = max(self.__global_lmax)
+        nradbase = self.__global_nradbase
         crad = np.zeros((nradmax, lmax + 1, nradbase), dtype=int)
         for n in range(nradmax):
             for l in range(lmax + 1):
@@ -176,75 +264,86 @@ class ACEPotential:
                 for k in range(1, nradbase + 1):
                     cnew[k - 1][n - 1][l] = crad[n - 1][l][k - 1]
 
-        for bondind, bondlst in enumerate(self.bondlsts):
+        for bondind, bondlst in enumerate(self.__bondlsts):
             bstr = "[%d, %d]" % (bondlst[0], bondlst[1])
-            if self.global_mode:
+            if self.__global_mode:
                 bonds[bstr] = {
                     "nradmax": nradmax,
-                    "lmax": max(self.global_lmax),
-                    "nradbasemax": self.global_nradbase,
-                    "radbasename": self.radbasetype,
+                    "lmax": max(self.__global_lmax),
+                    "nradbasemax": self.__global_nradbase,
+                    "radbasename": self.__radbasetype,
                     "radparameters": [self.global_lmbda],
                     "radcoefficients": crad.tolist(),
                     "prehc": 0,
-                    "lambdahc": self.lmbda,
-                    "rcut": self.rcut,
+                    "lambdahc": self.__lmbda,
+                    "rcut": self.__rcut,
                     "dcut": 0.01,
-                    "rcut_in": self.rcutinner,
-                    "dcut_in": self.drcutinner,
+                    "rcut_in": self.__rcutinner,
+                    "dcut_in": self.__drcutinner,
                     "inner_cutoff_type": "distance",
                 }
             else:
-                if isinstance(self.rcut, dict):
+                if isinstance(self.__rcut, dict):
                     bonds[bstr] = {
                         "nradmax": nradmax,
-                        "lmax": max(self.global_lmax),
-                        "nradbasemax": self.global_nradbase,
-                        "radbasename": self.radbasetype,
-                        "radparameters": [self.lmbda[bstr]],
+                        "lmax": max(self.__global_lmax),
+                        "nradbasemax": self.__global_nradbase,
+                        "radbasename": self.__radbasetype,
+                        "radparameters": [self.__lmbda[bstr]],
                         "radcoefficients": crad.tolist(),
                         "prehc": 0,
-                        "lambdahc": self.lmbda[bstr],
-                        "rcut": self.rcut[bstr],
+                        "lambdahc": self.__lmbda[bstr],
+                        "rcut": self.__rcut[bstr],
                         "dcut": 0.01,
-                        "rcut_in": self.rcutinner[bstr],
-                        "dcut_in": self.drcutinner[bstr],
+                        "rcut_in": self.__rcutinner[bstr],
+                        "dcut_in": self.__drcutinner[bstr],
                         "inner_cutoff_type": "distance",
                     }
-                elif isinstance(self.rcut, list):
+                elif isinstance(self.__rcut, list):
                     bonds[bstr] = {
                         "nradmax": nradmax,
-                        "lmax": max(self.global_lmax),
-                        "nradbasemax": self.global_nradbase,
-                        "radbasename": self.radbasetype,
-                        "radparameters": [self.lmbda[bondind]],
+                        "lmax": max(self.__global_lmax),
+                        "nradbasemax": self.__global_nradbase,
+                        "radbasename": self.__radbasetype,
+                        "radparameters": [self.__lmbda[bondind]],
                         "radcoefficients": crad.tolist(),
                         "prehc": 0,
-                        "lambdahc": self.lmbda[bondind],
-                        "rcut": self.rcut[bondind],
+                        "lambdahc": self.__lmbda[bondind],
+                        "rcut": self.__rcut[bondind],
                         "dcut": 0.01,
-                        "rcut_in": self.rcutinner[bondind],
-                        "dcut_in": self.drcutinner[bondind],
+                        "rcut_in": self.__rcutinner[bondind],
+                        "dcut_in": self.__drcutinner[bondind],
                         "inner_cutoff_type": "distance",
                     }
 
-        self.bonds = bonds
+        self.__bonds = bonds
 
-    def set_funcs(self, nulst=None, muflg=True, print_0s=True):
+    def set_funcs(self, nulst=None, print_0s=True):
+        """
+        Set functions. ACE_DOCS_MISSING - what does this function do?
 
+
+        Parameters
+        ----------
+        nulst : list
+            List of nus ACE_DOCS_MISSING - what are those?
+
+        print_0s : bool
+            ACE_DOCS_MISSING - what does this do?
+        """
         if nulst is None:
-            if self.nus is not None:
-                nulst = self.nus.copy()
+            if self.__nus is not None:
+                nulst = self.__nus.copy()
             else:
                 raise AttributeError("No list of descriptors found/specified")
         nus_per_rank = {}
-        permu0 = {b: [] for b in range(len(self.elements))}
-        permunu = {b: [] for b in range(len(self.elements))}
-        if self.betas != None:
-            betas = self.betas
+        permu0 = {b: [] for b in range(len(self.__elements))}
+        permunu = {b: [] for b in range(len(self.__elements))}
+        if self.__betas != None:
+            betas = self.__betas
         else:
             # betas = {ind:{nu:1.0 for nu in nulst} for ind in range(len(self.elements))}
-            betas = {ind: {} for ind in range(len(self.elements))}
+            betas = {ind: {} for ind in range(len(self.__elements))}
             for nu in nulst:
                 mu0, mu, n, l, L = ace_coupling_utils.get_mu_n_l(
                     nu, return_L=True
@@ -261,12 +360,12 @@ class ACEPotential:
             # print (nu,l,oldfmt,muflg)
             lstr = ",".join(b for b in llst) % tuple(l)
             if L != None:
-                ccs = self.global_ccs[rank][lstr][tuple(L)]
+                ccs = self.__global_ccs[rank][lstr][tuple(L)]
             elif L == None:
                 try:
-                    ccs = self.global_ccs[rank][lstr][()]
+                    ccs = self.__global_ccs[rank][lstr][()]
                 except KeyError:
-                    ccs = self.global_ccs[rank][lstr]
+                    ccs = self.__global_ccs[rank][lstr]
             ms = list(ccs.keys())
             mslsts = [[int(k) for k in m.split(",")] for m in ms]
             msflat = [item for sublist in mslsts for item in sublist]
@@ -276,7 +375,7 @@ class ACEPotential:
                     {
                         "mu0": mu0,
                         "rank": rank,
-                        "ndensity": self.global_ndensity,
+                        "ndensity": self.__global_ndensity,
                         "num_ms_combs": len(ms),
                         "mus": mu,
                         "ns": n,
@@ -288,55 +387,84 @@ class ACEPotential:
                 permunu[mu0].append(nu)
             elif betas[mu0][nu] == 0.0 and not print_0s:
                 print("Not printing descriptor: %s, coefficient is 0" % nu)
-        self.nus_per_rank = nus_per_rank
+        self.__nus_per_rank = nus_per_rank
 
         # for b in range(len(self.elements)):
         #   for i in permunu[b]:
         #       print (b,i)
         # for b in range(len(self.elements)):
         #   print (b,len(permu0[b]))
-        self.funcs = permu0
-        self.permunu = permunu
+        self.__funcs = permu0
+        self.__permunu = permunu
 
     def write_pot(self, name):
-        class NpEncoder(json.JSONEncoder):
+        """
+        Write coupling coefficients to file
+
+        Parameters
+        ----------
+        name : str
+            Name (without file ending) of the file to write to.
+
+        Returns
+        -------
+        name : str
+            Filename of the written file (with file ending)
+        """
+
+        class _NPEncoder(json.JSONEncoder):
+            """Helper class for encoding numpy arrays."""
+
             def default(self, obj):
+                """
+                Provdide conversion for numpy default types.
+
+                Parameters
+                ----------
+                obj : any
+                    Object to convert.
+
+                Returns
+                -------
+                converted_obj : any
+                    Converted object.
+                """
                 if isinstance(obj, np.integer):
                     return int(obj)
                 if isinstance(obj, np.floating):
                     return float(obj)
                 if isinstance(obj, np.ndarray):
                     return obj.tolist()
-                return super(NpEncoder, self).default(obj)
+                return super(_NPEncoder, self).default(obj)
 
         with open("%s.yace" % name, "w") as writeout:
-            e0lst = ["%f"] * len(self.elements)
-            e0str = ", ".join(b for b in e0lst) % tuple(self.E0)
-            elemlst = ["%s"] * len(self.elements)
-            elemstr = ", ".join(b for b in elemlst) % tuple(self.elements)
+            e0lst = ["%f"] * len(self.__elements)
+            e0str = ", ".join(b for b in e0lst) % tuple(self.__E0)
+            elemlst = ["%s"] * len(self.__elements)
+            elemstr = ", ".join(b for b in elemlst) % tuple(self.__elements)
             writeout.write("elements: [%s] \n" % elemstr)
             writeout.write("E0: [%s] \n" % e0str)
-            writeout.write("deltaSplineBins: %f \n" % self.deltaSplineBins)
+            writeout.write("deltaSplineBins: %f \n" % self.__deltaSplineBins)
             writeout.write("embeddings:\n")
-            for mu0, embed in self.embeddings.items():
+            for mu0, embed in self.__embeddings.items():
                 writeout.write("  %d: " % mu0)
                 ystr = json.dumps(embed) + "\n"
                 ystr = ystr.replace('"', "")
                 writeout.write(ystr)
             writeout.write("bonds:\n")
-            bondstrs = ["[%d, %d]" % (b[0], b[1]) for b in self.bondlsts]
+            bondstrs = ["[%d, %d]" % (b[0], b[1]) for b in self.__bondlsts]
             for bondstr in bondstrs:
                 writeout.write("  %s: " % bondstr)
-                bstr = json.dumps(self.bonds[bondstr]) + "\n"
+                bstr = json.dumps(self.__bonds[bondstr]) + "\n"
                 bstr = bstr.replace('"', "")
                 writeout.write(bstr)
             writeout.write("functions:\n")
-            for mu0 in range(len(self.elements)):
+            for mu0 in range(len(self.__elements)):
                 writeout.write("  %d:\n" % (mu0))
-                mufuncs = self.funcs[mu0]
+                mufuncs = self.__funcs[mu0]
                 for mufunc in mufuncs:
                     mufuncstr = (
-                        "    - " + json.dumps(mufunc, cls=NpEncoder) + "\n"
+                        "    - " + json.dumps(mufunc, cls=_NPEncoder) + "\n"
                     )
                     mufuncstr = mufuncstr.replace('"', "")
                     writeout.write(mufuncstr)

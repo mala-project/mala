@@ -8,6 +8,16 @@ from mala.descriptors.acelib.common_utils import (
 
 
 def leaf_filter(lperms):
+    """
+
+    Parameters
+    ----------
+    lperms
+
+    Returns
+    -------
+
+    """
     rank = len(lperms[0])
     part = local_sigma_c_partitions[rank][-1]
     filtered = []
@@ -36,6 +46,16 @@ def leaf_filter(lperms):
 
 
 def find_degenerate_indices(lst):
+    """
+
+    Parameters
+    ----------
+    lst
+
+    Returns
+    -------
+
+    """
     degenerate_indices = {}
     for i in range(len(lst)):
         if lst.count(lst[i]) >= 1:
@@ -46,6 +66,16 @@ def find_degenerate_indices(lst):
 
 
 def check_sequential(lst):
+    """
+
+    Parameters
+    ----------
+    lst
+
+    Returns
+    -------
+
+    """
     flags = []
     if len(lst) > 1:
         for i in range(len(lst) - 1):
@@ -56,6 +86,16 @@ def check_sequential(lst):
 
 
 def get_degen_orb(l):
+    """
+
+    Parameters
+    ----------
+    l
+
+    Returns
+    -------
+
+    """
     degen_ind_dict = find_degenerate_indices(l)
     partition = []
     inds_per_orbit = {}
@@ -73,6 +113,16 @@ def get_degen_orb(l):
 
 
 def enforce_sorted_orbit(partition_inds):
+    """
+
+    Parameters
+    ----------
+    partition_inds
+
+    Returns
+    -------
+
+    """
     rank = len(flatten(partition_inds))
     couple_ref = group_vec_by_orbits(
         list(range(rank)), local_sigma_c_partitions[rank][-1]
