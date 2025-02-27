@@ -17,7 +17,7 @@ from mala.common.parallelizer import printout
 from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
 from mala.descriptors.acelib.ace_potential import ACEPotential
-import mala.descriptors.acelib.ace_coupling_utils as ace_coupling_utils
+import mala.descriptors.acelib.coupling_utils as ace_coupling_utils
 import mala.descriptors.acelib.wigner_coupling as wigner_coupling
 import mala.descriptors.acelib.clebsch_gordan_coupling as cg_coupling
 

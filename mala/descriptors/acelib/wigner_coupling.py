@@ -1,6 +1,6 @@
 """Wigner coupling functions."""
 
-from mala.descriptors.acelib import ace_coupling_utils as ace_coupling_utils
+from mala.descriptors.acelib import coupling_utils as ace_coupling_utils
 
 
 def get_coupling(Wigner_3j, ldict, L_R=0, **kwargs):

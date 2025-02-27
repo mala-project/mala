@@ -3,7 +3,7 @@ import json
 
 import numpy as np
 
-import mala.descriptors.acelib.ace_coupling_utils as ace_coupling_utils
+import mala.descriptors.acelib.coupling_utils as ace_coupling_utils
 
 
 class ACEPotential:
