@@ -2,7 +2,7 @@ from mala.descriptors.acelib.young import (
     flatten,
 )
 from mala.descriptors.acelib.common_utils import (
-    group_vec_by_orbits,
+    group_vector_by_orbits,
     local_sigma_c_partitions,
 )
 
@@ -23,7 +23,7 @@ def leaf_filter(lperms):
     filtered = []
     if rank <= 5:
         for lperm in lperms:
-            grouped = group_vec_by_orbits(lperm, part)
+            grouped = group_vector_by_orbits(lperm, part)
             subgroup = [g for g in grouped if len(g) > 1]
             if tuple(sorted(subgroup)) == tuple(subgroup):
                 filtered.append(lperm)
@@ -31,7 +31,7 @@ def leaf_filter(lperms):
                 pass
     elif rank in [6, 7]:
         for lperm in lperms:
-            grouped = group_vec_by_orbits(lperm, part)
+            grouped = group_vector_by_orbits(lperm, part)
             subgroup = [g for g in grouped[:2]]
             if tuple(sorted(subgroup)) == tuple(subgroup):
                 filtered.append(lperm)
@@ -124,7 +124,7 @@ def enforce_sorted_orbit(partition_inds):
 
     """
     rank = len(flatten(partition_inds))
-    couple_ref = group_vec_by_orbits(
+    couple_ref = group_vector_by_orbits(
         list(range(rank)), local_sigma_c_partitions[rank][-1]
     )
     new_partition = []

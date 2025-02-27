@@ -13,7 +13,7 @@ from mala.descriptors.acelib.young import (
     flatten,
 )
 from mala.descriptors.acelib.common_utils import (
-    group_vec_by_node,
+    group_vector_by_node,
     local_sigma_c_partitions,
     filled_perm,
 )
@@ -1177,7 +1177,7 @@ def simple_parity_filt(l, inters, even=True):
 
     """
     nodes, remainder = build_quick_tree(l)
-    base_ls = group_vec_by_node(l, nodes, remainder=remainder)
+    base_ls = group_vector_by_node(l, nodes, remainder=remainder)
     base_ls = [list(k) for k in base_ls]
     if even:
         assert (

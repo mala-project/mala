@@ -3,8 +3,8 @@ import numpy as np
 
 from mala.descriptors.acelib.common_utils import (
     flatten,
-    group_vec_by_node,
-    group_vec_by_orbits,
+    group_vector_by_node,
+    group_vector_by_orbits,
 )
 from mala.descriptors.acelib.tree_sorting import build_quick_tree
 import itertools
@@ -95,7 +95,7 @@ class YoungSubgroup:
         if self.partition is None:
             self.partition = partition
         mapped_perm = tuple(place_holders)
-        fill = group_vec_by_orbits(mapped_perm, partition)
+        fill = group_vector_by_orbits(mapped_perm, partition)
         row_sort = self.is_row_sort(fill)
         col_sort = self.is_column_sort(fill)
         if semistandard:
@@ -156,7 +156,7 @@ class YoungSubgroup:
             tmp = []
             nodes, remainder = build_quick_tree(inds)
             for loopperm in loopperms:
-                grouped = group_vec_by_node(loopperm, nodes, remainder)
+                grouped = group_vector_by_node(loopperm, nodes, remainder)
                 if remainder != None:
                     srted = sorted(grouped[:-1])
                     srted.append(grouped[-1])

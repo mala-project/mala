@@ -1,93 +1,125 @@
+"""Useful helper functions for several files in the ACE library."""
+
 import numpy as np
 from sympy.combinatorics import Permutation
 
 
-def filled_perm(tups, rank):
+def filled_perm(tuples, rank):
     """
+    Create a filled permutation.
+
+    ACE_DOCS_MISSING - What is this used for?
 
     Parameters
     ----------
-    tups
-    rank
+    tuples : list
+        List of tuples.
+
+    rank : int
+        Rank of the permutation.
 
     Returns
     -------
-
+    Permutation : sympy.combinatorics.Permutation
+        Permutation object.
     """
     allinds = list(range(rank))
     try:
-        remainders = [i for i in allinds if i not in flatten(tups)]
-        alltups = tups + tuple([tuple([k]) for k in remainders])
+        remainders = [i for i in allinds if i not in flatten(tuples)]
+        alltups = tuples + tuple([tuple([k]) for k in remainders])
     except TypeError:
-        remainders = [i for i in allinds if i not in flatten(flatten(tups))]
-        alltups = tups + tuple([tuple([k]) for k in remainders])
+        remainders = [i for i in allinds if i not in flatten(flatten(tuples))]
+        alltups = tuples + tuple([tuple([k]) for k in remainders])
     return Permutation(alltups)
 
 
-def flatten(lstoflsts):
+def flatten(list_of_lists):
     """
+    Flatten a list of lists.
+
+    Returns input, if input is not a list of lists.
 
     Parameters
     ----------
-    lstoflsts
+    list_of_lists : list
+        List of lists.
 
     Returns
     -------
-
+    list : list
+        Flattened list.
     """
     try:
-        flat = [i for sublist in lstoflsts for i in sublist]
+        flat = [i for sublist in list_of_lists for i in sublist]
         return flat
     except TypeError:
-        return lstoflsts
+        return list_of_lists
 
 
-def group_vec_by_node(vec, nodes, remainder=None):
+def group_vector_by_node(vector, nodes, remainder=None):
     """
+    Group a vector according to the mapping given in nodes.
+
+    If there is a remainder, it is added to the end of the list.
 
     Parameters
     ----------
-    vec
-    nodes
-    remainder
+    vector : list
+        Vector to be grouped.
+
+    nodes : list
+        List of nodes.
+
+    remainder : int
+        Remainder to be added to the end of the list.
 
     Returns
     -------
-
+    vector_by_tuples : list
+        Grouped vector.
     """
-    # vec_by_tups = [tuple([vec[node[0]],vec[node[1]]]) for node in nodes]
-    vec_by_tups = []
+    # vector_by_tuples = [tuple([vec[node[0]],vec[node[1]]]) for node in nodes]
+    vector_by_tuples = []
     for node in nodes:
         orbit_list = []
         for inode in node:
-            orbit_list.append(vec[inode])
+            orbit_list.append(vector[inode])
         orbit_tup = tuple(orbit_list)
-        vec_by_tups.append(orbit_tup)
-    if remainder != None:
-        vec_by_tups = vec_by_tups + [tuple([vec[remainder]])]
-    return vec_by_tups
+        vector_by_tuples.append(orbit_tup)
+    if remainder is not None:
+        vector_by_tuples = vector_by_tuples + [tuple([vector[remainder]])]
+    return vector_by_tuples
 
 
-def group_vec_by_orbits(vec, part):
+def group_vector_by_orbits(vector, partition):
     """
+    Group vector by orbits.
+
+    The partition is a list of integers that sum to the length of the vector.
 
     Parameters
     ----------
-    vec
-    part
+    vector : list
+        Vector to be grouped.
+
+    partition : list
+        Partition to be grouped by.
 
     Returns
     -------
-
+    vector_by_orbits : list
+        Grouped vector.
     """
-    ind_range = np.sum(part)
-    assert len(vec) == ind_range, "vector must be able to fit in the partion"
+    ind_range = np.sum(partition)
+    assert (
+        len(vector) == ind_range
+    ), "vector must be able to fit in the partion"
     count = 0
     by_orbits = []
-    for orbit in part:
+    for orbit in partition:
         orbit_vec = []
         for i in range(orbit):
-            orbit_vec.append(vec[count])
+            orbit_vec.append(vector[count])
             count += 1
         by_orbits.append(tuple(orbit_vec))
     return tuple(by_orbits)
