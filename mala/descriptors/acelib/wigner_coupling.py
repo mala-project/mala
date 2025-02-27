@@ -1,5 +1,6 @@
 """Wigner 3j coupling functions."""
 
+import mala.descriptors.acelib.common_utils
 from mala.descriptors.acelib import coupling_utils as ace_coupling_utils
 
 
@@ -52,7 +53,7 @@ def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
         """
         # no nodes for rank 1
 
-        mstrs = ace_coupling_utils.get_ms(_l, _M_R)
+        mstrs = mala.descriptors.acelib.common_utils.get_ms(_l, _M_R)
         full_inter_tuples = [()]
         assert _l[0] == _L_R, "invalid l=%d for irrep L_R = %d" % (_l[0], _L_R)
 
@@ -103,10 +104,10 @@ def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
         """
         nodes, remainder = ace_coupling_utils.build_quick_tree(_l)
         node = nodes[0]
-        mstrs = ace_coupling_utils.get_ms(_l, _M_R)
+        mstrs = mala.descriptors.acelib.common_utils.get_ms(_l, _M_R)
         full_inter_tuples = [()]
 
-        assert ace_coupling_utils.check_triangle(
+        assert mala.descriptors.acelib.common_utils.check_triangle(
             _l[0], _l[1], _L_R
         ), "invalid l=(%d,%d) for irrep L_R = %d" % (_l[0], _l[1], _L_R)
 
@@ -155,10 +156,10 @@ def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
         decomposed : dict
             Wigner 3j couplings for rank 3.
         """
-        full_inter_tuples = ace_coupling_utils.tree_l_inters(
-            _l, L_R=_L_R, M_R=_M_R
+        full_inter_tuples = ace_coupling_utils.build_tree_for_l_intermediates(
+            _l, L_R=_L_R
         )
-        mstrs = ace_coupling_utils.get_ms(_l, _M_R)
+        mstrs = mala.descriptors.acelib.common_utils.get_ms(_l, _M_R)
         decomposed = {
             full_inter_tup: {mstr: 0.0 for mstr in mstrs}
             for full_inter_tup in full_inter_tuples
@@ -213,9 +214,9 @@ def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
             Wigner 3j couplings for rank 4.
         """
         nodes, remainder = ace_coupling_utils.build_quick_tree(_l)
-        mstrs = ace_coupling_utils.get_ms(_l, _M_R)
-        full_inter_tuples = ace_coupling_utils.tree_l_inters(
-            _l, L_R=_L_R, M_R=_M_R
+        mstrs = mala.descriptors.acelib.common_utils.get_ms(_l, _M_R)
+        full_inter_tuples = ace_coupling_utils.build_tree_for_l_intermediates(
+            _l, L_R=_L_R
         )
         decomposed = {
             full_inter_tup: {mstr: 0.0 for mstr in mstrs}

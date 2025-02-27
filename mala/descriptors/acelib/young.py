@@ -3,7 +3,7 @@ import numpy as np
 
 from mala.descriptors.acelib.common_utils import (
     flatten,
-    group_vector_by_node,
+    group_vector_by_nodes,
     group_vector_by_orbits,
 )
 from mala.descriptors.acelib.tree_sorting import build_quick_tree
@@ -156,7 +156,7 @@ class YoungSubgroup:
             tmp = []
             nodes, remainder = build_quick_tree(inds)
             for loopperm in loopperms:
-                grouped = group_vector_by_node(loopperm, nodes, remainder)
+                grouped = group_vector_by_nodes(loopperm, nodes, remainder)
                 if remainder != None:
                     srted = sorted(grouped[:-1])
                     srted.append(grouped[-1])

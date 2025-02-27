@@ -1,4 +1,10 @@
-"""Utility functions for calculation of ACE coupling coefficients."""
+"""
+Utility functions for calculation of ACE coupling coefficients.
+
+Some of the functions here are specifically related to the PA basis set,
+and formerly lived in the pa_gen.py or pa_lib.py files, before these
+were unified.
+"""
 
 from collections import Counter
 import itertools
@@ -10,12 +16,13 @@ from sympy.combinatorics import Permutation
 
 from mala.descriptors.acelib.young import (
     YoungSubgroup,
-    flatten,
 )
 from mala.descriptors.acelib.common_utils import (
-    group_vector_by_node,
+    group_vector_by_nodes,
     local_sigma_c_partitions,
     filled_perm,
+    group_vector_by_nodes_pairwise,
+    check_triangle,
 )
 from mala.descriptors.acelib.symmetric_group_manipulations import (
     leaf_filter,
@@ -28,88 +35,31 @@ from mala.descriptors.acelib.tree_sorting import (
 )
 
 
-def get_ms(l, M_R=0):
+def build_tree_for_l_intermediates(l, L_R=0):
     """
+    Build the "intermediate" angular momenta.
+
+    This assumes a pairwise coupling structure.
+    ACE_DOCS_MISSING : What is meant by "intermediate" angular momenta?
 
     Parameters
     ----------
-    l
-    M_R
+    l : list
+        List of angular momenta.
+
+    L_R : int
+        ACE_DOCS_MISSING.
 
     Returns
     -------
-
-    """
-    # retrieves the set of m_i combinations obeying \sum_i m_i = M_R for an arbitrary l vector
-    m_ranges = {ind: range(-l[ind], l[ind] + 1) for ind in range(len(l))}
-    m_range_arrays = [list(m_ranges[ind]) for ind in range(len(l))]
-    m_combos = list(itertools.product(*m_range_arrays))
-    first_m_filter = [i for i in m_combos if np.sum(i) == M_R]
-    m_list_replace = ["%d"] * len(l)
-    m_str_variable = ",".join(b for b in m_list_replace)
-    m_strs = [m_str_variable % fmf for fmf in first_m_filter]
-    return m_strs
-
-
-def check_triangle(l1, l2, l3):
-    """
-
-    Parameters
-    ----------
-    l1
-    l2
-    l3
-
-    Returns
-    -------
-
-    """
-    # checks triangle condition between |l1+l2| and l3
-    lower_bound = np.abs(l1 - l2)
-    upper_bound = np.abs(l1 + l2)
-    condition = lower_bound <= l3 <= upper_bound
-    return condition
-
-
-# groups a vector of l quantum numbers pairwise
-def vec_nodes(vec, nodes, remainder=None):
-    """
-
-    Parameters
-    ----------
-    vec
-    nodes
-    remainder
-
-    Returns
-    -------
-
-    """
-    vec_by_tups = [tuple([vec[node[0]], vec[node[1]]]) for node in nodes]
-    if remainder != None:
-        vec_by_tups = vec_by_tups
-    return vec_by_tups
-
-
-# assuming a pairwise coupling structure, build the "intermediate" angular momenta
-def tree_l_inters(l, L_R=0, M_R=0):
-    """
-
-    Parameters
-    ----------
-    l
-    L_R
-    M_R
-
-    Returns
-    -------
-
+    full_inter_tuples : list
+        List of "intermediate" angular momenta.
     """
     nodes, remainder = build_quick_tree(l)
     rank = len(l)
     if rank >= 3:
         base_node_inters = {
-            node: get_intermediates_wrapper(l[node[0]], l[node[1]])
+            node: compute_intermediates(l[node[0]], l[node[1]])
             for node in nodes
         }
 
@@ -144,7 +94,7 @@ def tree_l_inters(l, L_R=0, M_R=0):
             )
         ]
         next_node_inters = [
-            get_intermediates_wrapper(L1L2[0], L1L2[1]) for L1L2 in L1L2_prod
+            compute_intermediates(L1L2[0], L1L2[1]) for L1L2 in L1L2_prod
         ]
         for L1L2, L3l in zip(L1L2_prod, next_node_inters):
             L1L2L3s = list(itertools.product([L1L2], L3l))
@@ -164,7 +114,7 @@ def tree_l_inters(l, L_R=0, M_R=0):
             )
         ]
         next_node_inters = [
-            get_intermediates_wrapper(L1L2L3[0], L1L2L3[1])
+            compute_intermediates(L1L2L3[0], L1L2L3[1])
             for L1L2L3 in L1L2L3_prod
         ]
         for L1L2L3, L4l in zip(L1L2L3_prod, next_node_inters):
@@ -185,11 +135,11 @@ def tree_l_inters(l, L_R=0, M_R=0):
             )
         ]
         next_node_inters_l = [
-            get_intermediates_wrapper(L1L2L3[0], L1L2L3[1])
+            compute_intermediates(L1L2L3[0], L1L2L3[1])
             for L1L2L3 in L1L2L3_prod
         ]  # left hand branch
         next_node_inters_r = [
-            get_intermediates_wrapper(L1L2L3[2], l[remainder])
+            compute_intermediates(L1L2L3[2], l[remainder])
             for L1L2L3 in L1L2L3_prod
         ]  # right hand branch
         next_node_inters = [
@@ -216,11 +166,11 @@ def tree_l_inters(l, L_R=0, M_R=0):
             )
         ]
         next_node_inters_l = [
-            get_intermediates_wrapper(L1L2L3L4[0], L1L2L3L4[1])
+            compute_intermediates(L1L2L3L4[0], L1L2L3L4[1])
             for L1L2L3L4 in L1L2L3L4_prod
         ]  # left hand branch
         next_node_inters_r = [
-            get_intermediates_wrapper(L1L2L3L4[2], L1L2L3L4[3])
+            compute_intermediates(L1L2L3L4[2], L1L2L3L4[3])
             for L1L2L3L4 in L1L2L3L4_prod
         ]  # right hand branch
         # next_node_inters = [tuple(L5+L6) for L5,L6 in zip(next_node_inters_l,
@@ -250,18 +200,32 @@ def tree_l_inters(l, L_R=0, M_R=0):
 
 def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
     """
+    Generate the angular momenta for a given rank.
+
+    ACE_DOCS_MISSING I am not sure what this does exactly, the description
+    above is just a guess.
 
     Parameters
     ----------
-    lrng
-    rank
-    L_R
-    M_R
-    use_permutations
+    lrng : ???
+        ACE_DOCS_MISSING
+
+    rank : int
+        ACE_DOCS_MISSING
+
+    L_R : int
+        ACE_DOCS_MISSING
+
+    M_R : int
+        ACE_DOCS_MISSING
+
+    use_permutations : bool
+        Controls if permutations are used during the generation.
 
     Returns
     -------
-
+    ls : list
+        List of angular momenta.
     """
     if L_R % 2 == 0:
         # symmetric w.r.t. inversion
@@ -298,8 +262,10 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
         elif rank == 3:
             nodes, remainder = build_quick_tree(list(all_ls[0]))
             for ltup in all_ls:
-                inters = tree_l_inters(list(ltup), L_R=L_R)
-                by_node = vec_nodes(ltup, nodes, remainder)
+                inters = build_tree_for_l_intermediates(list(ltup), L_R=L_R)
+                by_node = group_vector_by_nodes_pairwise(
+                    ltup, nodes, remainder
+                )
                 for inters_i in inters:
                     li_flags = [
                         check_triangle(node[0], node[1], inter)
@@ -320,8 +286,10 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
         elif rank == 4:
             nodes, remainder = build_quick_tree(list(all_ls[0]))
             for ltup in all_ls:
-                inters = tree_l_inters(list(ltup), L_R=L_R)
-                by_node = vec_nodes(ltup, nodes, remainder)
+                inters = build_tree_for_l_intermediates(list(ltup), L_R=L_R)
+                by_node = group_vector_by_nodes_pairwise(
+                    ltup, nodes, remainder
+                )
                 for inters_i in inters:
                     li_flags = [
                         check_triangle(node[0], node[1], inter)
@@ -343,8 +311,10 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
         elif rank == 5:
             nodes, remainder = build_quick_tree(list(all_ls[0]))
             for ltup in all_ls:
-                inters = tree_l_inters(list(ltup), L_R=L_R)
-                by_node = vec_nodes(ltup, nodes, remainder)
+                inters = build_tree_for_l_intermediates(list(ltup), L_R=L_R)
+                by_node = group_vector_by_nodes_pairwise(
+                    ltup, nodes, remainder
+                )
                 for inters_i in inters:
                     li_flags = [
                         check_triangle(node[0], node[1], inter)
@@ -367,8 +337,10 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
         elif rank == 6:
             nodes, remainder = build_quick_tree(list(all_ls[0]))
             for ltup in all_ls:
-                inters = tree_l_inters(list(ltup), L_R=L_R)
-                by_node = vec_nodes(ltup, nodes, remainder)
+                inters = build_tree_for_l_intermediates(list(ltup), L_R=L_R)
+                by_node = group_vector_by_nodes_pairwise(
+                    ltup, nodes, remainder
+                )
                 for inters_i in inters:
                     li_flags = [
                         check_triangle(node[0], node[1], inter)
@@ -391,8 +363,10 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
         elif rank == 7:
             nodes, remainder = build_quick_tree(list(all_ls[0]))
             for ltup in all_ls:
-                inters = tree_l_inters(list(ltup), L_R=L_R)
-                by_node = vec_nodes(ltup, nodes, remainder)
+                inters = build_tree_for_l_intermediates(list(ltup), L_R=L_R)
+                by_node = group_vector_by_nodes_pairwise(
+                    ltup, nodes, remainder
+                )
                 for inters_i in inters:
                     li_flags = [
                         check_triangle(node[0], node[1], inter)
@@ -418,8 +392,10 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
         elif rank == 8:
             nodes, remainder = build_quick_tree(list(all_ls[0]))
             for ltup in all_ls:
-                inters = tree_l_inters(list(ltup), L_R=L_R)
-                by_node = vec_nodes(ltup, nodes, remainder)
+                inters = build_tree_for_l_intermediates(list(ltup), L_R=L_R)
+                by_node = group_vector_by_nodes_pairwise(
+                    ltup, nodes, remainder
+                )
                 for inters_i in inters:
                     li_flags = [
                         check_triangle(node[0], node[1], inter)
@@ -443,17 +419,19 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
     return ls
 
 
-def get_intermediates(l):
+def compute_intermediates(l1, l2):
     """
 
     Parameters
     ----------
-    l
+    l1
+    l2
 
     Returns
     -------
 
     """
+    l = [l1, l2]
     try:
         l = l.split(",")
         l1 = int(l[0])
@@ -468,39 +446,44 @@ def get_intermediates(l):
     return ints
 
 
-# wrapper
-def get_intermediates_wrapper(l1, l2):
+def compute_pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
     """
+    Compute raw PA labels.
+
+    ACE_DOCS_MISSING - what does this do exactly?
+    I'll also not down all of the parameters as "to fill" even though I
+    think by now I know some of them, simply because this is one of
+    the central entrypoints to the acelib ecosystem so it makes sense
+    to be extra careful here.
 
     Parameters
     ----------
-    l1
-    l2
+    rank : int
+        ACE_DOCS_MISSING
+
+    nmax : any
+        ACE_DOCS_MISSING
+
+    lmax : any
+        ACE_DOCS_MISSING
+
+    mumax : any
+        ACE_DOCS_MISSING
+
+    lmin : any
+        ACE_DOCS_MISSING
+
+    L_R : any
+        ACE_DOCS_MISSING
+
+    M_R : any
+        ACE_DOCS_MISSING
+
 
     Returns
     -------
-
-    """
-    l = [l1, l2]
-    return get_intermediates(l)
-
-
-def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
-    """
-
-    Parameters
-    ----------
-    rank
-    nmax
-    lmax
-    mumax
-    lmin
-    L_R
-    M_R
-
-    Returns
-    -------
-
+    all_lammps_labels : list
+        PA labels.
     """
     if rank >= 4:
         all_max_l = 12
@@ -517,8 +500,8 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
             ),
         )
         if not os.path.isfile(label_file):
-            build_tabulated(
-                rank, all_max_mu, all_max_n, all_max_l, label_file, L_R, M_R
+            build_and_write_to_tabulated(
+                rank, all_max_n, all_max_l, label_file, L_R, M_R
             )
 
         with open(label_file, "r") as readjson:
@@ -575,7 +558,7 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
                 nvec = tuple(nvec)
                 lvec = tuple(lvec)
                 # nus = from_tabulated((0,0,0,0),(1,1,1,1),(4,4,4,4),allowed_mus = possible_mus, tabulated_all = data)
-                nus = from_tabulated(
+                nus = read_from_tabulated(
                     muvec,
                     nvec,
                     lvec,
@@ -595,14 +578,7 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
         # no symmetry reduction required for rank <= 3
         # use typical lexicographical ordering for such cases
         labels = generate_nl(
-            rank,
-            nmax,
-            lmax,
-            mumax=mumax,
-            lmin=lmin,
-            L_R=L_R,
-            M_R=M_R,
-            all_perms=False,
+            rank, nmax, lmax, mumax=mumax, lmin=lmin, L_R=L_R, all_perms=False
         )
         all_lammps_labs = labels
         # all_not_compat = []
@@ -610,32 +586,42 @@ def pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
     return all_lammps_labs
 
 
-def generate_nl(
-    rank, nmax, lmax, mumax=1, lmin=0, L_R=0, M_R=0, all_perms=False
-):
+def generate_nl(rank, nmax, lmax, mumax=1, lmin=0, L_R=0, all_perms=False):
     """
+    Generate NL combinations.
+
+    ACE_DOCS_MISSING - what does this do exactly?
 
     Parameters
     ----------
-    rank
-    nmax
-    lmax
-    mumax
-    lmin
-    L_R
-    M_R
-    all_perms
+    rank: int
+        Basis function rank to evaluate nl combinations for.
+
+    nmax : int
+        Maximum value of the n quantum numbers in the nl vectors.
+
+    lmax : int
+        Maximum value of the l quantum numbers in the nl vectors.
+
+    mumax : int
+        Maximum value of the chemical variable in the munl vectors
+        (default is none for single component system)
+
+    lmin : int
+        ACE_DOCS_MISSING
+
+    L_R : int
+        ACE_DOCS_MISSING
+
+    all_perms : bool
+        ACE_DOCS_MISSING
 
     Returns
     -------
-
+    munl : list
+        List of munl vectors in string format, i.e.
+        mu0_mu1,mu2,...muk,n1,n2,..n_k,l1,l2,..l_k_L1-L2...-LK
     """
-    # rank: int  - basis function rank to evaluate nl combinations for
-    # nmax: int  - maximum value of the n quantum numbers in the nl vectors
-    # lmax: int  - maximum value of the l quantum numbers in the nl vectors
-    # mumax: int  - maximum value of the chemical variable in the munl vectors (default is none for single component system)
-    # RETURN: list of munl vectors in string format mu0_mu1,mu2,...muk,n1,n2,..n_k,l1,l2,..l_k_L1-L2...-LK
-    # NOTE: All valid intermediates L are generated
 
     munl = []
 
@@ -648,7 +634,10 @@ def generate_nl(
     ls = generate_l_LR(lrng, rank, L_R)
 
     linters_per_l = {
-        l: tree_l_inters([int(b) for b in l.split(",")], L_R=0) for l in ls
+        l: build_tree_for_l_intermediates(
+            [int(b) for b in l.split(",")], L_R=0
+        )
+        for l in ls
     }
 
     munllst = ["%d"] * int(rank * 3)
@@ -681,14 +670,19 @@ def generate_nl(
 
 def get_mapped_subset(ns):
     """
+    Get a mapped subset of ns.
+
+    ACE_DOCS_MISSING  - what is ns in this context? And by what is it mapped.
 
     Parameters
     ----------
-    ns
+    ns : list
+        List of ns (a list of lists, ACE_DOCS_MISSING?)
 
     Returns
     -------
-
+    reduced_ns : list
+        ACE_DOCS_MISSING
     """
     mapped_n_per_n = {}
     n_per_mapped_n = {}
@@ -715,20 +709,36 @@ def get_mapped_subset(ns):
     return reduced_ns
 
 
-def build_tabulated(
-    rank, all_max_mu, all_max_n, all_max_l, label_file, L_R=0, M_R=0
+def build_and_write_to_tabulated(
+    rank, all_max_n, all_max_l, label_file, L_R=0, M_R=0
 ):
     """
+    Build a tabulated label file.
+
+
+    This only matters for rank >=4. The json files build in this function
+    are saved in the acelib directory and read in the process of
+    computing the labels/coupling coefficients.
 
     Parameters
     ----------
-    rank
-    all_max_mu
-    all_max_n
-    all_max_l
-    label_file
-    L_R
-    M_R
+    rank : int
+        ACE_DOCS_MISSING
+
+    all_max_n : int
+        ACE_DOCS_MISSING
+
+    all_max_l : int
+        ACE_DOCS_MISSING
+
+    label_file : int
+        ACE_DOCS_MISSING
+
+    L_R : int
+        ACE_DOCS_MISSING
+
+    M_R : int
+        ACE_DOCS_MISSING
     """
     lmax_strs = generate_l_LR(
         range(0, all_max_l + 1), rank, L_R=L_R, M_R=M_R, use_permutations=False
@@ -800,20 +810,31 @@ def build_tabulated(
         json.dump(dct, writejson, sort_keys=False, indent=2)
 
 
-def from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
+def read_from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
     """
+    Read from tabulated data saved to a json file (by build_tabulated)
 
     Parameters
     ----------
-    mu
-    n
-    l
-    allowed_mus
-    tabulated_all
+    mu : list
+        ACE_DOCS_MISSING.
+
+    n : list
+        ACE_DOCS_MISSING.
+
+    l : list
+        ACE_DOCS_MISSING
+
+    allowed_mus : list
+        ACE_DOCS_MISSING
+
+    tabulated_all : dict
+        ACE_DOCS_MISSING
 
     Returns
     -------
-
+    chem_labels : list
+        Labels read from json file.
     """
     rank = len(l)
     Lveclst = ["%d"] * (rank - 2)
@@ -1177,7 +1198,7 @@ def simple_parity_filt(l, inters, even=True):
 
     """
     nodes, remainder = build_quick_tree(l)
-    base_ls = group_vector_by_node(l, nodes, remainder=remainder)
+    base_ls = group_vector_by_nodes(l, nodes, remainder=remainder)
     base_ls = [list(k) for k in base_ls]
     if even:
         assert (
@@ -1319,7 +1340,7 @@ def tree_labels(nin, lin, L_R=0, M_R=0):
     # this could equivalently be done with a search over S_N
     for lp in ls:
         rank = len(lp)
-        original_span_SO3 = tree_l_inters(lp)  # RI basis size
+        original_span_SO3 = build_tree_for_l_intermediates(lp)  # RI basis size
         degen_orbit, orbit_inds = get_degen_orb(lp)  # PI basis size
         ysgi.subgroup_fill(
             nin, [degen_orbit], sigma_c_symmetric=False, semistandard=False
@@ -1344,7 +1365,7 @@ def tree_labels(nin, lin, L_R=0, M_R=0):
         l = list(l)
         subblock = []
         rank = len(l)
-        inters = tree_l_inters(list(l), L_R=L_R, M_R=M_R)
+        inters = build_tree_for_l_intermediates(list(l), L_R=L_R)
         nperms = nps_per_l[tuple(l)]
         muperms = [tuple([0] * rank)]
         for inter in inters:
@@ -1469,7 +1490,7 @@ def combine_blocks(blocks, lin, original_spans, L_R=0):
 
     for blockpair in list(block_map.keys()):
         l1i, l2i = blockpair
-        inters1 = tree_l_inters(l1i, L_R)
+        inters1 = build_tree_for_l_intermediates(l1i, L_R)
         is_sigma0 = tuple(l1i) == lps[0]
         l1i = list(l1i)
         l2i = list(l2i)
@@ -1480,7 +1501,7 @@ def combine_blocks(blocks, lin, original_spans, L_R=0):
             if np.sum([inter[0]] + l1i[:2]) % 2 == 0
             and np.sum([inter[1]] + l1i[2:4]) % 2 == 0
         ]
-        inters2 = tree_l_inters(l2i, L_R)
+        inters2 = build_tree_for_l_intermediates(l2i, L_R)
         inters2 = [
             inter
             for inter in inters2
@@ -1599,7 +1620,7 @@ def apply_ladder_relationships(
     ndegen_rep = tuple(ndegen_rep)
     degen_fam = (mappedl, ndegen_rep)
 
-    all_inters = tree_l_inters(lin)
+    all_inters = build_tree_for_l_intermediates(lin)
     even_inters = simple_parity_filt(lin, all_inters)
 
     if 0 in lin:
