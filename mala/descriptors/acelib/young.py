@@ -6,7 +6,7 @@ from mala.descriptors.acelib.common_utils import (
     group_vec_by_node,
     group_vec_by_orbits,
 )
-from mala.descriptors.acelib.tree_sorting import tree
+from mala.descriptors.acelib.tree_sorting import build_quick_tree
 import itertools
 
 
@@ -24,7 +24,7 @@ class YoungSubgroup:
 
     def sigma_c_partitions(self, max_orbit):
         # returns a list of partitions compatible with sigma_c
-        nodes, remainder = tree(range(self.rank))
+        nodes, remainder = build_quick_tree(range(self.rank))
         self.nodes = nodes
         self.remainder = remainder
 
@@ -119,7 +119,7 @@ class YoungSubgroup:
         loopperms = all_perms.copy()
         if lreduce:
             tmp = []
-            nodes, remainder = tree(inds)
+            nodes, remainder = build_quick_tree(inds)
             for loopperm in loopperms:
                 grouped = group_vec_by_node(loopperm, nodes, remainder)
                 if remainder != None:

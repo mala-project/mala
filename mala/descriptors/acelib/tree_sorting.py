@@ -161,7 +161,7 @@ class Node:
         self.set_children(self.children)
 
 
-def build_tree(l, L, L_R):
+def build_full_tree(l, L, L_R):
     assert isinstance(l, list) or isinstance(
         l, tuple
     ), "convert l to list or tuple"
@@ -213,7 +213,7 @@ def build_tree(l, L, L_R):
     return root
 
 
-def tree(l):
+def build_quick_tree(l):
     # quick construction of tree leaves
     rank = len(l)
     rngs = list(range(0, rank))

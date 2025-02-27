@@ -68,7 +68,7 @@ def rank_1_tree(Clebsch_Gordan, l, L_R=0, M_R=0):
 
 
 def rank_2_tree(Clebsch_Gordan, l, L_R=0, M_R=0):
-    nodes, remainder = ace_coupling_utils.tree(l)
+    nodes, remainder = ace_coupling_utils.build_quick_tree(l)
     node = nodes[0]
     mstrs = ace_coupling_utils.get_ms(l, M_R)
     full_inter_tuples = [()]
@@ -133,7 +133,7 @@ def rank_3_tree(Clebsch_Gordan, l, L_R=0, M_R=0):
 
 
 def rank_4_tree(Clebsch_Gordan, l, L_R=0, M_R=0):
-    nodes, remainder = ace_coupling_utils.tree(l)
+    nodes, remainder = ace_coupling_utils.build_quick_tree(l)
     mstrs = ace_coupling_utils.get_ms(l, M_R)
     full_inter_tuples = ace_coupling_utils.tree_l_inters(l, L_R=L_R, M_R=M_R)
     decomposed = {

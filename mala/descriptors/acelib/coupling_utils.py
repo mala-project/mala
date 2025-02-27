@@ -21,7 +21,10 @@ from mala.descriptors.acelib.symmetric_group_manipulations import (
     get_degen_orb,
     enforce_sorted_orbit,
 )
-from mala.descriptors.acelib.tree_sorting import build_tree, tree
+from mala.descriptors.acelib.tree_sorting import (
+    build_full_tree,
+    build_quick_tree,
+)
 
 
 def get_ms(l, M_R=0):
@@ -54,7 +57,7 @@ def vec_nodes(vec, nodes, remainder=None):
 
 # assuming a pairwise coupling structure, build the "intermediate" angular momenta
 def tree_l_inters(l, L_R=0, M_R=0):
-    nodes, remainder = tree(l)
+    nodes, remainder = build_quick_tree(l)
     rank = len(l)
     if rank >= 3:
         base_node_inters = {
@@ -232,7 +235,7 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
                 if flag:
                     ls.append(lstr % ltup)
         elif rank == 3:
-            nodes, remainder = tree(list(all_ls[0]))
+            nodes, remainder = build_quick_tree(list(all_ls[0]))
             for ltup in all_ls:
                 inters = tree_l_inters(list(ltup), L_R=L_R)
                 by_node = vec_nodes(ltup, nodes, remainder)
@@ -254,7 +257,7 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
                         if lsub not in ls:
                             ls.append(lsub)
         elif rank == 4:
-            nodes, remainder = tree(list(all_ls[0]))
+            nodes, remainder = build_quick_tree(list(all_ls[0]))
             for ltup in all_ls:
                 inters = tree_l_inters(list(ltup), L_R=L_R)
                 by_node = vec_nodes(ltup, nodes, remainder)
@@ -277,7 +280,7 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
                             ls.append(lsub)
 
         elif rank == 5:
-            nodes, remainder = tree(list(all_ls[0]))
+            nodes, remainder = build_quick_tree(list(all_ls[0]))
             for ltup in all_ls:
                 inters = tree_l_inters(list(ltup), L_R=L_R)
                 by_node = vec_nodes(ltup, nodes, remainder)
@@ -301,7 +304,7 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
                             ls.append(lsub)
 
         elif rank == 6:
-            nodes, remainder = tree(list(all_ls[0]))
+            nodes, remainder = build_quick_tree(list(all_ls[0]))
             for ltup in all_ls:
                 inters = tree_l_inters(list(ltup), L_R=L_R)
                 by_node = vec_nodes(ltup, nodes, remainder)
@@ -325,7 +328,7 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
                             ls.append(lsub)
 
         elif rank == 7:
-            nodes, remainder = tree(list(all_ls[0]))
+            nodes, remainder = build_quick_tree(list(all_ls[0]))
             for ltup in all_ls:
                 inters = tree_l_inters(list(ltup), L_R=L_R)
                 by_node = vec_nodes(ltup, nodes, remainder)
@@ -352,7 +355,7 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
                             ls.append(lsub)
 
         elif rank == 8:
-            nodes, remainder = tree(list(all_ls[0]))
+            nodes, remainder = build_quick_tree(list(all_ls[0]))
             for ltup in all_ls:
                 inters = tree_l_inters(list(ltup), L_R=L_R)
                 by_node = vec_nodes(ltup, nodes, remainder)
@@ -943,7 +946,7 @@ def lammps_remap(PA_labels, rank, allowed_mus=[0]):
 
 
 def simple_parity_filt(l, inters, even=True):
-    nodes, remainder = tree(l)
+    nodes, remainder = build_quick_tree(l)
     base_ls = group_vec_by_node(l, nodes, remainder=remainder)
     base_ls = [list(k) for k in base_ls]
     if even:
@@ -1132,7 +1135,7 @@ def tree_labels(nin, lin, L_R=0, M_R=0):
         for nu in labs:
             mu0, _, ntst, ltst, L = get_mu_n_l(nu, return_L=True)
             ltree = [(li, ni) for ni, li in zip(ntst, ltst)]  # sort first on n
-            tree_i = build_tree(ltree, L, L_R)
+            tree_i = build_full_tree(ltree, L, L_R)
             tid = tree_i.tree_id
             conds = (
                 tid not in used_ids
@@ -1254,7 +1257,7 @@ def combine_blocks(blocks, lin, original_spans, L_R=0):
                 new_ltree = [
                     (liii, niii) for niii, liii in zip(newnii, newlii)
                 ]
-                tree_i = build_tree(new_ltree, Lii, L_R)
+                tree_i = build_full_tree(new_ltree, Lii, L_R)
                 # tree_i =  build_tree(new_ltree,new_Lii,L_R)
                 tid = tree_i.tree_id
                 atrees.append(tid)
