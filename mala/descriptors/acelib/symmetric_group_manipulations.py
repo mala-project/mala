@@ -11,9 +11,9 @@ from mala.descriptors.acelib.common_utils import (
 
 def leaf_filter(lperms):
     """
-    Filter leafs.
+    Filter permutations.
 
-    ACE_DOCS_MISSING
+    ACE_DOCS_MISSING - maybe also rename this function?
 
     Parameters
     ----------
@@ -22,7 +22,8 @@ def leaf_filter(lperms):
 
     Returns
     -------
-
+    filtered : List
+        Filtered permutations of l.
     """
     rank = len(lperms[0])
     part = local_sigma_c_partitions[rank][-1]
@@ -51,56 +52,67 @@ def leaf_filter(lperms):
     return filtered
 
 
-def find_degenerate_indices(lst):
+def find_degenerate_indices(indices_list):
     """
+    Find degenarate indices in a list.
 
     Parameters
     ----------
-    lst
+    indices_list : List
+        List of indices
 
     Returns
     -------
-
+    degenerate_indices : dict
+        Dictionary of degenerate indices.
     """
     degenerate_indices = {}
-    for i in range(len(lst)):
-        if lst.count(lst[i]) >= 1:
-            if lst[i] not in degenerate_indices:
-                degenerate_indices[lst[i]] = []
-            degenerate_indices[lst[i]].append(i)
+    for i in range(len(indices_list)):
+        if indices_list.count(indices_list[i]) >= 1:
+            if indices_list[i] not in degenerate_indices:
+                degenerate_indices[indices_list[i]] = []
+            degenerate_indices[indices_list[i]].append(i)
     return degenerate_indices
 
 
-def check_sequential(lst):
+def check_sequential(list_to_check):
     """
+    Check if a list is sequential/ordered.
 
     Parameters
     ----------
-    lst
+    list_to_check : List
+        List which _may_ be sequential.
 
     Returns
     -------
-
+    is_sequential : bool
+        If True, list is sequential (i.e., ordered).
     """
     flags = []
-    if len(lst) > 1:
-        for i in range(len(lst) - 1):
-            flags.append(lst[i] + 1 == lst[i + 1])
+    if len(list_to_check) > 1:
+        for i in range(len(list_to_check) - 1):
+            flags.append(list_to_check[i] + 1 == list_to_check[i + 1])
         return all(flags)
     else:
         return True
 
 
-def get_degen_orb(l):
+def calculate_degenerate_orbit(l):
     """
+    Calculate degenerate orbit for l
+
+    ACE_DOCS_MISSING
 
     Parameters
     ----------
-    l
+    l : List
+        ACE_DOCS_MISSING
 
     Returns
     -------
-
+    degenerate_orbit : Tuple
+        ACE_DOCS_MISSING
     """
     degen_ind_dict = find_degenerate_indices(l)
     partition = []
@@ -118,36 +130,41 @@ def get_degen_orb(l):
     return part_tup, partition
 
 
-def enforce_sorted_orbit(partition_inds):
+def enforce_sorted_orbit(partition_indices):
     """
+    Enforce sorted orbit.
+
+    ACE_DOCS_MISSING
 
     Parameters
     ----------
-    partition_inds
+    partition_indices : List
+        A list (presumably of lists) of indices.
 
     Returns
     -------
-
+    part_tup : Tuple
+        ACE_DOC_MISSING
     """
-    rank = len(flatten(partition_inds))
+    rank = len(flatten(partition_indices))
     couple_ref = group_vector_by_orbits(
         list(range(rank)), local_sigma_c_partitions[rank][-1]
     )
     new_partition = []
     flag = all(
-        [check_sequential(oi) and oi in couple_ref for oi in partition_inds]
+        [check_sequential(oi) and oi in couple_ref for oi in partition_indices]
     )
     if not flag:
         flags = [
             check_sequential(oi) == oi and oi in couple_ref
-            for oi in partition_inds
+            for oi in partition_indices
         ]
         for iflag, orbit_flag in enumerate(flags):
             if not orbit_flag:
                 symmetric_sub_orbits = []
                 for couple_orb in couple_ref:
                     has_symmetric_sub_orbit = all(
-                        [oo in partition_inds[iflag] for oo in couple_orb]
+                        [oo in partition_indices[iflag] for oo in couple_orb]
                     )
                     if (
                         has_symmetric_sub_orbit
@@ -156,21 +173,21 @@ def enforce_sorted_orbit(partition_inds):
                         symmetric_sub_orbits.append(couple_orb)
                 if len(symmetric_sub_orbits) == 0:
                     new_orbit = [
-                        tuple([ki]) for ki in flatten(partition_inds[iflag])
+                        tuple([ki]) for ki in flatten(partition_indices[iflag])
                     ]
                 else:
                     remain = [
                         tuple([ki])
-                        for ki in flatten(partition_inds[iflag])
+                        for ki in flatten(partition_indices[iflag])
                         if ki not in flatten(symmetric_sub_orbits)
                     ]
                     new_orbit = symmetric_sub_orbits + remain
                 new_partition.extend(new_orbit)
                 new_partition = sorted(new_partition)
             else:
-                new_partition.extend(partition_inds[iflag])
+                new_partition.extend(partition_indices[iflag])
     else:
-        new_partition = tuple(list(partition_inds).copy())
+        new_partition = tuple(list(partition_indices).copy())
     part_tup = tuple([len(ki) for ki in new_partition])
 
     # The tuple(new_partition) never seems to be used in all the functions

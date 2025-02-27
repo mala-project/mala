@@ -26,7 +26,7 @@ from mala.descriptors.acelib.common_utils import (
 )
 from mala.descriptors.acelib.symmetric_group_manipulations import (
     leaf_filter,
-    get_degen_orb,
+    calculate_degenerate_orbit,
     enforce_sorted_orbit,
 )
 from mala.descriptors.acelib.tree_sorting import (
@@ -1398,7 +1398,9 @@ def generate_tree_labels(nin, lin, L_R=0):
     for lp in ls:
         rank = len(lp)
         original_span_SO3 = build_tree_for_l_intermediates(lp)  # RI basis size
-        degen_orbit, orbit_inds = get_degen_orb(lp)  # PI basis size
+        degen_orbit, orbit_inds = calculate_degenerate_orbit(
+            lp
+        )  # PI basis size
         ysgi.subgroup_fill(
             nin, [degen_orbit], sigma_c_symmetric=False, semistandard=False
         )
@@ -1581,7 +1583,7 @@ def combine_blocks(blocks, lin, L_R=0):
     super_inters_per_nl = {}
     for lp, nus in blocks.items():
         rank = len(lp)
-        degen_orbit, orbit_inds = get_degen_orb(lp)
+        degen_orbit, orbit_inds = calculate_degenerate_orbit(lp)
         block_pairs = [
             blockpair
             for blockpair in list(block_map.keys())
@@ -1597,7 +1599,7 @@ def combine_blocks(blocks, lin, L_R=0):
         for nu in nus:
             mu0ii, muii, nii, lii, Lii = calculate_mu_n_l(nu, return_L=True)
             is_sigma0 = tuple(lii) == lps[0]
-            degen_orbit, orbit_inds = get_degen_orb(lp)
+            degen_orbit, orbit_inds = calculate_degenerate_orbit(lp)
             nlii = [(niii, liii) for niii, liii in zip(nii, lii)]
             atrees = []
             for perm_map in perms_2_check:
@@ -1691,7 +1693,7 @@ def apply_ladder_relationships(
 
     max_labs = parity_span_labs.copy()
     #  based on degeneracy
-    ndegen_rep, _ = get_degen_orb(mappedn)
+    ndegen_rep, _ = calculate_degenerate_orbit(mappedn)
     ndegen_rep = list(ndegen_rep)
     ndegen_rep.sort(key=lambda x: x, reverse=True)
     ndegen_rep = tuple(ndegen_rep)
@@ -1725,7 +1727,7 @@ def apply_ladder_relationships(
                 mu0ii, muii, nii, lii, Lii = calculate_mu_n_l(
                     lab, return_L=True
                 )
-                lidegen_rep, l_orbit_inds = get_degen_orb(lii)
+                lidegen_rep, l_orbit_inds = calculate_degenerate_orbit(lii)
                 ysgi.subgroup_fill(
                     list(nin),
                     [lidegen_rep],
@@ -1744,7 +1746,7 @@ def apply_ladder_relationships(
                 mu0ii, muii, nii, lii, Lii = calculate_mu_n_l(
                     lab, return_L=True
                 )
-                lidegen_rep, l_orbit_inds = get_degen_orb(lii)
+                lidegen_rep, l_orbit_inds = calculate_degenerate_orbit(lii)
                 ysgi.subgroup_fill(
                     list(nin),
                     [lidegen_rep],
@@ -1765,7 +1767,7 @@ def apply_ladder_relationships(
                 mu0ii, muii, nii, lii, Lii = calculate_mu_n_l(
                     lab, return_L=True
                 )
-                lidegen_rep, l_orbit_inds = get_degen_orb(lii)
+                lidegen_rep, l_orbit_inds = calculate_degenerate_orbit(lii)
                 l_sequential_degen_orbit = enforce_sorted_orbit(l_orbit_inds)
                 # switch to lower symmetry SN representation
                 ysgi.subgroup_fill(
