@@ -16,10 +16,10 @@ from mendeleev.fetch import fetch_table
 from mala.common.parallelizer import printout
 from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
-from mala.descriptors.ace_potential import ACEPotential
-import mala.descriptors.ace_coupling_utils as acu
-import mala.descriptors.wigner_coupling as wigner_coupling
-import mala.descriptors.clebsch_gordan_coupling as cg_coupling
+from mala.descriptors.acelib.ace_potential import ACEPotential
+import mala.descriptors.acelib.ace_coupling_utils as ace_coupling_utils
+import mala.descriptors.acelib.wigner_coupling as wigner_coupling
+import mala.descriptors.acelib.clebsch_gordan_coupling as cg_coupling
 
 
 class ACE(Descriptor):
@@ -452,7 +452,7 @@ class ACE(Descriptor):
         ranked_chem_nus = []
         for ind, rank in enumerate(self.parameters.ace_ranks):
             rank = int(rank)
-            PA_lammps = acu.pa_labels_raw(
+            PA_lammps = ace_coupling_utils.pa_labels_raw(
                 rank,
                 int(self.parameters.ace_nmax[ind]),
                 int(self.parameters.ace_lmax[ind]),
@@ -468,7 +468,7 @@ class ACE(Descriptor):
         ns = []
         ls = []
         for nu in nus_unsort:
-            mu0ii, muii, nii, lii = acu.get_mu_n_l(nu)
+            mu0ii, muii, nii, lii = ace_coupling_utils.get_mu_n_l(nu)
             mu0s.append(mu0ii)
             mus.append(tuple(muii))
             ns.append(tuple(nii))
@@ -624,7 +624,7 @@ class ACE(Descriptor):
         for nu in nulst:
             mu0 = nu.split("_")[0]
             byattyp[mu0].append(nu)
-            mu0ii, muii, nii, lii = acu.get_mu_n_l(nu)
+            mu0ii, muii, nii, lii = ace_coupling_utils.get_mu_n_l(nu)
             if mumax not in muii:
                 byattypfiltered[mu0].append(nu)
         return byattyp, byattypfiltered

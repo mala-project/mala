@@ -8,18 +8,18 @@ import os
 import numpy as np
 from sympy.combinatorics import Permutation
 
-from mala.descriptors.label_sublib.young import (
+from mala.descriptors.acelib.young import (
     YoungSubgroup,
     local_sigma_c_partitions,
     flatten,
     group_vec_by_node,
 )
-from mala.descriptors.symmetric_grp_manip import (
+from mala.descriptors.acelib.symmetric_grp_manip import (
     leaf_filter,
     get_degen_orb,
     enforce_sorted_orbit,
 )
-from mala.descriptors.tree_sorting import build_tree, tree
+from mala.descriptors.acelib.tree_sorting import build_tree, tree
 
 
 def get_ms(l, M_R=0):

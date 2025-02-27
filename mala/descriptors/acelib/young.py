@@ -1,7 +1,7 @@
 from sympy.combinatorics import Permutation
 import math
 import numpy as np
-from mala.descriptors.tree_sorting import tree
+from mala.descriptors.acelib.tree_sorting import tree
 import itertools
 
 local_sigma_c_partitions = {

@@ -1,6 +1,4 @@
-import numpy as np
-
-from mala.descriptors.label_sublib.young import (
+from mala.descriptors.acelib.young import (
     local_sigma_c_partitions,
     flatten,
     group_vec_by_orbits,
