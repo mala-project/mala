@@ -43,9 +43,6 @@ class ACE(Descriptor):
 
         # Initialize a dictionary with ionic radii (in Angstrom).
         # and a list containing all elements which are considered metals.
-        # Both is done via mendeleev. The definition of metal here is
-        # "everything in groups 12 and below, including Lanthanoids and
-        # Actininoids, excluding hydrogen".
         self._ionic_radii, self._metal_list = self.__init_element_lists()
 
         # Initialize several arrays that are computed using
@@ -363,7 +360,6 @@ class ACE(Descriptor):
             Path to the coupling coefficients file. None if the file was
             found incompatible.
         """
-
         if coupling_file is not None and os.path.isfile(coupling_file):
             with open(coupling_file, "r") as readout:
                 lines = readout.readlines()
@@ -397,7 +393,8 @@ class ACE(Descriptor):
 
         This is essentially part of the computation of the coupling
         coefficients, but a part that has to be done every time,
-        since it initializes the cutoff radii."""
+        since it initializes the cutoff radii.
+        """
         ncols0 = 3
 
         # "G" for grid has to be added to the element list.
@@ -777,8 +774,6 @@ class ACE(Descriptor):
         are the same across different calculations, they are stored in the
         MALA directory upon first execution of the code and can be reused
         essentially always.
-        ACE_DOCS_MISSING: What reference can we give for this
-        function? Should we just use the ACE paper by Ralf Drautz?
 
         Parameters
         ----------
@@ -831,8 +826,6 @@ class ACE(Descriptor):
         are the same across different calculations, they are stored in the
         MALA directory upon first execution of the code and can be reused
         essentially always.
-        ACE_DOCS_MISSING: What reference can we give for this
-        function? Should we just use the ACE paper by Ralf Drautz?
 
         Parameters
         ----------
@@ -887,6 +880,24 @@ class ACE(Descriptor):
 
     @staticmethod
     def __init_element_lists():
+        """
+        Initialize a dictionary with ionic radii and list of metals.
+
+        This function initializes a dictionary with ionic radii (in
+        Angstrom) and a list containing all elements which are considered
+        metals. Both is done via mendeleev. The definition of metal here is
+        "everything in groups 12 and below, including Lanthanoids and
+        Actininoids, excluding hydrogen".
+        ACE_DOCS_MISSING: Why is that the definition of metal?
+
+        Returns
+        -------
+        ionic_radii : dict
+            Dictionary with ionic radii.
+
+        metal_list : list
+            List of metals.
+        """
         # Access periodic table data from mendeleev.
         element_info = fetch_table("elements")[
             ["symbol", "group_id", "atomic_radius"]
@@ -922,11 +933,40 @@ class ACE(Descriptor):
 
     @staticmethod
     def _clebsch_gordan(j1, m1, j2, m2, j3, m3):
-        # Clebsch-gordan coefficient calculator based on eqs. 4-5 of:
-        # https://hal.inria.fr/hal-01851097/document
+        """
+        Compute a Clebsch-Gordan coefficient.
 
-        # VERIFIED: test non-zero indices in Wolfram using format ClebschGordan[{j1,m1},{j2,m2},{j3,m3}]
-        # rules:
+        Calculation is based on Eqs. 4-5 of:
+        https://hal.inria.fr/hal-01851097/document
+
+        Parameters
+        ----------
+        j1 : int
+            ACE_DOCS_MISSING
+
+        m1 : int
+            ACE_DOCS_MISSING
+
+        j2: int
+            ACE_DOCS_MISSING
+
+        m2: int
+            ACE_DOCS_MISSING
+
+        j3: int
+            ACE_DOCS_MISSING
+
+        m3: int
+            ACE_DOCS_MISSING
+
+        Returns
+        -------
+        cg_coefficient : float
+            Clebsch-Gordan coefficient for combination of j1,m1,j2,m2,j3,m3.
+        """
+        # CODE IS VERIFIED: test non-zero indices in Wolfram using format
+        # ClebschGordan[{j1,m1},{j2,m2},{j3,m3}]
+        # Rules:
         rule1 = np.abs(j1 - j2) <= j3
         rule2 = j3 <= j1 + j2
         rule3 = m3 == m1 + m2
@@ -963,7 +1003,8 @@ class ACE(Descriptor):
 
             G = np.longdouble(0.0)
 
-            # k conditions (see eq.5 of https://hal.inria.fr/hal-01851097/document)
+            # k conditions (see eq.5 of
+            # https://hal.inria.fr/hal-01851097/document)
             # k  >= 0
             # k <= j1 - m1
             # k <= j2 + m2
@@ -987,8 +1028,38 @@ class ACE(Descriptor):
 
     @staticmethod
     def _wigner_3j(j1, m1, j2, m2, j3, m3):
-        # uses relation between Clebsch-Gordann coefficients and W-3j symbols to evaluate W-3j
-        # VERIFIED - wolframalpha.com
+        """
+        Compute a Wigner 3j coefficient.
+
+        Uses relation between Clebsch-Gordann coefficients and Wigner 3j
+        symbols to evaluate Wigner 3j symbols.
+
+        Parameters
+        ----------
+        j1 : int
+            ACE_DOCS_MISSING
+
+        m1 : int
+            ACE_DOCS_MISSING
+
+        j2: int
+            ACE_DOCS_MISSING
+
+        m2: int
+            ACE_DOCS_MISSING
+
+        j3: int
+            ACE_DOCS_MISSING
+
+        m3: int
+            ACE_DOCS_MISSING
+
+        Returns
+        -------
+        wigner_3j_coefficient : float
+            Wigner 3j coefficient for combination of j1,m1,j2,m2,j3,m3.
+        """
+        # CODE IS VERIFIED by wolframalpha.com
         cg = ACE._clebsch_gordan(j1, m1, j2, m2, j3, -m3)
 
         num = np.longdouble((-1) ** (j1 - j2 - m3))
@@ -997,6 +1068,17 @@ class ACE(Descriptor):
         return cg * num / denom  # float(num/denom)
 
     def _read_feature_dimension_from_json(self, json_dict):
+        """
+        Read the feature dimension from a saved JSON file.
+
+        For ACE descriptors, the feature dimension does directly depend on
+        the number of atoms.
+
+        Parameters
+        ----------
+        json_dict : dict
+            Dictionary containing info loaded from the JSON file.
+        """
         nus, limit_nus = self.__calculate_limit_nus()
 
         if self.parameters.descriptors_contain_xyz:
