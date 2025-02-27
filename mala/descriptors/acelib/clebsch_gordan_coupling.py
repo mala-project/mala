@@ -45,7 +45,7 @@ def clebsch_gordan_coupling(
         _clebsch_gordan_coefficients : dict
             Precomputed Clebsch-Gordan coefficients.
 
-        _l : list
+        _l : List
             ACE_DOCS_MISSING
 
         _L_R : int
@@ -93,7 +93,7 @@ def clebsch_gordan_coupling(
         _clebsch_gordan_coefficients : dict
             Precomputed Clebsch-Gordan coefficients.
 
-        _l : list
+        _l : List
             ACE_DOCS_MISSING
 
         _L_R : int
@@ -146,7 +146,7 @@ def clebsch_gordan_coupling(
         _clebsch_gordan_coefficients : dict
             Precomputed Clebsch-Gordan coefficients.
 
-        _l : list
+        _l : List
             ACE_DOCS_MISSING
 
         _L_R : int
@@ -202,7 +202,7 @@ def clebsch_gordan_coupling(
         _clebsch_gordan_coefficients : dict
             Precomputed Clebsch-Gordan coefficients.
 
-        _l : list
+        _l : List
             ACE_DOCS_MISSING
 
         _L_R : int

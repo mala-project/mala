@@ -37,7 +37,7 @@ def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
         _wigner_3j_coefficients : dict
         Precomputed Wigner 3j coefficients.
 
-        _l : list
+        _l : List
             ACE_DOCS_MISSING
 
         _L_R : int
@@ -88,7 +88,7 @@ def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
         _wigner_3j_coefficients : dict
         Precomputed Wigner 3j coefficients.
 
-        _l : list
+        _l : List
             ACE_DOCS_MISSING
 
         _L_R : int
@@ -142,7 +142,7 @@ def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
         _wigner_3j_coefficients : dict
         Precomputed Wigner 3j coefficients.
 
-        _l : list
+        _l : List
             ACE_DOCS_MISSING
 
         _L_R : int
@@ -199,7 +199,7 @@ def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
         _wigner_3j_coefficients : dict
         Precomputed Wigner 3j coefficients.
 
-        _l : list
+        _l : List
             ACE_DOCS_MISSING
 
         _L_R : int

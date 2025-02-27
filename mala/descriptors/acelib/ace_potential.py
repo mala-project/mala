@@ -23,20 +23,20 @@ class ACEPotential:
 
     Parameters
     ----------
-    elements : list
+    elements : List
         List of elements (symbols)
 
-    reference_ens : list
+    reference_ens : List
         List of floats, has same dimensions as elements. ACE_DOCS_MISSING:
         What does it do?
 
-    ranks : list
+    ranks : List
         ACE_DOCS_MISSING
 
-    nmax: list
+    nmax: List
         ACE_DOCS_MISSING
 
-    lmax: list
+    lmax: List
         ACE_DOCS_MISSING
 
     nradbase : int
@@ -51,10 +51,10 @@ class ACEPotential:
     css : dict
         ACE_DOCS_MISSING
 
-    rcutinner : list
+    rcutinner : List
         ACE_DOCS_MISSING
 
-    drcutinner : list
+    drcutinner : List
         ACE_DOCS_MISSING
 
     lmin : int
@@ -212,7 +212,7 @@ class ACEPotential:
         npoti : str
             ACE_DOCS_MISSING
 
-        FSparams : list
+        FSparams : List
             ACE_DOCS_MISSING
         """
         # embeddings =dict()#OrderedDict() #{ind:None for ind in range(len(self.elements))}
@@ -326,7 +326,7 @@ class ACEPotential:
 
         Parameters
         ----------
-        nulst : list
+        nulst : List
             List of nus ACE_DOCS_MISSING - what are those?
 
         print_0s : bool

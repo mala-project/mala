@@ -1,3 +1,5 @@
+"""Functions for computations related to group symmetry. """
+
 from mala.descriptors.acelib.young import (
     flatten,
 )
@@ -9,10 +11,14 @@ from mala.descriptors.acelib.common_utils import (
 
 def leaf_filter(lperms):
     """
+    Filter leafs.
+
+    ACE_DOCS_MISSING
 
     Parameters
     ----------
-    lperms
+    lperms : List
+        Permutations of l.
 
     Returns
     -------

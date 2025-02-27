@@ -518,10 +518,10 @@ class ACE(Descriptor):
 
         Returns
         -------
-        nus : list
+        nus : List
             List of nus. ACE_DOCS_MISSING: What are nus?
 
-        limit_nus : list
+        limit_nus : List
             List of limit nus. ACE_DOCS_MISSING: What are limit_nus?
         """
         # ACE_DOCS_MISSING: Add maybe a general outline of what is being
@@ -734,7 +734,7 @@ class ACE(Descriptor):
 
         Parameters
         ----------
-        nulst : list
+        nulst : List
             ACE_DOCS_MISSING: What exactly is this?
 
         remove_type : int
@@ -896,7 +896,7 @@ class ACE(Descriptor):
         ionic_radii : dict
             Dictionary with ionic radii.
 
-        metal_list : list
+        metal_list : List
             List of metals.
         """
         # Access periodic table data from mendeleev.

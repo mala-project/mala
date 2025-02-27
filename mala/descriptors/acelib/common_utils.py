@@ -14,7 +14,7 @@ def filled_perm(tuples, rank):
 
     Parameters
     ----------
-    tuples : list
+    tuples : List
         List of tuples.
 
     rank : int
@@ -43,12 +43,12 @@ def flatten(list_of_lists):
 
     Parameters
     ----------
-    list_of_lists : list
+    list_of_lists : List
         List of lists.
 
     Returns
     -------
-    list : list
+    list : List
         Flattened list.
     """
     try:
@@ -66,10 +66,10 @@ def group_vector_by_nodes(vector, nodes, remainder=None):
 
     Parameters
     ----------
-    vector : list
+    vector : List
         Vector to be grouped.
 
-    nodes : list
+    nodes : List
         List of nodes.
 
     remainder : int
@@ -77,7 +77,7 @@ def group_vector_by_nodes(vector, nodes, remainder=None):
 
     Returns
     -------
-    vector_by_tuples : list
+    vector_by_tuples : List
         Grouped vector.
     """
     # vector_by_tuples = [tuple([vec[node[0]],vec[node[1]]]) for node in nodes]
@@ -101,15 +101,15 @@ def group_vector_by_orbits(vector, partition):
 
     Parameters
     ----------
-    vector : list
+    vector : List
         Vector to be grouped.
 
-    partition : list
+    partition : List
         Partition to be grouped by.
 
     Returns
     -------
-    vector_by_orbits : list
+    vector_by_orbits : List
         Grouped vector.
     """
     ind_range = np.sum(partition)
@@ -145,10 +145,10 @@ def group_vector_by_nodes_pairwise(vector, nodes, remainder=None):
 
     Parameters
     ----------
-    vector : list
+    vector : List
         vector of l quantum numbers.
 
-    nodes : list
+    nodes : List
         List of nodes by which to pair vector.
 
     remainder
@@ -156,7 +156,7 @@ def group_vector_by_nodes_pairwise(vector, nodes, remainder=None):
 
     Returns
     -------
-    vector_by_tuples : list
+    vector_by_tuples : List
     """
     vector_by_tuples = [
         tuple([vector[node[0]], vector[node[1]]]) for node in nodes
@@ -177,7 +177,7 @@ def get_ms(l_vector, M_R=0):
 
     Parameters
     ----------
-    l_vector : list
+    l_vector : List
         Arbitrary vector.
 
     M_R : int
@@ -185,7 +185,7 @@ def get_ms(l_vector, M_R=0):
 
     Returns
     -------
-    m_strs : list
+    m_strs : List
         Set of all combinations.
     """
     m_ranges = {

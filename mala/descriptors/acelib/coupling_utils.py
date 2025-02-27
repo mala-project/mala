@@ -44,7 +44,7 @@ def build_tree_for_l_intermediates(l, L_R=0):
 
     Parameters
     ----------
-    l : list
+    l : List
         List of angular momenta.
 
     L_R : int
@@ -52,7 +52,7 @@ def build_tree_for_l_intermediates(l, L_R=0):
 
     Returns
     -------
-    full_inter_tuples : list
+    full_inter_tuples : List
         List of "intermediate" angular momenta.
     """
     nodes, remainder = build_quick_tree(l)
@@ -224,7 +224,7 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
 
     Returns
     -------
-    ls : list
+    ls : List
         List of angular momenta.
     """
     if L_R % 2 == 0:
@@ -482,7 +482,7 @@ def compute_pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
 
     Returns
     -------
-    all_lammps_labels : list
+    all_lammps_labels : List
         PA labels.
     """
     if rank >= 4:
@@ -618,7 +618,7 @@ def generate_nl(rank, nmax, lmax, mumax=1, lmin=0, L_R=0, all_perms=False):
 
     Returns
     -------
-    munl : list
+    munl : List
         List of munl vectors in string format, i.e.
         mu0_mu1,mu2,...muk,n1,n2,..n_k,l1,l2,..l_k_L1-L2...-LK
     """
@@ -676,12 +676,12 @@ def get_mapped_subset(ns):
 
     Parameters
     ----------
-    ns : list
+    ns : List
         List of ns (a list of lists, ACE_DOCS_MISSING?)
 
     Returns
     -------
-    reduced_ns : list
+    reduced_ns : List
         ACE_DOCS_MISSING
     """
     mapped_n_per_n = {}
@@ -814,16 +814,16 @@ def read_from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
 
     Parameters
     ----------
-    mu : list
+    mu : List
         ACE_DOCS_MISSING.
 
-    n : list
+    n : List
         ACE_DOCS_MISSING.
 
-    l : list
+    l : List
         ACE_DOCS_MISSING
 
-    allowed_mus : list
+    allowed_mus : List
         ACE_DOCS_MISSING
 
     tabulated_all : dict
@@ -831,7 +831,7 @@ def read_from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
 
     Returns
     -------
-    chem_labels : list
+    chem_labels : List
         Labels read from json file.
     """
     rank = len(l)
@@ -891,10 +891,10 @@ def get_mapped(nin, lin):
 
     Parameters
     ----------
-    nin : list
+    nin : List
         First list to map.
 
-    lin : list
+    lin : List
         Second list to map.
 
     Returns
@@ -931,15 +931,15 @@ def combine_muvector_nvector(mu, n):
 
     Parameters
     ----------
-    mu : list
+    mu : List
         Vector for mu.
 
-    n : list
+    n : List
         Vector for n.
 
     Returns
     -------
-    tuppled : list
+    tuppled : List
         List of tuples of mu and n.
     """
     mu = sorted(mu)
@@ -976,7 +976,7 @@ def create_unique_combinations(lrng, size):
 
     Returns
     -------
-    uniques : list
+    uniques : List
         List of unique combinations.
     """
     uniques = []
@@ -1079,13 +1079,13 @@ def lammps_remap(PA_labels, rank, allowed_mus=[0]):
 
     Parameters
     ----------
-    PA_labels : list
+    PA_labels : List
         List of PA labels to be remapped.
 
     rank : int
         Rank used for the remapping.
 
-    allowed_mus : list
+    allowed_mus : List
         Allowed mu values for the remapping.
 
     Returns
@@ -1225,7 +1225,7 @@ def simple_parity_filter(l, inters, even=True):
 
     Parameters
     ----------
-    l : list
+    l : List
         ACE_DOCS_MISSING
 
     inters :
@@ -1236,7 +1236,7 @@ def simple_parity_filter(l, inters, even=True):
 
     Returns
     -------
-    inters_filt : list
+    inters_filt : List
         inters (ACE_DOCS_MISSING) filtered.
     """
     nodes, remainder = build_quick_tree(l)
@@ -1305,10 +1305,10 @@ def calculate_highest_coupling_representation(lp, lref):
 
     Parameters
     ----------
-    lp : list
+    lp : List
         ACE_DOCS_MISSING
 
-    lref : list
+    lref : List
         ACE_DOCS_MISSING
 
     Returns
@@ -1341,10 +1341,10 @@ def generate_tree_labels(nin, lin, L_R=0):
 
     Parameters
     ----------
-    nin : list
+    nin : List
         ACE_DOCS_MISSING
 
-    lin : list
+    lin : List
         ACE_DOCS_MISSING
 
     L_R : int
@@ -1504,7 +1504,7 @@ def combine_blocks(blocks, lin, L_R=0):
     blocks : dict
         ACE_DOCS_MISSING
 
-    lin : list
+    lin : List
         ACE_DOCS_MISSING
 
     L_R : int
@@ -1512,7 +1512,7 @@ def combine_blocks(blocks, lin, L_R=0):
 
     Returns
     -------
-    combined_labs : list
+    combined_labs : List
         ACE_DOCS_MISSING
     """
     rank = len(lin)
@@ -1646,27 +1646,27 @@ def apply_ladder_relationships(
 
     Parameters
     ----------
-    lin : list
+    lin : List
         ACE_DOCS_MISSING
 
-    nin : list
+    nin : List
         ACE_DOCS_MISSING
 
-    combined_labs : list
+    combined_labs : List
         ACE_DOCS_MISSING
 
-    parity_span : list
+    parity_span : List
         ACE_DOCS_MISSING
 
-    parity_span_labs : list
+    parity_span_labs : List
         ACE_DOCS_MISSING
 
-    full_span : list
+    full_span : List
         ACE_DOCS_MISSING
 
     Returns
     -------
-    funcs : list
+    funcs : List
         ACE_DOCS_MISSING
     """
     N = len(lin)
