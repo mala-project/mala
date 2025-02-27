@@ -1,4 +1,4 @@
-"""Functions for computations related to group symmetry. """
+"""Functions for computations related to group symmetry."""
 
 from mala.descriptors.acelib.young import (
     flatten,
@@ -100,7 +100,7 @@ def check_sequential(list_to_check):
 
 def calculate_degenerate_orbit(l):
     """
-    Calculate degenerate orbit for l
+    Calculate degenerate orbit for l.
 
     ACE_DOCS_MISSING
 

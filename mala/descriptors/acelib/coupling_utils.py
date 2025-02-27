@@ -421,15 +421,20 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
 
 def compute_intermediates(l1, l2):
     """
+    Compute integers lying between absolute difference and sum of l1 and l2.
 
     Parameters
     ----------
-    l1
-    l2
+    l1 : int
+        First integer.
+
+    l2 : int
+        Second integer.
 
     Returns
     -------
-
+    ints : List
+        List of all integers between abs(l1-l2) and l1+l2.
     """
     l = [l1, l2]
     try:

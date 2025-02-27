@@ -170,7 +170,7 @@ def group_vector_by_nodes_pairwise(vector, nodes, remainder=None):
 
 
 def get_ms(l_vector, M_R=0):
-    """
+    r"""
     Retrieve the set of m_i combination with \sum_i m_i = M_R.
 
     These combinations are retrieved for an arbitrary l vector.
@@ -219,7 +219,8 @@ def check_triangle(l1, l2, l3):
 
     Returns
     -------
-
+    condition : bool
+        If True, a triangle can be formed.
     """
     lower_bound = np.abs(l1 - l2)
     upper_bound = np.abs(l1 + l2)
