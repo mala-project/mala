@@ -1,22 +1,261 @@
-"""Wigner coupling functions."""
+"""Wigner 3j coupling functions."""
 
 from mala.descriptors.acelib import coupling_utils as ace_coupling_utils
 
 
-def get_coupling(Wigner_3j, ldict, L_R=0, **kwargs):
+def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
     """
+    Compute Wigner 3j symbols couplings for a given L_R.
+
+    ACE_DOCS_MISSING: Clarify what this means, and also maybe the name,
+    because I am not so sure about it (see ace.py).
 
     Parameters
     ----------
-    Wigner_3j
-    ldict
-    L_R
-    kwargs
+    wigner_3j_coefficients : dict
+        Precomputed Wigner 3j coefficients.
+
+    ldict : dict
+        Dictionary of ranks and their corresponding L values.
+
+    L_R : int
+        ACE_DOCS_MISSING
 
     Returns
     -------
-
+    coupling : dict
+        Wigner 3j couplings.
     """
+
+    def _rank_1_tree(_wigner_3j_coefficients, _l, _L_R=0, _M_R=0):
+        """
+        Compute the coupling for rank 1.
+
+        Parameters
+        ----------
+        _wigner_3j_coefficients : dict
+        Precomputed Wigner 3j coefficients.
+
+        _l : list
+            ACE_DOCS_MISSING
+
+        _L_R : int
+            ACE_DOCS_MISSING
+
+        _M_R : int
+            ACE_DOCS_MISSING
+
+        Returns
+        -------
+        decomposed : dict
+            Wigner 3j couplings for rank 1.
+        """
+        # no nodes for rank 1
+
+        mstrs = ace_coupling_utils.get_ms(_l, _M_R)
+        full_inter_tuples = [()]
+        assert _l[0] == _L_R, "invalid l=%d for irrep L_R = %d" % (_l[0], _L_R)
+
+        decomposed = {
+            full_inter_tup: {mstr: 0.0 for mstr in mstrs}
+            for full_inter_tup in full_inter_tuples
+        }
+
+        for inter in full_inter_tuples:
+            for mstr in mstrs:
+                m_ints = [int(b) for b in mstr.split(",")]
+                # m_1  = - M_R
+                conds = m_ints[0] == -_M_R
+                if conds:
+                    w1 = _wigner_3j_coefficients[
+                        "%d,%d,%d,%d,%d,%d"
+                        % (_l[0], m_ints[0], _L_R, _M_R, 0, 0)
+                    ]
+                    phase_power = 0
+                    phase = (-1) ** phase_power
+                    w = phase * w1
+
+                    decomposed[inter][mstr] = float(w)
+        return decomposed
+
+    def _rank_2_tree(_wigner_3j_coefficients, _l, _L_R=0, _M_R=0):
+        """
+        Compute the coupling for rank 2.
+
+        Parameters
+        ----------
+        _wigner_3j_coefficients : dict
+        Precomputed Wigner 3j coefficients.
+
+        _l : list
+            ACE_DOCS_MISSING
+
+        _L_R : int
+            ACE_DOCS_MISSING
+
+        _M_R : int
+            ACE_DOCS_MISSING
+
+        Returns
+        -------
+        decomposed : dict
+            Wigner 3j couplings for rank 2.
+        """
+        nodes, remainder = ace_coupling_utils.build_quick_tree(_l)
+        node = nodes[0]
+        mstrs = ace_coupling_utils.get_ms(_l, _M_R)
+        full_inter_tuples = [()]
+
+        assert ace_coupling_utils.check_triangle(
+            _l[0], _l[1], _L_R
+        ), "invalid l=(%d,%d) for irrep L_R = %d" % (_l[0], _l[1], _L_R)
+
+        decomposed = {
+            full_inter_tup: {mstr: 0.0 for mstr in mstrs}
+            for full_inter_tup in full_inter_tuples
+        }
+
+        for inter in full_inter_tuples:
+            for mstr in mstrs:
+                m_ints = [int(b) for b in mstr.split(",")]
+                # m_1 + m_2 = M1
+                conds = (m_ints[0] + m_ints[1]) == _M_R
+                if conds:
+                    w1 = _wigner_3j_coefficients[
+                        "%d,%d,%d,%d,%d,%d"
+                        % (_l[0], m_ints[0], _l[1], m_ints[1], _L_R, -_M_R)
+                    ]
+                    phase_power = _L_R - _M_R
+                    phase = (-1) ** phase_power
+                    w = phase * w1
+
+                    decomposed[inter][mstr] = w
+        return decomposed
+
+    def _rank_3_tree(_wigner_3j_coefficients, _l, _L_R=0, _M_R=0):
+        """
+        Compute the coupling for rank 3.
+
+        Parameters
+        ----------
+        _wigner_3j_coefficients : dict
+        Precomputed Wigner 3j coefficients.
+
+        _l : list
+            ACE_DOCS_MISSING
+
+        _L_R : int
+            ACE_DOCS_MISSING
+
+        _M_R : int
+            ACE_DOCS_MISSING
+
+        Returns
+        -------
+        decomposed : dict
+            Wigner 3j couplings for rank 3.
+        """
+        full_inter_tuples = ace_coupling_utils.tree_l_inters(
+            _l, L_R=_L_R, M_R=_M_R
+        )
+        mstrs = ace_coupling_utils.get_ms(_l, _M_R)
+        decomposed = {
+            full_inter_tup: {mstr: 0.0 for mstr in mstrs}
+            for full_inter_tup in full_inter_tuples
+        }
+
+        for inter in full_inter_tuples:
+            L1 = inter[0]
+            for mstr in mstrs:
+                m_ints = [int(b) for b in mstr.split(",")]
+                for M1 in range(-L1, L1 + 1):
+                    # m_1 + m_2 = M1
+                    # M1 + m_3 = M_R
+                    conds = (m_ints[0] + m_ints[1]) == M1 and (
+                        M1 + m_ints[2]
+                    ) == _M_R
+                    if conds:
+                        w1 = _wigner_3j_coefficients[
+                            "%d,%d,%d,%d,%d,%d"
+                            % (_l[0], m_ints[0], _l[1], m_ints[1], L1, -M1)
+                        ]
+                        w2 = _wigner_3j_coefficients[
+                            "%d,%d,%d,%d,%d,%d"
+                            % (L1, M1, _l[2], m_ints[2], _L_R, -_M_R)
+                        ]
+                        phase_power = (L1) - (M1) + (_L_R - _M_R)
+                        phase = (-1) ** phase_power
+                        w = phase * w1 * w2
+                        decomposed[inter][mstr] = w
+        return decomposed
+
+    def _rank_4_tree(_wigner_3j_coefficients, _l, _L_R=0, _M_R=0):
+        """
+        Compute the coupling for rank 4.
+
+        Parameters
+        ----------
+        _wigner_3j_coefficients : dict
+        Precomputed Wigner 3j coefficients.
+
+        _l : list
+            ACE_DOCS_MISSING
+
+        _L_R : int
+            ACE_DOCS_MISSING
+
+        _M_R : int
+            ACE_DOCS_MISSING
+
+        Returns
+        -------
+        decomposed : dict
+            Wigner 3j couplings for rank 4.
+        """
+        nodes, remainder = ace_coupling_utils.build_quick_tree(_l)
+        mstrs = ace_coupling_utils.get_ms(_l, _M_R)
+        full_inter_tuples = ace_coupling_utils.tree_l_inters(
+            _l, L_R=_L_R, M_R=_M_R
+        )
+        decomposed = {
+            full_inter_tup: {mstr: 0.0 for mstr in mstrs}
+            for full_inter_tup in full_inter_tuples
+        }
+
+        for inter in full_inter_tuples:
+            L1, L2 = inter
+            for mstr in mstrs:
+                m_ints = [int(b) for b in mstr.split(",")]
+                for M1 in range(-L1, L1 + 1):
+                    for M2 in range(-L2, L2 + 1):
+                        # m_1 + m_2 = M1
+                        # m_4 + m_3 = M2
+                        # M1 + M2 = M_R
+                        conds = (
+                            (m_ints[0] + m_ints[1]) == M1
+                            and (m_ints[2] + m_ints[3]) == M2
+                            and (M1 + M2) == _M_R
+                        )
+                        if conds:
+                            w1 = _wigner_3j_coefficients[
+                                "%d,%d,%d,%d,%d,%d"
+                                % (_l[0], m_ints[0], _l[1], m_ints[1], L1, -M1)
+                            ]
+                            w2 = _wigner_3j_coefficients[
+                                "%d,%d,%d,%d,%d,%d"
+                                % (_l[2], m_ints[2], _l[3], m_ints[3], L2, -M2)
+                            ]
+                            w3 = _wigner_3j_coefficients[
+                                "%d,%d,%d,%d,%d,%d"
+                                % (L1, M1, L2, M2, _L_R, -_M_R)
+                            ]
+                            phase_power = (L1 + L2) - (M1 + M2) + (_L_R - _M_R)
+                            phase = (-1) ** phase_power
+                            w = phase * w1 * w2 * w3
+
+                            decomposed[inter][mstr] = w
+        return decomposed
+
     # for now we restrict up to rank 4 trees
     M_Rs = list(range(-L_R, L_R + 1))
     # generic coupling for any L_R - support must be added to call
@@ -32,16 +271,24 @@ def get_coupling(Wigner_3j, ldict, L_R=0, **kwargs):
             for lstr in ls_per_rnk:
                 l = [int(k) for k in lstr.split(",")]
                 if rank == 1:
-                    decomped = rank_1_tree(Wigner_3j, l, L_R, M_R)
+                    decomped = _rank_1_tree(
+                        wigner_3j_coefficients, l, L_R, M_R
+                    )
                     coupling[M_R][rnk][lstr] = decomped
                 elif rank == 2:
-                    decomped = rank_2_tree(Wigner_3j, l, L_R, M_R)
+                    decomped = _rank_2_tree(
+                        wigner_3j_coefficients, l, L_R, M_R
+                    )
                     coupling[M_R][rnk][lstr] = decomped
                 elif rank == 3:
-                    decomped = rank_3_tree(Wigner_3j, l, L_R, M_R)
+                    decomped = _rank_3_tree(
+                        wigner_3j_coefficients, l, L_R, M_R
+                    )
                     coupling[M_R][rnk][lstr] = decomped
                 elif rank == 4:
-                    decomped = rank_4_tree(Wigner_3j, l, L_R, M_R)
+                    decomped = _rank_4_tree(
+                        wigner_3j_coefficients, l, L_R, M_R
+                    )
                     coupling[M_R][rnk][lstr] = decomped
                 elif rank > 4:
                     raise ValueError(
@@ -50,194 +297,3 @@ def get_coupling(Wigner_3j, ldict, L_R=0, **kwargs):
                         % rank
                     )
     return coupling
-
-
-def rank_1_tree(Wigner_3j, l, L_R=0, M_R=0):
-    """
-
-    Parameters
-    ----------
-    Wigner_3j
-    l
-    L_R
-    M_R
-
-    Returns
-    -------
-
-    """
-    # no nodes for rank 1
-
-    mstrs = ace_coupling_utils.get_ms(l, M_R)
-    full_inter_tuples = [()]
-    assert l[0] == L_R, "invalid l=%d for irrep L_R = %d" % (l[0], L_R)
-
-    decomposed = {
-        full_inter_tup: {mstr: 0.0 for mstr in mstrs}
-        for full_inter_tup in full_inter_tuples
-    }
-
-    for inter in full_inter_tuples:
-        for mstr in mstrs:
-            m_ints = [int(b) for b in mstr.split(",")]
-            # m_1  = - M_R
-            conds = m_ints[0] == -M_R
-            if conds:
-                w1 = Wigner_3j[
-                    "%d,%d,%d,%d,%d,%d" % (l[0], m_ints[0], L_R, M_R, 0, 0)
-                ]
-                phase_power = 0
-                phase = (-1) ** phase_power
-                w = phase * w1
-
-                decomposed[inter][mstr] = float(w)
-    return decomposed
-
-
-def rank_2_tree(Wigner_3j, l, L_R=0, M_R=0):
-    """
-
-    Parameters
-    ----------
-    Wigner_3j
-    l
-    L_R
-    M_R
-
-    Returns
-    -------
-
-    """
-    nodes, remainder = ace_coupling_utils.build_quick_tree(l)
-    node = nodes[0]
-    mstrs = ace_coupling_utils.get_ms(l, M_R)
-    full_inter_tuples = [()]
-
-    assert ace_coupling_utils.check_triangle(
-        l[0], l[1], L_R
-    ), "invalid l=(%d,%d) for irrep L_R = %d" % (l[0], l[1], L_R)
-
-    decomposed = {
-        full_inter_tup: {mstr: 0.0 for mstr in mstrs}
-        for full_inter_tup in full_inter_tuples
-    }
-
-    for inter in full_inter_tuples:
-        for mstr in mstrs:
-            m_ints = [int(b) for b in mstr.split(",")]
-            # m_1 + m_2 = M1
-            conds = (m_ints[0] + m_ints[1]) == M_R
-            if conds:
-                w1 = Wigner_3j[
-                    "%d,%d,%d,%d,%d,%d"
-                    % (l[0], m_ints[0], l[1], m_ints[1], L_R, -M_R)
-                ]
-                phase_power = L_R - M_R
-                phase = (-1) ** phase_power
-                w = phase * w1
-
-                decomposed[inter][mstr] = w
-    return decomposed
-
-
-def rank_3_tree(Wigner_3j, l, L_R=0, M_R=0):
-    """
-
-    Parameters
-    ----------
-    Wigner_3j
-    l
-    L_R
-    M_R
-
-    Returns
-    -------
-
-    """
-    full_inter_tuples = ace_coupling_utils.tree_l_inters(l, L_R=L_R, M_R=M_R)
-    mstrs = ace_coupling_utils.get_ms(l, M_R)
-    decomposed = {
-        full_inter_tup: {mstr: 0.0 for mstr in mstrs}
-        for full_inter_tup in full_inter_tuples
-    }
-
-    for inter in full_inter_tuples:
-        L1 = inter[0]
-        for mstr in mstrs:
-            m_ints = [int(b) for b in mstr.split(",")]
-            for M1 in range(-L1, L1 + 1):
-                # m_1 + m_2 = M1
-                # M1 + m_3 = M_R
-                conds = (m_ints[0] + m_ints[1]) == M1 and (
-                    M1 + m_ints[2]
-                ) == M_R
-                if conds:
-                    w1 = Wigner_3j[
-                        "%d,%d,%d,%d,%d,%d"
-                        % (l[0], m_ints[0], l[1], m_ints[1], L1, -M1)
-                    ]
-                    w2 = Wigner_3j[
-                        "%d,%d,%d,%d,%d,%d"
-                        % (L1, M1, l[2], m_ints[2], L_R, -M_R)
-                    ]
-                    phase_power = (L1) - (M1) + (L_R - M_R)
-                    phase = (-1) ** phase_power
-                    w = phase * w1 * w2
-                    decomposed[inter][mstr] = w
-    return decomposed
-
-
-def rank_4_tree(Wigner_3j, l, L_R=0, M_R=0):
-    """
-
-    Parameters
-    ----------
-    Wigner_3j
-    l
-    L_R
-    M_R
-
-    Returns
-    -------
-
-    """
-    nodes, remainder = ace_coupling_utils.build_quick_tree(l)
-    mstrs = ace_coupling_utils.get_ms(l, M_R)
-    full_inter_tuples = ace_coupling_utils.tree_l_inters(l, L_R=L_R, M_R=M_R)
-    decomposed = {
-        full_inter_tup: {mstr: 0.0 for mstr in mstrs}
-        for full_inter_tup in full_inter_tuples
-    }
-
-    for inter in full_inter_tuples:
-        L1, L2 = inter
-        for mstr in mstrs:
-            m_ints = [int(b) for b in mstr.split(",")]
-            for M1 in range(-L1, L1 + 1):
-                for M2 in range(-L2, L2 + 1):
-                    # m_1 + m_2 = M1
-                    # m_4 + m_3 = M2
-                    # M1 + M2 = M_R
-                    conds = (
-                        (m_ints[0] + m_ints[1]) == M1
-                        and (m_ints[2] + m_ints[3]) == M2
-                        and (M1 + M2) == M_R
-                    )
-                    if conds:
-                        w1 = Wigner_3j[
-                            "%d,%d,%d,%d,%d,%d"
-                            % (l[0], m_ints[0], l[1], m_ints[1], L1, -M1)
-                        ]
-                        w2 = Wigner_3j[
-                            "%d,%d,%d,%d,%d,%d"
-                            % (l[2], m_ints[2], l[3], m_ints[3], L2, -M2)
-                        ]
-                        w3 = Wigner_3j[
-                            "%d,%d,%d,%d,%d,%d" % (L1, M1, L2, M2, L_R, -M_R)
-                        ]
-                        phase_power = (L1 + L2) - (M1 + M2) + (L_R - M_R)
-                        phase = (-1) ** phase_power
-                        w = phase * w1 * w2 * w3
-
-                        decomposed[inter][mstr] = w
-    return decomposed

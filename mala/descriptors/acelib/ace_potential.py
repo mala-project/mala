@@ -235,9 +235,9 @@ class ACEPotential:
 
     def __set_bond_base(self):
         """
-        Set bond base ACE_DOCS_MISSING - what does that mean?
+        Set bond base.
 
-        ACE_DOCS_MISSING - what does this function do?
+        ACE_DOCS_MISSING - what does that mean, what does this function do?
         """
         bondstrs = ["[%d, %d]" % (b[0], b[1]) for b in self.__bondlsts]
         bonds = {bondstr: None for bondstr in bondstrs}
@@ -320,8 +320,9 @@ class ACEPotential:
 
     def set_funcs(self, nulst=None, print_0s=True):
         """
-        Set functions. ACE_DOCS_MISSING - what does this function do?
+        Set functions.
 
+        ACE_DOCS_MISSING - what does this function do?
 
         Parameters
         ----------
@@ -399,7 +400,7 @@ class ACEPotential:
 
     def write_pot(self, name):
         """
-        Write coupling coefficients to file
+        Write coupling coefficients to file.
 
         Parameters
         ----------

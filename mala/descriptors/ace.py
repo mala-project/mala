@@ -465,14 +465,14 @@ class ACE(Descriptor):
         # So maybe "reduction coefficients" or something?
         # Or is this really the "coupling type"?
         if self.parameters.ace_coupling_type == "wigner3j":
-            ccs = wigner_coupling.get_coupling(
+            ccs = wigner_coupling.wigner_3j_coupling(
                 self.__precomputed_wigner_3j,
                 ldict,
                 L_R=self.parameters.ace_L_R,
             )
 
         elif self.parameters.ace_coupling_type == "clebsch_gordan":
-            ccs = cg_coupling.get_coupling(
+            ccs = cg_coupling.clebsch_gordan_coupling(
                 self.__precomputed_clebsch_gordan,
                 ldict,
                 L_R=self.parameters.ace_L_R,
