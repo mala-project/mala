@@ -23,12 +23,19 @@ import mala.descriptors.acelib.clebsch_gordan_coupling as cg_coupling
 
 
 class ACE(Descriptor):
-    """Class for calculation and parsing of bispectrum descriptors.
+    """Class for calculation and parsing of ACE descriptors.
 
     Parameters
     ----------
     parameters : mala.common.parameters.Parameters
         Parameters object used to create this object.
+
+    Attributes
+    ----------
+    couplings_yace_file : str
+        File which holds the coupling coefficients. Can be provided by users,
+        in which case consistency will be checked. If no file is detected, a
+        new file is computed.
     """
 
     def __init__(self, parameters):
@@ -39,7 +46,7 @@ class ACE(Descriptor):
         # Both is done via mendeleev. The definition of metal here is
         # "everything in groups 12 and below, including Lanthanoids and
         # Actininoids, excluding hydrogen".
-        self.ionic_radii, self.metal_list = self.__init_element_lists()
+        self._ionic_radii, self._metal_list = self.__init_element_lists()
 
         # Initialize several arrays that are computed using
         # nested for-loops but can be reused.
@@ -47,14 +54,17 @@ class ACE(Descriptor):
         # in the directory where ace.py is located.
         # If a pkl file is detected, the array is loaded from the pkl file,
         # otherwise it is computed and saved to a pkl file.
-        # The arrys are used within the ACE descriptor calculation.
-        self.__precomputed_wigner_3j = self.__init_wigner_3j(
-            self.parameters.ace_reduction_coefficients_lmax
-        )
-
-        self.__precomputed_clebsch_gordan = self.__init_clebsch_gordan(
-            self.parameters.ace_reduction_coefficients_lmax
-        )
+        # The arrays are used within the ACE descriptor calculation.
+        # Which arrays are actually needed depends on which type of coefficients
+        # are used for the ACE descriptor calculation.
+        if self.parameters.ace_coupling_type == "wigner3j":
+            self.__precomputed_wigner_3j = self.__init_wigner_3j(
+                self.parameters.ace_reduction_coefficients_lmax
+            )
+        if self.parameters.ace_coupling_type == "clebsch_gordan":
+            self.__precomputed_clebsch_gordan = self.__init_clebsch_gordan(
+                self.parameters.ace_reduction_coefficients_lmax
+            )
 
         # File which holds the coupling coefficients.
         # Can be provided by users, in which case consistency will be checked.
@@ -62,23 +72,25 @@ class ACE(Descriptor):
         self.couplings_yace_file = None
 
         # Will get filled once the atoms object has been loaded.
-        self._ace_mumax = None
-        self._ace_reference_ensemble = None
+        self.__ace_mumax = None
+        self.__ace_reference_ensemble = None
 
         # Will get filled during calculation of coupling coefficients.
-        self.bonds = None
-        self.maximum_cutoff_factor = None
-        self.cutoff_factors = None
-        self.lambdas = None
-        self.nus = None
-        self.limit_nus = None
+        # ACE_DOCS_MISSING: What is nus/limit_nus? What exactly does
+        # bonds hold?
+        self.__bonds = None
+        self._maximum_cutoff_factor = None
+        self._cutoff_factors = None
+        self.__lambdas = None
+        self.__nus = None
+        self.__limit_nus = None
 
         # These used to live in the parameters subclass for the descriptors,
         # but I have moved them here, because I think they are defaults that
         # barely ever change. I will not be removing them outright, because
         # they may be needed for debugging.
-        self.ace_grid_filter = True
-        self.ace_padfunc = True
+        self.__ace_grid_filter = True
+        self.__ace_padfunc = True
 
         # Consistency checks for the ACE settings.
         if (
@@ -146,6 +158,25 @@ class ACE(Descriptor):
             raise Exception("Unsupported unit for bispectrum descriptors.")
 
     def _calculate(self, outdir, **kwargs):
+        """
+        Perform ACE descriptor calculation.
+
+        This function is the main entry point for the calculation of the
+        bispectrum descriptors. Currently, only LAMMPS is implemented.
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        ace_descriptors_np : numpy.ndarray
+            The calculated bispectrum descriptors.
+        """
         if self.parameters._configuration["lammps"]:
             if find_spec("lammps") is None:
                 printout(
@@ -162,6 +193,19 @@ class ACE(Descriptor):
 
         Creates a LAMMPS instance with appropriate call parameters and uses
         it for the calculation.
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        ace_descriptors_np : numpy.ndarray
+            The calculated bispectrum descriptors.
         """
         # For version compatibility; older lammps versions (the serial version
         # we still use on some machines) have these constants as part of the
@@ -187,22 +231,25 @@ class ACE(Descriptor):
         # Calculate and store the coupling coefficients, if necessary.
         # If coupling coefficients are provided by the user, these are
         # first checked for consistency.
-        self.calculate_bonds_and_cutoff()
+        # The bonds and cutoff have to always be computed, the coupling
+        # coefficients only, if none were provided.
+        self._calculate_bonds_and_cutoff()
         self.couplings_yace_file = self.check_coupling_coeffs(
             self.couplings_yace_file
         )
         if self.couplings_yace_file is None:
-            self.couplings_yace_file = self.calculate_coupling_coeffs()
+            self.couplings_yace_file = self._calculate_coupling_coeffs()
 
-        # Check the cutoff radius.
-        if self.parameters.ace_cutoff < self.maximum_cutoff_factor:
+        # Check the cutoff radius, i.e., compare that the user choice
+        # is not too small compared to those requird by ACE.
+        if self.parameters.ace_cutoff < self._maximum_cutoff_factor:
             printout(
                 "One or more automatically generated ACE cutoff radii is "
                 "larger than the input cutoff radius. Updating input cutoff "
                 "radius stored in parameters.descriptors.ace_cutoff "
-                "accordingly"
+                "accordingly."
             )
-            self.parameters.ace_cutoff = self.maximum_cutoff_factor
+            self.parameters.ace_cutoff = self._maximum_cutoff_factor
 
         # Create LAMMPS instance.
         lammps_dict = {
@@ -344,59 +391,69 @@ class ACE(Descriptor):
         else:
             return None
 
-    def calculate_bonds_and_cutoff(self):
-        """This part has to be always calculated, while
-        calculate_coupling_coeffs is only calculated sometimes."""
+    def _calculate_bonds_and_cutoff(self):
+        """
+        Calculate bonds and cutoff radii.
+
+        This is essentially part of the computation of the coupling
+        coefficients, but a part that has to be done every time,
+        since it initializes the cutoff radii."""
         ncols0 = 3
 
+        # "G" for grid has to be added to the element list.
         element_list = sorted(list(set(self._atoms.symbols))) + ["G"]
 
-        self.bonds = [p for p in itertools.product(element_list, element_list)]
+        # Bond types correspond to all bonds between elements.
+        self.__bonds = [
+            p for p in itertools.product(element_list, element_list)
+        ]
 
+        # Default settings for the cutoff radii and lambda values.
+        # ACE_DOCS_MISSING: What are the lambda values?
         (
             rc_range,
             rc_default,
             lmb_default,
         ) = self.__default_settings()
 
-        self.cutoff_factors = [float(k) for k in rc_default.split()[2:]]
-        self.maximum_cutoff_factor = np.max(
-            self.cutoff_factors
-        )  # set radial cutoff based on automatically generated ACE cutoffs
-        self.lambdas = [float(k) for k in lmb_default.split()[2:]]
-        assert len(self.bonds) == len(self.cutoff_factors) and len(
-            self.bonds
+        self._cutoff_factors = [float(k) for k in rc_default.split()[2:]]
+        self._maximum_cutoff_factor = np.max(self._cutoff_factors)
+        self.__lambdas = [float(k) for k in lmb_default.split()[2:]]
+        assert len(self.__bonds) == len(self._cutoff_factors) and len(
+            self.__bonds
         ) == len(
-            self.lambdas
+            self.__lambdas
         ), "you must have rcutfac and lmbda defined for each bond type"
-
-        self.nus, self.limit_nus = self.__calculate_limit_nus()
+        # ACE_DOCS_MISSING: What are the nus/limit_nus settings?
+        self.__nus, self.__limit_nus = self.__calculate_limit_nus()
 
         # NOTE to use unique ACE types for gridpoints, we must subtract off
         #  dummy descriptor counts (for non-grid element types)
         self.feature_size = (
-            ncols0 + len(self.limit_nus) - (len(element_list) - 1)
+            ncols0 + len(self.__limit_nus) - (len(element_list) - 1)
         )
 
-    def calculate_coupling_coeffs(self):
+    def _calculate_coupling_coeffs(self):
         """
         Calculate coupling coefficients and save them to file.
 
-        @JamesGoff: Is there a good reference for the equations implemented
-        here?
+        Calculation and saving is done via the ACEPotential class.
+
+        ACE_DOCS_MISSING: Is there a good reference for the equations
+        implemented here? Should we just try to explain them here or point
+        to appropriate material?
 
         Returns
         -------
         coupling_file : str
             Path to the coupling coefficients file.
         """
+        # "G" for grid has to be added to the element list.
         element_list = sorted(list(set(self._atoms.symbols))) + ["G"]
 
-        ncols0 = 3
-        # printout("global max cutoff (angstrom)", max(rcutfac))
-        rcinner = [0.0] * len(self.bonds)
-        drcinner = [0.0] * len(self.bonds)
-
+        # ACE_DOCS_MISSING: What do these three variables mean?
+        rcinner = [0.0] * len(self.__bonds)
+        drcinner = [0.0] * len(self.__bonds)
         ldict = {
             ranki: li
             for ranki, li in zip(
@@ -404,7 +461,11 @@ class ACE(Descriptor):
             )
         }
 
-        # load or generate generalized coupling coefficients
+        # ACE_DOCS_MISSING: Is "coupling type" really a good name for
+        # this parameter? It seems to be about the type of matrices
+        # used for the reduction of the spherical harmonics products.
+        # So maybe "reduction coefficients" or something?
+        # Or is this really the "coupling type"?
         if self.parameters.ace_coupling_type == "wigner3j":
             ccs = wigner_coupling.get_coupling(
                 self.__precomputed_wigner_3j,
@@ -426,29 +487,47 @@ class ACE(Descriptor):
                 + " not recongised"
             )
 
-        # permutation symmetry adapted ACE labels
+        # Calculating permutation symmetry adapted ACE labels.
+        # ACE_DOCS_MISSING: What are these labels?
         Apot = ACEPotential(
             element_list,
-            self._ace_reference_ensemble,
+            self.__ace_reference_ensemble,
             self.parameters.ace_ranks,
             self.parameters.ace_nmax,
             self.parameters.ace_lmax,
             max(self.parameters.ace_nmax),
-            self.cutoff_factors,
-            self.lambdas,
+            self._cutoff_factors,
+            self.__lambdas,
             ccs[self.parameters.ace_M_R],
             rcinner,
             drcinner,
             lmin=self.parameters.ace_lmin,
         )
 
-        Apot.set_funcs(nulst=self.limit_nus, muflg=True, print_0s=True)
+        # ACE_DOCS_MISSING: What does this function do?
+        Apot.set_funcs(nulst=self.__limit_nus, muflg=True, print_0s=True)
+
+        # Write the coupling coefficients to file.
         return Apot.write_pot(
             "coupling_coefficients_" + str.join("_", element_list[:-1])
         )
 
     def __calculate_limit_nus(self):
-        # Also, maybe make it private?
+        """
+        Calculate the limit of nus.
+
+        ACE_DOCS_MISSING: What are nus and limit_nus?
+
+        Returns
+        -------
+        nus : list
+            List of nus. ACE_DOCS_MISSING: What are nus?
+
+        limit_nus : list
+            List of limit nus. ACE_DOCS_MISSING: What are limit_nus?
+        """
+        # ACE_DOCS_MISSING: Add maybe a general outline of what is being
+        # done here.
         ranked_chem_nus = []
         for ind, rank in enumerate(self.parameters.ace_ranks):
             rank = int(rank)
@@ -456,7 +535,7 @@ class ACE(Descriptor):
                 rank,
                 int(self.parameters.ace_nmax[ind]),
                 int(self.parameters.ace_lmax[ind]),
-                int(self._ace_mumax),
+                int(self.__ace_mumax),
                 lmin=int(self.parameters.ace_lmin[ind]),
             )
             ranked_chem_nus.append(PA_lammps)
@@ -485,33 +564,50 @@ class ACE(Descriptor):
         byattyp, byattypfiltered = self.__sort_by_atom_type(
             nus, len(list(set(self._atoms.symbols))) + 1
         )
-        if self.ace_grid_filter:
+        if self.__ace_grid_filter:
             limit_nus = byattypfiltered[
                 "%d" % (len(list(set(self._atoms.symbols))))
             ]
-            assert self.ace_padfunc, (
+            assert self.__ace_padfunc, (
                 "Must pad with at least 1 other basis function for other "
                 "element types to work in LAMMPS - set padfunc=True"
             )
-            if self.ace_padfunc:
+            if self.__ace_padfunc:
                 for muii in musins:
                     limit_nus.append(byattypfiltered["%d" % muii][0])
-        elif not self.ace_grid_filter:
+        elif not self.__ace_grid_filter:
             limit_nus = byattyp["%d" % (len(list(set(self._atoms.symbols))))]
-            if self.ace_padfunc:
+            if self.__ace_padfunc:
                 for muii in musins:
                     limit_nus.append(byattyp["%d" % muii][0])
-        # printout(
-        #    "all basis functions", len(nus), "grid subset", len(limit_nus)
-        # )
 
         return nus, limit_nus
 
     def __default_settings(self):
-        rc_range = {bp: None for bp in self.bonds}
-        rin_def = {bp: None for bp in self.bonds}
-        rc_def = {bp: None for bp in self.bonds}
-        fac_per_elem = {key: 0.5 for key in list(self.ionic_radii.keys())}
+        """
+        Set default cutoff factors and lambdas.
+
+        ACE_DOCS_MISSING what does "default" mean here? What are the
+        assumptions we make to get to "default"?
+
+        Returns
+        -------
+        rc_range : dict
+            Dictionary with bond types as keys and cutoff radii ranges as
+            values.
+
+        rc_def_str : str
+            String with default cutoff radii values.
+
+        lmb_def_str : str
+            String with default lambda values.
+        """
+        # ACE_DOCS_MISSING: Add maybe a general outline of what is being
+        # done here.
+        rc_range = {bp: None for bp in self.__bonds}
+        rin_def = {bp: None for bp in self.__bonds}
+        rc_def = {bp: None for bp in self.__bonds}
+        fac_per_elem = {key: 0.5 for key in list(self._ionic_radii.keys())}
         fac_per_elem_sub = {
             "H": 0.61,
             "Be": 0.52,
@@ -524,7 +620,7 @@ class ACE(Descriptor):
         }
         fac_per_elem.update(fac_per_elem_sub)
 
-        for bond in self.bonds:
+        for bond in self.__bonds:
             rcmini, rcmaxi = self.__default_cutoff_factors(bond)
             defaultri = (rcmaxi + rcmini) / np.sum(
                 [fac_per_elem[elem] * 2 for elem in bond]
@@ -538,24 +634,45 @@ class ACE(Descriptor):
         # shift = ( max(rc_def.values()) - min(rc_def.values())  )/2
         shift = np.std(list(rc_def.values()))
         # if apply_shift:
-        for bond in self.bonds:
+        for bond in self.__bonds:
             if rc_def[bond] != max(rc_def.values()):
                 if self.parameters.ace_apply_shift:
                     rc_def[bond] = rc_def[bond] + shift  # *nshell
                 else:
                     rc_def[bond] = rc_def[bond]  # *nshell
         default_lmbs = [i * 0.05 for i in list(rc_def.values())]
-        rc_def_lst = ["%1.3f"] * len(self.bonds)
+        rc_def_lst = ["%1.3f"] * len(self.__bonds)
         rc_def_str = "rcutfac = " + "  ".join(b for b in rc_def_lst) % tuple(
             list(rc_def.values())
         )
-        lmb_def_lst = ["%1.3f"] * len(self.bonds)
+        lmb_def_lst = ["%1.3f"] * len(self.__bonds)
         lmb_def_str = "lambda = " + "  ".join(b for b in lmb_def_lst) % tuple(
             default_lmbs
         )
         return rc_range, rc_def_str, lmb_def_str
 
     def __default_cutoff_factors(self, elms):
+        """
+        Compute default cutoff factors.
+
+        ACE_DOCS_MISSING: What are the assumptions made here? How is this
+        computation performed?
+
+        Parameters
+        ----------
+        elms
+
+        Returns
+        -------
+        rcmini : float
+            Minimum cutoff factor.
+
+        rcmaxi : float
+            Maximum cutoff factor.
+        """
+        # ACE_DOCS_MISSING: Add maybe a general outline of what is being
+        # done here.
+
         elms = sorted(elms)
         elm1, elm2 = tuple(elms)
         try:
@@ -564,7 +681,7 @@ class ACE(Descriptor):
             atnum1 = ase.data.atomic_numbers["Au"]
         covr1 = ase.data.covalent_radii[atnum1]
         vdwr1 = ase.data.vdw_radii[atnum1]
-        ionr1 = self.ionic_radii[elm1]
+        ionr1 = self._ionic_radii[elm1]
         if np.isnan(vdwr1):
             printout(
                 "NOTE: using dummy VDW radius of 2* covalent radius for %s"
@@ -577,7 +694,7 @@ class ACE(Descriptor):
             atnum2 = ase.data.atomic_numbers["Au"]
         covr2 = ase.data.covalent_radii[atnum2]
         vdwr2 = ase.data.vdw_radii[atnum2]
-        ionr2 = self.ionic_radii[elm2]
+        ionr2 = self._ionic_radii[elm2]
         if np.isnan(vdwr2):
             printout(
                 "NOTE: using dummy VDW radius of 2* covalent radius for %s"
@@ -586,12 +703,12 @@ class ACE(Descriptor):
             vdwr2 = 2 * covr2
         minbond = ionr1 + ionr2
         if self.parameters.ace_metal_max:
-            if elm1 not in self.metal_list and elm2 not in self.metal_list:
+            if elm1 not in self._metal_list and elm2 not in self._metal_list:
                 maxbond = vdwr1 + vdwr2
-            elif elm1 in self.metal_list and elm2 not in self.metal_list:
+            elif elm1 in self._metal_list and elm2 not in self._metal_list:
                 maxbond = ionr1 + vdwr2
                 minbond = (ionr1 + ionr2) * 0.8
-            elif elm1 in self.metal_list and elm2 in self.metal_list:
+            elif elm1 in self._metal_list and elm2 in self._metal_list:
                 maxbond = ionr1 + ionr2
                 minbond = (ionr1 + ionr2) * 0.8
             else:
@@ -612,6 +729,27 @@ class ACE(Descriptor):
 
     @staticmethod
     def __sort_by_atom_type(nulst, remove_type=2):
+        """
+        Sort... ACE_DOCS_MISSING: I am not sure what is being sorted.
+
+        ACE_DOCS_MISSING: In what format is the sorted result returned exactly?
+
+        Parameters
+        ----------
+        nulst : list
+            ACE_DOCS_MISSING: What exactly is this?
+
+        remove_type : int
+            ACE_DOCS_MISSING: What is this parameter? Why is the default 2?
+
+        Returns
+        -------
+        byattyp : dict
+            ACE_DOCS_MISSING: What is this?
+
+        byattypfiltered : dict
+            ACE_DOCS_MISSING: What is this?
+        """
         mu0s = []
         for nu in nulst:
             mu0 = nu.split("_")[0]
@@ -630,7 +768,29 @@ class ACE(Descriptor):
         return byattyp, byattypfiltered
 
     def __init_wigner_3j(self, lmax):
-        # returns dictionary of all cg coefficients to be used at a given value of lmax
+        """
+        Compute Wigner 3j coefficients.
+
+        Returns dictionary of all cg coefficients to be used at a given value
+        of lmax. Reads these coefficients from a pickle file, if one is found,
+        and computes and stores them otherwise. Since these coefficients
+        are the same across different calculations, they are stored in the
+        MALA directory upon first execution of the code and can be reused
+        essentially always.
+        ACE_DOCS_MISSING: What reference can we give for this
+        function? Should we just use the ACE paper by Ralf Drautz?
+
+        Parameters
+        ----------
+        lmax : int
+            Maximum l value. ACE_DOCS_MISSING: What is l?
+
+        Returns
+        -------
+        wigner : dict
+            Dictionary of all Wigner 3j coefficients to be used at a given
+            value of lmax.
+        """
         try:
             with open(
                 "%s/wig.pkl" % os.path.dirname(os.path.abspath(__file__)), "rb"
@@ -662,7 +822,29 @@ class ACE(Descriptor):
         return cg
 
     def __init_clebsch_gordan(self, lmax):
-        # returns dictionary of all cg coefficients to be used at a given value of lmax
+        """
+        Compute Clebsch-Gordan coefficients.
+
+        Returns dictionary of all cg coefficients to be used at a given value
+        of lmax. Reads these coefficients from a pickle file, if one is found,
+        and computes and stores them otherwise. Since these coefficients
+        are the same across different calculations, they are stored in the
+        MALA directory upon first execution of the code and can be reused
+        essentially always.
+        ACE_DOCS_MISSING: What reference can we give for this
+        function? Should we just use the ACE paper by Ralf Drautz?
+
+        Parameters
+        ----------
+        lmax : int
+            Maximum l value. ACE_DOCS_MISSING: What is l?
+
+        Returns
+        -------
+        cg : dict
+            Dictionary of all Clebsch-Gordan coefficients to be used at a given
+            value of lmax.
+        """
         try:
             with open(
                 "%s/cg.pkl" % os.path.dirname(os.path.abspath(__file__)), "rb"
@@ -700,8 +882,8 @@ class ACE(Descriptor):
 
         These depend on the number of elements.
         """
-        self._ace_mumax = len(list(set(self._atoms.symbols))) + 1
-        self._ace_reference_ensemble = [0.0] * self._ace_mumax
+        self.__ace_mumax = len(list(set(self._atoms.symbols))) + 1
+        self.__ace_reference_ensemble = [0.0] * self.__ace_mumax
 
     @staticmethod
     def __init_element_lists():
