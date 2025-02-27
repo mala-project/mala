@@ -1,110 +1,17 @@
-from sympy.combinatorics import Permutation
 import math
 import numpy as np
+
+from mala.descriptors.acelib.common_utils import (
+    flatten,
+    group_vec_by_node,
+    group_vec_by_orbits,
+)
 from mala.descriptors.acelib.tree_sorting import tree
 import itertools
 
-local_sigma_c_partitions = {
-    1: [(1,)],
-    2: [(2,)],
-    3: [(2, 1)],
-    4: [(4,), (2, 2)],
-    5: [(4, 1), (2, 2, 1)],
-    6: [(4, 2), (2, 2, 2)],
-    7: [(4, 2, 1), (2, 2, 2, 1)],
-    8: [(4, 4), (4, 2, 2), (2, 2, 2, 2)],
-}
 
 # library of functions and classes for building young diagrams and filling them
 # this includes young subgroup fillings within orbits of irreps of S_N
-global_sigma_c_parts = {}
-
-
-def Reverse(v):
-    vtmp = v.copy()
-    vtmp.reverse()
-    return vtmp
-
-
-def flatten(lstoflsts):
-    try:
-        flat = [i for sublist in lstoflsts for i in sublist]
-        return flat
-    except TypeError:
-        return lstoflsts
-
-
-def filled_perm(tups, rank):
-    allinds = list(range(rank))
-    try:
-        remainders = [i for i in allinds if i not in flatten(tups)]
-        alltups = tups + tuple([tuple([k]) for k in remainders])
-    except TypeError:
-        remainders = [i for i in allinds if i not in flatten(flatten(tups))]
-        alltups = tups + tuple([tuple([k]) for k in remainders])
-    return Permutation(alltups)
-
-
-def is_column_sort(partitionfill, strict_col_sort=False):
-    lens = [len(x) for x in partitionfill]
-    ranges = [list(range(ln)) for ln in lens]
-    cols = list(set(flatten(ranges)))
-    bycol = {col: [] for col in cols}
-    for subrange, orbitlst in zip(ranges, partitionfill):
-        for colidx, orbitval in zip(subrange, orbitlst):
-            bycol[colidx].append(orbitval)
-    coltups = [tuple(bycol[colidx]) for colidx in cols]
-    sortedcols = [tuple(sorted(bycol[colidx])) for colidx in cols]
-    # check to see if columns are sorted
-    sortedcol_flag = all([a == b for a, b in zip(coltups, sortedcols)])
-    if strict_col_sort:
-        sortedcol_flag = sortedcol_flag and all(
-            [len(list(set(a))) == len(a) for a in coltups]
-        )
-    return sortedcol_flag
-
-
-def is_row_sort(partitionfill):
-    all_srt = []
-    for orbit in partitionfill:
-        logi = tuple(sorted(orbit)) == orbit
-        all_srt.append(logi)
-    return all(all_srt)
-
-
-def group_vec_by_node(vec, nodes, remainder=None):
-    # vec_by_tups = [tuple([vec[node[0]],vec[node[1]]]) for node in nodes]
-    vec_by_tups = []
-    for node in nodes:
-        orbit_list = []
-        for inode in node:
-            orbit_list.append(vec[inode])
-        orbit_tup = tuple(orbit_list)
-        vec_by_tups.append(orbit_tup)
-    if remainder != None:
-        vec_by_tups = vec_by_tups + [tuple([vec[remainder]])]
-    return vec_by_tups
-
-
-def group_vec_by_orbits(vec, part):
-    ind_range = np.sum(part)
-    assert len(vec) == ind_range, "vector must be able to fit in the partion"
-    count = 0
-    by_orbits = []
-    for orbit in part:
-        orbit_vec = []
-        for i in range(orbit):
-            orbit_vec.append(vec[count])
-            count += 1
-        by_orbits.append(tuple(orbit_vec))
-    return tuple(by_orbits)
-
-
-def unique_perms(vec):
-    all_perms = [p for p in itertools.permutations(vec)]
-    return sorted(list(set(all_perms)))
-
-
 class YoungSubgroup:
     # Class for young tableau with subgroup filling options
 
@@ -143,7 +50,7 @@ class YoungSubgroup:
             good_partitions = []
             for norbits in range(min_orbits, max_orbits + 1):
                 possible_parts = [
-                    tuple(Reverse(sorted(p)))
+                    tuple(self.Reverse(sorted(p)))
                     for p in itertools.product(orb_base, repeat=norbits)
                     if np.sum(p) == self.rank and max(p) <= 2**max_nc2
                 ]
@@ -161,12 +68,12 @@ class YoungSubgroup:
             indi_to_ii[indi] = ii
 
         place_holders = [indi_to_ii[ik] for ik in inds]
-        if self.partition == None:
+        if self.partition is None:
             self.partition = partition
         mapped_perm = tuple(place_holders)
         fill = group_vec_by_orbits(mapped_perm, partition)
-        row_sort = is_row_sort(fill)
-        col_sort = is_column_sort(fill)
+        row_sort = self.is_row_sort(fill)
+        col_sort = self.is_column_sort(fill)
         if semistandard:
             return row_sort and col_sort
         elif not semistandard:
@@ -188,7 +95,7 @@ class YoungSubgroup:
         subgroup_fills = []
         fills_perpart = {tuple(partition): [] for partition in partitions}
         part_perfill = {}
-        all_perms = unique_perms(inds)
+        all_perms = self.unique_perms(inds)
 
         # get the full automorphism group including any expansion due to degeneracy
         # G_N = get_auto_part(inds,partitions[0],add_degen_autos=True,part_only=False)
@@ -249,3 +156,41 @@ class YoungSubgroup:
             )
             pts.sort(key=lambda x: max(x), reverse=True)
             part_perfill[sgf] = pts
+
+    @staticmethod
+    def unique_perms(vec):
+        all_perms = [p for p in itertools.permutations(vec)]
+        return sorted(list(set(all_perms)))
+
+    @staticmethod
+    def is_column_sort(partitionfill, strict_col_sort=False):
+        lens = [len(x) for x in partitionfill]
+        ranges = [list(range(ln)) for ln in lens]
+        cols = list(set(flatten(ranges)))
+        bycol = {col: [] for col in cols}
+        for subrange, orbitlst in zip(ranges, partitionfill):
+            for colidx, orbitval in zip(subrange, orbitlst):
+                bycol[colidx].append(orbitval)
+        coltups = [tuple(bycol[colidx]) for colidx in cols]
+        sortedcols = [tuple(sorted(bycol[colidx])) for colidx in cols]
+        # check to see if columns are sorted
+        sortedcol_flag = all([a == b for a, b in zip(coltups, sortedcols)])
+        if strict_col_sort:
+            sortedcol_flag = sortedcol_flag and all(
+                [len(list(set(a))) == len(a) for a in coltups]
+            )
+        return sortedcol_flag
+
+    @staticmethod
+    def is_row_sort(partitionfill):
+        all_srt = []
+        for orbit in partitionfill:
+            logi = tuple(sorted(orbit)) == orbit
+            all_srt.append(logi)
+        return all(all_srt)
+
+    @staticmethod
+    def Reverse(v):
+        vtmp = v.copy()
+        vtmp.reverse()
+        return vtmp

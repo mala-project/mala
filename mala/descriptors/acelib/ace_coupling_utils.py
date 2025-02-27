@@ -10,11 +10,13 @@ from sympy.combinatorics import Permutation
 
 from mala.descriptors.acelib.young import (
     YoungSubgroup,
-    local_sigma_c_partitions,
     flatten,
-    group_vec_by_node,
 )
-from mala.descriptors.acelib.symmetric_grp_manip import (
+from mala.descriptors.acelib.common_utils import (
+    group_vec_by_node,
+    local_sigma_c_partitions,
+)
+from mala.descriptors.acelib.symmetric_group_manipulations import (
     leaf_filter,
     get_degen_orb,
     enforce_sorted_orbit,
@@ -811,17 +813,6 @@ def get_mu_nu_rank(nu_in):
         nu = nu_in
         nu_splt = nu.split(",")
         return int(len(nu_splt) / 2)
-
-
-def filled_perm(tups, rank):
-    allinds = list(range(rank))
-    try:
-        remainders = [i for i in allinds if i not in flatten(tups)]
-        alltups = tups + tuple([tuple([k]) for k in remainders])
-    except TypeError:
-        remainders = [i for i in allinds if i not in flatten(flatten(tups))]
-        alltups = tups + tuple([tuple([k]) for k in remainders])
-    return Permutation(alltups)
 
 
 def lammps_remap(PA_labels, rank, allowed_mus=[0]):

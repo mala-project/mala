@@ -1,7 +1,9 @@
 from mala.descriptors.acelib.young import (
-    local_sigma_c_partitions,
     flatten,
+)
+from mala.descriptors.acelib.common_utils import (
     group_vec_by_orbits,
+    local_sigma_c_partitions,
 )
 
 

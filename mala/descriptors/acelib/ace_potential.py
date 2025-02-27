@@ -126,6 +126,9 @@ class ACEPotential:
         nus.sort(key=lambda x: mu0s[nus_unsort.index(x)], reverse=False)
         self.nus = nus
         self.set_funcs(nus)
+        self.nus_per_rank = None
+        self.funcs = None
+        self.permunu = None
 
     def set_embeddings(
         self, npoti="FinnisSinclair", FSparams=[1.0, 1.0]
