@@ -629,8 +629,8 @@ def generate_nl(rank, nmax, lmax, mumax=1, lmin=0, L_R=0, all_perms=False):
     nrng = range(1, nmax + 1)
     lrng = range(lmin, lmax + 1)
 
-    mus = ind_vec(murng, rank)
-    ns = ind_vec(nrng, rank)
+    mus = create_unique_combinations(murng, rank)
+    ns = create_unique_combinations(nrng, rank)
     ls = generate_l_LR(lrng, rank, L_R)
 
     linters_per_l = {
@@ -758,12 +758,10 @@ def build_and_write_to_tabulated(
     PA_per_nlblock = {}
     for nin in reduced_nvecs:
         for lin in lvecs:
-            max_labs, all_labs, labels_per_block, original_spans = tree_labels(
-                nin, lin
+            max_labs, all_labs, labels_per_block, original_spans = (
+                generate_tree_labels(nin, lin)
             )
-            combined_labs = combine_blocks(
-                labels_per_block, lin, original_spans
-            )
+            combined_labs = combine_blocks(labels_per_block, lin)
             nl = (nin, lin)
             lspan_perm = list(original_spans.keys())[0]
             parity_span = [
@@ -790,7 +788,7 @@ def build_and_write_to_tabulated(
                 + ",".join(lstrlst) % tuple(lin)
             )
             for lab in PA_labels:
-                mu0, mu, n, l, L = get_mu_n_l(lab, return_L=True)
+                mu0, mu, n, l, L = calculate_mu_n_l(lab, return_L=True)
                 simple_str = (
                     ",".join(nstrlst) % tuple(n)
                     + "_"
@@ -839,7 +837,7 @@ def read_from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
     rank = len(l)
     Lveclst = ["%d"] * (rank - 2)
     vecstrlst = ["%d"] * rank
-    mun_tupped = muvec_nvec_combined(mu, n)
+    mun_tupped = combine_muvector_nvector(mu, n)
     all_labels = []
     for mun_tup in mun_tupped:
         mappedn, mappedl, mprev_n, mprev = get_mapped(mun_tup, l)
@@ -887,15 +885,22 @@ def read_from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
 
 def get_mapped(nin, lin):
     """
+    Get a mapped version of nin and lin.
+
+    ACE_DOCS_MISSING - what does this function do?
 
     Parameters
     ----------
-    nin
-    lin
+    nin : list
+        First list to map.
+
+    lin : list
+        Second list to map.
 
     Returns
     -------
-
+    mappedn : tuple
+        ACE_DOCS_MISSING.
     """
     N = len(lin)
     uniques = list(set(lin))
@@ -920,17 +925,22 @@ def get_mapped(nin, lin):
     return mappedn, mappedl, mprev_n, mprev
 
 
-def muvec_nvec_combined(mu, n):
+def combine_muvector_nvector(mu, n):
     """
+    Tuple vectors mu and n.
 
     Parameters
     ----------
-    mu
-    n
+    mu : list
+        Vector for mu.
+
+    n : list
+        Vector for n.
 
     Returns
     -------
-
+    tuppled : list
+        List of tuples of mu and n.
     """
     mu = sorted(mu)
     # n = sorted(n)
@@ -952,17 +962,22 @@ def muvec_nvec_combined(mu, n):
     return tupped
 
 
-def ind_vec(lrng, size):
+def create_unique_combinations(lrng, size):
     """
+    Create all unique combinations of a size from integers in a range.
 
     Parameters
     ----------
-    lrng
-    size
+    lrng : range
+        Range of l-values.
+
+    size : int
+        Size of combinations to be created.
 
     Returns
     -------
-
+    uniques : list
+        List of unique combinations.
     """
     uniques = []
     combs = itertools.combinations_with_replacement(lrng, size)
@@ -975,20 +990,26 @@ def ind_vec(lrng, size):
     return uniques
 
 
-def get_mu_n_l(nu_in, return_L=False, **kwargs):
+def calculate_mu_n_l(nu_in, return_L=False):
     """
+    Calculate mu, n and l from nu.
+
+    ACE_DOCS_MISSING - what does this function do exactly?
 
     Parameters
     ----------
-    nu_in
-    return_L
-    kwargs
+    nu_in : str
+        ACE_DOCS_MISSING
+
+    return_L : bool
+        Whether to return L.
 
     Returns
     -------
-
+    mu_n_l : tuple
+        Tuple containing mu0, mu, n and l (and L, if return_L is True).
     """
-    rank = get_mu_nu_rank(nu_in)
+    rank = calculate_mu_nu_rank(nu_in)
     if len(nu_in.split("_")) > 1:
         if len(nu_in.split("_")) == 2:
             nu = nu_in.split("_")[-1]
@@ -1020,16 +1041,21 @@ def get_mu_n_l(nu_in, return_L=False, **kwargs):
         return mu0, mu, n, l
 
 
-def get_mu_nu_rank(nu_in):
+def calculate_mu_nu_rank(nu_in):
     """
+    Calculate mu-nu rank from nu.
+
+    ACE_DOCS_MISSING - what does this function do exactly?
 
     Parameters
     ----------
-    nu_in
+    nu_in : str
+        ACE_DOCS_MISSING
 
     Returns
     -------
-
+    mu_nu_rank : int
+        Rank computed from label.
     """
     if len(nu_in.split("_")) > 1:
         assert len(nu_in.split("_")) <= 3, (
@@ -1047,18 +1073,27 @@ def get_mu_nu_rank(nu_in):
 
 def lammps_remap(PA_labels, rank, allowed_mus=[0]):
     """
+    Remap PA labels for LAMMPS.
+
+    ACE_DOCS_MISSING - from what to what does this map?
 
     Parameters
     ----------
-    PA_labels
-    rank
-    allowed_mus
+    PA_labels : list
+        List of PA labels to be remapped.
+
+    rank : int
+        Rank used for the remapping.
+
+    allowed_mus : list
+        Allowed mu values for the remapping.
 
     Returns
     -------
-
+    remapped : tuple
+        Tuple contain the remapped labels (fs labels, FS=Finnis Sinclair?
+        ACE_DOCS_MISSING?) and labels that are not compatible.
     """
-    # transforms_all ={ 4: [((0,1),(2,),(3,)), ((0,),(1,),(2,3)), ((0,1),(2,3)), ((0,2),(1,3)),((0,3,1,2)),((0,2,1,3)),((0,3),(1,2))]}
     transforms_all = {
         4: [
             ((0, 1), (2,), (3,)),
@@ -1109,7 +1144,7 @@ def lammps_remap(PA_labels, rank, allowed_mus=[0]):
     fs_labs = []
     not_compatible = []
     for lab in PA_labels:
-        mu0, mu, n, l, Lraw = get_mu_n_l(lab, return_L=True)
+        mu0, mu, n, l, Lraw = calculate_mu_n_l(lab, return_L=True)
         nl = (tuple(mu), tuple(n), tuple(l))
         nl_tup = tuple([(mui, ni, li) for mui, ni, li in zip(mu, n, l)])
         if nl in all_nl[mu0]:
@@ -1184,18 +1219,25 @@ def lammps_remap(PA_labels, rank, allowed_mus=[0]):
     return fs_labs, not_compatible
 
 
-def simple_parity_filt(l, inters, even=True):
+def simple_parity_filter(l, inters, even=True):
     """
+    Filter parity in ... ACE_DOCS_MISSING
 
     Parameters
     ----------
-    l
-    inters
-    even
+    l : list
+        ACE_DOCS_MISSING
+
+    inters :
+        ACE_DOCS_MISSING
+
+    even : bool
+        Control for which parity to filter.
 
     Returns
     -------
-
+    inters_filt : list
+        inters (ACE_DOCS_MISSING) filtered.
     """
     nodes, remainder = build_quick_tree(l)
     base_ls = group_vector_by_nodes(l, nodes, remainder=remainder)
@@ -1255,17 +1297,24 @@ def simple_parity_filt(l, inters, even=True):
     return inters_filt
 
 
-def get_highest_coupling_representation(lp, lref):
+def calculate_highest_coupling_representation(lp, lref):
     """
+    Calculate the highest coupling representation.
+
+    ACE_DOCS_MISSING - what does this function do exactly?
 
     Parameters
     ----------
-    lp
-    lref
+    lp : list
+        ACE_DOCS_MISSING
+
+    lref : list
+        ACE_DOCS_MISSING
 
     Returns
     -------
-
+    highest_rep : tuple
+        ACE_DOCS_MISSING
     """
     rank = len(lp)
     coupling_reps = local_sigma_c_partitions[rank]
@@ -1284,19 +1333,27 @@ def get_highest_coupling_representation(lp, lref):
     return highest_rep
 
 
-def tree_labels(nin, lin, L_R=0, M_R=0):
+def generate_tree_labels(nin, lin, L_R=0):
     """
+    Generate tree labels.
+
+    ACE_DOCS_MISSING - Also should this be moved to tree_sorting.py?
 
     Parameters
     ----------
-    nin
-    lin
-    L_R
-    M_R
+    nin : list
+        ACE_DOCS_MISSING
+
+    lin : list
+        ACE_DOCS_MISSING
+
+    L_R : int
 
     Returns
     -------
-
+    tree_labels : tuple
+        Tuple containing max_labs, all_labs, labels_per_block and
+        original_spans.
     """
     rank = len(lin)
     ysgi = YoungSubgroup(rank)
@@ -1321,7 +1378,7 @@ def tree_labels(nin, lin, L_R=0, M_R=0):
         lperms_tmp = []
         used_hrep = []
         for lperm in lperms:
-            hrep = get_highest_coupling_representation(
+            hrep = calculate_highest_coupling_representation(
                 tuple(lperm), tuple(lperms[0])
             )
             if hrep not in used_hrep:
@@ -1408,7 +1465,7 @@ def tree_labels(nin, lin, L_R=0, M_R=0):
         used_ns = []
         used_ids = []
         for nu in labs:
-            mu0, _, ntst, ltst, L = get_mu_n_l(nu, return_L=True)
+            mu0, _, ntst, ltst, L = calculate_mu_n_l(nu, return_L=True)
             ltree = [(li, ni) for ni, li in zip(ntst, ltst)]  # sort first on n
             tree_i = build_full_tree(ltree, L, L_R)
             tid = tree_i.tree_id
@@ -1436,23 +1493,29 @@ def tree_labels(nin, lin, L_R=0, M_R=0):
     return max_labs, all_labs, labels_per_block, original_joint_span
 
 
-def combine_blocks(blocks, lin, original_spans, L_R=0):
+def combine_blocks(blocks, lin, L_R=0):
     """
+    Recombine trees from multiple permutations of l.
+
+    ACE_DOCS_MISSING
 
     Parameters
     ----------
-    blocks
-    lin
-    original_spans
-    L_R
+    blocks : dict
+        ACE_DOCS_MISSING
+
+    lin : list
+        ACE_DOCS_MISSING
+
+    L_R : int
+        ACE_DOCS_MISSING
 
     Returns
     -------
-
+    combined_labs : list
+        ACE_DOCS_MISSING
     """
-    # tool to recombine trees from multiple permutations of l
     rank = len(lin)
-    ysgi = YoungSubgroup(rank)
     lps = list(blocks.keys())
     blockpairs = [
         (block1, block2)
@@ -1532,7 +1595,7 @@ def combine_blocks(blocks, lin, original_spans, L_R=0):
             perms_2_check = [block_map[blockpair]]
             # perms_2_check = all_map[blockpair]
         for nu in nus:
-            mu0ii, muii, nii, lii, Lii = get_mu_n_l(nu, return_L=True)
+            mu0ii, muii, nii, lii, Lii = calculate_mu_n_l(nu, return_L=True)
             is_sigma0 = tuple(lii) == lps[0]
             degen_orbit, orbit_inds = get_degen_orb(lp)
             nlii = [(niii, liii) for niii, liii in zip(nii, lii)]
@@ -1574,23 +1637,37 @@ def combine_blocks(blocks, lin, original_spans, L_R=0):
 
 # apply ladder relationships
 def apply_ladder_relationships(
-    lin, nin, combined_labs, parity_span, parity_span_labs, full_span, L_R=0
+    lin, nin, combined_labs, parity_span, parity_span_labs, full_span
 ):
     """
+    Apply ladder relationships.
+
+    ACE_DOCS_MISSING - what does this function do exactly?
 
     Parameters
     ----------
-    lin
-    nin
-    combined_labs
-    parity_span
-    parity_span_labs
-    full_span
-    L_R
+    lin : list
+        ACE_DOCS_MISSING
+
+    nin : list
+        ACE_DOCS_MISSING
+
+    combined_labs : list
+        ACE_DOCS_MISSING
+
+    parity_span : list
+        ACE_DOCS_MISSING
+
+    parity_span_labs : list
+        ACE_DOCS_MISSING
+
+    full_span : list
+        ACE_DOCS_MISSING
 
     Returns
     -------
-
+    funcs : list
+        ACE_DOCS_MISSING
     """
     N = len(lin)
     uniques = list(set(lin))
@@ -1621,7 +1698,7 @@ def apply_ladder_relationships(
     degen_fam = (mappedl, ndegen_rep)
 
     all_inters = build_tree_for_l_intermediates(lin)
-    even_inters = simple_parity_filt(lin, all_inters)
+    even_inters = simple_parity_filter(lin, all_inters)
 
     if 0 in lin:
         funcs = combined_labs[: len(full_span)]
@@ -1645,7 +1722,9 @@ def apply_ladder_relationships(
             recurmax = len(max_labs) / 2
             count = 0
             for lab in max_labs:
-                mu0ii, muii, nii, lii, Lii = get_mu_n_l(lab, return_L=True)
+                mu0ii, muii, nii, lii, Lii = calculate_mu_n_l(
+                    lab, return_L=True
+                )
                 lidegen_rep, l_orbit_inds = get_degen_orb(lii)
                 ysgi.subgroup_fill(
                     list(nin),
@@ -1662,7 +1741,9 @@ def apply_ladder_relationships(
             recurmax = len(max_labs) / 2
             count = 0
             for lab in max_labs:
-                mu0ii, muii, nii, lii, Lii = get_mu_n_l(lab, return_L=True)
+                mu0ii, muii, nii, lii, Lii = calculate_mu_n_l(
+                    lab, return_L=True
+                )
                 lidegen_rep, l_orbit_inds = get_degen_orb(lii)
                 ysgi.subgroup_fill(
                     list(nin),
@@ -1681,7 +1762,9 @@ def apply_ladder_relationships(
             recurmax = len(max_labs) / 2
             count = 0
             for lab in max_labs:
-                mu0ii, muii, nii, lii, Lii = get_mu_n_l(lab, return_L=True)
+                mu0ii, muii, nii, lii, Lii = calculate_mu_n_l(
+                    lab, return_L=True
+                )
                 lidegen_rep, l_orbit_inds = get_degen_orb(lii)
                 l_sequential_degen_orbit = enforce_sorted_orbit(l_orbit_inds)
                 # switch to lower symmetry SN representation
@@ -1792,7 +1875,9 @@ def apply_ladder_relationships(
         elif degen_fam == ((0, 0, 0, 1, 1), (5,)):
             funcs = []
             for lab in parity_span_labs:
-                mu0ii, muii, nii, lii, Lii = get_mu_n_l(lab, return_L=True)
+                mu0ii, muii, nii, lii, Lii = calculate_mu_n_l(
+                    lab, return_L=True
+                )
                 if 0 not in Lii:
                     funcs.append(lab)
 

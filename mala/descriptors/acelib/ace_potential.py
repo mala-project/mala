@@ -168,7 +168,7 @@ class ACEPotential:
         else:
             nulst_1 = []
             for rank in self.__ranks:
-                PA_lammps = ace_coupling_utils.pa_labels_raw(
+                PA_lammps = ace_coupling_utils.compute_pa_labels_raw(
                     rank,
                     nradmax_dict[rank],
                     lmax_dict[rank],
@@ -184,7 +184,7 @@ class ACEPotential:
         ns = []
         ls = []
         for nu in nus_unsort:
-            mu0ii, muii, nii, lii = ace_coupling_utils.get_mu_n_l(nu)
+            mu0ii, muii, nii, lii = ace_coupling_utils.calculate_mu_n_l(nu)
             mu0s.append(mu0ii)
             mus.append(tuple(muii))
             ns.append(tuple(nii))
@@ -346,13 +346,15 @@ class ACEPotential:
             # betas = {ind:{nu:1.0 for nu in nulst} for ind in range(len(self.elements))}
             betas = {ind: {} for ind in range(len(self.__elements))}
             for nu in nulst:
-                mu0, mu, n, l, L = ace_coupling_utils.get_mu_n_l(
+                mu0, mu, n, l, L = ace_coupling_utils.calculate_mu_n_l(
                     nu, return_L=True
                 )
                 betas[mu0][nu] = 1.0
         for nu in nulst:
-            mu0, mu, n, l, L = ace_coupling_utils.get_mu_n_l(nu, return_L=True)
-            rank = ace_coupling_utils.get_mu_nu_rank(nu)
+            mu0, mu, n, l, L = ace_coupling_utils.calculate_mu_n_l(
+                nu, return_L=True
+            )
+            rank = ace_coupling_utils.calculate_mu_nu_rank(nu)
             try:
                 nus_per_rank[rank].append(nu)
             except KeyError:

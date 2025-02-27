@@ -529,7 +529,7 @@ class ACE(Descriptor):
         ranked_chem_nus = []
         for ind, rank in enumerate(self.parameters.ace_ranks):
             rank = int(rank)
-            PA_lammps = ace_coupling_utils.pa_labels_raw(
+            PA_lammps = ace_coupling_utils.compute_pa_labels_raw(
                 rank,
                 int(self.parameters.ace_nmax[ind]),
                 int(self.parameters.ace_lmax[ind]),
@@ -545,7 +545,7 @@ class ACE(Descriptor):
         ns = []
         ls = []
         for nu in nus_unsort:
-            mu0ii, muii, nii, lii = ace_coupling_utils.get_mu_n_l(nu)
+            mu0ii, muii, nii, lii = ace_coupling_utils.calculate_mu_n_l(nu)
             mu0s.append(mu0ii)
             mus.append(tuple(muii))
             ns.append(tuple(nii))
@@ -760,7 +760,7 @@ class ACE(Descriptor):
         for nu in nulst:
             mu0 = nu.split("_")[0]
             byattyp[mu0].append(nu)
-            mu0ii, muii, nii, lii = ace_coupling_utils.get_mu_n_l(nu)
+            mu0ii, muii, nii, lii = ace_coupling_utils.calculate_mu_n_l(nu)
             if mumax not in muii:
                 byattypfiltered[mu0].append(nu)
         return byattyp, byattypfiltered
