@@ -468,6 +468,57 @@ class ParametersDescriptors(ParametersBase):
     minterpy_polynomial_degree : int
         WILL BE DEPRECATED IN MALA v1.4.0 - polynomial degree for minterpy
         descriptor calculation.
+
+    ace_cutoff : float
+        Cutoff radius for ACE descriptor calculation. May be dynamically
+        increased during descriptor calculation (MALA will notify you, if
+        this is necessary)
+
+    ace_ranks : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_nmax  : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_lmax : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_lmin : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_nshell : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_apply_shift : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_metal_max : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_use_vdw : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_L_R : list
+        ACE_DOCS_MISSING: I am not sure how to set this.
+
+    ace_M_R : list
+        ACE_DOCS_MISSING: I am not sure how to set this.
+
+    ace_coupling_type : str
+        Coupling type used for reduction of spherical harmonic products.
+        Can be "clebsch_gordan" or "wigner_3j".
+
+    ace_reduction_coefficients_lmax : int
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
     """
 
     def __init__(self):
