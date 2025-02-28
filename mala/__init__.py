@@ -19,6 +19,7 @@ from .descriptors import (
     Descriptor,
     AtomicDensity,
     MinterpyDescriptors,
+    ACE,
 )
 from .datahandling import (
     DataHandler,
