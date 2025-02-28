@@ -261,25 +261,27 @@ class ACE(Descriptor):
 
         # An empty string means that the user wants to use the standard input.
         # What that is differs depending on serial/parallel execution.
-        if self.parameters.lammps_compute_file == "":
-            filepath = os.path.join(__file__.split("ace")[0], "inputfiles")
+        if self.parameters.custom_lammps_compute_file != "":
+            lammps_compute_file = self.parameters.custom_lammps_compute_file
+        else:
+            filepath = os.path.join(os.path.dirname(__file__), "inputfiles")
             if self.parameters._configuration["mpi"]:
                 if self.parameters.use_z_splitting:
-                    self.parameters.lammps_compute_file = os.path.join(
+                    lammps_compute_file = os.path.join(
                         filepath,
                         "in.acegridlocal_n{0}.python".format(
                             len(set(self._atoms.numbers))
                         ),
                     )
                 else:
-                    self.parameters.lammps_compute_file = os.path.join(
+                    lammps_compute_file = os.path.join(
                         filepath,
                         "in.acegridlocal_defaultproc_n{0}.python".format(
                             len(set(self._atoms.numbers))
                         ),
                     )
             else:
-                self.parameters.lammps_compute_file = os.path.join(
+                lammps_compute_file = os.path.join(
                     filepath,
                     "in.acegrid_n{0}.python".format(
                         len(set(self._atoms.numbers))
@@ -287,7 +289,7 @@ class ACE(Descriptor):
                 )
 
         # Do the LAMMPS calculation.
-        lmp.file(self.parameters.lammps_compute_file)
+        lmp.file(lammps_compute_file)
 
         # Extract data from LAMMPS calculation.
         # This is different for the parallel and the serial case.
