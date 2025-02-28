@@ -14,5 +14,7 @@ dependencies:
   - mpmath
   - tensorboard
   - scikit-spatial
+  - mendeleev
+  - sympy
   - pip:
       - openpmd-api
