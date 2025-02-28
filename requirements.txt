@@ -12,3 +12,4 @@ openpmd-api
 scikit-spatial
 tqdm
 mendeleev
+sympy
