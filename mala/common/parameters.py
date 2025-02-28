@@ -470,11 +470,6 @@ class ParametersDescriptors(ParametersBase):
         WILL BE DEPRECATED IN MALA v1.4.0 - polynomial degree for minterpy
         descriptor calculation.
 
-    ace_cutoff : float
-        Cutoff radius for ACE descriptor calculation. May be dynamically
-        increased during descriptor calculation (MALA will notify you, if
-        this is necessary)
-
     ace_ranks : list
         ACE_DOCS_MISSING: I think I know what this does, but I am not sure
         how to best communicate to users how to set this.
@@ -631,7 +626,12 @@ class ParametersDescriptors(ParametersBase):
 
     @property
     def ace_cutoff(self):
-        """Cut off radius for bispectrum calculation."""
+        """
+        Cutoff radius for ACE descriptor calculation.
+
+        May be dynamically increased during descriptor calculation
+        (MALA will notify you, if this is necessary)
+        """
         return self._ace_cutoff
 
     @ace_cutoff.setter
