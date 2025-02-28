@@ -186,7 +186,9 @@ class MinterpyDescriptors(Descriptor):
 
             # For now the file is chosen automatically, because this is used
             # mostly under the hood anyway.
-            filepath = __file__.split("minterpy")[0]
+            filepath = os.path.join(
+                __file__.split("minterpy")[0], "inputfiles"
+            )
             if self.parameters._configuration["mpi"]:
                 raise Exception(
                     "Minterpy descriptors cannot be calculated "

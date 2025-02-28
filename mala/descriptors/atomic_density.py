@@ -211,7 +211,9 @@ class AtomicDensity(Descriptor):
 
         # For now the file is chosen automatically, because this is used
         # mostly under the hood anyway.
-        filepath = __file__.split("atomic_density")[0]
+        filepath = os.path.join(
+            __file__.split("atomic_density")[0], "inputfiles"
+        )
         if self.parameters._configuration["mpi"]:
             if self.parameters.use_z_splitting:
                 self.parameters.lammps_compute_file = os.path.join(

@@ -7,7 +7,8 @@ units		metal
 
 read_data ${atom_config_fname}
 
-mass 1 9.012182
+mass 1 ${mass1}
+mass 2 ${mass2}
 
 run_style verlet
 
@@ -28,8 +29,7 @@ pair_coeff * *
 
 # define atom and grid computes
 
-compute 	mygrid all pace/grid  grid ${ngridx} ${ngridy} ${ngridz} ${ace_coeff_file} ugridtype 0
-compute 	mygridlocal all pace/grid/local  grid ${ngridx} ${ngridy} ${ngridz} ${ace_coeff_file} ugridtype 0
+compute 	agrid all pace/grid grid ${ngridx} ${ngridy} ${ngridz}  ${ace_coeff_file} ugridtype 1
 
 thermo_modify norm yes
 

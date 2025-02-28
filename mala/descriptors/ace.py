@@ -7,252 +7,97 @@ import pickle
 
 import ase
 import ase.io
-
+from ase.data import atomic_numbers, atomic_masses
 from importlib.util import find_spec
 import numpy as np
-from scipy.spatial import distance
 from scipy import special
+from mendeleev.fetch import fetch_table
 
 from mala.common.parallelizer import printout
 from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
-from mala.descriptors.ace_potential import AcePot
-import mala.descriptors.ace_coupling_utils as acu
-import mala.descriptors.wigner_coupling as wigner_coupling
-import mala.descriptors.cg_coupling as cg_coupling
+from mala.descriptors.acelib.ace_potential import ACEPotential
+import mala.descriptors.acelib.coupling_utils as ace_coupling_utils
+import mala.descriptors.acelib.wigner_coupling as wigner_coupling
+import mala.descriptors.acelib.clebsch_gordan_coupling as cg_coupling
 
 
 class ACE(Descriptor):
-    """Class for calculation and parsing of bispectrum descriptors.
+    """Class for calculation and parsing of ACE descriptors.
 
     Parameters
     ----------
     parameters : mala.common.parameters.Parameters
         Parameters object used to create this object.
+
+    Attributes
+    ----------
+    couplings_yace_file : str
+        File which holds the coupling coefficients. Can be provided by users,
+        in which case consistency will be checked. If no file is detected, a
+        new file is computed.
     """
 
     def __init__(self, parameters):
         super(ACE, self).__init__(parameters)
-        self.ionic_radii = {
-            "H": 0.25,
-            "He": 1.2,
-            "Li": 1.45,
-            "Be": 1.05,
-            "B": 0.85,
-            "C": 0.7,
-            "N": 0.65,
-            "O": 0.6,
-            "F": 0.5,
-            "Ne": 1.6,
-            "Na": 1.8,
-            "Mg": 1.5,
-            "Al": 1.25,
-            "Si": 1.1,
-            "P": 1.0,
-            "S": 1.0,
-            "Cl": 1.0,
-            "Ar": 0.71,
-            "K": 2.2,
-            "Ca": 1.8,
-            "Sc": 1.6,
-            "Ti": 1.4,
-            "V": 1.35,
-            "Cr": 1.4,
-            "Mn": 1.4,
-            "Fe": 1.4,
-            "Co": 1.35,
-            "Ni": 1.35,
-            "Cu": 1.35,
-            "Zn": 1.35,
-            "Ga": 1.3,
-            "Ge": 1.25,
-            "As": 1.15,
-            "Se": 1.15,
-            "Br": 1.15,
-            "Kr": np.nan,
-            "Rb": 2.35,
-            "Sr": 2.0,
-            "Y": 1.8,
-            "Zr": 1.55,
-            "Nb": 1.45,
-            "Mo": 1.45,
-            "Tc": 1.35,
-            "Ru": 1.3,
-            "Rh": 1.35,
-            "Pd": 1.4,
-            "Ag": 1.6,
-            "Cd": 1.55,
-            "In": 1.55,
-            "Sn": 1.45,
-            "Sb": 1.45,
-            "Te": 1.4,
-            "I": 1.4,
-            "Xe": np.nan,
-            "Cs": 2.6,
-            "Ba": 2.15,
-            "La": 1.95,
-            "Ce": 1.85,
-            "Pr": 1.85,
-            "Nd": 1.85,
-            "Pm": 1.85,
-            "Sm": 1.85,
-            "Eu": 1.85,
-            "Gd": 1.8,
-            "Tb": 1.75,
-            "Dy": 1.75,
-            "Ho": 1.75,
-            "Er": 1.75,
-            "Tm": 1.75,
-            "Yb": 1.75,
-            "Lu": 1.75,
-            "Hf": 1.55,
-            "Ta": 1.45,
-            "W": 1.35,
-            "Re": 1.35,
-            "Os": 1.3,
-            "Ir": 1.35,
-            "Pt": 1.35,
-            "Au": 1.35,
-            "Hg": 1.5,
-            "Tl": 1.9,
-            "Pb": 1.8,
-            "Bi": 1.6,
-            "Po": 1.9,
-            "At": np.nan,
-            "Rn": np.nan,
-            "Fr": np.nan,
-            "Ra": 2.15,
-            "Ac": 1.95,
-            "Th": 1.8,
-            "Pa": 1.8,
-            "U": 1.75,
-            "Np": 1.75,
-            "Pu": 1.75,
-            "Am": 1.75,
-            "Cm": np.nan,
-            "Bk": np.nan,
-            "Cf": np.nan,
-            "Es": np.nan,
-            "Fm": np.nan,
-            "Md": np.nan,
-            "No": np.nan,
-            "Lr": np.nan,
-            "Rf": np.nan,
-            "Db": np.nan,
-            "Sg": np.nan,
-            "Bh": np.nan,
-            "Hs": np.nan,
-            "Mt": np.nan,
-            "Ds": np.nan,
-            "Rg": np.nan,
-            "Cn": np.nan,
-            "Nh": np.nan,
-            "Fl": np.nan,
-            "Mc": np.nan,
-            "Lv": np.nan,
-            "Ts": np.nan,
-            "Og": np.nan,
-            "G": 1.35,
-        }
 
-        self.metal_list = [
-            "Li",
-            "Be",
-            "Na",
-            "Mg",
-            "K",
-            "Ca",
-            "Sc",
-            "Ti",
-            "V",
-            "Cr",
-            "Mn",
-            "Fe",
-            "Co",
-            "Ni",
-            "Cu",
-            "Zn",
-            "Rb",
-            "Sr",
-            "Y",
-            "Zr",
-            "Nb",
-            "Mo",
-            "Tc",
-            "Ru",
-            "Rh",
-            "Pd",
-            "Ag",
-            "Cd",
-            "Cs",
-            "Ba",
-            "Lu",
-            "Hf",
-            "Ta",
-            "W",
-            "Re",
-            "Os",
-            "Ir",
-            "Pt",
-            "Au",
-            "Hg",
-            "Fr",
-            "Ha",
-            "La",
-            "Ce",
-            "Pr",
-            "Nd",
-            "Pm",
-            "Sm",
-            "Eu",
-            "Gd",
-            "Tb",
-            "Dy",
-            "Ho",
-            "Er",
-            "Tb",
-            "Yb",
-            "Ac",
-            "Th",
-            "Pa",
-            "U",
-            "Np",
-            "Pu",
-            "Am",
-        ]
+        # Initialize a dictionary with ionic radii (in Angstrom).
+        # and a list containing all elements which are considered metals.
+        self._ionic_radii, self._metal_list = self.__init_element_lists()
 
-        topfile = cg_coupling.__file__
-        top_dir = topfile.split("/cg")[0]
-        lib_path = "%s" % top_dir
-        self.lib_path = lib_path
-
-        self.Wigner_3j = self.init_wigner_3j(
-            self.parameters.ace_lmax_traditional
-        )
-
-        self.Clebsch_Gordan = self.init_clebsch_gordan(
-            self.parameters.ace_lmax_traditional
-        )
-
-        self.ncols0 = 3
-        self.couplings = None
-
-        assert (
-            not self.parameters.ace_types_like_snap
-        ), "Using the same 'element' type for atoms and grid points is not permitted for standar d mala models"
-        if (
-            self.parameters.ace_types_like_snap
-            and "G" in self.parameters.ace_elements
-        ):
-            raise Exception(
-                "for types_like_snap = True, you must remove the separate element type for grid points"
+        # Initialize several arrays that are computed using
+        # nested for-loops but can be reused.
+        # Within these routines, these arrays are saved to pkl files
+        # in the directory where ace.py is located.
+        # If a pkl file is detected, the array is loaded from the pkl file,
+        # otherwise it is computed and saved to a pkl file.
+        # The arrays are used within the ACE descriptor calculation.
+        # Which arrays are actually needed depends on which type of coefficients
+        # are used for the ACE descriptor calculation.
+        if self.parameters.ace_coupling_type == "wigner3j":
+            self.__precomputed_wigner_3j = self.__init_wigner_3j(
+                self.parameters.ace_reduction_coefficients_lmax
+            )
+        if self.parameters.ace_coupling_type == "clebsch_gordan":
+            self.__precomputed_clebsch_gordan = self.__init_clebsch_gordan(
+                self.parameters.ace_reduction_coefficients_lmax
             )
 
-        if len(self.parameters.ace_elements) != len(
-            self.parameters.ace_reference_ens
+        # File which holds the coupling coefficients.
+        # Can be provided by users, in which case consistency will be checked.
+        # If no file is detected, a new file is computed.
+        self.couplings_yace_file = None
+
+        # Will get filled once the atoms object has been loaded.
+        # ACE_DOCS_MISSING: What do these do?
+        self.__ace_mumax = None
+        self.__ace_reference_ensemble = None
+
+        # Will get filled during calculation of coupling coefficients.
+        # ACE_DOCS_MISSING: What is nus/limit_nus? What exactly does
+        # bonds hold?
+        self.__bonds = None
+        self._maximum_cutoff_factor = None
+        self._cutoff_factors = None
+        self.__lambdas = None
+        self.__nus = None
+        self.__limit_nus = None
+
+        # These used to live in the parameters subclass for the descriptors,
+        # but I have moved them here, because I think they are defaults that
+        # barely ever change. I will not be removing them outright, because
+        # they may be needed for debugging.
+        self.__ace_grid_filter = True
+        self.__ace_padfunc = True
+
+        # Consistency checks for the ACE settings.
+        if (
+            len(self.parameters.ace_ranks) != len(self.parameters.ace_lmax)
+            or len(self.parameters.ace_ranks) != len(self.parameters.ace_nmax)
+            or len(self.parameters.ace_ranks) != len(self.parameters.ace_lmin)
         ):
             raise Exception(
-                "Reference ensemble must match length of element list!"
+                "ACE ranks, lmax, nmax, and lmin must have the same length"
             )
 
     @property
@@ -311,6 +156,25 @@ class ACE(Descriptor):
             raise Exception("Unsupported unit for bispectrum descriptors.")
 
     def _calculate(self, outdir, **kwargs):
+        """
+        Perform ACE descriptor calculation.
+
+        This function is the main entry point for the calculation of the
+        bispectrum descriptors. Currently, only LAMMPS is implemented.
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        ace_descriptors_np : numpy.ndarray
+            The calculated bispectrum descriptors.
+        """
         if self.parameters._configuration["lammps"]:
             if find_spec("lammps") is None:
                 printout(
@@ -323,10 +187,23 @@ class ACE(Descriptor):
 
     def __calculate_lammps(self, outdir, **kwargs):
         """
-        Perform bispectrum calculation using LAMMPS.
+        Perform ACE descriptor calculation using LAMMPS.
 
         Creates a LAMMPS instance with appropriate call parameters and uses
         it for the calculation.
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        ace_descriptors_np : numpy.ndarray
+            The calculated bispectrum descriptors.
         """
         # For version compatibility; older lammps versions (the serial version
         # we still use on some machines) have these constants as part of the
@@ -334,10 +211,12 @@ class ACE(Descriptor):
         from lammps import constants as lammps_constants
 
         use_fp64 = kwargs.get("use_fp64", False)
-        keep_logs = kwargs.get("keep_logs", True)
+        keep_logs = kwargs.get("keep_logs", False)
 
         lammps_format = "lammps-data"
         self.setup_lammps_tmp_files("acegrid", outdir)
+
+        self.__init_element_arrays()
 
         ase.io.write(
             self._lammps_temporary_input, self._atoms, format=lammps_format
@@ -347,90 +226,84 @@ class ACE(Descriptor):
         ny = self.grid_dimensions[1]
         nz = self.grid_dimensions[2]
 
-        # TODO: Save the coupling coefficients.
-        if self.couplings != None:
-            coupling_coeffs = self.couplings
-        else:
-            self.couplings = self.calculate_coupling_coeffs()
-            coupling_coeffs = self.couplings
-        # save the coupling coefficients
-        # saving function will go here
+        # Calculate and store the coupling coefficients, if necessary.
+        # If coupling coefficients are provided by the user, these are
+        # first checked for consistency.
+        # The bonds and cutoff have to always be computed, the coupling
+        # coefficients only, if none were provided.
+        self._calculate_bonds_and_cutoff()
+        self.couplings_yace_file = self.check_coupling_coeffs(
+            self.couplings_yace_file
+        )
+        if self.couplings_yace_file is None:
+            self.couplings_yace_file = self._calculate_coupling_coeffs()
+
+        # Check the cutoff radius, i.e., compare that the user choice
+        # is not too small compared to those requird by ACE.
+        if self.parameters.ace_cutoff < self._maximum_cutoff_factor:
+            printout(
+                "One or more automatically generated ACE cutoff radii is "
+                "larger than the input cutoff radius. Updating input cutoff "
+                "radius stored in parameters.descriptors.ace_cutoff "
+                "accordingly."
+            )
+            self.parameters.ace_cutoff = self._maximum_cutoff_factor
 
         # Create LAMMPS instance.
-        if self.parameters.bispectrum_cutoff > self.maxrc:
-            lammps_dict = {
-                "ace_coeff_file": "coupling_coefficients.yace",
-                "rcutfac": self.parameters.bispectrum_cutoff,
-            }
-        else:
-            printout(
-                "one or more automatically generated ACE rcutfacs is larger than the input rcutfac- updating rcutfac accordingly"
-            )
-            lammps_dict = {
-                "ace_coeff_file": "coupling_coefficients.yace",
-                "rcutfac": self.maxrc,
-            }
+        lammps_dict = {
+            "ace_coeff_file": self.couplings_yace_file,
+            "rcutfac": self.parameters.ace_cutoff,
+        }
+        for idx, element in enumerate(sorted(list(set(self._atoms.numbers)))):
+            lammps_dict["mass" + str(idx + 1)] = atomic_masses[element]
 
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # An empty string means that the user wants to use the standard input.
         # What that is differs depending on serial/parallel execution.
         if self.parameters.lammps_compute_file == "":
-            filepath = __file__.split("ace")[0]
-            if not self.parameters.ace_types_like_snap:
-                if self.parameters._configuration["mpi"]:
-                    if self.parameters.use_z_splitting:
-                        self.parameters.lammps_compute_file = os.path.join(
-                            filepath, "in.acegridlocal.python"
-                        )
-                    else:
-                        self.parameters.lammps_compute_file = os.path.join(
-                            filepath, "in.acegridlocal_defaultproc.python"
-                        )
+            filepath = os.path.join(__file__.split("ace")[0], "inputfiles")
+            if self.parameters._configuration["mpi"]:
+                if self.parameters.use_z_splitting:
+                    self.parameters.lammps_compute_file = os.path.join(
+                        filepath,
+                        "in.acegridlocal_n{0}.python".format(
+                            len(set(self._atoms.numbers))
+                        ),
+                    )
                 else:
                     self.parameters.lammps_compute_file = os.path.join(
-                        filepath, "in.acegrid.python"
+                        filepath,
+                        "in.acegridlocal_defaultproc_n{0}.python".format(
+                            len(set(self._atoms.numbers))
+                        ),
                     )
-            if self.parameters.ace_types_like_snap:
-                if self.parameters._configuration["mpi"]:
-                    if self.parameters.use_z_splitting:
-                        self.parameters.lammps_compute_file = os.path.join(
-                            filepath, "in.acegridlocal_s.python"
-                        )
-                    else:
-                        self.parameters.lammps_compute_file = os.path.join(
-                            filepath, "in.acegridlocal_defaultproc_s.python"
-                        )
-                else:
-                    self.parameters.lammps_compute_file = os.path.join(
-                        filepath, "in.acegrid_s.python"
-                    )
-        # Do the LAMMPS calculation and clean up.
+            else:
+                self.parameters.lammps_compute_file = os.path.join(
+                    filepath,
+                    "in.acegrid_n{0}.python".format(
+                        len(set(self._atoms.numbers))
+                    ),
+                )
+
+        # Do the LAMMPS calculation.
         lmp.file(self.parameters.lammps_compute_file)
 
-        # Set things not accessible from LAMMPS
-
-        # Calculation for fingerprint length
-        # NOTE: we handle fingerprint length later while setting the coupling_coefficients
-        #       (the coupling coefficients specify wich fingerprints are evaluated
-        #        in lammps directly)
-
-        self.couplings = self.calculate_coupling_coeffs()
         # Extract data from LAMMPS calculation.
         # This is different for the parallel and the serial case.
-        # In the serial case we can expect to have a full bispectrum array at
+        # In the serial case we can expect to have a full array at
         # the end of this function.
         # This is not necessarily true for the parallel case.
         if self.parameters._configuration["mpi"]:
             nrows_local = extract_compute_np(
                 lmp,
-                "mygridlocal",
+                "agridlocal",
                 lammps_constants.LMP_STYLE_LOCAL,
                 lammps_constants.LMP_SIZE_ROWS,
             )
             ncols_local = extract_compute_np(
                 lmp,
-                "mygridlocal",
+                "agridlocal",
                 lammps_constants.LMP_STYLE_LOCAL,
                 lammps_constants.LMP_SIZE_COLS,
             )
@@ -440,7 +313,7 @@ class ACE(Descriptor):
 
             ace_descriptors_np = extract_compute_np(
                 lmp,
-                "mygridlocal",
+                "agridlocal",
                 lammps_constants.LMP_STYLE_LOCAL,
                 2,
                 array_shape=(nrows_local, ncols_local),
@@ -456,10 +329,10 @@ class ACE(Descriptor):
             # Extract data from LAMMPS calculation.
             ace_descriptors_np = extract_compute_np(
                 lmp,
-                "mygrid",
+                "agrid",
                 0,
                 2,
-                (nz, ny, nx, self.fingerprint_length),
+                (nz, ny, nx, self.feature_size),
                 use_fp64=use_fp64,
             )
             self._clean_calculation(lmp, keep_logs)
@@ -474,124 +347,199 @@ class ACE(Descriptor):
             else:
                 return ace_descriptors_np[:, :, :, 3:], nx * ny * nz
 
-    def calculate_coupling_coeffs(self):
-        self.bonds = [
-            p
-            for p in itertools.product(
-                self.parameters.ace_elements, self.parameters.ace_elements
-            )
+    def check_coupling_coeffs(self, coupling_file):
+        """
+        Check the coupling coefficients for consistency.
+
+        This reads the first line of the coupling coefficients file, which
+        contains a list of the elements the coupling coefficients have been
+        computed for, and checks whether this is consistent with the
+        elements for this calculation.
+
+        Parameters
+        ----------
+        coupling_file : str
+            Path to the coupling coefficients file.
+
+        Returns
+        -------
+        coupling_file : str
+            Path to the coupling coefficients file. None if the file was
+            found incompatible.
+        """
+        if coupling_file is not None and os.path.isfile(coupling_file):
+            with open(coupling_file, "r") as readout:
+                lines = readout.readlines()
+                element_list = (
+                    lines[0]
+                    .split(":")[1]
+                    .split("[")[1]
+                    .split("]")[0]
+                    .split(",")
+                )
+                element_list = [e.strip() for e in element_list]
+
+                # We cannot compare the lists as sets, because order is
+                # important.
+                # We omit "G" from the comparison, because it is not an
+                # element. It does have to be in the list for the coupling
+                # constants though.
+                if (
+                    sorted(list(set(self._atoms.symbols))) != element_list[:-1]
+                    or element_list[-1] != "G"
+                ):
+                    return None
+                else:
+                    return coupling_file
+        else:
+            return None
+
+    def _calculate_bonds_and_cutoff(self):
+        """
+        Calculate bonds and cutoff radii.
+
+        This is essentially part of the computation of the coupling
+        coefficients, but a part that has to be done every time,
+        since it initializes the cutoff radii.
+        """
+        ncols0 = 3
+
+        # "G" for grid has to be added to the element list.
+        element_list = sorted(list(set(self._atoms.symbols))) + ["G"]
+
+        # Bond types correspond to all bonds between elements.
+        self.__bonds = [
+            p for p in itertools.product(element_list, element_list)
         ]
 
+        # Default settings for the cutoff radii and lambda values.
+        # ACE_DOCS_MISSING: What are the lambda values?
         (
             rc_range,
             rc_default,
             lmb_default,
-            rcin_default,
-        ) = self.get_default_settings()
+        ) = self.__default_settings()
 
-        rcutfac = [float(k) for k in rc_default.split()[2:]]
-        self.maxrc = np.max(
-            rcutfac
-        )  # set radial cutoff based on automatically generated ACE cutoffs
-        lmbda = [float(k) for k in lmb_default.split()[2:]]
-        assert len(self.bonds) == len(rcutfac) and len(self.bonds) == len(
-            lmbda
+        self._cutoff_factors = [float(k) for k in rc_default.split()[2:]]
+        self._maximum_cutoff_factor = np.max(self._cutoff_factors)
+        self.__lambdas = [float(k) for k in lmb_default.split()[2:]]
+        assert len(self.__bonds) == len(self._cutoff_factors) and len(
+            self.__bonds
+        ) == len(
+            self.__lambdas
         ), "you must have rcutfac and lmbda defined for each bond type"
+        # ACE_DOCS_MISSING: What are the nus/limit_nus settings?
+        self.__nus, self.__limit_nus = self.__calculate_limit_nus()
 
-        # printout("global max cutoff (angstrom)", max(rcutfac))
-        rcinner = [0.0] * len(self.bonds)
-        drcinner = [0.0] * len(self.bonds)
+        # NOTE to use unique ACE types for gridpoints, we must subtract off
+        #  dummy descriptor counts (for non-grid element types)
+        self.feature_size = (
+            ncols0 + len(self.__limit_nus) - (len(element_list) - 1)
+        )
 
-        coeffs = None
+    def _calculate_coupling_coeffs(self):
+        """
+        Calculate coupling coefficients and save them to file.
+
+        Calculation and saving is done via the ACEPotential class.
+
+        ACE_DOCS_MISSING: Is there a good reference for the equations
+        implemented here? Should we just try to explain them here or point
+        to appropriate material?
+
+        Returns
+        -------
+        coupling_file : str
+            Path to the coupling coefficients file.
+        """
+        # "G" for grid has to be added to the element list.
+        element_list = sorted(list(set(self._atoms.symbols))) + ["G"]
+
+        # ACE_DOCS_MISSING: What do these three variables mean?
+        rcinner = [0.0] * len(self.__bonds)
+        drcinner = [0.0] * len(self.__bonds)
         ldict = {
             ranki: li
             for ranki, li in zip(
                 self.parameters.ace_ranks, self.parameters.ace_lmax
             )
         }
-        rankstrlst = ["%s"] * len(self.parameters.ace_ranks)
-        rankstr = "".join(rankstrlst) % tuple(self.parameters.ace_ranks)
-        lstrlst = ["%s"] * len(self.parameters.ace_ranks)
-        lstr = "".join(lstrlst) % tuple(self.parameters.ace_lmax)
 
-        # load or generate generalized coupling coefficients
-
-        if self.parameters.ace_coupling_type == "wig":
-            ccs = wigner_coupling.get_coupling(
-                self.Wigner_3j, ldict, L_R=self.parameters.ace_L_R
+        # ACE_DOCS_MISSING: Is "coupling type" really a good name for
+        # this parameter? It seems to be about the type of matrices
+        # used for the reduction of the spherical harmonics products.
+        # So maybe "reduction coefficients" or something?
+        # Or is this really the "coupling type"?
+        if self.parameters.ace_coupling_type == "wigner3j":
+            ccs = wigner_coupling.wigner_3j_coupling(
+                self.__precomputed_wigner_3j,
+                ldict,
+                L_R=self.parameters.ace_L_R,
             )
 
-        elif self.parameters.ace_coupling_type == "cg":
-            ccs = cg_coupling.get_coupling(
-                self.Clebsch_Gordan, ldict, L_R=self.parameters.ace_L_R
+        elif self.parameters.ace_coupling_type == "clebsch_gordan":
+            ccs = cg_coupling.clebsch_gordan_coupling(
+                self.__precomputed_clebsch_gordan,
+                ldict,
+                L_R=self.parameters.ace_L_R,
             )
 
         else:
-            sys.exit(
+            raise Exception(
                 "Coupling type "
                 + str(self.parameters.ace_coupling_type)
                 + " not recongised"
             )
 
-        nus, limit_nus = self.calc_limit_nus()
+        # Calculating permutation symmetry adapted ACE labels.
+        # ACE_DOCS_MISSING: What are these labels?
+        Apot = ACEPotential(
+            element_list,
+            self.__ace_reference_ensemble,
+            self.parameters.ace_ranks,
+            self.parameters.ace_nmax,
+            self.parameters.ace_lmax,
+            max(self.parameters.ace_nmax),
+            self._cutoff_factors,
+            self.__lambdas,
+            ccs[self.parameters.ace_M_R],
+            rcutinner=rcinner,
+            drcutinner=drcinner,
+            lmin=self.parameters.ace_lmin,
+        )
 
-        if not self.parameters.ace_types_like_snap:
-            # NOTE to use unique ACE types for gridpoints, we must subtract off
-            #  dummy descriptor counts (for non-grid element types)
-            self.fingerprint_length = (
-                self.ncols0
-                + len(limit_nus)
-                - (len(self.parameters.ace_elements) - 1)
-            )
-            # permutation symmetry adapted ACE labels
-            Apot = AcePot(
-                self.parameters.ace_elements,
-                self.parameters.ace_reference_ens,
-                self.parameters.ace_ranks,
-                self.parameters.ace_nmax,
-                self.parameters.ace_lmax,
-                self.parameters.ace_nradbase,
-                rcutfac,
-                lmbda,
-                rcinner,
-                drcinner,
-                lmin=self.parameters.ace_lmin,
-                **{"input_nus": limit_nus, "ccs": ccs[self.parameters.ace_M_R]}
-            )
+        # ACE_DOCS_MISSING: What does this function do?
+        Apot.set_funcs(nulst=self.__limit_nus, print_0s=True)
 
-            Apot.set_funcs(nulst=limit_nus, muflg=True, print_0s=True)
-            Apot.write_pot("coupling_coefficients")
+        # Write the coupling coefficients to file.
+        return Apot.write_pot(
+            "coupling_coefficients_" + str.join("_", element_list[:-1])
+        )
 
-        # add case for full basis separately
-        # NOTE that this basis evaluates grid-atom and atom-atom descriptors that are not needed in the current implementation of MALA
-        elif self.parameters.ace_types_like_snap:
-            self.fingerprint_length = self.ncols0 + len(nus)
-            # permutation symmetry adapted ACE labels
-            Apot = AcePot(
-                self.parameters.ace_elements,
-                self.parameters.ace_reference_ens,
-                self.parameters.ace_ranks,
-                self.parameters.ace_nmax,
-                self.parameters.ace_lmax,
-                self.parameters.ace_nradbase,
-                rcutfac,
-                lmbda,
-                rcinner,
-                drcinner,
-                lmin=self.parameters.ace_lmin,
-                **{"input_nus": nus, "ccs": ccs[self.parameters.ace_M_R]}
-            )
-            Apot.write_pot("coupling_coefficients")
+    def __calculate_limit_nus(self):
+        """
+        Calculate the limit of nus.
 
-    def calc_limit_nus(self):
+        ACE_DOCS_MISSING: What are nus and limit_nus?
+
+        Returns
+        -------
+        nus : List
+            List of nus. ACE_DOCS_MISSING: What are nus?
+
+        limit_nus : List
+            List of limit nus. ACE_DOCS_MISSING: What are limit_nus?
+        """
+        # ACE_DOCS_MISSING: Add maybe a general outline of what is being
+        # done here.
         ranked_chem_nus = []
         for ind, rank in enumerate(self.parameters.ace_ranks):
             rank = int(rank)
-            PA_lammps, not_compat = acu.pa_labels_raw(
+            PA_lammps = ace_coupling_utils.compute_pa_labels_raw(
                 rank,
                 int(self.parameters.ace_nmax[ind]),
                 int(self.parameters.ace_lmax[ind]),
-                int(self.parameters.ace_mumax),
+                int(self.__ace_mumax),
                 lmin=int(self.parameters.ace_lmin[ind]),
             )
             ranked_chem_nus.append(PA_lammps)
@@ -603,7 +551,7 @@ class ACE(Descriptor):
         ns = []
         ls = []
         for nu in nus_unsort:
-            mu0ii, muii, nii, lii = acu.get_mu_n_l(nu)
+            mu0ii, muii, nii, lii = ace_coupling_utils.calculate_mu_n_l(nu)
             mu0s.append(mu0ii)
             mus.append(tuple(muii))
             ns.append(tuple(nii))
@@ -614,53 +562,56 @@ class ACE(Descriptor):
         nus.sort(key=lambda x: mu0s[nus_unsort.index(x)], reverse=False)
         nus.sort(key=lambda x: len(x), reverse=False)
         nus.sort(key=lambda x: mu0s[nus_unsort.index(x)], reverse=False)
-        musins = range(len(self.parameters.ace_elements) - 1)
-        all_funcs = {}
-        if self.parameters.ace_types_like_snap:
-            byattyp, byattypfiltered = self.srt_by_attyp(nus, 1)
-            if self.parameters.ace_grid_filter:
-                assert (
-                    self.parameters.ace_padfunc
-                ), "must pad with at least 1 other basis function for other element types to work in LAMMPS - set padfunc=True"
-                limit_nus = byattypfiltered["%d" % 0]
-                if self.parameters.ace_padfunc:
-                    for muii in musins:
-                        limit_nus.append(byattypfiltered["%d" % muii][0])
-            elif not self.parameters.ace_grid_filter:
-                limit_nus = byattyp["%d" % 0]
+        musins = range(len(list(set(self._atoms.symbols))))
 
-        else:
-            byattyp, byattypfiltered = self.srt_by_attyp(
-                nus, len(self.parameters.ace_elements)
+        # +1 here because this should include the G for grid.
+        byattyp, byattypfiltered = self.__sort_by_atom_type(
+            nus, len(list(set(self._atoms.symbols))) + 1
+        )
+        if self.__ace_grid_filter:
+            limit_nus = byattypfiltered[
+                "%d" % (len(list(set(self._atoms.symbols))))
+            ]
+            assert self.__ace_padfunc, (
+                "Must pad with at least 1 other basis function for other "
+                "element types to work in LAMMPS - set padfunc=True"
             )
-            if self.parameters.ace_grid_filter:
-                limit_nus = byattypfiltered[
-                    "%d" % (len(self.parameters.ace_elements) - 1)
-                ]
-                assert (
-                    self.parameters.ace_padfunc
-                ), "must pad with at least 1 other basis function for other element types to work in LAMMPS - set padfunc=True"
-                if self.parameters.ace_padfunc:
-                    for muii in musins:
-                        limit_nus.append(byattypfiltered["%d" % muii][0])
-            elif not self.parameters.ace_grid_filter:
-                limit_nus = byattyp[
-                    "%d" % (len(self.parameters.ace_elements) - 1)
-                ]
-                if self.parameters.ace_padfunc:
-                    for muii in musins:
-                        limit_nus.append(byattyp["%d" % muii][0])
-        # printout(
-        #    "all basis functions", len(nus), "grid subset", len(limit_nus)
-        # )
+            if self.__ace_padfunc:
+                for muii in musins:
+                    limit_nus.append(byattypfiltered["%d" % muii][0])
+        elif not self.__ace_grid_filter:
+            limit_nus = byattyp["%d" % (len(list(set(self._atoms.symbols))))]
+            if self.__ace_padfunc:
+                for muii in musins:
+                    limit_nus.append(byattyp["%d" % muii][0])
 
         return nus, limit_nus
 
-    def get_default_settings(self):
-        rc_range = {bp: None for bp in self.bonds}
-        rin_def = {bp: None for bp in self.bonds}
-        rc_def = {bp: None for bp in self.bonds}
-        fac_per_elem = {key: 0.5 for key in list(self.ionic_radii.keys())}
+    def __default_settings(self):
+        """
+        Set default cutoff factors and lambdas.
+
+        ACE_DOCS_MISSING what does "default" mean here? What are the
+        assumptions we make to get to "default"?
+
+        Returns
+        -------
+        rc_range : dict
+            Dictionary with bond types as keys and cutoff radii ranges as
+            values.
+
+        rc_def_str : str
+            String with default cutoff radii values.
+
+        lmb_def_str : str
+            String with default lambda values.
+        """
+        # ACE_DOCS_MISSING: Add maybe a general outline of what is being
+        # done here.
+        rc_range = {bp: None for bp in self.__bonds}
+        rin_def = {bp: None for bp in self.__bonds}
+        rc_def = {bp: None for bp in self.__bonds}
+        fac_per_elem = {key: 0.5 for key in list(self._ionic_radii.keys())}
         fac_per_elem_sub = {
             "H": 0.61,
             "Be": 0.52,
@@ -673,8 +624,8 @@ class ACE(Descriptor):
         }
         fac_per_elem.update(fac_per_elem_sub)
 
-        for bond in self.bonds:
-            rcmini, rcmaxi = self.default_rc(bond)
+        for bond in self.__bonds:
+            rcmini, rcmaxi = self.__default_cutoff_factors(bond)
             defaultri = (rcmaxi + rcmini) / np.sum(
                 [fac_per_elem[elem] * 2 for elem in bond]
             )
@@ -687,28 +638,45 @@ class ACE(Descriptor):
         # shift = ( max(rc_def.values()) - min(rc_def.values())  )/2
         shift = np.std(list(rc_def.values()))
         # if apply_shift:
-        for bond in self.bonds:
+        for bond in self.__bonds:
             if rc_def[bond] != max(rc_def.values()):
                 if self.parameters.ace_apply_shift:
                     rc_def[bond] = rc_def[bond] + shift  # *nshell
                 else:
                     rc_def[bond] = rc_def[bond]  # *nshell
         default_lmbs = [i * 0.05 for i in list(rc_def.values())]
-        rc_def_lst = ["%1.3f"] * len(self.bonds)
+        rc_def_lst = ["%1.3f"] * len(self.__bonds)
         rc_def_str = "rcutfac = " + "  ".join(b for b in rc_def_lst) % tuple(
             list(rc_def.values())
         )
-        lmb_def_lst = ["%1.3f"] * len(self.bonds)
+        lmb_def_lst = ["%1.3f"] * len(self.__bonds)
         lmb_def_str = "lambda = " + "  ".join(b for b in lmb_def_lst) % tuple(
             default_lmbs
         )
-        rcin_def_lst = ["%1.3f"] * len(self.bonds)
-        rcin_def_str = "rcinner = " + "  ".join(
-            b for b in rcin_def_lst
-        ) % tuple(list(rin_def.values()))
-        return rc_range, rc_def_str, lmb_def_str, rcin_def_str
+        return rc_range, rc_def_str, lmb_def_str
 
-    def default_rc(self, elms):
+    def __default_cutoff_factors(self, elms):
+        """
+        Compute default cutoff factors.
+
+        ACE_DOCS_MISSING: What are the assumptions made here? How is this
+        computation performed?
+
+        Parameters
+        ----------
+        elms
+
+        Returns
+        -------
+        rcmini : float
+            Minimum cutoff factor.
+
+        rcmaxi : float
+            Maximum cutoff factor.
+        """
+        # ACE_DOCS_MISSING: Add maybe a general outline of what is being
+        # done here.
+
         elms = sorted(elms)
         elm1, elm2 = tuple(elms)
         try:
@@ -717,7 +685,7 @@ class ACE(Descriptor):
             atnum1 = ase.data.atomic_numbers["Au"]
         covr1 = ase.data.covalent_radii[atnum1]
         vdwr1 = ase.data.vdw_radii[atnum1]
-        ionr1 = self.ionic_radii[elm1]
+        ionr1 = self._ionic_radii[elm1]
         if np.isnan(vdwr1):
             printout(
                 "NOTE: using dummy VDW radius of 2* covalent radius for %s"
@@ -730,7 +698,7 @@ class ACE(Descriptor):
             atnum2 = ase.data.atomic_numbers["Au"]
         covr2 = ase.data.covalent_radii[atnum2]
         vdwr2 = ase.data.vdw_radii[atnum2]
-        ionr2 = self.ionic_radii[elm2]
+        ionr2 = self._ionic_radii[elm2]
         if np.isnan(vdwr2):
             printout(
                 "NOTE: using dummy VDW radius of 2* covalent radius for %s"
@@ -739,12 +707,12 @@ class ACE(Descriptor):
             vdwr2 = 2 * covr2
         minbond = ionr1 + ionr2
         if self.parameters.ace_metal_max:
-            if elm1 not in self.metal_list and elm2 not in self.metal_list:
+            if elm1 not in self._metal_list and elm2 not in self._metal_list:
                 maxbond = vdwr1 + vdwr2
-            elif elm1 in self.metal_list and elm2 not in self.metal_list:
+            elif elm1 in self._metal_list and elm2 not in self._metal_list:
                 maxbond = ionr1 + vdwr2
                 minbond = (ionr1 + ionr2) * 0.8
-            elif elm1 in self.metal_list and elm2 in self.metal_list:
+            elif elm1 in self._metal_list and elm2 in self._metal_list:
                 maxbond = ionr1 + ionr2
                 minbond = (ionr1 + ionr2) * 0.8
             else:
@@ -752,7 +720,8 @@ class ACE(Descriptor):
         else:
             maxbond = vdwr1 + vdwr2
         midbond = (maxbond + minbond) / 2
-        # by default, return the ionic bond length * number of bonds for minimum
+        # by default, return the ionic bond length * number of bonds for
+        # minimum
         returnmin = minbond
         if self.parameters.ace_use_vdw:
             # return vdw bond length if requested
@@ -762,7 +731,29 @@ class ACE(Descriptor):
             returnmax = midbond
         return round(returnmin, 3), round(returnmax, 3)
 
-    def srt_by_attyp(self, nulst, remove_type=2):
+    @staticmethod
+    def __sort_by_atom_type(nulst, remove_type=2):
+        """
+        Sort... ACE_DOCS_MISSING: I am not sure what is being sorted.
+
+        ACE_DOCS_MISSING: In what format is the sorted result returned exactly?
+
+        Parameters
+        ----------
+        nulst : List
+            ACE_DOCS_MISSING: What exactly is this?
+
+        remove_type : int
+            ACE_DOCS_MISSING: What is this parameter? Why is the default 2?
+
+        Returns
+        -------
+        byattyp : dict
+            ACE_DOCS_MISSING: What is this?
+
+        byattypfiltered : dict
+            ACE_DOCS_MISSING: What is this?
+        """
         mu0s = []
         for nu in nulst:
             mu0 = nu.split("_")[0]
@@ -775,25 +766,37 @@ class ACE(Descriptor):
         for nu in nulst:
             mu0 = nu.split("_")[0]
             byattyp[mu0].append(nu)
-            mu0ii, muii, nii, lii = acu.get_mu_n_l(nu)
+            mu0ii, muii, nii, lii = ace_coupling_utils.calculate_mu_n_l(nu)
             if mumax not in muii:
                 byattypfiltered[mu0].append(nu)
         return byattyp, byattypfiltered
 
-    def wigner_3j(self, j1, m1, j2, m2, j3, m3):
-        # uses relation between Clebsch-Gordann coefficients and W-3j symbols to evaluate W-3j
-        # VERIFIED - wolframalpha.com
-        cg = self.clebsch_gordan(j1, m1, j2, m2, j3, -m3)
+    def __init_wigner_3j(self, lmax):
+        """
+        Compute Wigner 3j coefficients.
 
-        num = np.longdouble((-1) ** (j1 - j2 - m3))
-        denom = np.longdouble(((2 * j3) + 1) ** (1 / 2))
+        Returns dictionary of all cg coefficients to be used at a given value
+        of lmax. Reads these coefficients from a pickle file, if one is found,
+        and computes and stores them otherwise. Since these coefficients
+        are the same across different calculations, they are stored in the
+        MALA directory upon first execution of the code and can be reused
+        essentially always.
 
-        return cg * num / denom  # float(num/denom)
+        Parameters
+        ----------
+        lmax : int
+            Maximum l value. ACE_DOCS_MISSING: What is l?
 
-    def init_wigner_3j(self, lmax):
-        # returns dictionary of all cg coefficients to be used at a given value of lmax
+        Returns
+        -------
+        wigner : dict
+            Dictionary of all Wigner 3j coefficients to be used at a given
+            value of lmax.
+        """
         try:
-            with open("%s/wig.pkl" % self.lib_path, "rb") as readinwig:
+            with open(
+                "%s/wig.pkl" % os.path.dirname(os.path.abspath(__file__)), "rb"
+            ) as readinwig:
                 cg = pickle.load(readinwig)
         except FileNotFoundError:
             cg = {}
@@ -811,17 +814,41 @@ class ACE(Descriptor):
                                         l3,
                                         m3,
                                     )
-                                    cg[key] = self.wigner_3j(
+                                    cg[key] = self._wigner_3j(
                                         l1, m1, l2, m2, l3, m3
                                     )
-            with open("%s/wig.pkl" % self.lib_path, "wb") as writewig:
+            with open(
+                "%s/wig.pkl" % os.path.dirname(os.path.abspath(__file__)), "wb"
+            ) as writewig:
                 pickle.dump(cg, writewig)
         return cg
 
-    def init_clebsch_gordan(self, lmax):
-        # returns dictionary of all cg coefficients to be used at a given value of lmax
+    def __init_clebsch_gordan(self, lmax):
+        """
+        Compute Clebsch-Gordan coefficients.
+
+        Returns dictionary of all cg coefficients to be used at a given value
+        of lmax. Reads these coefficients from a pickle file, if one is found,
+        and computes and stores them otherwise. Since these coefficients
+        are the same across different calculations, they are stored in the
+        MALA directory upon first execution of the code and can be reused
+        essentially always.
+
+        Parameters
+        ----------
+        lmax : int
+            Maximum l value. ACE_DOCS_MISSING: What is l?
+
+        Returns
+        -------
+        cg : dict
+            Dictionary of all Clebsch-Gordan coefficients to be used at a given
+            value of lmax.
+        """
         try:
-            with open("%s/cg.pkl" % self.lib_path, "rb") as readincg:
+            with open(
+                "%s/cg.pkl" % os.path.dirname(os.path.abspath(__file__)), "rb"
+            ) as readincg:
                 cg = pickle.load(readincg)
         except FileNotFoundError:
             cg = {}
@@ -839,20 +866,114 @@ class ACE(Descriptor):
                                         l3,
                                         m3,
                                     )
-                                    cg[key] = self.clebsch_gordan(
+                                    cg[key] = self._clebsch_gordan(
                                         l1, m1, l2, m2, l3, m3
                                     )
-            with open("%s/cg.pkl" % self.lib_path, "wb") as writecg:
+            with open(
+                "%s/cg.pkl" % os.path.dirname(os.path.abspath(__file__)), "wb"
+            ) as writecg:
                 pickle.dump(cg, writecg)
             # pickle.dump(cg,'cg.pkl')
         return cg
 
-    def clebsch_gordan(self, j1, m1, j2, m2, j3, m3):
-        # Clebsch-gordan coefficient calculator based on eqs. 4-5 of:
-        # https://hal.inria.fr/hal-01851097/document
+    def __init_element_arrays(self):
+        """
+        Initialize reference ensemble and mumax parameter.
 
-        # VERIFIED: test non-zero indices in Wolfram using format ClebschGordan[{j1,m1},{j2,m2},{j3,m3}]
-        # rules:
+        These depend on the number of elements.
+        """
+        self.__ace_mumax = len(list(set(self._atoms.symbols))) + 1
+        self.__ace_reference_ensemble = [0.0] * self.__ace_mumax
+
+    @staticmethod
+    def __init_element_lists():
+        """
+        Initialize a dictionary with ionic radii and list of metals.
+
+        This function initializes a dictionary with ionic radii (in
+        Angstrom) and a list containing all elements which are considered
+        metals. Both is done via mendeleev. The definition of metal here is
+        "everything in groups 12 and below, including Lanthanoids and
+        Actininoids, excluding hydrogen".
+        ACE_DOCS_MISSING: Why is that the definition of metal?
+
+        Returns
+        -------
+        ionic_radii : dict
+            Dictionary with ionic radii.
+
+        metal_list : List
+            List of metals.
+        """
+        # Access periodic table data from mendeleev.
+        element_info = fetch_table("elements")[
+            ["symbol", "group_id", "atomic_radius"]
+        ]
+        element_info.set_index("symbol", inplace=True)
+
+        # These ionic (actually, atomic radii) are taken from mendeleev.
+        # In the original implementation of the ACE class, these were
+        # hardcoded, now we get them automatically from mendeleev.
+        ionic_radii = element_info.to_dict()["atomic_radius"]
+        ionic_radii = {key: v / 100 for (key, v) in ionic_radii.items()}
+        ionic_radii["G"] = 1.35
+
+        # The metal list that was originally here only contains elements up to
+        # the 13th group (I am not sure why, e.g., Al is excluded).
+        # Additionally, only _some_ Lanthanoids and Actininoids were included,
+        # but that may be due to the list having been outdated, since the old
+        # name for Db (Ha) had been used. The code here now includes all
+        # elements up to group 13 (minus H) and all Lanthanoids and
+        # Actininoids.
+        main_groups = element_info["group_id"] < 13.0
+        actininoids_lanthanoids = element_info["group_id"].isna()
+        main_groups = main_groups.to_dict()
+        main_groups = [key for (key, v) in main_groups.items() if v]
+        actininoids_lanthanoids = actininoids_lanthanoids.to_dict()
+        actininoids_lanthanoids = [
+            key for (key, v) in actininoids_lanthanoids.items() if v
+        ]
+        metal_list = list(set(main_groups + actininoids_lanthanoids))
+        metal_list.remove("H")
+
+        return ionic_radii, metal_list
+
+    @staticmethod
+    def _clebsch_gordan(j1, m1, j2, m2, j3, m3):
+        """
+        Compute a Clebsch-Gordan coefficient.
+
+        Calculation is based on Eqs. 4-5 of:
+        https://hal.inria.fr/hal-01851097/document
+
+        Parameters
+        ----------
+        j1 : int
+            ACE_DOCS_MISSING
+
+        m1 : int
+            ACE_DOCS_MISSING
+
+        j2: int
+            ACE_DOCS_MISSING
+
+        m2: int
+            ACE_DOCS_MISSING
+
+        j3: int
+            ACE_DOCS_MISSING
+
+        m3: int
+            ACE_DOCS_MISSING
+
+        Returns
+        -------
+        cg_coefficient : float
+            Clebsch-Gordan coefficient for combination of j1,m1,j2,m2,j3,m3.
+        """
+        # CODE IS VERIFIED: test non-zero indices in Wolfram using format
+        # ClebschGordan[{j1,m1},{j2,m2},{j3,m3}]
+        # Rules:
         rule1 = np.abs(j1 - j2) <= j3
         rule2 = j3 <= j1 + j2
         rule3 = m3 == m1 + m2
@@ -889,7 +1010,8 @@ class ACE(Descriptor):
 
             G = np.longdouble(0.0)
 
-            # k conditions (see eq.5 of https://hal.inria.fr/hal-01851097/document)
+            # k conditions (see eq.5 of
+            # https://hal.inria.fr/hal-01851097/document)
             # k  >= 0
             # k <= j1 - m1
             # k <= j2 + m2
@@ -911,10 +1033,62 @@ class ACE(Descriptor):
         else:
             return 0.0
 
+    @staticmethod
+    def _wigner_3j(j1, m1, j2, m2, j3, m3):
+        """
+        Compute a Wigner 3j coefficient.
+
+        Uses relation between Clebsch-Gordann coefficients and Wigner 3j
+        symbols to evaluate Wigner 3j symbols.
+
+        Parameters
+        ----------
+        j1 : int
+            ACE_DOCS_MISSING
+
+        m1 : int
+            ACE_DOCS_MISSING
+
+        j2: int
+            ACE_DOCS_MISSING
+
+        m2: int
+            ACE_DOCS_MISSING
+
+        j3: int
+            ACE_DOCS_MISSING
+
+        m3: int
+            ACE_DOCS_MISSING
+
+        Returns
+        -------
+        wigner_3j_coefficient : float
+            Wigner 3j coefficient for combination of j1,m1,j2,m2,j3,m3.
+        """
+        # CODE IS VERIFIED by wolframalpha.com
+        cg = ACE._clebsch_gordan(j1, m1, j2, m2, j3, -m3)
+
+        num = np.longdouble((-1) ** (j1 - j2 - m3))
+        denom = np.longdouble(((2 * j3) + 1) ** (1 / 2))
+
+        return cg * num / denom  # float(num/denom)
+
     def _read_feature_dimension_from_json(self, json_dict):
-        nus, limit_nus = self.calc_limit_nus()
+        """
+        Read the feature dimension from a saved JSON file.
+
+        For ACE descriptors, the feature dimension does directly depend on
+        the number of atoms.
+
+        Parameters
+        ----------
+        json_dict : dict
+            Dictionary containing info loaded from the JSON file.
+        """
+        nus, limit_nus = self.__calculate_limit_nus()
 
         if self.parameters.descriptors_contain_xyz:
-            return len(limit_nus) - (len(self.parameters.ace_elements) - 1)
+            return len(limit_nus) - (len(list(set(self._atoms.symbols))))
         else:
-            return len(limit_nus) - (len(self.parameters.ace_elements) - 1) + 3
+            return len(limit_nus) - (len(list(set(self._atoms.symbols)))) + 3

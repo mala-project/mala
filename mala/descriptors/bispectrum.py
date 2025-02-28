@@ -230,7 +230,9 @@ class Bispectrum(Descriptor):
         # An empty string means that the user wants to use the standard input.
         # What that is differs depending on serial/parallel execution.
         if self.parameters.lammps_compute_file == "":
-            filepath = __file__.split("bispectrum")[0]
+            filepath = os.path.join(
+                __file__.split("bispectrum")[0], "inputfiles"
+            )
             if self.parameters._configuration["mpi"]:
                 if self.parameters.use_z_splitting:
                     self.parameters.lammps_compute_file = os.path.join(
@@ -388,8 +390,8 @@ class Bispectrum(Descriptor):
         self._bnorm_flag = False
         # Currently not supported
         self._quadraticflag = False
-        self._python_calculation_number_elements = 1
-        self._wself = 1.0
+        # self._python_calculation_number_elements = 1
+        # self._wself = 1.0
 
         # What follows is the python implementation of the
         # bispectrum descriptor calculation.

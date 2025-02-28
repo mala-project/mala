@@ -436,7 +436,7 @@ class Descriptor(PhysicalData):
         atoms : ase.Atoms
             Atoms object holding the atomic configuration.
 
-        grid_dimensions : list
+        grid_dimensions : List
             Grid dimensions to be used, in the format [x,y,z].
 
         working_directory : string
@@ -637,7 +637,7 @@ class Descriptor(PhysicalData):
 
         Returns
         -------
-        dimension_info : list or tuple
+        dimension_info : List or tuple
             If read_dtype is False, then only a list containing the dimensions
             of the saved array is returned. If read_dtype is True, a tuple
             containing this list of dimensions and the dtype of the array will
@@ -799,8 +799,7 @@ class Descriptor(PhysicalData):
             # be 1x{ny}x{nz} need to configure separate total_energy_module
             # with nyfft enabled
             if self.parameters.use_y_splitting > 1:
-                # TODO automatically pass nyfft into QE from MALA
-                # if more processors thatn y*z grid dimensions requested
+                # If more processors thatn y*z grid dimensions requested
                 # send error. More processors than y*z grid dimensions reduces
                 # efficiency and scaling of QE.
                 nyfft = self.parameters.use_y_splitting
@@ -1172,7 +1171,7 @@ class Descriptor(PhysicalData):
 
         Parameters
         ----------
-        gridpoint : list
+        gridpoint : List
             List of grid indices in the format [x, y, z].
 
         Returns

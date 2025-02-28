@@ -129,3 +129,11 @@ class TestExamples:
             self.dir_path
             + "/../examples/advanced/ex10_convert_numpy_openpmd.py"
         )
+
+    @pytest.mark.order(after="test_basic_ex01")
+    def test_advanced_ex11(self, tmp_path):
+        os.chdir(tmp_path)
+        runpy.run_path(
+            self.dir_path
+            + "/../examples/advanced/ex11_preprocess_ace_descriptors.py"
+        )

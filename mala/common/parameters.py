@@ -468,6 +468,57 @@ class ParametersDescriptors(ParametersBase):
     minterpy_polynomial_degree : int
         WILL BE DEPRECATED IN MALA v1.4.0 - polynomial degree for minterpy
         descriptor calculation.
+
+    ace_cutoff : float
+        Cutoff radius for ACE descriptor calculation. May be dynamically
+        increased during descriptor calculation (MALA will notify you, if
+        this is necessary)
+
+    ace_ranks : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_nmax  : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_lmax : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_lmin : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_nshell : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_apply_shift : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_metal_max : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_use_vdw : list
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
+
+    ace_L_R : list
+        ACE_DOCS_MISSING: I am not sure how to set this.
+
+    ace_M_R : list
+        ACE_DOCS_MISSING: I am not sure how to set this.
+
+    ace_coupling_type : str
+        Coupling type used for reduction of spherical harmonic products.
+        Can be "clebsch_gordan" or "wigner_3j".
+
+    ace_reduction_coefficients_lmax : int
+        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
+        how to best communicate to users how to set this.
     """
 
     def __init__(self):
@@ -506,37 +557,27 @@ class ParametersDescriptors(ParametersBase):
         self.minterpy_polynomial_degree = 4
         self.minterpy_lp_norm = 2
 
-        # ace descriptors
-        self.ace_elements = ["Al", "G"]
-        #NOTE that if types_like_snap=True, you will instead need for your ace_elements:
-        #self.ace_elements = ["Al"]
-        self.ace_mumax = len(self.ace_elements)
+        # Everything pertaining to the ACE descriptors.
+        self.ace_cutoff = None
+
         self.ace_ranks = [1, 2, 3]
         self.ace_nmax = [6, 2, 2]
         self.ace_lmax = [0, 2, 2]
-        self.ace_nradbase = max(self.ace_nmax)
         self.ace_lmin = [0, 0, 0]
-        self.ace_reference_ens = [0.0, 0.0]
 
+        # Flavors/extra options for the ACE descriptors.
         self.ace_nshell = 2.0
         self.ace_apply_shift = False
         self.ace_metal_max = True
         self.ace_use_vdw = False
 
+        # ???
         self.ace_L_R = 0
         self.ace_M_R = 0
 
-        self.ace_coupling_type = "cg"
-        self.ace_lmax_traditional = 12
-        
-        # TODO: add consistency check for these
-        # if grid_filter, types_like_snap must be False
-        # if grid_filter, padfunc must be True
-        self.ace_grid_filter = True
-        self.ace_types_like_snap = False
-        self.ace_padfunc = True
-
-        
+        # Other value could be "wigner3j".
+        self.ace_coupling_type = "clebsch_gordan"
+        self.ace_reduction_coefficients_lmax = 12
 
     @property
     def use_z_splitting(self):
@@ -585,6 +626,16 @@ class ParametersDescriptors(ParametersBase):
     @bispectrum_cutoff.setter
     def bispectrum_cutoff(self, value):
         self._rcutfac = value
+        self.atomic_density_cutoff = value
+
+    @property
+    def ace_cutoff(self):
+        """Cut off radius for bispectrum calculation."""
+        return self._ace_cutoff
+
+    @ace_cutoff.setter
+    def ace_cutoff(self, value):
+        self._ace_cutoff = value
         self.atomic_density_cutoff = value
 
     @property
