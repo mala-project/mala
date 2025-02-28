@@ -1,3 +1,10 @@
+"""
+Library of functions and classes for building Young diagrams and filling them.
+
+This includes young subgroup fillings within orbits of irreproducible
+representations of S_N.
+"""
+
 import math
 import numpy as np
 
@@ -10,12 +17,32 @@ from mala.descriptors.acelib.tree_sorting import build_quick_tree
 import itertools
 
 
-# library of functions and classes for building young diagrams and filling them
-# this includes young subgroup fillings within orbits of irreps of S_N
 class YoungSubgroup:
-    """ """
+    """
+    Class for Young tableau with subgroup filling options.
 
-    # Class for young tableau with subgroup filling options
+    Parameters
+    ----------
+    rank : int
+        Rank of the Young tableau.
+
+    Attributes
+    ----------
+    rank : int
+        Rank of the Young tableau.
+
+    partition : List
+        Partition of the Young tableau.
+
+    fills : List
+        List of subgroup fillings.
+
+    nodes : List or tuple
+        List of nodes.
+
+    remainder : any
+        Remainder of building trees during filling of the subgroups.
+    """
 
     def __init__(self, rank):
         self.rank = rank
@@ -26,14 +53,17 @@ class YoungSubgroup:
 
     def sigma_c_partitions(self, max_orbit):
         """
+        Get a list of partitions compatible with sigma_c.
 
         Parameters
         ----------
-        max_orbit
+        max_orbit : int
+            Maximum orbit.
 
         Returns
         -------
-
+        partitions : List
+            List of partitions compatible with sigma_c.
         """
         # returns a list of partitions compatible with sigma_c
         nodes, remainder = build_quick_tree(range(self.rank))
@@ -45,11 +75,11 @@ class YoungSubgroup:
         min_orbits += math.floor(self.rank / 4)
 
         min_nc1 = 0
-        if remainder != None:
+        if remainder is not None:
             min_nc1 = 1
-        if max_orbit != None:
+        if max_orbit is not None:
             max_orbits = max_orbit
-        elif max_orbit == None:
+        elif max_orbit is None:
             max_orbits = max_nc2 + min_nc1
         # orb_base = [i for i in range(1,self.rank+1) if i %2 ==0 or i == 1]
         orb_base = [i for i in range(1, self.rank + 1) if i == 2 or i == 1]
@@ -62,7 +92,7 @@ class YoungSubgroup:
             good_partitions = []
             for norbits in range(min_orbits, max_orbits + 1):
                 possible_parts = [
-                    tuple(self.Reverse(sorted(p)))
+                    tuple(self.reverse_vector(sorted(p)))
                     for p in itertools.product(orb_base, repeat=norbits)
                     if np.sum(p) == self.rank and max(p) <= 2**max_nc2
                 ]
@@ -72,16 +102,23 @@ class YoungSubgroup:
 
     def check_single_fill(self, partition, inds, semistandard=True):
         """
+        Chechk single fill, ACE_DOCS_MISSING.
 
         Parameters
         ----------
-        partition
-        inds
-        semistandard
+        partition : List
+            Partition of the Young tableau.
+
+        inds : List
+            Indices of the Young tableau.
+
+        semistandard : bool
+            Whether the Young tableau is semistandard.
 
         Returns
         -------
-
+        bool
+            True if the fill is correct, False otherwise.
         """
         tmpi = sorted(inds)
         unique_tmpi = list(set(tmpi))
@@ -108,37 +145,51 @@ class YoungSubgroup:
         inds,
         partitions=None,
         max_orbit=None,
-        sigma_c_symmetric=False,
         semistandard=True,
         lreduce=False,
     ):
         """
+        Fill the subgroup.
+
+        ACE_DOCS_MISSING.
 
         Parameters
         ----------
-        inds
-        partitions
-        max_orbit
-        sigma_c_symmetric
-        semistandard
-        lreduce
+        inds : List
+            Indices of the Young tableau.
+
+        partitions : List
+            Partitions of the Young tableau.
+
+        max_orbit : int
+            Maximum orbit.
+
+        semistandard : bool
+            Whether the Young tableau is semistandard.
+
+        lreduce : bool
+            Whether to reduce the Young tableau.
         """
-        if partitions == None:
+        if partitions is None:
             partitions = self.sigma_c_partitions(max_orbit)
         if len(set(inds)) == 1:
             partitions = [tuple([len(inds)])] + partitions
         subgroup_fills = []
         fills_perpart = {tuple(partition): [] for partition in partitions}
         part_perfill = {}
-        all_perms = self.unique_perms(inds)
+        all_perms = self.unique_permutations(inds)
 
-        # get the full automorphism group including any expansion due to degeneracy
-        # G_N = get_auto_part(inds,partitions[0],add_degen_autos=True,part_only=False)
-        # applied_perms = [tuple(Permutation(filled_perm(pi,len(inds)))(inds)) for pi in G_N]
+        # UNUSED CODE, maybe we will need this laterm, so I am not deleting it
+        # directly.
 
+        # get the full automorphism group including any expansion due to
+        # degeneracy
+        # G_N = get_auto_part(inds,partitions[0],add_degen_autos=True,part_
+        # only=False)
+        # applied_perms = [tuple(Permutation(filled_perm(pi,len(inds)))(inds))
+        # for pi in G_N]
         # collect a group of permutations \sigma \in S_N \notin G_N
         # idi = [tuple([ki]) for ki in range(len(inds))]
-
         # H_N = [tuple(idi) ]
         # for raw_perm in perms_raw:
         #    P = Permutation(raw_perm)
@@ -147,7 +198,8 @@ class YoungSubgroup:
         #    this_applied = P(inds)
         #    if tuple(this_applied) not in applied_perms:
         #        H_N.append(cyc)
-        # not_equals  = [tuple(Permutation(filled_perm(pi,len(inds)))(inds)) for pi in H_N]
+        # not_equals  = [tuple(Permutation(filled_perm(pi,len(inds)))(inds))
+        # for pi in H_N]
         # if len(not_equals) != 0:
         #    loopperms = not_equals.copy()
         # elif len(not_equals) == 0:
@@ -193,16 +245,19 @@ class YoungSubgroup:
             part_perfill[sgf] = pts
 
     @staticmethod
-    def unique_perms(vec):
+    def unique_permutations(vec):
         """
+        Get the unique permutations of a vector.
 
         Parameters
         ----------
-        vec
+        vec : List
+            Vector to get the permutations of.
 
         Returns
         -------
-
+        unique_perms : List
+            List of unique permutations.
         """
         all_perms = [p for p in itertools.permutations(vec)]
         return sorted(list(set(all_perms)))
@@ -210,15 +265,20 @@ class YoungSubgroup:
     @staticmethod
     def is_column_sort(partitionfill, strict_col_sort=False):
         """
+        Check if the columns are sorted.
 
         Parameters
         ----------
-        partitionfill
-        strict_col_sort
+        partitionfill : List
+            Partition fill to check.
+
+        strict_col_sort : bool
+            Whether to check for strict column sorting. ACE_DOCS_MISSING.
 
         Returns
         -------
-
+        sorted : bool
+            True if the columns are sorted, False otherwise.
         """
         lens = [len(x) for x in partitionfill]
         ranges = [list(range(ln)) for ln in lens]
@@ -240,14 +300,17 @@ class YoungSubgroup:
     @staticmethod
     def is_row_sort(partitionfill):
         """
+        Check if the rows are sorted.
 
         Parameters
         ----------
-        partitionfill
+        partitionfill : List
+            Partition fill to check.
 
         Returns
         -------
-
+        sorted : bool
+            True if the rows are sorted, False otherwise.
         """
         all_srt = []
         for orbit in partitionfill:
@@ -256,16 +319,22 @@ class YoungSubgroup:
         return all(all_srt)
 
     @staticmethod
-    def Reverse(v):
+    def reverse_vector(v):
         """
+        Reverse a vector.
+
+        Returns a copy of the vector, to allow reverse and actual vector
+        to both be present.
 
         Parameters
         ----------
-        v
+        v : List
+            Vector to reverse.
 
         Returns
         -------
-
+        v_reversed : List
+            Reversed vector.
         """
         vtmp = v.copy()
         vtmp.reverse()

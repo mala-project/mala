@@ -18,10 +18,10 @@ class Node:
     value_tuple : tuple
         Tuple of the value of this node and the values of its children.
 
-    children : list
+    children : List
         List of the children of this node.
 
-    leaves : list
+    leaves : List
         List of the leaves of this node.
 
     left : Node
@@ -269,10 +269,10 @@ def build_full_tree(l, L, L_R):
 
     Parameters
     ----------
-    l : list
+    l : List
         ACE_DOCS_MISSING
 
-    L : list
+    L : List
         ACE_DOCS_MISSING
 
     L_R : int

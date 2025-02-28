@@ -1324,9 +1324,7 @@ def calculate_highest_coupling_representation(lp, lref):
     ysgi = YoungSubgroup(rank)
     highest_rep = tuple([1] * rank)
     for rep in coupling_reps:
-        ysgi.subgroup_fill(
-            lref, [rep], sigma_c_symmetric=False, semistandard=False
-        )
+        ysgi.subgroup_fill(lref, [rep], semistandard=False)
         test_fills = ysgi.fills.copy()
         if lp not in test_fills:
             pass
@@ -1372,7 +1370,6 @@ def generate_tree_labels(nin, lin, L_R=0):
         lin,
         partitions=[local_sigma_c_partitions[rank][-1]],
         max_orbit=len(local_sigma_c_partitions[rank][-1]),
-        sigma_c_symmetric=False,
         semistandard=False,
     )
     lperms = ysgi.fills.copy()
@@ -1404,17 +1401,10 @@ def generate_tree_labels(nin, lin, L_R=0):
         degen_orbit, orbit_inds = calculate_degenerate_orbit(
             lp
         )  # PI basis size
-        ysgi.subgroup_fill(
-            nin, [degen_orbit], sigma_c_symmetric=False, semistandard=False
-        )
+        ysgi.subgroup_fill(nin, [degen_orbit], semistandard=False)
         degen_fills = ysgi.fills.copy()
         sequential_degen_orbit = enforce_sorted_orbit(orbit_inds)
-        ysgi.subgroup_fill(
-            nin,
-            [sequential_degen_orbit],
-            sigma_c_symmetric=False,
-            semistandard=False,
-        )
+        ysgi.subgroup_fill(nin, [sequential_degen_orbit], semistandard=False)
         nps_per_l[lp] = ysgi.fills.copy()
         original_joint_span[lp] = [
             (prd[0], lp, prd[1])
@@ -1732,10 +1722,7 @@ def apply_ladder_relationships(
                 )
                 lidegen_rep, l_orbit_inds = calculate_degenerate_orbit(lii)
                 ysgi.subgroup_fill(
-                    list(nin),
-                    [lidegen_rep],
-                    sigma_c_symmetric=False,
-                    semistandard=False,
+                    list(nin), [lidegen_rep], semistandard=False
                 )
                 degen_nfills = ysgi.fills.copy()
                 if count < recurmax and tuple(nii) in degen_nfills:
@@ -1751,10 +1738,7 @@ def apply_ladder_relationships(
                 )
                 lidegen_rep, l_orbit_inds = calculate_degenerate_orbit(lii)
                 ysgi.subgroup_fill(
-                    list(nin),
-                    [lidegen_rep],
-                    sigma_c_symmetric=False,
-                    semistandard=False,
+                    list(nin), [lidegen_rep], semistandard=False
                 )
                 degen_nfills = ysgi.fills.copy()
                 if count < recurmax and tuple(nii) in degen_nfills:
@@ -1774,10 +1758,7 @@ def apply_ladder_relationships(
                 l_sequential_degen_orbit = enforce_sorted_orbit(l_orbit_inds)
                 # switch to lower symmetry SN representation
                 ysgi.subgroup_fill(
-                    list(nin),
-                    [l_sequential_degen_orbit],
-                    sigma_c_symmetric=False,
-                    semistandard=False,
+                    list(nin), [l_sequential_degen_orbit], semistandard=False
                 )
                 degen_nfills = ysgi.fills.copy()
                 if count < recurmax and tuple(nii) in degen_nfills:
