@@ -10,7 +10,7 @@ dependencies:
   - optuna
   - pandas
   - ase
-  - pytorch-cpu
+  - pytorch-cpu<2.6.0
   - mpmath
   - tensorboard
   - scikit-spatial
