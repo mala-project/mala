@@ -145,7 +145,7 @@ dependencies:
     - scipy==1.15.2
     - sqlalchemy==2.0.38
     - tensorboard-data-server==0.7.0
-    - torch==2.6.0
+    - torch==2.5.1.post103
     - unicodedata2==16.0.0
     - urllib3==2.3.0
     - wrapt==1.17.2
