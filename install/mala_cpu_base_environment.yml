@@ -16,5 +16,6 @@ dependencies:
   - scikit-spatial
   - mendeleev
   - sympy
+  - requests
   - pip:
       - openpmd-api
