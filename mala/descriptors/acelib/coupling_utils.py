@@ -627,7 +627,6 @@ def generate_nl(rank, nmax, lmax, mumax=1, lmin=0, L_R=0, all_perms=False):
         List of munl vectors in string format, i.e.
         mu0_mu1,mu2,...muk,n1,n2,..n_k,l1,l2,..l_k_L1-L2...-LK
     """
-
     munl = []
 
     murng = range(mumax)
@@ -719,7 +718,6 @@ def build_and_write_to_tabulated(
 ):
     """
     Build a tabulated label file.
-
 
     This only matters for rank >=4. The json files build in this function
     are saved in the acelib directory and read in the process of
@@ -815,7 +813,7 @@ def build_and_write_to_tabulated(
 
 def read_from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
     """
-    Read from tabulated data saved to a json file (by build_tabulated)
+    Read from tabulated data saved to a json file (by build_tabulated).
 
     Parameters
     ----------
@@ -1226,7 +1224,7 @@ def lammps_remap(PA_labels, rank, allowed_mus=[0]):
 
 def simple_parity_filter(l, inters, even=True):
     """
-    Filter parity in ... ACE_DOCS_MISSING
+    Filter parity in ... ACE_DOCS_MISSING.
 
     Parameters
     ----------
