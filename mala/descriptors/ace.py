@@ -71,7 +71,7 @@ class ACE(Descriptor):
         # Will get filled once the atoms object has been loaded.
         # ACE_DOCS_MISSING: What do these do?
         self.__ace_mumax = None
-        self.__ace_reference_ensemble = None
+        self.__ace_reference_energy = None
 
         # Will get filled during calculation of coupling coefficients.
         # ACE_DOCS_MISSING: What is nus/limit_nus? What exactly does
@@ -398,15 +398,49 @@ class ACE(Descriptor):
 
     def _calculate_bonds_and_cutoff(self):
         """
-        Calculate bonds and cutoff radii.
+        Calculate bonds, cutoff radii, and other radial basis parameters.
 
         This is essentially part of the computation of the coupling
         coefficients, but a part that has to be done every time,
         since it initializes the cutoff radii.
+
+        Radial basis functions in ACE descriptors are defined per
+        bond type. "Bond type"s in ace descriptors are defined by all
+        possible combinations of element types. These may be found with
+        with itertools.product(ace_types,ace_types). For MALA, ace_types
+        includes the gridpoints as a type, and typically descriptors are only
+        used that form "bonds" with the gridpoints at the center.
+
+        The cutoff radii determine how far from the gridpoint to search for
+        atoms when calculating the grid-centered ACE descriptors. These are,
+        by default, determined based on the atomic radii of the elements
+        allowed in the system and must be defined per "bond type".
+
+        The radial basis in the LAMMPS-based ACE descriptors use a scaled
+        distance input rather than the radial distance between gridpoint and
+        atom directly. This scaled distance, defined in Drautz 2019, allows
+        one to make the ACE descriptors (exponentially) more sensitive to short
+        distances from the grid center. The exponential scaling factor, lambda,
+        must be defined per "bond type". A larger `lambda` provides more
+        sensitivity for small distances compared to larger distances, and does
+        so through an exponential function. As `lambda` approaches 0, the scaled
+        distance approaches the true separation distance between the gridpoint 
+        and the atom `r`. The default values for `lambda` are chosen to be small
+        fractions of the respective cutoff radii, so that small and large
+        separations are given similar sensitivities. In practice, these are
+        hyperparameters that should be optimized. 
+
         """
         ncols0 = 3
 
         # "G" for grid has to be added to the element list.
+        #!NOTE <element_list> below may cause mismatching descriptor matrix
+        # sizes, resulting in errors for LAMMPS or MALA when applied to
+        # multi-element systems. It is safer to specify all possible elements/
+        # symbols outside of the ASE atoms object. Otherwise if you have an ASE
+        # atoms object with 1/2 possible elements (e.g., just Ga not Ga,N), the
+        # descriptor matrix you calculate here wont be the same as that from
+        # Ga/N.
         element_list = sorted(list(set(self._atoms.symbols))) + ["G"]
 
         # Bond types correspond to all bonds between elements.
@@ -415,7 +449,6 @@ class ACE(Descriptor):
         ]
 
         # Default settings for the cutoff radii and lambda values.
-        # ACE_DOCS_MISSING: What are the lambda values?
         (
             rc_range,
             rc_default,
@@ -441,7 +474,7 @@ class ACE(Descriptor):
 
     def _calculate_coupling_coeffs(self):
         """
-        Calculate coupling coefficients and save them to file.
+        Calculate generalized coupling coefficients and save them to file.
 
         Calculation and saving is done via the ACEPotential class.
 
@@ -497,7 +530,7 @@ class ACE(Descriptor):
         # ACE_DOCS_MISSING: What are these labels?
         Apot = ACEPotential(
             element_list,
-            self.__ace_reference_ensemble,
+            self.__ace_reference_energy,
             self.parameters.ace_ranks,
             self.parameters.ace_nmax,
             self.parameters.ace_lmax,
@@ -880,21 +913,31 @@ class ACE(Descriptor):
 
     def __init_element_arrays(self):
         """
-        Initialize reference ensemble and mumax parameter.
+        Initialize reference energy per atom type and max chemical
+        basis index, mumax, for the system. These depend on the
+        number of elements.
+    
+        Typically, one will set the ace reference energy to 0.0 eV
+        for each element type. It is possible to use this to apply
+        a constant shift to the energy if using a linear model.
 
-        These depend on the number of elements.
+        For standard usage, the maximum chemical basis index, mumax,
+        should be 1 larger than the number of chemical species in
+        the system. The + 1 is to account for the grid point as a
+        unique "species" in the ACE descriptors.
         """
         self.__ace_mumax = len(list(set(self._atoms.symbols))) + 1
-        self.__ace_reference_ensemble = [0.0] * self.__ace_mumax
+        self.__ace_reference_energy = [0.0] * self.__ace_mumax
 
     @staticmethod
     def __init_element_lists():
+        #initially, the hard-coded values included vdW radii for elements where available (thus the weird definition of metal here). Where they werent available, other radii were used. We may use ionic radii instead, but we may want to change the factor by which we multiply the radii by to get the default cutoffs. Having them be ~2x the vdW radii is usually a good starting point.
         """
-        Initialize a dictionary with ionic radii and list of metals.
+        Initialize a dictionary with ionic/vdW radii and list of metals.
 
         This function initializes a dictionary with ionic radii (in
         Angstrom) and a list containing all elements which are considered
-        metals. Both is done via mendeleev. The definition of metal here is
+        metals. Both are done via mendeleev. The definition of metal here is
         "everything in groups 12 and below, including Lanthanoids and
         Actininoids, excluding hydrogen".
         ACE_DOCS_MISSING: Why is that the definition of metal?
@@ -943,7 +986,8 @@ class ACE(Descriptor):
     @staticmethod
     def _clebsch_gordan(j1, m1, j2, m2, j3, m3):
         """
-        Compute a Clebsch-Gordan coefficient.
+        Compute a traditional Clebsch-Gordan coefficient, used to reduce
+        products of spherical harmonics occuring in ACE descriptors.
 
         Calculation is based on Eqs. 4-5 of:
         https://hal.inria.fr/hal-01851097/document
@@ -951,22 +995,22 @@ class ACE(Descriptor):
         Parameters
         ----------
         j1 : int
-            ACE_DOCS_MISSING
+            angluar momentum quantum number for spherical harmonic 1
 
         m1 : int
-            ACE_DOCS_MISSING
+            projection quantum number for spherical harmonic 1
 
         j2: int
-            ACE_DOCS_MISSING
+            angluar momentum quantum number for spherical harmonic 2
 
         m2: int
-            ACE_DOCS_MISSING
+            projection quantum number for spherical harmonic 2
 
         j3: int
-            ACE_DOCS_MISSING
+            angluar momentum quantum number for spherical harmonic 3
 
         m3: int
-            ACE_DOCS_MISSING
+            projection quantum number for spherical harmonic 1
 
         Returns
         -------
@@ -1038,7 +1082,8 @@ class ACE(Descriptor):
     @staticmethod
     def _wigner_3j(j1, m1, j2, m2, j3, m3):
         """
-        Compute a Wigner 3j coefficient.
+        Compute a traditional Wigner 3j symbol, used to reduce
+        products of spherical harmonics occuring in ACE descriptors.
 
         Uses relation between Clebsch-Gordann coefficients and Wigner 3j
         symbols to evaluate Wigner 3j symbols.
@@ -1046,22 +1091,22 @@ class ACE(Descriptor):
         Parameters
         ----------
         j1 : int
-            ACE_DOCS_MISSING
+            angluar momentum quantum number for spherical harmonic 1
 
         m1 : int
-            ACE_DOCS_MISSING
+            projection quantum number for spherical harmonic 1
 
         j2: int
-            ACE_DOCS_MISSING
+            angluar momentum quantum number for spherical harmonic 2
 
         m2: int
-            ACE_DOCS_MISSING
+            projection quantum number for spherical harmonic 2
 
         j3: int
-            ACE_DOCS_MISSING
+            angluar momentum quantum number for spherical harmonic 3
 
         m3: int
-            ACE_DOCS_MISSING
+            projection quantum number for spherical harmonic 1
 
         Returns
         -------

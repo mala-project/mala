@@ -72,7 +72,7 @@ class ACEPotential:
     def __init__(
         self,
         elements,
-        reference_ensemble,
+        reference_energy,
         ranks,
         nmax,
         lmax,
@@ -93,7 +93,7 @@ class ACEPotential:
         # briefly, and give them more meaningful names.
         self.__global_ccs = css
         self.__global_ccs[1] = {"0": {tuple([]): {"0": 1.0}}}
-        self.__E0 = reference_ensemble
+        self.__E0 = reference_energy
         self.__ranks = ranks
         self.__elements = elements
         self.__betas = None
