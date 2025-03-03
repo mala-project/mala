@@ -247,7 +247,7 @@ class LDOSFeatureExtractor:
                 predicted_twolinear + predicted_gaussian
             ) / self.rescaling_factor
             for f in range(5 + 3 * self.number_of_gaussians):
-                temp = self.__internal_feature_scaling(temp, f)
+                temp = self.__internal_feature_rescaling(temp, f)
             return temp
         else:
             return (
@@ -343,6 +343,22 @@ class LDOSFeatureExtractor:
             return temp_array
         elif i > 20:
             return np.log(temp_array)
+
+    @staticmethod
+    def __internal_feature_rescaling(input_array, i):
+        temp_array = input_array.copy().astype(np.float64)
+        if i == 0:
+            return temp_array
+        if i == 1 or i == 4:
+            return np.exp(temp_array)
+        if i == 2 or i == 3:
+            return np.exp(temp_array) * -1.0
+        elif 4 < i < 13:
+            return np.power(temp_array, 3)
+        elif 12 < i < 21:
+            return temp_array
+        elif i > 20:
+            return np.exp(temp_array)
 
     def composite_fit(
         self,
