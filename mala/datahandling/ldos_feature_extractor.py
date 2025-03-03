@@ -19,6 +19,7 @@ class LDOSFeatureExtractor:
         rescaling_factor=1000,
         number_of_gaussians=8,
         maximum_number_of_retries=3,
+        use_feature_scaling=True,
     ):
         self.parameters = parameters
         self.target_calculator = target_calculator
@@ -27,6 +28,7 @@ class LDOSFeatureExtractor:
         self.rescaling_factor = rescaling_factor
         self.number_of_gaussians = number_of_gaussians
         self.maximum_number_of_retries = maximum_number_of_retries
+        self.use_feature_scaling = use_feature_scaling
 
     def extract_features(
         self,
@@ -202,6 +204,11 @@ class LDOSFeatureExtractor:
                     ": Time per point: ",
                     (time.perf_counter() - start_time) / (point + 1),
                 )
+        if self.use_feature_scaling:
+            for f in range(5 + 3 * self.number_of_gaussians):
+                features[:, f] = self.__internal_feature_scaling(
+                    features[:, f], f
+                )
 
         barrier()
 
@@ -235,9 +242,17 @@ class LDOSFeatureExtractor:
         predicted_twolinear = np.concatenate((predicted_left, predicted_right))
         predicted_gaussian = self.gaussians(xdata, *ldos_features[5:])
 
-        return (
-            predicted_twolinear + predicted_gaussian
-        ) / self.rescaling_factor
+        if self.use_feature_scaling:
+            temp = (
+                predicted_twolinear + predicted_gaussian
+            ) / self.rescaling_factor
+            for f in range(5 + 3 * self.number_of_gaussians):
+                temp = self.__internal_feature_scaling(temp, f)
+            return temp
+        else:
+            return (
+                predicted_twolinear + predicted_gaussian
+            ) / self.rescaling_factor
 
     def reconstruct_ldos(self, ldos_features, original_dimension=300):
         xdata = np.arange(original_dimension)
@@ -314,6 +329,20 @@ class LDOSFeatureExtractor:
         )
 
         return np.concatenate(([splitting_x], popt_left, popt_right, popt_2))
+
+    @staticmethod
+    def __internal_feature_scaling(input_array, i):
+        temp_array = input_array.copy().astype(np.float32)
+        if i == 0:
+            return temp_array
+        if 1 <= i <= 4:
+            return np.log(np.abs(temp_array))
+        elif 4 < i < 13:
+            return np.cbrt(temp_array)
+        elif 12 < i < 21:
+            return temp_array
+        elif i > 20:
+            return np.log(temp_array)
 
     def composite_fit(
         self,
