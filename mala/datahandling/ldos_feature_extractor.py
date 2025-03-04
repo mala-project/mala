@@ -269,6 +269,12 @@ class LDOSFeatureExtractor:
             )
         elif len(ldos_shape) != 2:
             raise Exception("Cannot work with provided LDOS shape.")
+
+        if self.use_feature_scaling:
+            for f in range(5 + 3 * self.number_of_gaussians):
+                ldos_features[:, f] = self.__internal_feature_rescaling(
+                    ldos_features[:, f], f
+                )
         full_ldos = np.zeros((ldos_features.shape[0], original_dimension))
 
         # Initializing the arrays for the left and right side of linear fit as
