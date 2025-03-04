@@ -233,6 +233,12 @@ class LDOSFeatureExtractor:
 
     def reconstruct_single_ldos(self, ldos_features, original_dimension=300):
         xdata = np.arange(original_dimension)
+        if self.use_feature_scaling:
+            for f in range(5 + 3 * self.number_of_gaussians):
+                ldos_features[f] = self.__internal_feature_rescaling(
+                    ldos_features[f], f
+                )
+
         splitting_x = int(ldos_features[0])
         x_left = slice(0, splitting_x, 1)
         x_right = slice(splitting_x, original_dimension, 1)
@@ -242,17 +248,9 @@ class LDOSFeatureExtractor:
         predicted_twolinear = np.concatenate((predicted_left, predicted_right))
         predicted_gaussian = self.gaussians(xdata, *ldos_features[5:])
 
-        if self.use_feature_scaling:
-            temp = (
-                predicted_twolinear + predicted_gaussian
-            ) / self.rescaling_factor
-            for f in range(5 + 3 * self.number_of_gaussians):
-                temp = self.__internal_feature_rescaling(temp, f)
-            return temp
-        else:
-            return (
-                predicted_twolinear + predicted_gaussian
-            ) / self.rescaling_factor
+        return (
+            predicted_twolinear + predicted_gaussian
+        ) / self.rescaling_factor
 
     def reconstruct_ldos(self, ldos_features, original_dimension=300):
         xdata = np.arange(original_dimension)
