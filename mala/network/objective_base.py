@@ -67,6 +67,7 @@ class ObjectiveBase:
         ).count(True)
 
         self._trial_type = self.params.hyperparameters.hyper_opt_method
+        self._last_trainer = None
 
     def __call__(self, trial):
         """
@@ -93,11 +94,13 @@ class ObjectiveBase:
             0, self.params.hyperparameters.number_training_per_trial
         ):
             test_network = Network(self.params)
-            test_trainer = Trainer(
+            self._last_trainer = Trainer(
                 self.params, test_network, self._data_handler
             )
-            test_trainer.train_network()
-            final_validation_loss.append(test_trainer.final_validation_loss)
+            self._last_trainer.train_network()
+            final_validation_loss.append(
+                self._last_trainer.final_validation_loss
+            )
             if (
                 self._trial_type == "optuna"
                 and self.params.hyperparameters.pruner == "multi_training"
@@ -107,7 +110,7 @@ class ObjectiveBase:
                 # meant for values DURING training, but we instead
                 # use it for one of the losses during multiple trainings.
                 # It should not pose a problem though.
-                trial.report(test_trainer.final_validation_loss, i)
+                trial.report(self._last_trainer.final_validation_loss, i)
                 if trial.should_prune():
                     raise TrialPruned()
 

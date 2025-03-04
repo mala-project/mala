@@ -396,6 +396,11 @@ class HyperOptOptuna(HyperOpt):
                     "checkpoint for it.",
                     min_verbosity=0,
                 )
+                # TODO: This is just a quick and dirty to save the model.
+                if self.params.hyperparameters.number_training_per_trial == 1:
+                    self.objective._last_trainer.save_run(
+                        self.params.hyperparameters.checkpoint_name + "_best"
+                    )
 
         if need_to_checkpoint is True:
             # We need to create a checkpoint!
