@@ -121,7 +121,7 @@ class LDOSFeatureExtractor:
         # TODO: The FFT changes the dimensions from 301 to 300 - this is OK
         # for the moment since we are interested in qualitative results,
         # but should eventually be fixed!
-        ldos = self.__lowpass_filter(ldos, cutoff=cutoff)
+        ldos = self.lowpass_filter(ldos, cutoff=cutoff)
         ldos_shape = np.shape(ldos)
 
         if dry_run and not self.parameters.use_mpi:
@@ -491,7 +491,7 @@ class LDOSFeatureExtractor:
         return gauss
 
     @staticmethod
-    def __lowpass_filter(ldos, cutoff):
+    def lowpass_filter(ldos, cutoff):
         ldos_fft = rfft(ldos, axis=-1)
         ldos_fft[:, cutoff:] = 0
         ldos = irfft(ldos_fft, axis=-1)
