@@ -554,7 +554,7 @@ class ParametersDescriptors(ParametersBase):
         self.minterpy_lp_norm = 2
 
         # Everything pertaining to the ACE descriptors.
-        self.ace_cutoff = None
+        self.ace_cutoff_factor = 2.0
 
         # Many body orders
         self.ace_included_expansion_ranks = [1, 2, 3]
@@ -584,8 +584,8 @@ class ParametersDescriptors(ParametersBase):
 
         # Other value could be "wigner3j".
         self.ace_coupling_coefficients_type = "clebsch_gordan"
-        
-        # TODO: Implement a check in the ace.py class, so that symbols 
+
+        # TODO: Implement a check in the ace.py class, so that symbols
         # are recomputed if a larger lmax is requested.
         self.ace_coupling_coefficients_maximum_l = 12
 
@@ -639,19 +639,30 @@ class ParametersDescriptors(ParametersBase):
         self.atomic_density_cutoff = value
 
     @property
-    def ace_cutoff(self):
+    def ace_cutoff_factor(self):
         """
-        Cutoff radius for ACE descriptor calculation.
+        Cutoff radius factor for ACE descriptor calculation.
 
-        May be dynamically increased during descriptor calculation
-        (MALA will notify you, if this is necessary)
+        This is NOT a cutoff radius itself. Rather, ACE computes on cutoff
+        radius for every bond between element types (with grid points counting
+        as an element type). These cutoff radii are then multiplied by this
+        factor to get the actual cutoff radii. This factor is a global factor,
+        and by default 2.0. Chage it carefully, since changing it may lead to
+        an increase in computation time.
         """
         return self._ace_cutoff
 
-    @ace_cutoff.setter
-    def ace_cutoff(self, value):
-        self._ace_cutoff = value
-        self.atomic_density_cutoff = value
+    @ace_cutoff_factor.setter
+    def ace_cutoff_factor(self, value):
+        if value <= 0.0:
+            printout(
+                "ACE cutoff factor must be larger than 0.0, defaulting"
+                " to 2.0.",
+                min_verbosity=0,
+            )
+            self._ace_cutoff = 2.0
+        else:
+            self._ace_cutoff = value
 
     @property
     def bispectrum_switchflag(self):

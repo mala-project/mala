@@ -243,25 +243,10 @@ class ACE(Descriptor):
         if self.couplings_yace_file is None:
             self.couplings_yace_file = self._calculate_coupling_coeffs()
 
-        # Check the cutoff radius, i.e., compare that the user choice
-        # is not too small compared to those requird by ACE.
-
-        # TODO: Not self.parameters.ace_cutoff will be passed to LAMMPS,
-        # but rather self._maximum_cutoff_factor.
-        # It is only used for the pair_style command in the LAMMPS input file.
-        if self.parameters.ace_cutoff < self._maximum_cutoff_factor:
-            printout(
-                "One or more automatically generated ACE cutoff radii is "
-                "larger than the input cutoff radius. Updating input cutoff "
-                "radius stored in parameters.descriptors.ace_cutoff "
-                "accordingly."
-            )
-            self.parameters.ace_cutoff = self._maximum_cutoff_factor
-
         # Create LAMMPS instance.
         lammps_dict = {
             "ace_coeff_file": self.couplings_yace_file,
-            "rcutfac": self.parameters.ace_cutoff,
+            "rcutfac": self._maximum_cutoff_factor,
         }
         for idx, element in enumerate(sorted(list(set(self._atoms.numbers)))):
             lammps_dict["mass" + str(idx + 1)] = atomic_masses[element]
@@ -431,8 +416,6 @@ class ACE(Descriptor):
             lmb_default,
         ) = self.__default_settings()
 
-        # TODO: Scale _cutoff_factors by * self.parameters.ace_cutoff
-        # Make self.parameters.ace_cutoff 1.0 by default
         self._cutoff_factors = [float(k) for k in rc_default.split()[2:]]
         self._maximum_cutoff_factor = np.max(self._cutoff_factors)
         self.__lambdas = [float(k) for k in lmb_default.split()[2:]]
@@ -651,7 +634,7 @@ class ACE(Descriptor):
                 rcmini
             ) * 0.25  # 1/4 of shortest ionic bond length
             rc_range[bond] = [rcmini, rcmaxi]
-            rc_def[bond] = defaultri * self.parameters.ace_nshell
+            rc_def[bond] = defaultri * self.parameters.ace_cutoff_factor
             rin_def[bond] = defaultrcinner
         # shift = ( max(rc_def.values()) - min(rc_def.values())  )/2
         shift = np.std(list(rc_def.values()))
