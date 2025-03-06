@@ -42,6 +42,7 @@ class LDOS(Target):
 
     def __init__(self, params):
         super(LDOS, self).__init__(params)
+        # Consistency check for parameters describing energy grid.
         self.local_density_of_states = None
 
     @classmethod
@@ -194,7 +195,10 @@ class LDOS(Target):
     @property
     def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
-        return self.parameters.ldos_gridsize
+        if isinstance(self.parameters.ldos_gridsize, int):
+            return self.parameters.ldos_gridsize
+        elif isinstance(self.parameters.ldos_gridsize, list):
+            return np.sum(self.parameters.ldos_gridsize)
 
     @property
     def data_name(self):
@@ -283,7 +287,7 @@ class LDOS(Target):
     @cached_property
     def energy_grid(self):
         """Energy grid on which the LDOS is expressed."""
-        return self.get_energy_grid()
+        return self._get_energy_grid()
 
     @cached_property
     def total_energy(self):
@@ -561,26 +565,6 @@ class LDOS(Target):
 
     # Calculations
     ##############
-
-    def get_energy_grid(self):
-        """
-        Get energy grid.
-
-        Returns
-        -------
-        e_grid : numpy.ndarray
-            Energy grid on which the LDOS is defined.
-        """
-        emin = self.parameters.ldos_gridoffset_ev
-
-        emax = (
-            self.parameters.ldos_gridoffset_ev
-            + self.parameters.ldos_gridsize
-            * self.parameters.ldos_gridspacing_ev
-        )
-        grid_size = self.parameters.ldos_gridsize
-        linspace_array = np.linspace(emin, emax, grid_size, endpoint=False)
-        return linspace_array
 
     def get_total_energy(
         self,
@@ -1200,7 +1184,7 @@ class LDOS(Target):
             raise Exception("Invalid LDOS array shape.")
 
         # Build the energy grid and calculate the fermi function.
-        energy_grid = self.get_energy_grid()
+        energy_grid = self._get_energy_grid()
         fermi_values = fermi_function(
             energy_grid, fermi_energy, temperature, suppress_overflow=True
         )

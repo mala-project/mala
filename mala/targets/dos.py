@@ -36,35 +36,6 @@ class DOS(Target):
 
     def __init__(self, params):
         super(DOS, self).__init__(params)
-
-        split = (
-            isinstance(self.parameters.ldos_gridsize, list)
-            and isinstance(self.parameters.ldos_gridoffset_ev, list)
-            and isinstance(self.parameters.ldos_gridspacing_ev, list)
-        )
-        no_split = (
-            isinstance(self.parameters.ldos_gridsize, int)
-            and isinstance(self.parameters.ldos_gridoffset_ev, int)
-            and isinstance(self.parameters.ldos_gridspacing_ev, int)
-        )
-        if not (split or no_split):
-            raise Exception(
-                "All DOS related parameters (grid size, offset and "
-                "spacing) must be either a single value or "
-                "a list."
-            )
-        if split:
-            if not (
-                len(self.parameters.ldos_gridsize)
-                == len(self.parameters.ldos_gridoffset_ev)
-                and len(self.parameters.ldos_gridsize)
-                == len(self.parameters.ldos_gridspacing_ev)
-            ):
-                raise Exception(
-                    "All DOS related parameters (grid size, offset and "
-                    "spacing) must be of same length if splitting along"
-                    "the energy axis is performed."
-                )
         self.density_of_states = None
 
     @classmethod
@@ -301,7 +272,7 @@ class DOS(Target):
     @cached_property
     def energy_grid(self):
         """Energy grid on which the DOS is expressed."""
-        return self.get_energy_grid()
+        return self._get_energy_grid()
 
     @cached_property
     def band_energy(self):
@@ -597,40 +568,6 @@ class DOS(Target):
 
     # Calculations
     ##############
-
-    def get_energy_grid(self):
-        """
-        Get energy grid.
-
-        Returns
-        -------
-        e_grid : numpy.ndarray
-            Energy grid on which the DOS is defined.
-        """
-        if isinstance(self.parameters.ldos_gridsize, int):
-            gridsizes = [self.parameters.ldos_gridsize]
-            offsets = [self.parameters.ldos_gridoffset_ev]
-            spacings = [self.parameters.ldos_gridspacing_ev]
-        else:
-            gridsizes = self.parameters.ldos_gridsize
-            offsets = self.parameters.ldos_gridoffset_ev
-            spacings = self.parameters.ldos_gridspacing_ev
-
-        for i in range(len(gridsizes)):
-            emin = offsets[i]
-            emax = offsets[i] + gridsizes[i] * spacings[i]
-            linspace_array = np.linspace(
-                emin, emax, gridsizes[i], endpoint=False
-            )
-            if i != len(gridsizes) - 1:
-                linspace_array = linspace_array[:-1]
-
-            if i == 0:
-                e_grid = linspace_array
-            else:
-                e_grid = np.concatenate((e_grid, linspace_array))
-
-        return e_grid
 
     def get_band_energy(
         self,
