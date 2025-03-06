@@ -1671,16 +1671,6 @@ class LDOS(Target):
             if get_rank() + 1 == get_size():
                 local_size += len(file_list) % get_size()
             end_index = start_index + local_size
-            print(
-                "r"
-                + str(get_rank())
-                + "_"
-                + "s"
-                + str(start_index)
-                + "_"
-                + "e"
-                + str(end_index),
-            )
         else:
             start_index = 0
             end_index = len(file_list)
@@ -1709,14 +1699,6 @@ class LDOS(Target):
             # Convert and then append the LDOS data.
             data = data * self.convert_units(1, in_units=units)
             ldos_data[:, :, :, i - start_index] = data[:, :, :]
-            print(
-                get_rank(),
-                tmp_file_name,
-                i,
-                start_index,
-                i - start_index,
-                ldos_data[0, 0, 0, i - start_index],
-            )
             self.grid_dimensions = list(np.shape(ldos_data)[0:3])
 
         # We have to gather the LDOS either file based or not.
@@ -1793,19 +1775,17 @@ class LDOS(Target):
                             dtype=ldos_dtype,
                         )
                         comm.Recv(ldos_local, source=i, tag=100 + i)
-                        ldos_data_full[
-                            :, :, :, local_start - 1 : local_end - 1
-                        ] = np.reshape(
-                            ldos_local,
-                            (
-                                data_shape[0],
-                                data_shape[1],
-                                data_shape[2],
-                                local_size,
-                            ),
-                        )[
-                            :, :, :, :
-                        ]
+                        ldos_data_full[:, :, :, local_start:local_end] = (
+                            np.reshape(
+                                ldos_local,
+                                (
+                                    data_shape[0],
+                                    data_shape[1],
+                                    data_shape[2],
+                                    local_size,
+                                ),
+                            )[:, :, :, :]
+                        )
                 else:
                     comm.Send(ldos_data, dest=0, tag=get_rank() + 100)
                 barrier()
