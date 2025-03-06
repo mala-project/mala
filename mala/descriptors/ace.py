@@ -397,18 +397,23 @@ class ACE(Descriptor):
                 )
                 element_list = [e.strip() for e in element_list]
 
-                # We cannot compare the lists as sets, because order is
-                # important.
-                # We omit "G" from the comparison, because it is not an
-                # element. It does have to be in the list for the coupling
-                # constants though.
-                if (
-                    sorted(list(set(self._atoms.symbols))) != element_list[:-1]
-                    or element_list[-1] != "G"
-                ):
-                    return None
-                else:
+                # We don't have to worry about order in this comparison,
+                # because both lists are ordered, and the element lists
+                # in the coupling coefficients are always saved in an
+                # ordered fashion.
+                compatible = True
+                if element_list[-1] != "G":
+                    compatible = False
+                list_ase = sorted(list(set(self._atoms.symbols)))
+                for element_idx in range(len(list_ase)):
+                    if list_ase[element_idx] not in element_list:
+                        compatible = False
+                        break
+
+                if compatible:
                     return coupling_file
+                else:
+                    return None
         else:
             return None
 
