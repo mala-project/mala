@@ -470,19 +470,19 @@ class ParametersDescriptors(ParametersBase):
         WILL BE DEPRECATED IN MALA v1.4.0 - polynomial degree for minterpy
         descriptor calculation.
 
-    ace_ranks : list
+    ace_included_expansion_ranks : list
         ACE_DOCS_MISSING: I think I know what this does, but I am not sure
         how to best communicate to users how to set this.
 
-    ace_nmax  : list
+    ace_maximum_n_per_rank  : list
         ACE_DOCS_MISSING: I think I know what this does, but I am not sure
         how to best communicate to users how to set this.
 
-    ace_lmax : list
+    ace_maximum_l_per_rank : list
         ACE_DOCS_MISSING: I think I know what this does, but I am not sure
         how to best communicate to users how to set this.
 
-    ace_lmin : list
+    ace_minimum_l_per_rank : list
         ACE_DOCS_MISSING: I think I know what this does, but I am not sure
         how to best communicate to users how to set this.
 
@@ -490,15 +490,15 @@ class ParametersDescriptors(ParametersBase):
         ACE_DOCS_MISSING: I think I know what this does, but I am not sure
         how to best communicate to users how to set this.
 
-    ace_apply_shift : list
+    ace_balance_cutoff_radii_for_elements : list
         ACE_DOCS_MISSING: I think I know what this does, but I am not sure
         how to best communicate to users how to set this.
 
-    ace_metal_max : list
+    ace_larger_cutoff_for_metals : list
         ACE_DOCS_MISSING: I think I know what this does, but I am not sure
         how to best communicate to users how to set this.
 
-    ace_use_vdw : list
+    ace_use_maximum_cutoff_per_element : list
         ACE_DOCS_MISSING: I think I know what this does, but I am not sure
         how to best communicate to users how to set this.
 
@@ -508,11 +508,11 @@ class ParametersDescriptors(ParametersBase):
     ace_M_R : list
         ACE_DOCS_MISSING: I am not sure how to set this.
 
-    ace_coupling_type : str
+    ace_coupling_coefficients_type : str
         Coupling type used for reduction of spherical harmonic products.
         Can be "clebsch_gordan" or "wigner_3j".
 
-    ace_reduction_coefficients_lmax : int
+    ace_coupling_coefficients_maximum_l : int
         ACE_DOCS_MISSING: I think I know what this does, but I am not sure
         how to best communicate to users how to set this.
     """
@@ -556,24 +556,38 @@ class ParametersDescriptors(ParametersBase):
         # Everything pertaining to the ACE descriptors.
         self.ace_cutoff = None
 
-        self.ace_ranks = [1, 2, 3]
-        self.ace_nmax = [6, 2, 2]
-        self.ace_lmax = [0, 2, 2]
-        self.ace_lmin = [0, 0, 0]
+        # Many body orders
+        self.ace_included_expansion_ranks = [1, 2, 3]
+        self.ace_maximum_n_per_rank = [6, 2, 2]
+        self.ace_maximum_l_per_rank = [0, 2, 2]
+        self.ace_minimum_l_per_rank = [0, 0, 0]
 
         # Flavors/extra options for the ACE descriptors.
+        # TODO: This will become ace_cutoff, and the default should be 2.0!
         self.ace_nshell = 2.0
-        self.ace_apply_shift = False
-        self.ace_metal_max = True
-        self.ace_use_vdw = False
 
-        # ???
+        self.ace_balance_cutoff_radii_for_elements = False
+        self.ace_larger_cutoff_for_metals = True
+
+        # TODO: Based on VdW radii
+        self.ace_use_maximum_cutoff_per_element = False
+
+        # TODO: Move that into the ace.py class. Rename them, also they are
+        # always 0 for now
+        # Equivariance options for the ACE descriptors.
+        # L_R: Transformation characteristics of the descriptor
+        # (0: scalar, 1: vector, 2: tensor, etc.)
+        # M_R: Selects which transformation within the subclass of
+        # transformations selected by L_R.
         self.ace_L_R = 0
         self.ace_M_R = 0
 
         # Other value could be "wigner3j".
-        self.ace_coupling_type = "clebsch_gordan"
-        self.ace_reduction_coefficients_lmax = 12
+        self.ace_coupling_coefficients_type = "clebsch_gordan"
+        
+        # TODO: Implement a check in the ace.py class, so that symbols 
+        # are recomputed if a larger lmax is requested.
+        self.ace_coupling_coefficients_maximum_l = 12
 
     @property
     def use_z_splitting(self):

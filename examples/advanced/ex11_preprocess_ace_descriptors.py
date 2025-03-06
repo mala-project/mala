@@ -30,11 +30,11 @@ REQUIRES LAMMPS.
 parameters = mala.Parameters()
 # Bispectrum parameters.
 parameters.descriptors.descriptor_type = "ACE"
-parameters.descriptors.ace_cutoff = 5.8
-parameters.descriptors.ace_ranks = [1, 2, 3]
-parameters.descriptors.ace_lmax = [0, 1, 1]
-parameters.descriptors.ace_nmax = [1, 1, 1]
-parameters.descriptors.ace_lmin = [0, 0, 0]
+parameters.descriptors.ace_cutoff_factor = 5.8
+parameters.descriptors.ace_included_expansion_ranks = [1, 2, 3]
+parameters.descriptors.ace_maximum_l_per_rank = [0, 1, 1]
+parameters.descriptors.ace_maximum_n_per_rank = [1, 1, 1]
+parameters.descriptors.ace_minimum_l_per_rank = [0, 0, 0]
 
 ####################
 # 2. ADDING DATA FOR DATA CONVERSION

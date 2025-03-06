@@ -43,7 +43,7 @@ class ACE(Descriptor):
 
         # Initialize a dictionary with ionic radii (in Angstrom).
         # and a list containing all elements which are considered metals.
-        self._ionic_radii, self._metal_list = self.__init_element_lists()
+        self._atomic_radii, self._metal_list = self.__init_element_lists()
 
         # Initialize several arrays that are computed using
         # nested for-loops but can be reused.
@@ -52,15 +52,15 @@ class ACE(Descriptor):
         # If a pkl file is detected, the array is loaded from the pkl file,
         # otherwise it is computed and saved to a pkl file.
         # The arrays are used within the ACE descriptor calculation.
-        # Which arrays are actually needed depends on which type of coefficients
-        # are used for the ACE descriptor calculation.
-        if self.parameters.ace_coupling_type == "wigner3j":
+        # Which arrays are actually needed depends on which type of
+        # coefficients are used for the ACE descriptor calculation.
+        if self.parameters.ace_coupling_coefficients_type == "wigner3j":
             self.__precomputed_wigner_3j = self.__init_wigner_3j(
-                self.parameters.ace_reduction_coefficients_lmax
+                self.parameters.ace_coupling_coefficients_maximum_l
             )
-        if self.parameters.ace_coupling_type == "clebsch_gordan":
+        if self.parameters.ace_coupling_coefficients_type == "clebsch_gordan":
             self.__precomputed_clebsch_gordan = self.__init_clebsch_gordan(
-                self.parameters.ace_reduction_coefficients_lmax
+                self.parameters.ace_coupling_coefficients_maximum_l
             )
 
         # File which holds the coupling coefficients.
@@ -71,6 +71,8 @@ class ACE(Descriptor):
         # Will get filled once the atoms object has been loaded.
         # ACE_DOCS_MISSING: What do these do?
         self.__ace_mumax = None
+
+        # Comment WHY this is always zero.
         self.__ace_reference_ensemble = None
 
         # Will get filled during calculation of coupling coefficients.
@@ -92,9 +94,12 @@ class ACE(Descriptor):
 
         # Consistency checks for the ACE settings.
         if (
-            len(self.parameters.ace_ranks) != len(self.parameters.ace_lmax)
-            or len(self.parameters.ace_ranks) != len(self.parameters.ace_nmax)
-            or len(self.parameters.ace_ranks) != len(self.parameters.ace_lmin)
+            len(self.parameters.ace_included_expansion_ranks)
+            != len(self.parameters.ace_maximum_l_per_rank)
+            or len(self.parameters.ace_included_expansion_ranks)
+            != len(self.parameters.ace_maximum_n_per_rank)
+            or len(self.parameters.ace_included_expansion_ranks)
+            != len(self.parameters.ace_minimum_l_per_rank)
         ):
             raise Exception(
                 "ACE ranks, lmax, nmax, and lmin must have the same length"
@@ -240,6 +245,10 @@ class ACE(Descriptor):
 
         # Check the cutoff radius, i.e., compare that the user choice
         # is not too small compared to those requird by ACE.
+
+        # TODO: Not self.parameters.ace_cutoff will be passed to LAMMPS,
+        # but rather self._maximum_cutoff_factor.
+        # It is only used for the pair_style command in the LAMMPS input file.
         if self.parameters.ace_cutoff < self._maximum_cutoff_factor:
             printout(
                 "One or more automatically generated ACE cutoff radii is "
@@ -422,6 +431,8 @@ class ACE(Descriptor):
             lmb_default,
         ) = self.__default_settings()
 
+        # TODO: Scale _cutoff_factors by * self.parameters.ace_cutoff
+        # Make self.parameters.ace_cutoff 1.0 by default
         self._cutoff_factors = [float(k) for k in rc_default.split()[2:]]
         self._maximum_cutoff_factor = np.max(self._cutoff_factors)
         self.__lambdas = [float(k) for k in lmb_default.split()[2:]]
@@ -463,7 +474,8 @@ class ACE(Descriptor):
         ldict = {
             ranki: li
             for ranki, li in zip(
-                self.parameters.ace_ranks, self.parameters.ace_lmax
+                self.parameters.ace_included_expansion_ranks,
+                self.parameters.ace_maximum_l_per_rank,
             )
         }
 
@@ -472,14 +484,16 @@ class ACE(Descriptor):
         # used for the reduction of the spherical harmonics products.
         # So maybe "reduction coefficients" or something?
         # Or is this really the "coupling type"?
-        if self.parameters.ace_coupling_type == "wigner3j":
+        if self.parameters.ace_coupling_coefficients_type == "wigner3j":
             ccs = wigner_coupling.wigner_3j_coupling(
                 self.__precomputed_wigner_3j,
                 ldict,
                 L_R=self.parameters.ace_L_R,
             )
 
-        elif self.parameters.ace_coupling_type == "clebsch_gordan":
+        elif (
+            self.parameters.ace_coupling_coefficients_type == "clebsch_gordan"
+        ):
             ccs = cg_coupling.clebsch_gordan_coupling(
                 self.__precomputed_clebsch_gordan,
                 ldict,
@@ -489,7 +503,7 @@ class ACE(Descriptor):
         else:
             raise Exception(
                 "Coupling type "
-                + str(self.parameters.ace_coupling_type)
+                + str(self.parameters.ace_coupling_coefficients_type)
                 + " not recongised"
             )
 
@@ -498,16 +512,16 @@ class ACE(Descriptor):
         Apot = ACEPotential(
             element_list,
             self.__ace_reference_ensemble,
-            self.parameters.ace_ranks,
-            self.parameters.ace_nmax,
-            self.parameters.ace_lmax,
-            max(self.parameters.ace_nmax),
+            self.parameters.ace_included_expansion_ranks,
+            self.parameters.ace_maximum_n_per_rank,
+            self.parameters.ace_maximum_l_per_rank,
+            max(self.parameters.ace_maximum_n_per_rank),
             self._cutoff_factors,
             self.__lambdas,
             ccs[self.parameters.ace_M_R],
             rcutinner=rcinner,
             drcutinner=drcinner,
-            lmin=self.parameters.ace_lmin,
+            lmin=self.parameters.ace_minimum_l_per_rank,
         )
 
         # ACE_DOCS_MISSING: What does this function do?
@@ -535,14 +549,16 @@ class ACE(Descriptor):
         # ACE_DOCS_MISSING: Add maybe a general outline of what is being
         # done here.
         ranked_chem_nus = []
-        for ind, rank in enumerate(self.parameters.ace_ranks):
+        for ind, rank in enumerate(
+            self.parameters.ace_included_expansion_ranks
+        ):
             rank = int(rank)
             PA_lammps = ace_coupling_utils.compute_pa_labels_raw(
                 rank,
-                int(self.parameters.ace_nmax[ind]),
-                int(self.parameters.ace_lmax[ind]),
+                int(self.parameters.ace_maximum_n_per_rank[ind]),
+                int(self.parameters.ace_maximum_l_per_rank[ind]),
                 int(self.__ace_mumax),
-                lmin=int(self.parameters.ace_lmin[ind]),
+                lmin=int(self.parameters.ace_minimum_l_per_rank[ind]),
             )
             ranked_chem_nus.append(PA_lammps)
 
@@ -613,7 +629,7 @@ class ACE(Descriptor):
         rc_range = {bp: None for bp in self.__bonds}
         rin_def = {bp: None for bp in self.__bonds}
         rc_def = {bp: None for bp in self.__bonds}
-        fac_per_elem = {key: 0.5 for key in list(self._ionic_radii.keys())}
+        fac_per_elem = {key: 0.5 for key in list(self._atomic_radii.keys())}
         fac_per_elem_sub = {
             "H": 0.61,
             "Be": 0.52,
@@ -642,7 +658,7 @@ class ACE(Descriptor):
         # if apply_shift:
         for bond in self.__bonds:
             if rc_def[bond] != max(rc_def.values()):
-                if self.parameters.ace_apply_shift:
+                if self.parameters.ace_balance_cutoff_radii_for_elements:
                     rc_def[bond] = rc_def[bond] + shift  # *nshell
                 else:
                     rc_def[bond] = rc_def[bond]  # *nshell
@@ -687,7 +703,7 @@ class ACE(Descriptor):
             atnum1 = ase.data.atomic_numbers["Au"]
         covr1 = ase.data.covalent_radii[atnum1]
         vdwr1 = ase.data.vdw_radii[atnum1]
-        ionr1 = self._ionic_radii[elm1]
+        ionr1 = self._atomic_radii[elm1]
         if np.isnan(vdwr1):
             printout(
                 "NOTE: using dummy VDW radius of 2* covalent radius for %s"
@@ -700,7 +716,7 @@ class ACE(Descriptor):
             atnum2 = ase.data.atomic_numbers["Au"]
         covr2 = ase.data.covalent_radii[atnum2]
         vdwr2 = ase.data.vdw_radii[atnum2]
-        ionr2 = self._ionic_radii[elm2]
+        ionr2 = self._atomic_radii[elm2]
         if np.isnan(vdwr2):
             printout(
                 "NOTE: using dummy VDW radius of 2* covalent radius for %s"
@@ -708,7 +724,7 @@ class ACE(Descriptor):
             )
             vdwr2 = 2 * covr2
         minbond = ionr1 + ionr2
-        if self.parameters.ace_metal_max:
+        if self.parameters.ace_larger_cutoff_for_metals:
             if elm1 not in self._metal_list and elm2 not in self._metal_list:
                 maxbond = vdwr1 + vdwr2
             elif elm1 in self._metal_list and elm2 not in self._metal_list:
@@ -725,7 +741,7 @@ class ACE(Descriptor):
         # by default, return the ionic bond length * number of bonds for
         # minimum
         returnmin = minbond
-        if self.parameters.ace_use_vdw:
+        if self.parameters.ace_use_maximum_cutoff_per_element:
             # return vdw bond length if requested
             returnmax = maxbond
         else:
@@ -890,7 +906,7 @@ class ACE(Descriptor):
     @staticmethod
     def __init_element_lists():
         """
-        Initialize a dictionary with ionic radii and list of metals.
+        Initialize a dictionary with atomic radii and list of metals.
 
         This function initializes a dictionary with ionic radii (in
         Angstrom) and a list containing all elements which are considered
@@ -901,7 +917,7 @@ class ACE(Descriptor):
 
         Returns
         -------
-        ionic_radii : dict
+        atomic_radii : dict
             Dictionary with ionic radii.
 
         metal_list : List
@@ -916,13 +932,13 @@ class ACE(Descriptor):
         # These ionic (actually, atomic radii) are taken from mendeleev.
         # In the original implementation of the ACE class, these were
         # hardcoded, now we get them automatically from mendeleev.
-        ionic_radii = element_info.to_dict()["atomic_radius"]
-        ionic_radii = {key: v / 100 for (key, v) in ionic_radii.items()}
-        ionic_radii["G"] = 1.35
+        atomic_radii = element_info.to_dict()["atomic_radius"]
+        atomic_radii = {key: v / 100 for (key, v) in atomic_radii.items()}
+        atomic_radii["G"] = 1.35
 
         # The metal list that was originally here only contains elements up to
         # the 13th group (I am not sure why, e.g., Al is excluded).
-        # Additionally, only _some_ Lanthanoids and Actininoids were included,
+        # Additionally, only _some_ Lanthanoids and Actinoids were included,
         # but that may be due to the list having been outdated, since the old
         # name for Db (Ha) had been used. The code here now includes all
         # elements up to group 13 (minus H) and all Lanthanoids and
@@ -938,7 +954,7 @@ class ACE(Descriptor):
         metal_list = list(set(main_groups + actininoids_lanthanoids))
         metal_list.remove("H")
 
-        return ionic_radii, metal_list
+        return atomic_radii, metal_list
 
     @staticmethod
     def _clebsch_gordan(j1, m1, j2, m2, j3, m3):
