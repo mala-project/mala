@@ -76,7 +76,7 @@ class LDOS(Target):
         Create an LDOS calculator from a numpy array in memory.
 
         By using this function rather then setting the local_density_of_states
-        object directly, proper unit coversion is ensured.
+        object directly, proer unit coversion is ensured.
 
         Parameters
         ----------
@@ -1611,15 +1611,54 @@ class LDOS(Target):
         return_local = kwargs.get("return_local", False)
         ldos_dtype = np.float64 if use_fp64 else DEFAULT_NP_DATA_DTYPE
 
+        # Build file list. I think it is faster if this is done on all ranks
+        # simultaneously, as the file list is not that large.
+        if not isinstance(path_scheme, list):
+            path_scheme_list = [path_scheme]
+            ldos_grid_sizes = [self.parameters.ldos_gridsize]
+
+        else:
+            path_scheme_list = path_scheme
+            ldos_grid_sizes = self.parameters.ldos_gridsize
+
         # Find out the number of digits that are needed to encode this
         # grid (by QE).
-        digits = int(math.log10(self.parameters.ldos_gridsize)) + 1
+        digits = [int(math.log10(x)) + 1 for x in ldos_grid_sizes]
+
+        file_list = []
+        for path_index, _path_scheme in enumerate(path_scheme_list):
+
+            # Directly at the split we discard the last energy value
+            # of the left side of the split. This requires that both
+            # DOS have been sampled to/from the EXACT same value.
+            # Currently, this responsibility lies with the user, and I
+            # am not sure if we can consistently check for this, even
+            # if we wanted to. In the DOS case, the energies get reported,
+            # but that is NOT the case in the LDOS case.
+            end = (
+                ldos_grid_sizes[path_index] - 1
+                if path_index != len(path_scheme_list) - 1
+                else ldos_grid_sizes[path_index]
+            ) + 1
+
+            # Actually fill the file list.
+            for i in range(1, end):
+                tmp_file_name = _path_scheme
+                if digits[path_index] < 4:
+                    tmp_file_name = tmp_file_name.replace(
+                        "*", str(i).zfill(digits[path_index])
+                    )
+                else:
+                    # For some reason, there are no leading zeros above 3
+                    # digits in QE.
+                    tmp_file_name = tmp_file_name.replace("*", str(i).zfill(3))
+                file_list.append(tmp_file_name)
 
         # Iterate over the amount of specified LDOS input files.
         # QE is a Fortran code, so everything is 1 based.
         printout(
             "Reading "
-            + str(self.parameters.ldos_gridsize)
+            + str(len(file_list))
             + " LDOS files from"
             + path_scheme
             + ".",
@@ -1627,29 +1666,28 @@ class LDOS(Target):
         )
         ldos_data = None
         if self.parameters._configuration["mpi"]:
-            local_size = int(
-                np.floor(self.parameters.ldos_gridsize / get_size())
-            )
-            start_index = get_rank() * local_size + 1
+            local_size = int(np.floor(len(file_list) / get_size()))
+            start_index = get_rank() * local_size
             if get_rank() + 1 == get_size():
-                local_size += self.parameters.ldos_gridsize % get_size()
+                local_size += len(file_list) % get_size()
             end_index = start_index + local_size
+            print(
+                "r"
+                + str(get_rank())
+                + "_"
+                + "s"
+                + str(start_index)
+                + "_"
+                + "e"
+                + str(end_index),
+            )
         else:
-            start_index = 1
-            end_index = self.parameters.ldos_gridsize + 1
-            local_size = self.parameters.ldos_gridsize
+            start_index = 0
+            end_index = len(file_list)
+            local_size = len(file_list)
 
         for i in range(start_index, end_index):
-            tmp_file_name = path_scheme
-            if digits < 4:
-                tmp_file_name = tmp_file_name.replace(
-                    "*", str(i).zfill(digits)
-                )
-            else:
-                # For some reason, there are no leading zeros above 3 digits
-                # in QE.
-                tmp_file_name = tmp_file_name.replace("*", str(i).zfill(3))
-
+            tmp_file_name = file_list[i]
             # Open the cube file
             if file_type == ".cube":
                 data, meta = read_cube(tmp_file_name)
@@ -1671,6 +1709,14 @@ class LDOS(Target):
             # Convert and then append the LDOS data.
             data = data * self.convert_units(1, in_units=units)
             ldos_data[:, :, :, i - start_index] = data[:, :, :]
+            print(
+                get_rank(),
+                tmp_file_name,
+                i,
+                start_index,
+                i - start_index,
+                ldos_data[0, 0, 0, i - start_index],
+            )
             self.grid_dimensions = list(np.shape(ldos_data)[0:3])
 
         # We have to gather the LDOS either file based or not.
@@ -1678,7 +1724,7 @@ class LDOS(Target):
             barrier()
             data_shape = np.shape(ldos_data)
             if return_local:
-                return ldos_data, start_index - 1, end_index - 1
+                return ldos_data, start_index, end_index
             if use_memmap is not None:
                 if get_rank() == 0:
                     ldos_data_full = np.memmap(
@@ -1687,7 +1733,7 @@ class LDOS(Target):
                             data_shape[0],
                             data_shape[1],
                             data_shape[2],
-                            self.parameters.ldos_gridsize,
+                            len(file_list),
                         ),
                         mode="w+",
                         dtype=ldos_dtype,
@@ -1700,15 +1746,15 @@ class LDOS(Target):
                             data_shape[0],
                             data_shape[1],
                             data_shape[2],
-                            self.parameters.ldos_gridsize,
+                            len(file_list),
                         ),
                         mode="r+",
                         dtype=ldos_dtype,
                     )
                 barrier()
-                ldos_data_full[:, :, :, start_index - 1 : end_index - 1] = (
-                    ldos_data[:, :, :, :]
-                )
+                ldos_data_full[:, :, :, start_index:end_index] = ldos_data[
+                    :, :, :, :
+                ]
                 self.local_density_of_states = ldos_data_full
                 return ldos_data_full
             else:
@@ -1725,13 +1771,13 @@ class LDOS(Target):
                             data_shape[0],
                             data_shape[1],
                             data_shape[2],
-                            self.parameters.ldos_gridsize,
+                            len(file_list),
                         ),
                         dtype=ldos_dtype,
                     )
-                    ldos_data_full[
-                        :, :, :, start_index - 1 : end_index - 1
-                    ] = ldos_data[:, :, :, :]
+                    ldos_data_full[:, :, :, start_index:end_index] = ldos_data[
+                        :, :, :, :
+                    ]
 
                     # No MPI necessary for first rank. For all the others,
                     # collect the buffers.

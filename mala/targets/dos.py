@@ -445,6 +445,14 @@ class DOS(Target):
             # Open the file, then iterate through its contents.
             with open(readpath, "r") as infile:
                 lines = infile.readlines()
+
+                # Directly at the split we discard the last energy value
+                # of the left side of the split. This requires that both
+                # DOS have been sampled to/from the EXACT same value.
+                # Currently, this responsibility lies with the user, and I
+                # am not sure if we can consistently check for this, even
+                # if we wanted to. In the DOS case, the energies get reported,
+                # but that is NOT the case in the LDOS case.
                 end = (
                     self.parameters.ldos_gridsize[path_index] - 1
                     if path_index != len(readpaths) - 1
