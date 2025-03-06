@@ -58,7 +58,7 @@ class YoungSubgroup:
         Parameters
         ----------
         max_orbit : int
-            Maximum orbit.
+            Maximum orbit size for permutation (P-cycle where P<N)
 
         Returns
         -------
@@ -102,18 +102,20 @@ class YoungSubgroup:
 
     def check_single_fill(self, partition, inds, semistandard=True):
         """
-        Chechk single fill, ACE_DOCS_MISSING.
+        Chechk a that a collection of indices is sorted in a young tableau. This
+        tableau will typically correspond to a young subgroup relevant for pairwise
+        reduction of N spherical harmonics.
 
         Parameters
         ----------
         partition : List
-            Partition of the Young tableau.
+            Partition of N determining shape of the Young tableau.
 
         inds : List
-            Indices of the Young tableau.
+            Indices (filling) of the Young tableau.
 
         semistandard : bool
-            Whether the Young tableau is semistandard.
+            Whether the Young tableau filling is semistandard.
 
         Returns
         -------
@@ -149,26 +151,27 @@ class YoungSubgroup:
         lreduce=False,
     ):
         """
-        Fill the subgroup.
-
-        ACE_DOCS_MISSING.
+        Fill the young subgroup subgroup according to standard, semistandard, etc conventions.
+        This will generate multiple fillings relevant for the pairwise reduction of N spherical
+        harmonics. 
+        
 
         Parameters
         ----------
         inds : List
-            Indices of the Young tableau.
+            Indices to be filled in the Young tableau.
 
         partitions : List
-            Partitions of the Young tableau.
+            Partitions of N determining the shape of the Young tableau.
 
         max_orbit : int
-            Maximum orbit.
+            Maximum orbit, aka max row size in the tableau.
 
         semistandard : bool
-            Whether the Young tableau is semistandard.
+            Whether the Young tableau filling is semistandard.
 
         lreduce : bool
-            Whether to reduce the Young tableau.
+            Whether to reduce the Young tableau fillings according to 2-cycles (according to pairwise angular momentum coupling scheme)
         """
         if partitions is None:
             partitions = self.sigma_c_partitions(max_orbit)
@@ -265,7 +268,7 @@ class YoungSubgroup:
     @staticmethod
     def is_column_sort(partitionfill, strict_col_sort=False):
         """
-        Check if the columns are sorted.
+        Check if the young tableau is column sorted.
 
         Parameters
         ----------
@@ -273,7 +276,8 @@ class YoungSubgroup:
             Partition fill to check.
 
         strict_col_sort : bool
-            Whether to check for strict column sorting. ACE_DOCS_MISSING.
+            Whether to check for strict column sorting in the young tableau. If True, 
+            entries in columns of the tableau must be strictly increasing. 
 
         Returns
         -------
@@ -300,7 +304,7 @@ class YoungSubgroup:
     @staticmethod
     def is_row_sort(partitionfill):
         """
-        Check if the rows are sorted.
+        Check if the Young Tableau filling is row sorted.
 
         Parameters
         ----------
@@ -324,7 +328,7 @@ class YoungSubgroup:
         Reverse a vector.
 
         Returns a copy of the vector, to allow reverse and actual vector
-        to both be present.
+        to both be present. This is just a wrapper for the python reverse() function.
 
         Parameters
         ----------
