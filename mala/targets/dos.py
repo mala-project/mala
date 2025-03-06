@@ -36,6 +36,35 @@ class DOS(Target):
 
     def __init__(self, params):
         super(DOS, self).__init__(params)
+
+        split = (
+            isinstance(self.parameters.ldos_gridsize, list)
+            and isinstance(self.parameters.ldos_gridoffset_ev, list)
+            and isinstance(self.parameters.ldos_gridspacing_ev, list)
+        )
+        no_split = (
+            isinstance(self.parameters.ldos_gridsize, int)
+            and isinstance(self.parameters.ldos_gridoffset_ev, int)
+            and isinstance(self.parameters.ldos_gridspacing_ev, int)
+        )
+        if not (split or no_split):
+            raise Exception(
+                "All DOS related parameters (grid size, offset and "
+                "spacing) must be either a single value or "
+                "a list."
+            )
+        if split:
+            if not (
+                len(self.parameters.ldos_gridsize)
+                == len(self.parameters.ldos_gridoffset_ev)
+                and len(self.parameters.ldos_gridsize)
+                == len(self.parameters.ldos_gridspacing_ev)
+            ):
+                raise Exception(
+                    "All DOS related parameters (grid size, offset and "
+                    "spacing) must be of same length if splitting along"
+                    "the energy axis is performed."
+                )
         self.density_of_states = None
 
     @classmethod
@@ -203,7 +232,10 @@ class DOS(Target):
     @property
     def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
-        return self.parameters.ldos_gridsize
+        if isinstance(self.parameters.ldos_gridsize, int):
+            return self.parameters.ldos_gridsize
+        elif isinstance(self.parameters.ldos_gridsize, list):
+            return np.sum(self.parameters.ldos_gridsize)
 
     @property
     def data_name(self):
@@ -416,7 +448,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        path : string
+        path : string or List
             Path of the file containing the DOS.
 
         Returns
@@ -428,26 +460,44 @@ class DOS(Target):
         # check whether we have a correct file.
 
         energy_grid = self.energy_grid
-        return_dos_values = []
 
-        # Open the file, then iterate through its contents.
-        with open(path, "r") as infile:
-            lines = infile.readlines()
-            i = 0
+        if isinstance(path, str):
+            readpaths = [path]
+        else:
+            readpaths = path
 
-            for dos_line in lines:
-                # The first column contains the energy value.
-                if "#" not in dos_line and i < self.parameters.ldos_gridsize:
-                    e_val = float(dos_line.split()[0])
-                    dosval = float(dos_line.split()[1])
-                    if (
-                        np.abs(e_val - energy_grid[i])
-                        < self.parameters.ldos_gridspacing_ev * 0.98
-                    ):
-                        return_dos_values.append(dosval)
-                        i += 1
+        current_energy_index = 0
 
-        array = np.array(return_dos_values)
+        for path_index, readpath in enumerate(readpaths):
+            return_dos_values = []
+
+            # Open the file, then iterate through its contents.
+            with open(readpath, "r") as infile:
+                lines = infile.readlines()
+                end = (
+                    self.parameters.ldos_gridsize[path_index] - 1
+                    if path_index != len(readpaths) - 1
+                    else self.parameters.ldos_gridsize[path_index]
+                )
+                end += current_energy_index
+
+                for dos_line in lines:
+                    # The first column contains the energy value.
+                    if "#" not in dos_line and current_energy_index < end:
+                        e_val = float(dos_line.split()[0])
+                        dosval = float(dos_line.split()[1])
+                        if (
+                            np.abs(e_val - energy_grid[current_energy_index])
+                            < self.parameters.ldos_gridspacing_ev[path_index]
+                            * 0.98
+                        ):
+                            return_dos_values.append(dosval)
+                            current_energy_index += 1
+                        # print(path_index, i)
+            if path_index == 0:
+                array = np.array(return_dos_values)
+            else:
+                array = np.concatenate((array, return_dos_values))
         self.density_of_states = array
         return array
 
@@ -557,16 +607,30 @@ class DOS(Target):
         e_grid : numpy.ndarray
             Energy grid on which the DOS is defined.
         """
-        emin = self.parameters.ldos_gridoffset_ev
+        if isinstance(self.parameters.ldos_gridsize, int):
+            gridsizes = [self.parameters.ldos_gridsize]
+            offsets = [self.parameters.ldos_gridoffset_ev]
+            spacings = [self.parameters.ldos_gridspacing_ev]
+        else:
+            gridsizes = self.parameters.ldos_gridsize
+            offsets = self.parameters.ldos_gridoffset_ev
+            spacings = self.parameters.ldos_gridspacing_ev
 
-        emax = (
-            self.parameters.ldos_gridoffset_ev
-            + self.parameters.ldos_gridsize
-            * self.parameters.ldos_gridspacing_ev
-        )
-        grid_size = self.parameters.ldos_gridsize
-        linspace_array = np.linspace(emin, emax, grid_size, endpoint=False)
-        return linspace_array
+        for i in range(len(gridsizes)):
+            emin = offsets[i]
+            emax = offsets[i] + gridsizes[i] * spacings[i]
+            linspace_array = np.linspace(
+                emin, emax, gridsizes[i], endpoint=False
+            )
+            if i != len(gridsizes) - 1:
+                linspace_array = linspace_array[:-1]
+
+            if i == 0:
+                e_grid = linspace_array
+            else:
+                e_grid = np.concatenate((e_grid, linspace_array))
+
+        return e_grid
 
     def get_band_energy(
         self,
