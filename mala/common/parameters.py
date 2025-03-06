@@ -471,50 +471,66 @@ class ParametersDescriptors(ParametersBase):
         descriptor calculation.
 
     ace_included_expansion_ranks : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        List of all included expansion ranks for the ACE descriptors.
+        These expansion ranks correspond to the many body order in the
+        expansion of the atomic energy in many body terms. The list does
+        can exclude terms, i.e., [1,2,4] is a valid option.
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
 
     ace_maximum_n_per_rank  : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        Maximum n for each expansion rank in the ACE descriptors. These
+        n correspond to the n starting from equation 27 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104)
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
 
     ace_maximum_l_per_rank : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        Maximum l for each expansion rank in the ACE descriptors. These
+        n correspond to the n starting from equation 27 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104).
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
 
     ace_minimum_l_per_rank : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        Minimum l for each expansion rank in the ACE descriptors. These
+        n correspond to the n starting from equation 27 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104)
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
 
-    ace_nshell : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
-
-    ace_balance_cutoff_radii_for_elements : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+    ace_balance_cutoff_radii_for_elements : bool
+        If True, cutoff radii will be balanced between element types.
+        This is helpful when dealing with elements varying drastically in size.
 
     ace_larger_cutoff_for_metals : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        If True (default) a slightly larger cutoff is used for metals. This
+        is recommended.
 
     ace_use_maximum_cutoff_per_element : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
-
-    ace_L_R : list
-        ACE_DOCS_MISSING: I am not sure how to set this.
-
-    ace_M_R : list
-        ACE_DOCS_MISSING: I am not sure how to set this.
+        If True, the maximum chemically reasonable cutoff will be used
+        for all bonds. These maximum cutoff radii are based on the
+        Van-der-Waals radii. Note that this may increase computation time!
 
     ace_coupling_coefficients_type : str
         Coupling type used for reduction of spherical harmonic products.
-        Can be "clebsch_gordan" or "wigner_3j".
+        These come into play starting from equation 28 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104).
+        Can be "clebsch_gordan" or "wigner_3j". This parameter usually does
+        not have to be changed. The default is "clebsch_gordan".
 
     ace_coupling_coefficients_maximum_l : int
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        The maximum l up to which to precompute the Clebsch-Gordan/Wigner 3j
+        symbols. These are precomputed within MALA to reduce overall
+        computation time, but to save on storage space, precomputation is only
+        done to a certain l (for the meaning of l, refer to the original ACE
+        paper, doi.org/10.1103/PhysRevB.99.014104, page 5). MALA automatically
+        recomputes the coefficients if ace_coupling_coefficients_maximum_l is
+        increased.
     """
 
     def __init__(self):
@@ -563,24 +579,9 @@ class ParametersDescriptors(ParametersBase):
         self.ace_minimum_l_per_rank = [0, 0, 0]
 
         # Flavors/extra options for the ACE descriptors.
-        # TODO: This will become ace_cutoff, and the default should be 2.0!
-        self.ace_nshell = 2.0
-
         self.ace_balance_cutoff_radii_for_elements = False
         self.ace_larger_cutoff_for_metals = True
-
-        # TODO: Based on VdW radii
         self.ace_use_maximum_cutoff_per_element = False
-
-        # TODO: Move that into the ace.py class. Rename them, also they are
-        # always 0 for now
-        # Equivariance options for the ACE descriptors.
-        # L_R: Transformation characteristics of the descriptor
-        # (0: scalar, 1: vector, 2: tensor, etc.)
-        # M_R: Selects which transformation within the subclass of
-        # transformations selected by L_R.
-        self.ace_L_R = 0
-        self.ace_M_R = 0
 
         # Other value could be "wigner3j".
         self.ace_coupling_coefficients_type = "clebsch_gordan"

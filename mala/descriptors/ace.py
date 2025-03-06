@@ -92,6 +92,27 @@ class ACE(Descriptor):
         self.__ace_grid_filter = True
         self.__ace_padfunc = True
 
+        # TODO: Move that into the ace.py class. Rename them, also they are
+        # always 0 for now
+        # Equivariance options for the ACE descriptors.
+        # L_R: Transformation characteristics of the descriptor
+        # (0: scalar, 1: vector, 2: tensor, etc.)
+        # M_R: Selects which transformation within the subclass of
+        # transformations selected by L_R.
+
+        # Transformation characteristic and selector, also referred to as
+        # L_R and M_R, respectively. The former governs which type of
+        # transformation characteristic the descriptors follow (i.e., do they
+        # transform as 0: scalar, 1: vector, 2: tensor, etc.). The latter
+        # selects which transformation within the subclass of transformations
+        # selected by L_R is used. E.g., if _transformation_characteristic=1,
+        # then the descriptors may transform like a p_x, p_y, or p_z orbital,
+        # depending on the value of _transformation_selector (-1, 0, 1).
+        # For now, these will always be 0. I put them as class attributes
+        # so that they may be changed for debugging purposes.
+        self._transformation_characteristic = 0
+        self._transformation_selector = 0
+
         # Consistency checks for the ACE settings.
         if (
             len(self.parameters.ace_included_expansion_ranks)
@@ -471,7 +492,7 @@ class ACE(Descriptor):
             ccs = wigner_coupling.wigner_3j_coupling(
                 self.__precomputed_wigner_3j,
                 ldict,
-                L_R=self.parameters.ace_L_R,
+                L_R=self._transformation_characteristic,
             )
 
         elif (
@@ -480,7 +501,7 @@ class ACE(Descriptor):
             ccs = cg_coupling.clebsch_gordan_coupling(
                 self.__precomputed_clebsch_gordan,
                 ldict,
-                L_R=self.parameters.ace_L_R,
+                L_R=self._transformation_characteristic,
             )
 
         else:
@@ -501,7 +522,7 @@ class ACE(Descriptor):
             max(self.parameters.ace_maximum_n_per_rank),
             self._cutoff_factors,
             self.__lambdas,
-            ccs[self.parameters.ace_M_R],
+            ccs[self._transformation_selector],
             rcutinner=rcinner,
             drcutinner=drcinner,
             lmin=self.parameters.ace_minimum_l_per_rank,
