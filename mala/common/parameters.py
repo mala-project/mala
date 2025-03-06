@@ -585,9 +585,6 @@ class ParametersDescriptors(ParametersBase):
 
         # Other value could be "wigner3j".
         self.ace_coupling_coefficients_type = "clebsch_gordan"
-
-        # TODO: Implement a check in the ace.py class, so that symbols
-        # are recomputed if a larger lmax is requested.
         self.ace_coupling_coefficients_maximum_l = 12
 
     @property

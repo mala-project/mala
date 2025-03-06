@@ -1,5 +1,6 @@
 """ACE descriptor class."""
 
+import glob
 import os
 import itertools
 import sys
@@ -807,7 +808,7 @@ class ACE(Descriptor):
         Parameters
         ----------
         lmax : int
-            Maximum l value. ACE_DOCS_MISSING: What is l?
+            Maximum l value for precomputation.
 
         Returns
         -------
@@ -815,10 +816,32 @@ class ACE(Descriptor):
             Dictionary of all Wigner 3j coefficients to be used at a given
             value of lmax.
         """
+        # We only recompute the coefficients if there is no file we can use.
+        # A file we can use can either mean one for the exact same lmax or
+        # one for a higher lmax.
+        raw_list = glob.glob(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "wig_*.pkl",
+            )
+        )
+        lmaxes = [
+            int(os.path.basename(x.split("_")[1].split(".")[0]))
+            for x in raw_list
+        ]
+        if len(lmaxes) > 0:
+            loaded_lmax = max(lmax, min(lmaxes))
+        else:
+            loaded_lmax = lmax
+
+        # We try to load the file and recompute, if necessary.
+        file_name = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "wig_" + str(loaded_lmax) + ".pkl",
+        )
+
         try:
-            with open(
-                "%s/wig.pkl" % os.path.dirname(os.path.abspath(__file__)), "rb"
-            ) as readinwig:
+            with open(file_name, "rb") as readinwig:
                 cg = pickle.load(readinwig)
         except FileNotFoundError:
             cg = {}
@@ -839,9 +862,7 @@ class ACE(Descriptor):
                                     cg[key] = self._wigner_3j(
                                         l1, m1, l2, m2, l3, m3
                                     )
-            with open(
-                "%s/wig.pkl" % os.path.dirname(os.path.abspath(__file__)), "wb"
-            ) as writewig:
+            with open(file_name, "wb") as writewig:
                 pickle.dump(cg, writewig)
         return cg
 
@@ -859,7 +880,7 @@ class ACE(Descriptor):
         Parameters
         ----------
         lmax : int
-            Maximum l value. ACE_DOCS_MISSING: What is l?
+            Maximum l value for precomputation.
 
         Returns
         -------
@@ -867,10 +888,31 @@ class ACE(Descriptor):
             Dictionary of all Clebsch-Gordan coefficients to be used at a given
             value of lmax.
         """
+        # We only recompute the coefficients if there is no file we can use.
+        # A file we can use can either mean one for the exact same lmax or
+        # one for a higher lmax.
+        raw_list = glob.glob(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "cg_*.pkl",
+            )
+        )
+        lmaxes = [
+            int(os.path.basename(x.split("_")[1].split(".")[0]))
+            for x in raw_list
+        ]
+        if len(lmaxes) > 0:
+            loaded_lmax = max(lmax, min(lmaxes))
+        else:
+            loaded_lmax = lmax
+
+        # We try to load the file and recompute, if necessary.
+        file_name = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "cg_" + str(loaded_lmax) + ".pkl",
+        )
         try:
-            with open(
-                "%s/cg.pkl" % os.path.dirname(os.path.abspath(__file__)), "rb"
-            ) as readincg:
+            with open(file_name, "rb") as readincg:
                 cg = pickle.load(readincg)
         except FileNotFoundError:
             cg = {}
@@ -891,9 +933,7 @@ class ACE(Descriptor):
                                     cg[key] = self._clebsch_gordan(
                                         l1, m1, l2, m2, l3, m3
                                     )
-            with open(
-                "%s/cg.pkl" % os.path.dirname(os.path.abspath(__file__)), "wb"
-            ) as writecg:
+            with open(file_name, "wb") as writecg:
                 pickle.dump(cg, writecg)
             # pickle.dump(cg,'cg.pkl')
         return cg
