@@ -8,7 +8,9 @@ from sympy.combinatorics import Permutation
 
 def filled_perm(tuples, rank):
     """
-    Returns the sympy permutation from permutations of N tabulated from GAP
+    Returns a sympy Permutation object for permutations tabulated from GAP. This function
+    uses `rank` to fill in missing permutation indices from GAP. For example tuples = [(0,1)],
+    rank=4 would yeild Permutation(3)(0,1) corresponding to the cycles (0,1)(2)(3)
 
     Parameters
     ----------

@@ -1,9 +1,9 @@
 """
 ACE potential class.
 
-Computes the coupling coefficients. ACE_DOCS_MISSING: Why is this called
-"potential" - would this work as an actual ACE potential or is this just the
-expansion coefficients?
+It writes a .yace file (ACE potential file) that is readable by LAMMPS. When only the
+coupling coefficients are saved to the .yace file, this acts as a parameter
+file with which one can evaluate ACE descriptors.
 """
 
 import itertools
@@ -16,49 +16,70 @@ import mala.descriptors.acelib.coupling_utils as ace_coupling_utils
 
 class ACEPotential:
     """
-    Class for calculation of ACE coupling coefficients.
+    Class to manage interface between ACE descriptor enumeration library and
+    LAMMPS. By default, it will enumerate ACE descriptors according to the 
+    Permutation-adapted approach described in https://doi.org/10.1016/j.jcp.2024.113073.
+    However, there are options for assigning descriptor labels if desired, manually
+    for example.
 
-    ACE_DOCS_MISSING: Explain scope of class. I think we always assume PA
-    basis, but I don't know what that is.
-
+    After enumerating descriptors, it assigns all relevant hyperparamters needed
+    to evaluate the ACE descriptors in LAMMPS. It saves a .yace file needed to
+    evaluate ACE descriptors in LAMMPS (containing coupling coefficients). It does this
+    by writing an ACE potential file, readable by LAMNMPS, that contains only
+    information to evaluate descriptors, not energy models.
+    
     Parameters
     ----------
     elements : List
-        List of elements (symbols)
+        List of elements (symbols), including 'G' for the grid points. In ACE, all possible
+        combinations of these elements determine the "bond types" spanned by the ACE chemical
+        basis (the chemical basis is the delta function basis used in Drautz 2019). For
+        example, the "bond types" resulting from all possible combinations of ['Al','G'] are
+        determined with :code:`itertools.product()` in python. They are (Al,Al)(Al,G)(G,Al)(G,G).
+        For mala, only those of type (G,X) are kept, (grid-atom interactions) and only a placeholder
+        is kept for other interaction types.
 
     reference_ens : List
-        List of floats, has same dimensions as elements. ACE_DOCS_MISSING:
-        What does it do?
+        List of reference energies. (To be applied only for linear models) with a constant
+        shift to the energy per element type. Values other than 0 not be necessary in MALA.
 
     ranks : List
-        ACE_DOCS_MISSING
+        Orders of the expansion, referred to as `N` in Drautz 2019, of the
+        descriptors to be enumerated
 
     nmax: List
-        ACE_DOCS_MISSING
+        Maximum radial basis function index per descriptor rank
 
     lmax: List
-        ACE_DOCS_MISSING
+        Maximum angular momentum number per descriptor rank (maximum angular function index)
 
     nradbase : int
-        ACE_DOCS_MISSING
+        Maximum radial basis function index OVERALL: max(nmax) - in the future, may be used
+        to define the number of g_k(r) comprising R_nl from Drautz 2019 radial basis.
 
-    rcut : float
-        ACE_DOCS_MISSING
+    rcut : float/list
+        radial basis function cutoff per bond type. For example, if elements are ['Al','G']
+        then rcut must be supplied for each:(Al,Al)(Al,G)(G,Al)(G,G)
 
-    lmbda : float
-        ACE_DOCS_MISSING
+    lmbda : float/list
+        Exponential factor for scaled distance in Drautz 2019 used in the radial basis
+        functions. As with the radial cutoff, lambda must be supplied per bond type. For
+        example, if elements are ['Al','G'] then lambda must be supplied for 
+        each:(Al,Al)(Al,G)(G,Al)(G,G)
 
     css : dict
-        ACE_DOCS_MISSING
+        Dictionary of coupling coefficients of the format: {rank:{l:{m:coupling_coefficient}}
 
     rcutinner : List
-        ACE_DOCS_MISSING
+        Inner cutoff to turn on soft-core repulsions. This parameter should be 0.0 (OFF) for
+        each bond type in MALA. 
 
     drcutinner : List
-        ACE_DOCS_MISSING
+        Parameter for soft-core repulsions. This parameter should not matter if rcutinner is
+         0.0 (OFF) for each bond type in MALA. 
 
-    lmin : int
-        ACE_DOCS_MISSING
+    lmin : int/list
+        lower bound on angular momentum quantum number per rank.
 
     manual_labels : str
         File for loading labels. If not None, then labels will be loaded from
@@ -89,15 +110,22 @@ class ACEPotential:
         if kwargs is not None:
             self.__dict__.update(kwargs)
 
-        # ACE_DOCS_MISSING: Explain what all these variables do, at least
-        # briefly, and give them more meaningful names.
+        #NOTE Our unused variable names here match exactly what is in LAMMPS
+        # I'm hesitant to change these to something else. We wont use them in MALA
+        # and if people are really interested, they can find them in the lammps
+        # source code directly
+        #coupling coefficients (generalized Wigner symbols or Generalized Clebsch-Gordan coefficients)
         self.__global_ccs = css
         self.__global_ccs[1] = {"0": {tuple([]): {"0": 1.0}}}
+        #0th-order expansion term in ACE (e.g., constant energy shift)
         self.__E0 = reference_energy
         self.__ranks = ranks
         self.__elements = elements
+        #linear model coefficients
         self.__betas = None
+        #descriptor labels in FitSNAP/LAMMPS format - as described elsewhere
         self.__nus = None
+        #hyperparameters for ACE basis (relevant for density embeddings)
         self.__deltaSplineBins = 0.001
         self.__global_ndensity = 1
         self.__global_rhocut = 100000
@@ -203,17 +231,17 @@ class ACEPotential:
 
     def __set_embeddings(self, npoti="FinnisSinclair", FSparams=[1.0, 1.0]):
         """
-        Set embeddings.
-
-        ACE_DOCS_MISSING
+        Set 'embeddings' in the .yace file for lammps. Some terms here control
+        if a square-root embedding term is added. This should always be OFF
+        for descriptor calculations in MALA
 
         Parameters
         ----------
         npoti : str
-            ACE_DOCS_MISSING
+            paramter to specify descriptor type in LAMMPS
 
         FSparams : List
-            ACE_DOCS_MISSING
+            parameters to specify embedding terms in LAMMPS
         """
         # embeddings =dict()#OrderedDict() #{ind:None for ind in range(len(self.elements))}
         embeddings = {ind: None for ind in range(len(self.__elements))}
@@ -235,9 +263,13 @@ class ACEPotential:
 
     def __set_bond_base(self):
         """
-        Set bond base.
+        Set the per-bond radial basis parameters. The 'bonds' are determined based
+        on the elements. If the elements are ['Al','G'], the bonds may be
+        determined with :code:`itertools.product()` in python. They are
+        (Al,Al)(Al,G)(G,Al)(G,G). Some hyperparameters must be specified per bond
+        label shown here.
 
-        ACE_DOCS_MISSING - what does that mean, what does this function do?
+        
         """
         bondstrs = ["[%d, %d]" % (b[0], b[1]) for b in self.__bondlsts]
         bonds = {bondstr: None for bondstr in bondstrs}
@@ -320,17 +352,19 @@ class ACEPotential:
 
     def set_funcs(self, nulst=None, print_0s=True):
         """
-        Set functions.
-
-        ACE_DOCS_MISSING - what does this function do?
+        Set ctilde 'functions' in the .yace file, used to calculate
+        descriptors in lammps
 
         Parameters
         ----------
         nulst : List
-            List of nus ACE_DOCS_MISSING - what are those?
+            List of nus, a.k.a. ACE descriptor labels to write to 
+            the .yace file.
 
         print_0s : bool
-            ACE_DOCS_MISSING - what does this do?
+            Logical to include 0-valued descriptors, this should always
+            be True in MALA as 0-valued descriptors only arise after 
+            training linear models with sparsifying solvers like LASSO
         """
         if nulst is None:
             if self.__nus is not None:

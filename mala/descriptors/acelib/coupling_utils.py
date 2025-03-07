@@ -227,7 +227,8 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
         these will be (0,1,2...lmax)
 
     rank : int
-        body order of angular ace descriptor labels to be generated
+        order of the expansion, referred to as `N` in Drautz 2019, of the
+        descriptors to be enumerated
 
     L_R : int
         Resultant angular momentum quantum number. This determines the equivariant
@@ -494,7 +495,7 @@ def compute_pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
         maximum radial basis function index for the given descriptor rank
 
     lmax : any
-        maximum angular momentum number for the given descriptor rank
+        maximum angular momentum number for the given descriptor rank (maximum angular function index)
 
     mumax : any
         maximum chemical basis index for the given rank (should generally be 
