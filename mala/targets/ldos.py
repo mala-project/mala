@@ -482,7 +482,7 @@ class LDOS(Target):
 
         Parameters
         ----------
-        path_scheme : string
+        path_scheme : string or list[string]
             Naming scheme for the LDOS .cube files. Every asterisk will be
             replaced with an appropriate number for the LDOS files. Before
             the file name, please make sure to include the proper file path.
@@ -1626,6 +1626,7 @@ class LDOS(Target):
         digits = [int(math.log10(x)) + 1 for x in ldos_grid_sizes]
 
         file_list = []
+        path_scheme_string = ""
         for path_index, _path_scheme in enumerate(path_scheme_list):
 
             # Directly at the split we discard the last energy value
@@ -1640,6 +1641,11 @@ class LDOS(Target):
                 if path_index != len(path_scheme_list) - 1
                 else ldos_grid_sizes[path_index]
             ) + 1
+
+            # For diagnostic output.
+            path_scheme_string += _path_scheme
+            if path_index != len(path_scheme_list) - 1:
+                path_scheme_string += ", "
 
             # Actually fill the file list.
             for i in range(1, end):
@@ -1656,11 +1662,12 @@ class LDOS(Target):
 
         # Iterate over the amount of specified LDOS input files.
         # QE is a Fortran code, so everything is 1 based.
+
         printout(
             "Reading "
             + str(len(file_list))
             + " LDOS files from"
-            + path_scheme
+            + path_scheme_string
             + ".",
             min_verbosity=0,
         )
