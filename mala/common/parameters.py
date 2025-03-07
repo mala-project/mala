@@ -604,14 +604,31 @@ class ParametersTargets(ParametersBase):
         Number of points in the energy grid that is used to calculate the
         (L)DOS.
 
-    ldos_gridsize : int
-        Gridsize of the LDOS.
+    ldos_gridsize : int or list
+        Gridsize of the LDOS. Can either be an int or a list of ints,
+        in which case splitting of the (L)DOS along the energy axis is assumed.
+        Note that this splitting feature is currently experimental and the
+        interface may change in the future. Further, if this type of splitting
+        is used, please make sure that ldos_gridsize, ldos_gridspacing_ev
+        and ldos_gridoffset_ev are lists of the same length.
 
-    ldos_gridspacing_ev: float
+    ldos_gridspacing_ev: float or list
         Gridspacing of the energy grid the (L)DOS is evaluated on [eV].
+        Can either be a float or a list of floats, in which case splitting of
+        the (L)DOS along the energy axis is assumed.
+        Note that this splitting feature is currently experimental and the
+        interface may change in the future. Further, if this type of splitting
+        is used, please make sure that ldos_gridsize, ldos_gridspacing_ev
+        and ldos_gridoffset_ev are lists of the same length.
 
-    ldos_gridoffset_ev: float
+    ldos_gridoffset_ev: float or list
         Lowest energy value on the (L)DOS energy grid [eV].
+        Can either be a float or a list of floats, in which case splitting of
+        the (L)DOS along the energy axis is assumed.
+        Note that this splitting feature is currently experimental and the
+        interface may change in the future. Further, if this type of splitting
+        is used, please make sure that ldos_gridsize, ldos_gridspacing_ev
+        and ldos_gridoffset_ev are lists of the same length.
 
     pseudopotential_path : string
         Path at which pseudopotentials are located (for TEM).

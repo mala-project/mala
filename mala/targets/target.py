@@ -856,9 +856,42 @@ class Target(PhysicalData):
     # Calculations
     ##############
 
-    def get_energy_grid(self):
-        """Get energy grid."""
-        raise Exception("No method implement to calculate an energy grid.")
+    def _get_energy_grid(self):
+        """
+        Get energy grid.
+
+        Returns
+        -------
+        e_grid : numpy.ndarray
+            Energy grid on which the DOS is defined.
+        """
+        # Check consistency before actually calculating the energy grid.
+        self._check_energy_grid_parameter_consistency()
+
+        if isinstance(self.parameters.ldos_gridsize, int):
+            gridsizes = [self.parameters.ldos_gridsize]
+            offsets = [self.parameters.ldos_gridoffset_ev]
+            spacings = [self.parameters.ldos_gridspacing_ev]
+        else:
+            gridsizes = self.parameters.ldos_gridsize
+            offsets = self.parameters.ldos_gridoffset_ev
+            spacings = self.parameters.ldos_gridspacing_ev
+
+        for i in range(len(gridsizes)):
+            emin = offsets[i]
+            emax = offsets[i] + gridsizes[i] * spacings[i]
+            linspace_array = np.linspace(
+                emin, emax, gridsizes[i], endpoint=False
+            )
+            if i != len(gridsizes) - 1:
+                linspace_array = linspace_array[:-1]
+
+            if i == 0:
+                e_grid = linspace_array
+            else:
+                e_grid = np.concatenate((e_grid, linspace_array))
+
+        return e_grid
 
     def get_real_space_grid(self):
         """
@@ -1872,6 +1905,51 @@ class Target(PhysicalData):
             An ASE atoms object holding the associated atoms of this object.
         """
         return self.atoms
+
+    def _check_energy_grid_parameter_consistency(self):
+        """
+        Check consistency of parameters related to energy grid.
+
+        These can either be singular values or lists, dependent on whether
+        splitting along the energy domain is used.
+        """
+        split = (
+            isinstance(self.parameters.ldos_gridsize, list)
+            and isinstance(self.parameters.ldos_gridoffset_ev, list)
+            and isinstance(self.parameters.ldos_gridspacing_ev, list)
+        )
+        no_split = (
+            isinstance(self.parameters.ldos_gridsize, int)
+            and (
+                isinstance(self.parameters.ldos_gridoffset_ev, int)
+                or isinstance(self.parameters.ldos_gridoffset_ev, float)
+            )
+            and isinstance(self.parameters.ldos_gridspacing_ev, float)
+        )
+        if not (split or no_split):
+            raise Exception(
+                "All DOS related parameters (grid size, offset and "
+                "spacing) must be either a single value or "
+                "a list."
+            )
+        if split:
+            parallel_warn(
+                "Splitting along energy axis for LDOS, this "
+                "feature is currently experimental. Correctness "
+                "of results has been verified for most systems, "
+                "but the interface may change in the future."
+            )
+            if not (
+                len(self.parameters.ldos_gridsize)
+                == len(self.parameters.ldos_gridoffset_ev)
+                and len(self.parameters.ldos_gridsize)
+                == len(self.parameters.ldos_gridspacing_ev)
+            ):
+                raise Exception(
+                    "All DOS related parameters (grid size, offset and "
+                    "spacing) must be of same length if splitting along"
+                    "the energy axis is performed."
+                )
 
     @staticmethod
     def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):

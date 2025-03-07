@@ -203,7 +203,18 @@ class DOS(Target):
     @property
     def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
-        return self.parameters.ldos_gridsize
+        if isinstance(self.parameters.ldos_gridsize, int):
+            return self.parameters.ldos_gridsize
+        elif isinstance(self.parameters.ldos_gridsize, list):
+            # For splits, we sum up the individual grid sizes, BUT we
+            # have to subtract one for each split, as the last energy
+            # of each section gets discarded. So for three sections,
+            # we have to subtract 2.
+            return (
+                np.sum(self.parameters.ldos_gridsize)
+                - len(self.parameters.ldos_gridsize)
+                + 1
+            )
 
     @property
     def data_name(self):
@@ -269,7 +280,7 @@ class DOS(Target):
     @cached_property
     def energy_grid(self):
         """Energy grid on which the DOS is expressed."""
-        return self.get_energy_grid()
+        return self._get_energy_grid()
 
     @cached_property
     def band_energy(self):
@@ -416,7 +427,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        path : string
+        path : string or List
             Path of the file containing the DOS.
 
         Returns
@@ -428,26 +439,52 @@ class DOS(Target):
         # check whether we have a correct file.
 
         energy_grid = self.energy_grid
-        return_dos_values = []
 
-        # Open the file, then iterate through its contents.
-        with open(path, "r") as infile:
-            lines = infile.readlines()
-            i = 0
+        if isinstance(path, str):
+            readpaths = [path]
+        else:
+            readpaths = path
 
-            for dos_line in lines:
-                # The first column contains the energy value.
-                if "#" not in dos_line and i < self.parameters.ldos_gridsize:
-                    e_val = float(dos_line.split()[0])
-                    dosval = float(dos_line.split()[1])
-                    if (
-                        np.abs(e_val - energy_grid[i])
-                        < self.parameters.ldos_gridspacing_ev * 0.98
-                    ):
-                        return_dos_values.append(dosval)
-                        i += 1
+        current_energy_index = 0
 
-        array = np.array(return_dos_values)
+        for path_index, readpath in enumerate(readpaths):
+            return_dos_values = []
+
+            # Open the file, then iterate through its contents.
+            with open(readpath, "r") as infile:
+                lines = infile.readlines()
+
+                # Directly at the split we discard the last energy value
+                # of the left side of the split. This requires that both
+                # DOS have been sampled to/from the EXACT same value.
+                # Currently, this responsibility lies with the user, and I
+                # am not sure if we can consistently check for this, even
+                # if we wanted to. In the DOS case, the energies get reported,
+                # but that is NOT the case in the LDOS case.
+                end = (
+                    self.parameters.ldos_gridsize[path_index] - 1
+                    if path_index != len(readpaths) - 1
+                    else self.parameters.ldos_gridsize[path_index]
+                )
+                end += current_energy_index
+
+                for dos_line in lines:
+                    # The first column contains the energy value.
+                    if "#" not in dos_line and current_energy_index < end:
+                        e_val = float(dos_line.split()[0])
+                        dosval = float(dos_line.split()[1])
+                        if (
+                            np.abs(e_val - energy_grid[current_energy_index])
+                            < self.parameters.ldos_gridspacing_ev[path_index]
+                            * 0.98
+                        ):
+                            return_dos_values.append(dosval)
+                            current_energy_index += 1
+                        # print(path_index, i)
+            if path_index == 0:
+                array = np.array(return_dos_values)
+            else:
+                array = np.concatenate((array, return_dos_values))
         self.density_of_states = array
         return array
 
@@ -485,17 +522,40 @@ class DOS(Target):
                 "Rerun calculation with verbosity set to 'high'."
             )
 
+        if isinstance(self.parameters.ldos_gridspacing_ev, list):
+            grid_spacings = self.parameters.ldos_gridspacing_ev
+            grid_sizes = self.parameters.ldos_gridsize
+        else:
+            grid_spacings = [self.parameters.ldos_gridspacing_ev]
+            grid_sizes = [self.parameters.ldos_gridsize]
+
         # Get the gaussians for all energy values and calculate the DOS per
         # band.
-        dos_per_band = gaussians(
-            self.energy_grid,
-            atoms_object.get_calculator().band_structure().energies[0, :, :],
-            smearing_factor * self.parameters.ldos_gridspacing_ev,
-        )
-        dos_per_band = kweights[:, np.newaxis, np.newaxis] * dos_per_band
+        dos_data = None
+        previous_beginning = 0
+        for spacing_idx, grid_spacing in enumerate(grid_spacings):
+            size_for_spacing = grid_sizes[spacing_idx] + previous_beginning
+            if spacing_idx != len(grid_spacings) - 1:
+                size_for_spacing -= 1
 
-        # QE gives the band energies in eV, so no conversion necessary here.
-        dos_data = np.sum(dos_per_band, axis=(0, 1))
+            dos_per_band = gaussians(
+                self.energy_grid[previous_beginning:size_for_spacing],
+                atoms_object.get_calculator()
+                .band_structure()
+                .energies[0, :, :],
+                smearing_factor * grid_spacing,
+            )
+            dos_per_band = kweights[:, np.newaxis, np.newaxis] * dos_per_band
+
+            # QE gives the band energies in eV, so no conversion necessary
+            # here.
+            if spacing_idx == 0:
+                dos_data = np.sum(dos_per_band, axis=(0, 1))
+            else:
+                dos_data = np.concatenate(
+                    (dos_data, np.sum(dos_per_band, axis=(0, 1)))
+                )
+            previous_beginning = size_for_spacing
         self.density_of_states = dos_data
         return dos_data
 
@@ -547,26 +607,6 @@ class DOS(Target):
 
     # Calculations
     ##############
-
-    def get_energy_grid(self):
-        """
-        Get energy grid.
-
-        Returns
-        -------
-        e_grid : numpy.ndarray
-            Energy grid on which the DOS is defined.
-        """
-        emin = self.parameters.ldos_gridoffset_ev
-
-        emax = (
-            self.parameters.ldos_gridoffset_ev
-            + self.parameters.ldos_gridsize
-            * self.parameters.ldos_gridspacing_ev
-        )
-        grid_size = self.parameters.ldos_gridsize
-        linspace_array = np.linspace(emin, emax, grid_size, endpoint=False)
-        return linspace_array
 
     def get_band_energy(
         self,
