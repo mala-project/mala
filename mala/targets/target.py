@@ -1933,6 +1933,12 @@ class Target(PhysicalData):
                 "a list."
             )
         if split:
+            parallel_warn(
+                "Splitting along energy axis for LDOS, this "
+                "feature is currently experimental. Correctness "
+                "of results has been verified for most systems, "
+                "but the interface may change in the future."
+            )
             if not (
                 len(self.parameters.ldos_gridsize)
                 == len(self.parameters.ldos_gridoffset_ev)
