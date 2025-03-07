@@ -270,13 +270,16 @@ def build_full_tree(l, L, L_R):
     Parameters
     ----------
     l : List
-        ACE_DOCS_MISSING
+        list (multiset) of angular momentum indices l1,l2,...lN
 
     L : List
-        ACE_DOCS_MISSING
+        list (multiset) of intermediate angular momentum indices l1,l2,...lN
 
     L_R : int
-        ACE_DOCS_MISSING
+        Resultant angular momentum quantum number. This determines the equivariant
+        character of the rank N descriptor after reduction. L_R=0 corresponds to
+        a rotationally invariant feature, L_R=1 corresponds to a feature that
+        transforms like a vector, L_R=2 a tensor, etc.
 
     Returns
     -------
@@ -359,7 +362,7 @@ def build_full_tree(l, L, L_R):
 
 def build_quick_tree(l):
     """
-    Build a quick tree from the given list.
+    Build a binary tree from the given list.
 
     Rank is assumed to be the length of the list. If the rank is odd, a
     remainder is returned.

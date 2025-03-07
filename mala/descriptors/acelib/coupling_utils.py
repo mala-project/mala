@@ -53,8 +53,8 @@ def build_tree_for_l_intermediates(l, L_R=0):
     Parameters
     ----------
     l : List
-        List of angular momentum quantum numbers. These correspond to the N
-        spherical harmonics in the ACE descriptor(s).
+        list (multiset) of angular momentum indices l1,l2,...lN. These correspond
+        to the N spherical harmonics in the ACE descriptor(s).
 
     L_R : int
         Resultant angular momentum quantum number. This determines the equivariant
