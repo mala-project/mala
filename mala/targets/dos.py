@@ -206,7 +206,15 @@ class DOS(Target):
         if isinstance(self.parameters.ldos_gridsize, int):
             return self.parameters.ldos_gridsize
         elif isinstance(self.parameters.ldos_gridsize, list):
-            return np.sum(self.parameters.ldos_gridsize)
+            # For splits, we sum up the individual grid sizes, BUT we
+            # have to subtract one for each split, as the last energy
+            # of each section gets discarded. So for three sections,
+            # we have to subtract 2.
+            return (
+                np.sum(self.parameters.ldos_gridsize)
+                - len(self.parameters.ldos_gridsize)
+                + 1
+            )
 
     @property
     def data_name(self):
@@ -514,17 +522,40 @@ class DOS(Target):
                 "Rerun calculation with verbosity set to 'high'."
             )
 
+        if isinstance(self.parameters.ldos_gridspacing_ev, list):
+            grid_spacings = self.parameters.ldos_gridspacing_ev
+            grid_sizes = self.parameters.ldos_gridsize
+        else:
+            grid_spacings = [self.parameters.ldos_gridspacing_ev]
+            grid_sizes = [self.parameters.ldos_gridsize]
+
         # Get the gaussians for all energy values and calculate the DOS per
         # band.
-        dos_per_band = gaussians(
-            self.energy_grid,
-            atoms_object.get_calculator().band_structure().energies[0, :, :],
-            smearing_factor * self.parameters.ldos_gridspacing_ev,
-        )
-        dos_per_band = kweights[:, np.newaxis, np.newaxis] * dos_per_band
+        dos_data = None
+        previous_beginning = 0
+        for spacing_idx, grid_spacing in enumerate(grid_spacings):
+            size_for_spacing = grid_sizes[spacing_idx] + previous_beginning
+            if spacing_idx != len(grid_spacings) - 1:
+                size_for_spacing -= 1
 
-        # QE gives the band energies in eV, so no conversion necessary here.
-        dos_data = np.sum(dos_per_band, axis=(0, 1))
+            dos_per_band = gaussians(
+                self.energy_grid[previous_beginning:size_for_spacing],
+                atoms_object.get_calculator()
+                .band_structure()
+                .energies[0, :, :],
+                smearing_factor * grid_spacing,
+            )
+            dos_per_band = kweights[:, np.newaxis, np.newaxis] * dos_per_band
+
+            # QE gives the band energies in eV, so no conversion necessary
+            # here.
+            if spacing_idx == 0:
+                dos_data = np.sum(dos_per_band, axis=(0, 1))
+            else:
+                dos_data = np.concatenate(
+                    (dos_data, np.sum(dos_per_band, axis=(0, 1)))
+                )
+            previous_beginning = size_for_spacing
         self.density_of_states = dos_data
         return dos_data
 

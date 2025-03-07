@@ -198,7 +198,15 @@ class LDOS(Target):
         if isinstance(self.parameters.ldos_gridsize, int):
             return self.parameters.ldos_gridsize
         elif isinstance(self.parameters.ldos_gridsize, list):
-            return np.sum(self.parameters.ldos_gridsize)
+            # For splits, we sum up the individual grid sizes, BUT we
+            # have to subtract one for each split, as the last energy
+            # of each section gets discarded. So for three sections,
+            # we have to subtract 2.
+            return (
+                np.sum(self.parameters.ldos_gridsize)
+                - len(self.parameters.ldos_gridsize)
+                + 1
+            )
 
     @property
     def data_name(self):
