@@ -186,7 +186,7 @@ def get_ms(l_vector, M_R=0):
     Returns
     -------
     m_strs : List
-        Set of all combinations.
+        Set of all combinations of m quantum numbers, obeying appropriate -li <= mi <= li
     """
     m_ranges = {
         ind: range(-l_vector[ind], l_vector[ind] + 1)
