@@ -207,7 +207,7 @@ If run in MPI parallel mode, such a file MUST be provided.</p></li>
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_numpy_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/(eV*A^3)'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.from_numpy_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.from_numpy_array" title="Link to this definition"></a></dt>
 <dd><p>Create an LDOS calculator from a numpy array in memory.</p>
 <p>By using this function rather then setting the local_density_of_states
-object directly, proper unit coversion is ensured.</p>
+object directly, proer unit coversion is ensured.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -455,20 +455,6 @@ and only one for network pass.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_energy_grid">
-<span class="sig-name descname"><span class="pre">get_energy_grid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_energy_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_energy_grid" title="Link to this definition"></a></dt>
-<dd><p>Get energy grid.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>e_grid</strong> – Energy grid on which the LDOS is defined.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>numpy.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_entropy_contribution">
 <span class="sig-name descname"><span class="pre">get_entropy_contribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_entropy_contribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_entropy_contribution" title="Link to this definition"></a></dt>
 <dd><p>Calculate the entropy contribution from given LDOS data.</p>
@@ -700,7 +686,7 @@ It should work for all implemented targets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path_scheme</strong> (<em>string</em>) – Naming scheme for the LDOS .cube files. Every asterisk will be
+<li><p><strong>path_scheme</strong> (<em>string</em><em> or </em><em>list</em><em>[</em><em>string</em><em>]</em>) – Naming scheme for the LDOS .cube files. Every asterisk will be
 replaced with an appropriate number for the LDOS files. Before
 the file name, please make sure to include the proper file path.</p></li>
 <li><p><strong>units</strong> (<em>string</em>) – Units the LDOS is saved in.</p></li>

@@ -127,6 +127,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">LDOS</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="c1"># Consistency check for parameters describing energy grid.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="LDOS.from_numpy_file">
@@ -165,7 +166,7 @@
 <span class="sd">        Create an LDOS calculator from a numpy array in memory.</span>
 
 <span class="sd">        By using this function rather then setting the local_density_of_states</span>
-<span class="sd">        object directly, proper unit coversion is ensured.</span>
+<span class="sd">        object directly, proer unit coversion is ensured.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -294,7 +295,18 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="c1"># For splits, we sum up the individual grid sizes, BUT we</span>
+            <span class="c1"># have to subtract one for each split, as the last energy</span>
+            <span class="c1"># of each section gets discarded. So for three sections,</span>
+            <span class="c1"># we have to subtract 2.</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">)</span>
+                <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">)</span>
+                <span class="o">+</span> <span class="mi">1</span>
+            <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">data_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -392,7 +404,7 @@
     <span class="nd">@cached_property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Energy grid on which the LDOS is expressed.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_energy_grid</span><span class="p">()</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">total_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -595,7 +607,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        path_scheme : string</span>
+<span class="sd">        path_scheme : string or list[string]</span>
 <span class="sd">            Naming scheme for the LDOS .cube files. Every asterisk will be</span>
 <span class="sd">            replaced with an appropriate number for the LDOS files. Before</span>
 <span class="sd">            the file name, please make sure to include the proper file path.</span>
@@ -685,29 +697,6 @@
 
     <span class="c1"># Calculations</span>
     <span class="c1">##############</span>
-
-<div class="viewcode-block" id="LDOS.get_energy_grid">
-<a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_energy_grid">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get energy grid.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        e_grid : numpy.ndarray</span>
-<span class="sd">            Energy grid on which the LDOS is defined.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">emin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
-
-        <span class="n">emax</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
-            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
-            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
-        <span class="p">)</span>
-        <span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
-        <span class="n">linspace_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">linspace_array</span></div>
-
 
 <div class="viewcode-block" id="LDOS.get_total_energy">
 <a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_total_energy">[docs]</a>
@@ -1344,7 +1333,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid LDOS array shape.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Build the energy grid and calculate the fermi function.</span>
-        <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
+        <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_energy_grid</span><span class="p">()</span>
         <span class="n">fermi_values</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span>
             <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
@@ -1778,45 +1767,80 @@
         <span class="n">return_local</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;return_local&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="n">ldos_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span> <span class="k">if</span> <span class="n">use_fp64</span> <span class="k">else</span> <span class="n">DEFAULT_NP_DATA_DTYPE</span>
 
+        <span class="c1"># Build file list. I think it is faster if this is done on all ranks</span>
+        <span class="c1"># simultaneously, as the file list is not that large.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path_scheme</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">path_scheme_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">path_scheme</span><span class="p">]</span>
+            <span class="n">ldos_grid_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path_scheme_list</span> <span class="o">=</span> <span class="n">path_scheme</span>
+            <span class="n">ldos_grid_sizes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+
         <span class="c1"># Find out the number of digits that are needed to encode this</span>
         <span class="c1"># grid (by QE).</span>
-        <span class="n">digits</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">digits</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ldos_grid_sizes</span><span class="p">]</span>
+
+        <span class="n">file_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">path_scheme_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">path_index</span><span class="p">,</span> <span class="n">_path_scheme</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">path_scheme_list</span><span class="p">):</span>
+
+            <span class="c1"># Directly at the split we discard the last energy value</span>
+            <span class="c1"># of the left side of the split. This requires that both</span>
+            <span class="c1"># DOS have been sampled to/from the EXACT same value.</span>
+            <span class="c1"># Currently, this responsibility lies with the user, and I</span>
+            <span class="c1"># am not sure if we can consistently check for this, even</span>
+            <span class="c1"># if we wanted to. In the DOS case, the energies get reported,</span>
+            <span class="c1"># but that is NOT the case in the LDOS case.</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ldos_grid_sizes</span><span class="p">[</span><span class="n">path_index</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">path_index</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">path_scheme_list</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="k">else</span> <span class="n">ldos_grid_sizes</span><span class="p">[</span><span class="n">path_index</span><span class="p">]</span>
+            <span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="c1"># For diagnostic output.</span>
+            <span class="n">path_scheme_string</span> <span class="o">+=</span> <span class="n">_path_scheme</span>
+            <span class="k">if</span> <span class="n">path_index</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">path_scheme_list</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">path_scheme_string</span> <span class="o">+=</span> <span class="s2">&quot;, &quot;</span>
+
+            <span class="c1"># Actually fill the file list.</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+                <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">_path_scheme</span>
+                <span class="k">if</span> <span class="n">digits</span><span class="p">[</span><span class="n">path_index</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">tmp_file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                        <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">digits</span><span class="p">[</span><span class="n">path_index</span><span class="p">])</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># For some reason, there are no leading zeros above 3</span>
+                    <span class="c1"># digits in QE.</span>
+                    <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">tmp_file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+                <span class="n">file_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp_file_name</span><span class="p">)</span>
 
         <span class="c1"># Iterate over the amount of specified LDOS input files.</span>
         <span class="c1"># QE is a Fortran code, so everything is 1 based.</span>
+
         <span class="n">printout</span><span class="p">(</span>
             <span class="s2">&quot;Reading &quot;</span>
-            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">)</span>
+            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">))</span>
             <span class="o">+</span> <span class="s2">&quot; LDOS files from&quot;</span>
-            <span class="o">+</span> <span class="n">path_scheme</span>
+            <span class="o">+</span> <span class="n">path_scheme_string</span>
             <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
             <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">ldos_data</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
-            <span class="n">local_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">/</span> <span class="n">get_size</span><span class="p">())</span>
-            <span class="p">)</span>
-            <span class="n">start_index</span> <span class="o">=</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">*</span> <span class="n">local_size</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">local_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span> <span class="o">/</span> <span class="n">get_size</span><span class="p">()))</span>
+            <span class="n">start_index</span> <span class="o">=</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">*</span> <span class="n">local_size</span>
             <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">get_size</span><span class="p">():</span>
-                <span class="n">local_size</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">%</span> <span class="n">get_size</span><span class="p">()</span>
+                <span class="n">local_size</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span> <span class="o">%</span> <span class="n">get_size</span><span class="p">()</span>
             <span class="n">end_index</span> <span class="o">=</span> <span class="n">start_index</span> <span class="o">+</span> <span class="n">local_size</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">start_index</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">end_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="n">local_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+            <span class="n">start_index</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">end_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span>
+            <span class="n">local_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_index</span><span class="p">,</span> <span class="n">end_index</span><span class="p">):</span>
-            <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">path_scheme</span>
-            <span class="k">if</span> <span class="n">digits</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">tmp_file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-                    <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">digits</span><span class="p">)</span>
-                <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># For some reason, there are no leading zeros above 3 digits</span>
-                <span class="c1"># in QE.</span>
-                <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">tmp_file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
-
+            <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">file_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="c1"># Open the cube file</span>
             <span class="k">if</span> <span class="n">file_type</span> <span class="o">==</span> <span class="s2">&quot;.cube&quot;</span><span class="p">:</span>
                 <span class="n">data</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">read_cube</span><span class="p">(</span><span class="n">tmp_file_name</span><span class="p">)</span>
@@ -1845,7 +1869,7 @@
             <span class="n">barrier</span><span class="p">()</span>
             <span class="n">data_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">return_local</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">start_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">end_index</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="k">return</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">start_index</span><span class="p">,</span> <span class="n">end_index</span>
             <span class="k">if</span> <span class="n">use_memmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">ldos_data_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span>
@@ -1854,7 +1878,7 @@
                             <span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                             <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                             <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">,</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">),</span>
                         <span class="p">),</span>
                         <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w+&quot;</span><span class="p">,</span>
                         <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">,</span>
@@ -1867,15 +1891,15 @@
                             <span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                             <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                             <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">,</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">),</span>
                         <span class="p">),</span>
                         <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r+&quot;</span><span class="p">,</span>
                         <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="n">barrier</span><span class="p">()</span>
-                <span class="n">ldos_data_full</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">start_index</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">end_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">ldos_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
-                <span class="p">)</span>
+                <span class="n">ldos_data_full</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">start_index</span><span class="p">:</span><span class="n">end_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">ldos_data</span><span class="p">[</span>
+                    <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:</span>
+                <span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="o">=</span> <span class="n">ldos_data_full</span>
                 <span class="k">return</span> <span class="n">ldos_data_full</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1892,13 +1916,13 @@
                             <span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                             <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                             <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">,</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">),</span>
                         <span class="p">),</span>
                         <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">,</span>
                     <span class="p">)</span>
-                    <span class="n">ldos_data_full</span><span class="p">[</span>
-                        <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">start_index</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">end_index</span> <span class="o">-</span> <span class="mi">1</span>
-                    <span class="p">]</span> <span class="o">=</span> <span class="n">ldos_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+                    <span class="n">ldos_data_full</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">start_index</span><span class="p">:</span><span class="n">end_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">ldos_data</span><span class="p">[</span>
+                        <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:</span>
+                    <span class="p">]</span>
 
                     <span class="c1"># No MPI necessary for first rank. For all the others,</span>
                     <span class="c1"># collect the buffers.</span>
@@ -1914,19 +1938,17 @@
                             <span class="n">dtype</span><span class="o">=</span><span class="n">ldos_dtype</span><span class="p">,</span>
                         <span class="p">)</span>
                         <span class="n">comm</span><span class="o">.</span><span class="n">Recv</span><span class="p">(</span><span class="n">ldos_local</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">100</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span>
-                        <span class="n">ldos_data_full</span><span class="p">[</span>
-                            <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">local_start</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">local_end</span> <span class="o">-</span> <span class="mi">1</span>
-                        <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
-                            <span class="n">ldos_local</span><span class="p">,</span>
-                            <span class="p">(</span>
-                                <span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                                <span class="n">local_size</span><span class="p">,</span>
-                            <span class="p">),</span>
-                        <span class="p">)[</span>
-                            <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:</span>
-                        <span class="p">]</span>
+                        <span class="n">ldos_data_full</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">local_start</span><span class="p">:</span><span class="n">local_end</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                                <span class="n">ldos_local</span><span class="p">,</span>
+                                <span class="p">(</span>
+                                    <span class="n">data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                    <span class="n">data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                    <span class="n">data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                    <span class="n">local_size</span><span class="p">,</span>
+                                <span class="p">),</span>
+                            <span class="p">)[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+                        <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">comm</span><span class="o">.</span><span class="n">Send</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">+</span> <span class="mi">100</span><span class="p">)</span>
                 <span class="n">barrier</span><span class="p">()</span>

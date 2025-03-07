@@ -325,20 +325,6 @@ reasons. In the future, that may change.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.dos.DOS.get_energy_grid">
-<span class="sig-name descname"><span class="pre">get_energy_grid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_energy_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_energy_grid" title="Link to this definition"></a></dt>
-<dd><p>Get energy grid.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>e_grid</strong> – Energy grid on which the DOS is defined.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>numpy.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.dos.DOS.get_entropy_contribution">
 <span class="sig-name descname"><span class="pre">get_entropy_contribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">broadcast_entropy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_entropy_contribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_entropy_contribution" title="Link to this definition"></a></dt>
 <dd><p>Calculate the entropy contribution to the total energy.</p>
@@ -508,7 +494,7 @@ array.</p>
 qe.dos.txt here. QE saves the DOS in 1/eV.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>path</strong> (<em>string</em>) – Path of the file containing the DOS.</p>
+<dd class="field-odd"><p><strong>path</strong> (<em>string</em><em> or </em><em>List</em>) – Path of the file containing the DOS.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>DOS data in 1/eV.</p>

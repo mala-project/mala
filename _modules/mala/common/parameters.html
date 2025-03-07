@@ -707,14 +707,31 @@
 <span class="sd">        Number of points in the energy grid that is used to calculate the</span>
 <span class="sd">        (L)DOS.</span>
 
-<span class="sd">    ldos_gridsize : int</span>
-<span class="sd">        Gridsize of the LDOS.</span>
+<span class="sd">    ldos_gridsize : int or list</span>
+<span class="sd">        Gridsize of the LDOS. Can either be an int or a list of ints,</span>
+<span class="sd">        in which case splitting of the (L)DOS along the energy axis is assumed.</span>
+<span class="sd">        Note that this splitting feature is currently experimental and the</span>
+<span class="sd">        interface may change in the future. Further, if this type of splitting</span>
+<span class="sd">        is used, please make sure that ldos_gridsize, ldos_gridspacing_ev</span>
+<span class="sd">        and ldos_gridoffset_ev are lists of the same length.</span>
 
-<span class="sd">    ldos_gridspacing_ev: float</span>
+<span class="sd">    ldos_gridspacing_ev: float or list</span>
 <span class="sd">        Gridspacing of the energy grid the (L)DOS is evaluated on [eV].</span>
+<span class="sd">        Can either be a float or a list of floats, in which case splitting of</span>
+<span class="sd">        the (L)DOS along the energy axis is assumed.</span>
+<span class="sd">        Note that this splitting feature is currently experimental and the</span>
+<span class="sd">        interface may change in the future. Further, if this type of splitting</span>
+<span class="sd">        is used, please make sure that ldos_gridsize, ldos_gridspacing_ev</span>
+<span class="sd">        and ldos_gridoffset_ev are lists of the same length.</span>
 
-<span class="sd">    ldos_gridoffset_ev: float</span>
+<span class="sd">    ldos_gridoffset_ev: float or list</span>
 <span class="sd">        Lowest energy value on the (L)DOS energy grid [eV].</span>
+<span class="sd">        Can either be a float or a list of floats, in which case splitting of</span>
+<span class="sd">        the (L)DOS along the energy axis is assumed.</span>
+<span class="sd">        Note that this splitting feature is currently experimental and the</span>
+<span class="sd">        interface may change in the future. Further, if this type of splitting</span>
+<span class="sd">        is used, please make sure that ldos_gridsize, ldos_gridspacing_ev</span>
+<span class="sd">        and ldos_gridoffset_ev are lists of the same length.</span>
 
 <span class="sd">    pseudopotential_path : string</span>
 <span class="sd">        Path at which pseudopotentials are located (for TEM).</span>

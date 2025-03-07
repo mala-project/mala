@@ -303,7 +303,18 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="c1"># For splits, we sum up the individual grid sizes, BUT we</span>
+            <span class="c1"># have to subtract one for each split, as the last energy</span>
+            <span class="c1"># of each section gets discarded. So for three sections,</span>
+            <span class="c1"># we have to subtract 2.</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">)</span>
+                <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">)</span>
+                <span class="o">+</span> <span class="mi">1</span>
+            <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">data_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -375,7 +386,7 @@
     <span class="nd">@cached_property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Energy grid on which the DOS is expressed.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_energy_grid</span><span class="p">()</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -533,7 +544,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        path : string</span>
+<span class="sd">        path : string or List</span>
 <span class="sd">            Path of the file containing the DOS.</span>
 
 <span class="sd">        Returns</span>
@@ -545,26 +556,52 @@
         <span class="c1"># check whether we have a correct file.</span>
 
         <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span>
-        <span class="n">return_dos_values</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="c1"># Open the file, then iterate through its contents.</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
-            <span class="n">lines</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
-            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">readpaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">path</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">readpaths</span> <span class="o">=</span> <span class="n">path</span>
 
-            <span class="k">for</span> <span class="n">dos_line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-                <span class="c1"># The first column contains the energy value.</span>
-                <span class="k">if</span> <span class="s2">&quot;#&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dos_line</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">:</span>
-                    <span class="n">e_val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dos_line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="n">dosval</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dos_line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">e_val</span> <span class="o">-</span> <span class="n">energy_grid</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-                        <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span> <span class="o">*</span> <span class="mf">0.98</span>
-                    <span class="p">):</span>
-                        <span class="n">return_dos_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dosval</span><span class="p">)</span>
-                        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">current_energy_index</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">return_dos_values</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">path_index</span><span class="p">,</span> <span class="n">readpath</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">readpaths</span><span class="p">):</span>
+            <span class="n">return_dos_values</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Open the file, then iterate through its contents.</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">readpath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+                <span class="c1"># Directly at the split we discard the last energy value</span>
+                <span class="c1"># of the left side of the split. This requires that both</span>
+                <span class="c1"># DOS have been sampled to/from the EXACT same value.</span>
+                <span class="c1"># Currently, this responsibility lies with the user, and I</span>
+                <span class="c1"># am not sure if we can consistently check for this, even</span>
+                <span class="c1"># if we wanted to. In the DOS case, the energies get reported,</span>
+                <span class="c1"># but that is NOT the case in the LDOS case.</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">[</span><span class="n">path_index</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">path_index</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">readpaths</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                    <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">[</span><span class="n">path_index</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">end</span> <span class="o">+=</span> <span class="n">current_energy_index</span>
+
+                <span class="k">for</span> <span class="n">dos_line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                    <span class="c1"># The first column contains the energy value.</span>
+                    <span class="k">if</span> <span class="s2">&quot;#&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dos_line</span> <span class="ow">and</span> <span class="n">current_energy_index</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">:</span>
+                        <span class="n">e_val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dos_line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">dosval</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dos_line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="p">(</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">e_val</span> <span class="o">-</span> <span class="n">energy_grid</span><span class="p">[</span><span class="n">current_energy_index</span><span class="p">])</span>
+                            <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span><span class="p">[</span><span class="n">path_index</span><span class="p">]</span>
+                            <span class="o">*</span> <span class="mf">0.98</span>
+                        <span class="p">):</span>
+                            <span class="n">return_dos_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dosval</span><span class="p">)</span>
+                            <span class="n">current_energy_index</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="c1"># print(path_index, i)</span>
+            <span class="k">if</span> <span class="n">path_index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">return_dos_values</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">array</span><span class="p">,</span> <span class="n">return_dos_values</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="n">array</span>
         <span class="k">return</span> <span class="n">array</span></div>
 
@@ -605,17 +642,40 @@
                 <span class="s2">&quot;Rerun calculation with verbosity set to &#39;high&#39;.&quot;</span>
             <span class="p">)</span>
 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">grid_spacings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
+            <span class="n">grid_sizes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">grid_spacings</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span><span class="p">]</span>
+            <span class="n">grid_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">]</span>
+
         <span class="c1"># Get the gaussians for all energy values and calculate the DOS per</span>
         <span class="c1"># band.</span>
-        <span class="n">dos_per_band</span> <span class="o">=</span> <span class="n">gaussians</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span><span class="p">,</span>
-            <span class="n">atoms_object</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span><span class="o">.</span><span class="n">band_structure</span><span class="p">()</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span>
-            <span class="n">smearing_factor</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">dos_per_band</span> <span class="o">=</span> <span class="n">kweights</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">dos_per_band</span>
+        <span class="n">dos_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">previous_beginning</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">spacing_idx</span><span class="p">,</span> <span class="n">grid_spacing</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grid_spacings</span><span class="p">):</span>
+            <span class="n">size_for_spacing</span> <span class="o">=</span> <span class="n">grid_sizes</span><span class="p">[</span><span class="n">spacing_idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">previous_beginning</span>
+            <span class="k">if</span> <span class="n">spacing_idx</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_spacings</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">size_for_spacing</span> <span class="o">-=</span> <span class="mi">1</span>
 
-        <span class="c1"># QE gives the band energies in eV, so no conversion necessary here.</span>
-        <span class="n">dos_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dos_per_band</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">dos_per_band</span> <span class="o">=</span> <span class="n">gaussians</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span><span class="p">[</span><span class="n">previous_beginning</span><span class="p">:</span><span class="n">size_for_spacing</span><span class="p">],</span>
+                <span class="n">atoms_object</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span>
+                <span class="o">.</span><span class="n">band_structure</span><span class="p">()</span>
+                <span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span>
+                <span class="n">smearing_factor</span> <span class="o">*</span> <span class="n">grid_spacing</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">dos_per_band</span> <span class="o">=</span> <span class="n">kweights</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">dos_per_band</span>
+
+            <span class="c1"># QE gives the band energies in eV, so no conversion necessary</span>
+            <span class="c1"># here.</span>
+            <span class="k">if</span> <span class="n">spacing_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">dos_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dos_per_band</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dos_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dos_per_band</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+                <span class="p">)</span>
+            <span class="n">previous_beginning</span> <span class="o">=</span> <span class="n">size_for_spacing</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="n">dos_data</span>
         <span class="k">return</span> <span class="n">dos_data</span></div>
 
@@ -674,29 +734,6 @@
 
     <span class="c1"># Calculations</span>
     <span class="c1">##############</span>
-
-<div class="viewcode-block" id="DOS.get_energy_grid">
-<a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_energy_grid">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get energy grid.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        e_grid : numpy.ndarray</span>
-<span class="sd">            Energy grid on which the DOS is defined.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">emin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
-
-        <span class="n">emax</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
-            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
-            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
-        <span class="p">)</span>
-        <span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
-        <span class="n">linspace_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">linspace_array</span></div>
-
 
 <div class="viewcode-block" id="DOS.get_band_energy">
 <a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_band_energy">[docs]</a>

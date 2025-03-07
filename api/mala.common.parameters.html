@@ -1705,10 +1705,15 @@ from CUDA 11.0 upwards.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersTargets.ldos_gridsize">
 <span class="sig-name descname"><span class="pre">ldos_gridsize</span></span><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ldos_gridsize" title="Link to this definition"></a></dt>
-<dd><p>Gridsize of the LDOS.</p>
+<dd><p>Gridsize of the LDOS. Can either be an int or a list of ints,
+in which case splitting of the (L)DOS along the energy axis is assumed.
+Note that this splitting feature is currently experimental and the
+interface may change in the future. Further, if this type of splitting
+is used, please make sure that ldos_gridsize, ldos_gridspacing_ev
+and ldos_gridoffset_ev are lists of the same length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-odd"><p>int or list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1716,10 +1721,16 @@ from CUDA 11.0 upwards.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersTargets.ldos_gridspacing_ev">
 <span class="sig-name descname"><span class="pre">ldos_gridspacing_ev</span></span><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ldos_gridspacing_ev" title="Link to this definition"></a></dt>
-<dd><p>Gridspacing of the energy grid the (L)DOS is evaluated on [eV].</p>
+<dd><p>Gridspacing of the energy grid the (L)DOS is evaluated on [eV].
+Can either be a float or a list of floats, in which case splitting of
+the (L)DOS along the energy axis is assumed.
+Note that this splitting feature is currently experimental and the
+interface may change in the future. Further, if this type of splitting
+is used, please make sure that ldos_gridsize, ldos_gridspacing_ev
+and ldos_gridoffset_ev are lists of the same length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-odd"><p>float or list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1727,10 +1738,16 @@ from CUDA 11.0 upwards.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersTargets.ldos_gridoffset_ev">
 <span class="sig-name descname"><span class="pre">ldos_gridoffset_ev</span></span><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ldos_gridoffset_ev" title="Link to this definition"></a></dt>
-<dd><p>Lowest energy value on the (L)DOS energy grid [eV].</p>
+<dd><p>Lowest energy value on the (L)DOS energy grid [eV].
+Can either be a float or a list of floats, in which case splitting of
+the (L)DOS along the energy axis is assumed.
+Note that this splitting feature is currently experimental and the
+interface may change in the future. Further, if this type of splitting
+is used, please make sure that ldos_gridsize, ldos_gridspacing_ev
+and ldos_gridoffset_ev are lists of the same length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-odd"><p>float or list</p>
 </dd>
 </dl>
 </dd></dl>
