@@ -622,8 +622,12 @@
 <span class="sd">            Path to the QE out file. If None, the QE output that was loaded</span>
 <span class="sd">            via read_additional_calculation_data will be used.</span>
 
-<span class="sd">        smearing_factor : int</span>
+<span class="sd">        smearing_factor : int or List</span>
 <span class="sd">            Smearing factor relative to the energy grid spacing. Default is 2.</span>
+<span class="sd">            If list, DOS splitting is assumed. In this case, the length</span>
+<span class="sd">            of the list must be consistent with the length of</span>
+<span class="sd">            parameters.targets.ldos_gridspacing_ev, which is a list in this</span>
+<span class="sd">            case as well.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -645,9 +649,16 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">grid_spacings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
             <span class="n">grid_sizes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+            <span class="n">_smearing_factors</span> <span class="o">=</span> <span class="n">smearing_factor</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_smearing_factors</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_spacings</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Length of smearing factor list must be consistent with &quot;</span>
+                    <span class="s2">&quot;the length of the grid spacing list.&quot;</span>
+                <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">grid_spacings</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span><span class="p">]</span>
             <span class="n">grid_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">]</span>
+            <span class="n">_smearing_factors</span> <span class="o">=</span> <span class="p">[</span><span class="n">smearing_factor</span><span class="p">]</span>
 
         <span class="c1"># Get the gaussians for all energy values and calculate the DOS per</span>
         <span class="c1"># band.</span>
@@ -663,7 +674,7 @@
                 <span class="n">atoms_object</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span>
                 <span class="o">.</span><span class="n">band_structure</span><span class="p">()</span>
                 <span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span>
-                <span class="n">smearing_factor</span> <span class="o">*</span> <span class="n">grid_spacing</span><span class="p">,</span>
+                <span class="n">_smearing_factors</span><span class="p">[</span><span class="n">spacing_idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">grid_spacing</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">dos_per_band</span> <span class="o">=</span> <span class="n">kweights</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">dos_per_band</span>
 
