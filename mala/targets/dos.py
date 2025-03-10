@@ -502,8 +502,12 @@ class DOS(Target):
             Path to the QE out file. If None, the QE output that was loaded
             via read_additional_calculation_data will be used.
 
-        smearing_factor : int
+        smearing_factor : int or List
             Smearing factor relative to the energy grid spacing. Default is 2.
+            If list, DOS splitting is assumed. In this case, the length
+            of the list must be consistent with the length of
+            parameters.targets.ldos_gridspacing_ev, which is a list in this
+            case as well.
 
         Returns
         -------
@@ -525,9 +529,16 @@ class DOS(Target):
         if isinstance(self.parameters.ldos_gridspacing_ev, list):
             grid_spacings = self.parameters.ldos_gridspacing_ev
             grid_sizes = self.parameters.ldos_gridsize
+            _smearing_factors = smearing_factor
+            if len(_smearing_factors) != len(grid_spacings):
+                raise Exception(
+                    "Length of smearing factor list must be consistent with "
+                    "the length of the grid spacing list."
+                )
         else:
             grid_spacings = [self.parameters.ldos_gridspacing_ev]
             grid_sizes = [self.parameters.ldos_gridsize]
+            _smearing_factors = [smearing_factor]
 
         # Get the gaussians for all energy values and calculate the DOS per
         # band.
@@ -543,7 +554,7 @@ class DOS(Target):
                 atoms_object.get_calculator()
                 .band_structure()
                 .energies[0, :, :],
-                smearing_factor * grid_spacing,
+                _smearing_factors[spacing_idx] * grid_spacing,
             )
             dos_per_band = kweights[:, np.newaxis, np.newaxis] * dos_per_band
 
