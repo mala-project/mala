@@ -62,7 +62,8 @@ class TestSplitting:
         cubes_path = os.path.join(data_path, "cubes")
         dos_calculator3 = mala.DOS(parameters3)
         dos_calculator3.read_from_qe_out(
-            os.path.join(data_path, "Be_snapshot1.out")
+            os.path.join(data_path, "Be_snapshot1.out"),
+            smearing_factor=[2, 2, 2],
         )
 
         parameters = mala.Parameters()
