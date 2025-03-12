@@ -385,17 +385,22 @@ class FeedForwardFeaturizationNet(FeedForwardNet):
         # Remove the last layer in the layer sizes, since we will be doing
         # this layer ourselves.
         self.output_size = params.network.layer_sizes.pop()
-        self.number_of_gaussians = 8
+        self.number_of_gaussians = (
+            params.network.featurization_number_of_gaussians
+        )
         self.batch_size = params.running.mini_batch_size
         super(FeedForwardFeaturizationNet, self).__init__(params)
         self.register_buffer(
-            "t", torch.linspace(-1, 1, self.output_size).unsqueeze(0)
+            "x_tensor",
+            torch.linspace(-1, 1, self.output_size)
+            .unsqueeze(0)
+            .to(params.device),
         )  # Shape: [1, num_points]
 
     def forward(self, inputs):
         inputs = super(FeedForwardFeaturizationNet, self).forward(inputs)
         # x = torch.arange(self.output_size).to(inputs.device)
-        x = torch.linspace(-1, 1, self.output_size).to(inputs.device)
+        # x = torch.linspace(-1, 1, self.output_size).to(inputs.device)
 
         m_left = inputs[:, 0].unsqueeze(
             1
@@ -411,11 +416,13 @@ class FeedForwardFeaturizationNet(FeedForwardNet):
         )  # y-value at the meeting point, shape: [batch_size, 1]
 
         # Compute the left and right segments using broadcasting
-        y_left = m_left * (x - t_min) + f_min
-        y_right = m_right * (x - t_min) + f_min
+        y_left = m_left * (self.x_tensor - t_min) + f_min
+        y_right = m_right * (self.x_tensor - t_min) + f_min
 
         # Create a mask for t-values: for each sample, use the left segment when t <= t_min
-        mask = (x <= t_min).float()  # Shape: [batch_size, num_points]
+        mask = (
+            self.x_tensor <= t_min
+        ).float()  # Shape: [batch_size, num_points]
         linear_term = mask * y_left + (1 - mask) * y_right
 
         weights = inputs[:, 4 : self.number_of_gaussians + 4]
@@ -425,11 +432,14 @@ class FeedForwardFeaturizationNet(FeedForwardNet):
         ]
         sigmas = inputs[:, (2 * self.number_of_gaussians) + 4 :]
 
-        x_exp = x.view(1, 1, -1)
+        x_exp = self.x_tensor.view(1, 1, -1)
 
         centers_exp = centers.unsqueeze(2)
         sigmas_exp = sigmas.unsqueeze(2)
         weights_exp = weights.unsqueeze(2)
+        # widths = (
+        #     torch.nn.functional.softplus(sigmas_exp) + 1e-6
+        # )  # [batch_size, 8]
 
         # Compute each Gaussian's contribution; result is shape (batch, 8, 300)
         gaussians = weights_exp * torch.exp(
