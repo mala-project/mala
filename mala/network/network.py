@@ -137,6 +137,8 @@ class Network(nn.Module):
             self.loss_func = functional.mse_loss
         elif self.params.loss_function_type == "cross_entropy":
             self.loss_func = functional.cross_entropy
+        elif self.params.loss_function_type == "l1loss":
+            self.loss_func = functional.l1_loss
         elif self.params.loss_function_type == "weighted_mse":
             self.loss_func = self.weighted_mse_loss
         else:
@@ -321,6 +323,7 @@ class FeedForwardNet(Network):
         # Add the layers.
         # As this is a feedforward layer we always add linear layers, and then
         # an activation function
+        layer_index = 0
         for i in range(0, self.number_of_layers):
             self.layers.append(
                 (
@@ -330,6 +333,9 @@ class FeedForwardNet(Network):
                     )
                 )
             )
+            # torch.nn.init.constant(self.layers[layer_index].weight, 0)
+            # torch.nn.init.constant(self.layers[layer_index].bias, 0)
+            layer_index += 1
             try:
                 if use_only_one_activation_type:
                     self.layers.append(
@@ -343,6 +349,7 @@ class FeedForwardNet(Network):
                             self.params.layer_activations[i]
                         ]()
                     )
+                layer_index += 1
             except KeyError:
                 raise Exception("Invalid activation type seleceted.")
             except IndexError:
@@ -381,37 +388,56 @@ class FeedForwardFeaturizationNet(FeedForwardNet):
         self.number_of_gaussians = 8
         self.batch_size = params.running.mini_batch_size
         super(FeedForwardFeaturizationNet, self).__init__(params)
+        self.register_buffer(
+            "t", torch.linspace(-1, 1, self.output_size).unsqueeze(0)
+        )  # Shape: [1, num_points]
 
     def forward(self, inputs):
         inputs = super(FeedForwardFeaturizationNet, self).forward(inputs)
-        x = torch.arange(self.output_size).to(inputs.device)
+        # x = torch.arange(self.output_size).to(inputs.device)
+        x = torch.linspace(-1, 1, self.output_size).to(inputs.device)
 
-        linear1 = inputs[:, 0:1] * x + inputs[:, 1:2]  # shape (2, 300)
-        linear2 = inputs[:, 2:3] * x + inputs[:, 3:4]  # shape (2, 300)
-        linear_term = torch.max(linear1, linear2)
+        m_left = inputs[:, 0].unsqueeze(
+            1
+        )  # Left slope, shape: [batch_size, 1]
+        m_right = inputs[:, 1].unsqueeze(
+            1
+        )  # Right slope, shape: [batch_size, 1]
+        t_min = inputs[:, 2].unsqueeze(
+            1
+        )  # Meeting point x-coordinate, shape: [batch_size, 1]
+        f_min = inputs[:, 3].unsqueeze(
+            1
+        )  # y-value at the meeting point, shape: [batch_size, 1]
 
-        # weights = inputs[:, 4 : self.number_of_gaussians + 4]
-        # centers = inputs[
-        #     :,
-        #     self.number_of_gaussians + 4 : (2 * self.number_of_gaussians) + 4,
-        # ]
-        # # sigmas = inputs[:, (2 * self.number_of_gaussians) + 4 :]
-        #
-        # x_exp = x.view(1, 1, -1)
-        #
-        # centers_exp = centers.unsqueeze(2)
-        # # sigmas_exp = sigmas.unsqueeze(2)
-        # weights_exp = weights.unsqueeze(2)
-        #
-        # sigmas_exp = torch.ones(centers_exp.shape).to(inputs.device)
-        #
-        # # Compute each Gaussian's contribution; result is shape (batch, 8, 300)
-        # gaussians = weights_exp * torch.exp(
-        #     -((x_exp - centers_exp) ** 2) / (2 * sigmas_exp**2)
-        # )
-        # gaussians_sum = gaussians.sum(dim=1)
+        # Compute the left and right segments using broadcasting
+        y_left = m_left * (x - t_min) + f_min
+        y_right = m_right * (x - t_min) + f_min
 
-        outputs = linear_term  # + gaussians_sum
+        # Create a mask for t-values: for each sample, use the left segment when t <= t_min
+        mask = (x <= t_min).float()  # Shape: [batch_size, num_points]
+        linear_term = mask * y_left + (1 - mask) * y_right
+
+        weights = inputs[:, 4 : self.number_of_gaussians + 4]
+        centers = inputs[
+            :,
+            self.number_of_gaussians + 4 : (2 * self.number_of_gaussians) + 4,
+        ]
+        sigmas = inputs[:, (2 * self.number_of_gaussians) + 4 :]
+
+        x_exp = x.view(1, 1, -1)
+
+        centers_exp = centers.unsqueeze(2)
+        sigmas_exp = sigmas.unsqueeze(2)
+        weights_exp = weights.unsqueeze(2)
+
+        # Compute each Gaussian's contribution; result is shape (batch, 8, 300)
+        gaussians = weights_exp * torch.exp(
+            -((x_exp - centers_exp) ** 2) / (2 * sigmas_exp**2)
+        )
+        gaussians_sum = gaussians.sum(dim=1)
+
+        outputs = linear_term + gaussians_sum
         # print(outputs)
         return outputs
 
