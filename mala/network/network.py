@@ -385,70 +385,112 @@ class FeedForwardFeaturizationNet(FeedForwardNet):
         # Remove the last layer in the layer sizes, since we will be doing
         # this layer ourselves.
         self.output_size = params.network.layer_sizes.pop()
+
+        # Initialize internal feature layer. This means assigning the number
+        # of Gaussians, and deciding whether to use a piecewise linear
+        # function.
         self.number_of_gaussians = (
             params.network.featurization_number_of_gaussians
         )
+        self.use_twolinear = (
+            True
+            if params.network.featurization_base_function == "twolinear"
+            else False
+        )
+        if self.use_twolinear:
+            self.number_of_base_terms = 5
+        else:
+            self.number_of_base_terms = 3
         self.batch_size = params.running.mini_batch_size
         super(FeedForwardFeaturizationNet, self).__init__(params)
+
+        # This buffer holds the x-values for the internal fitting layer.
+        # We initialize it here once.
+        # I initially had this as a range going from 0 to 300, but that led
+        # to the fit not converging. The x-values seemingly need to adhere
+        #  to this range.
         self.register_buffer(
             "x_tensor",
             torch.linspace(-1, 1, self.output_size)
             .unsqueeze(0)
             .to(params.device),
-        )  # Shape: [1, num_points]
+        )
 
     def forward(self, inputs):
         inputs = super(FeedForwardFeaturizationNet, self).forward(inputs)
-        # x = torch.arange(self.output_size).to(inputs.device)
-        # x = torch.linspace(-1, 1, self.output_size).to(inputs.device)
 
-        m_left = inputs[:, 0].unsqueeze(
-            1
-        )  # Left slope, shape: [batch_size, 1]
-        m_right = inputs[:, 1].unsqueeze(
-            1
-        )  # Right slope, shape: [batch_size, 1]
-        t_min = inputs[:, 2].unsqueeze(
-            1
-        )  # Meeting point x-coordinate, shape: [batch_size, 1]
-        f_min = inputs[:, 3].unsqueeze(
-            1
-        )  # y-value at the meeting point, shape: [batch_size, 1]
+        if self.use_twolinear:
+            # Left slope
+            m_left = inputs[:, 0].unsqueeze(1)
 
-        # Compute the left and right segments using broadcasting
-        y_left = m_left * (self.x_tensor - t_min) + f_min
-        y_right = m_right * (self.x_tensor - t_min) + f_min
+            # Right slope
+            m_right = inputs[:, 1].unsqueeze(1)
+            # Meeting point x-coordinate.
+            t_min = inputs[:, 2].unsqueeze(1)
+            # Y-value at the meeting point.
+            f_min = inputs[:, 3].unsqueeze(1)
 
-        # Create a mask for t-values: for each sample, use the left segment when t <= t_min
-        mask = (
-            self.x_tensor <= t_min
-        ).float()  # Shape: [batch_size, num_points]
-        linear_term = mask * y_left + (1 - mask) * y_right
+            # Compute the left and right segments
+            y_left = m_left * (self.x_tensor - t_min) + f_min
+            y_right = m_right * (self.x_tensor - t_min) + f_min
 
-        weights = inputs[:, 4 : self.number_of_gaussians + 4]
+            # Create a mask for t-values: for each sample, use the left
+            # segment when t <= t_min
+            mask = (self.x_tensor <= t_min).float()
+
+            # Assemble the piecewise linear function.
+            base_term = mask * y_left + (1 - mask) * y_right
+        else:
+            # Parabola parameters: a*x^2 + b*x + c
+            a = inputs[:, 0].unsqueeze(1)
+            b = inputs[:, 1].unsqueeze(1)
+            c = inputs[:, 2].unsqueeze(1)
+
+            # Reconstruct the parabola
+            base_term = a * self.x_tensor**2 + b * self.x_tensor + c
+
+        # Extract the Gaussian parameters.
+        weights = inputs[
+            :,
+            self.number_of_base_terms : self.number_of_gaussians
+            + self.number_of_base_terms,
+        ]
         centers = inputs[
             :,
-            self.number_of_gaussians + 4 : (2 * self.number_of_gaussians) + 4,
+            self.number_of_gaussians
+            + self.number_of_base_terms : (2 * self.number_of_gaussians)
+            + self.number_of_base_terms,
         ]
-        sigmas = inputs[:, (2 * self.number_of_gaussians) + 4 :]
+        sigmas = inputs[
+            :, (2 * self.number_of_gaussians) + self.number_of_base_terms :
+        ]
 
+        # Reshape as needed.
         x_exp = self.x_tensor.view(1, 1, -1)
-
         centers_exp = centers.unsqueeze(2)
         sigmas_exp = sigmas.unsqueeze(2)
         weights_exp = weights.unsqueeze(2)
+
+        # I don't think we need this, but I'll keep it in here for
+        # future reference.
         # widths = (
         #     torch.nn.functional.softplus(sigmas_exp) + 1e-6
-        # )  # [batch_size, 8]
+        # )
 
-        # Compute each Gaussian's contribution; result is shape (batch, 8, 300)
+        # Compute each Gaussian's contribution
         gaussians = weights_exp * torch.exp(
             -((x_exp - centers_exp) ** 2) / (2 * sigmas_exp**2)
         )
         gaussians_sum = gaussians.sum(dim=1)
 
-        outputs = linear_term + gaussians_sum
-        # print(outputs)
+        # Assemble Gaussian and base term.
+        outputs = base_term + gaussians_sum
+
+        # Learned scale of the outputs, because the scale can vary WILDLY
+        # across the simulation cell. Not doing this as a oneliner
+        # for debugging purposes.
+        scale = torch.abs(inputs[:, 4].unsqueeze(1))
+        outputs = outputs * scale
         return outputs
 
 

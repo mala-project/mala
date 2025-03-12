@@ -303,14 +303,19 @@ class ParametersNetwork(ParametersBase):
         self.dropout = 0.1
         self.num_heads = 10
 
-        # For featurization network
+        # For featurization network.
+        # TODO: Add documentation
         self.featurization_number_of_gaussians = 8
         self.featurization_layer_length = None
+        self.featurization_base_function = "twolinear"  # or "quadratic"
 
     @property
     def featurization_layer_length(self):
         """..."""
-        return self.featurization_number_of_gaussians * 3 + 4
+        if self.featurization_base_function == "twolinear":
+            return self.featurization_number_of_gaussians * 3 + 5
+        else:
+            return self.featurization_number_of_gaussians * 3 + 4
 
     @featurization_layer_length.setter
     def featurization_layer_length(self, value):
