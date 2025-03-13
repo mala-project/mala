@@ -66,7 +66,7 @@ class Bispectrum(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -74,7 +74,7 @@ class Bispectrum(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in MALA units.
         """
         if in_units == "None" or in_units is None:
@@ -91,7 +91,7 @@ class Bispectrum(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in MALA units.
 
         out_units : string
@@ -99,7 +99,7 @@ class Bispectrum(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
         """
         if out_units == "None" or out_units is None:
@@ -108,6 +108,27 @@ class Bispectrum(Descriptor):
             raise Exception("Unsupported unit for bispectrum descriptors.")
 
     def _calculate(self, outdir, **kwargs):
+        """
+        Perform Bispectrum descriptor calculation.
+
+        This function is the main entry point for the calculation of the
+        bispectrum descriptors. It will decide whether to use LAMMPS or
+        a python implementation based on the availability of LAMMPS (and
+        user specifications).
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        bispectrum_descriptors_np : numpy.ndarray
+            The calculated bispectrum descriptors.
+        """
         if self.parameters._configuration["lammps"]:
             if find_spec("lammps") is None:
                 printout(
@@ -120,12 +141,65 @@ class Bispectrum(Descriptor):
         else:
             return self.__calculate_python(**kwargs)
 
+    def _read_feature_dimension_from_json(self, json_dict):
+        """
+        Read the feature dimension from a saved JSON file.
+
+        For bispectrum descriptors, the feature dimension does not change with
+        the number of species or atoms. It is solely dependent on the
+        hyperparameter 2Jmax, and is computed here.
+
+        Parameters
+        ----------
+        json_dict : dict
+            Dictionary containing info loaded from the JSON file.
+        """
+        if self.parameters.descriptors_contain_xyz:
+            return self.__get_feature_size() - 3
+        else:
+            return self.__get_feature_size()
+
+    def __get_feature_size(self):
+        """
+        Compute the feature size of the bispectrum descriptors.
+
+        This is done using the hyperparameter 2Jmax.
+
+        Returns
+        -------
+        ncols0 : int
+            The feature dimension of the bispectrum descriptors.
+        """
+        ncols0 = 3
+
+        # Analytical relation for fingerprint length
+        ncoeff = (
+            (self.parameters.bispectrum_twojmax + 2)
+            * (self.parameters.bispectrum_twojmax + 3)
+            * (self.parameters.bispectrum_twojmax + 4)
+        )
+        ncoeff = ncoeff // 24  # integer division
+        return ncols0 + ncoeff
+
     def __calculate_lammps(self, outdir, **kwargs):
         """
         Perform bispectrum calculation using LAMMPS.
 
         Creates a LAMMPS instance with appropriate call parameters and uses
         it for the calculation.
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        bispectrum_descriptors_np : numpy.ndarray
+            The calculated bispectrum descriptors.
         """
         # For version compatibility; older lammps versions (the serial version
         # we still use on some machines) have these constants as part of the
@@ -176,8 +250,12 @@ class Bispectrum(Descriptor):
 
         # An empty string means that the user wants to use the standard input.
         # What that is differs depending on serial/parallel execution.
-        if self.parameters.lammps_compute_file == "":
-            filepath = __file__.split("bispectrum")[0]
+        # We also have to ensure that no input files from a different
+        # descriptor calculator gets used.
+        if self.parameters.custom_lammps_compute_file != "":
+            lammps_compute_file = self.parameters.custom_lammps_compute_file
+        else:
+            filepath = os.path.dirname(__file__)
             if self.parameters._configuration["mpi"]:
                 if self.parameters.use_z_splitting:
                     self.parameters.lammps_compute_file = os.path.join(
@@ -201,20 +279,8 @@ class Bispectrum(Descriptor):
                     ),
                 )
         # Do the LAMMPS calculation and clean up.
-        lmp.file(self.parameters.lammps_compute_file)
-
-        # Set things not accessible from LAMMPS
-        # First 3 cols are x, y, z, coords
-        ncols0 = 3
-
-        # Analytical relation for fingerprint length
-        ncoeff = (
-            (self.parameters.bispectrum_twojmax + 2)
-            * (self.parameters.bispectrum_twojmax + 3)
-            * (self.parameters.bispectrum_twojmax + 4)
-        )
-        ncoeff = ncoeff // 24  # integer division
-        self.feature_size = ncols0 + ncoeff
+        lmp.file(lammps_compute_file)
+        self.feature_size = self.__get_feature_size()
 
         # Extract data from LAMMPS calculation.
         # This is different for the parallel and the serial case.
@@ -296,6 +362,16 @@ class Bispectrum(Descriptor):
         Some options are hardcoded in the same manner the LAMMPS implementation
         hard codes them. Compared to the LAMMPS implementation, some
         essentially never used options are not maintained/optimized.
+
+        Parameters
+        ----------
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        bispectrum_descriptors_np : numpy.ndarray
+            The calculated bispectrum descriptors.
         """
         printout(
             "Using python for descriptor calculation. "

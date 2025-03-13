@@ -3,6 +3,17 @@
 Installing LAMMPS
 ==================
 
+Every LAMMPS release released after January 23th, 2025 contains the
+functionalities needed for descriptor calculation with MALA. If you are working
+on a high perfomance computing cluster, check if you have a LAMMPS version
+installed that may already be used with LAMMPS. Note that in order to use
+GPU acceleration, you need access to a GPU version
+(i.e., Kokkos enabled version) of LAMMPS. In the following, a brief overview
+of how to build LAMMPS is provided. The MALA team recommends to build LAMMPS
+with ``cmake``.
+For a full overview of how to build LAMMPS, please refer to
+the `official instructions <https://docs.lammps.org/Build.html>`_.
+
 Prerequisites
 **************
 
@@ -14,14 +25,7 @@ to be installed on your machine.
 Build LAMMPS
 ************
 
-We provide a LAMMPS version compatible with the most recent MALA version
-`here <https://github.com/mala-project/lammps/tree/mala>`_, which should always
-be used with MALA. For a full overview of how to build LAMMPS, please refer to
-the `official instructions <https://docs.lammps.org/Build.html>`_.
-The MALA team recommends to build LAMMPS with ``cmake``. To do so
-
-* Checkout https://github.com/mala-project/lammps/tree/mala
-* Make sure the ``mala`` tree is checked out locally via ``git branch``!
+* Checkout LAMMPS at https://github.com/lammps/lammps
 * Inside the LAMMPS folder create a build folder (named, e.g., ``build``)
 * In the ``build`` folder, configure your ``cmake`` build:
   ``cmake ../cmake -D OPTION1 -D OPTION2 ...``; Options for a typical LAMMPS

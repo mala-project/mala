@@ -44,7 +44,7 @@ class AtomicForce(Target):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -55,7 +55,7 @@ class AtomicForce(Target):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in 1/eV.
         """
         if in_units == "eV/Ang":

@@ -180,6 +180,46 @@ class LazyLoadDatasetSingle(Dataset):
                     read_dtype=True,
                 )
             )
+        elif self.snapshot.snapshot_type == "json+openpmd":
+            self.input_shape = (
+                self.descriptor_calculator.read_dimensions_from_json(
+                    os.path.join(
+                        self.snapshot.input_npy_directory,
+                        self.snapshot.input_npy_file,
+                    ),
+                )
+            )
+            self.input_dtype = np.dtype(np.float32)
+
+            self.output_shape, self.output_dtype = (
+                self.target_calculator.read_dimensions_from_openpmd_file(
+                    os.path.join(
+                        self.snapshot.output_npy_directory,
+                        self.snapshot.output_npy_file,
+                    ),
+                    read_dtype=True,
+                )
+            )
+        elif self.snapshot.snapshot_type == "json+numpy":
+            self.input_shape = (
+                self.descriptor_calculator.read_dimensions_from_json(
+                    os.path.join(
+                        self.snapshot.input_npy_directory,
+                        self.snapshot.input_npy_file,
+                    ),
+                )
+            )
+            self.input_dtype = np.dtype(np.float32)
+
+            self.output_shape, self.output_dtype = (
+                self.target_calculator.read_dimensions_from_numpy_file(
+                    os.path.join(
+                        self.snapshot.output_npy_directory,
+                        self.snapshot.output_npy_file,
+                    ),
+                    read_dtype=True,
+                )
+            )
         else:
             raise Exception("Invalid snapshot type selected.")
 

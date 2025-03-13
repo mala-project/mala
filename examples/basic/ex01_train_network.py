@@ -48,16 +48,43 @@ parameters.descriptors.bispectrum_cutoff = 4.67637
 # Data has to be added to the MALA workflow. The central object for this
 # is the DataHandler class, which takes care of all data needs. After data
 # has been added, it is loaded and scaled with the prepare_data function.
-####################
+#
+# There are two ways to add descriptor (=input) data. One is to provide
+# precomputed numpy files. This makes sense when training multiple models
+# with the same data. Alternatively, MALA generated JSON files containin
+# information about a simulation can be provided, with which MALA will
+# automatically generate volumetric descriptor input. This is useful when, e.g.
+# descriptor hyperparameters are to be optimized. In order to use that
+# feature, an existing GPU-ready LAMMPS version is recommended. Creation
+# of MALA JSON files is shown in ex03_preprocess_data.
+#####################
 
 data_handler = mala.DataHandler(parameters)
-# Add a snapshot we want to use in to the list.
+
+# Add precomputed snapshots.
 data_handler.add_snapshot(
     "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path, "tr"
 )
 data_handler.add_snapshot(
     "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path, "va"
 )
+# Add snapshots with "raw" (=MALA formatted) JSON, computation of descriptors
+# will be performed "on-the-fly".
+# data_handler.add_snapshot(
+#     "Be_snapshot0.info.json",
+#     data_path,
+#     "Be_snapshot0.out.npy",
+#     data_path,
+#     "tr",
+# )
+# data_handler.add_snapshot(
+#     "Be_snapshot1.info.json",
+#     data_path,
+#     "Be_snapshot1.out.npy",
+#     data_path,
+#     "va",
+# )
+
 data_handler.prepare_data()
 
 ####################

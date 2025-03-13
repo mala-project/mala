@@ -46,7 +46,7 @@ class MinterpyDescriptors(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -54,7 +54,7 @@ class MinterpyDescriptors(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in MALA units.
         """
         if in_units == "None" or in_units is None:
@@ -71,7 +71,7 @@ class MinterpyDescriptors(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in MALA units.
 
         out_units : string
@@ -79,13 +79,19 @@ class MinterpyDescriptors(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
         """
         if out_units == "None":
             return array
         else:
             raise Exception("Unsupported unit for Minterpy descriptors.")
+
+    def _read_feature_dimension_from_json(self, json_dict):
+        raise Exception(
+            "This feature has not been implemented for Minterpy "
+            "descriptors."
+        )
 
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         # For version compatibility; older lammps versions (the serial version
@@ -180,23 +186,28 @@ class MinterpyDescriptors(Descriptor):
 
             # For now the file is chosen automatically, because this is used
             # mostly under the hood anyway.
-            filepath = __file__.split("minterpy")[0]
-            if self.parameters._configuration["mpi"]:
-                raise Exception(
-                    "Minterpy descriptors cannot be calculated "
-                    "in parallel yet."
+            if self.parameters.custom_lammps_compute_file != "":
+                lammps_compute_file = (
+                    self.parameters.custom_lammps_compute_file
                 )
-                # if self.parameters.use_z_splitting:
-                #     runfile = os.path.join(filepath, "in.ggrid.python")
-                # else:
-                #     runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
             else:
-                self.parameters.lammps_compute_file = os.path.join(
-                    filepath, "in.ggrid_defaultproc.python"
-                )
+                filepath = os.path.dirname(__file__)
+                if self.parameters._configuration["mpi"]:
+                    raise Exception(
+                        "Minterpy descriptors cannot be calculated "
+                        "in parallel yet."
+                    )
+                    # if self.parameters.use_z_splitting:
+                    #     runfile = os.path.join(filepath, "in.ggrid.python")
+                    # else:
+                    #     runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
+                else:
+                    lammps_compute_file = os.path.join(
+                        filepath, "in.ggrid_defaultproc.python"
+                    )
 
             # Do the LAMMPS calculation and clean up.
-            lmp.file(self.parameters.lammps_compute_file)
+            lmp.file(lammps_compute_file)
 
             # Extract the data.
             nrows_ggrid = extract_compute_np(
@@ -255,7 +266,7 @@ class MinterpyDescriptors(Descriptor):
 
         Returns
         -------
-        nodes : numpy.array
+        nodes : numpy.ndarray
             Two-dimensional array containing the nodes.
         """
         import minterpy as mp

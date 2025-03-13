@@ -46,7 +46,7 @@ class AtomicDensity(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -54,7 +54,7 @@ class AtomicDensity(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in MALA units.
         """
         if in_units == "None" or in_units is None:
@@ -71,7 +71,7 @@ class AtomicDensity(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in MALA units.
 
         out_units : string
@@ -79,7 +79,7 @@ class AtomicDensity(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
         """
         if out_units == "None":
@@ -107,6 +107,27 @@ class AtomicDensity(Descriptor):
         ) * optimal_sigma_aluminium
 
     def _calculate(self, outdir, **kwargs):
+        """
+        Perform Gaussian descriptor calculation.
+
+        This function is the main entry point for the calculation of the
+        Gaussian descriptors. It will decide whether to use LAMMPS or
+        a python implementation based on the availability of LAMMPS (and
+        user specifications).
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        gaussian_descriptors_np : numpy.ndarray
+            The calculated Gaussian descriptors.
+        """
         if self.parameters._configuration["lammps"]:
             if find_spec("lammps") is None:
                 printout(
@@ -119,8 +140,41 @@ class AtomicDensity(Descriptor):
         else:
             return self.__calculate_python(**kwargs)
 
+    def _read_feature_dimension_from_json(self, json_dict):
+        """
+        Read the feature dimension from a saved JSON file.
+
+        Always returns (number of coordinate dimensions xyz = 3) +
+        (number of species), so for a single species system 4.
+
+        Parameters
+        ----------
+        json_dict : dict
+            Dictionary containing info loaded from the JSON file.
+        """
+        return 4
+
     def __calculate_lammps(self, outdir, **kwargs):
-        """Perform actual Gaussian descriptor calculation."""
+        """
+        Perform actual Gaussian descriptor calculation using LAMMPS.
+
+        Creates a LAMMPS instance with appropriate call parameters and uses
+        it for the calculation.
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        gaussian_descriptors_np : numpy.ndarray
+            The calculated Gaussian descriptors.
+
+        """
         # For version compatibility; older lammps versions (the serial version
         # we still use on some machines) have these constants as part of the
         # general LAMMPS import.
@@ -164,15 +218,26 @@ class AtomicDensity(Descriptor):
 
         # For now the file is chosen automatically, because this is used
         # mostly under the hood anyway.
-        filepath = __file__.split("atomic_density")[0]
-        if self.parameters._configuration["mpi"]:
-            if self.parameters.use_z_splitting:
-                self.parameters.lammps_compute_file = os.path.join(
-                    filepath,
-                    "in.ggrid_n{0}.python".format(
-                        len(set(self._atoms.numbers))
-                    ),
-                )
+
+        if self.parameters.custom_lammps_compute_file != "":
+            lammps_compute_file = self.parameters.custom_lammps_compute_file
+        else:
+            filepath = os.path.dirname(__file__)
+            if self.parameters._configuration["mpi"]:
+                if self.parameters.use_z_splitting:
+                    self.parameters.lammps_compute_file = os.path.join(
+                        filepath,
+                        "in.ggrid_n{0}.python".format(
+                            len(set(self._atoms.numbers))
+                        ),
+                    )
+                else:
+                    self.parameters.lammps_compute_file = os.path.join(
+                        filepath,
+                        "in.ggrid_defaultproc_n{0}.python".format(
+                            len(set(self._atoms.numbers))
+                        ),
+                    )
             else:
                 self.parameters.lammps_compute_file = os.path.join(
                     filepath,
@@ -180,16 +245,9 @@ class AtomicDensity(Descriptor):
                         len(set(self._atoms.numbers))
                     ),
                 )
-        else:
-            self.parameters.lammps_compute_file = os.path.join(
-                filepath,
-                "in.ggrid_defaultproc_n{0}.python".format(
-                    len(set(self._atoms.numbers))
-                ),
-            )
 
         # Do the LAMMPS calculation and clean up.
-        lmp.file(self.parameters.lammps_compute_file)
+        lmp.file(lammps_compute_file)
 
         # Extract the data.
         nrows_ggrid = extract_compute_np(
@@ -289,6 +347,16 @@ class AtomicDensity(Descriptor):
               and doesn't scale too great
             - It only works for ONE chemical element
             - It has no MPI or GPU support
+
+        Parameters
+        ----------
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        gaussian_descriptors_np : numpy.ndarray
+            The calculated Gaussian descriptors.
         """
         printout(
             "Using python for descriptor calculation. "

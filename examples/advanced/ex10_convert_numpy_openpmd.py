@@ -20,15 +20,15 @@ for snapshot in range(2):
         target_input_path=os.path.join(
             data_path, "Be_snapshot{}.out.npy".format(snapshot)
         ),
-        additional_info_input_type=None,
-        additional_info_input_path=None,
+        simulation_output_type=None,
+        simulation_output_path=None,
         target_units=None,
     )
 
 data_converter.convert_snapshots(
     descriptor_save_path="./",
     target_save_path="./",
-    additional_info_save_path="./",
+    simulation_output_save_path="./",
     naming_scheme="converted_from_numpy_*.h5",
     descriptor_calculation_kwargs={"working_directory": "./"},
 )
@@ -43,15 +43,15 @@ for snapshot in range(2):
         descriptor_input_path="converted_from_numpy_{}.in.h5".format(snapshot),
         target_input_type="openpmd",
         target_input_path="converted_from_numpy_{}.out.h5".format(snapshot),
-        additional_info_input_type=None,
-        additional_info_input_path=None,
+        simulation_output_type=None,
+        simulation_output_path=None,
         target_units=None,
     )
 
 data_converter.convert_snapshots(
     descriptor_save_path="./",
     target_save_path="./",
-    additional_info_save_path="./",
+    simulation_output_save_path="./",
     naming_scheme="verify_against_original_numpy_data_*.npy",
     descriptor_calculation_kwargs={"working_directory": "./"},
 )
@@ -84,15 +84,15 @@ for snapshot in range(2):
         target_input_path=os.path.join(
             data_path, "Be_snapshot{}.out.h5".format(snapshot)
         ),
-        additional_info_input_type=None,
-        additional_info_input_path=None,
+        simulation_output_type=None,
+        simulation_output_path=None,
         target_units=None,
     )
 
 data_converter.convert_snapshots(
     descriptor_save_path="./",
     target_save_path="./",
-    additional_info_save_path="./",
+    simulation_output_save_path="./",
     naming_scheme="converted_from_openpmd_*.npy",
     descriptor_calculation_kwargs={"working_directory": "./"},
 )
