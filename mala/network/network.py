@@ -404,6 +404,9 @@ class FeedForwardFeaturizationNet(FeedForwardNet):
         self.batch_size = params.running.mini_batch_size
         super(FeedForwardFeaturizationNet, self).__init__(params)
 
+        # Reattach the last layer.
+        params.network.layer_sizes.append(self.output_size)
+
         # This buffer holds the x-values for the internal fitting layer.
         # We initialize it here once.
         # I initially had this as a range going from 0 to 300, but that led
