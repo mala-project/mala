@@ -1,9 +1,5 @@
 """Tester class for testing a network."""
-try:
-    import horovod.torch as hvd
-except ModuleNotFoundError:
-    # Warning is thrown by Parameters class
-    pass
+
 import numpy as np
 
 from mala.common.parameters import printout
@@ -49,17 +45,49 @@ class Tester(Runner):
         Can be "list" or "mae". If "list", then a list of results across all
         snapshots is returned. If "mae", then the MAE across all snapshots
         will be calculated and returned.
+
+    Attributes
+    ----------
+    target_calculator : mala.targets.target.Target
+        Target calculator used for predictions. Can be used for further
+        processing.
+
+    observables_to_test : list
+        List of observables to test. Supported are:
+
+            - "ldos": Calculate the MSE loss of the LDOS.
+            - "band_energy": Band energy error
+            - "band_energy_full": Band energy absolute values (only works with
+              list, as both actual and predicted are returned)
+            - "total_energy": Total energy error
+            - "total_energy_full": Total energy absolute values (only works
+              with list, as both actual and predicted are returned)
+            - "number_of_electrons": Number of electrons (Fermi energy is not
+              determined dynamically for this quantity.
+            - "density": MAPE of the density prediction
+            - "dos": MAPE of the DOS prediction
+
+    output_format : string
+        Can be "list" or "mae". If "list", then a list of results across all
+        snapshots is returned. If "mae", then the MAE across all snapshots
+        will be calculated and returned.
     """
 
-    def __init__(self, params, network, data, observables_to_test=["ldos"],
-                 output_format="list"):
+    def __init__(
+        self,
+        params,
+        network,
+        data,
+        observables_to_test=["ldos"],
+        output_format="list",
+    ):
         # copy the parameters into the class.
         super(Tester, self).__init__(params, network, data)
-        self.test_data_loader = None
-        self.number_of_batches_per_snapshot = 0
+        self._test_data_loader = None
+        self._number_of_batches_per_snapshot = 0
         self.observables_to_test = observables_to_test
         self.output_format = output_format
-        if self.output_format != "list" and self.output_format == "mae":
+        if self.output_format != "list" and self.output_format != "mae":
             raise Exception("Wrong output format for testing selected.")
         self.target_calculator = data.target_calculator
 
@@ -82,6 +110,8 @@ class Tester(Runner):
             for observable in self.observables_to_test:
                 results[observable].append(snapshot_result[observable])
 
+        self.data.delete_temporary_inputs()
+
         if self.output_format == "list":
             return results
 
@@ -94,7 +124,7 @@ class Tester(Runner):
         else:
             raise Exception("Wrong output format for testing selected.")
 
-    def test_snapshot(self, snapshot_number, data_type='te'):
+    def test_snapshot(self, snapshot_number, data_type="te"):
         """
         Test the selected observables for a single snapshot.
 
@@ -111,26 +141,61 @@ class Tester(Runner):
         results : dict
             A dictionary containing the errors for the selected observables.
         """
-        actual_outputs, predicted_outputs = \
-            self.predict_targets(snapshot_number, data_type=data_type)
+        actual_outputs, predicted_outputs = self.predict_targets(
+            snapshot_number, data_type=data_type
+        )
 
-        results = {}
-        for observable in self.observables_to_test:
-            results[observable] = self.\
-                __calculate_observable_error(snapshot_number,
-                                             observable, predicted_outputs,
-                                             actual_outputs)
+        results = self._calculate_errors(
+            actual_outputs,
+            predicted_outputs,
+            self.observables_to_test,
+            snapshot_number,
+        )
         return results
 
-    def predict_targets(self, snapshot_number, data_type='te'):
+    def get_energy_targets_and_predictions(
+        self, snapshot_number, data_type="te"
+    ):
         """
-        Get actual and predicted output for a snapshot.
+        Get the energy targets and predictions for a single snapshot.
+
+        Parameters
+        ----------
+        snapshot_number : int
+            Snapshot which to test.
+
+        data_type : str
+            'tr', 'va', or 'te' indicating the partition to be tested
+
+        Returns
+        -------
+        results : dict
+            A dictionary containing the errors for the selected observables.
+        """
+        actual_outputs, predicted_outputs = self.predict_targets(
+            snapshot_number, data_type=data_type
+        )
+
+        energy_metrics = [
+            metric for metric in self.observables_to_test if "energy" in metric
+        ]
+        targets, predictions = self._calculate_energy_targets_and_predictions(
+            actual_outputs,
+            predicted_outputs,
+            energy_metrics,
+            snapshot_number,
+        )
+        return targets, predictions
+
+    def predict_targets(self, snapshot_number, data_type="te"):
+        """
+        Get actual and predicted energy outputs for a snapshot.
 
         Parameters
         ----------
         snapshot_number : int
             Snapshot for which the prediction is done.
-        
+
         data_type : str
             'tr', 'va', or 'te' indicating the partition to be tested
 
@@ -147,154 +212,43 @@ class Tester(Runner):
         # Make sure no data lingers in the target calculator.
         self.data.target_calculator.invalidate_target()
         # Select the inputs used for prediction
-        if data_type == 'tr':
+        if data_type == "tr":
             offset_snapshots = 0
             data_set = self.data.training_data_sets[0]
-        elif data_type == 'va':
+        elif data_type == "va":
             offset_snapshots = self.data.nr_training_snapshots
             data_set = self.data.validation_data_sets[0]
-        elif data_type == 'te':
-            offset_snapshots = self.data.nr_validation_snapshots + \
-                               self.data.nr_training_snapshots
+        elif data_type == "te":
+            offset_snapshots = (
+                self.data.nr_validation_snapshots
+                + self.data.nr_training_snapshots
+            )
             data_set = self.data.test_data_sets[0]
         else:
-            raise ValueError(f"Invalid data_type: {data_type} -- Valid options are tr, va, te.")
+            raise ValueError(
+                f"Invalid data_type: {data_type} -- Valid options are tr, va, te."
+            )
         # Forward through network.
-        return self.\
-            _forward_entire_snapshot(offset_snapshots+snapshot_number,
-                                     data_set,
-                                     data_type,
-                                     self.number_of_batches_per_snapshot,
-                                     self.parameters.mini_batch_size)
-
-    def __calculate_observable_error(self, snapshot_number, observable,
-                                     predicted_target, actual_target):
-        if observable == "ldos":
-            return np.mean((predicted_target - actual_target)**2)
-
-        elif observable == "band_energy":
-            target_calculator = self.data.target_calculator
-            if not isinstance(target_calculator, LDOS) and not \
-                    isinstance(target_calculator, DOS):
-                raise Exception("Cannot calculate the band energy from this "
-                                "observable.")
-            target_calculator.\
-                read_additional_calculation_data(
-                self.data.get_snapshot_calculation_output(snapshot_number))
-
-            target_calculator.read_from_array(actual_target)
-            actual = target_calculator.band_energy
-
-            target_calculator.read_from_array(predicted_target)
-            predicted = target_calculator.band_energy
-            return actual - predicted
-
-        elif observable == "band_energy_full":
-            target_calculator = self.data.target_calculator
-            if not isinstance(target_calculator, LDOS) and not \
-                    isinstance(target_calculator, DOS):
-                raise Exception("Cannot calculate the band energy from this "
-                                "observable.")
-            target_calculator.\
-                read_additional_calculation_data(
-                self.data.get_snapshot_calculation_output(snapshot_number))
-
-            target_calculator.read_from_array(actual_target)
-            actual = target_calculator.band_energy
-
-            target_calculator.read_from_array(predicted_target)
-            predicted = target_calculator.band_energy
-            return [actual, predicted,
-                    target_calculator.total_energy_dft_calculation]
-
-        elif observable == "number_of_electrons":
-            target_calculator = self.data.target_calculator
-            if not isinstance(target_calculator, LDOS) and not \
-                    isinstance(target_calculator, DOS) and not \
-                    isinstance(target_calculator, Density):
-                raise Exception("Cannot calculate the band energy from this "
-                                "observable.")
-            target_calculator.\
-                read_additional_calculation_data(
-                self.data.get_snapshot_calculation_output(snapshot_number))
-
-            actual = target_calculator.get_number_of_electrons(actual_target)
-
-            predicted = target_calculator.get_number_of_electrons(predicted_target)
-            return actual - predicted
-
-        elif observable == "total_energy":
-            target_calculator = self.data.target_calculator
-            if not isinstance(target_calculator, LDOS):
-                raise Exception("Cannot calculate the total energy from this "
-                                "observable.")
-            target_calculator.\
-                read_additional_calculation_data(
-                self.data.get_snapshot_calculation_output(snapshot_number))
-
-            target_calculator.read_from_array(actual_target)
-            actual = target_calculator.total_energy
-
-            target_calculator.read_from_array(predicted_target)
-            predicted = target_calculator.total_energy
-            return actual - predicted
-
-        elif observable == "total_energy_full":
-            target_calculator = self.data.target_calculator
-            if not isinstance(target_calculator, LDOS):
-                raise Exception("Cannot calculate the total energy from this "
-                                "observable.")
-            target_calculator.\
-                read_additional_calculation_data(
-                self.data.get_snapshot_calculation_output(snapshot_number))
-
-            target_calculator.read_from_array(actual_target)
-            actual = target_calculator.total_energy
-
-            target_calculator.read_from_array(predicted_target)
-            predicted = target_calculator.total_energy
-            return [actual, predicted,
-                    target_calculator.total_energy_dft_calculation]
-
-        elif observable == "density":
-            target_calculator = self.data.target_calculator
-            if not isinstance(target_calculator, LDOS) and \
-                    not isinstance(target_calculator, Density):
-                raise Exception("Cannot calculate the total energy from this "
-                                "observable.")
-            target_calculator.\
-                read_additional_calculation_data(
-                self.data.get_snapshot_calculation_output(snapshot_number))
-
-            target_calculator.read_from_array(actual_target)
-            actual = target_calculator.density
-
-            target_calculator.read_from_array(predicted_target)
-            predicted = target_calculator.density
-            return np.mean(np.abs((actual - predicted) / actual)) * 100
-
-        elif observable == "dos":
-            target_calculator = self.data.target_calculator
-            if not isinstance(target_calculator, LDOS) and \
-                    not isinstance(target_calculator, DOS):
-                raise Exception("Cannot calculate the total energy from this "
-                                "observable.")
-            target_calculator.\
-                read_additional_calculation_data(
-                self.data.get_snapshot_calculation_output(snapshot_number))
-
-            target_calculator.read_from_array(actual_target)
-            actual = target_calculator.density_of_states
-
-            target_calculator.read_from_array(predicted_target)
-            predicted = target_calculator.density_of_states
-            return np.mean(np.abs((actual - predicted) / actual)) * 100
-
-
-
+        return self._forward_entire_snapshot(
+            offset_snapshots + snapshot_number,
+            data_set,
+            data_type,
+            self._number_of_batches_per_snapshot,
+            self.parameters.mini_batch_size,
+        )
 
     def __prepare_to_test(self, snapshot_number):
-        """Prepare the tester class to for test run."""
+        """
+        Prepare the tester class to for test run.
+
+        The snapshot for which to test is required to correct the batch size
+        for it.
+
+        Parameters
+        ----------
+        snapshot_number : int
+            The number of the snapshot within the test data set to be tested.
+        """
         # We will use the DataSet iterator to iterate over the test data.
         # But since we only want the data per snapshot,
         # we need to make sure the batch size is compatible with that.
@@ -307,14 +261,18 @@ class Tester(Runner):
                     break
                 test_snapshot += 1
 
-        optimal_batch_size = self.\
-            _correct_batch_size_for_testing(grid_size,
-                                            self.parameters.mini_batch_size)
+        optimal_batch_size = self._correct_batch_size(
+            grid_size, self.parameters.mini_batch_size
+        )
         if optimal_batch_size != self.parameters.mini_batch_size:
-            printout("Had to readjust batch size from",
-                     self.parameters.mini_batch_size, "to",
-                     optimal_batch_size, min_verbosity=0)
+            printout(
+                "Had to readjust batch size from",
+                self.parameters.mini_batch_size,
+                "to",
+                optimal_batch_size,
+                min_verbosity=0,
+            )
             self.parameters.mini_batch_size = optimal_batch_size
-        self.number_of_batches_per_snapshot = int(grid_size /
-                                                  self.parameters.
-                                                  mini_batch_size)
+        self._number_of_batches_per_snapshot = int(
+            grid_size / self.parameters.mini_batch_size
+        )

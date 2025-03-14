@@ -4,8 +4,8 @@ import mala
 from mala import printout
 import numpy as np
 
-from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Be2")
+from mala.datahandling.data_repo import data_path
+
 test_checkpoint_name = "test"
 
 # Define the accuracy used in the tests.
@@ -20,7 +20,7 @@ class TestTrainingCheckpoint:
         # First run the entire test.
         trainer = self.__original_setup(test_checkpoint_name, 40)
         trainer.train_network()
-        original_final_test_loss = trainer.final_test_loss
+        original_final_validation_loss = trainer.final_validation_loss
 
         # Now do the same, but cut at epoch 22 and see if it recovers the
         # correct result.
@@ -28,57 +28,77 @@ class TestTrainingCheckpoint:
         trainer.train_network()
         trainer = self.__resume_checkpoint(test_checkpoint_name, 40)
         trainer.train_network()
-        new_final_test_loss = trainer.final_test_loss
-        assert np.isclose(original_final_test_loss, new_final_test_loss,
-                          atol=accuracy)
+        new_final_validation_loss = trainer.final_validation_loss
+        assert np.isclose(
+            original_final_validation_loss,
+            new_final_validation_loss,
+            atol=accuracy,
+        )
 
     def test_learning_rate(self):
         """Test that the learning rate scheduler is correctly checkpointed."""
         # First run the entire test.
-        trainer = self.__original_setup(test_checkpoint_name, 40,
-                                 learning_rate_scheduler="ReduceLROnPlateau",
-                                 learning_rate=0.1)
+        trainer = self.__original_setup(
+            test_checkpoint_name,
+            40,
+            learning_rate_scheduler="ReduceLROnPlateau",
+            learning_rate=0.1,
+        )
         trainer.train_network()
-        original_learning_rate = trainer.optimizer.param_groups[0]['lr']
+        original_learning_rate = trainer._optimizer.param_groups[0]["lr"]
 
         # Now do the same, but cut at epoch 22 and see if it recovers the
         # correct result.
-        trainer = self.__original_setup(test_checkpoint_name, 22,
-                                 learning_rate_scheduler="ReduceLROnPlateau",
-                                 learning_rate=0.1)
+        trainer = self.__original_setup(
+            test_checkpoint_name,
+            22,
+            learning_rate_scheduler="ReduceLROnPlateau",
+            learning_rate=0.1,
+        )
         trainer.train_network()
         trainer = self.__resume_checkpoint(test_checkpoint_name, 40)
         trainer.train_network()
-        new_learning_rate = trainer.optimizer.param_groups[0]['lr']
-        assert np.isclose(original_learning_rate, new_learning_rate,
-                          atol=accuracy)
+        new_learning_rate = trainer._optimizer.param_groups[0]["lr"]
+        assert np.isclose(
+            original_learning_rate, new_learning_rate, atol=accuracy
+        )
 
     def test_early_stopping(self):
         """Test that the early stopping mechanism is correctly checkpointed."""
         # First run the entire test.
-        trainer = self.__original_setup(test_checkpoint_name, 40,
-                                        early_stopping_epochs=30,
-                                        learning_rate=0.1)
+        trainer = self.__original_setup(
+            test_checkpoint_name,
+            40,
+            early_stopping_epochs=30,
+            learning_rate=0.1,
+        )
         trainer.train_network()
-        original_nr_epochs = trainer.last_epoch
+        original_nr_epochs = trainer._last_epoch
 
         # Now do the same, but cut at epoch 22 and see if it recovers the
         # correct result.
-        trainer = self.__original_setup(test_checkpoint_name, 22,
-                                        early_stopping_epochs=30,
-                                        learning_rate=0.1)
+        trainer = self.__original_setup(
+            test_checkpoint_name,
+            22,
+            early_stopping_epochs=30,
+            learning_rate=0.1,
+        )
         trainer.train_network()
         trainer = self.__resume_checkpoint(test_checkpoint_name, 40)
         trainer.train_network()
-        last_nr_epochs = trainer.last_epoch
+        last_nr_epochs = trainer._last_epoch
 
         # integer comparison!
         assert original_nr_epochs == last_nr_epochs
 
     @staticmethod
-    def __original_setup(checkpoint_name, maxepochs,
-                         learning_rate_scheduler=None,
-                         early_stopping_epochs=0, learning_rate=0.00001):
+    def __original_setup(
+        checkpoint_name,
+        maxepochs,
+        learning_rate_scheduler=None,
+        early_stopping_epochs=0,
+        learning_rate=0.00001,
+    ):
         """
         Sets up a NN training.
 
@@ -117,7 +137,7 @@ class TestTrainingCheckpoint:
 
         # Specify the data scaling.
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
-        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.data.output_rescaling_type = "minmax"
 
         # Specify the used activation function.
         test_parameters.network.layer_activations = ["ReLU"]
@@ -126,8 +146,10 @@ class TestTrainingCheckpoint:
         test_parameters.running.max_number_epochs = maxepochs
         test_parameters.running.mini_batch_size = 38
         test_parameters.running.learning_rate = learning_rate
-        test_parameters.running.trainingtype = "Adam"
-        test_parameters.running.learning_rate_scheduler = learning_rate_scheduler
+        test_parameters.running.optimizer = "Adam"
+        test_parameters.running.learning_rate_scheduler = (
+            learning_rate_scheduler
+        )
         test_parameters.running.learning_rate_decay = 0.1
         test_parameters.running.learning_rate_patience = 30
         test_parameters.running.early_stopping_epochs = early_stopping_epochs
@@ -145,12 +167,27 @@ class TestTrainingCheckpoint:
         data_handler = mala.DataHandler(test_parameters)
 
         # Add a snapshot we want to use in to the list.
-        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                                  "Be_snapshot0.out.npy", data_path, "tr")
-        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                  "Be_snapshot1.out.npy", data_path, "va")
-        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                  "Be_snapshot2.out.npy", data_path, "te")
+        data_handler.add_snapshot(
+            "Be_snapshot0.in.npy",
+            data_path,
+            "Be_snapshot0.out.npy",
+            data_path,
+            "tr",
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot1.in.npy",
+            data_path,
+            "Be_snapshot1.out.npy",
+            data_path,
+            "va",
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot2.in.npy",
+            data_path,
+            "Be_snapshot2.out.npy",
+            data_path,
+            "te",
+        )
         data_handler.prepare_data()
         printout("Read data: DONE.", min_verbosity=0)
 
@@ -161,16 +198,17 @@ class TestTrainingCheckpoint:
         # but it is safer this way.
         ####################
 
-        test_parameters.network.layer_sizes = [data_handler.
-                                               input_dimension,
-                                               100,
-                                               data_handler.
-                                               output_dimension]
+        test_parameters.network.layer_sizes = [
+            data_handler.input_dimension,
+            100,
+            data_handler.output_dimension,
+        ]
 
         # Setup network and trainer.
         test_network = mala.Network(test_parameters)
-        test_trainer = mala.Trainer(test_parameters, test_network,
-                                    data_handler)
+        test_trainer = mala.Trainer(
+            test_parameters, test_network, data_handler
+        )
 
         return test_trainer
 
@@ -194,12 +232,8 @@ class TestTrainingCheckpoint:
             The trainer object created with the specified parameters.
         """
 
-        loaded_params, loaded_network, \
-            new_datahandler, new_trainer = \
+        loaded_params, loaded_network, new_datahandler, new_trainer = (
             mala.Trainer.load_run(checkpoint_name)
+        )
         loaded_params.running.max_number_epochs = actual_max_epochs
         return new_trainer
-
-
-
-

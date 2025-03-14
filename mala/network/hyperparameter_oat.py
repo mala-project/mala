@@ -29,11 +29,18 @@ class HyperparameterOAT(Hyperparameter):
         List of possible choices (for categorical parameter).
     """
 
-    def __init__(self, hotype=None, opttype="categorical", name="", choices=[],
-                 low=0, high=0):
-        super(HyperparameterOAT, self).__init__(opttype=opttype,
-                                                name=name,
-                                                choices=choices)
+    def __init__(
+        self,
+        hotype=None,
+        opttype="categorical",
+        name="",
+        choices=[],
+        low=0,
+        high=0,
+    ):
+        super(HyperparameterOAT, self).__init__(
+            opttype=opttype, name=name, choices=choices
+        )
 
         if self.opttype != "categorical":
             raise Exception("Unsupported Hyperparameter type.")
@@ -53,7 +60,7 @@ class HyperparameterOAT(Hyperparameter):
 
         Parameters
         ----------
-        trial : numpy.array
+        trial : numpy.ndarray
             Row in an orthogonal array which respresents current trial.
 
         idx : int
@@ -75,7 +82,7 @@ class HyperparameterOAT(Hyperparameter):
 
         Parameters
         ----------
-        trial : numpy.array
+        trial : numpy.ndarray
             Row in an orthogonal array which respresents current trial.
 
         idx : int

@@ -1,4 +1,4 @@
-SUBROUTINE initialize(y_planes_in, calculate_eigts_in)
+SUBROUTINE initialize(file_name, y_planes_in, calculate_eigts_in)
   !----------------------------------------------------------------------------
   !  Derived from Quantum Espresso code
   !! author: Paolo Giannozzi
@@ -11,7 +11,8 @@ SUBROUTINE initialize(y_planes_in, calculate_eigts_in)
   USE mp_global,         ONLY : mp_startup
   USE mp,                ONLY : mp_size
   USE read_input,        ONLY : read_input_file
-  USE command_line_options, ONLY: input_file_, command_line, ndiag_, nyfft_
+  USE command_line_options, ONLY: input_file_, command_line, ndiag_, nyfft_, &
+          pencil_decomposition_
   !
   IMPLICIT NONE
   CHARACTER(len=256) :: srvaddress
@@ -29,6 +30,7 @@ SUBROUTINE initialize(y_planes_in, calculate_eigts_in)
   LOGICAL, INTENT(IN), OPTIONAL :: calculate_eigts_in
   LOGICAL :: calculate_eigts = .false.
   INTEGER, INTENT(IN), OPTIONAL :: y_planes_in
+  CHARACTER(len=256), INTENT(IN) :: file_name
     ! Parse optional arguments.
   IF (PRESENT(calculate_eigts_in)) THEN
     calculate_eigts = calculate_eigts_in
@@ -36,16 +38,16 @@ SUBROUTINE initialize(y_planes_in, calculate_eigts_in)
   IF (PRESENT(y_planes_in)) THEN
     IF (y_planes_in > 1) THEN
       nyfft_ = y_planes_in
+      pencil_decomposition_ = .true.
     ENDIF
   ENDIF
-
   !! checks if first string is contained in the second
   !
   CALL mp_startup ( start_images=.true., images_only=.true.)
   !
   CALL environment_start ( 'PWSCF' )
   !
-  CALL read_input_file ('PW', 'mala.pw.scf.in' )
+  CALL read_input_file ('PW', file_name )
   CALL run_pwscf_setup ( exit_status, calculate_eigts)
 
   print *, "Setup completed"
@@ -250,11 +252,14 @@ SUBROUTINE init_run_setup(calculate_eigts)
      CALL ggen( dfftp, gamma_only, at, bg, gcutm, ngm_g, ngm, &
        g, gg, mill, ig_l2g, gstart )
   END IF
+
+
+  IF (do_cutoff_2D) CALL cutoff_fact()
+
   !
   !  This seems to be needed by set_rhoc()
   !
   CALL gshells ( lmovecell )
-
   !
   ! ... allocate memory for structure factors
   !

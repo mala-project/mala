@@ -1,7 +1,4 @@
 """Represents an entire atomic snapshot (including descriptor/target data)."""
-from os.path import join
-
-import numpy as np
 
 from mala.common.json_serializable import JSONSerializable
 
@@ -46,16 +43,68 @@ class Snapshot(JSONSerializable):
           - tr: This snapshot will be a training snapshot.
           - va: This snapshot will be a validation snapshot.
 
-        Replaces the old approach of MALA to have a separate list.
-        Default is None.
+    Attributes
+    ----------
+    grid_dimensions :  list
+        Grid dimension [x,y,z].
+
+    grid_size : int
+        Number of grid points in total.
+
+    input_dimension : int
+        Input feature dimension.
+
+    output_dimension : int
+        Output feature dimension
+
+    input_npy_file : string
+        File with saved numpy input array.
+
+    input_npy_directory : string
+        Directory containing input_npy_directory.
+
+    output_npy_file : string
+        File with saved numpy output array.
+
+    output_npy_directory : string
+        Directory containing output_npy_file.
+
+    input_units : string
+        Units of input data. See descriptor classes to see which units are
+        supported.
+
+    output_units : string
+        Units of output data. See target classes to see which units are
+        supported.
+
+    calculation_output : string
+        File with the output of the original snapshot calculation. This is
+        only needed when testing multiple snapshots.
+
+    snapshot_function : string
+        "Function" of the snapshot in the MALA workflow.
+
+          - te: This snapshot will be a testing snapshot.
+          - tr: This snapshot will be a training snapshot.
+          - va: This snapshot will be a validation snapshot.
+
+    snapshot_type : string
+        Can be either "numpy" or "openpmd" and denotes which type of files
+        this snapshot contains.
     """
 
-    def __init__(self, input_npy_file, input_npy_directory,
-                 output_npy_file,  output_npy_directory,
-                 snapshot_function,
-                 input_units="", output_units="",
-                 calculation_output="",
-                 snapshot_type="openpmd"):
+    def __init__(
+        self,
+        input_npy_file,
+        input_npy_directory,
+        output_npy_file,
+        output_npy_directory,
+        snapshot_function,
+        input_units="",
+        output_units="",
+        calculation_output="",
+        snapshot_type="openpmd",
+    ):
         super(Snapshot, self).__init__()
 
         # Inputs.
@@ -84,6 +133,9 @@ class Snapshot(JSONSerializable):
         self.input_dimension = None
         self.output_dimension = None
 
+        # Temporary descriptor files, which may be needed.
+        self.temporary_input_file = None
+
     @classmethod
     def from_json(cls, json_dict):
         """
@@ -101,12 +153,14 @@ class Snapshot(JSONSerializable):
             The object as read from the JSON file.
 
         """
-        deserialized_object = cls(json_dict["input_npy_file"],
-                                  json_dict["input_npy_directory"],
-                                  json_dict["output_npy_file"],
-                                  json_dict["output_npy_directory"],
-                                  json_dict["snapshot_function"],
-                                  json_dict["snapshot_type"])
+        deserialized_object = cls(
+            json_dict["input_npy_file"],
+            json_dict["input_npy_directory"],
+            json_dict["output_npy_file"],
+            json_dict["output_npy_directory"],
+            json_dict["snapshot_function"],
+            json_dict["snapshot_type"],
+        )
         for key in json_dict:
             setattr(deserialized_object, key, json_dict[key])
         return deserialized_object

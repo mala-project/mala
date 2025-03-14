@@ -1,4 +1,5 @@
 """Base class for all hyperparameter optimizers."""
+
 from abc import abstractmethod, ABC
 import os
 
@@ -23,6 +24,11 @@ class HyperOpt(ABC):
 
     use_pkl_checkpoints : bool
         If true, .pkl checkpoints will be created.
+
+    Attributes
+    ----------
+    params : mala.common.parametes.Parameters
+        MALA Parameters object.
     """
 
     def __new__(cls, params: Parameters, data=None, use_pkl_checkpoints=False):
@@ -46,16 +52,20 @@ class HyperOpt(ABC):
         if cls == HyperOpt:
             if params.hyperparameters.hyper_opt_method == "optuna":
                 from mala.network.hyper_opt_optuna import HyperOptOptuna
-                hoptimizer = super(HyperOpt, HyperOptOptuna).\
-                    __new__(HyperOptOptuna)
+
+                hoptimizer = super(HyperOpt, HyperOptOptuna).__new__(
+                    HyperOptOptuna
+                )
             if params.hyperparameters.hyper_opt_method == "oat":
                 from mala.network.hyper_opt_oat import HyperOptOAT
-                hoptimizer = super(HyperOpt, HyperOptOAT).\
-                    __new__(HyperOptOAT)
+
+                hoptimizer = super(HyperOpt, HyperOptOAT).__new__(HyperOptOAT)
             if params.hyperparameters.hyper_opt_method == "naswot":
                 from mala.network.hyper_opt_naswot import HyperOptNASWOT
-                hoptimizer = super(HyperOpt, HyperOptNASWOT).\
-                    __new__(HyperOptNASWOT)
+
+                hoptimizer = super(HyperOpt, HyperOptNASWOT).__new__(
+                    HyperOptNASWOT
+                )
 
             if hoptimizer is None:
                 raise Exception("Unknown hyperparameter optimizer requested.")
@@ -64,15 +74,17 @@ class HyperOpt(ABC):
 
         return hoptimizer
 
-    def __init__(self, params: Parameters, data=None,
-                 use_pkl_checkpoints=False):
+    def __init__(
+        self, params: Parameters, data=None, use_pkl_checkpoints=False
+    ):
         self.params: Parameters = params
-        self.data_handler = data
-        self.objective = ObjectiveBase(self.params, self.data_handler)
-        self.use_pkl_checkpoints = use_pkl_checkpoints
+        self._data_handler = data
+        self._objective = ObjectiveBase(self.params, self._data_handler)
+        self._use_pkl_checkpoints = use_pkl_checkpoints
 
-    def add_hyperparameter(self, opttype="float", name="", low=0, high=0,
-                           choices=None):
+    def add_hyperparameter(
+        self, opttype="float", name="", low=0, high=0, choices=None
+    ):
         """
         Add a hyperparameter to the current investigation.
 
@@ -105,15 +117,16 @@ class HyperOpt(ABC):
         choices :
             List of possible choices (for categorical parameter).
         """
-        self.params.\
-            hyperparameters.hlist.append(
-                Hyperparameter(self.params.hyperparameters.
-                               hyper_opt_method,
-                               opttype=opttype,
-                               name=name,
-                               low=low,
-                               high=high,
-                               choices=choices))
+        self.params.hyperparameters.hlist.append(
+            Hyperparameter(
+                self.params.hyperparameters.hyper_opt_method,
+                opttype=opttype,
+                name=name,
+                low=low,
+                high=high,
+                choices=choices,
+            )
+        )
 
     def clear_hyperparameters(self):
         """Clear the list of hyperparameters that are to be investigated."""
@@ -145,26 +158,31 @@ class HyperOpt(ABC):
         The parameters will be written to the parameter object with which the
         hyperparameter optimizer was created.
         """
-        self.objective.parse_trial(trial)
+        self._objective.parse_trial(trial)
 
     def _save_params_and_scaler(self):
+        """Save the parameters and scalers to disk."""
         # Saving the Scalers is straight forward.
-        iscaler_name = self.params.hyperparameters.checkpoint_name \
-            + "_iscaler.pkl"
-        oscaler_name = self.params.hyperparameters.checkpoint_name \
-            + "_oscaler.pkl"
-        self.data_handler.input_data_scaler.save(iscaler_name)
-        self.data_handler.output_data_scaler.save(oscaler_name)
+        iscaler_name = (
+            self.params.hyperparameters.checkpoint_name + "_iscaler.pkl"
+        )
+        oscaler_name = (
+            self.params.hyperparameters.checkpoint_name + "_oscaler.pkl"
+        )
+        self._data_handler.input_data_scaler.save(iscaler_name)
+        self._data_handler.output_data_scaler.save(oscaler_name)
 
         # For the parameters we have to make sure we choose the correct
         # format.
-        if self.use_pkl_checkpoints:
-            param_name = self.params.hyperparameters.checkpoint_name \
-                         + "_params.pkl"
+        if self._use_pkl_checkpoints:
+            param_name = (
+                self.params.hyperparameters.checkpoint_name + "_params.pkl"
+            )
             self.params.save_as_pickle(param_name)
         else:
-            param_name = self.params.hyperparameters.checkpoint_name \
-                         + "_params.json"
+            param_name = (
+                self.params.hyperparameters.checkpoint_name + "_params.json"
+            )
             self.params.save_as_json(param_name)
 
     @classmethod
@@ -186,7 +204,6 @@ class HyperOpt(ABC):
         -------
         checkpoint_exists : bool
             True if the checkpoint exists, False otherwise.
-
         """
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"
@@ -195,12 +212,14 @@ class HyperOpt(ABC):
         else:
             param_name = checkpoint_name + "_params.json"
 
-        return all(map(os.path.isfile, [iscaler_name, oscaler_name,
-                                        param_name]))
+        return all(
+            map(os.path.isfile, [iscaler_name, oscaler_name, param_name])
+        )
 
     @classmethod
-    def _resume_checkpoint(cls, checkpoint_name, no_data=False,
-                           use_pkl_checkpoints=False):
+    def _resume_checkpoint(
+        cls, checkpoint_name, no_data=False, use_pkl_checkpoints=False
+    ):
         """
         Prepare resumption of hyperparameter optimization from a checkpoint.
 
@@ -228,8 +247,10 @@ class HyperOpt(ABC):
         new_hyperopt : HyperOptOptuna
             The hyperparameter optimizer reconstructed from the checkpoint.
         """
-        printout("Loading hyperparameter optimization from checkpoint.",
-                 min_verbosity=0)
+        printout(
+            "Loading hyperparameter optimization from checkpoint.",
+            min_verbosity=0,
+        )
         # The names are based upon the checkpoint name.
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"
@@ -249,10 +270,12 @@ class HyperOpt(ABC):
         # Create a new data handler and prepare the data.
         if no_data is True:
             loaded_params.data.use_lazy_loading = True
-        new_datahandler = DataHandler(loaded_params,
-                                      input_data_scaler=loaded_iscaler,
-                                      output_data_scaler=loaded_oscaler,
-                                      clear_data=False)
+        new_datahandler = DataHandler(
+            loaded_params,
+            input_data_scaler=loaded_iscaler,
+            output_data_scaler=loaded_oscaler,
+            clear_data=False,
+        )
         new_datahandler.prepare_data(reparametrize_scaler=False)
 
         return loaded_params, new_datahandler, optimizer_name

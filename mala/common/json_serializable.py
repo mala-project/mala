@@ -47,19 +47,42 @@ class JSONSerializable:
         return cls._standard_deserializer(json_dict)
 
     def _standard_serializer(self):
+        """
+        Serialize a JSONSerializable object.
+
+        Returns
+        -------
+        return : dict
+            JSON dict containing the object's data.
+        """
         data = {}
-        members = inspect.getmembers(self,
-                                     lambda a: not (inspect.isroutine(a)))
+        members = inspect.getmembers(
+            self, lambda a: not (inspect.isroutine(a))
+        )
         for member in members:
             # Filter out all private members, builtins, etc.
             if member[0][0] != "_":
                 data[member[0]] = member[1]
-        json_dict = {"object": type(self).__name__,
-                     "data": data}
+        json_dict = {"object": type(self).__name__, "data": data}
         return json_dict
 
     @classmethod
     def _standard_deserializer(cls, json_dict):
+        """
+        Deserialize a JSON dictionary containing a serialized object.
+
+        Takes in a JSON dict and returns an object.
+
+        Parameters
+        ----------
+        json_dict : dict
+            JSON dict containing the object's data.
+
+        Returns
+        -------
+        deserialized_object : JSONSerializable
+            The object as read from the JSON file/dict.
+        """
         deserialized_object = cls()
         for key in json_dict:
             setattr(deserialized_object, key, json_dict[key])

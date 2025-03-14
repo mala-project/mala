@@ -1,19 +1,26 @@
 """Electronic density calculation class."""
-import os
+
+import os.path
 import time
 
-import ase.io
 from ase.units import Rydberg, Bohr, m
 from functools import cached_property
 import numpy as np
+
 try:
     import total_energy as te
 except ModuleNotFoundError:
     pass
 
-from mala.common.parallelizer import printout, parallel_warn, barrier, get_size
+from mala.common.parallelizer import (
+    printout,
+    parallel_warn,
+    barrier,
+    get_size,
+    get_comm,
+    get_rank,
+)
 from mala.targets.target import Target
-from mala.targets.calculation_helpers import integrate_values_on_spacing
 from mala.targets.cube_parser import read_cube, write_cube
 from mala.targets.calculation_helpers import integrate_values_on_spacing
 from mala.targets.xsf_parser import read_xsf
@@ -22,7 +29,8 @@ from mala.descriptors.atomic_density import AtomicDensity
 
 
 class Density(Target):
-    """Postprocessing / parsing functions for the electronic density.
+    """
+    Postprocessing / parsing functions for the electronic density.
 
     Parameters
     ----------
@@ -33,7 +41,10 @@ class Density(Target):
     ##############################
     # Class attributes
     ##############################
-
+    """
+    Total energy module mutual exclusion token used to make sure there
+    the total energy module is not initialized twice.
+    """
     te_mutex = False
 
     ##############################
@@ -98,7 +109,7 @@ class Density(Target):
         return return_dos
 
     @classmethod
-    def from_cube_file(cls, params, path, units="1/A^3"):
+    def from_cube_file(cls, params, path, units="1/Bohr^3"):
         """
         Create a Density calculator from a cube file.
 
@@ -193,20 +204,25 @@ class Density(Target):
         return_density_object.fermi_energy_dft = ldos_object.fermi_energy_dft
         return_density_object.temperature = ldos_object.temperature
         return_density_object.voxel = ldos_object.voxel
-        return_density_object.number_of_electrons_exact = ldos_object.\
-            number_of_electrons_exact
-        return_density_object.band_energy_dft_calculation = ldos_object.\
-            band_energy_dft_calculation
+        return_density_object.number_of_electrons_exact = (
+            ldos_object.number_of_electrons_exact
+        )
+        return_density_object.band_energy_dft_calculation = (
+            ldos_object.band_energy_dft_calculation
+        )
         return_density_object.grid_dimensions = ldos_object.grid_dimensions
         return_density_object.atoms = ldos_object.atoms
         return_density_object.qe_input_data = ldos_object.qe_input_data
-        return_density_object.qe_pseudopotentials = ldos_object.\
-            qe_pseudopotentials
-        return_density_object.total_energy_dft_calculation = \
+        return_density_object.qe_pseudopotentials = (
+            ldos_object.qe_pseudopotentials
+        )
+        return_density_object.total_energy_dft_calculation = (
             ldos_object.total_energy_dft_calculation
+        )
         return_density_object.kpoints = ldos_object.kpoints
-        return_density_object.number_of_electrons_from_eigenvals = \
+        return_density_object.number_of_electrons_from_eigenvals = (
             ldos_object.number_of_electrons_from_eigenvals
+        )
         return_density_object.local_grid = ldos_object.local_grid
         return_density_object._parameters_full = ldos_object._parameters_full
         return_density_object.y_planes = ldos_object.y_planes
@@ -266,6 +282,12 @@ class Density(Target):
 
         This is the generic interface for cached target quantities.
         It should work for all implemented targets.
+
+        Returns
+        -------
+        density : numpy.ndarray
+            Electronic charge density as a volumetric array. May be 4D or 2D
+            depending on workflow.
         """
         return self.density
 
@@ -289,8 +311,9 @@ class Density(Target):
         if self.density is not None:
             return self.get_number_of_electrons()
         else:
-            raise Exception("No cached density available to "
-                            "calculate this property.")
+            raise Exception(
+                "No cached density available to calculate this property."
+            )
 
     @cached_property
     def total_energy_contributions(self):
@@ -302,8 +325,9 @@ class Density(Target):
         if self.density is not None:
             return self.get_energy_contributions()
         else:
-            raise Exception("No cached density available to "
-                            "calculate this property.")
+            raise Exception(
+                "No cached density available to calculate this property."
+            )
 
     @cached_property
     def force_contributions(self):
@@ -345,7 +369,7 @@ class Density(Target):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -356,13 +380,13 @@ class Density(Target):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in 1/A^3.
         """
         if in_units == "1/A^3" or in_units is None:
             return array
         elif in_units == "1/Bohr^3":
-            return array * (1/Bohr) * (1/Bohr) * (1/Bohr)
+            return array * (1 / Bohr) * (1 / Bohr) * (1 / Bohr)
         else:
             raise Exception("Unsupported unit for density.")
 
@@ -375,7 +399,7 @@ class Density(Target):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in 1/A^3.
 
         out_units : string
@@ -386,7 +410,7 @@ class Density(Target):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
         """
         if out_units == "1/A^3":
@@ -396,7 +420,7 @@ class Density(Target):
         else:
             raise Exception("Unsupported unit for density.")
 
-    def read_from_cube(self, path, units="1/A^3", **kwargs):
+    def read_from_cube(self, path, units="1/Bohr^3", **kwargs):
         """
         Read the density data from a cube file.
 
@@ -409,7 +433,18 @@ class Density(Target):
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file ", path, min_verbosity=0)
+        # automatically convert units if they are None since cube files take
+        # atomic units
+        if units is None:
+            units = "1/Bohr^3"
+        if units != "1/Bohr^3":
+            printout(
+                "The expected units for the density from cube files are 1/Bohr^3\n"
+                f"Proceeding with specified units of {units}\n"
+                "We recommend to check and change the requested units"
+            )
         data, meta = read_cube(path)
+        data = np.expand_dims(data, -1)
         data *= self.convert_units(1, in_units=units)
         self.density = data
         self.grid_dimensions = list(np.shape(data)[0:3])
@@ -428,7 +463,7 @@ class Density(Target):
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file ", path, min_verbosity=0)
-        data, meta = read_xsf(path)*self.convert_units(1, in_units=units)
+        data, meta = read_xsf(path) * self.convert_units(1, in_units=units)
         self.density = data
         return data
 
@@ -448,9 +483,13 @@ class Density(Target):
         self.density = array
         return array
 
-    def write_to_openpmd_file(self, path, array=None,
-                              additional_attributes={},
-                              internal_iteration_number=0):
+    def write_to_openpmd_file(
+        self,
+        path,
+        array=None,
+        additional_attributes={},
+        internal_iteration_number=0,
+    ):
         """
         Write data to a numpy file.
 
@@ -473,25 +512,27 @@ class Density(Target):
         """
         if array is None:
             if len(self.density.shape) == 2:
-                super(Target, self).\
-                    write_to_openpmd_file(path, np.reshape(self.density,
-                                                           self.grid_dimensions
-                                                           + [1]),
-                                          internal_iteration_number=
-                                          internal_iteration_number)
+                super(Target, self).write_to_openpmd_file(
+                    path,
+                    np.reshape(self.density, self.grid_dimensions + [1]),
+                    internal_iteration_number=internal_iteration_number,
+                )
             elif len(self.density.shape) == 4:
-                super(Target, self).\
-                    write_to_openpmd_file(path, self.density,
-                                          internal_iteration_number=
-                                          internal_iteration_number)
+                super(Target, self).write_to_openpmd_file(
+                    path,
+                    self.density,
+                    internal_iteration_number=internal_iteration_number,
+                )
         else:
-            super(Target, self).\
-                write_to_openpmd_file(path, array,
-                                      internal_iteration_number=
-                                      internal_iteration_number)
+            super(Target, self).write_to_openpmd_file(
+                path,
+                array,
+                internal_iteration_number=internal_iteration_number,
+            )
 
-    def write_to_cube(self, file_name, density_data=None, atoms=None,
-                      grid_dimensions=None):
+    def write_to_cube(
+        self, file_name, density_data=None, atoms=None, grid_dimensions=None
+    ):
         """
         Write the density data in a cube file.
 
@@ -513,10 +554,12 @@ class Density(Target):
         """
         if density_data is not None:
             if grid_dimensions is None or atoms is None:
-                raise Exception("No grid or atom data provided. "
-                                "Please note that these are only optional "
-                                "if the density saved in the calculator is "
-                                "used and have to be provided otherwise.")
+                raise Exception(
+                    "No grid or atom data provided. "
+                    "Please note that these are only optional "
+                    "if the density saved in the calculator is "
+                    "used and have to be provided otherwise."
+                )
         else:
             density_data = self.density
             grid_dimensions = self.grid_dimensions
@@ -531,7 +574,14 @@ class Density(Target):
         atom_list = []
         for i in range(0, len(atoms)):
             atom_list.append(
-                (atoms[i].number, [4.0, ] + list(atoms[i].position / Bohr)))
+                (
+                    atoms[i].number,
+                    [
+                        4.0,
+                    ]
+                    + list(atoms[i].position / Bohr),
+                )
+            )
 
         meta["atoms"] = atom_list
         meta["org"] = [0.0, 0.0, 0.0]
@@ -543,14 +593,15 @@ class Density(Target):
     # Calculations
     ##############
 
-    def get_number_of_electrons(self, density_data=None, voxel=None,
-                                integration_method="summation"):
+    def get_number_of_electrons(
+        self, density_data=None, voxel=None, integration_method="summation"
+    ):
         """
         Calculate the number of electrons from given density data.
 
         Parameters
         ----------
-        density_data : numpy.array
+        density_data : numpy.ndarray
             Electronic density on the given grid. Has to either be of the form
             gridpoints or (gridx, gridy, gridz). If None, then the cached
             density will be used for the calculation.
@@ -558,21 +609,23 @@ class Density(Target):
 
         voxel : ase.cell.Cell
             Voxel to be used for grid intergation. Needs to reflect the
-            symmetry of the simulation cell. In Bohr.
+            symmetry of the simulation cell.
 
         integration_method : str
             Integration method used to integrate density on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
+            - "trapezoid" for trapezoid method (only for cubic grids).
+            - "simpson" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
         """
         if density_data is None:
             density_data = self.density
             if density_data is None:
-                raise Exception("No density data provided, cannot calculate"
-                                " this quantity.")
+                raise Exception(
+                    "No density data provided, cannot calculate"
+                    " this quantity."
+                )
 
         if voxel is None:
             voxel = self.voxel
@@ -581,11 +634,15 @@ class Density(Target):
         data_shape = np.shape(density_data)
         if len(data_shape) != 4:
             if len(data_shape) != 2:
-                raise Exception("Unknown Density shape, cannot calculate "
-                                "number of electrons.")
+                raise Exception(
+                    "Unknown Density shape, cannot calculate "
+                    "number of electrons."
+                )
             elif integration_method != "summation":
-                raise Exception("If using a 1D density array, you can only"
-                                " use summation as integration method.")
+                raise Exception(
+                    "If using a 1D density array, you can only"
+                    " use summation as integration method."
+                )
 
         # We integrate along the three axis in space.
         # If there is only one point in a certain direction we do not
@@ -602,47 +659,60 @@ class Density(Target):
 
             # X
             if data_shape[0] > 1:
-                number_of_electrons = \
-                    integrate_values_on_spacing(number_of_electrons,
-                                                grid_spacing_bohr_x, axis=0,
-                                                method=integration_method)
+                number_of_electrons = integrate_values_on_spacing(
+                    number_of_electrons,
+                    grid_spacing_bohr_x,
+                    axis=0,
+                    method=integration_method,
+                )
             else:
-                number_of_electrons =\
-                    np.reshape(number_of_electrons, (data_shape[1],
-                                                     data_shape[2]))
+                number_of_electrons = np.reshape(
+                    number_of_electrons, (data_shape[1], data_shape[2])
+                )
                 number_of_electrons *= grid_spacing_bohr_x
 
             # Y
             if data_shape[1] > 1:
-                number_of_electrons = \
-                    integrate_values_on_spacing(number_of_electrons,
-                                                grid_spacing_bohr_y, axis=0,
-                                                method=integration_method)
+                number_of_electrons = integrate_values_on_spacing(
+                    number_of_electrons,
+                    grid_spacing_bohr_y,
+                    axis=0,
+                    method=integration_method,
+                )
             else:
-                number_of_electrons = \
-                    np.reshape(number_of_electrons, (data_shape[2]))
+                number_of_electrons = np.reshape(
+                    number_of_electrons, (data_shape[2])
+                )
                 number_of_electrons *= grid_spacing_bohr_y
 
             # Z
             if data_shape[2] > 1:
-                number_of_electrons = \
-                    integrate_values_on_spacing(number_of_electrons,
-                                                grid_spacing_bohr_z, axis=0,
-                                                method=integration_method)
+                number_of_electrons = integrate_values_on_spacing(
+                    number_of_electrons,
+                    grid_spacing_bohr_z,
+                    axis=0,
+                    method=integration_method,
+                )
             else:
                 number_of_electrons *= grid_spacing_bohr_z
         else:
             if len(data_shape) == 4:
-                number_of_electrons = np.sum(density_data, axis=(0, 1, 2)) \
-                                      * voxel.volume
+                number_of_electrons = (
+                    np.sum(density_data, axis=(0, 1, 2)) * voxel.volume
+                )
             if len(data_shape) == 2:
-                number_of_electrons = np.sum(density_data, axis=0) * \
-                                      voxel.volume
+                number_of_electrons = (
+                    np.sum(density_data, axis=0) * voxel.volume
+                )
 
         return np.squeeze(number_of_electrons)
 
-    def get_density(self, density_data=None, convert_to_threedimensional=False,
-                    grid_dimensions=None):
+    def get_density(
+        self,
+        density_data=None,
+        convert_to_threedimensional=False,
+        grid_dimensions=None,
+    ):
         """
         Get the electronic density, based on density data.
 
@@ -650,7 +720,7 @@ class Density(Target):
 
         Parameters
         ----------
-        density_data : numpy.array
+        density_data : numpy.ndarray
             Electronic density data, this array will be returned unchanged
             depending on the other parameters. If None, then the cached
             density will be used for the calculation.
@@ -667,7 +737,7 @@ class Density(Target):
 
         Returns
         -------
-        density_data : numpy.array
+        density_data : numpy.ndarray
             Electronic density data in the desired shape.
         """
         if len(density_data.shape) == 4:
@@ -688,23 +758,33 @@ class Density(Target):
                     #                                   last_y-first_y,
                     #                                   last_z-first_z],
                     #                                  dtype=np.float64)
-                    density_data = \
-                        np.reshape(density_data,
-                                   [last_z - first_z, last_y - first_y,
-                                    last_x - first_x, 1]).transpose([2, 1, 0, 3])
+                    density_data = np.reshape(
+                        density_data,
+                        [
+                            last_z - first_z,
+                            last_y - first_y,
+                            last_x - first_x,
+                            1,
+                        ],
+                    ).transpose([2, 1, 0, 3])
                     return density_data
                 else:
                     if grid_dimensions is None:
                         grid_dimensions = self.grid_dimensions
-                    return density_data.reshape(grid_dimensions+[1])
+                    return density_data.reshape(grid_dimensions + [1])
             else:
                 return density_data
         else:
             raise Exception("Unknown density data shape.")
 
-    def get_energy_contributions(self, density_data=None, create_file=True,
-                                 atoms_Angstrom=None, qe_input_data=None,
-                                 qe_pseudopotentials=None):
+    def get_energy_contributions(
+        self,
+        density_data=None,
+        create_file=True,
+        atoms_Angstrom=None,
+        qe_input_data=None,
+        qe_pseudopotentials=None,
+    ):
         r"""
         Extract density based energy contributions from Quantum Espresso.
 
@@ -713,7 +793,7 @@ class Density(Target):
 
         Parameters
         ----------
-        density_data : numpy.array
+        density_data : numpy.ndarray
             Density data on a grid. If None, then the cached
             density will be used for the calculation.
 
@@ -747,22 +827,29 @@ class Density(Target):
         if density_data is None:
             density_data = self.density
             if density_data is None:
-                raise Exception("No density data provided, cannot calculate"
-                                " this quantity.")
+                raise Exception(
+                    "No density data provided, cannot calculate"
+                    " this quantity."
+                )
 
         if atoms_Angstrom is None:
             atoms_Angstrom = self.atoms
-        self.__setup_total_energy_module(density_data, atoms_Angstrom,
-                                         create_file=create_file,
-                                         qe_input_data=qe_input_data,
-                                         qe_pseudopotentials=
-                                         qe_pseudopotentials)
+        self.__setup_total_energy_module(
+            density_data,
+            atoms_Angstrom,
+            create_file=create_file,
+            qe_input_data=qe_input_data,
+            qe_pseudopotentials=qe_pseudopotentials,
+        )
 
         # Get and return the energies.
-        energies = np.array(te.get_energies())*Rydberg
-        energies_dict = {"e_rho_times_v_hxc": energies[0],
-                         "e_hartree": energies[1], "e_xc": energies[2],
-                         "e_ewald": energies[3]}
+        energies = np.array(te.get_energies()) * Rydberg
+        energies_dict = {
+            "e_rho_times_v_hxc": energies[0],
+            "e_hartree": energies[1],
+            "e_xc": energies[2],
+            "e_ewald": energies[3],
+        }
         return energies_dict
 
     def get_force_contributions(self, density_data=None, create_file=True,
@@ -771,8 +858,10 @@ class Density(Target):
         if density_data is None:
             density_data = self.density
             if density_data is None:
-                raise Exception("No density data provided, cannot calculate"
-                                " this quantity.")
+                raise Exception(
+                    "No density data provided, cannot calculate"
+                    " this quantity."
+                )
 
         if atoms_Angstrom is None:
             atoms_Angstrom = self.atoms
@@ -835,11 +924,11 @@ class Density(Target):
 
         Returns
         -------
-        scaled_positions : numpy.array
+        scaled_positions : numpy.ndarray
             The scaled positions.
         """
         principal_axis = atoms.get_cell()[0][0]
-        scaled_positions = atoms.get_positions()/principal_axis
+        scaled_positions = atoms.get_positions() / principal_axis
         return scaled_positions
 
     # Private methods
@@ -854,20 +943,39 @@ class Density(Target):
         # Feature size is always 1 in this case, no need to do anything.
         pass
 
-    def __setup_total_energy_module(self, density_data, atoms_Angstrom,
-                                    create_file=True, qe_input_data=None,
-                                    qe_pseudopotentials=None):
-        if create_file:
+    def __setup_total_energy_module(
+        self,
+        density_data,
+        atoms_Angstrom,
+        create_file=True,
+        qe_input_data=None,
+        qe_pseudopotentials=None,
+    ):
+        if create_file and Density.te_mutex is False:
             # If not otherwise specified, use values as read in.
             if qe_input_data is None:
                 qe_input_data = self.qe_input_data
             if qe_pseudopotentials is None:
                 qe_pseudopotentials = self.qe_pseudopotentials
 
-            self.write_tem_input_file(atoms_Angstrom, qe_input_data,
-                                      qe_pseudopotentials,
-                                      self.grid_dimensions,
-                                      self.kpoints)
+            if self.parameters.assume_two_dimensional:
+                qe_input_data["assume_isolated"] = "2D"
+
+                # In the 2D case, the Gamma point approximation introduces
+                # errors in the Ewald and Hartree energy for some reason.
+                kpoints = [1, 1, 1]
+            else:
+                kpoints = self.kpoints
+
+            tem_input_name = self.write_tem_input_file(
+                atoms_Angstrom,
+                qe_input_data,
+                qe_pseudopotentials,
+                self.grid_dimensions,
+                kpoints,
+                get_comm(),
+                get_rank(),
+            )
 
         # initialize the total energy module.
         # FIXME: So far, the total energy module can only be initialized once.
@@ -878,21 +986,44 @@ class Density(Target):
         # for this.
 
         if Density.te_mutex is False:
-            printout("MALA: Starting QuantumEspresso to get density-based"
-                     " energy contributions.", min_verbosity=0)
+            printout(
+                "Starting QuantumEspresso to get density-based"
+                " energy contributions.",
+                min_verbosity=0,
+            )
             barrier()
             t0 = time.perf_counter()
-            te.initialize(self.y_planes)
+
+            # We have to make sure we have the correct format for the file.
+            # QE expects the file without a path, and with a fixed length.
+            # I chose 256 for this length, simply to have some space in case
+            # we need it at some point (i.e., the tempfile format changes).
+            tem_input_name_qe = os.path.basename(tem_input_name)
+            tem_input_name_qe = tem_input_name_qe + " " * (
+                256 - len(tem_input_name_qe)
+            )
+            te.initialize(tem_input_name_qe, self.y_planes)
             barrier()
-            t1 = time.perf_counter()
-            printout("time used by total energy initialization: ", t1 - t0)
+
+            # Right after setup we can delete the file.
+            if get_rank() == 0:
+                os.remove(tem_input_name)
+
+            printout(
+                "Total energy module: Time used by total energy initialization: {:.8f}s".format(
+                    time.perf_counter() - t0
+                ),
+                min_verbosity=2,
+            )
 
             Density.te_mutex = True
-            printout("MALA: QuantumEspresso setup done.", min_verbosity=0)
+            printout("QuantumEspresso setup done.", min_verbosity=0)
         else:
-            printout("MALA: QuantumEspresso is already running. Except for"
-                     " the atomic positions, no new parameters will be used.",
-                     min_verbosity=0)
+            printout(
+                "QuantumEspresso is already running. Except for"
+                " the atomic positions, no new parameters will be used.",
+                min_verbosity=0,
+            )
 
         # Before we proceed, some sanity checks are necessary.
         # Is the calculation spinpolarized?
@@ -904,67 +1035,83 @@ class Density(Target):
         number_of_atoms = te.get_nat()
         if create_file is True:
             if number_of_atoms != atoms_Angstrom.get_global_number_of_atoms():
-                raise Exception("Number of atoms is inconsistent between MALA "
-                                "and Quantum Espresso.")
+                raise Exception(
+                    "Number of atoms is inconsistent between MALA "
+                    "and Quantum Espresso."
+                )
 
         # We need to find out if the grid dimensions are consistent.
         # That depends on the form of the density data we received.
         number_of_gridpoints = te.get_nnr()
         if len(density_data.shape) == 4:
-            number_of_gridpoints_mala = density_data.shape[0] * \
-                                        density_data.shape[1] * \
-                                        density_data.shape[2]
+            number_of_gridpoints_mala = (
+                density_data.shape[0]
+                * density_data.shape[1]
+                * density_data.shape[2]
+            )
         elif len(density_data.shape) == 2:
             number_of_gridpoints_mala = density_data.shape[0]
         else:
             raise Exception("Density data has wrong dimensions. ")
 
         # If MPI is enabled, we NEED z-splitting for this to work.
-        if self._parameters_full.use_mpi and \
-                not self._parameters_full.descriptors.use_z_splitting:
-            raise Exception("Cannot calculate the total energy if "
-                            "the real space grid was not split in "
-                            "z-direction.")
+        if (
+            self._parameters_full.use_mpi
+            and not self._parameters_full.descriptors.use_z_splitting
+        ):
+            raise Exception(
+                "Cannot calculate the total energy if "
+                "the real space grid was not split in "
+                "z-direction."
+            )
 
         # Check if we need to test the grid points.
         # We skip the check only if z-splitting is enabled and unequal
         # z-splits are to be expected, and no
         # y-splitting is enabled (since y-splitting currently works
         # for equal z-splitting anyway).
-        if self._parameters_full.use_mpi and \
-           self._parameters_full.descriptors.use_y_splitting == 0 \
-           and int(self.grid_dimensions[2] / get_size()) != \
-                  (self.grid_dimensions[2] / get_size()):
+        if (
+            self._parameters_full.use_mpi
+            and self._parameters_full.descriptors.use_y_splitting == 0
+            and int(self.grid_dimensions[2] / get_size())
+            != (self.grid_dimensions[2] / get_size())
+        ):
             pass
         else:
             if number_of_gridpoints_mala != number_of_gridpoints:
-                raise Exception("Grid is inconsistent between MALA and"
-                                " Quantum Espresso")
+                raise Exception(
+                    "Grid is inconsistent between MALA and Quantum Espresso"
+                )
 
         # Now we need to reshape the density.
         density_for_qe = None
         if len(density_data.shape) == 4:
-            density_for_qe = np.reshape(density_data, [number_of_gridpoints,
-                                                       1], order='F')
+            density_for_qe = np.reshape(
+                density_data, [number_of_gridpoints, 1], order="F"
+            )
         elif len(density_data.shape) == 2:
-            parallel_warn("Using 1D density to calculate the total energy"
-                          " requires reshaping of this data. "
-                          "This is unproblematic, as long as you provided t"
-                          "he correct grid_dimensions.")
-            density_for_qe = self.get_density(density_data,
-                                              convert_to_threedimensional=True)
+            parallel_warn(
+                "Using 1D density to calculate the total energy"
+                " requires reshaping of this data. "
+                "This is unproblematic, as long as you provided t"
+                "he correct grid_dimensions."
+            )
+            density_for_qe = self.get_density(
+                density_data, convert_to_threedimensional=True
+            )
 
-            density_for_qe = np.reshape(density_for_qe,
-                                        [number_of_gridpoints_mala, 1],
-                                        order='F')
+            density_for_qe = np.reshape(
+                density_for_qe, [number_of_gridpoints_mala, 1], order="F"
+            )
 
             # If there is an inconsistency between MALA and QE (which
             # can only happen in the uneven z-splitting case at the moment)
             # we need to pad the density array.
             if density_for_qe.shape[0] < number_of_gridpoints:
                 grid_diff = number_of_gridpoints - number_of_gridpoints_mala
-                density_for_qe = np.pad(density_for_qe,
-                                        pad_width=((0, grid_diff), (0, 0)))
+                density_for_qe = np.pad(
+                    density_for_qe, pad_width=((0, grid_diff), (0, 0))
+                )
 
         # QE has the density in 1/Bohr^3
         density_for_qe *= self.backconvert_units(1, "1/Bohr^3")
@@ -974,26 +1121,30 @@ class Density(Target):
         # instantiate the process with the file.
         positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
 
-        if self._parameters_full.descriptors.\
-                use_atomic_density_energy_formula:
+        if self.parameters._configuration["atomic_density_formula"]:
             # Calculate the Gaussian descriptors for the calculation of the
             # structure factors.
             barrier()
             t0 = time.perf_counter()
-            gaussian_descriptors = \
+            gaussian_descriptors = (
                 self._get_gaussian_descriptors_for_structure_factors(
-                    atoms_Angstrom, self.grid_dimensions)
+                    atoms_Angstrom, self.grid_dimensions
+                )
+            )
             barrier()
-            t1 = time.perf_counter()
-            printout("time used by gaussian descriptors: ", t1 - t0,
-                     min_verbosity=2)
+            printout(
+                "Total energy module: Time used by gaussian descriptors: {:.8f}s".format(
+                    time.perf_counter() - t0
+                ),
+                min_verbosity=2,
+            )
 
             #
             # Check normalization of the Gaussian descriptors
             #
             # from mpi4py import MPI
             # ggrid_sum = np.sum(gaussian_descriptors)
-            # full_ggrid_sum = np.array([0.0])
+            # full_ggrid_sum = numpy.ndarray([0.0])
             # comm = get_comm()
             # comm.Barrier()
             # comm.Reduce([ggrid_sum, MPI.DOUBLE],
@@ -1007,19 +1158,24 @@ class Density(Target):
             atoms_reference = atoms_Angstrom.copy()
             del atoms_reference[1:]
             atoms_reference.set_positions([(0.0, 0.0, 0.0)])
-            reference_gaussian_descriptors = \
+            reference_gaussian_descriptors = (
                 self._get_gaussian_descriptors_for_structure_factors(
-                    atoms_reference, self.grid_dimensions)
+                    atoms_reference, self.grid_dimensions
+                )
+            )
             barrier()
-            t1 = time.perf_counter()
-            printout("time used by reference gaussian descriptors: ", t1 - t0,
-                     min_verbosity=2)
+            printout(
+                "Total energy module: Time used by reference gaussian descriptors: {:.8f}s".format(
+                    time.perf_counter() - t0
+                ),
+                min_verbosity=2,
+            )
 
             #
             # Check normalization of the reference Gaussian descriptors
             #
             # reference_ggrid_sum = np.sum(reference_gaussian_descriptors)
-            # full_reference_ggrid_sum = np.array([0.0])
+            # full_reference_ggrid_sum = numpy.ndarray([0.0])
             # comm = get_comm()
             # comm.Barrier()
             # comm.Reduce([reference_ggrid_sum, MPI.DOUBLE],
@@ -1031,53 +1187,82 @@ class Density(Target):
 
         # If the Gaussian formula is used, both the calculation of the
         # Ewald energy and the structure factor can be skipped.
-        te.set_positions(np.transpose(positions_for_qe), number_of_atoms,
-                         self._parameters_full.descriptors. \
-                         use_atomic_density_energy_formula,
-                         self._parameters_full.descriptors. \
-                         use_atomic_density_energy_formula)
+        te.set_positions(
+            np.transpose(positions_for_qe),
+            number_of_atoms,
+            self.parameters._configuration["atomic_density_formula"],
+            self.parameters._configuration["atomic_density_formula"],
+        )
         barrier()
-        t1 = time.perf_counter()
-        printout("time used by set_positions: ", t1 - t0,
-                 min_verbosity=2)
-
+        printout(
+            "Total energy module: Time used by set_positions: {:.8f}s".format(
+                time.perf_counter() - t0
+            ),
+            min_verbosity=2,
+        )
         barrier()
 
-        if self._parameters_full.descriptors.\
-                use_atomic_density_energy_formula:
+        if self.parameters._configuration["atomic_density_formula"]:
             t0 = time.perf_counter()
-            gaussian_descriptors = \
-                np.reshape(gaussian_descriptors,
-                           [number_of_gridpoints, 1], order='F')
-            reference_gaussian_descriptors = \
-                np.reshape(reference_gaussian_descriptors,
-                           [number_of_gridpoints, 1], order='F')
-            sigma = self._parameters_full.descriptors.\
-                atomic_density_sigma
+            gaussian_descriptors = np.reshape(
+                gaussian_descriptors,
+                [number_of_gridpoints_mala, 1],
+                order="F",
+            )
+            reference_gaussian_descriptors = np.reshape(
+                reference_gaussian_descriptors,
+                [number_of_gridpoints_mala, 1],
+                order="F",
+            )
+
+            # If there is an inconsistency between MALA and QE (which
+            # can only happen in the uneven z-splitting case at the moment)
+            # we need to pad the gaussian descriptor arrays.
+            if number_of_gridpoints_mala < number_of_gridpoints:
+                grid_diff = number_of_gridpoints - number_of_gridpoints_mala
+                gaussian_descriptors = np.pad(
+                    gaussian_descriptors, pad_width=((0, grid_diff), (0, 0))
+                )
+                reference_gaussian_descriptors = np.pad(
+                    reference_gaussian_descriptors,
+                    pad_width=((0, grid_diff), (0, 0)),
+                )
+
+            sigma = self._parameters_full.descriptors.atomic_density_sigma
             sigma = sigma / Bohr
-            te.set_positions_gauss(self._parameters_full.verbosity,
-                                   gaussian_descriptors,
-                                   reference_gaussian_descriptors,
-                                   sigma,
-                                   number_of_gridpoints, 1)
+            te.set_positions_gauss(
+                self._parameters_full.verbosity,
+                gaussian_descriptors,
+                reference_gaussian_descriptors,
+                sigma,
+                number_of_gridpoints,
+                1,
+            )
             barrier()
-            t1 = time.perf_counter()
-            printout("time used by set_positions_gauss: ", t1 - t0,
-                     min_verbosity=2)
+            printout(
+                "Total energy module: Time used by set_positions_gauss: {:.8f}s".format(
+                    time.perf_counter() - t0
+                ),
+                min_verbosity=2,
+            )
 
         # Now we can set the new density.
         barrier()
         t0 = time.perf_counter()
         te.set_rho_of_r(density_for_qe, number_of_gridpoints, nr_spin_channels)
         barrier()
-        t1 = time.perf_counter()
-        printout("time used by set_rho_of_r: ", t1 - t0,
-                 min_verbosity=2)
+        printout(
+            "Total energy module: Time used by set_rho_of_r: {:.8f}s".format(
+                time.perf_counter() - t0
+            ),
+            min_verbosity=2,
+        )
 
         return atoms_Angstrom
 
     def _get_gaussian_descriptors_for_structure_factors(self, atoms, grid):
         descriptor_calculator = AtomicDensity(self._parameters_full)
         kwargs = {"return_directly": True, "use_fp64": True}
-        return descriptor_calculator.\
-            calculate_from_atoms(atoms, grid, **kwargs)[:, 6:]
+        return descriptor_calculator.calculate_from_atoms(
+            atoms, grid, **kwargs
+        )[:, 6:]
