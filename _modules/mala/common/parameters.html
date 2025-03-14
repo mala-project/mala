@@ -990,6 +990,9 @@
 <span class="sd">        Name used for the checkpoints. Using this, multiple runs</span>
 <span class="sd">        can be performed in the same directory.</span>
 
+<span class="sd">    checkpoint_path : string</span>
+<span class="sd">        Path where the checkpoints will be saved (and loaded from)</span>
+
 <span class="sd">    run_name : string</span>
 <span class="sd">        Name of the run used for logging.</span>
 
@@ -1081,6 +1084,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoints_each_epoch</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="c1"># self.checkpoint_best_so_far = False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_name</span> <span class="o">=</span> <span class="s2">&quot;checkpoint_mala&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_path</span> <span class="o">=</span> <span class="s2">&quot;./&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging_dir</span> <span class="o">=</span> <span class="s2">&quot;./mala_logging&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging_dir_append_date</span> <span class="o">=</span> <span class="kc">True</span>
