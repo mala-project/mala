@@ -6,6 +6,7 @@ from mala import printout
 import numpy as np
 
 from mala.datahandling.data_repo import data_repo_path
+
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
@@ -16,15 +17,16 @@ predictions can be made.
 
 
 # Uses a network to make a prediction.
-assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
+assert os.path.exists("Be_model.zip"), "Be model missing, run ex01 first."
 
 
 def run_prediction(backprop=False):
     """
     This just runs a regular MALA prediction for a two-atom Beryllium model.
     """
-    parameters, network, data_handler, predictor = mala.Predictor. \
-        load_run("be_model")
+    parameters, network, data_handler, predictor = mala.Predictor.load_run(
+        "Be_model"
+    )
 
     parameters.targets.target_type = "LDOS"
     parameters.targets.ldos_gridsize = 11
@@ -71,8 +73,9 @@ def band_energy_contribution():
         ldos_calculator.read_from_array(ldos_minus)
         derivative_minus = ldos_calculator.band_energy
 
-        numerical_forces.append((derivative_plus - derivative_minus) /
-                                delta_numerical)
+        numerical_forces.append(
+            (derivative_plus - derivative_minus) / delta_numerical
+        )
 
     print("FORCE TEST: Band energy contribution.")
     print(mala_forces[0, :] / np.array(numerical_forces))
@@ -110,8 +113,9 @@ def entropy_contribution():
         ldos_calculator.read_from_array(ldos_minus)
         derivative_minus = ldos_calculator.entropy_contribution
 
-        numerical_forces.append((derivative_plus - derivative_minus) /
-                                delta_numerical)
+        numerical_forces.append(
+            (derivative_plus - derivative_minus) / delta_numerical
+        )
 
     print("FORCE TEST: Entropy contribution.")
     print(mala_forces[0, :] / np.array(numerical_forces))
@@ -143,16 +147,21 @@ def hartree_contribution():
             ldos_plus = ldos.copy()
             ldos_plus[point, i] += delta_numerical * 0.5
             ldos_calculator.read_from_array(ldos_plus)
-            _, derivative_plus = ldos_calculator.get_total_energy(return_energy_contributions=True)
+            _, derivative_plus = ldos_calculator.get_total_energy(
+                return_energy_contributions=True
+            )
             derivative_plus = derivative_plus["e_hartree"]
 
             ldos_minus = ldos.copy()
             ldos_minus[point, i] -= delta_numerical * 0.5
             ldos_calculator.read_from_array(ldos_minus)
-            _, derivative_minus = ldos_calculator.get_total_energy(return_energy_contributions=True)
+            _, derivative_minus = ldos_calculator.get_total_energy(
+                return_energy_contributions=True
+            )
             derivative_minus = derivative_minus["e_hartree"]
-            numerical_forces.append((derivative_plus - derivative_minus) /
-                                    delta_numerical)
+            numerical_forces.append(
+                (derivative_plus - derivative_minus) / delta_numerical
+            )
 
         print(mala_forces[point, :] / np.array(numerical_forces))
 
@@ -163,7 +172,9 @@ def backpropagation():
     computed, and then backpropagated through the network.
     """
     # Only compute a specific part of the forces.
-    ldos, ldos_calculator, parameters, predictor = run_prediction(backprop=True)
+    ldos, ldos_calculator, parameters, predictor = run_prediction(
+        backprop=True
+    )
     ldos_calculator.input_data_derivative = predictor.input_data
     ldos_calculator.output_data_torch = predictor.output_data
     mala_forces = ldos_calculator.atomic_forces

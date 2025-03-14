@@ -320,8 +320,9 @@ class LDOS(Target):
         if self.local_density_of_states is not None:
             return self.get_atomic_forces()
         else:
-            raise Exception("No cached LDOS available to calculate this "
-                            "property.")
+            raise Exception(
+                "No cached LDOS available to calculate this " "property."
+            )
 
     @cached_property
     def band_energy(self):
@@ -1419,15 +1420,23 @@ class LDOS(Target):
         else:
             return dos_values
 
-    def get_atomic_forces(self, ldos_data=None, dos_data=None,
-                         density_data=None, fermi_energy=None,
-                         temperature=None, voxel=None,
-                         grid_integration_method="summation",
-                         energy_integration_method="analytical",
-                         atoms_Angstrom=None, qe_input_data=None,
-                         qe_pseudopotentials=None, create_qe_file=True,
-                         return_energy_contributions=False,
-                          delta=None):
+    def get_atomic_forces(
+        self,
+        ldos_data=None,
+        dos_data=None,
+        density_data=None,
+        fermi_energy=None,
+        temperature=None,
+        voxel=None,
+        grid_integration_method="summation",
+        energy_integration_method="analytical",
+        atoms_Angstrom=None,
+        qe_input_data=None,
+        qe_pseudopotentials=None,
+        create_qe_file=True,
+        return_energy_contributions=False,
+        delta=None,
+    ):
         r"""
         Get the atomic forces, currently work in progress.
 
@@ -1466,33 +1475,41 @@ class LDOS(Target):
             if ldos_data is None:
                 fermi_energy = self.fermi_energy
             if fermi_energy is None:
-                printout("Warning: No fermi energy was provided or could be "
-                         "calculated from electronic structure data. "
-                         "Using the DFT fermi energy, this may "
-                         "yield unexpected results", min_verbosity=1)
+                printout(
+                    "Warning: No fermi energy was provided or could be "
+                    "calculated from electronic structure data. "
+                    "Using the DFT fermi energy, this may "
+                    "yield unexpected results",
+                    min_verbosity=1,
+                )
                 fermi_energy = self.fermi_energy_dft
         if temperature is None:
             temperature = self.temperature
         if delta is None:
             delta = self.parameters.delta_forces
 
-        energy_grid = self.get_energy_grid()
+        energy_grid = self._get_energy_grid()
 
         # Here we check whether we will use our internal, cached
         # LDOS, or calculate everything from scratch.
-        if ldos_data is not None or (dos_data is not None
-                                     and density_data is not None):
+        if ldos_data is not None or (
+            dos_data is not None and density_data is not None
+        ):
             # Not using cached properties is currently not implemented.
             # We can implement this later as needed.
-            raise Exception("Forces can currently only be calculated using "
-                            "cached properties!")
+            raise Exception(
+                "Forces can currently only be calculated using "
+                "cached properties!"
+            )
         else:
             # In this case, we use cached propeties wherever possible.
             ldos_data = self.local_density_of_states
             if ldos_data is None:
-                raise Exception("No input data provided to caculate "
-                                "total energy. Provide EITHER LDOS"
-                                " OR DOS and density.")
+                raise Exception(
+                    "No input data provided to caculate "
+                    "total energy. Provide EITHER LDOS"
+                    " OR DOS and density."
+                )
 
             d_E_d_d = np.zeros_like(self.local_density_of_states)
 
@@ -1504,24 +1521,28 @@ class LDOS(Target):
             # (if the debug flag asks for it) or as a singular DOS
             # contribution.
             if self.debug_forces_flag == "band_energy":
-                d_E_d_D = (self._density_of_states_calculator.d_band_energy_d_dos) \
-                           * voxel.volume
+                d_E_d_D = (
+                    self._density_of_states_calculator.d_band_energy_d_dos
+                ) * voxel.volume
 
             if self.debug_forces_flag == "entropy_contribution":
-                d_E_d_D = (self._density_of_states_calculator.
-                         d_entropy_contribution_d_dos) * voxel.volume
+                d_E_d_D = (
+                    self._density_of_states_calculator.d_entropy_contribution_d_dos
+                ) * voxel.volume
 
             # This is the entire DOS contribution.
             if self.debug_forces_flag is None:
-                d_E_d_D = (self._density_of_states_calculator.d_band_energy_d_dos
-                           + self._density_of_states_calculator.
-                           d_entropy_contribution_d_dos) \
-                           * voxel.volume
+                d_E_d_D = (
+                    self._density_of_states_calculator.d_band_energy_d_dos
+                    + self._density_of_states_calculator.d_entropy_contribution_d_dos
+                ) * voxel.volume
 
             # The DOS contribution may need reshaping.
-            if self.debug_forces_flag == "band_energy" or \
-                self.debug_forces_flag == "entropy_contribution" or \
-                self.debug_forces_flag is None:
+            if (
+                self.debug_forces_flag == "band_energy"
+                or self.debug_forces_flag == "entropy_contribution"
+                or self.debug_forces_flag is None
+            ):
                 if len(np.shape(self.local_density_of_states)) == 4:
                     d_E_d_d[:, :, :] = d_E_d_D
                 elif len(np.shape(self.local_density_of_states)) == 2:
@@ -1534,31 +1555,47 @@ class LDOS(Target):
             #################################
 
             # Currently only the Hartree energy is computded.
-            if self.debug_forces_flag is None or self.debug_forces_flag == \
-                "hartree":
+            if (
+                self.debug_forces_flag is None
+                or self.debug_forces_flag == "hartree"
+            ):
 
                 # The derivative of the Hartree energy w.r.t the density
                 # is simply the Hartree potential.
                 # Then we have to apply the chain rule.
-                d_E_h_d_n = self._density_calculator.force_contributions["hartree"]
-                d_n_d_d = analytical_integration_weights("F0", "F1", fermi_energy,
-                                                         energy_grid, temperature)
-
+                d_E_h_d_n = self._density_calculator.force_contributions[
+                    "hartree"
+                ]
+                d_n_d_d = analytical_integration_weights(
+                    "F0", "F1", fermi_energy, energy_grid, temperature
+                )
 
                 # The second portion of the derivative is the derivative of the
                 # Hartree energy w.r.t. the chemical potential.
                 # That's what happens here.
-                d_f01_d_mu = (analytical_integration_weights("F0", "F1", fermi_energy+delta,
-                                                         energy_grid, temperature)
-                            - analytical_integration_weights("F0", "F1", fermi_energy-delta,
-                                                                 energy_grid, temperature)) / \
-                           (2.0*delta)
+                d_f01_d_mu = (
+                    analytical_integration_weights(
+                        "F0",
+                        "F1",
+                        fermi_energy + delta,
+                        energy_grid,
+                        temperature,
+                    )
+                    - analytical_integration_weights(
+                        "F0",
+                        "F1",
+                        fermi_energy - delta,
+                        energy_grid,
+                        temperature,
+                    )
+                ) / (2.0 * delta)
                 d_n_d_mu = np.dot(ldos_data, d_f01_d_mu)
-                d_E_h_d_mu = np.dot(d_E_h_d_n[:,0], d_n_d_mu)
+                d_E_h_d_mu = np.dot(d_E_h_d_n[:, 0], d_n_d_mu)
                 d_mu_d_d = np.zeros_like(ldos_data)
-                d_mu_d_d[:] = (d_n_d_d*self.voxel.volume)
-                d_mu_d_d /= (-1.0) * (self._density_of_states_calculator.
-                                      d_number_of_electrons_d_mu)
+                d_mu_d_d[:] = d_n_d_d * self.voxel.volume
+                d_mu_d_d /= (-1.0) * (
+                    self._density_of_states_calculator.d_number_of_electrons_d_mu
+                )
 
                 # Add both portions together.
                 d_E_d_n = d_E_h_d_n * d_n_d_d + d_E_h_d_mu * d_mu_d_d
