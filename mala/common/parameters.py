@@ -881,6 +881,9 @@ class ParametersRunning(ParametersBase):
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
 
+    checkpoint_path : string
+        Path where the checkpoints will be saved (and loaded from)
+
     run_name : string
         Name of the run used for logging.
 
@@ -972,6 +975,7 @@ class ParametersRunning(ParametersBase):
         self.checkpoints_each_epoch = 0
         # self.checkpoint_best_so_far = False
         self.checkpoint_name = "checkpoint_mala"
+        self.checkpoint_path = "./"
         self.run_name = ""
         self.logging_dir = "./mala_logging"
         self.logging_dir_append_date = True
