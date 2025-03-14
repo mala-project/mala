@@ -169,7 +169,7 @@ class Descriptor(PhysicalData):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -177,7 +177,7 @@ class Descriptor(PhysicalData):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in MALA units.
 
         """
@@ -202,7 +202,7 @@ class Descriptor(PhysicalData):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in MALA units.
 
         out_units : string
@@ -210,7 +210,7 @@ class Descriptor(PhysicalData):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
 
         """
@@ -336,7 +336,7 @@ class Descriptor(PhysicalData):
 
         Returns
         -------
-        descriptors : numpy.array
+        descriptors : numpy.ndarray
             Numpy array containing the descriptors with the dimension
             (x,y,z,descriptor_dimension)
 
@@ -406,7 +406,7 @@ class Descriptor(PhysicalData):
 
         Returns
         -------
-        descriptors : numpy.array
+        descriptors : numpy.ndarray
             Numpy array containing the descriptors with the dimension
             (x,y,z,descriptor_dimension)
 
@@ -452,7 +452,7 @@ class Descriptor(PhysicalData):
 
         Returns
         -------
-        descriptors : numpy.array
+        descriptors : numpy.ndarray
             Numpy array containing the descriptors with the dimension
             (x,y,z,descriptor_dimension)
         """
@@ -478,7 +478,7 @@ class Descriptor(PhysicalData):
 
         Parameters
         ----------
-        descriptors_np : numpy.array
+        descriptors_np : numpy.ndarray
             Numpy array with the descriptors of this ranks local grid.
 
         use_pickled_comm : bool
@@ -596,7 +596,7 @@ class Descriptor(PhysicalData):
 
         Parameters
         ----------
-        descriptors_np : numpy.array
+        descriptors_np : numpy.ndarray
             Numpy array with the descriptors of this ranks local grid.
         """
         local_offset = [None, None, None]
@@ -651,9 +651,31 @@ class Descriptor(PhysicalData):
     #################
 
     def _process_loaded_array(self, array, units=None):
+        """
+        Process loaded array (i.e., unit change, reshaping, etc.).
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Array to process.
+
+        units : string
+            Units of input array.
+        """
         array *= self.convert_units(1, in_units=units)
 
     def _process_loaded_dimensions(self, array_dimensions):
+        """
+        Process loaded dimensions.
+
+        In this case, cut xyz coordinates from descriptors if
+        descriptors_contain_xyz is set in the parameters.
+
+        Parameters
+        ----------
+        array_dimensions : tuple
+            Raw dimensions of the array.
+        """
         if self.descriptors_contain_xyz:
             return (
                 array_dimensions[0],
@@ -665,6 +687,16 @@ class Descriptor(PhysicalData):
             return array_dimensions
 
     def _set_geometry_info(self, mesh):
+        """
+        Set geometry information to openPMD mesh.
+
+        This has to be done as part of the openPMD saving process.
+
+        Parameters
+        ----------
+        mesh : openpmd_api.Mesh
+            OpenPMD mesh for which to set geometry information.
+        """
         # Geometry: Save the cell parameters and angles of the grid.
         if self._atoms is not None:
             import openpmd_api as io
@@ -679,9 +711,33 @@ class Descriptor(PhysicalData):
             mesh.set_attribute("angles", self._voxel.cellpar()[3:])
 
     def _get_atoms(self):
+        """
+        Access atoms saved in PhysicalData-derived class.
+
+        For any derived class which is atom based (currently, all are), this
+        function returns the atoms, which may not be directly accessible as
+        an attribute for a variety of reasons.
+
+        Returns
+        -------
+        atoms : ase.Atoms
+            An ASE atoms object holding the associated atoms of this object.
+        """
         return self._atoms
 
     def _feature_mask(self):
+        """
+        Return a mask for features that are not part of the feature dimension.
+
+        The mask assumes that the features which do not belong to the feature
+        dimension are at the beginning of the array. Here, return 3 if the
+        descriptors contain xyz coordinates, otherwise 0.
+
+        Returns
+        -------
+        mask : int
+            Starting index after which the actual feature dimension starts.
+        """
         if self.descriptors_contain_xyz:
             return 3
         else:
@@ -692,6 +748,24 @@ class Descriptor(PhysicalData):
         Set up the lammps processor grid.
 
         Takes into account y/z-splitting.
+
+        Parameters
+        ----------
+        nx : int
+            Number of gridpoints in x-direction.
+
+        ny : int
+            Number of gridpoints in y-direction.
+        nz : int
+            Number of gridpoints in z-direction.
+
+        lammps_dict : dict
+            Dictionary with LAMMPS options.
+
+        Returns
+        -------
+        lmp : lammps.LAMMPS
+            LAMMPS instance.
         """
         from lammps import lammps
 
@@ -916,6 +990,20 @@ class Descriptor(PhysicalData):
         return lmp
 
     def _clean_calculation(self, lmp, keep_logs):
+        """
+        Clean a LAMMPS calculation.
+
+        This function closes the LAMMPS instance and deletes the temporary
+        files created during the calculation, if keep_logs is False.
+
+        Parameters
+        ----------
+        lmp : lammps.LAMMPS
+            LAMMPS instance to close.
+
+        keep_logs : bool
+            If True, the temporary files are not deleted.
+        """
         lmp.close()
         if not keep_logs:
             if get_rank() == 0:
@@ -932,6 +1020,12 @@ class Descriptor(PhysicalData):
 
         FURTHER OPTIMIZATION: Probably not that much, this mostly already uses
         optimized python functions.
+
+        Returns
+        -------
+        all_atoms : numpy.ndarray
+            Numpy array containing the positions of all atoms potentially
+            relevant for the descriptor calculation.
         """
         if np.any(self._atoms.pbc):
 
@@ -1068,6 +1162,19 @@ class Descriptor(PhysicalData):
             return self._atoms.positions
 
     def _grid_to_coord(self, gridpoint):
+        """
+        Convert grid indices to a real space coordinate.
+
+        Parameters
+        ----------
+        gridpoint : list
+            List of grid indices in the format [x, y, z].
+
+        Returns
+        -------
+        coord : numpy.ndarray
+            Real space coordinate corresponding to the grid point.
+        """
         # Convert grid indices to real space grid point.
         i = gridpoint[0]
         j = gridpoint[1]
@@ -1093,11 +1200,46 @@ class Descriptor(PhysicalData):
 
     @abstractmethod
     def _calculate(self, outdir, **kwargs):
+        """
+        Perform descriptor calculation.
+
+        Has to be implemented by inheriting classes.
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+        """
         pass
 
     @abstractmethod
     def _read_feature_dimension_from_json(self, json_dict):
+        """
+        Read the feature dimension from a saved JSON file.
+
+        This process may also involve reading additional information from the
+        Parameters object.
+
+        Parameters
+        ----------
+        json_dict : dict
+            Dictionary containing info loaded from the JSON file.
+        """
         pass
 
     def _set_feature_size_from_array(self, array):
+        """
+        Set the feature size from the array.
+
+        Feature sizes are saved in different ways for different physical data
+        classes.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Array to extract the feature size from.
+        """
         self.feature_size = np.shape(array)[-1]

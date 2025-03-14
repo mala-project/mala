@@ -286,7 +286,7 @@ class ObjectiveBase:
 
         Parameters
         ----------
-        trial : numpy.array
+        trial : numpy.ndarray
             Row in an orthogonal array which respresents current trial.
         """
         if self._optimize_layer_list:

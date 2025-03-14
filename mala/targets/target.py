@@ -300,7 +300,7 @@ class Target(PhysicalData):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -308,7 +308,7 @@ class Target(PhysicalData):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in MALA units.
 
         """
@@ -324,7 +324,7 @@ class Target(PhysicalData):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in MALA units.
 
         out_units : string
@@ -332,7 +332,7 @@ class Target(PhysicalData):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
 
         """
@@ -856,9 +856,42 @@ class Target(PhysicalData):
     # Calculations
     ##############
 
-    def get_energy_grid(self):
-        """Get energy grid."""
-        raise Exception("No method implement to calculate an energy grid.")
+    def _get_energy_grid(self):
+        """
+        Get energy grid.
+
+        Returns
+        -------
+        e_grid : numpy.ndarray
+            Energy grid on which the DOS is defined.
+        """
+        # Check consistency before actually calculating the energy grid.
+        self._check_energy_grid_parameter_consistency()
+
+        if isinstance(self.parameters.ldos_gridsize, int):
+            gridsizes = [self.parameters.ldos_gridsize]
+            offsets = [self.parameters.ldos_gridoffset_ev]
+            spacings = [self.parameters.ldos_gridspacing_ev]
+        else:
+            gridsizes = self.parameters.ldos_gridsize
+            offsets = self.parameters.ldos_gridoffset_ev
+            spacings = self.parameters.ldos_gridspacing_ev
+
+        for i in range(len(gridsizes)):
+            emin = offsets[i]
+            emax = offsets[i] + gridsizes[i] * spacings[i]
+            linspace_array = np.linspace(
+                emin, emax, gridsizes[i], endpoint=False
+            )
+            if i != len(gridsizes) - 1:
+                linspace_array = linspace_array[:-1]
+
+            if i == 0:
+                e_grid = linspace_array
+            else:
+                e_grid = np.concatenate((e_grid, linspace_array))
+
+        return e_grid
 
     def get_real_space_grid(self):
         """
@@ -1498,12 +1531,12 @@ class Target(PhysicalData):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Numpy array, for which the restrictions are to be applied.
 
         Returns
         -------
-        array : numpy.array
+        array : numpy.ndarray
             The same array, with restrictions enforced.
         """
         if self.parameters.restrict_targets == "zero_out_negative":
@@ -1521,14 +1554,53 @@ class Target(PhysicalData):
     #################
 
     def _process_loaded_dimensions(self, array_dimensions):
+        """
+        Process loaded dimensions.
+
+        For the target classes, this does not entail any actions.
+
+        Parameters
+        ----------
+        array_dimensions : tuple
+            Raw dimensions of the array.
+        """
         return array_dimensions
 
     def _process_additional_metadata(self, additional_metadata):
+        """
+        Process additional metadata.
+
+        If additional metadata is provided, and saving is performed via
+        openpmd, then this function process the metadata dictionary in a way
+        it can be saved by openpmd. Here, the additional metadata is parsed
+        by the function "read_additional_calculation_data".
+
+        Parameters
+        ----------
+        additional_metadata : dict
+            Dictionary containing additional metadata.
+        """
         self.read_additional_calculation_data(
             additional_metadata[0], additional_metadata[1]
         )
 
     def _set_openpmd_attribtues(self, iteration, mesh):
+        """
+        Set openPMD attributes.
+
+        This has to be done as part of the openPMD saving process. It saves
+        metadata related to the saved data to make data more reproducible.
+        For the Target class and subclasses, this means saving DFT simulation
+        info.
+
+        Parameters
+        ----------
+        iteration : openpmd_api.Iteration
+            OpenPMD iteration for which to set attributes.
+
+        mesh : openpmd_api.Mesh
+            OpenPMD mesh for which to set attributes.
+        """
         import openpmd_api as io
 
         super(Target, self)._set_openpmd_attribtues(iteration, mesh)
@@ -1597,6 +1669,25 @@ class Target(PhysicalData):
                     ].unit_SI = 1.0e-10
 
     def _process_openpmd_attributes(self, series, iteration, mesh):
+        """
+        Process loaded openPMD attributes.
+
+        This is done during loading from OpenPMD data. OpenPMD can save
+        metadata not contained in the data itself, but in the file. For the
+        Target class and subclasses, this means reading DFT simulation
+        output info from OpenPMD.
+
+        Parameters
+        ----------
+        series : openpmd_api.Series
+            OpenPMD series from which to load an iteration.
+
+        iteration : openpmd_api.Iteration
+            OpenPMD iteration from which to load.
+
+        mesh : openpmd_api.Mesh
+            OpenPMD mesh used during loading.
+        """
         super(Target, self)._process_openpmd_attributes(
             series, iteration, mesh
         )
@@ -1761,6 +1852,16 @@ class Target(PhysicalData):
         )
 
     def _set_geometry_info(self, mesh):
+        """
+        Set geometry information to openPMD mesh.
+
+        This has to be done as part of the openPMD saving process.
+
+        Parameters
+        ----------
+        mesh : openpmd_api.Mesh
+            OpenPMD mesh for which to set geometry information.
+        """
         # Geometry: Save the cell parameters and angles of the grid.
         if self.atoms is not None:
             import openpmd_api as io
@@ -1770,6 +1871,19 @@ class Target(PhysicalData):
             mesh.set_attribute("angles", self.voxel.cellpar()[3:])
 
     def _process_geometry_info(self, mesh):
+        """
+        Process loaded openPMD geometry information.
+
+        Information on geometry is one of the pieces of metadata that can be
+        saved in OpenPMD files. This function processes this information upon
+        loading, and saves it to the correct place in the respective MALA
+        class.
+
+        Parameters
+        ----------
+        mesh : openpmd_api.Mesh
+            OpenPMD mesh used during loading.
+        """
         spacing = mesh.grid_spacing
         if "angles" in mesh.attributes:
             angles = mesh.get_attribute("angles")
@@ -1778,10 +1892,90 @@ class Target(PhysicalData):
             self.voxel = None
 
     def _get_atoms(self):
+        """
+        Access atoms saved in PhysicalData-derived class.
+
+        For any derived class which is atom based (currently, all are), this
+        function returns the atoms, which may not be directly accessible as
+        an attribute for a variety of reasons.
+
+        Returns
+        -------
+        atoms : ase.Atoms
+            An ASE atoms object holding the associated atoms of this object.
+        """
         return self.atoms
+
+    def _check_energy_grid_parameter_consistency(self):
+        """
+        Check consistency of parameters related to energy grid.
+
+        These can either be singular values or lists, dependent on whether
+        splitting along the energy domain is used.
+        """
+        split = (
+            isinstance(self.parameters.ldos_gridsize, list)
+            and isinstance(self.parameters.ldos_gridoffset_ev, list)
+            and isinstance(self.parameters.ldos_gridspacing_ev, list)
+        )
+        no_split = (
+            isinstance(self.parameters.ldos_gridsize, int)
+            and (
+                isinstance(self.parameters.ldos_gridoffset_ev, int)
+                or isinstance(self.parameters.ldos_gridoffset_ev, float)
+            )
+            and isinstance(self.parameters.ldos_gridspacing_ev, float)
+        )
+        if not (split or no_split):
+            raise Exception(
+                "All DOS related parameters (grid size, offset and "
+                "spacing) must be either a single value or "
+                "a list."
+            )
+        if split:
+            parallel_warn(
+                "Splitting along energy axis for LDOS, this "
+                "feature is currently experimental. Correctness "
+                "of results has been verified for most systems, "
+                "but the interface may change in the future."
+            )
+            if not (
+                len(self.parameters.ldos_gridsize)
+                == len(self.parameters.ldos_gridoffset_ev)
+                and len(self.parameters.ldos_gridsize)
+                == len(self.parameters.ldos_gridspacing_ev)
+            ):
+                raise Exception(
+                    "All DOS related parameters (grid size, offset and "
+                    "spacing) must be of same length if splitting along"
+                    "the energy axis is performed."
+                )
 
     @staticmethod
     def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):
+        """
+        Get the ideal rMax for RDF calculation.
+
+        Ideal here means following the minimum image convention, which is
+        explained in "The Minimum Image Convention in Non-Cubic MD Cells"
+        by Smith,
+        http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.57.1696
+
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            Atoms for which to calculate the rMax.
+
+        method : string
+            Can be "mic" or "2mic". The former calculates rMax according to
+            the minimum image convention, the latter doubles this value.
+
+        Returns
+        -------
+        rMax : float
+            The ideal rMax for the RDF calculation.
+        """
         if method == "mic":
             return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) / 2
         elif method == "2mic":

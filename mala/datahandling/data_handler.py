@@ -350,7 +350,7 @@ class DataHandler(DataHandlerBase):
 
         Parameters
         ----------
-        numpy_array : np.array
+        numpy_array : numpy.ndarray
             Array that is to be converted.
 
         data_type : string
@@ -514,6 +514,11 @@ class DataHandler(DataHandlerBase):
         )
 
     def __allocate_arrays(self):
+        """
+        Allocate arrays for data used during training.
+
+        Preallocating arrays before loading reduces overall memory footprint.
+        """
         if self.nr_training_data > 0:
             self._training_data_inputs = np.zeros(
                 (self.nr_training_data, self.input_dimension),
@@ -554,6 +559,7 @@ class DataHandler(DataHandlerBase):
         ----------
         function : string
             Can be "tr", "va" or "te.
+
         data_type : string
             Can be "input" or "output".
         """
@@ -1025,6 +1031,11 @@ class DataHandler(DataHandlerBase):
         printout("Output scaler parametrized.", min_verbosity=1)
 
     def __parametrized_load_training_data(self):
+        """
+        Load training data and scale it with the already parametrized scalers.
+
+        This is mostly used when resuming an interrupted training run.
+        """
         if self.parameters.use_lazy_loading:
             printout(
                 "Data scalers already initilized, preparing input data.",
@@ -1048,7 +1059,26 @@ class DataHandler(DataHandlerBase):
     def __raw_numpy_to_converted_numpy(
         self, numpy_array, data_type="in", units=None
     ):
-        """Convert a raw numpy array containing into the correct units."""
+        """
+        Convert a raw numpy array into the correct units.
+
+        Parameters
+        ----------
+        numpy_array : numpy.ndarray
+            Array that is to be converted.
+
+        data_type : string
+            Can be "in" or "out", depending if input or output data is
+            processed.
+
+        units : string
+            Units of the data that is processed.
+
+        Returns
+        -------
+        converted_numpy_array: numpy.ndarray
+            The fully converted numpy array.
+        """
         if data_type == "in":
             if (
                 data_type == "in"
@@ -1077,6 +1107,24 @@ class DataHandler(DataHandlerBase):
 
         This tensor that can simply be put into a MALA network.
         No unit conversion is done here.
+
+        Parameters
+        ----------
+        numpy_array : numpy.ndarray
+            Array that is to be converted.
+
+        desired_dimensions : tuple
+            Desired dimensions of the array. If None, the array will not be
+            reshaped.
+
+        data_type : string
+            Can be "in" or "out", depending if input or output data is
+            processed.
+
+        Returns
+        -------
+        converted_tensor: torch.Tensor
+            The converted and scaled tensor.
         """
         numpy_array = numpy_array.astype(DEFAULT_NP_DATA_DTYPE)
         if desired_dimensions is not None:

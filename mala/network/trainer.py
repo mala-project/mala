@@ -124,7 +124,9 @@ class Trainer(Runner):
         self._validation_graph = None
 
     @classmethod
-    def run_exists(cls, run_name, params_format="json", zip_run=True):
+    def run_exists(
+        cls, run_name, path="./", params_format="json", zip_run=True
+    ):
         """
         Check if a hyperparameter optimization checkpoint exists.
 
@@ -132,6 +134,13 @@ class Trainer(Runner):
 
         Parameters
         ----------
+        path : str
+            Path to check for saved run.
+
+        zip_run : bool
+            If True, MALA will check for a .zip file. If False,
+            then separate files will be checked for.
+
         run_name : string
             Name of the checkpoint.
 
@@ -145,12 +154,14 @@ class Trainer(Runner):
 
         """
         if zip_run is True:
-            return os.path.isfile(run_name + ".zip")
+            return os.path.isfile(os.path.join(path, run_name + ".zip"))
         else:
-            network_name = run_name + ".network.pth"
-            iscaler_name = run_name + ".iscaler.pkl"
-            oscaler_name = run_name + ".oscaler.pkl"
-            param_name = run_name + ".params." + params_format
+            network_name = os.path.join(path, run_name + ".network.pth")
+            iscaler_name = os.path.join(path, run_name + ".iscaler.pkl")
+            oscaler_name = os.path.join(path, run_name + ".oscaler.pkl")
+            param_name = os.path.join(
+                path, run_name + ".params." + params_format
+            )
             optimizer_name = run_name + ".optimizer.pth"
             return all(
                 map(
@@ -231,7 +242,10 @@ class Trainer(Runner):
     @classmethod
     def _load_from_run(cls, params, network, data, file=None):
         """
-        Load a trainer from a file.
+        Instantiaties a Trainer object from loaded objects.
+
+        This processes already load Parameters, Network and DataHandler
+        objects.
 
         Parameters
         ----------
@@ -606,6 +620,25 @@ class Trainer(Runner):
             self._validation_data_loaders.cleanup()
 
     def _validate_network(self, data_set_fractions, metrics):
+        """
+        Validate a network, using train or validation data.
+
+        Parameters
+        ----------
+        data_set_fractions : string
+            The data set fractions to validate on. Can be "train" or
+            "validation". "test" is not supported.
+
+        metrics : list
+            List of metrics to calculate. Can be "ldos", or a number of
+            error metrics (see Tester class). Most common apart from "ldos"
+            is arguably "band_energy".
+
+        Returns
+        -------
+        errors : dict
+            Dictionary containing the errors for the selected observables.
+        """
         # """Validate a network, using train or validation data."""
         self.network.eval()
         errors = {}
@@ -737,6 +770,25 @@ class Trainer(Runner):
         return errors
 
     def __calculate_validation_error_ldos_only(self, data_loaders):
+        """
+        Calculate the validation error for the LDOS only.
+
+        This is a specialization of _validate_network that ONLY computes
+        one error, namely the LDOS error. It is more efficient, especially
+        in the distributed case, than the implementation called from
+        _validate_network. As such it is mostly "legacy" code for now, until
+        we adapt _validate_network.
+
+        Parameters
+        ----------
+        data_loaders : torch.utils.data.DataLoader
+            DataLoader for the validation data.
+
+        Returns
+        -------
+        error : float
+            Validation error for the LDOS.
+        """
         validation_loss_sum = torch.zeros(
             1, device=self.parameters._configuration["device"]
         )
@@ -881,7 +933,14 @@ class Trainer(Runner):
         return validation_loss_sum.item() / batchid
 
     def __prepare_to_train(self, optimizer_dict):
-        """Prepare everything for training."""
+        """
+        Prepare everything for training.
+
+        Parameters
+        ----------
+        optimizer_dict : dict
+            Torch optimizer dictionary.
+        """
         # Configure keyword arguments for DataSampler.
         kwargs = {
             "num_workers": self.parameters.num_workers,
@@ -1074,7 +1133,27 @@ class Trainer(Runner):
                 )
 
     def __process_mini_batch(self, network, input_data, target_data):
-        """Process a mini batch."""
+        """
+        Process a mini batch.
+
+        This includes calculating errors and updating the weights.
+
+        Parameters
+        ----------
+        network : mala.network.network.Network
+            Neural network used for error calculation and weight update.
+
+        input_data : torch.Tensor
+            Input data batch for the network.
+
+        target_data : torch.Tensor
+            Output data batch for the network.
+
+        Returns
+        -------
+        loss : torch.Tensor
+            Loss for the current mini batch.
+        """
         if self.parameters._configuration["gpu"]:
             if self.parameters.use_graphs and self._train_graph is None:
                 printout("Capturing CUDA graph for training.", min_verbosity=2)
@@ -1215,7 +1294,10 @@ class Trainer(Runner):
         Follows https://pytorch.org/tutorials/recipes/recipes/saving_and_
         loading_a_general_checkpoint.html to some degree.
         """
-        optimizer_name = self.parameters.checkpoint_name + ".optimizer.pth"
+        optimizer_name = os.path.join(
+            self.parameters.checkpoint_path,
+            self.parameters.checkpoint_name + ".optimizer.pth",
+        )
 
         # Next, we save all the other objects.
 
@@ -1240,18 +1322,30 @@ class Trainer(Runner):
         torch.save(
             save_dict, optimizer_name, _use_new_zipfile_serialization=False
         )
-        if self.parameters.run_name != "":
-            self.save_run(
-                self.parameters.checkpoint_name,
-                save_runner=True,
-                path=self.parameters.run_name,
-            )
-        else:
-            self.save_run(self.parameters.checkpoint_name, save_runner=True)
+        self.save_run(
+            self.parameters.checkpoint_name,
+            save_runner=True,
+            path=self.parameters.checkpoint_path,
+        )
 
     @staticmethod
-    def __average_validation(val, name, device="cpu"):
-        """Average validation over multiple parallel processes."""
+    def __average_validation(val, device="cpu"):
+        """
+        Average validation over multiple parallel processes.
+
+        Parameters
+        ----------
+        val : float
+            Validation loss for each rank.
+
+        device : str
+            Device to use for the calculation. Default is "cpu".
+
+        Returns
+        -------
+        avg_loss : float
+            Average loss over all parallel processes.
+        """
         tensor = torch.tensor(val, device=device)
         dist.all_reduce(tensor)
         avg_loss = tensor / dist.get_world_size()

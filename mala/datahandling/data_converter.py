@@ -530,10 +530,10 @@ class DataConverter:
 
         Returns
         -------
-        inputs : numpy.array , optional
+        inputs : numpy.ndarray , optional
             Numpy array containing the preprocessed inputs.
 
-        outputs : numpy.array , optional
+        outputs : numpy.ndarray , optional
             Numpy array containing the preprocessed outputs.
         """
         snapshot = self.__snapshots_to_convert[snapshot_number]

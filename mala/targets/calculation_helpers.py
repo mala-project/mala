@@ -14,7 +14,7 @@ def integrate_values_on_spacing(values, spacing, method, axis=0):
 
     Parameters
     ----------
-    values : numpy.array
+    values : numpy.ndarray
         Values to be integrated.
     spacing : int
         Spacing of the grid on which the integration is performed.
@@ -49,7 +49,7 @@ def fermi_function(energy, fermi_energy, temperature, suppress_overflow=False):
 
     Parameters
     ----------
-    energy : float or numpy.array
+    energy : float or numpy.ndarray
         Energy for which the Fermi function is supposed to be calculated in
         energy_units.
 
@@ -103,7 +103,7 @@ def entropy_multiplicator(energy, fermi_energy, temperature):
 
     Parameters
     ----------
-    energy : float or numpy.array
+    energy : float or numpy.ndarray
         Energy for which the Fermi function is supposed to be calculated in
         energy_units.
 
@@ -298,7 +298,7 @@ def analytical_integration(D, I0, I1, fermi_energy, energy_grid, temperature):
 
     Parameters
     ----------
-    D : numpy.array or float
+    D : numpy.ndarray or float
         Either LDOS or DOS data.
 
     I0 : string
@@ -324,7 +324,7 @@ def analytical_integration(D, I0, I1, fermi_energy, energy_grid, temperature):
     fermi_energy : float
         The fermi energy in eV.
 
-    energy_grid : numpy.array
+    energy_grid : numpy.ndarray
         Energy grid on which the integration should be performed.
 
     temperature : float
@@ -332,7 +332,7 @@ def analytical_integration(D, I0, I1, fermi_energy, energy_grid, temperature):
 
     Returns
     -------
-    integration_value : numpy.array or float
+    integration_value : numpy.ndarray or float
         Value of the integral.
     """
     # Mappings for the functions further down.
@@ -410,10 +410,10 @@ def gaussians(grid, centers, sigma):
 
     Parameters
     ----------
-    grid : np.array
+    grid : numpy.ndarray
         Grid on which this Gaussian is defined.
 
-    centers : np.array
+    centers : numpy.ndarray
         Array of centers for the Gaussians
 
     sigma : float
@@ -421,7 +421,7 @@ def gaussians(grid, centers, sigma):
 
     Returns
     -------
-    multiple_gaussians : np.array
+    multiple_gaussians : numpy.ndarray
         multiple gaussians on the same grid, but with different centers.
 
 

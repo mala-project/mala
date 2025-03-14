@@ -353,7 +353,7 @@ class Density(Target):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -364,7 +364,7 @@ class Density(Target):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in 1/A^3.
         """
         if in_units == "1/A^3" or in_units is None:
@@ -383,7 +383,7 @@ class Density(Target):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in 1/A^3.
 
         out_units : string
@@ -394,7 +394,7 @@ class Density(Target):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
         """
         if out_units == "1/A^3":
@@ -585,7 +585,7 @@ class Density(Target):
 
         Parameters
         ----------
-        density_data : numpy.array
+        density_data : numpy.ndarray
             Electronic density on the given grid. Has to either be of the form
             gridpoints or (gridx, gridy, gridz). If None, then the cached
             density will be used for the calculation.
@@ -704,7 +704,7 @@ class Density(Target):
 
         Parameters
         ----------
-        density_data : numpy.array
+        density_data : numpy.ndarray
             Electronic density data, this array will be returned unchanged
             depending on the other parameters. If None, then the cached
             density will be used for the calculation.
@@ -721,7 +721,7 @@ class Density(Target):
 
         Returns
         -------
-        density_data : numpy.array
+        density_data : numpy.ndarray
             Electronic density data in the desired shape.
         """
         if len(density_data.shape) == 4:
@@ -777,7 +777,7 @@ class Density(Target):
 
         Parameters
         ----------
-        density_data : numpy.array
+        density_data : numpy.ndarray
             Density data on a grid. If None, then the cached
             density will be used for the calculation.
 
@@ -856,7 +856,7 @@ class Density(Target):
 
         Parameters
         ----------
-        density_data : numpy.array
+        density_data : numpy.ndarray
             Density data on a grid. If None, then the cached
             density will be used for the calculation.
 
@@ -932,7 +932,7 @@ class Density(Target):
 
         Returns
         -------
-        scaled_positions : numpy.array
+        scaled_positions : numpy.ndarray
             The scaled positions.
         """
         principal_axis = atoms.get_cell()[0][0]
@@ -1152,7 +1152,7 @@ class Density(Target):
             #
             # from mpi4py import MPI
             # ggrid_sum = np.sum(gaussian_descriptors)
-            # full_ggrid_sum = np.array([0.0])
+            # full_ggrid_sum = numpy.ndarray([0.0])
             # comm = get_comm()
             # comm.Barrier()
             # comm.Reduce([ggrid_sum, MPI.DOUBLE],
@@ -1183,7 +1183,7 @@ class Density(Target):
             # Check normalization of the reference Gaussian descriptors
             #
             # reference_ggrid_sum = np.sum(reference_gaussian_descriptors)
-            # full_reference_ggrid_sum = np.array([0.0])
+            # full_reference_ggrid_sum = numpy.ndarray([0.0])
             # comm = get_comm()
             # comm.Barrier()
             # comm.Reduce([reference_ggrid_sum, MPI.DOUBLE],

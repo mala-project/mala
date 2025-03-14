@@ -230,6 +230,31 @@ class LazyLoadDataset(Dataset):
         self.currently_loaded_file = file_index
 
     def _get_file_index(self, idx, is_slice=False, is_start=False):
+        """
+        Get the file index and the index in the file.
+
+        These indices are determined from the index within the data set.
+        Also supports slices as indices.
+
+        Parameters
+        ----------
+        idx : int
+            Index within the data set.
+
+        is_slice : bool
+            If True, the index is a slice.
+
+        is_start : bool
+            If True, the slice starts at the beginning of the file.
+
+        Returns
+        -------
+        file_index : int
+            Index of the file that contains the requested data.
+
+        index_in_file : int
+            Index within the file.
+        """
         file_index = None
         index_in_file = idx
         if is_slice:

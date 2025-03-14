@@ -203,7 +203,18 @@ class DOS(Target):
     @property
     def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
-        return self.parameters.ldos_gridsize
+        if isinstance(self.parameters.ldos_gridsize, int):
+            return self.parameters.ldos_gridsize
+        elif isinstance(self.parameters.ldos_gridsize, list):
+            # For splits, we sum up the individual grid sizes, BUT we
+            # have to subtract one for each split, as the last energy
+            # of each section gets discarded. So for three sections,
+            # we have to subtract 2.
+            return (
+                np.sum(self.parameters.ldos_gridsize)
+                - len(self.parameters.ldos_gridsize)
+                + 1
+            )
 
     @property
     def data_name(self):
@@ -269,7 +280,7 @@ class DOS(Target):
     @cached_property
     def energy_grid(self):
         """Energy grid on which the DOS is expressed."""
-        return self.get_energy_grid()
+        return self._get_energy_grid()
 
     @cached_property
     def band_energy(self):
@@ -359,7 +370,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -370,7 +381,7 @@ class DOS(Target):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in 1/eV.
         """
         if in_units == "1/eV" or in_units is None:
@@ -389,7 +400,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in 1/eV.
 
         out_units : string
@@ -397,7 +408,7 @@ class DOS(Target):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
         """
         if out_units == "1/eV":
@@ -416,7 +427,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        path : string
+        path : string or List
             Path of the file containing the DOS.
 
         Returns
@@ -428,26 +439,52 @@ class DOS(Target):
         # check whether we have a correct file.
 
         energy_grid = self.energy_grid
-        return_dos_values = []
 
-        # Open the file, then iterate through its contents.
-        with open(path, "r") as infile:
-            lines = infile.readlines()
-            i = 0
+        if isinstance(path, str):
+            readpaths = [path]
+        else:
+            readpaths = path
 
-            for dos_line in lines:
-                # The first column contains the energy value.
-                if "#" not in dos_line and i < self.parameters.ldos_gridsize:
-                    e_val = float(dos_line.split()[0])
-                    dosval = float(dos_line.split()[1])
-                    if (
-                        np.abs(e_val - energy_grid[i])
-                        < self.parameters.ldos_gridspacing_ev * 0.98
-                    ):
-                        return_dos_values.append(dosval)
-                        i += 1
+        current_energy_index = 0
 
-        array = np.array(return_dos_values)
+        for path_index, readpath in enumerate(readpaths):
+            return_dos_values = []
+
+            # Open the file, then iterate through its contents.
+            with open(readpath, "r") as infile:
+                lines = infile.readlines()
+
+                # Directly at the split we discard the last energy value
+                # of the left side of the split. This requires that both
+                # DOS have been sampled to/from the EXACT same value.
+                # Currently, this responsibility lies with the user, and I
+                # am not sure if we can consistently check for this, even
+                # if we wanted to. In the DOS case, the energies get reported,
+                # but that is NOT the case in the LDOS case.
+                end = (
+                    self.parameters.ldos_gridsize[path_index] - 1
+                    if path_index != len(readpaths) - 1
+                    else self.parameters.ldos_gridsize[path_index]
+                )
+                end += current_energy_index
+
+                for dos_line in lines:
+                    # The first column contains the energy value.
+                    if "#" not in dos_line and current_energy_index < end:
+                        e_val = float(dos_line.split()[0])
+                        dosval = float(dos_line.split()[1])
+                        if (
+                            np.abs(e_val - energy_grid[current_energy_index])
+                            < self.parameters.ldos_gridspacing_ev[path_index]
+                            * 0.98
+                        ):
+                            return_dos_values.append(dosval)
+                            current_energy_index += 1
+                        # print(path_index, i)
+            if path_index == 0:
+                array = np.array(return_dos_values)
+            else:
+                array = np.concatenate((array, return_dos_values))
         self.density_of_states = array
         return array
 
@@ -465,8 +502,12 @@ class DOS(Target):
             Path to the QE out file. If None, the QE output that was loaded
             via read_additional_calculation_data will be used.
 
-        smearing_factor : int
+        smearing_factor : int or List
             Smearing factor relative to the energy grid spacing. Default is 2.
+            If list, DOS splitting is assumed. In this case, the length
+            of the list must be consistent with the length of
+            parameters.targets.ldos_gridspacing_ev, which is a list in this
+            case as well.
 
         Returns
         -------
@@ -485,17 +526,47 @@ class DOS(Target):
                 "Rerun calculation with verbosity set to 'high'."
             )
 
+        if isinstance(self.parameters.ldos_gridspacing_ev, list):
+            grid_spacings = self.parameters.ldos_gridspacing_ev
+            grid_sizes = self.parameters.ldos_gridsize
+            _smearing_factors = smearing_factor
+            if len(_smearing_factors) != len(grid_spacings):
+                raise Exception(
+                    "Length of smearing factor list must be consistent with "
+                    "the length of the grid spacing list."
+                )
+        else:
+            grid_spacings = [self.parameters.ldos_gridspacing_ev]
+            grid_sizes = [self.parameters.ldos_gridsize]
+            _smearing_factors = [smearing_factor]
+
         # Get the gaussians for all energy values and calculate the DOS per
         # band.
-        dos_per_band = gaussians(
-            self.energy_grid,
-            atoms_object.get_calculator().band_structure().energies[0, :, :],
-            smearing_factor * self.parameters.ldos_gridspacing_ev,
-        )
-        dos_per_band = kweights[:, np.newaxis, np.newaxis] * dos_per_band
+        dos_data = None
+        previous_beginning = 0
+        for spacing_idx, grid_spacing in enumerate(grid_spacings):
+            size_for_spacing = grid_sizes[spacing_idx] + previous_beginning
+            if spacing_idx != len(grid_spacings) - 1:
+                size_for_spacing -= 1
 
-        # QE gives the band energies in eV, so no conversion necessary here.
-        dos_data = np.sum(dos_per_band, axis=(0, 1))
+            dos_per_band = gaussians(
+                self.energy_grid[previous_beginning:size_for_spacing],
+                atoms_object.get_calculator()
+                .band_structure()
+                .energies[0, :, :],
+                _smearing_factors[spacing_idx] * grid_spacing,
+            )
+            dos_per_band = kweights[:, np.newaxis, np.newaxis] * dos_per_band
+
+            # QE gives the band energies in eV, so no conversion necessary
+            # here.
+            if spacing_idx == 0:
+                dos_data = np.sum(dos_per_band, axis=(0, 1))
+            else:
+                dos_data = np.concatenate(
+                    (dos_data, np.sum(dos_per_band, axis=(0, 1)))
+                )
+            previous_beginning = size_for_spacing
         self.density_of_states = dos_data
         return dos_data
 
@@ -548,26 +619,6 @@ class DOS(Target):
     # Calculations
     ##############
 
-    def get_energy_grid(self):
-        """
-        Get energy grid.
-
-        Returns
-        -------
-        e_grid : numpy.array
-            Energy grid on which the DOS is defined.
-        """
-        emin = self.parameters.ldos_gridoffset_ev
-
-        emax = (
-            self.parameters.ldos_gridoffset_ev
-            + self.parameters.ldos_gridsize
-            * self.parameters.ldos_gridspacing_ev
-        )
-        grid_size = self.parameters.ldos_gridsize
-        linspace_array = np.linspace(emin, emax, grid_size, endpoint=False)
-        return linspace_array
-
     def get_band_energy(
         self,
         dos_data=None,
@@ -581,7 +632,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        dos_data : numpy.array
+        dos_data : numpy.ndarray
             DOS data with dimension [energygrid]. If None, then the cached
             DOS will be used for the calculation.
 
@@ -678,7 +729,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        dos_data : numpy.array
+        dos_data : numpy.ndarray
             DOS data with dimension [energygrid]. If None, then the cached
             DOS will be used for the calculation.
 
@@ -746,7 +797,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        dos_data : numpy.array
+        dos_data : numpy.ndarray
             DOS data with dimension [energygrid]. If None, then the cached
             DOS will be used for the calculation.
 
@@ -839,7 +890,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        dos_data : numpy.array
+        dos_data : numpy.ndarray
             DOS data with dimension [energygrid]. If None, then the cached
             DOS will be used for the calculation.
 
@@ -931,18 +982,71 @@ class DOS(Target):
     #################
 
     def _process_loaded_array(self, array, units=None):
+        """
+        Process loaded array (i.e., unit change, reshaping, etc.).
+
+        Saves array to internal variable if class attribute save_target_data
+        is True.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Array to process.
+
+        units : string
+            Units of input array.
+        """
         array *= self.convert_units(1, in_units=units)
         if self.save_target_data:
             self.density_of_states = array
 
     def _set_feature_size_from_array(self, array):
+        """
+        Set the feature size from the array.
+
+        Feature sizes are saved in different ways for different physical data
+        classes.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Array to extract the feature size from.
+        """
         self.parameters.ldos_gridsize = np.shape(array)[-1]
 
     @staticmethod
     def __number_of_electrons_from_dos(
         dos_data, energy_grid, fermi_energy, temperature, integration_method
     ):
-        """Calculate the number of electrons from DOS data."""
+        """
+        Calculate the number of electrons from DOS data.
+
+        Parameters
+        ----------
+        dos_data : numpy.ndarray
+            DOS data (1D).
+
+        energy_grid : numpy.ndarray
+            Energy grid on which the DOS is defined.
+
+        fermi_energy : float
+            Fermi energy level in eV.
+
+        temperature : float
+            Temperature in K.
+
+        integration_method : string
+            Integration method to be used. Currently supported:
+
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
+                - "analytical" for analytical integration. Recommended.
+
+        Returns
+        -------
+        number_of_electrons : float
+            Number of electrons.
+        """
         # Calculate the energy levels and the Fermi function.
 
         fermi_vals = fermi_function(
@@ -982,7 +1086,35 @@ class DOS(Target):
     def __band_energy_from_dos(
         dos_data, energy_grid, fermi_energy, temperature, integration_method
     ):
-        """Calculate the band energy from DOS data."""
+        """
+        Calculate the band energy from DOS data.
+
+        Parameters
+        ----------
+        dos_data : numpy.ndarray
+            DOS data (1D).
+
+        energy_grid : numpy.ndarray
+            Energy grid on which the DOS is defined.
+
+        fermi_energy : float
+            Fermi energy level in eV.
+
+        temperature : float
+            Temperature in K.
+
+        integration_method : string
+            Integration method to be used. Currently supported:
+
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
+                - "analytical" for analytical integration. Recommended.
+
+        Returns
+        -------
+        band_energy : float
+            Band energy in eV.
+        """
         # Calculate the energy levels and the Fermi function.
         fermi_vals = fermi_function(
             energy_grid, fermi_energy, temperature, suppress_overflow=True
@@ -1033,6 +1165,32 @@ class DOS(Target):
         Calculate the entropy contribution to the total energy from DOS data.
 
         More specifically, this gives -\beta^-1*S_S
+
+        Parameters
+        ----------
+        dos_data : numpy.ndarray
+            DOS data (1D).
+
+        energy_grid : numpy.ndarray
+            Energy grid on which the DOS is defined.
+
+        fermi_energy : float
+            Fermi energy level in eV.
+
+        temperature : float
+            Temperature in K.
+
+        integration_method : string
+            Integration method to be used. Currently supported:
+
+                - "trapezoid" for trapezoid method
+                - "simpson" for Simpson method.
+                - "analytical" for analytical integration. Recommended.
+
+        Returns
+        -------
+        entropy_contribution : float
+            Entropy contribution in eV.
         """
         # Calculate the entropy contribution to the energy.
         if integration_method == "trapezoid":
