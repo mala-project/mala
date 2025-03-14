@@ -23,7 +23,7 @@ parameters = mala.Parameters()
 parameters.verbosity = 1
 parameters.data.input_rescaling_type = "feature-wise-standard"
 parameters.data.output_rescaling_type = "minmax"
-parameters.network.layer_activations = ["ReLU"]
+parameters.network.layer_activations = "ReLU"
 
 # No real training, just showing how shuffling directly before training works.
 parameters.running.max_number_epochs = 5

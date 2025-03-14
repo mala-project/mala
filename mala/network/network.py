@@ -231,10 +231,8 @@ class FeedForwardNet(Network):
         # We should NOT modify the list itself. This would break the
         # hyperparameter algorithms.
         use_only_one_activation_type = False
-        if len(self.params.layer_activations) == 1:
+        if type(self.params.layer_activations) == str:
             use_only_one_activation_type = True
-        elif len(self.params.layer_activations) < self.number_of_layers:
-            raise Exception("Not enough activation layers provided.")
         elif len(self.params.layer_activations) > self.number_of_layers:
             printout(
                 "Too many activation layers provided. The last",
@@ -246,7 +244,7 @@ class FeedForwardNet(Network):
             )
 
         # Add the layers.
-        # As this is a feedforward layer we always add linear layers, and then
+        # As this is a feedforward NN we always add linear layers, and then
         # an activation function
         for i in range(0, self.number_of_layers):
             self.layers.append(
@@ -261,7 +259,7 @@ class FeedForwardNet(Network):
                 if use_only_one_activation_type:
                     self.layers.append(
                         self._activation_mappings[
-                            self.params.layer_activations[0]
+                            self.params.layer_activations
                         ]()
                     )
                 else:
@@ -272,6 +270,9 @@ class FeedForwardNet(Network):
                     )
             except KeyError:
                 raise Exception("Invalid activation type seleceted.")
+            except IndexError:
+                # Layer without activation
+                pass
 
         # Once everything is done, we can move the Network on the target
         # device.

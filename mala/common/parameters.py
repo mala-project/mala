@@ -344,16 +344,17 @@ class ParametersNetwork(ParametersBase):
         network. Please note that the input layer is included therein.
         Default: [10,10,0]
 
-    layer_activations : list
+    layer_activations : list or str
         A list of strings detailing the activation functions to be used
-        by the neural network. If the dimension of layer_activations is
-        smaller than the dimension of layer_sizes-1, than the first entry
-        is used for all layers.
+        by the neural network. If a single string is supplied, then this
+        activation function is used for all layers (including the output layer,
+        i.e., an output activation is used!). Otherwise, the activation
+        functions are added layer by layer.
         Currently supported activation functions are:
 
-            - Sigmoid (default)
+            - Sigmoid
             - ReLU
-            - LeakyReLU
+            - LeakyReLU (default)
 
     loss_function_type : string
         Loss function for the neural network
@@ -388,7 +389,7 @@ class ParametersNetwork(ParametersBase):
         super(ParametersNetwork, self).__init__()
         self.nn_type = "feed-forward"
         self.layer_sizes = [10, 10, 10]
-        self.layer_activations = ["Sigmoid"]
+        self.layer_activations = "LeakyReLU"
         self.loss_function_type = "mse"
 
         # for LSTM/Gru

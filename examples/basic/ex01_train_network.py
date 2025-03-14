@@ -22,7 +22,7 @@ parameters = mala.Parameters()
 parameters.data.input_rescaling_type = "feature-wise-standard"
 parameters.data.output_rescaling_type = "minmax"
 # Specify the used activation function.
-parameters.network.layer_activations = ["ReLU"]
+parameters.network.layer_activations = "ReLU"
 # Specify the training parameters.
 # These may be determined via hyperparameter tuning.
 parameters.running.max_number_epochs = 100
