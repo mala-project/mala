@@ -166,24 +166,32 @@ def hartree_contribution():
         print(mala_forces[point, :] / np.array(numerical_forces))
 
 
-def backpropagation():
+def backpropagation_pieces():
     """
-    Test whether backpropagation works. To this end, the entire forces are
-    computed, and then backpropagated through the network.
+    Check the individual parts of the backpropagation.
     """
     # Only compute a specific part of the forces.
+    ldos_calculator: mala.LDOS
+    predictor: mala.Predictor
     ldos, ldos_calculator, parameters, predictor = run_prediction(
         backprop=True
     )
-    ldos_calculator.input_data_derivative = predictor.input_data
-    ldos_calculator.output_data_torch = predictor.output_data
+    # For easier testing, can also be commented out.
+    ldos_calculator.debug_forces_flag = "band_energy"
+
+    # This next line can later be part of the prediction itself within the
+    # Predictor class.
+    ldos_calculator.setup_for_forces(predictor)
+
+    # Performs the calculation internally.
     mala_forces = ldos_calculator.atomic_forces
+
     # Should be 8748, 91
     print("FORCE TEST: Backpropagation machinery.")
     print(mala_forces.size())
 
 
-band_energy_contribution()
-entropy_contribution()
-hartree_contribution()
-backpropagation()
+# band_energy_contribution()
+# entropy_contribution()
+# hartree_contribution()
+backpropagation_pieces()

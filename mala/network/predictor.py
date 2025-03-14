@@ -46,6 +46,7 @@ class Predictor(Runner):
         self._test_data_loader = None
         self._number_of_batches_per_snapshot = 0
         self.target_calculator = data.target_calculator
+
         self.input_data = None
         self.output_data = None
 
@@ -76,8 +77,9 @@ class Predictor(Runner):
             self.data.target_calculator.atoms, gather_ldos=gather_ldos
         )
 
-    def predict_for_atoms(self, atoms, gather_ldos=False, temperature=None,
-                          save_grads=False):
+    def predict_for_atoms(
+        self, atoms, gather_ldos=False, temperature=None, save_grads=False
+    ):
         """
         Get predicted LDOS for an atomic configuration.
 
@@ -206,14 +208,15 @@ class Predictor(Runner):
             if save_grads is True:
                 self.input_data = snap_descriptors
                 self.input_data.requires_grad = True
-                return self._forward_snap_descriptors(snap_descriptors,
-                                                      save_torch_outputs=True)
+                return self._forward_snap_descriptors(
+                    snap_descriptors, save_torch_outputs=True
+                )
             else:
                 return self._forward_snap_descriptors(snap_descriptors)
 
-    def _forward_snap_descriptors(self, snap_descriptors,
-                                  local_data_size=None,
-                                  save_torch_outputs=False):
+    def _forward_snap_descriptors(
+        self, snap_descriptors, local_data_size=None, save_torch_outputs=False
+    ):
         """
         Forward a scaled tensor of descriptors through the neural network.
 
@@ -244,13 +247,13 @@ class Predictor(Runner):
 
         if local_data_size is None:
             local_data_size = self.data.grid_size
-        predicted_outputs = \
-            np.zeros((local_data_size,
-                      self.data.target_calculator.feature_size))
+        predicted_outputs = np.zeros(
+            (local_data_size, self.data.target_calculator.feature_size)
+        )
         if save_torch_outputs:
-            self.output_data = \
-                torch.zeros((local_data_size,
-                             self.data.target_calculator.feature_size))
+            self.output_data = torch.zeros(
+                (local_data_size, self.data.target_calculator.feature_size)
+            )
 
         # Only predict if there is something to predict.
         # Elsewise, we just wait at the barrier down below.
@@ -281,8 +284,7 @@ class Predictor(Runner):
                     self.parameters._configuration["device"]
                 )
                 if save_torch_outputs:
-                    self.output_data[sl] \
-                    = self.network(inputs)
+                    self.output_data[sl] = self.network(inputs)
                 predicted_outputs[sl] = (
                     self.data.output_data_scaler.inverse_transform(
                         self.network(inputs).to("cpu"), as_numpy=True

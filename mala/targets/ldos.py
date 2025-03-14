@@ -2,6 +2,7 @@
 
 from functools import cached_property
 
+import mala.datahandling.data_scaler
 from ase.units import Rydberg, Bohr, J, m
 import math
 import numpy as np
@@ -49,6 +50,10 @@ class LDOS(Target):
         self.debug_forces_flag = None
         self.input_data_derivative = None
         self.output_data_torch = None
+        self.input_data_scaler: mala.datahandling.data_scaler.DataScaler = None
+        self.output_data_scaler: mala.datahandling.data_scaler.DataScaler = (
+            None
+        )
 
     @classmethod
     def from_numpy_file(cls, params, path, units="1/(eV*A^3)"):
@@ -1606,8 +1611,21 @@ class LDOS(Target):
             #################################
 
             if self.input_data_derivative is not None:
-                self.output_data_torch.backward(torch.from_numpy(d_E_d_d))
-                d_d_d_B = self.input_data_derivative.grad
+                # OLD: This is how the code was until 14.03.2025.
+                # I think it is not yet correct - d_E_d_d is still scaled,
+                # and d_d_d_B is never unscaled.
+                # self.output_data_torch.backward(torch.from_numpy(d_E_d_d))
+                # d_d_d_B = self.input_data_derivative.grad
+
+                # I think this is how it is supposed to read:
+                self.output_data_torch.backward(
+                    self.output_data_scaler.transform(
+                        torch.from_numpy(d_E_d_d)
+                    )
+                )
+                d_d_d_B = self.input_data_scaler.inverse_transform(
+                    self.input_data_derivative.grad
+                )
                 return d_d_d_B
 
             else:
@@ -1983,3 +2001,18 @@ class LDOS(Target):
         else:
             self.local_density_of_states = ldos_data
             return ldos_data
+
+    def setup_for_forces(self, predictor):
+        """
+        Set calculator up for forces prediction by copying data from Predictor.
+
+
+        Parameters
+        ----------
+        predictor : mala.Predictor
+            Predictor class used for LDOS prediction.
+        """
+        self.input_data_derivative = predictor.input_data
+        self.output_data_torch = predictor.output_data
+        self.input_data_scaler = predictor.data.input_data_scaler
+        self.output_data_scaler = predictor.data.output_data_scaler
