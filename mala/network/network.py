@@ -231,17 +231,18 @@ class FeedForwardNet(Network):
         # We should NOT modify the list itself. This would break the
         # hyperparameter algorithms.
         use_only_one_activation_type = False
-        if type(self.params.layer_activations) == str:
-            use_only_one_activation_type = True
-        elif len(self.params.layer_activations) > self.number_of_layers:
-            printout(
-                "Too many activation layers provided. The last",
-                str(
-                    len(self.params.layer_activations) - self.number_of_layers
-                ),
-                "activation function(s) will be ignored.",
-                min_verbosity=1,
-            )
+
+        if not isinstance(self.params.layer_activations, str):
+            if len(self.params.layer_activations) > self.number_of_layers:
+                printout(
+                    "Too many activation layers provided. The last",
+                    str(
+                        len(self.params.layer_activations)
+                        - self.number_of_layers
+                    ),
+                    "activation function(s) will be ignored.",
+                    min_verbosity=1,
+                )
 
         # Add the layers.
         # As this is a feedforward NN we always add linear layers, and then
@@ -256,22 +257,18 @@ class FeedForwardNet(Network):
                 )
             )
             try:
-                if use_only_one_activation_type:
-                    self.layers.append(
-                        self._activation_mappings[
-                            self.params.layer_activations
-                        ]()
+                if isinstance(self.params.layer_activations, str):
+                    self._append_activation_function(
+                        self.params.layer_activations
                     )
                 else:
-                    self.layers.append(
-                        self._activation_mappings[
-                            self.params.layer_activations[i]
-                        ]()
+                    self._append_activation_function(
+                        self.params.layer_activations[i]
                     )
             except KeyError:
                 raise Exception("Invalid activation type seleceted.")
             except IndexError:
-                # Layer without activation
+                # No activation functions left to append at the end.
                 pass
 
         # Once everything is done, we can move the Network on the target
@@ -296,6 +293,24 @@ class FeedForwardNet(Network):
         for layer in self.layers:
             inputs = layer(inputs)
         return inputs
+
+    def _append_activation_function(self, activation_function):
+        """
+        Append an activation function to the network.
+
+        Parameters
+        ----------
+        activation_function : str
+            Activation function to be appended.
+        """
+        if activation_function is None:
+            pass
+        elif isinstance(activation_function, str):
+            self.layers.append(
+                self._activation_mappings[activation_function]()
+            )
+        elif isinstance(activation_function, nn.Module):
+            self.layers.append(activation_function)
 
 
 class LSTM(Network):

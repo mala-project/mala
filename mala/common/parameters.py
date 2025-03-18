@@ -350,10 +350,13 @@ class ParametersNetwork(ParametersBase):
         activation function is used for all layers (including the output layer,
         i.e., an output activation is used!). Otherwise, the activation
         functions are added layer by layer.
+        Note that no activation function is applied between input layer and
+        first hidden layer!
         Currently supported activation functions are:
 
             - Sigmoid
             - ReLU
+            - None (no activation used)
             - LeakyReLU (default)
 
     loss_function_type : string
