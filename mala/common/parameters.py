@@ -352,12 +352,17 @@ class ParametersNetwork(ParametersBase):
         functions are added layer by layer.
         Note that no activation function is applied between input layer and
         first hidden layer!
-        Currently supported activation functions are:
+        The items in the list can either be strings, which MALA
+        will map them directly to the correct activation functions or
+        torch.nn.Module objects containing the activation functions directly
+        OR None, in which case no activation function is used. The None
+        can be ommitted at the end, but is useful when layers without
+        activation functions are to be added in the middle
+        Currently supported activation function strings are:
 
-            - Sigmoid
-            - ReLU
-            - None (no activation used)
-            - LeakyReLU (default)
+            - "Sigmoid"
+            - "ReLU"
+            - "LeakyReLU" (default)
 
     loss_function_type : string
         Loss function for the neural network
