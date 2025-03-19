@@ -1,5 +1,6 @@
 """ACE descriptor class."""
 
+import glob
 import os
 import itertools
 import sys
@@ -43,7 +44,7 @@ class ACE(Descriptor):
 
         # Initialize a dictionary with ionic radii (in Angstrom).
         # and a list containing all elements which are considered metals.
-        self._ionic_radii, self._metal_list = self.__init_element_lists()
+        self._atomic_radii, self._metal_list = self.__init_element_lists()
 
         # Initialize several arrays that are computed using
         # nested for-loops but can be reused.
@@ -52,15 +53,15 @@ class ACE(Descriptor):
         # If a pkl file is detected, the array is loaded from the pkl file,
         # otherwise it is computed and saved to a pkl file.
         # The arrays are used within the ACE descriptor calculation.
-        # Which arrays are actually needed depends on which type of coefficients
-        # are used for the ACE descriptor calculation.
-        if self.parameters.ace_coupling_type == "wigner3j":
+        # Which arrays are actually needed depends on which type of
+        # coefficients are used for the ACE descriptor calculation.
+        if self.parameters.ace_coupling_coefficients_type == "wigner3j":
             self.__precomputed_wigner_3j = self.__init_wigner_3j(
-                self.parameters.ace_reduction_coefficients_lmax
+                self.parameters.ace_coupling_coefficients_maximum_l
             )
-        if self.parameters.ace_coupling_type == "clebsch_gordan":
+        if self.parameters.ace_coupling_coefficients_type == "clebsch_gordan":
             self.__precomputed_clebsch_gordan = self.__init_clebsch_gordan(
-                self.parameters.ace_reduction_coefficients_lmax
+                self.parameters.ace_coupling_coefficients_maximum_l
             )
 
         # File which holds the coupling coefficients.
@@ -70,7 +71,7 @@ class ACE(Descriptor):
 
         # Will get filled once the atoms object has been loaded.
         # mumax is the maximum chemical basis index (should be equal to the number of chemical types for now)
-        self.__ace_mumax = Nonea
+        self.__ace_mumax = None
         # constant energy to shift ace model by - should be 0/NONE in MALA
         self.__ace_reference_energy = None
 
@@ -91,11 +92,35 @@ class ACE(Descriptor):
         self.__ace_grid_filter = True
         self.__ace_padfunc = True
 
+        # TODO: Move that into the ace.py class. Rename them, also they are
+        # always 0 for now
+        # Equivariance options for the ACE descriptors.
+        # L_R: Transformation characteristics of the descriptor
+        # (0: scalar, 1: vector, 2: tensor, etc.)
+        # M_R: Selects which transformation within the subclass of
+        # transformations selected by L_R.
+
+        # Transformation characteristic and selector, also referred to as
+        # L_R and M_R, respectively. The former governs which type of
+        # transformation characteristic the descriptors follow (i.e., do they
+        # transform as 0: scalar, 1: vector, 2: tensor, etc.). The latter
+        # selects which transformation within the subclass of transformations
+        # selected by L_R is used. E.g., if _transformation_characteristic=1,
+        # then the descriptors may transform like a p_x, p_y, or p_z orbital,
+        # depending on the value of _transformation_selector (-1, 0, 1).
+        # For now, these will always be 0. I put them as class attributes
+        # so that they may be changed for debugging purposes.
+        self._transformation_characteristic = 0
+        self._transformation_selector = 0
+
         # Consistency checks for the ACE settings.
         if (
-            len(self.parameters.ace_ranks) != len(self.parameters.ace_lmax)
-            or len(self.parameters.ace_ranks) != len(self.parameters.ace_nmax)
-            or len(self.parameters.ace_ranks) != len(self.parameters.ace_lmin)
+            len(self.parameters.ace_included_expansion_ranks)
+            != len(self.parameters.ace_maximum_l_per_rank)
+            or len(self.parameters.ace_included_expansion_ranks)
+            != len(self.parameters.ace_maximum_n_per_rank)
+            or len(self.parameters.ace_included_expansion_ranks)
+            != len(self.parameters.ace_minimum_l_per_rank)
         ):
             raise Exception(
                 "ACE ranks, lmax, nmax, and lmin must have the same length"
@@ -239,21 +264,10 @@ class ACE(Descriptor):
         if self.couplings_yace_file is None:
             self.couplings_yace_file = self._calculate_coupling_coeffs()
 
-        # Check the cutoff radius, i.e., compare that the user choice
-        # is not too small compared to those requird by ACE.
-        if self.parameters.ace_cutoff < self._maximum_cutoff_factor:
-            printout(
-                "One or more automatically generated ACE cutoff radii is "
-                "larger than the input cutoff radius. Updating input cutoff "
-                "radius stored in parameters.descriptors.ace_cutoff "
-                "accordingly."
-            )
-            self.parameters.ace_cutoff = self._maximum_cutoff_factor
-
         # Create LAMMPS instance.
         lammps_dict = {
             "ace_coeff_file": self.couplings_yace_file,
-            "rcutfac": self.parameters.ace_cutoff,
+            "rcutfac": self._maximum_cutoff_factor,
         }
         for idx, element in enumerate(sorted(list(set(self._atoms.numbers)))):
             lammps_dict["mass" + str(idx + 1)] = atomic_masses[element]
@@ -382,18 +396,23 @@ class ACE(Descriptor):
                 )
                 element_list = [e.strip() for e in element_list]
 
-                # We cannot compare the lists as sets, because order is
-                # important.
-                # We omit "G" from the comparison, because it is not an
-                # element. It does have to be in the list for the coupling
-                # constants though.
-                if (
-                    sorted(list(set(self._atoms.symbols))) != element_list[:-1]
-                    or element_list[-1] != "G"
-                ):
-                    return None
-                else:
+                # We don't have to worry about order in this comparison,
+                # because both lists are ordered, and the element lists
+                # in the coupling coefficients are always saved in an
+                # ordered fashion.
+                compatible = True
+                if element_list[-1] != "G":
+                    compatible = False
+                list_ase = sorted(list(set(self._atoms.symbols)))
+                for element_idx in range(len(list_ase)):
+                    if list_ase[element_idx] not in element_list:
+                        compatible = False
+                        break
+
+                if compatible:
                     return coupling_file
+                else:
+                    return None
         else:
             return None
 
@@ -425,23 +444,16 @@ class ACE(Descriptor):
         must be defined per "bond type". A larger `lambda` provides more
         sensitivity for small distances compared to larger distances, and does
         so through an exponential function. As `lambda` approaches 0, the scaled
-        distance approaches the true separation distance between the gridpoint 
+        distance approaches the true separation distance between the gridpoint
         and the atom `r`. The default values for `lambda` are chosen to be small
         fractions of the respective cutoff radii, so that small and large
         separations are given similar sensitivities. In practice, these are
-        hyperparameters that should be optimized. 
+        hyperparameters that should be optimized.
 
         """
         ncols0 = 3
 
         # "G" for grid has to be added to the element list.
-        #!NOTE <element_list> below may cause mismatching descriptor matrix
-        # sizes, resulting in errors for LAMMPS or MALA when applied to
-        # multi-element systems. It is safer to specify all possible elements/
-        # symbols outside of the ASE atoms object. Otherwise if you have an ASE
-        # atoms object with 1/2 possible elements (e.g., just Ga not Ga,N), the
-        # descriptor matrix you calculate here wont be the same as that from
-        # Ga/N.
         element_list = sorted(list(set(self._atoms.symbols))) + ["G"]
 
         # Bond types correspond to all bonds between elements.
@@ -496,29 +508,32 @@ class ACE(Descriptor):
         ldict = {
             ranki: li
             for ranki, li in zip(
-                self.parameters.ace_ranks, self.parameters.ace_lmax
+                self.parameters.ace_included_expansion_ranks,
+                self.parameters.ace_maximum_l_per_rank,
             )
         }
 
         # Coupling type: type of coupling coefficients used to reduce prodects of spherical harmonics (e.g., generalized wigner symbols or generalized clebsch-gordan coefficients)
-        if self.parameters.ace_coupling_type == "wigner3j":
+        if self.parameters.ace_coupling_coefficients_type == "wigner3j":
             ccs = wigner_coupling.wigner_3j_coupling(
                 self.__precomputed_wigner_3j,
                 ldict,
-                L_R=self.parameters.ace_L_R,
+                L_R=self._transformation_characteristic,
             )
 
-        elif self.parameters.ace_coupling_type == "clebsch_gordan":
+        elif (
+            self.parameters.ace_coupling_coefficients_type == "clebsch_gordan"
+        ):
             ccs = cg_coupling.clebsch_gordan_coupling(
                 self.__precomputed_clebsch_gordan,
                 ldict,
-                L_R=self.parameters.ace_L_R,
+                L_R=self._transformation_characteristic,
             )
 
         else:
             raise Exception(
                 "Coupling type "
-                + str(self.parameters.ace_coupling_type)
+                + str(self.parameters.ace_coupling_coefficients_type)
                 + " not recongised"
             )
 
@@ -527,20 +542,20 @@ class ACE(Descriptor):
         Apot = ACEPotential(
             element_list,
             self.__ace_reference_energy,
-            self.parameters.ace_ranks,
-            self.parameters.ace_nmax,
-            self.parameters.ace_lmax,
-            max(self.parameters.ace_nmax),
+            self.parameters.ace_included_expansion_ranks,
+            self.parameters.ace_maximum_n_per_rank,
+            self.parameters.ace_maximum_l_per_rank,
+            max(self.parameters.ace_maximum_n_per_rank),
             self._cutoff_factors,
             self.__lambdas,
-            ccs[self.parameters.ace_M_R],
+            ccs[self._transformation_selector],
             rcutinner=rcinner,
             drcutinner=drcinner,
-            lmin=self.parameters.ace_lmin,
+            lmin=self.parameters.ace_minimum_l_per_rank,
         )
 
         # set the ace descriptor labels in the ACE "potential" class, to be read by LAMMPS as coupling coefficients
-        # these are the descriptors calculated in lammps 
+        # these are the descriptors calculated in lammps
         Apot.set_funcs(nulst=self.__limit_nus, print_0s=True)
 
         # Write the coupling coefficients to file.
@@ -564,14 +579,16 @@ class ACE(Descriptor):
         """
         # enumerate all descriptors, whether or not the chemical basis includes grid points (e.g., grid-grid interactions)
         ranked_chem_nus = []
-        for ind, rank in enumerate(self.parameters.ace_ranks):
+        for ind, rank in enumerate(
+            self.parameters.ace_included_expansion_ranks
+        ):
             rank = int(rank)
             PA_lammps = ace_coupling_utils.compute_pa_labels_raw(
                 rank,
-                int(self.parameters.ace_nmax[ind]),
-                int(self.parameters.ace_lmax[ind]),
+                int(self.parameters.ace_maximum_n_per_rank[ind]),
+                int(self.parameters.ace_maximum_l_per_rank[ind]),
                 int(self.__ace_mumax),
-                lmin=int(self.parameters.ace_lmin[ind]),
+                lmin=int(self.parameters.ace_minimum_l_per_rank[ind]),
             )
             ranked_chem_nus.append(PA_lammps)
 
@@ -643,7 +660,7 @@ class ACE(Descriptor):
         rc_range = {bp: None for bp in self.__bonds}
         rin_def = {bp: None for bp in self.__bonds}
         rc_def = {bp: None for bp in self.__bonds}
-        fac_per_elem = {key: 0.5 for key in list(self._ionic_radii.keys())}
+        fac_per_elem = {key: 0.5 for key in list(self._atomic_radii.keys())}
         fac_per_elem_sub = {
             "H": 0.61,
             "Be": 0.52,
@@ -665,14 +682,14 @@ class ACE(Descriptor):
                 rcmini
             ) * 0.25  # 1/4 of shortest ionic bond length
             rc_range[bond] = [rcmini, rcmaxi]
-            rc_def[bond] = defaultri * self.parameters.ace_nshell
+            rc_def[bond] = defaultri * self.parameters.ace_cutoff_factor
             rin_def[bond] = defaultrcinner
         # shift = ( max(rc_def.values()) - min(rc_def.values())  )/2
         shift = np.std(list(rc_def.values()))
         # if apply_shift:
         for bond in self.__bonds:
             if rc_def[bond] != max(rc_def.values()):
-                if self.parameters.ace_apply_shift:
+                if self.parameters.ace_balance_cutoff_radii_for_elements:
                     rc_def[bond] = rc_def[bond] + shift  # *nshell
                 else:
                     rc_def[bond] = rc_def[bond]  # *nshell
@@ -714,7 +731,7 @@ class ACE(Descriptor):
             atnum1 = ase.data.atomic_numbers["Au"]
         covr1 = ase.data.covalent_radii[atnum1]
         vdwr1 = ase.data.vdw_radii[atnum1]
-        ionr1 = self._ionic_radii[elm1]
+        ionr1 = self._atomic_radii[elm1]
         if np.isnan(vdwr1):
             printout(
                 "NOTE: using dummy VDW radius of 2* covalent radius for %s"
@@ -727,7 +744,7 @@ class ACE(Descriptor):
             atnum2 = ase.data.atomic_numbers["Au"]
         covr2 = ase.data.covalent_radii[atnum2]
         vdwr2 = ase.data.vdw_radii[atnum2]
-        ionr2 = self._ionic_radii[elm2]
+        ionr2 = self._atomic_radii[elm2]
         if np.isnan(vdwr2):
             printout(
                 "NOTE: using dummy VDW radius of 2* covalent radius for %s"
@@ -735,7 +752,7 @@ class ACE(Descriptor):
             )
             vdwr2 = 2 * covr2
         minbond = ionr1 + ionr2
-        if self.parameters.ace_metal_max:
+        if self.parameters.ace_larger_cutoff_for_metals:
             if elm1 not in self._metal_list and elm2 not in self._metal_list:
                 maxbond = vdwr1 + vdwr2
             elif elm1 in self._metal_list and elm2 not in self._metal_list:
@@ -752,7 +769,7 @@ class ACE(Descriptor):
         # by default, return the ionic bond length * number of bonds for
         # minimum
         returnmin = minbond
-        if self.parameters.ace_use_vdw:
+        if self.parameters.ace_use_maximum_cutoff_per_element:
             # return vdw bond length if requested
             returnmax = maxbond
         else:
@@ -814,7 +831,7 @@ class ACE(Descriptor):
         Parameters
         ----------
         lmax : int
-            Maximum angular momentum quantum number (maximum angular function index) to be reduced by Wigner-3j coefficient.
+            Maximum l value for precomputation.
 
         Returns
         -------
@@ -822,10 +839,32 @@ class ACE(Descriptor):
             Dictionary of all Wigner 3j coefficients to be used at a given
             value of lmax.
         """
+        # We only recompute the coefficients if there is no file we can use.
+        # A file we can use can either mean one for the exact same lmax or
+        # one for a higher lmax.
+        raw_list = glob.glob(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "wig_*.pkl",
+            )
+        )
+        lmaxes = [
+            int(os.path.basename(x.split("_")[1].split(".")[0]))
+            for x in raw_list
+        ]
+        if len(lmaxes) > 0:
+            loaded_lmax = max(lmax, min(lmaxes))
+        else:
+            loaded_lmax = lmax
+
+        # We try to load the file and recompute, if necessary.
+        file_name = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "wig_" + str(loaded_lmax) + ".pkl",
+        )
+
         try:
-            with open(
-                "%s/wig.pkl" % os.path.dirname(os.path.abspath(__file__)), "rb"
-            ) as readinwig:
+            with open(file_name, "rb") as readinwig:
                 cg = pickle.load(readinwig)
         except FileNotFoundError:
             cg = {}
@@ -846,9 +885,7 @@ class ACE(Descriptor):
                                     cg[key] = self._wigner_3j(
                                         l1, m1, l2, m2, l3, m3
                                     )
-            with open(
-                "%s/wig.pkl" % os.path.dirname(os.path.abspath(__file__)), "wb"
-            ) as writewig:
+            with open(file_name, "wb") as writewig:
                 pickle.dump(cg, writewig)
         return cg
 
@@ -866,7 +903,7 @@ class ACE(Descriptor):
         Parameters
         ----------
         lmax : int
-            Maximum angular momentum quantum number (maximum angular function index) to be reduced by Clebsch-Gordan coefficient.
+            Maximum l value for precomputation.
 
         Returns
         -------
@@ -874,10 +911,31 @@ class ACE(Descriptor):
             Dictionary of all Clebsch-Gordan coefficients to be used at a given
             value of lmax.
         """
+        # We only recompute the coefficients if there is no file we can use.
+        # A file we can use can either mean one for the exact same lmax or
+        # one for a higher lmax.
+        raw_list = glob.glob(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "cg_*.pkl",
+            )
+        )
+        lmaxes = [
+            int(os.path.basename(x.split("_")[1].split(".")[0]))
+            for x in raw_list
+        ]
+        if len(lmaxes) > 0:
+            loaded_lmax = max(lmax, min(lmaxes))
+        else:
+            loaded_lmax = lmax
+
+        # We try to load the file and recompute, if necessary.
+        file_name = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "cg_" + str(loaded_lmax) + ".pkl",
+        )
         try:
-            with open(
-                "%s/cg.pkl" % os.path.dirname(os.path.abspath(__file__)), "rb"
-            ) as readincg:
+            with open(file_name, "rb") as readincg:
                 cg = pickle.load(readincg)
         except FileNotFoundError:
             cg = {}
@@ -898,9 +956,7 @@ class ACE(Descriptor):
                                     cg[key] = self._clebsch_gordan(
                                         l1, m1, l2, m2, l3, m3
                                     )
-            with open(
-                "%s/cg.pkl" % os.path.dirname(os.path.abspath(__file__)), "wb"
-            ) as writecg:
+            with open(file_name, "wb") as writecg:
                 pickle.dump(cg, writecg)
             # pickle.dump(cg,'cg.pkl')
         return cg
@@ -908,7 +964,7 @@ class ACE(Descriptor):
     def __init_element_arrays(self):
         """
         Initialize reference energy per atom type and max chemical basis index, mumax, for the system. These depend on the number of elements.
-    
+
         Typically, one will set the ace reference energy to 0.0 eV for each element type. It is possible to use this to apply a constant shift to the energy if using a linear model.
 
         For standard usage, the maximum chemical basis index, mumax, should be 1 larger than the number of chemical species in the system. The + 1 is to account for the grid point as a unique "species" in the ACE descriptors.
@@ -916,7 +972,7 @@ class ACE(Descriptor):
         Parameters
         ----------
         None: None
-            
+
         Returns
         -------
         ace_mumax : int
@@ -940,10 +996,17 @@ class ACE(Descriptor):
         "everything in groups 12 and below, including Lanthanoids and
         Actininoids, excluding hydrogen". For the smaller elements, different
         default radii are beneficial.
+        Initially, the hard-coded values included vdW radii for elements where
+        available (thus the weird definition of metal here). Where they werent
+        available, other radii were used. We may use ionic radii instead, but
+        we may want to change the factor by which we multiply the radii by to
+        get the default cutoffs. Having them be ~2x the vdW radii is usually a
+        good starting point.
+
 
         Returns
         -------
-        ionic_radii : dict
+        atomic_radii : dict
             Dictionary with ionic radii.
 
         metal_list : List
@@ -958,13 +1021,13 @@ class ACE(Descriptor):
         # These ionic (actually, atomic radii) are taken from mendeleev.
         # In the original implementation of the ACE class, these were
         # hardcoded, now we get them automatically from mendeleev.
-        ionic_radii = element_info.to_dict()["atomic_radius"]
-        ionic_radii = {key: v / 100 for (key, v) in ionic_radii.items()}
-        ionic_radii["G"] = 1.35
+        atomic_radii = element_info.to_dict()["atomic_radius"]
+        atomic_radii = {key: v / 100 for (key, v) in atomic_radii.items()}
+        atomic_radii["G"] = 1.35
 
         # The metal list that was originally here only contains elements up to
         # the 13th group (I am not sure why, e.g., Al is excluded).
-        # Additionally, only _some_ Lanthanoids and Actininoids were included,
+        # Additionally, only _some_ Lanthanoids and Actinoids were included,
         # but that may be due to the list having been outdated, since the old
         # name for Db (Ha) had been used. The code here now includes all
         # elements up to group 13 (minus H) and all Lanthanoids and
@@ -980,7 +1043,7 @@ class ACE(Descriptor):
         metal_list = list(set(main_groups + actininoids_lanthanoids))
         metal_list.remove("H")
 
-        return ionic_radii, metal_list
+        return atomic_radii, metal_list
 
     @staticmethod
     def _clebsch_gordan(j1, m1, j2, m2, j3, m3):

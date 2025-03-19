@@ -184,14 +184,6 @@ class ACEPotential:
             with open(self.__manual_labels, "r") as readjson:
                 labdata = json.load(readjson)
             nulst_1 = [list(ik) for ik in list(labdata.values())]
-
-        # If I am not mistaken, then this option is currently incomplete.
-        # I have commented it out, while also for now removing the option
-        # that relied on FitSNAP, because we do not want to ship MALA with
-        # FitSNAP as a requirement at the moment.
-        # elif self.b_basis == "ysg_x_so3":
-        #
-        #     nulst_1 = []
         else:
             nulst_1 = []
             for rank in self.__ranks:

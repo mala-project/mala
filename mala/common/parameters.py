@@ -470,48 +470,67 @@ class ParametersDescriptors(ParametersBase):
         WILL BE DEPRECATED IN MALA v1.4.0 - polynomial degree for minterpy
         descriptor calculation.
 
-    ace_ranks : list
-        Orders of the expansion, referred to as `N` in Drautz 2019, of the
-        descriptors to be enumerated
+    ace_included_expansion_ranks : list
+        List of all included expansion ranks for the ACE descriptors.
+        These expansion ranks correspond to the many body order in the
+        expansion of the atomic energy in many body terms. The list does
+        can exclude terms, i.e., [1,2,4] is a valid option.
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
 
-    ace_nmax  : list
-        Maximum radial basis function index per descriptor rank
+    ace_maximum_n_per_rank  : list
+        Maximum n for each expansion rank in the ACE descriptors. These
+        n correspond to the n starting from equation 27 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104)
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
 
-    ace_lmax : list
-        Maximum angular momentum number per descriptor rank (maximum angular function index)
+    ace_maximum_l_per_rank : list
+        Maximum l for each expansion rank in the ACE descriptors. These
+        n correspond to the n starting from equation 27 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104).
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
 
-    ace_lmin : list
-        Lower bound on angular momentum quantum number per rank.
+    ace_minimum_l_per_rank : list
+        Minimum l for each expansion rank in the ACE descriptors. These
+        n correspond to the n starting from equation 27 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104)
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
 
-    ace_nshell : list
-        Number(s) to multiply atomic radii by to get radial cutoffs
+    ace_balance_cutoff_radii_for_elements : bool
+        If True, cutoff radii will be balanced between element types.
+        This is helpful when dealing with elements varying drastically in size.
 
-    ace_apply_shift : list
-        Constants to shift radial cutoffs by (useful for small elements like H).
+    ace_larger_cutoff_for_metals : list
+        If True (default) a slightly larger cutoff is used for metals. This
+        is recommended.
 
-    ace_metal_max : list
-        Maximize radial cutoffs for "metals", effectively increases radial cutoffs for certain elements.
+    ace_use_maximum_cutoff_per_element : list
+        If True, the maximum chemically reasonable cutoff will be used
+        for all bonds. These maximum cutoff radii are based on the
+        Van-der-Waals radii. Note that this may increase computation time!
 
-    ace_use_vdw : list
-        Flag to use vdW radii (larger automated radial cutoffs generated). 
-
-    ace_L_R : list
-        Resultant angular momentum quantum number. This determines the equivariant
-        character of the rank N descriptor after reduction. L_R=0 corresponds to
-        a rotationally invariant feature, L_R=1 corresponds to a feature that
-        transforms like a vector, L_R=2 a tensor, etc.
-
-    ace_M_R : list
-        Resultant projection quantum number. This also determines the equivariant
-            character of the rank N descriptor after reduction. M_R must obey
-            -L_R <= M_R <= L_R
-
-    ace_coupling_type : str
+    ace_coupling_coefficients_type : str
         Coupling type used for reduction of spherical harmonic products.
-        Can be "clebsch_gordan" or "wigner_3j".
+        These come into play starting from equation 28 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104).
+        Can be "clebsch_gordan" or "wigner_3j". This parameter usually does
+        not have to be changed. The default is "clebsch_gordan".
 
-    ace_reduction_coefficients_lmax : int
-        Global maximum angular momentum for precalculating generalized coupling coefficients.
+    ace_coupling_coefficients_maximum_l : int
+        The maximum l up to which to precompute the Clebsch-Gordan/Wigner 3j
+        symbols. These are precomputed within MALA to reduce overall
+        computation time, but to save on storage space, precomputation is only
+        done to a certain l (for the meaning of l, refer to the original ACE
+        paper, doi.org/10.1103/PhysRevB.99.014104, page 5). MALA automatically
+        recomputes the coefficients if ace_coupling_coefficients_maximum_l is
+        increased.
     """
 
     def __init__(self):
@@ -551,26 +570,22 @@ class ParametersDescriptors(ParametersBase):
         self.minterpy_lp_norm = 2
 
         # Everything pertaining to the ACE descriptors.
-        self.ace_cutoff = None
+        self.ace_cutoff_factor = 2.0
 
-        self.ace_ranks = [1, 2, 3]
-        self.ace_nmax = [6, 2, 2]
-        self.ace_lmax = [0, 2, 2]
-        self.ace_lmin = [0, 0, 0]
+        # Many body orders
+        self.ace_included_expansion_ranks = [1, 2, 3]
+        self.ace_maximum_n_per_rank = [6, 2, 2]
+        self.ace_maximum_l_per_rank = [0, 2, 2]
+        self.ace_minimum_l_per_rank = [0, 0, 0]
 
         # Flavors/extra options for the ACE descriptors.
-        self.ace_nshell = 2.0
-        self.ace_apply_shift = False
-        self.ace_metal_max = True
-        self.ace_use_vdw = False
-
-        # ???
-        self.ace_L_R = 0
-        self.ace_M_R = 0
+        self.ace_balance_cutoff_radii_for_elements = False
+        self.ace_larger_cutoff_for_metals = True
+        self.ace_use_maximum_cutoff_per_element = False
 
         # Other value could be "wigner3j".
-        self.ace_coupling_type = "clebsch_gordan"
-        self.ace_reduction_coefficients_lmax = 12
+        self.ace_coupling_coefficients_type = "clebsch_gordan"
+        self.ace_coupling_coefficients_maximum_l = 12
 
     @property
     def use_z_splitting(self):
@@ -622,19 +637,30 @@ class ParametersDescriptors(ParametersBase):
         self.atomic_density_cutoff = value
 
     @property
-    def ace_cutoff(self):
+    def ace_cutoff_factor(self):
         """
-        Cutoff radius for ACE descriptor calculation.
+        Cutoff radius factor for ACE descriptor calculation.
 
-        May be dynamically increased during descriptor calculation
-        (MALA will notify you, if this is necessary)
+        This is NOT a cutoff radius itself. Rather, ACE computes on cutoff
+        radius for every bond between element types (with grid points counting
+        as an element type). These cutoff radii are then multiplied by this
+        factor to get the actual cutoff radii. This factor is a global factor,
+        and by default 2.0. Chage it carefully, since changing it may lead to
+        an increase in computation time.
         """
         return self._ace_cutoff
 
-    @ace_cutoff.setter
-    def ace_cutoff(self, value):
-        self._ace_cutoff = value
-        self.atomic_density_cutoff = value
+    @ace_cutoff_factor.setter
+    def ace_cutoff_factor(self, value):
+        if value <= 0.0:
+            printout(
+                "ACE cutoff factor must be larger than 0.0, defaulting"
+                " to 2.0.",
+                min_verbosity=0,
+            )
+            self._ace_cutoff = 2.0
+        else:
+            self._ace_cutoff = value
 
     @property
     def bispectrum_switchflag(self):
