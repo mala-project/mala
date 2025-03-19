@@ -1,8 +1,3 @@
-# Most install sites will want to use an already installed torch or install a
-# specific version before installing mala, e.g. via
-#
-#   pip install --extra-index-url https://download.pytorch.org/whl/cu<cuda_version> torch==<torch_version>
-#
 # The requirement below makes sure we have torch installed, even if that will
 # pull the latest GPU torch in case the user's environment may be misconfigured
 # such that a pre-installed torch is not found.

@@ -7,11 +7,16 @@ Prerequisites
 MALA supports any Python version starting from ``3.10.4``. No upper limit on
 Python versions are enforced. The most recent *tested* version is ``3.10.12``.
 
-MALA requires ``torch`` in order to function. As the installation of torch
-depends highly on the architecture you are using, ``torch`` will not
-automatically be installed alongside MALA. Please obtain a suitable version
-of ``torch`` from the `official website <https://pytorch.org/>`_ before
-continuing.
+MALA requires ``torch`` (https://pytorch.org). Most install sites will want to
+use an already installed ``torch`` or install a specific version before
+installing the MALA package itself, for instance
+
+.. code-block:: sh
+
+    pip install --index-url https://download.pytorch.org/whl/cu<cuda_version> torch==<torch_version>
+
+If no ``torch`` is found, we install the latest GPU-enabled version via ``pip
+install torch`` (see ``requirements.txt``).
 
 Installing the Python library
 *****************************
@@ -26,6 +31,7 @@ The following options are available:
   the version and thus needed for large code development (developers)
 - ``opt``: Installs ``oapackage``, so that the orthogonal array
   method may be used for large scale hyperparameter optimization (advanced users)
+- ``mpi``: Installs ``mpi4py`` for MPI parallelization (advanced users)
 - ``test``: Installs ``pytest`` which allows users to test the code (developers)
 - ``doc``: Installs all dependencies for building the documentary locally (developers)
 
