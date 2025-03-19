@@ -11,7 +11,7 @@ from mala.descriptors.acelib.common_utils import (
 
 def leaf_filter(lperms):
     """
-    Filter permutations based on 2-cycles (to reflect full binary trees)
+    Filter permutations based on 2-cycles (to reflect full binary trees).
 
     Parameters
     ----------
@@ -98,9 +98,11 @@ def check_sequential(list_to_check):
 
 def calculate_degenerate_orbit(l):
     """
-    Calculate frequency partitions of a list AS ORDERED. For example
-    l=[1,1,2,3] -> ((2, 1, 1), ((0, 1), (2,), (3,)))
-    l=[1,2,2,3] -> ((1, 2, 1), ((0,), (1, 2), (3,)))
+    Calculate frequency partitions of a list AS ORDERED.
+    
+    For example: l=[1,1,2,3] -> ((2, 1, 1), ((0, 1), (2,), (3,))).
+
+    For example: l=[1,2,2,3] -> ((1, 2, 1), ((0,), (1, 2), (3,)))
 
     Parameters
     ----------
@@ -131,13 +133,12 @@ def calculate_degenerate_orbit(l):
 def enforce_sorted_orbit(partition_indices):
     """
     Resorts partitions of N to be compatible in increasing cycle size.
-    Also breaks apart frequency partitions that aren't even to make them compatible
-    with ladder relationships. For example enforce_sorted_orbit(((1,2,3),(0,)))
-    returns the partition (1,1,2) corresponding to the permutation compatible with
-    ladder relationships in the pairwise coupling scheme ((0,), (1,), (2, 3))).
-    In this case, it took the (1,2,3) cycle and broke it into (1)(2,3).
 
-    TODO: change partition_indices to permutation_indices
+    Also breaks apart frequency partitions that aren't even to make them compatible with ladder relationships.
+
+    For example enforce_sorted_orbit(((1,2,3),(0,))) returns the partition (1,1,2) corresponding to the permutation compatible with ladder relationships in the pairwise coupling scheme ((0,), (1,), (2, 3))). In this case, it took the (1,2,3) cycle and broke it into (1)(2,3).
+
+    TODO: change partition_indices to permutation_indices.
 
     Parameters
     ----------

@@ -37,18 +37,13 @@ from mala.descriptors.acelib.tree_sorting import (
 
 def build_tree_for_l_intermediates(l, L_R=0):
     """
-    Build the "intermediate" angular momenta. When coupling N quantum 
-    angular momenta (and reducing product of N spherical harmonics in ACE),
-    only 2 quantum angular momenta can be added at a time with traditional
-    clebsch-gordan coefficients. Any more, and they must be reduced to an
-    'intermediate', and the intermediates added. The allowed intermediates
-    are those determined by repeated quantum angular momentum addition rules
-    (a.k.a. triangle conditions). This function gets all possible sets of 
-    intermediates given a set of N angular momentum quantum numbers. This
-    is described in more detail in https://doi.org/10.1016/j.jcp.2024.113073.
+    Build the "intermediate" angular momenta. When coupling N quantum angular momenta (and reducing product of N spherical harmonics in ACE), only 2 quantum angular momenta can be added at a time with traditional clebsch-gordan coefficients.
+
+    Any more, and they must be reduced to an 'intermediate', and the intermediates added. The allowed intermediates are those determined by repeated quantum angular momentum addition rules (a.k.a. triangle conditions).
+
+    This function gets all possible sets of intermediates given a set of N angular momentum quantum numbers. This is described in more detail in https://doi.org/10.1016/j.jcp.2024.113073.
     
-    More detail about the intermediates may be found following Eq. 7 in
-    the above reference.
+    More detail about the intermediates may be found following Eq. 7 in the above reference.
 
     Parameters
     ----------
@@ -213,12 +208,9 @@ def build_tree_for_l_intermediates(l, L_R=0):
 
 def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
     """
-    Generate the possible combinations of angular momentum quantum numbers
-    for a given rank. This takes into account that the desired descriptors
-    will, in general, be rotationally invariant. In short, this function
-    enumerates all possible angular basis function indices for a given
-    descriptor rank (before reducing according to rules defined in Eq. 33
-    of https://doi.org/10.1016/j.jcp.2024.113073.
+    Generate the possible combinations of angular momentum quantum numbers for a given rank. This takes into account that the desired descriptors will, in general, be rotationally invariant.
+
+    In short, this function enumerates all possible angular basis function indices for a given descriptor rank (before reducing according to rules defined in Eq. 33 of https://doi.org/10.1016/j.jcp.2024.113073.
 
     Parameters
     ----------
@@ -444,8 +436,9 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
 def compute_intermediates(l1, l2):
     """
     Compute integers lying between absolute difference and sum of l1 and l2.
-    This function enumerates possible third angular momentum quantum numbers
-    that obey the triangle conditions for quantum angular momentum addition.
+    
+    This function enumerates possible third angular momentum quantum numbers that obey the triangle conditions for quantum angular momentum addition.
+    
     See "Definitions" in https://doi.org/10.1016/j.jcp.2024.113073.
 
     Parameters
@@ -478,12 +471,9 @@ def compute_intermediates(l1, l2):
 
 def compute_pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
     """
-    Enumerates permutation-adapted ACE descriptors (ace descriptors obeying
-    eq. 33 in https://doi.org/10.1016/j.jcp.2024.113073). For ranks <=3,
-    this simply uses lexicographically ordered indices. This function
-    enumerates all ACE descriptor labels of rank N, up to a maximumum 
-    radial index and up to a maximum angular function index (angular 
-    momentum number for spherical harmonics).
+    Enumerate permutation-adapted ACE descriptors (ace descriptors obeying eq. 33 in https://doi.org/10.1016/j.jcp.2024.113073).
+
+    For ranks <=3, this simply uses lexicographically ordered indices. This function enumerates all ACE descriptor labels of rank N, up to a maximumum radial index and up to a maximum angular function index (angular momentum number for spherical harmonics).
     
     Parameters
     ----------
@@ -623,8 +613,7 @@ def compute_pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
 
 def generate_nl(rank, nmax, lmax, mumax=1, lmin=0, L_R=0, all_perms=False):
     """
-    Function to generate lexicographically ordered n,l tuples. (useful for
-    enumerating ACE descriptor labels up to rank 3.
+    Generate lexicographically ordered n,l tuples. (useful for enumerating ACE descriptor labels up to rank 3.
 
     Parameters
     ----------
@@ -708,10 +697,9 @@ def generate_nl(rank, nmax, lmax, mumax=1, lmin=0, L_R=0, all_perms=False):
 
 def get_mapped_subset(ns):
     """
-    Maps n indices to a new set of indices based on the frequency of elements in n
-    rather than the values of n themselves. 
-    This tool is to allow one to more conveniently order indices in their respective
-    frequency partitions, as needed by Eq. 33 in https://doi.org/10.1016/j.jcp.2024.113073.
+    Map n indices to a new set of indices based on the frequency of elements in n rather than the values of n themselves.
+
+    This tool is to allow one to more conveniently order indices in their respective frequency partitions, as needed by Eq. 33 in https://doi.org/10.1016/j.jcp.2024.113073.
 
     Parameters
     ----------
@@ -755,13 +743,10 @@ def build_and_write_to_tabulated(
     """
     Build a tabulated PA ACE descriptor label file.
 
-    This only matters for rank >=4. The json files build in this function
-    are saved in the acelib directory and read in the process of
-    computing the labels/coupling coefficients.
+    This only matters for rank >=4. The json files build in this function are saved in the acelib directory and read in the process of computing the labels/coupling coefficients.
 
     Parameters
     ----------
-
     rank : int
         body order of angular ace descriptor labels to be generated
 
@@ -785,6 +770,11 @@ def build_and_write_to_tabulated(
 
     label_file : str
         file name to contain PA labels
+
+    Returns
+    -------
+    None : None
+        Labels are written to file.
     """
     lmax_strs = generate_l_LR(
         range(0, all_max_l + 1), rank, L_R=L_R, M_R=M_R, use_permutations=False
@@ -857,8 +847,8 @@ def build_and_write_to_tabulated(
 def read_from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
     """
     Read PA ACE descriptor labels from tabulated data saved to a json file (by build_tabulated).
-    Since functions are only tabulated for n-l a conversion is made to include chemical basis
-    indices as well and make sure that they are permutation-adapted independent as well
+
+    Since functions are only tabulated for n-l a conversion is made to include chemical basis indices as well and make sure that they are permutation-adapted independent as well.
 
     Parameters
     ----------
@@ -933,20 +923,17 @@ def read_from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
 
 def get_mapped(nin, lin):
     """
-    This is a tool for sorting n and l multisets by frequency of occurence of elements
-    in nin and lin.
-    for nin, elements of nin are ordered according to their frequency, and a new index is assigned
-    to elements of nin based on their frequency of occurence. The map between these two is saved.
-    for lin, elements of lin are ordered according to their frequency, and a new index is assigned
-    to elements of lin based on their frequency of occurence. The map between these two is saved.
+    Sort n and l multisets by frequency of occurence of elements in nin and lin.
 
-    This function is used to avoid redundant enumeration for radial and angular function index multisets
-    with the same frequency partitions as others. For example n=(1,1,2,2), l=(1,1,3,5) uses the same
-    frequency partition as n=(2,2,3,3), l=(3,3,4,6). This function makes sure these two cases are handled
-    with the same frequency partition.
+    For nin, elements of nin are ordered according to their frequency, and a new index is assigned to elements of nin based on their frequency of occurence. The map between these two is saved.
 
-    For example, nin = [2,3,3,4] -> mappedn = [0,0,1,2], mprev_n = {0:3,1:2,2:4}
-                 lin = [1,1,1,3] -> mappedl = [0,0,0,1], mprev = {0:1,1:3}
+    For lin, elements of lin are ordered according to their frequency, and a new index is assigned to elements of lin based on their frequency of occurence. The map between these two is saved.
+
+    This function is used to avoid redundant enumeration for radial and angular function index multisets with the same frequency partitions as others.
+
+    For example n=(1,1,2,2), l=(1,1,3,5) uses the same frequency partition as n=(2,2,3,3), l=(3,3,4,6). This function makes sure these two cases are handledwith the same frequency partition.
+
+    For example, nin = [2,3,3,4] -> mappedn = [0,0,1,2], mprev_n = {0:3,1:2,2:4} and lin = [1,1,1,3] -> mappedl = [0,0,0,1], mprev = {0:1,1:3}.
 
 
     Parameters
@@ -1024,8 +1011,7 @@ def combine_muvector_nvector(mu, n):
 
 def create_unique_combinations(lrng, size):
     """
-    Create all unique combinations of a size from integers in a range. Useful for enumerating
-    index multisets where repetition of indices is allowed.
+    Create all unique combinations of a size from integers in a range. Useful for enumerating index multisets where repetition of indices is allowed.
 
     Parameters
     ----------
@@ -1053,8 +1039,7 @@ def create_unique_combinations(lrng, size):
 
 def calculate_mu_n_l(nu_in, return_L=False):
     """
-    Given an ACE descriptor label, nu, return the chemical basis function indices, radial basis
-    function indices, and angular basis function indices.
+    Given an ACE descriptor label, nu, return the chemical basis function indices, radial basis function indices, and angular basis function indices.
 
     Parameters
     ----------
@@ -1104,8 +1089,7 @@ def calculate_mu_n_l(nu_in, return_L=False):
 
 def calculate_mu_nu_rank(nu_in):
     """
-    Calculate mu-nu rank from nu. Given an ACE descriptor label in FitSNAP/LAMMPS format,
-    return the rank of the descriptor.
+    Calculate mu-nu rank from nu. Given an ACE descriptor label in FitSNAP/LAMMPS format, return the rank of the descriptor.
 
     Parameters
     ----------
@@ -1134,9 +1118,9 @@ def calculate_mu_nu_rank(nu_in):
 
 def lammps_remap(PA_labels, rank, allowed_mus=[0]):
     """
-    Remap PA labels for LAMMPS. Takes (tabulated) PA labels enumerated with n and l multisets,
-    and adds in chemical basis indices. A.k.a maps nl PA labels to munl labels compatible with
-    lammps .yace basis
+    Remap PA labels for LAMMPS. Takes (tabulated) PA labels enumerated with n and l multisets, and adds in chemical basis indices.
+
+    In other words, this function maps munl PA labels to nl labels compatible with lammps .yace basis.
 
     Parameters
     ----------
@@ -1282,7 +1266,7 @@ def lammps_remap(PA_labels, rank, allowed_mus=[0]):
 
 def simple_parity_filter(l, inters, even=True):
     """
-    Filters possible couplings according to parity of intermediates
+    Filter possible couplings according to parity of intermediates.
 
     Parameters
     ----------
@@ -1360,7 +1344,8 @@ def simple_parity_filter(l, inters, even=True):
 
 def calculate_highest_coupling_representation(lp, lref):
     """
-    Looks for the partition of N that has the biggest cycles that are multiples of 2.
+    Find the partition of N that has the biggest cycles that are multiples of 2.
+
     This is used to help define the recursion relationships assigned per frequency partition.
 
     Parameters
@@ -1394,8 +1379,8 @@ def calculate_highest_coupling_representation(lp, lref):
 def generate_tree_labels(nin, lin, L_R=0):
     """
     Sorts nl according to frequency partitions, not necessarily lexicographically.
-    This is just a special ordering of n and l multisets that is more compatible with
-    the application of quantum angular momentum "ladder opertations".
+
+    This is just a special ordering of n and l multisets that is more compatible with the application of quantum angular momentum "ladder opertations".
 
     Parameters
     ----------
@@ -1551,8 +1536,9 @@ def generate_tree_labels(nin, lin, L_R=0):
 
 def combine_blocks(blocks, lin, L_R=0):
     """
-    Recombine trees from multiple permutations of l. Combines 'blocks' 
-    of functions after rearranging l according to frequency.
+    Recombine trees from multiple permutations of l.
+
+    Combines 'blocks' of functions after rearranging l according to frequency.
 
     Parameters
     ----------
@@ -1699,10 +1685,9 @@ def apply_ladder_relationships(
     lin, nin, combined_labs, parity_span, parity_span_labs, full_span
 ):
     """
-    Apply ladder relationships. From Goff 2024. For input angular function indices and
-    radial function indices, apply ladder relationships to overcomplete set of L to remove
-    redundant functions. These ladder relationships are derived from repeatedly applying raising/
-    lowering relationships to the generalized coupling coefficients in https://doi.org/10.1016/j.jcp.2024.113073.
+    Apply ladder relationships. From Goff 2024. For input angular function indices and radial function indices, apply ladder relationships to overcomplete set of L to remove redundant functions.
+
+    These ladder relationships are derived from repeatedly applying raising/lowering relationships to the generalized coupling coefficients in https://doi.org/10.1016/j.jcp.2024.113073.
 
     Parameters
     ----------

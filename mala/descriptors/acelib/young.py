@@ -102,9 +102,9 @@ class YoungSubgroup:
 
     def check_single_fill(self, partition, inds, semistandard=True):
         """
-        Chechk a that a collection of indices is sorted in a young tableau. This
-        tableau will typically correspond to a young subgroup relevant for pairwise
-        reduction of N spherical harmonics.
+        Check a that a collection of indices is sorted in a young tableau.
+
+        This tableau will typically correspond to a young subgroup relevant for pairwise reduction of N spherical harmonics.
 
         Parameters
         ----------
@@ -152,10 +152,9 @@ class YoungSubgroup:
     ):
         """
         Fill the young subgroup subgroup according to standard, semistandard, etc conventions.
-        This will generate multiple fillings relevant for the pairwise reduction of N spherical
-        harmonics. 
         
-
+        This will generate multiple fillings relevant for the pairwise reduction of N spherical harmonics. 
+        
         Parameters
         ----------
         inds : List

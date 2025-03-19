@@ -9,11 +9,10 @@ def clebsch_gordan_coupling(
 ):
     """
     Compute generalized Clebsch-Gordan coefficients for a given L_R.
-    These are all defined according to the pairwise coupling scheme
-    in Goff et al. 2024. 
 
-    The approach to construct generalized Clebsch-Gordan coefficients is
-    manually defined for each rank for pedagogical and clarity purposes. 
+    These are all defined according to the pairwise coupling scheme in Goff et al. 2024. 
+
+    The approach to construct generalized Clebsch-Gordan coefficients is manually defined for each rank for pedagogical and clarity purposes. 
 
     Parameters
     ----------
@@ -53,15 +52,10 @@ def clebsch_gordan_coupling(
             list of angular momentum quantum numbers [l1]
 
         _L_R : int
-            Resultant angular momentum quantum number. This determines the equivariant
-            character of the rank N descriptor after reduction. L_R=0 corresponds to
-            a rotationally invariant feature, L_R=1 corresponds to a feature that
-            transforms like a vector, L_R=2 a tensor, etc.
+            Resultant angular momentum quantum number. This determines the equivariant character of the rank N descriptor after reduction. L_R=0 corresponds to a rotationally invariant feature, L_R=1 corresponds to a feature that transforms like a vector, L_R=2 a tensor, etc.
 
         _M_R : int
-            Resultant projection quantum number. This also determines the equivariant
-            character of the rank N descriptor after reduction. M_R must obey
-            -L_R <= M_R <= L_R
+            Resultant projection quantum number. This also determines the equivariant character of the rank N descriptor after reduction. M_R must obey -L_R <= M_R <= L_R.
 
         Returns
         -------

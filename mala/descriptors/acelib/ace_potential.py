@@ -16,17 +16,11 @@ import mala.descriptors.acelib.coupling_utils as ace_coupling_utils
 
 class ACEPotential:
     """
-    Class to manage interface between ACE descriptor enumeration library and
-    LAMMPS. By default, it will enumerate ACE descriptors according to the 
-    Permutation-adapted approach described in https://doi.org/10.1016/j.jcp.2024.113073.
-    However, there are options for assigning descriptor labels if desired, manually
-    for example.
+    Class to manage interface between ACE descriptor enumeration library and LAMMPS. By default, it will enumerate ACE descriptors according to the Permutation-adapted approach described in https://doi.org/10.1016/j.jcp.2024.113073.
 
-    After enumerating descriptors, it assigns all relevant hyperparamters needed
-    to evaluate the ACE descriptors in LAMMPS. It saves a .yace file needed to
-    evaluate ACE descriptors in LAMMPS (containing coupling coefficients). It does this
-    by writing an ACE potential file, readable by LAMNMPS, that contains only
-    information to evaluate descriptors, not energy models.
+    However, there are options for assigning descriptor labels if desired, manually for example.
+
+    After enumerating descriptors, it assigns all relevant hyperparamters needed to evaluate the ACE descriptors in LAMMPS. It saves a .yace file needed to evaluate ACE descriptors in LAMMPS (containing coupling coefficients). It does this by writing an ACE potential file, readable by LAMNMPS, that contains only information to evaluate descriptors, not energy models.
     
     Parameters
     ----------
@@ -79,7 +73,7 @@ class ACEPotential:
          0.0 (OFF) for each bond type in MALA. 
 
     lmin : int/list
-        lower bound on angular momentum quantum number per rank.
+        Lower bound on angular momentum quantum number per rank.
 
     manual_labels : str
         File for loading labels. If not None, then labels will be loaded from
@@ -88,6 +82,11 @@ class ACEPotential:
 
     **kwarg : dict
         Additional keyword arguments.
+
+    Returns
+    -------
+    ACEPotential : class
+        Class containing ACE descriptor and hyperparamter info.
     """
 
     def __init__(
@@ -231,9 +230,9 @@ class ACEPotential:
 
     def __set_embeddings(self, npoti="FinnisSinclair", FSparams=[1.0, 1.0]):
         """
-        Set 'embeddings' in the .yace file for lammps. Some terms here control
-        if a square-root embedding term is added. This should always be OFF
-        for descriptor calculations in MALA
+        Set 'embeddings' in the .yace file for lammps. Some terms here control if a square-root embedding term is added.
+
+        This should always be OFF for descriptor calculations in MALA.
 
         Parameters
         ----------
@@ -263,12 +262,11 @@ class ACEPotential:
 
     def __set_bond_base(self):
         """
-        Set the per-bond radial basis parameters. The 'bonds' are determined based
-        on the elements. If the elements are ['Al','G'], the bonds may be
-        determined with :code:`itertools.product()` in python. They are
-        (Al,Al)(Al,G)(G,Al)(G,G). Some hyperparameters must be specified per bond
-        label shown here.
+        Set the per-bond radial basis parameters. The 'bonds' are determined based on the elements.
 
+        If the elements are ['Al','G'], the bonds may be determined with :code:`itertools.product()` in python. They are (Al,Al)(Al,G)(G,Al)(G,G).
+
+        Some hyperparameters must be specified per bond label shown here.
         
         """
         bondstrs = ["[%d, %d]" % (b[0], b[1]) for b in self.__bondlsts]
@@ -352,8 +350,7 @@ class ACEPotential:
 
     def set_funcs(self, nulst=None, print_0s=True):
         """
-        Set ctilde 'functions' in the .yace file, used to calculate
-        descriptors in lammps
+        Set ctilde 'functions' in the .yace file, used to calculate descriptors in lammps.
 
         Parameters
         ----------

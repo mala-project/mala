@@ -471,50 +471,47 @@ class ParametersDescriptors(ParametersBase):
         descriptor calculation.
 
     ace_ranks : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        Orders of the expansion, referred to as `N` in Drautz 2019, of the
+        descriptors to be enumerated
 
     ace_nmax  : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        Maximum radial basis function index per descriptor rank
 
     ace_lmax : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        Maximum angular momentum number per descriptor rank (maximum angular function index)
 
     ace_lmin : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        Lower bound on angular momentum quantum number per rank.
 
     ace_nshell : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        Number(s) to multiply atomic radii by to get radial cutoffs
 
     ace_apply_shift : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        Constants to shift radial cutoffs by (useful for small elements like H).
 
     ace_metal_max : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        Maximize radial cutoffs for "metals", effectively increases radial cutoffs for certain elements.
 
     ace_use_vdw : list
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        Flag to use vdW radii (larger automated radial cutoffs generated). 
 
     ace_L_R : list
-        ACE_DOCS_MISSING: I am not sure how to set this.
+        Resultant angular momentum quantum number. This determines the equivariant
+        character of the rank N descriptor after reduction. L_R=0 corresponds to
+        a rotationally invariant feature, L_R=1 corresponds to a feature that
+        transforms like a vector, L_R=2 a tensor, etc.
 
     ace_M_R : list
-        ACE_DOCS_MISSING: I am not sure how to set this.
+        Resultant projection quantum number. This also determines the equivariant
+            character of the rank N descriptor after reduction. M_R must obey
+            -L_R <= M_R <= L_R
 
     ace_coupling_type : str
         Coupling type used for reduction of spherical harmonic products.
         Can be "clebsch_gordan" or "wigner_3j".
 
     ace_reduction_coefficients_lmax : int
-        ACE_DOCS_MISSING: I think I know what this does, but I am not sure
-        how to best communicate to users how to set this.
+        Global maximum angular momentum for precalculating generalized coupling coefficients.
     """
 
     def __init__(self):

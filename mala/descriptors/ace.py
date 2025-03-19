@@ -69,12 +69,13 @@ class ACE(Descriptor):
         self.couplings_yace_file = None
 
         # Will get filled once the atoms object has been loaded.
-        # ACE_DOCS_MISSING: What do these do?
-        self.__ace_mumax = None
+        # mumax is the maximum chemical basis index (should be equal to the number of chemical types for now)
+        self.__ace_mumax = Nonea
+        # constant energy to shift ace model by - should be 0/NONE in MALA
         self.__ace_reference_energy = None
 
         # Will get filled during calculation of coupling coefficients.
-        # ACE_DOCS_MISSING: What is nus/limit_nus? What exactly does
+        # nus is the full list of descriptor labels while limit_nus is the list of grid-centered descriptors only (without grid-grid interactions)
         # bonds hold?
         self.__bonds = None
         self._maximum_cutoff_factor = None
@@ -462,8 +463,9 @@ class ACE(Descriptor):
             self.__bonds
         ) == len(
             self.__lambdas
-        ), "you must have rcutfac and lmbda defined for each bond type"
-        # ACE_DOCS_MISSING: What are the nus/limit_nus settings?
+        ), """
+            you must have rcutfac and lmbda defined for each bond type
+            """
         self.__nus, self.__limit_nus = self.__calculate_limit_nus()
 
         # NOTE to use unique ACE types for gridpoints, we must subtract off
@@ -476,11 +478,8 @@ class ACE(Descriptor):
         """
         Calculate generalized coupling coefficients and save them to file.
 
-        Calculation and saving is done via the ACEPotential class.
-
-        ACE_DOCS_MISSING: Is there a good reference for the equations
-        implemented here? Should we just try to explain them here or point
-        to appropriate material?
+        By default, it will enumerate ACE descriptors according to the
+        Permutation-adapted approach described in https://doi.org/10.1016/j.jcp.2024.113073.
 
         Returns
         -------
@@ -490,7 +489,8 @@ class ACE(Descriptor):
         # "G" for grid has to be added to the element list.
         element_list = sorted(list(set(self._atoms.symbols))) + ["G"]
 
-        # ACE_DOCS_MISSING: What do these three variables mean?
+        # rcinner: Inner cutoff to turn on soft-core repulsions. This parameter should be 0.0 (OFF) for each bond type in MALA.
+        # drcinner: Parameter for soft-core repulsions. This parameter should not matter if rcutinner is 0.0 (OFF) for each bond type in MALA.
         rcinner = [0.0] * len(self.__bonds)
         drcinner = [0.0] * len(self.__bonds)
         ldict = {
@@ -500,11 +500,7 @@ class ACE(Descriptor):
             )
         }
 
-        # ACE_DOCS_MISSING: Is "coupling type" really a good name for
-        # this parameter? It seems to be about the type of matrices
-        # used for the reduction of the spherical harmonics products.
-        # So maybe "reduction coefficients" or something?
-        # Or is this really the "coupling type"?
+        # Coupling type: type of coupling coefficients used to reduce prodects of spherical harmonics (e.g., generalized wigner symbols or generalized clebsch-gordan coefficients)
         if self.parameters.ace_coupling_type == "wigner3j":
             ccs = wigner_coupling.wigner_3j_coupling(
                 self.__precomputed_wigner_3j,
@@ -527,7 +523,7 @@ class ACE(Descriptor):
             )
 
         # Calculating permutation symmetry adapted ACE labels.
-        # ACE_DOCS_MISSING: What are these labels?
+        # cutoff_factors : radial basis function cutoff per bond type. For example, if elements are ['Al','G'] then rcut must be supplied for each:(Al,Al)(Al,G)(G,Al)(G,G)
         Apot = ACEPotential(
             element_list,
             self.__ace_reference_energy,
@@ -543,7 +539,8 @@ class ACE(Descriptor):
             lmin=self.parameters.ace_lmin,
         )
 
-        # ACE_DOCS_MISSING: What does this function do?
+        # set the ace descriptor labels in the ACE "potential" class, to be read by LAMMPS as coupling coefficients
+        # these are the descriptors calculated in lammps 
         Apot.set_funcs(nulst=self.__limit_nus, print_0s=True)
 
         # Write the coupling coefficients to file.
@@ -553,20 +550,19 @@ class ACE(Descriptor):
 
     def __calculate_limit_nus(self):
         """
-        Calculate the limit of nus.
-
-        ACE_DOCS_MISSING: What are nus and limit_nus?
+        Enumerate ACE descriptors. By default, it will enumerate ACE descriptors according to the permutation-adapted approach described in https://doi.org/10.1016/j.jcp.2024.113073. After enumerating the complete set of atom-atom, atom-grid, grid-atom, and grid-grid descriptors, it will select the subset of grid-atom descriptors needed for MALA and will return those. It will include one dummy descriptor for each atom type as well (needed to make LAMMPS run).
 
         Returns
         -------
         nus : List
-            List of nus. ACE_DOCS_MISSING: What are nus?
+            Complete list of ACE descriptor labels in FitSNAP/LAMMPS format
+            mu0_mu1,mu2...muN,n1,n2...nN,l1,l2...lN_L1-L2-...-L_{N-3}-L_{N-2}
+            That include atom-atom, atom-grid, grid-atom, and grid-grid descriptors.
 
         limit_nus : List
-            List of limit nus. ACE_DOCS_MISSING: What are limit_nus?
+            List of grid-atom descriptors (grid at center) that are used as input in MALA along with dummy atom-atom descriptors to make LAMMPS run.
         """
-        # ACE_DOCS_MISSING: Add maybe a general outline of what is being
-        # done here.
+        # enumerate all descriptors, whether or not the chemical basis includes grid points (e.g., grid-grid interactions)
         ranked_chem_nus = []
         for ind, rank in enumerate(self.parameters.ace_ranks):
             rank = int(rank)
@@ -579,6 +575,7 @@ class ACE(Descriptor):
             )
             ranked_chem_nus.append(PA_lammps)
 
+        # sort the descriptors according to chemical function indices, radial function indices, and angular function indices
         nus_unsort = [item for sublist in ranked_chem_nus for item in sublist]
         nus = nus_unsort.copy()
         mu0s = []
@@ -599,6 +596,7 @@ class ACE(Descriptor):
         nus.sort(key=lambda x: mu0s[nus_unsort.index(x)], reverse=False)
         musins = range(len(list(set(self._atoms.symbols))))
 
+        # collect the descriptors according to central atom type (one entry here will correspond to grid-centered descriptors used in MALA)
         # +1 here because this should include the G for grid.
         byattyp, byattypfiltered = self.__sort_by_atom_type(
             nus, len(list(set(self._atoms.symbols))) + 1
@@ -607,6 +605,7 @@ class ACE(Descriptor):
             limit_nus = byattypfiltered[
                 "%d" % (len(list(set(self._atoms.symbols))))
             ]
+            # assert that dummy descriptor must be added per atom type to make LAMMPS run
             assert self.__ace_padfunc, (
                 "Must pad with at least 1 other basis function for other "
                 "element types to work in LAMMPS - set padfunc=True"
@@ -614,6 +613,7 @@ class ACE(Descriptor):
             if self.__ace_padfunc:
                 for muii in musins:
                     limit_nus.append(byattypfiltered["%d" % muii][0])
+        # if not using grid-grid and atom-atom descriptors, the dummy function is not strictly required
         elif not self.__ace_grid_filter:
             limit_nus = byattyp["%d" % (len(list(set(self._atoms.symbols))))]
             if self.__ace_padfunc:
@@ -624,10 +624,7 @@ class ACE(Descriptor):
 
     def __default_settings(self):
         """
-        Set default cutoff factors and lambdas.
-
-        ACE_DOCS_MISSING what does "default" mean here? What are the
-        assumptions we make to get to "default"?
+        Based on atomic radii, automatically generate the radial cutoffs and other ACE hyperparamters. These may need to be adjusted in practice for an optimal model, but these default values are often reasonable. These settings are generated for a provided list of ace_elements. These element symbols must include 'G' for the grid points. In ACE, all possible combinations of these elements determine the "bond types" spanned by the ACE chemical basis (the chemical basis is the delta function basis used in Drautz 2019). For example, the "bond types" resulting from all possible combinations of ['Al','G'] are determined with :code:`itertools.product()` in python. They are (Al,Al)(Al,G)(G,Al)(G,G). Default hyperparameters are defined in this function for all of the "bond types", even though or mala, only those of type (G,X) are kept.
 
         Returns
         -------
@@ -641,8 +638,8 @@ class ACE(Descriptor):
         lmb_def_str : str
             String with default lambda values.
         """
-        # ACE_DOCS_MISSING: Add maybe a general outline of what is being
-        # done here.
+        #for each bond type, determine what cutoff radii should be allowed
+        # these values (and ranges of values) are determined based on the element type with some defaults provided below
         rc_range = {bp: None for bp in self.__bonds}
         rin_def = {bp: None for bp in self.__bonds}
         rc_def = {bp: None for bp in self.__bonds}
@@ -694,8 +691,7 @@ class ACE(Descriptor):
         """
         Compute default cutoff factors.
 
-        ACE_DOCS_MISSING: What are the assumptions made here? How is this
-        computation performed?
+        It is assumed that most important interactions will occur within ~2r_atom (about two neighbor shells) for a given atom type. This is used to specify the bounds for the default cutoffs.
 
         Parameters
         ----------
@@ -709,9 +705,7 @@ class ACE(Descriptor):
         rcmaxi : float
             Maximum cutoff factor.
         """
-        # ACE_DOCS_MISSING: Add maybe a general outline of what is being
-        # done here.
-
+        # set default cutoffs given an atom type with the other (defaults to use Gold as the atom type for grid points which offers reasonably large cutoff)
         elms = sorted(elms)
         elm1, elm2 = tuple(elms)
         try:
@@ -769,25 +763,25 @@ class ACE(Descriptor):
     @staticmethod
     def __sort_by_atom_type(nulst, remove_type=2):
         """
-        Sort... ACE_DOCS_MISSING: I am not sure what is being sorted.
+        Sorts collections of ace descriptors by the element type (which is encoded by the mu0 chemical funciton index).
 
-        ACE_DOCS_MISSING: In what format is the sorted result returned exactly?
+        This is useful for organizing the descriptor matrix returned from LAMMPs. All descriptors used as input for MALA are given first.
 
         Parameters
         ----------
         nulst : List
-            ACE_DOCS_MISSING: What exactly is this?
+            List of ace descripor labels in LAMMPS/FitSNAP format.
 
         remove_type : int
-            ACE_DOCS_MISSING: What is this parameter? Why is the default 2?
+            Grid index (to remove from chemical basis) if it were left in, descriptors would contain mixed grid-grid and grid-atom interactions. It defaults to 2 to remove the grid type for a single element system. In general this value should be equal to the number of elements + the grid type. For example ['Ga',N','G'], remove_type should be 3.
 
         Returns
         -------
         byattyp : dict
-            ACE_DOCS_MISSING: What is this?
+            Complete set of atom-atom, atom-grid, grid-atom, and grid-grid descriptors
 
         byattypfiltered : dict
-            ACE_DOCS_MISSING: What is this?
+            Descriptors with grid-grid interactions filtered out.
         """
         mu0s = []
         for nu in nulst:
@@ -820,7 +814,7 @@ class ACE(Descriptor):
         Parameters
         ----------
         lmax : int
-            Maximum l value. ACE_DOCS_MISSING: What is l?
+            Maximum angular momentum quantum number (maximum angular function index) to be reduced by Wigner-3j coefficient.
 
         Returns
         -------
@@ -872,7 +866,7 @@ class ACE(Descriptor):
         Parameters
         ----------
         lmax : int
-            Maximum l value. ACE_DOCS_MISSING: What is l?
+            Maximum angular momentum quantum number (maximum angular function index) to be reduced by Clebsch-Gordan coefficient.
 
         Returns
         -------
@@ -913,18 +907,23 @@ class ACE(Descriptor):
 
     def __init_element_arrays(self):
         """
-        Initialize reference energy per atom type and max chemical
-        basis index, mumax, for the system. These depend on the
-        number of elements.
+        Initialize reference energy per atom type and max chemical basis index, mumax, for the system. These depend on the number of elements.
     
-        Typically, one will set the ace reference energy to 0.0 eV
-        for each element type. It is possible to use this to apply
-        a constant shift to the energy if using a linear model.
+        Typically, one will set the ace reference energy to 0.0 eV for each element type. It is possible to use this to apply a constant shift to the energy if using a linear model.
 
-        For standard usage, the maximum chemical basis index, mumax,
-        should be 1 larger than the number of chemical species in
-        the system. The + 1 is to account for the grid point as a
-        unique "species" in the ACE descriptors.
+        For standard usage, the maximum chemical basis index, mumax, should be 1 larger than the number of chemical species in the system. The + 1 is to account for the grid point as a unique "species" in the ACE descriptors.
+
+        Parameters
+        ----------
+        None: None
+            
+        Returns
+        -------
+        ace_mumax : int
+            Maximum chemical basis function index (should be equal to the number of species + 1 where the  +1 is for the grid point)
+
+        ace_reference_energy : List
+            The 0th order expansion term in a linear ACE model. Should be 0 for all element types in MALA.
         """
         self.__ace_mumax = len(list(set(self._atoms.symbols))) + 1
         self.__ace_reference_energy = [0.0] * self.__ace_mumax
@@ -939,8 +938,8 @@ class ACE(Descriptor):
         Angstrom) and a list containing all elements which are considered
         metals. Both are done via mendeleev. The definition of metal here is
         "everything in groups 12 and below, including Lanthanoids and
-        Actininoids, excluding hydrogen".
-        ACE_DOCS_MISSING: Why is that the definition of metal?
+        Actininoids, excluding hydrogen". For the smaller elements, different
+        default radii are beneficial.
 
         Returns
         -------
@@ -986,11 +985,9 @@ class ACE(Descriptor):
     @staticmethod
     def _clebsch_gordan(j1, m1, j2, m2, j3, m3):
         """
-        Compute a traditional Clebsch-Gordan coefficient, used to reduce
-        products of spherical harmonics occuring in ACE descriptors.
+        Compute a traditional Clebsch-Gordan coefficient, used to reduce products of spherical harmonics occuring in ACE descriptors.
 
-        Calculation is based on Eqs. 4-5 of:
-        https://hal.inria.fr/hal-01851097/document
+        Calculation is based on Eqs. 4-5 of: https://hal.inria.fr/hal-01851097/document .
 
         Parameters
         ----------
@@ -1082,11 +1079,9 @@ class ACE(Descriptor):
     @staticmethod
     def _wigner_3j(j1, m1, j2, m2, j3, m3):
         """
-        Compute a traditional Wigner 3j symbol, used to reduce
-        products of spherical harmonics occuring in ACE descriptors.
+        Compute a traditional Wigner 3j symbol, used to reduce products of spherical harmonics occuring in ACE descriptors.
 
-        Uses relation between Clebsch-Gordann coefficients and Wigner 3j
-        symbols to evaluate Wigner 3j symbols.
+        Uses relation between Clebsch-Gordann coefficients and Wigner 3j symbols to evaluate Wigner 3j symbols.
 
         Parameters
         ----------

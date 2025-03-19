@@ -6,14 +6,11 @@ from mala.descriptors.acelib import coupling_utils as ace_coupling_utils
 
 def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
     """
-    Compute generalized Wigner symbols for a given L_R. These, like the
-    generalized Clebsch-Gordan coefficients, may be used to reduce products
-    of arbitrary numbers of spherical harmonics. 
+    Compute generalized Wigner symbols for a given L_R. These, like the generalized Clebsch-Gordan coefficients, may be used to reduce products of arbitrary numbers of spherical harmonics.
 
-    The approach to construct generalized Wigner symbols is manually
-    defined for each rank for pedagogical and clarity purposes.
+    The approach to construct generalized Wigner symbols is manually defined for each rank for pedagogical and clarity purposes.
 
-    TODO: Change name to generalized_wigner_coupling
+    TODO: Change name to generalized_wigner_coupling.
 
     Parameters
     ----------
