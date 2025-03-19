@@ -6,10 +6,11 @@ from mala.descriptors.acelib import coupling_utils as ace_coupling_utils
 
 def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
     """
-    Compute Wigner 3j symbols couplings for a given L_R.
+    Compute generalized Wigner symbols for a given L_R. These, like the generalized Clebsch-Gordan coefficients, may be used to reduce products of arbitrary numbers of spherical harmonics.
 
-    ACE_DOCS_MISSING: Clarify what this means, and also maybe the name,
-    because I am not so sure about it (see ace.py).
+    The approach to construct generalized Wigner symbols is manually defined for each rank for pedagogical and clarity purposes.
+
+    TODO: Change name to generalized_wigner_coupling.
 
     Parameters
     ----------
@@ -20,12 +21,15 @@ def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
         Dictionary of ranks and their corresponding L values.
 
     L_R : int
-        ACE_DOCS_MISSING
+        Resultant angular momentum quantum number. This determines the equivariant
+        character of the rank N descriptor after reduction. L_R=0 corresponds to
+        a rotationally invariant feature, L_R=1 corresponds to a feature that
+        transforms like a vector, L_R=2 a tensor, etc.
 
     Returns
     -------
     coupling : dict
-        Wigner 3j couplings.
+        Generalized Wigner symbols, {M_R:{rank:{l:{m:coupling_coefficient}}}
     """
 
     def _rank_1_tree(_wigner_3j_coefficients, _l, _L_R=0, _M_R=0):
@@ -38,18 +42,23 @@ def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
         Precomputed Wigner 3j coefficients.
 
         _l : List
-            ACE_DOCS_MISSING
+            list of angular momentum quantum numbers [l1]
 
         _L_R : int
-            ACE_DOCS_MISSING
+            Resultant angular momentum quantum number. This determines the equivariant
+            character of the rank N descriptor after reduction. L_R=0 corresponds to
+            a rotationally invariant feature, L_R=1 corresponds to a feature that
+            transforms like a vector, L_R=2 a tensor, etc.
 
         _M_R : int
-            ACE_DOCS_MISSING
+            Resultant projection quantum number. This also determines the equivariant
+            character of the rank N descriptor after reduction. M_R must obey
+            -L_R <= M_R <= L_R
 
         Returns
         -------
         decomposed : dict
-            Wigner 3j couplings for rank 1.
+            Generalized Wigner symbol for rank 1
         """
         # no nodes for rank 1
 
@@ -89,18 +98,23 @@ def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
         Precomputed Wigner 3j coefficients.
 
         _l : List
-            ACE_DOCS_MISSING
+            list of angular momentum quantum numbers [l1,l2]
 
         _L_R : int
-            ACE_DOCS_MISSING
+            Resultant angular momentum quantum number. This determines the equivariant
+            character of the rank N descriptor after reduction. L_R=0 corresponds to
+            a rotationally invariant feature, L_R=1 corresponds to a feature that
+            transforms like a vector, L_R=2 a tensor, etc.
 
         _M_R : int
-            ACE_DOCS_MISSING
+            Resultant projection quantum number. This also determines the equivariant
+            character of the rank N descriptor after reduction. M_R must obey
+            -L_R <= M_R <= L_R
 
         Returns
         -------
         decomposed : dict
-            Wigner 3j couplings for rank 2.
+            Generalized Wigner symbol for rank 2
         """
         nodes, remainder = ace_coupling_utils.build_quick_tree(_l)
         node = nodes[0]
@@ -143,18 +157,23 @@ def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
         Precomputed Wigner 3j coefficients.
 
         _l : List
-            ACE_DOCS_MISSING
+            list of angular momentum quantum numbers [l1,l2,l3]
 
         _L_R : int
-            ACE_DOCS_MISSING
+            Resultant angular momentum quantum number. This determines the equivariant
+            character of the rank N descriptor after reduction. L_R=0 corresponds to
+            a rotationally invariant feature, L_R=1 corresponds to a feature that
+            transforms like a vector, L_R=2 a tensor, etc.
 
         _M_R : int
-            ACE_DOCS_MISSING
+            Resultant projection quantum number. This also determines the equivariant
+            character of the rank N descriptor after reduction. M_R must obey
+            -L_R <= M_R <= L_R
 
         Returns
         -------
         decomposed : dict
-            Wigner 3j couplings for rank 3.
+            Generalized Wigner symbol for rank 3
         """
         full_inter_tuples = ace_coupling_utils.build_tree_for_l_intermediates(
             _l, L_R=_L_R
@@ -200,18 +219,24 @@ def wigner_3j_coupling(wigner_3j_coefficients, ldict, L_R=0):
         Precomputed Wigner 3j coefficients.
 
         _l : List
-            ACE_DOCS_MISSING
+            list of angular momentum quantum numbers [l1,l2,l3,l4]
 
         _L_R : int
-            ACE_DOCS_MISSING
+            Resultant angular momentum quantum number. This determines the equivariant
+            character of the rank N descriptor after reduction. L_R=0 corresponds to
+            a rotationally invariant feature, L_R=1 corresponds to a feature that
+            transforms like a vector, L_R=2 a tensor, etc.
 
         _M_R : int
-            ACE_DOCS_MISSING
+            Resultant projection quantum number. This also determines the equivariant
+            character of the rank N descriptor after reduction. M_R must obey
+            -L_R <= M_R <= L_R
 
         Returns
         -------
         decomposed : dict
-            Wigner 3j couplings for rank 4.
+            Generalized Wigner symbol for rank 4
+
         """
         nodes, remainder = ace_coupling_utils.build_quick_tree(_l)
         mstrs = mala.descriptors.acelib.common_utils.get_ms(_l, _M_R)

@@ -8,10 +8,11 @@ def clebsch_gordan_coupling(
     clebsch_gordan_coefficients, ldict, L_R=0, use_permutations=True
 ):
     """
-    Compute Clebsch-Gordan couplings for a given L_R.
+    Compute generalized Clebsch-Gordan coefficients for a given L_R.
 
-    ACE_DOCS_MISSING: Clarify what this means, and also maybe the name,
-    because I am not so sure about it (see ace.py).
+    These are all defined according to the pairwise coupling scheme in Goff et al. 2024. 
+
+    The approach to construct generalized Clebsch-Gordan coefficients is manually defined for each rank for pedagogical and clarity purposes. 
 
     Parameters
     ----------
@@ -19,21 +20,23 @@ def clebsch_gordan_coupling(
         Precomputed Clebsch-Gordan coefficients.
 
     ldict : dict
-        Dictionary of ranks and their corresponding L values.
+        Dictionary of ranks and their corresponding l values.
 
     L_R : int
-        ACE_DOCS_MISSING
+        Resultant angular momentum quantum number. This determines the equivariant
+        character of the rank N descriptor after reduction. L_R=0 corresponds to
+        a rotationally invariant feature, L_R=1 corresponds to a feature that
+        transforms like a vector, L_R=2 a tensor, etc.
 
     use_permutations : bool
-        ACE_DOCS_MISSING
+        Flag to consider permutations of l in generation of coupling coefficients.
 
     Returns
     -------
     coupling : dict
-        Clebsch-Gordan couplings.
+        Generalized Clebsch-Gordan coefficients, {M_R:{rank:{l:{m:coupling_coefficient}}}
     """
     # Define the functions for the individual ranks.
-    # ACE_DOCS_MISSING Maybe we can briefly summarize what the differences
     # between the functions for the individual ranks are.
 
     def _rank_1_tree(_clebsch_gordan_coefficients, _l, _L_R=0, _M_R=0):
@@ -46,18 +49,18 @@ def clebsch_gordan_coupling(
             Precomputed Clebsch-Gordan coefficients.
 
         _l : List
-            ACE_DOCS_MISSING
+            list of angular momentum quantum numbers [l1]
 
         _L_R : int
-            ACE_DOCS_MISSING
+            Resultant angular momentum quantum number. This determines the equivariant character of the rank N descriptor after reduction. L_R=0 corresponds to a rotationally invariant feature, L_R=1 corresponds to a feature that transforms like a vector, L_R=2 a tensor, etc.
 
         _M_R : int
-            ACE_DOCS_MISSING
+            Resultant projection quantum number. This also determines the equivariant character of the rank N descriptor after reduction. M_R must obey -L_R <= M_R <= L_R.
 
         Returns
         -------
         decomposed : dict
-            Clebsch-Gordan couplings for rank 1.
+            Generalized Clebsch-Gordan coefficient for rank 1
         """
         mstrs = mala.descriptors.acelib.common_utils.get_ms(_l, _M_R)
         full_inter_tuples = [()]
@@ -94,18 +97,24 @@ def clebsch_gordan_coupling(
             Precomputed Clebsch-Gordan coefficients.
 
         _l : List
-            ACE_DOCS_MISSING
+            list of angular momentum quantum numbers [l1,l2]
 
         _L_R : int
-            ACE_DOCS_MISSING
+            Resultant angular momentum quantum number. This determines the equivariant
+            character of the rank N descriptor after reduction. L_R=0 corresponds to
+            a rotationally invariant feature, L_R=1 corresponds to a feature that
+            transforms like a vector, L_R=2 a tensor, etc.
 
         _M_R : int
-            ACE_DOCS_MISSING
+            Resultant projection quantum number. This also determines the equivariant
+            character of the rank N descriptor after reduction. M_R must obey
+            -L_R <= M_R <= L_R
 
         Returns
         -------
         decomposed : dict
-            Clebsch-Gordan couplings for rank 2.
+            Generalized Clebsch-Gordan coefficients for rank 2
+
         """
         nodes, remainder = ace_coupling_utils.build_quick_tree(_l)
         node = nodes[0]
@@ -147,18 +156,23 @@ def clebsch_gordan_coupling(
             Precomputed Clebsch-Gordan coefficients.
 
         _l : List
-            ACE_DOCS_MISSING
+            list of angular momentum quantum numbers [l1,l2,l3]
 
         _L_R : int
-            ACE_DOCS_MISSING
+            Resultant angular momentum quantum number. This determines the equivariant
+            character of the rank N descriptor after reduction. L_R=0 corresponds to
+            a rotationally invariant feature, L_R=1 corresponds to a feature that
+            transforms like a vector, L_R=2 a tensor, etc.
 
         _M_R : int
-            ACE_DOCS_MISSING
+            Resultant projection quantum number. This also determines the equivariant
+            character of the rank N descriptor after reduction. M_R must obey
+            -L_R <= M_R <= L_R
 
         Returns
         -------
         decomposed : dict
-            Clebsch-Gordan couplings for rank 3.
+            Generalized Clebsch-Gordan coefficients for rank 3
         """
         full_inter_tuples = ace_coupling_utils.build_tree_for_l_intermediates(
             _l, L_R=_L_R
@@ -203,18 +217,23 @@ def clebsch_gordan_coupling(
             Precomputed Clebsch-Gordan coefficients.
 
         _l : List
-            ACE_DOCS_MISSING
+            list of angular momentum quantum numbers [l1,l2,l3,l4]
 
         _L_R : int
-            ACE_DOCS_MISSING
+            Resultant angular momentum quantum number. This determines the equivariant
+            character of the rank N descriptor after reduction. L_R=0 corresponds to
+            a rotationally invariant feature, L_R=1 corresponds to a feature that
+            transforms like a vector, L_R=2 a tensor, etc.
 
         _M_R : int
-            ACE_DOCS_MISSING
+            Resultant projection quantum number. This also determines the equivariant
+            character of the rank N descriptor after reduction. M_R must obey
+            -L_R <= M_R <= L_R
 
         Returns
         -------
         decomposed : dict
-            Clebsch-Gordan couplings for rank 4.
+            Generalized Clebsch-Gordan coefficients for rank 4
         """
         nodes, remainder = ace_coupling_utils.build_quick_tree(_l)
         mstrs = mala.descriptors.acelib.common_utils.get_ms(_l, _M_R)
@@ -266,6 +285,8 @@ def clebsch_gordan_coupling(
     ranks = list(ldict.keys())
     coupling = {M_R: {rank: {} for rank in ranks} for M_R in M_Rs}
 
+    #NOTE higher-rank couplings (to enable higher rank descriptors)
+    # are available in FitSNAP
     for M_R in M_Rs:
         for rank in ranks:
             rnk = rank

@@ -37,23 +37,31 @@ from mala.descriptors.acelib.tree_sorting import (
 
 def build_tree_for_l_intermediates(l, L_R=0):
     """
-    Build the "intermediate" angular momenta.
+    Build the "intermediate" angular momenta. When coupling N quantum angular momenta (and reducing product of N spherical harmonics in ACE), only 2 quantum angular momenta can be added at a time with traditional clebsch-gordan coefficients.
 
-    This assumes a pairwise coupling structure.
-    ACE_DOCS_MISSING : What is meant by "intermediate" angular momenta?
+    Any more, and they must be reduced to an 'intermediate', and the intermediates added. The allowed intermediates are those determined by repeated quantum angular momentum addition rules (a.k.a. triangle conditions).
+
+    This function gets all possible sets of intermediates given a set of N angular momentum quantum numbers. This is described in more detail in https://doi.org/10.1016/j.jcp.2024.113073.
+    
+    More detail about the intermediates may be found following Eq. 7 in the above reference.
 
     Parameters
     ----------
     l : List
-        List of angular momenta.
+        list (multiset) of angular momentum indices l1,l2,...lN. These correspond
+        to the N spherical harmonics in the ACE descriptor(s).
 
     L_R : int
-        ACE_DOCS_MISSING.
+        Resultant angular momentum quantum number. This determines the equivariant
+        character of the rank N descriptor after reduction. L_R=0 corresponds to
+        a rotationally invariant feature, L_R=1 corresponds to a feature that
+        transforms like a vector, L_R=2 a tensor, etc.
 
     Returns
     -------
     full_inter_tuples : List
-        List of "intermediate" angular momenta.
+        List of all possible "intermediate" angular momenta allowed by polygon
+        conditions. See discussion following Eq. 7 in above reference.
     """
     nodes, remainder = build_quick_tree(l)
     rank = len(l)
@@ -200,27 +208,33 @@ def build_tree_for_l_intermediates(l, L_R=0):
 
 def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
     """
-    Generate the angular momenta for a given rank.
+    Generate the possible combinations of angular momentum quantum numbers for a given rank. This takes into account that the desired descriptors will, in general, be rotationally invariant.
 
-    ACE_DOCS_MISSING I am not sure what this does exactly, the description
-    above is just a guess.
+    In short, this function enumerates all possible angular basis function indices for a given descriptor rank (before reducing according to rules defined in Eq. 33 of https://doi.org/10.1016/j.jcp.2024.113073.
 
     Parameters
     ----------
-    lrng : ???
-        ACE_DOCS_MISSING
+    lrng : List
+        list of int of possible angular momentum quantum numbers. Typically, 
+        these will be (0,1,2...lmax)
 
     rank : int
-        ACE_DOCS_MISSING
+        order of the expansion, referred to as `N` in Drautz 2019, of the
+        descriptors to be enumerated
 
     L_R : int
-        ACE_DOCS_MISSING
+        Resultant angular momentum quantum number. This determines the equivariant
+        character of the rank N descriptor after reduction. L_R=0 corresponds to
+        a rotationally invariant feature, L_R=1 corresponds to a feature that
+        transforms like a vector, L_R=2 a tensor, etc.
 
     M_R : int
-        ACE_DOCS_MISSING
+        Resultant projection quantum number. This also determines the equivariant
+        character of the rank N descriptor after reduction. M_R must obey
+        -L_R <= M_R <= L_R
 
     use_permutations : bool
-        Controls if permutations are used during the generation.
+        Logical flag to generate all non-repeating permutations of `l` for
 
     Returns
     -------
@@ -422,14 +436,18 @@ def generate_l_LR(lrng, rank, L_R=0, M_R=0, use_permutations=False):
 def compute_intermediates(l1, l2):
     """
     Compute integers lying between absolute difference and sum of l1 and l2.
+    
+    This function enumerates possible third angular momentum quantum numbers that obey the triangle conditions for quantum angular momentum addition.
+    
+    See "Definitions" in https://doi.org/10.1016/j.jcp.2024.113073.
 
     Parameters
     ----------
     l1 : int
-        First integer.
+        First angular momentum quantum number
 
     l2 : int
-        Second integer.
+        Second angular momentum quantum number
 
     Returns
     -------
@@ -453,37 +471,39 @@ def compute_intermediates(l1, l2):
 
 def compute_pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
     """
-    Compute raw PA labels.
+    Enumerate permutation-adapted ACE descriptors (ace descriptors obeying eq. 33 in https://doi.org/10.1016/j.jcp.2024.113073).
 
-    ACE_DOCS_MISSING - what does this do exactly?
-    I'll also not down all of the parameters as "to fill" even though I
-    think by now I know some of them, simply because this is one of
-    the central entrypoints to the acelib ecosystem so it makes sense
-    to be extra careful here.
-
+    For ranks <=3, this simply uses lexicographically ordered indices. This function enumerates all ACE descriptor labels of rank N, up to a maximumum radial index and up to a maximum angular function index (angular momentum number for spherical harmonics).
+    
     Parameters
     ----------
     rank : int
-        ACE_DOCS_MISSING
+        order of the expansion, referred to as `N` in Drautz 2019, of the
+        descriptors to be enumerated
 
     nmax : any
-        ACE_DOCS_MISSING
+        maximum radial basis function index for the given descriptor rank
 
     lmax : any
-        ACE_DOCS_MISSING
+        maximum angular momentum number for the given descriptor rank (maximum angular function index)
 
     mumax : any
-        ACE_DOCS_MISSING
+        maximum chemical basis index for the given rank (should generally be 
+        mumax=len(ace_elements)
 
     lmin : any
-        ACE_DOCS_MISSING
+        minimum angular momentum number for the given descriptor rank
 
-    L_R : any
-        ACE_DOCS_MISSING
+    L_R : int
+        Resultant angular momentum quantum number. This determines the equivariant
+        character of the rank N descriptor after reduction. L_R=0 corresponds to
+        a rotationally invariant feature, L_R=1 corresponds to a feature that
+        transforms like a vector, L_R=2 a tensor, etc.
 
-    M_R : any
-        ACE_DOCS_MISSING
-
+    M_R : int
+        Resultant projection quantum number. This also determines the equivariant
+        character of the rank N descriptor after reduction. M_R must obey
+        -L_R <= M_R <= L_R
 
     Returns
     -------
@@ -593,33 +613,36 @@ def compute_pa_labels_raw(rank, nmax, lmax, mumax, lmin=1, L_R=0, M_R=0):
 
 def generate_nl(rank, nmax, lmax, mumax=1, lmin=0, L_R=0, all_perms=False):
     """
-    Generate NL combinations.
-
-    ACE_DOCS_MISSING - what does this do exactly?
+    Generate lexicographically ordered n,l tuples. (useful for enumerating ACE descriptor labels up to rank 3.
 
     Parameters
     ----------
     rank: int
-        Basis function rank to evaluate nl combinations for.
+        order of the expansion, referred to as `N` in Drautz 2019, of the
+        descriptors to be enumerated
 
-    nmax : int
-        Maximum value of the n quantum numbers in the nl vectors.
+    nmax : any
+        maximum radial basis function index for the given descriptor rank
 
-    lmax : int
-        Maximum value of the l quantum numbers in the nl vectors.
+    lmax : any
+        maximum angular momentum number for the given descriptor rank
 
-    mumax : int
-        Maximum value of the chemical variable in the munl vectors
-        (default is none for single component system)
+    mumax : any
+        maximum chemical basis index for the given rank (should generally be
+        mumax=len(ace_elements)
 
-    lmin : int
-        ACE_DOCS_MISSING
+    lmin : any
+        minimum angular momentum number for the given descriptor rank
 
     L_R : int
-        ACE_DOCS_MISSING
+        Resultant angular momentum quantum number. This determines the equivariant
+        character of the rank N descriptor after reduction. L_R=0 corresponds to
+        a rotationally invariant feature, L_R=1 corresponds to a feature that
+        transforms like a vector, L_R=2 a tensor, etc.
 
     all_perms : bool
-        ACE_DOCS_MISSING
+        logical flag to include redundant permutations of ACE descriptor labels.
+        This should only be used for testing.
 
     Returns
     -------
@@ -674,19 +697,20 @@ def generate_nl(rank, nmax, lmax, mumax=1, lmin=0, L_R=0, all_perms=False):
 
 def get_mapped_subset(ns):
     """
-    Get a mapped subset of ns.
+    Map n indices to a new set of indices based on the frequency of elements in n rather than the values of n themselves.
 
-    ACE_DOCS_MISSING  - what is ns in this context? And by what is it mapped.
+    This tool is to allow one to more conveniently order indices in their respective frequency partitions, as needed by Eq. 33 in https://doi.org/10.1016/j.jcp.2024.113073.
 
     Parameters
     ----------
     ns : List
-        List of ns (a list of lists, ACE_DOCS_MISSING?)
+        List of possible n multisets
 
     Returns
     -------
     reduced_ns : List
-        ACE_DOCS_MISSING
+        Returns a list of n multisets that have been reordered according to the frequency
+        of elements of n
     """
     mapped_n_per_n = {}
     n_per_mapped_n = {}
@@ -717,31 +741,40 @@ def build_and_write_to_tabulated(
     rank, all_max_n, all_max_l, label_file, L_R=0, M_R=0
 ):
     """
-    Build a tabulated label file.
+    Build a tabulated PA ACE descriptor label file.
 
-    This only matters for rank >=4. The json files build in this function
-    are saved in the acelib directory and read in the process of
-    computing the labels/coupling coefficients.
+    This only matters for rank >=4. The json files build in this function are saved in the acelib directory and read in the process of computing the labels/coupling coefficients.
 
     Parameters
     ----------
     rank : int
-        ACE_DOCS_MISSING
-
-    all_max_n : int
-        ACE_DOCS_MISSING
-
-    all_max_l : int
-        ACE_DOCS_MISSING
-
-    label_file : int
-        ACE_DOCS_MISSING
+        body order of angular ace descriptor labels to be generated
 
     L_R : int
-        ACE_DOCS_MISSING
+        Resultant angular momentum quantum number. This determines the equivariant
+        character of the rank N descriptor after reduction. L_R=0 corresponds to
+        a rotationally invariant feature, L_R=1 corresponds to a feature that
+        transforms like a vector, L_R=2 a tensor, etc.
 
     M_R : int
-        ACE_DOCS_MISSING
+        Resultant projection quantum number. This also determines the equivariant
+        character of the rank N descriptor after reduction. M_R must obey
+        -L_R <= M_R <= L_R
+
+    all_max_n : int
+        max radial basis function index (with possible shift according to max chemical 
+        basis index)
+
+    all_max_l : int
+        max angular basis function index
+
+    label_file : str
+        file name to contain PA labels
+
+    Returns
+    -------
+    None : None
+        Labels are written to file.
     """
     lmax_strs = generate_l_LR(
         range(0, all_max_l + 1), rank, L_R=L_R, M_R=M_R, use_permutations=False
@@ -813,24 +846,26 @@ def build_and_write_to_tabulated(
 
 def read_from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
     """
-    Read from tabulated data saved to a json file (by build_tabulated).
+    Read PA ACE descriptor labels from tabulated data saved to a json file (by build_tabulated).
+
+    Since functions are only tabulated for n-l a conversion is made to include chemical basis indices as well and make sure that they are permutation-adapted independent as well.
 
     Parameters
     ----------
     mu : List
-        ACE_DOCS_MISSING.
+        list of chemical basis indices mu1,mu2,...muN 
 
     n : List
-        ACE_DOCS_MISSING.
+        list of radial basis indices n1,n2,...nN
 
     l : List
-        ACE_DOCS_MISSING
+        list of radial basis indices l1,l2,...lN
 
     allowed_mus : List
-        ACE_DOCS_MISSING
+        all possible allowed chemical basis function indices. (generated by range(mumax))
 
     tabulated_all : dict
-        ACE_DOCS_MISSING
+        optionally, pass in tabulated PA ACE descriptor labels as a dictionary
 
     Returns
     -------
@@ -888,22 +923,31 @@ def read_from_tabulated(mu, n, l, allowed_mus=[0], tabulated_all=None):
 
 def get_mapped(nin, lin):
     """
-    Get a mapped version of nin and lin.
+    Sort n and l multisets by frequency of occurence of elements in nin and lin.
 
-    ACE_DOCS_MISSING - what does this function do?
+    For nin, elements of nin are ordered according to their frequency, and a new index is assigned to elements of nin based on their frequency of occurence. The map between these two is saved.
+
+    For lin, elements of lin are ordered according to their frequency, and a new index is assigned to elements of lin based on their frequency of occurence. The map between these two is saved.
+
+    This function is used to avoid redundant enumeration for radial and angular function index multisets with the same frequency partitions as others.
+
+    For example n=(1,1,2,2), l=(1,1,3,5) uses the same frequency partition as n=(2,2,3,3), l=(3,3,4,6). This function makes sure these two cases are handledwith the same frequency partition.
+
+    For example, nin = [2,3,3,4] -> mappedn = [0,0,1,2], mprev_n = {0:3,1:2,2:4} and lin = [1,1,1,3] -> mappedl = [0,0,0,1], mprev = {0:1,1:3}.
+
 
     Parameters
     ----------
     nin : List
-        First list to map.
+        radial indices to resort according to frequency and return the mapping to do so
 
     lin : List
-        Second list to map.
+        angular indices to resort according to frequency and return the mapping to do so
 
     Returns
     -------
     mappedn : tuple
-        ACE_DOCS_MISSING.
+        frequency-sorted indices for nin
     """
     N = len(lin)
     uniques = list(set(lin))
@@ -930,20 +974,20 @@ def get_mapped(nin, lin):
 
 def combine_muvector_nvector(mu, n):
     """
-    Tuple vectors mu and n.
+    Tuple vectors mu and n. Adds chemical basis to radial basis indices.
 
     Parameters
     ----------
     mu : List
-        Vector for mu.
+        multiset of chemical basis indices
 
     n : List
-        Vector for n.
+        multiset of radial basis indices
 
     Returns
     -------
     tuppled : List
-        List of tuples of mu and n.
+        combined chemical and radial basis indices
     """
     mu = sorted(mu)
     # n = sorted(n)
@@ -967,7 +1011,7 @@ def combine_muvector_nvector(mu, n):
 
 def create_unique_combinations(lrng, size):
     """
-    Create all unique combinations of a size from integers in a range.
+    Create all unique combinations of a size from integers in a range. Useful for enumerating index multisets where repetition of indices is allowed.
 
     Parameters
     ----------
@@ -995,17 +1039,16 @@ def create_unique_combinations(lrng, size):
 
 def calculate_mu_n_l(nu_in, return_L=False):
     """
-    Calculate mu, n and l from nu.
-
-    ACE_DOCS_MISSING - what does this function do exactly?
+    Given an ACE descriptor label, nu, return the chemical basis function indices, radial basis function indices, and angular basis function indices.
 
     Parameters
     ----------
     nu_in : str
-        ACE_DOCS_MISSING
+        ACE descriptor label in FitSNAP/LAMMPS format
+        mu0_mu1,mu2...muN,n1,n2...nN,l1,l2...lN_L1-L2-...-L_{N-3}-L_{N-2}
 
     return_L : bool
-        Whether to return L.
+        Flag to return multiset of intermediate angular indices
 
     Returns
     -------
@@ -1046,14 +1089,13 @@ def calculate_mu_n_l(nu_in, return_L=False):
 
 def calculate_mu_nu_rank(nu_in):
     """
-    Calculate mu-nu rank from nu.
-
-    ACE_DOCS_MISSING - what does this function do exactly?
+    Calculate mu-nu rank from nu. Given an ACE descriptor label in FitSNAP/LAMMPS format, return the rank of the descriptor.
 
     Parameters
     ----------
     nu_in : str
-        ACE_DOCS_MISSING
+        ACE descriptor label in FitSNAP/LAMMPS format
+        mu0_mu1,mu2...muN,n1,n2...nN,l1,l2...lN_L1-L2-...-L_{N-3}-L_{N-2}
 
     Returns
     -------
@@ -1076,9 +1118,9 @@ def calculate_mu_nu_rank(nu_in):
 
 def lammps_remap(PA_labels, rank, allowed_mus=[0]):
     """
-    Remap PA labels for LAMMPS.
+    Remap PA labels for LAMMPS. Takes (tabulated) PA labels enumerated with n and l multisets, and adds in chemical basis indices.
 
-    ACE_DOCS_MISSING - from what to what does this map?
+    In other words, this function maps munl PA labels to nl labels compatible with lammps .yace basis.
 
     Parameters
     ----------
@@ -1094,8 +1136,8 @@ def lammps_remap(PA_labels, rank, allowed_mus=[0]):
     Returns
     -------
     remapped : tuple
-        Tuple contain the remapped labels (fs labels, FS=Finnis Sinclair?
-        ACE_DOCS_MISSING?) and labels that are not compatible.
+        Tuple contain the remapped labels that are compatible with lammps descriptor calculators and,
+        in very rare cases, labels that are not compatible.
     """
     transforms_all = {
         4: [
@@ -1224,23 +1266,23 @@ def lammps_remap(PA_labels, rank, allowed_mus=[0]):
 
 def simple_parity_filter(l, inters, even=True):
     """
-    Filter parity in ... ACE_DOCS_MISSING.
+    Filter possible couplings according to parity of intermediates.
 
     Parameters
     ----------
     l : List
-        ACE_DOCS_MISSING
+        collection of angular momentum quantum numbers [l1,l2,...lN]
 
     inters :
-        ACE_DOCS_MISSING
+        possible multisets of intermediates [(L1,L2...L_{N-2}),(L1',L2',...L_{N-2})' ...]
 
     even : bool
-        Control for which parity to filter.
+        Control for which parity to filter according to. (For L_R=0 - will use 'even')
 
     Returns
     -------
     inters_filt : List
-        inters (ACE_DOCS_MISSING) filtered.
+        Filtered multisets of intermediates obeying parity constraints.
     """
     nodes, remainder = build_quick_tree(l)
     base_ls = group_vector_by_nodes(l, nodes, remainder=remainder)
@@ -1302,22 +1344,22 @@ def simple_parity_filter(l, inters, even=True):
 
 def calculate_highest_coupling_representation(lp, lref):
     """
-    Calculate the highest coupling representation.
+    Find the partition of N that has the biggest cycles that are multiples of 2.
 
-    ACE_DOCS_MISSING - what does this function do exactly?
+    This is used to help define the recursion relationships assigned per frequency partition.
 
     Parameters
     ----------
     lp : List
-        ACE_DOCS_MISSING
+        permutation of l indices
 
     lref : List
-        ACE_DOCS_MISSING
+        sorted indices of l
 
     Returns
     -------
     highest_rep : tuple
-        ACE_DOCS_MISSING
+        partition of N with maximized cycles which are powers of 2
     """
     rank = len(lp)
     coupling_reps = local_sigma_c_partitions[rank]
@@ -1336,19 +1378,23 @@ def calculate_highest_coupling_representation(lp, lref):
 
 def generate_tree_labels(nin, lin, L_R=0):
     """
-    Generate tree labels.
+    Sorts nl according to frequency partitions, not necessarily lexicographically.
 
-    ACE_DOCS_MISSING - Also should this be moved to tree_sorting.py?
+    This is just a special ordering of n and l multisets that is more compatible with the application of quantum angular momentum "ladder opertations".
 
     Parameters
     ----------
     nin : List
-        ACE_DOCS_MISSING
+        input collection of radial basis function indices
 
     lin : List
-        ACE_DOCS_MISSING
+        input collection of angular basis function indices
 
     L_R : int
+        Resultant angular momentum quantum number. This determines the equivariant
+        character of the rank N descriptor after reduction. L_R=0 corresponds to
+        a rotationally invariant feature, L_R=1 corresponds to a feature that
+        transforms like a vector, L_R=2 a tensor, etc.   
 
     Returns
     -------
@@ -1492,23 +1538,27 @@ def combine_blocks(blocks, lin, L_R=0):
     """
     Recombine trees from multiple permutations of l.
 
-    ACE_DOCS_MISSING
+    Combines 'blocks' of functions after rearranging l according to frequency.
 
     Parameters
     ----------
     blocks : dict
-        ACE_DOCS_MISSING
+        labels per block (could use a new name)
 
     lin : List
-        ACE_DOCS_MISSING
+        unique (nominally sorted) l
 
     L_R : int
-        ACE_DOCS_MISSING
+        Resultant angular momentum quantum number. This determines the equivariant
+        character of the rank N descriptor after reduction. L_R=0 corresponds to
+        a rotationally invariant feature, L_R=1 corresponds to a feature that
+        transforms like a vector, L_R=2 a tensor, etc.
 
     Returns
     -------
     combined_labs : List
-        ACE_DOCS_MISSING
+        combined lL labels for the frequency partition of l (defining the 'block' of
+        angular functions to work with).
     """
     rank = len(lin)
     lps = list(blocks.keys())
@@ -1635,34 +1685,34 @@ def apply_ladder_relationships(
     lin, nin, combined_labs, parity_span, parity_span_labs, full_span
 ):
     """
-    Apply ladder relationships.
+    Apply ladder relationships. From Goff 2024. For input angular function indices and radial function indices, apply ladder relationships to overcomplete set of L to remove redundant functions.
 
-    ACE_DOCS_MISSING - what does this function do exactly?
+    These ladder relationships are derived from repeatedly applying raising/lowering relationships to the generalized coupling coefficients in https://doi.org/10.1016/j.jcp.2024.113073.
 
     Parameters
     ----------
-    lin : List
-        ACE_DOCS_MISSING
-
     nin : List
-        ACE_DOCS_MISSING
+        radial indices to resort according to frequency and return the mapping to do so
+
+    lin : List
+        angular indices to resort according to frequency and return the mapping to do so
 
     combined_labs : List
-        ACE_DOCS_MISSING
+        blocks of lL generated based on frequency partition
 
     parity_span : List
-        ACE_DOCS_MISSING
+        span of young subgroup * SO(3) after parity constraints applied
 
     parity_span_labs : List
-        ACE_DOCS_MISSING
+        labels spanning young subgroup * SO(3) after parity constraints applied
 
     full_span : List
-        ACE_DOCS_MISSING
+        span of full young subgroup * SO(3) group 
 
     Returns
     -------
     funcs : List
-        ACE_DOCS_MISSING
+        reduced set of permutation-adapted functions
     """
     N = len(lin)
     uniques = list(set(lin))
@@ -1702,7 +1752,7 @@ def apply_ladder_relationships(
         if degen_fam == ((0, 0, 0, 0), (4,)):
             funcs = parity_span_labs[
                 ::3
-            ]  # according to full degen ladder relationship
+            ] 
         elif degen_fam == ((0, 0, 0, 0), (3, 1)):
             funcs = parity_span_labs[::3]
         elif degen_fam == ((0, 0, 0, 0), (2, 2)):

@@ -11,9 +11,7 @@ from mala.descriptors.acelib.common_utils import (
 
 def leaf_filter(lperms):
     """
-    Filter permutations.
-
-    ACE_DOCS_MISSING - maybe also rename this function?
+    Filter permutations based on 2-cycles (to reflect full binary trees).
 
     Parameters
     ----------
@@ -100,19 +98,21 @@ def check_sequential(list_to_check):
 
 def calculate_degenerate_orbit(l):
     """
-    Calculate degenerate orbit for l.
+    Calculate frequency partitions of a list AS ORDERED.
+    
+    For example: l=[1,1,2,3] -> ((2, 1, 1), ((0, 1), (2,), (3,))).
 
-    ACE_DOCS_MISSING
+    For example: l=[1,2,2,3] -> ((1, 2, 1), ((0,), (1, 2), (3,)))
 
     Parameters
     ----------
     l : List
-        ACE_DOCS_MISSING
-
+        multiset of indices to find frequency partitions for
     Returns
     -------
     degenerate_orbit : Tuple
-        ACE_DOCS_MISSING
+        returns partiton of N corresponding to frequency partition and
+        the cycles of the frequency partition ((<partition>),(<cycles>)) 
     """
     degen_ind_dict = find_degenerate_indices(l)
     partition = []
@@ -132,9 +132,13 @@ def calculate_degenerate_orbit(l):
 
 def enforce_sorted_orbit(partition_indices):
     """
-    Enforce sorted orbit.
+    Resorts partitions of N to be compatible in increasing cycle size.
 
-    ACE_DOCS_MISSING
+    Also breaks apart frequency partitions that aren't even to make them compatible with ladder relationships.
+
+    For example enforce_sorted_orbit(((1,2,3),(0,))) returns the partition (1,1,2) corresponding to the permutation compatible with ladder relationships in the pairwise coupling scheme ((0,), (1,), (2, 3))). In this case, it took the (1,2,3) cycle and broke it into (1)(2,3).
+
+    TODO: change partition_indices to permutation_indices.
 
     Parameters
     ----------
@@ -144,7 +148,8 @@ def enforce_sorted_orbit(partition_indices):
     Returns
     -------
     part_tup : Tuple
-        ACE_DOC_MISSING
+        Partition of N, sorted by increasing cycle size, that is obtained from
+        the input permutation indices
     """
     rank = len(flatten(partition_indices))
     couple_ref = group_vector_by_orbits(

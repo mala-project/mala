@@ -8,22 +8,23 @@ from sympy.combinatorics import Permutation
 
 def filled_perm(tuples, rank):
     """
-    Create a filled permutation.
+    Return sympy Permutation object for permutations tabulated from GAP. This function uses `rank` to fill in missing permutation indices from GAP.
 
-    ACE_DOCS_MISSING - What is this used for?
+    For example tuples = [(0,1)], rank=4 would yeild Permutation(3)(0,1) corresponding to the cycles (0,1)(2)(3).
 
     Parameters
     ----------
     tuples : List
-        List of tuples.
+        list of touples indicating the partitions of N (e.g., for the (2,2) partition of 4,
+        tuples should be [(0,1),(2,3)]
 
     rank : int
-        Rank of the permutation.
+        Rank of the descriptor (N)
 
     Returns
     -------
     Permutation : sympy.combinatorics.Permutation
-        Permutation object.
+        Permutation object for the permutations.
     """
     allinds = list(range(rank))
     try:
@@ -152,7 +153,7 @@ def group_vector_by_nodes_pairwise(vector, nodes, remainder=None):
         List of nodes by which to pair vector.
 
     remainder
-        ACE_DOCS_MISSING
+        Remainder node for binary trees with odd numbers of leaves.
 
     Returns
     -------
@@ -162,8 +163,7 @@ def group_vector_by_nodes_pairwise(vector, nodes, remainder=None):
         tuple([vector[node[0]], vector[node[1]]]) for node in nodes
     ]
 
-    # ACE_DOCS_MISSING - Am I missing something here that needs to be
-    # documented or does remainder really do nothing?
+    # for combinations of 2-cycles, nothing else needs to be done
     if remainder is not None:
         vector_by_tuples = vector_by_tuples
     return vector_by_tuples
@@ -173,12 +173,12 @@ def get_ms(l_vector, M_R=0):
     r"""
     Retrieve the set of m_i combination with \sum_i m_i = M_R.
 
-    These combinations are retrieved for an arbitrary l vector.
+    These combinations are retrieved for an arbitrary l multiset.
 
     Parameters
     ----------
     l_vector : List
-        Arbitrary vector.
+        collection of angular momentum quantum numbers corresponding to spherical harmonics l1,l2...lN 
 
     M_R : int
         Sum to which combinations sum.
@@ -186,7 +186,7 @@ def get_ms(l_vector, M_R=0):
     Returns
     -------
     m_strs : List
-        Set of all combinations.
+        Set of all combinations of m quantum numbers, obeying appropriate -li <= mi <= li
     """
     m_ranges = {
         ind: range(-l_vector[ind], l_vector[ind] + 1)
@@ -203,18 +203,20 @@ def get_ms(l_vector, M_R=0):
 
 def check_triangle(l1, l2, l3):
     """
-    Check if a triangle can be formed with the given sides.
+    Check if three quantum angular momenta obey triangle conditions.
+
+    Note that the order matters.
 
     Parameters
     ----------
     l1 : int
-        Length of the first side.
+        angular momentum quantum number 1
 
     l2 : int
-        Length of the second side.
+        angular momentum quantum number 2
 
     l3 : int
-        Length of the third side.
+        angular momentum quantum number 3
 
 
     Returns
