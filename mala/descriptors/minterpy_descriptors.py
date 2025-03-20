@@ -191,7 +191,9 @@ class MinterpyDescriptors(Descriptor):
                     self.parameters.custom_lammps_compute_file
                 )
             else:
-                filepath = os.path.dirname(__file__)
+                filepath = os.path.join(
+                    os.path.dirname(__file__), "inputfiles"
+                )
                 if self.parameters._configuration["mpi"]:
                     raise Exception(
                         "Minterpy descriptors cannot be calculated "

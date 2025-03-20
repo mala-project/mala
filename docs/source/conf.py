@@ -80,6 +80,8 @@ autodoc_mock_imports = [
     "openpmd_io",
     "skspatial",
     "tqdm",
+    "mendeleev",
+    "sympy",
 ]
 
 myst_heading_anchors = 3
