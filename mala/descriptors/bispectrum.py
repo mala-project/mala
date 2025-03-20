@@ -234,7 +234,7 @@ class Bispectrum(Descriptor):
         if self.parameters.custom_lammps_compute_file != "":
             lammps_compute_file = self.parameters.custom_lammps_compute_file
         else:
-            filepath = os.path.dirname(__file__)
+            filepath = os.path.join(os.path.dirname(__file__), "inputfiles")
             if self.parameters._configuration["mpi"]:
                 if self.parameters.use_z_splitting:
                     lammps_compute_file = os.path.join(
@@ -390,8 +390,8 @@ class Bispectrum(Descriptor):
         self._bnorm_flag = False
         # Currently not supported
         self._quadraticflag = False
-        self._python_calculation_number_elements = 1
-        self._wself = 1.0
+        # self._python_calculation_number_elements = 1
+        # self._wself = 1.0
 
         # What follows is the python implementation of the
         # bispectrum descriptor calculation.

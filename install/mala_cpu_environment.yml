@@ -6,28 +6,35 @@ dependencies:
   - _libgcc_mutex=0.1
   - _openmp_mutex=4.5
   - absl-py=2.1.0
-  - alembic=1.14.0
-  - ase=3.23.0
+  - alembic=1.14.1
+  - annotated-types=0.7.0
+  - ase=3.24.0
   - blinker=1.9.0
   - brotli-bin=1.1.0
-  - brotli-python=1.0.9
+  - brotli-python=1.1.0
   - bzip2=1.0.8
-  - c-ares=1.34.3
-  - ca-certificates=2024.9.24
-  - click=8.1.7
+  - c-ares=1.34.4
+  - ca-certificates=2025.1.31
+  - certifi=2025.1.31
+  - charset-normalizer=3.4.1
+  - click=8.1.8
   - colorama=0.4.6
   - colorlog=6.9.0
   - cycler=0.12.1
-  - filelock=3.16.1
+  - deprecated=1.2.18
+  - filelock=3.17.0
   - flask=3.1.0
   - freetype=2.12.1
-  - fsspec=2024.10.0
+  - fsspec=2025.2.0
   - gmp=6.3.0
-  - importlib-metadata=8.5.0
-  - importlib_resources=6.4.5
+  - h2=4.2.0
+  - hpack=4.1.0
+  - hyperframe=6.1.0
+  - idna=3.10
+  - importlib-metadata=8.6.1
   - itsdangerous=2.2.0
-  - jinja2=3.1.4
-  - lcms2=2.16
+  - jinja2=3.1.5
+  - lcms2=2.17
   - ld_impl_linux-64=2.43
   - lerc=4.0.0
   - libabseil=20240722.0
@@ -36,37 +43,40 @@ dependencies:
   - libbrotlidec=1.1.0
   - libbrotlienc=1.1.0
   - libcblas=3.9.0
-  - libdeflate=1.22
-  - libffi=3.4.2
+  - libdeflate=1.23
+  - libffi=3.4.6
   - libgcc=14.2.0
   - libgcc-ng=14.2.0
   - libgfortran=14.2.0
   - libgfortran5=14.2.0
   - libgrpc=1.67.1
-  - libhwloc=2.11.1
-  - libiconv=1.17
+  - libhwloc=2.11.2
+  - libiconv=1.18
   - libjpeg-turbo=3.0.0
   - liblapack=3.9.0
+  - liblzma=5.6.4
+  - liblzma-devel=5.6.4
   - libnsl=2.0.1
-  - libopenblas=0.3.28
-  - libpng=1.6.44
-  - libprotobuf=5.28.2
+  - libopenblas=0.3.29
+  - libpng=1.6.47
+  - libprotobuf=5.28.3
   - libre2-11=2024.07.02
-  - libsqlite=3.47.0
+  - libsqlite=3.49.1
   - libstdcxx=14.2.0
   - libstdcxx-ng=14.2.0
   - libtiff=4.7.0
   - libtorch=2.5.1
   - libuuid=2.38.1
-  - libuv=1.49.2
-  - libwebp-base=1.4.0
+  - libuv=1.50.0
+  - libwebp-base=1.5.0
   - libxcb=1.17.0
-  - libxml2=2.13.5
+  - libxml2=2.13.6
   - libzlib=1.3.1
-  - llvm-openmp=19.1.4
-  - mako=1.3.6
+  - llvm-openmp=19.1.7
+  - mako=1.3.9
   - markdown=3.6
-  - matplotlib-base=3.9.2
+  - matplotlib-base=3.10.0
+  - mendeleev=0.20.1
   - mkl=2024.2.2
   - mpc=1.3.1
   - mpfr=4.2.1
@@ -74,16 +84,21 @@ dependencies:
   - munkres=1.1.4
   - ncurses=6.5
   - networkx=3.4.2
-  - openjpeg=2.5.2
-  - openssl=3.4.0
-  - optuna=4.1.0
+  - openjpeg=2.5.3
+  - openssl=3.4.1
+  - optuna=4.2.1
   - packaging=24.2
-  - pip=24.3.1
+  - pip=25.0.1
   - pthread-stubs=0.4
-  - pyparsing=3.2.0
+  - pycparser=2.22
+  - pydantic=2.10.6
+  - pyfiglet=0.8.post1
+  - pygments=2.19.1
+  - pyparsing=3.2.1
+  - pysocks=1.7.1
   - python=3.10.4
   - python-dateutil=2.9.0.post0
-  - python-tzdata=2024.2
+  - python-tzdata=2025.1
   - python_abi=3.10
   - pytorch=2.5.1
   - pytorch-cpu=2.5.1
@@ -91,51 +106,53 @@ dependencies:
   - qhull=2020.2
   - re2=2024.07.02
   - readline=8.2
-  - scikit-spatial=8.0.0
-  - setuptools=75.6.0
-  - six=1.16.0
-  - sleef=3.7
-  - sqlite=3.47.0
+  - requests=2.32.3
+  - scikit-spatial=8.1.0
+  - setuptools=75.8.2
+  - six=1.17.0
+  - sleef=3.8
+  - sqlite=3.49.1
   - sympy=1.13.3
   - tbb=2021.13.0
-  - tensorboard=2.18.0
+  - tensorboard=2.19.0
   - tk=8.6.13
   - tqdm=4.67.1
   - typing-extensions=4.12.2
   - typing_extensions=4.12.2
-  - tzdata=2024b
+  - tzdata=2025a
+  - urllib3=2.3.0
   - werkzeug=3.1.3
   - wheel=0.45.1
-  - xorg-libxau=1.0.11
+  - xorg-libxau=1.0.12
   - xorg-libxdmcp=1.1.5
-  - xz=5.2.6
+  - xz=5.6.4
+  - xz-gpl-tools=5.6.4
+  - xz-tools=5.6.4
   - yaml=0.2.5
   - zipp=3.21.0
   - zstd=1.5.6
   - pip:
-    - brotli==1.0.9
-    - certifi==2024.8.30
-    - charset-normalizer==3.4.0
+    - brotli==1.1.0
+    - cffi==1.17.1
     - contourpy==1.3.1
-    - fonttools==4.55.0
+    - fonttools==4.56.0
     - gmpy2==2.1.5
     - greenlet==3.1.1
     - grpcio==1.67.1
-    - idna==3.10
     - kiwisolver==1.4.7
     - markupsafe==3.0.2
-    - matplotlib==3.9.2
+    - matplotlib==3.10.0
     - numpy==1.26.4
-    - oauthlib==3.2.2
-    - openpmd-api==0.15.2
+    - openpmd-api==0.16.1
     - pandas==2.2.3
-    - pillow==11.0.0
-    - protobuf==3.19.6
-    - pysocks==1.7.1
+    - pillow==11.1.0
+    - protobuf==5.28.3
+    - pydantic-core==2.27.2
     - pyyaml==6.0.2
-    - requests==2.32.3
-    - scipy==1.14.1
-    - sqlalchemy==2.0.36
+    - scipy==1.15.2
+    - sqlalchemy==2.0.38
     - tensorboard-data-server==0.7.0
-    - torch==2.5.1.post103
-    - unicodedata2==15.1.0
+    - torch==2.5.1.post108
+    - unicodedata2==16.0.0
+    - wrapt==1.17.2
+    - zstandard==0.23.0
