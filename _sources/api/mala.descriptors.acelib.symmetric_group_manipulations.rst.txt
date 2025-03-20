@@ -1,0 +1,7 @@
+symmetric\_group\_manipulations
+===============================
+
+.. automodule:: mala.descriptors.acelib.symmetric_group_manipulations
+   :members:
+   :undoc-members:
+   :show-inheritance:

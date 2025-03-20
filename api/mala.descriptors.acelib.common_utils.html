@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>common_utils &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="coupling_utils" href="mala.descriptors.acelib.coupling_utils.html" />
+    <link rel="prev" title="clebsch_gordan_coupling" href="mala.descriptors.acelib.clebsch_gordan_coupling.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datageneration.html">datageneration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="mala.descriptors.html">descriptors</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="mala.descriptors.acelib.html">acelib</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.ace.html">ace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.atomic_density.html">atomic_density</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.bispectrum.html">bispectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html">descriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.lammps_utils.html">lammps_utils</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.minterpy_descriptors.html">minterpy_descriptors</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.html">network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.html">targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="mala.html">mala</a></li>
+          <li class="breadcrumb-item"><a href="mala.descriptors.html">descriptors</a></li>
+          <li class="breadcrumb-item"><a href="mala.descriptors.acelib.html">acelib</a></li>
+      <li class="breadcrumb-item active">common_utils</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.descriptors.acelib.common_utils.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mala.descriptors.acelib.common_utils">
+<span id="common-utils"></span><h1>common_utils<a class="headerlink" href="#module-mala.descriptors.acelib.common_utils" title="Link to this heading"></a></h1>
+<p>Useful helper functions for several files in the ACE library.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.common_utils.check_triangle">
+<span class="sig-name descname"><span class="pre">check_triangle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/common_utils.html#check_triangle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.common_utils.check_triangle" title="Link to this definition"></a></dt>
+<dd><p>Check if three quantum angular momenta obey triangle conditions.</p>
+<p>Note that the order matters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>l1</strong> (<em>int</em>) – angular momentum quantum number 1</p></li>
+<li><p><strong>l2</strong> (<em>int</em>) – angular momentum quantum number 2</p></li>
+<li><p><strong>l3</strong> (<em>int</em>) – angular momentum quantum number 3</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>condition</strong> – If True, a triangle can be formed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.common_utils.filled_perm">
+<span class="sig-name descname"><span class="pre">filled_perm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tuples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/common_utils.html#filled_perm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.common_utils.filled_perm" title="Link to this definition"></a></dt>
+<dd><p>Return sympy Permutation object for permutations tabulated from GAP. This function uses <cite>rank</cite> to fill in missing permutation indices from GAP.</p>
+<p>For example tuples = [(0,1)], rank=4 would yeild Permutation(3)(0,1) corresponding to the cycles (0,1)(2)(3).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tuples</strong> (<em>List</em>) – list of touples indicating the partitions of N (e.g., for the (2,2) partition of 4,
+tuples should be [(0,1),(2,3)]</p></li>
+<li><p><strong>rank</strong> (<em>int</em>) – Rank of the descriptor (N)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Permutation</strong> – Permutation object for the permutations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>sympy.combinatorics.Permutation</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.common_utils.flatten">
+<span class="sig-name descname"><span class="pre">flatten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_of_lists</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/common_utils.html#flatten"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.common_utils.flatten" title="Link to this definition"></a></dt>
+<dd><p>Flatten a list of lists.</p>
+<p>Returns input, if input is not a list of lists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>list_of_lists</strong> (<em>List</em>) – List of lists.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>list</strong> – Flattened list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.common_utils.get_ms">
+<span class="sig-name descname"><span class="pre">get_ms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l_vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/common_utils.html#get_ms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.common_utils.get_ms" title="Link to this definition"></a></dt>
+<dd><p>Retrieve the set of m_i combination with sum_i m_i = M_R.</p>
+<p>These combinations are retrieved for an arbitrary l multiset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>l_vector</strong> (<em>List</em>) – collection of angular momentum quantum numbers corresponding to spherical harmonics l1,l2…lN</p></li>
+<li><p><strong>M_R</strong> (<em>int</em>) – Sum to which combinations sum.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>m_strs</strong> – Set of all combinations of m quantum numbers, obeying appropriate -li &lt;= mi &lt;= li</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.common_utils.group_vector_by_nodes">
+<span class="sig-name descname"><span class="pre">group_vector_by_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remainder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/common_utils.html#group_vector_by_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.common_utils.group_vector_by_nodes" title="Link to this definition"></a></dt>
+<dd><p>Group a vector according to the mapping given in nodes.</p>
+<p>If there is a remainder, it is added to the end of the list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vector</strong> (<em>List</em>) – Vector to be grouped.</p></li>
+<li><p><strong>nodes</strong> (<em>List</em>) – List of nodes.</p></li>
+<li><p><strong>remainder</strong> (<em>int</em>) – Remainder to be added to the end of the list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>vector_by_tuples</strong> – Grouped vector.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.common_utils.group_vector_by_nodes_pairwise">
+<span class="sig-name descname"><span class="pre">group_vector_by_nodes_pairwise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remainder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/common_utils.html#group_vector_by_nodes_pairwise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.common_utils.group_vector_by_nodes_pairwise" title="Link to this definition"></a></dt>
+<dd><p>Group a vector of l quantum numbers pairwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vector</strong> (<em>List</em>) – vector of l quantum numbers.</p></li>
+<li><p><strong>nodes</strong> (<em>List</em>) – List of nodes by which to pair vector.</p></li>
+<li><p><strong>remainder</strong> – Remainder node for binary trees with odd numbers of leaves.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>vector_by_tuples</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.common_utils.group_vector_by_orbits">
+<span class="sig-name descname"><span class="pre">group_vector_by_orbits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/common_utils.html#group_vector_by_orbits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.common_utils.group_vector_by_orbits" title="Link to this definition"></a></dt>
+<dd><p>Group vector by orbits.</p>
+<p>The partition is a list of integers that sum to the length of the vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vector</strong> (<em>List</em>) – Vector to be grouped.</p></li>
+<li><p><strong>partition</strong> (<em>List</em>) – Partition to be grouped by.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>vector_by_orbits</strong> – Grouped vector.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mala.descriptors.acelib.clebsch_gordan_coupling.html" class="btn btn-neutral float-left" title="clebsch_gordan_coupling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.descriptors.acelib.coupling_utils.html" class="btn btn-neutral float-right" title="coupling_utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

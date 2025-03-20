@@ -161,6 +161,11 @@
                     <span class="n">AtomicDensity</span>
                 <span class="p">)</span>
 
+            <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">==</span> <span class="s2">&quot;ACE&quot;</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.ace</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACE</span>
+
+                <span class="n">descriptors</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Descriptor</span><span class="p">,</span> <span class="n">ACE</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">ACE</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">==</span> <span class="s2">&quot;MinterpyDescriptors&quot;</span><span class="p">:</span>
                 <span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.minterpy_descriptors</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
                     <span class="n">MinterpyDescriptors</span><span class="p">,</span>
@@ -536,7 +541,7 @@
 <span class="sd">        atoms : ase.Atoms</span>
 <span class="sd">            Atoms object holding the atomic configuration.</span>
 
-<span class="sd">        grid_dimensions : list</span>
+<span class="sd">        grid_dimensions : List</span>
 <span class="sd">            Grid dimensions to be used, in the format [x,y,z].</span>
 
 <span class="sd">        working_directory : string</span>
@@ -746,7 +751,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        dimension_info : list or tuple</span>
+<span class="sd">        dimension_info : List or tuple</span>
 <span class="sd">            If read_dtype is False, then only a list containing the dimensions</span>
 <span class="sd">            of the saved array is returned. If read_dtype is True, a tuple</span>
 <span class="sd">            containing this list of dimensions and the dtype of the array will</span>
@@ -909,8 +914,7 @@
             <span class="c1"># be 1x{ny}x{nz} need to configure separate total_energy_module</span>
             <span class="c1"># with nyfft enabled</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_y_splitting</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="c1"># TODO automatically pass nyfft into QE from MALA</span>
-                <span class="c1"># if more processors thatn y*z grid dimensions requested</span>
+                <span class="c1"># If more processors thatn y*z grid dimensions requested</span>
                 <span class="c1"># send error. More processors than y*z grid dimensions reduces</span>
                 <span class="c1"># efficiency and scaling of QE.</span>
                 <span class="n">nyfft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_y_splitting</span>
@@ -1282,7 +1286,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        gridpoint : list</span>
+<span class="sd">        gridpoint : List</span>
 <span class="sd">            List of grid indices in the format [x, y, z].</span>
 
 <span class="sd">        Returns</span>

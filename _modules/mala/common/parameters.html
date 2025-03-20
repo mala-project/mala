@@ -569,6 +569,68 @@
 <span class="sd">    minterpy_polynomial_degree : int</span>
 <span class="sd">        WILL BE DEPRECATED IN MALA v1.4.0 - polynomial degree for minterpy</span>
 <span class="sd">        descriptor calculation.</span>
+
+<span class="sd">    ace_included_expansion_ranks : list</span>
+<span class="sd">        List of all included expansion ranks for the ACE descriptors.</span>
+<span class="sd">        These expansion ranks correspond to the many body order in the</span>
+<span class="sd">        expansion of the atomic energy in many body terms. The list does</span>
+<span class="sd">        can exclude terms, i.e., [1,2,4] is a valid option.</span>
+<span class="sd">        Lengths have to be consistent between ace_included_expansion_ranks,</span>
+<span class="sd">        ace_maximum_n_per_rank, ace_maximum_l_per_rank and</span>
+<span class="sd">        ace_minimum_l_per_rank.</span>
+
+<span class="sd">    ace_maximum_n_per_rank  : list</span>
+<span class="sd">        Maximum n for each expansion rank in the ACE descriptors. These</span>
+<span class="sd">        n correspond to the n starting from equation 27 in the original</span>
+<span class="sd">        ACE paper (doi.org/10.1103/PhysRevB.99.014104)</span>
+<span class="sd">        Lengths have to be consistent between ace_included_expansion_ranks,</span>
+<span class="sd">        ace_maximum_n_per_rank, ace_maximum_l_per_rank and</span>
+<span class="sd">        ace_minimum_l_per_rank.</span>
+
+<span class="sd">    ace_maximum_l_per_rank : list</span>
+<span class="sd">        Maximum l for each expansion rank in the ACE descriptors. These</span>
+<span class="sd">        n correspond to the n starting from equation 27 in the original</span>
+<span class="sd">        ACE paper (doi.org/10.1103/PhysRevB.99.014104).</span>
+<span class="sd">        Lengths have to be consistent between ace_included_expansion_ranks,</span>
+<span class="sd">        ace_maximum_n_per_rank, ace_maximum_l_per_rank and</span>
+<span class="sd">        ace_minimum_l_per_rank.</span>
+
+<span class="sd">    ace_minimum_l_per_rank : list</span>
+<span class="sd">        Minimum l for each expansion rank in the ACE descriptors. These</span>
+<span class="sd">        n correspond to the n starting from equation 27 in the original</span>
+<span class="sd">        ACE paper (doi.org/10.1103/PhysRevB.99.014104)</span>
+<span class="sd">        Lengths have to be consistent between ace_included_expansion_ranks,</span>
+<span class="sd">        ace_maximum_n_per_rank, ace_maximum_l_per_rank and</span>
+<span class="sd">        ace_minimum_l_per_rank.</span>
+
+<span class="sd">    ace_balance_cutoff_radii_for_elements : bool</span>
+<span class="sd">        If True, cutoff radii will be balanced between element types.</span>
+<span class="sd">        This is helpful when dealing with elements varying drastically in size.</span>
+
+<span class="sd">    ace_larger_cutoff_for_metals : list</span>
+<span class="sd">        If True (default) a slightly larger cutoff is used for metals. This</span>
+<span class="sd">        is recommended.</span>
+
+<span class="sd">    ace_use_maximum_cutoff_per_element : list</span>
+<span class="sd">        If True, the maximum chemically reasonable cutoff will be used</span>
+<span class="sd">        for all bonds. These maximum cutoff radii are based on the</span>
+<span class="sd">        Van-der-Waals radii. Note that this may increase computation time!</span>
+
+<span class="sd">    ace_coupling_coefficients_type : str</span>
+<span class="sd">        Coupling type used for reduction of spherical harmonic products.</span>
+<span class="sd">        These come into play starting from equation 28 in the original</span>
+<span class="sd">        ACE paper (doi.org/10.1103/PhysRevB.99.014104).</span>
+<span class="sd">        Can be &quot;clebsch_gordan&quot; or &quot;wigner_3j&quot;. This parameter usually does</span>
+<span class="sd">        not have to be changed. The default is &quot;clebsch_gordan&quot;.</span>
+
+<span class="sd">    ace_coupling_coefficients_maximum_l : int</span>
+<span class="sd">        The maximum l up to which to precompute the Clebsch-Gordan/Wigner 3j</span>
+<span class="sd">        symbols. These are precomputed within MALA to reduce overall</span>
+<span class="sd">        computation time, but to save on storage space, precomputation is only</span>
+<span class="sd">        done to a certain l (for the meaning of l, refer to the original ACE</span>
+<span class="sd">        paper, doi.org/10.1103/PhysRevB.99.014104, page 5). MALA automatically</span>
+<span class="sd">        recomputes the coefficients if ace_coupling_coefficients_maximum_l is</span>
+<span class="sd">        increased.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -606,6 +668,24 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">minterpy_cutoff_cube_size</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">minterpy_polynomial_degree</span> <span class="o">=</span> <span class="mi">4</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">minterpy_lp_norm</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="c1"># Everything pertaining to the ACE descriptors.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ace_cutoff_factor</span> <span class="o">=</span> <span class="mf">2.0</span>
+
+        <span class="c1"># Many body orders</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ace_included_expansion_ranks</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ace_maximum_n_per_rank</span> <span class="o">=</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ace_maximum_l_per_rank</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ace_minimum_l_per_rank</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Flavors/extra options for the ACE descriptors.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ace_balance_cutoff_radii_for_elements</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ace_larger_cutoff_for_metals</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ace_use_maximum_cutoff_per_element</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Other value could be &quot;wigner3j&quot;.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ace_coupling_coefficients_type</span> <span class="o">=</span> <span class="s2">&quot;clebsch_gordan&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ace_coupling_coefficients_maximum_l</span> <span class="o">=</span> <span class="mi">12</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">use_z_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -655,6 +735,32 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">bispectrum_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rcutfac</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atomic_density_cutoff</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ace_cutoff_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cutoff radius factor for ACE descriptor calculation.</span>
+
+<span class="sd">        This is NOT a cutoff radius itself. Rather, ACE computes on cutoff</span>
+<span class="sd">        radius for every bond between element types (with grid points counting</span>
+<span class="sd">        as an element type). These cutoff radii are then multiplied by this</span>
+<span class="sd">        factor to get the actual cutoff radii. This factor is a global factor,</span>
+<span class="sd">        and by default 2.0. Chage it carefully, since changing it may lead to</span>
+<span class="sd">        an increase in computation time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ace_cutoff</span>
+
+    <span class="nd">@ace_cutoff_factor</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ace_cutoff_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">printout</span><span class="p">(</span>
+                <span class="s2">&quot;ACE cutoff factor must be larger than 0.0, defaulting&quot;</span>
+                <span class="s2">&quot; to 2.0.&quot;</span><span class="p">,</span>
+                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ace_cutoff</span> <span class="o">=</span> <span class="mf">2.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ace_cutoff</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">bispectrum_switchflag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.descriptors.acelib.common_utils &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=33f2f6c7" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html">
+            
+              <img src="../../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mala.descriptors.acelib.common_utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.descriptors.acelib.common_utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Useful helper functions for several files in the ACE library.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy.combinatorics</span><span class="w"> </span><span class="kn">import</span> <span class="n">Permutation</span>
+
+
+<div class="viewcode-block" id="filled_perm">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.common_utils.html#mala.descriptors.acelib.common_utils.filled_perm">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">filled_perm</span><span class="p">(</span><span class="n">tuples</span><span class="p">,</span> <span class="n">rank</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return sympy Permutation object for permutations tabulated from GAP. This function uses `rank` to fill in missing permutation indices from GAP.</span>
+
+<span class="sd">    For example tuples = [(0,1)], rank=4 would yeild Permutation(3)(0,1) corresponding to the cycles (0,1)(2)(3).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tuples : List</span>
+<span class="sd">        list of touples indicating the partitions of N (e.g., for the (2,2) partition of 4,</span>
+<span class="sd">        tuples should be [(0,1),(2,3)]</span>
+
+<span class="sd">    rank : int</span>
+<span class="sd">        Rank of the descriptor (N)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Permutation : sympy.combinatorics.Permutation</span>
+<span class="sd">        Permutation object for the permutations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">allinds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">rank</span><span class="p">))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">remainders</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">allinds</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="n">tuples</span><span class="p">)]</span>
+        <span class="n">alltups</span> <span class="o">=</span> <span class="n">tuples</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">tuple</span><span class="p">([</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">remainders</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="n">remainders</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">allinds</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="n">tuples</span><span class="p">))]</span>
+        <span class="n">alltups</span> <span class="o">=</span> <span class="n">tuples</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">tuple</span><span class="p">([</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">remainders</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">Permutation</span><span class="p">(</span><span class="n">alltups</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="flatten">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.common_utils.html#mala.descriptors.acelib.common_utils.flatten">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">flatten</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Flatten a list of lists.</span>
+
+<span class="sd">    Returns input, if input is not a list of lists.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    list_of_lists : List</span>
+<span class="sd">        List of lists.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list : List</span>
+<span class="sd">        Flattened list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">flat</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">list_of_lists</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">flat</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">list_of_lists</span></div>
+
+
+
+<div class="viewcode-block" id="group_vector_by_nodes">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.common_utils.html#mala.descriptors.acelib.common_utils.group_vector_by_nodes">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">group_vector_by_nodes</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">remainder</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Group a vector according to the mapping given in nodes.</span>
+
+<span class="sd">    If there is a remainder, it is added to the end of the list.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    vector : List</span>
+<span class="sd">        Vector to be grouped.</span>
+
+<span class="sd">    nodes : List</span>
+<span class="sd">        List of nodes.</span>
+
+<span class="sd">    remainder : int</span>
+<span class="sd">        Remainder to be added to the end of the list.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    vector_by_tuples : List</span>
+<span class="sd">        Grouped vector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># vector_by_tuples = [tuple([vec[node[0]],vec[node[1]]]) for node in nodes]</span>
+    <span class="n">vector_by_tuples</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+        <span class="n">orbit_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">inode</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">orbit_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vector</span><span class="p">[</span><span class="n">inode</span><span class="p">])</span>
+        <span class="n">orbit_tup</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">orbit_list</span><span class="p">)</span>
+        <span class="n">vector_by_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">orbit_tup</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">remainder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vector_by_tuples</span> <span class="o">=</span> <span class="n">vector_by_tuples</span> <span class="o">+</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">([</span><span class="n">vector</span><span class="p">[</span><span class="n">remainder</span><span class="p">]])]</span>
+    <span class="k">return</span> <span class="n">vector_by_tuples</span></div>
+
+
+
+<div class="viewcode-block" id="group_vector_by_orbits">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.common_utils.html#mala.descriptors.acelib.common_utils.group_vector_by_orbits">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">group_vector_by_orbits</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">partition</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Group vector by orbits.</span>
+
+<span class="sd">    The partition is a list of integers that sum to the length of the vector.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    vector : List</span>
+<span class="sd">        Vector to be grouped.</span>
+
+<span class="sd">    partition : List</span>
+<span class="sd">        Partition to be grouped by.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    vector_by_orbits : List</span>
+<span class="sd">        Grouped vector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ind_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span> <span class="o">==</span> <span class="n">ind_range</span>
+    <span class="p">),</span> <span class="s2">&quot;vector must be able to fit in the partion&quot;</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">by_orbits</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">orbit</span> <span class="ow">in</span> <span class="n">partition</span><span class="p">:</span>
+        <span class="n">orbit_vec</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">orbit</span><span class="p">):</span>
+            <span class="n">orbit_vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vector</span><span class="p">[</span><span class="n">count</span><span class="p">])</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">by_orbits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">orbit_vec</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">by_orbits</span><span class="p">)</span></div>
+
+
+
+<span class="n">local_sigma_c_partitions</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,)],</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="p">[(</span><span class="mi">2</span><span class="p">,)],</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="p">[(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="p">[(</span><span class="mi">4</span><span class="p">,),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="p">[(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="p">[(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span>
+    <span class="mi">7</span><span class="p">:</span> <span class="p">[(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span>
+    <span class="mi">8</span><span class="p">:</span> <span class="p">[(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="group_vector_by_nodes_pairwise">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.common_utils.html#mala.descriptors.acelib.common_utils.group_vector_by_nodes_pairwise">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">group_vector_by_nodes_pairwise</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">remainder</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Group a vector of l quantum numbers pairwise.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    vector : List</span>
+<span class="sd">        vector of l quantum numbers.</span>
+
+<span class="sd">    nodes : List</span>
+<span class="sd">        List of nodes by which to pair vector.</span>
+
+<span class="sd">    remainder</span>
+<span class="sd">        Remainder node for binary trees with odd numbers of leaves.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    vector_by_tuples : List</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vector_by_tuples</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">tuple</span><span class="p">([</span><span class="n">vector</span><span class="p">[</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">vector</span><span class="p">[</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]]])</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span>
+    <span class="p">]</span>
+
+    <span class="c1"># for combinations of 2-cycles, nothing else needs to be done</span>
+    <span class="k">if</span> <span class="n">remainder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vector_by_tuples</span> <span class="o">=</span> <span class="n">vector_by_tuples</span>
+    <span class="k">return</span> <span class="n">vector_by_tuples</span></div>
+
+
+
+<div class="viewcode-block" id="get_ms">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.common_utils.html#mala.descriptors.acelib.common_utils.get_ms">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_ms</span><span class="p">(</span><span class="n">l_vector</span><span class="p">,</span> <span class="n">M_R</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve the set of m_i combination with \sum_i m_i = M_R.</span>
+
+<span class="sd">    These combinations are retrieved for an arbitrary l multiset.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    l_vector : List</span>
+<span class="sd">        collection of angular momentum quantum numbers corresponding to spherical harmonics l1,l2...lN </span>
+
+<span class="sd">    M_R : int</span>
+<span class="sd">        Sum to which combinations sum.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    m_strs : List</span>
+<span class="sd">        Set of all combinations of m quantum numbers, obeying appropriate -li &lt;= mi &lt;= li</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">m_ranges</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">ind</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">l_vector</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">l_vector</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">l_vector</span><span class="p">))</span>
+    <span class="p">}</span>
+    <span class="n">m_range_arrays</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">m_ranges</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">l_vector</span><span class="p">))]</span>
+    <span class="n">m_combos</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">m_range_arrays</span><span class="p">))</span>
+    <span class="n">first_m_filter</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">m_combos</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="n">M_R</span><span class="p">]</span>
+    <span class="n">m_list_replace</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">l_vector</span><span class="p">)</span>
+    <span class="n">m_str_variable</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">m_list_replace</span><span class="p">)</span>
+    <span class="n">m_strs</span> <span class="o">=</span> <span class="p">[</span><span class="n">m_str_variable</span> <span class="o">%</span> <span class="n">fmf</span> <span class="k">for</span> <span class="n">fmf</span> <span class="ow">in</span> <span class="n">first_m_filter</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">m_strs</span></div>
+
+
+
+<div class="viewcode-block" id="check_triangle">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.common_utils.html#mala.descriptors.acelib.common_utils.check_triangle">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_triangle</span><span class="p">(</span><span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">,</span> <span class="n">l3</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if three quantum angular momenta obey triangle conditions.</span>
+
+<span class="sd">    Note that the order matters.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    l1 : int</span>
+<span class="sd">        angular momentum quantum number 1</span>
+
+<span class="sd">    l2 : int</span>
+<span class="sd">        angular momentum quantum number 2</span>
+
+<span class="sd">    l3 : int</span>
+<span class="sd">        angular momentum quantum number 3</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    condition : bool</span>
+<span class="sd">        If True, a triangle can be formed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">l1</span> <span class="o">-</span> <span class="n">l2</span><span class="p">)</span>
+    <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">l1</span> <span class="o">+</span> <span class="n">l2</span><span class="p">)</span>
+    <span class="n">condition</span> <span class="o">=</span> <span class="n">lower_bound</span> <span class="o">&lt;=</span> <span class="n">l3</span> <span class="o">&lt;=</span> <span class="n">upper_bound</span>
+    <span class="k">return</span> <span class="n">condition</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

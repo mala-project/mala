@@ -1,0 +1,7 @@
+tree\_sorting
+=============
+
+.. automodule:: mala.descriptors.acelib.tree_sorting
+   :members:
+   :undoc-members:
+   :show-inheritance:

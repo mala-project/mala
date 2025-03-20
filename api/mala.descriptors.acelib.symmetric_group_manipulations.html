@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>symmetric_group_manipulations &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="tree_sorting" href="mala.descriptors.acelib.tree_sorting.html" />
+    <link rel="prev" title="coupling_utils" href="mala.descriptors.acelib.coupling_utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datageneration.html">datageneration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="mala.descriptors.html">descriptors</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="mala.descriptors.acelib.html">acelib</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.ace.html">ace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.atomic_density.html">atomic_density</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.bispectrum.html">bispectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html">descriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.lammps_utils.html">lammps_utils</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.minterpy_descriptors.html">minterpy_descriptors</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.html">network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.html">targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="mala.html">mala</a></li>
+          <li class="breadcrumb-item"><a href="mala.descriptors.html">descriptors</a></li>
+          <li class="breadcrumb-item"><a href="mala.descriptors.acelib.html">acelib</a></li>
+      <li class="breadcrumb-item active">symmetric_group_manipulations</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.descriptors.acelib.symmetric_group_manipulations.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mala.descriptors.acelib.symmetric_group_manipulations">
+<span id="symmetric-group-manipulations"></span><h1>symmetric_group_manipulations<a class="headerlink" href="#module-mala.descriptors.acelib.symmetric_group_manipulations" title="Link to this heading"></a></h1>
+<p>Functions for computations related to group symmetry.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.symmetric_group_manipulations.calculate_degenerate_orbit">
+<span class="sig-name descname"><span class="pre">calculate_degenerate_orbit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/symmetric_group_manipulations.html#calculate_degenerate_orbit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.symmetric_group_manipulations.calculate_degenerate_orbit" title="Link to this definition"></a></dt>
+<dd><p>Calculate frequency partitions of a list AS ORDERED.</p>
+<p>For example: l=[1,1,2,3] -&gt; ((2, 1, 1), ((0, 1), (2,), (3,))).</p>
+<p>For example: l=[1,2,2,3] -&gt; ((1, 2, 1), ((0,), (1, 2), (3,)))</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>l</strong> (<em>List</em>) – multiset of indices to find frequency partitions for</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>degenerate_orbit</strong> – returns partiton of N corresponding to frequency partition and
+the cycles of the frequency partition ((&lt;partition&gt;),(&lt;cycles&gt;))</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.symmetric_group_manipulations.check_sequential">
+<span class="sig-name descname"><span class="pre">check_sequential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_to_check</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/symmetric_group_manipulations.html#check_sequential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.symmetric_group_manipulations.check_sequential" title="Link to this definition"></a></dt>
+<dd><p>Check if a list is sequential/ordered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>list_to_check</strong> (<em>List</em>) – List which _may_ be sequential.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>is_sequential</strong> – If True, list is sequential (i.e., ordered).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.symmetric_group_manipulations.enforce_sorted_orbit">
+<span class="sig-name descname"><span class="pre">enforce_sorted_orbit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition_indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/symmetric_group_manipulations.html#enforce_sorted_orbit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.symmetric_group_manipulations.enforce_sorted_orbit" title="Link to this definition"></a></dt>
+<dd><p>Resorts partitions of N to be compatible in increasing cycle size.</p>
+<p>Also breaks apart frequency partitions that aren’t even to make them compatible with ladder relationships.</p>
+<p>For example enforce_sorted_orbit(((1,2,3),(0,))) returns the partition (1,1,2) corresponding to the permutation compatible with ladder relationships in the pairwise coupling scheme ((0,), (1,), (2, 3))). In this case, it took the (1,2,3) cycle and broke it into (1)(2,3).</p>
+<p>TODO: change partition_indices to permutation_indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>partition_indices</strong> (<em>List</em>) – A list (presumably of lists) of indices.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>part_tup</strong> – Partition of N, sorted by increasing cycle size, that is obtained from
+the input permutation indices</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.symmetric_group_manipulations.find_degenerate_indices">
+<span class="sig-name descname"><span class="pre">find_degenerate_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/symmetric_group_manipulations.html#find_degenerate_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.symmetric_group_manipulations.find_degenerate_indices" title="Link to this definition"></a></dt>
+<dd><p>Find degenarate indices in a list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>indices_list</strong> (<em>List</em>) – List of indices</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>degenerate_indices</strong> – Dictionary of degenerate indices.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.symmetric_group_manipulations.leaf_filter">
+<span class="sig-name descname"><span class="pre">leaf_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lperms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/symmetric_group_manipulations.html#leaf_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.symmetric_group_manipulations.leaf_filter" title="Link to this definition"></a></dt>
+<dd><p>Filter permutations based on 2-cycles (to reflect full binary trees).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lperms</strong> (<em>List</em>) – Permutations of l.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>filtered</strong> – Filtered permutations of l.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mala.descriptors.acelib.coupling_utils.html" class="btn btn-neutral float-left" title="coupling_utils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.descriptors.acelib.tree_sorting.html" class="btn btn-neutral float-right" title="tree_sorting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

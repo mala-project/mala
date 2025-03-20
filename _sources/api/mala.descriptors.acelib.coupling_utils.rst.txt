@@ -1,0 +1,7 @@
+coupling\_utils
+===============
+
+.. automodule:: mala.descriptors.acelib.coupling_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

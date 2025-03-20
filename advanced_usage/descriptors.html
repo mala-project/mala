@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Improved data conversion &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>Advanced descriptor options &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -56,9 +56,10 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../advanced_usage.html">Advanced options</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="trainingmodel.html">Improved training performance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openpmd.html">Storing data with OpenPMD</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Improved data conversion</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Advanced descriptor options</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id1">Tuning descriptors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#parallel-data-conversion">Parallel data conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ace-descriptors">ACE Descriptors</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="hyperparameters.html">Improved hyperparameter optimization</a></li>
@@ -85,7 +86,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../advanced_usage.html">Advanced options</a></li>
-      <li class="breadcrumb-item active">Improved data conversion</li>
+      <li class="breadcrumb-item active">Advanced descriptor options</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/advanced_usage/descriptors.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -95,8 +96,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="improved-data-conversion">
-<span id="tuning-descriptors"></span><h1>Improved data conversion<a class="headerlink" href="#improved-data-conversion" title="Link to this heading"></a></h1>
+  <section id="advanced-descriptor-options">
+<span id="tuning-descriptors"></span><h1>Advanced descriptor options<a class="headerlink" href="#advanced-descriptor-options" title="Link to this heading"></a></h1>
 <p>As a general remark please be reminded that if you have not used LAMMPS
 for your first steps in MALA, and instead used the python-based descriptor
 calculation methods, we highly advise switching to LAMMPS for advanced/more
@@ -203,6 +204,44 @@ calculate descriptors. Enabling MPI in MALA can easily be done via</p>
 <p>prior to using the <code class="docutils literal notranslate"><span class="pre">DataConverter</span></code> class. Then, all processing will
 be done in parallel - both the descriptor calculation as well as the LDOS
 parsing.</p>
+</section>
+<section id="ace-descriptors">
+<h2>ACE Descriptors<a class="headerlink" href="#ace-descriptors" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To use ACE descriptors with MALA, you need to install LAMMPS from source
+using the ACE descriptor development branch, since the ACE descriptors
+are not yet part of the descriptor calculation code the MALA team has
+integrated into mainline LAMMPS. You can find the code here:
+<a class="reference external" href="https://github.com/jmgoff/lammps_compute_PACE/tree/mala-ace-grid">https://github.com/jmgoff/lammps_compute_PACE/tree/mala-ace-grid</a>.</p>
+</div>
+<p>Recently, and as described in the
+<a class="reference external" href="https://arxiv.org/abs/2411.19617">MALA technical paper</a> ACE descriptors
+have been implemented as an alternative to bispectrum descriptors. They
+follow the Atomic Cluster Expansion (ACE) formalism, introduced by
+the <a class="reference external" href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.99.014104">eponymous publication</a>
+by Ralf Drautz. ACE descriptors hold the promise of being more descriptive and
+accurate than bispectrum descriptors and are currently being investigated by
+the MALA team. MALA already implements most functionalities of bispectrum
+descriptors for ACE descriptors. You can use them in the same fashion as
+the bispectrum descriptors, with the only difference being the hyperparameters
+you need to set.</p>
+<p>Specifically, by replacing all bispectrum hyperparameters in your script
+with code such as this</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">=</span> <span class="s2">&quot;ACE&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">ace_cutoff</span> <span class="o">=</span> <span class="mf">5.8</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">ace_included_expansion_ranks</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">ace_maximum_l_per_rank</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">ace_maximum_n_per_rank</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">ace_minimum_l_per_rank</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>ACE descriptors will be used in your processing/training/testing scripts.
+ACE_DOCS_MISSING: Describe what the parameters mean/how to best tune them.</p>
+<p>A known current limitation is that ACE descriptors can only be run on CPU.
+A GPU version is currently being developed.</p>
 </section>
 </section>
 

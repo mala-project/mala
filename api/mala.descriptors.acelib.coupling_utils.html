@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coupling_utils &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="symmetric_group_manipulations" href="mala.descriptors.acelib.symmetric_group_manipulations.html" />
+    <link rel="prev" title="common_utils" href="mala.descriptors.acelib.common_utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datageneration.html">datageneration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="mala.descriptors.html">descriptors</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="mala.descriptors.acelib.html">acelib</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.ace.html">ace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.atomic_density.html">atomic_density</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.bispectrum.html">bispectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html">descriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.lammps_utils.html">lammps_utils</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.minterpy_descriptors.html">minterpy_descriptors</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.html">network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.html">targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="mala.html">mala</a></li>
+          <li class="breadcrumb-item"><a href="mala.descriptors.html">descriptors</a></li>
+          <li class="breadcrumb-item"><a href="mala.descriptors.acelib.html">acelib</a></li>
+      <li class="breadcrumb-item active">coupling_utils</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.descriptors.acelib.coupling_utils.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mala.descriptors.acelib.coupling_utils">
+<span id="coupling-utils"></span><h1>coupling_utils<a class="headerlink" href="#module-mala.descriptors.acelib.coupling_utils" title="Link to this heading"></a></h1>
+<p>Utility functions for calculation of ACE coupling coefficients.</p>
+<p>Some of the functions here are specifically related to the PA basis set,
+and formerly lived in the pa_gen.py or pa_lib.py files, before these
+were unified.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.apply_ladder_relationships">
+<span class="sig-name descname"><span class="pre">apply_ladder_relationships</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combined_labs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parity_span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parity_span_labs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_span</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#apply_ladder_relationships"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.apply_ladder_relationships" title="Link to this definition"></a></dt>
+<dd><p>Apply ladder relationships. From Goff 2024. For input angular function indices and radial function indices, apply ladder relationships to overcomplete set of L to remove redundant functions.</p>
+<p>These ladder relationships are derived from repeatedly applying raising/lowering relationships to the generalized coupling coefficients in <a class="reference external" href="https://doi.org/10.1016/j.jcp.2024.113073">https://doi.org/10.1016/j.jcp.2024.113073</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nin</strong> (<em>List</em>) – radial indices to resort according to frequency and return the mapping to do so</p></li>
+<li><p><strong>lin</strong> (<em>List</em>) – angular indices to resort according to frequency and return the mapping to do so</p></li>
+<li><p><strong>combined_labs</strong> (<em>List</em>) – blocks of lL generated based on frequency partition</p></li>
+<li><p><strong>parity_span</strong> (<em>List</em>) – span of young subgroup * SO(3) after parity constraints applied</p></li>
+<li><p><strong>parity_span_labs</strong> (<em>List</em>) – labels spanning young subgroup * SO(3) after parity constraints applied</p></li>
+<li><p><strong>full_span</strong> (<em>List</em>) – span of full young subgroup * SO(3) group</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>funcs</strong> – reduced set of permutation-adapted functions</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.build_and_write_to_tabulated">
+<span class="sig-name descname"><span class="pre">build_and_write_to_tabulated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_max_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_max_l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#build_and_write_to_tabulated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.build_and_write_to_tabulated" title="Link to this definition"></a></dt>
+<dd><p>Build a tabulated PA ACE descriptor label file.</p>
+<p>This only matters for rank &gt;=4. The json files build in this function are saved in the acelib directory and read in the process of computing the labels/coupling coefficients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rank</strong> (<em>int</em>) – body order of angular ace descriptor labels to be generated</p></li>
+<li><p><strong>L_R</strong> (<em>int</em>) – Resultant angular momentum quantum number. This determines the equivariant
+character of the rank N descriptor after reduction. L_R=0 corresponds to
+a rotationally invariant feature, L_R=1 corresponds to a feature that
+transforms like a vector, L_R=2 a tensor, etc.</p></li>
+<li><p><strong>M_R</strong> (<em>int</em>) – Resultant projection quantum number. This also determines the equivariant
+character of the rank N descriptor after reduction. M_R must obey
+-L_R &lt;= M_R &lt;= L_R</p></li>
+<li><p><strong>all_max_n</strong> (<em>int</em>) – max radial basis function index (with possible shift according to max chemical
+basis index)</p></li>
+<li><p><strong>all_max_l</strong> (<em>int</em>) – max angular basis function index</p></li>
+<li><p><strong>label_file</strong> (<em>str</em>) – file name to contain PA labels</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None</strong> – Labels are written to file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.build_tree_for_l_intermediates">
+<span class="sig-name descname"><span class="pre">build_tree_for_l_intermediates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#build_tree_for_l_intermediates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.build_tree_for_l_intermediates" title="Link to this definition"></a></dt>
+<dd><p>Build the “intermediate” angular momenta. When coupling N quantum angular momenta (and reducing product of N spherical harmonics in ACE), only 2 quantum angular momenta can be added at a time with traditional clebsch-gordan coefficients.</p>
+<p>Any more, and they must be reduced to an ‘intermediate’, and the intermediates added. The allowed intermediates are those determined by repeated quantum angular momentum addition rules (a.k.a. triangle conditions).</p>
+<p>This function gets all possible sets of intermediates given a set of N angular momentum quantum numbers. This is described in more detail in <a class="reference external" href="https://doi.org/10.1016/j.jcp.2024.113073">https://doi.org/10.1016/j.jcp.2024.113073</a>.</p>
+<p>More detail about the intermediates may be found following Eq. 7 in the above reference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>l</strong> (<em>List</em>) – list (multiset) of angular momentum indices l1,l2,…lN. These correspond
+to the N spherical harmonics in the ACE descriptor(s).</p></li>
+<li><p><strong>L_R</strong> (<em>int</em>) – Resultant angular momentum quantum number. This determines the equivariant
+character of the rank N descriptor after reduction. L_R=0 corresponds to
+a rotationally invariant feature, L_R=1 corresponds to a feature that
+transforms like a vector, L_R=2 a tensor, etc.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>full_inter_tuples</strong> – List of all possible “intermediate” angular momenta allowed by polygon
+conditions. See discussion following Eq. 7 in above reference.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.calculate_highest_coupling_representation">
+<span class="sig-name descname"><span class="pre">calculate_highest_coupling_representation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lref</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#calculate_highest_coupling_representation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.calculate_highest_coupling_representation" title="Link to this definition"></a></dt>
+<dd><p>Find the partition of N that has the biggest cycles that are multiples of 2.</p>
+<p>This is used to help define the recursion relationships assigned per frequency partition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lp</strong> (<em>List</em>) – permutation of l indices</p></li>
+<li><p><strong>lref</strong> (<em>List</em>) – sorted indices of l</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>highest_rep</strong> – partition of N with maximized cycles which are powers of 2</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.calculate_mu_n_l">
+<span class="sig-name descname"><span class="pre">calculate_mu_n_l</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nu_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#calculate_mu_n_l"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.calculate_mu_n_l" title="Link to this definition"></a></dt>
+<dd><p>Given an ACE descriptor label, nu, return the chemical basis function indices, radial basis function indices, and angular basis function indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nu_in</strong> (<em>str</em>) – ACE descriptor label in FitSNAP/LAMMPS format
+mu0_mu1,mu2…muN,n1,n2…nN,l1,l2…lN_L1-L2-…-L_{N-3}-L_{N-2}</p></li>
+<li><p><strong>return_L</strong> (<em>bool</em>) – Flag to return multiset of intermediate angular indices</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>mu_n_l</strong> – Tuple containing mu0, mu, n and l (and L, if return_L is True).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.calculate_mu_nu_rank">
+<span class="sig-name descname"><span class="pre">calculate_mu_nu_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nu_in</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#calculate_mu_nu_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.calculate_mu_nu_rank" title="Link to this definition"></a></dt>
+<dd><p>Calculate mu-nu rank from nu. Given an ACE descriptor label in FitSNAP/LAMMPS format, return the rank of the descriptor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nu_in</strong> (<em>str</em>) – ACE descriptor label in FitSNAP/LAMMPS format
+mu0_mu1,mu2…muN,n1,n2…nN,l1,l2…lN_L1-L2-…-L_{N-3}-L_{N-2}</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>mu_nu_rank</strong> – Rank computed from label.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.combine_blocks">
+<span class="sig-name descname"><span class="pre">combine_blocks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blocks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#combine_blocks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.combine_blocks" title="Link to this definition"></a></dt>
+<dd><p>Recombine trees from multiple permutations of l.</p>
+<p>Combines ‘blocks’ of functions after rearranging l according to frequency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>blocks</strong> (<em>dict</em>) – labels per block (could use a new name)</p></li>
+<li><p><strong>lin</strong> (<em>List</em>) – unique (nominally sorted) l</p></li>
+<li><p><strong>L_R</strong> (<em>int</em>) – Resultant angular momentum quantum number. This determines the equivariant
+character of the rank N descriptor after reduction. L_R=0 corresponds to
+a rotationally invariant feature, L_R=1 corresponds to a feature that
+transforms like a vector, L_R=2 a tensor, etc.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>combined_labs</strong> – combined lL labels for the frequency partition of l (defining the ‘block’ of
+angular functions to work with).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.combine_muvector_nvector">
+<span class="sig-name descname"><span class="pre">combine_muvector_nvector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#combine_muvector_nvector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.combine_muvector_nvector" title="Link to this definition"></a></dt>
+<dd><p>Tuple vectors mu and n. Adds chemical basis to radial basis indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mu</strong> (<em>List</em>) – multiset of chemical basis indices</p></li>
+<li><p><strong>n</strong> (<em>List</em>) – multiset of radial basis indices</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>tuppled</strong> – combined chemical and radial basis indices</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.compute_intermediates">
+<span class="sig-name descname"><span class="pre">compute_intermediates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#compute_intermediates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.compute_intermediates" title="Link to this definition"></a></dt>
+<dd><p>Compute integers lying between absolute difference and sum of l1 and l2.</p>
+<p>This function enumerates possible third angular momentum quantum numbers that obey the triangle conditions for quantum angular momentum addition.</p>
+<p>See “Definitions” in <a class="reference external" href="https://doi.org/10.1016/j.jcp.2024.113073">https://doi.org/10.1016/j.jcp.2024.113073</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>l1</strong> (<em>int</em>) – First angular momentum quantum number</p></li>
+<li><p><strong>l2</strong> (<em>int</em>) – Second angular momentum quantum number</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ints</strong> – List of all integers between abs(l1-l2) and l1+l2.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.compute_pa_labels_raw">
+<span class="sig-name descname"><span class="pre">compute_pa_labels_raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mumax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#compute_pa_labels_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.compute_pa_labels_raw" title="Link to this definition"></a></dt>
+<dd><p>Enumerate permutation-adapted ACE descriptors (ace descriptors obeying eq. 33 in <a class="reference external" href="https://doi.org/10.1016/j.jcp.2024.113073">https://doi.org/10.1016/j.jcp.2024.113073</a>).</p>
+<p>For ranks &lt;=3, this simply uses lexicographically ordered indices. This function enumerates all ACE descriptor labels of rank N, up to a maximumum radial index and up to a maximum angular function index (angular momentum number for spherical harmonics).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rank</strong> (<em>int</em>) – order of the expansion, referred to as <cite>N</cite> in Drautz 2019, of the
+descriptors to be enumerated</p></li>
+<li><p><strong>nmax</strong> (<em>any</em>) – maximum radial basis function index for the given descriptor rank</p></li>
+<li><p><strong>lmax</strong> (<em>any</em>) – maximum angular momentum number for the given descriptor rank (maximum angular function index)</p></li>
+<li><p><strong>mumax</strong> (<em>any</em>) – maximum chemical basis index for the given rank (should generally be
+mumax=len(ace_elements)</p></li>
+<li><p><strong>lmin</strong> (<em>any</em>) – minimum angular momentum number for the given descriptor rank</p></li>
+<li><p><strong>L_R</strong> (<em>int</em>) – Resultant angular momentum quantum number. This determines the equivariant
+character of the rank N descriptor after reduction. L_R=0 corresponds to
+a rotationally invariant feature, L_R=1 corresponds to a feature that
+transforms like a vector, L_R=2 a tensor, etc.</p></li>
+<li><p><strong>M_R</strong> (<em>int</em>) – Resultant projection quantum number. This also determines the equivariant
+character of the rank N descriptor after reduction. M_R must obey
+-L_R &lt;= M_R &lt;= L_R</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>all_lammps_labels</strong> – PA labels.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.create_unique_combinations">
+<span class="sig-name descname"><span class="pre">create_unique_combinations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lrng</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#create_unique_combinations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.create_unique_combinations" title="Link to this definition"></a></dt>
+<dd><p>Create all unique combinations of a size from integers in a range. Useful for enumerating index multisets where repetition of indices is allowed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lrng</strong> (<em>range</em>) – Range of l-values.</p></li>
+<li><p><strong>size</strong> (<em>int</em>) – Size of combinations to be created.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>uniques</strong> – List of unique combinations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.generate_l_LR">
+<span class="sig-name descname"><span class="pre">generate_l_LR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lrng</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_permutations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#generate_l_LR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.generate_l_LR" title="Link to this definition"></a></dt>
+<dd><p>Generate the possible combinations of angular momentum quantum numbers for a given rank. This takes into account that the desired descriptors will, in general, be rotationally invariant.</p>
+<p>In short, this function enumerates all possible angular basis function indices for a given descriptor rank (before reducing according to rules defined in Eq. 33 of <a class="reference external" href="https://doi.org/10.1016/j.jcp.2024.113073">https://doi.org/10.1016/j.jcp.2024.113073</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lrng</strong> (<em>List</em>) – list of int of possible angular momentum quantum numbers. Typically,
+these will be (0,1,2…lmax)</p></li>
+<li><p><strong>rank</strong> (<em>int</em>) – order of the expansion, referred to as <cite>N</cite> in Drautz 2019, of the
+descriptors to be enumerated</p></li>
+<li><p><strong>L_R</strong> (<em>int</em>) – Resultant angular momentum quantum number. This determines the equivariant
+character of the rank N descriptor after reduction. L_R=0 corresponds to
+a rotationally invariant feature, L_R=1 corresponds to a feature that
+transforms like a vector, L_R=2 a tensor, etc.</p></li>
+<li><p><strong>M_R</strong> (<em>int</em>) – Resultant projection quantum number. This also determines the equivariant
+character of the rank N descriptor after reduction. M_R must obey
+-L_R &lt;= M_R &lt;= L_R</p></li>
+<li><p><strong>use_permutations</strong> (<em>bool</em>) – Logical flag to generate all non-repeating permutations of <cite>l</cite> for</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ls</strong> – List of angular momenta.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.generate_nl">
+<span class="sig-name descname"><span class="pre">generate_nl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mumax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_perms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#generate_nl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.generate_nl" title="Link to this definition"></a></dt>
+<dd><p>Generate lexicographically ordered n,l tuples. (useful for enumerating ACE descriptor labels up to rank 3.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rank</strong> (<em>int</em>) – order of the expansion, referred to as <cite>N</cite> in Drautz 2019, of the
+descriptors to be enumerated</p></li>
+<li><p><strong>nmax</strong> (<em>any</em>) – maximum radial basis function index for the given descriptor rank</p></li>
+<li><p><strong>lmax</strong> (<em>any</em>) – maximum angular momentum number for the given descriptor rank</p></li>
+<li><p><strong>mumax</strong> (<em>any</em>) – maximum chemical basis index for the given rank (should generally be
+mumax=len(ace_elements)</p></li>
+<li><p><strong>lmin</strong> (<em>any</em>) – minimum angular momentum number for the given descriptor rank</p></li>
+<li><p><strong>L_R</strong> (<em>int</em>) – Resultant angular momentum quantum number. This determines the equivariant
+character of the rank N descriptor after reduction. L_R=0 corresponds to
+a rotationally invariant feature, L_R=1 corresponds to a feature that
+transforms like a vector, L_R=2 a tensor, etc.</p></li>
+<li><p><strong>all_perms</strong> (<em>bool</em>) – logical flag to include redundant permutations of ACE descriptor labels.
+This should only be used for testing.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>munl</strong> – List of munl vectors in string format, i.e.
+mu0_mu1,mu2,…muk,n1,n2,..n_k,l1,l2,..l_k_L1-L2…-LK</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.generate_tree_labels">
+<span class="sig-name descname"><span class="pre">generate_tree_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#generate_tree_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.generate_tree_labels" title="Link to this definition"></a></dt>
+<dd><p>Sorts nl according to frequency partitions, not necessarily lexicographically.</p>
+<p>This is just a special ordering of n and l multisets that is more compatible with the application of quantum angular momentum “ladder opertations”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nin</strong> (<em>List</em>) – input collection of radial basis function indices</p></li>
+<li><p><strong>lin</strong> (<em>List</em>) – input collection of angular basis function indices</p></li>
+<li><p><strong>L_R</strong> (<em>int</em>) – Resultant angular momentum quantum number. This determines the equivariant
+character of the rank N descriptor after reduction. L_R=0 corresponds to
+a rotationally invariant feature, L_R=1 corresponds to a feature that
+transforms like a vector, L_R=2 a tensor, etc.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>tree_labels</strong> – Tuple containing max_labs, all_labs, labels_per_block and
+original_spans.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.get_mapped">
+<span class="sig-name descname"><span class="pre">get_mapped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lin</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#get_mapped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.get_mapped" title="Link to this definition"></a></dt>
+<dd><p>Sort n and l multisets by frequency of occurence of elements in nin and lin.</p>
+<p>For nin, elements of nin are ordered according to their frequency, and a new index is assigned to elements of nin based on their frequency of occurence. The map between these two is saved.</p>
+<p>For lin, elements of lin are ordered according to their frequency, and a new index is assigned to elements of lin based on their frequency of occurence. The map between these two is saved.</p>
+<p>This function is used to avoid redundant enumeration for radial and angular function index multisets with the same frequency partitions as others.</p>
+<p>For example n=(1,1,2,2), l=(1,1,3,5) uses the same frequency partition as n=(2,2,3,3), l=(3,3,4,6). This function makes sure these two cases are handledwith the same frequency partition.</p>
+<p>For example, nin = [2,3,3,4] -&gt; mappedn = [0,0,1,2], mprev_n = {0:3,1:2,2:4} and lin = [1,1,1,3] -&gt; mappedl = [0,0,0,1], mprev = {0:1,1:3}.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nin</strong> (<em>List</em>) – radial indices to resort according to frequency and return the mapping to do so</p></li>
+<li><p><strong>lin</strong> (<em>List</em>) – angular indices to resort according to frequency and return the mapping to do so</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>mappedn</strong> – frequency-sorted indices for nin</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.get_mapped_subset">
+<span class="sig-name descname"><span class="pre">get_mapped_subset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ns</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#get_mapped_subset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.get_mapped_subset" title="Link to this definition"></a></dt>
+<dd><p>Map n indices to a new set of indices based on the frequency of elements in n rather than the values of n themselves.</p>
+<p>This tool is to allow one to more conveniently order indices in their respective frequency partitions, as needed by Eq. 33 in <a class="reference external" href="https://doi.org/10.1016/j.jcp.2024.113073">https://doi.org/10.1016/j.jcp.2024.113073</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ns</strong> (<em>List</em>) – List of possible n multisets</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>reduced_ns</strong> – Returns a list of n multisets that have been reordered according to the frequency
+of elements of n</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.lammps_remap">
+<span class="sig-name descname"><span class="pre">lammps_remap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PA_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_mus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#lammps_remap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.lammps_remap" title="Link to this definition"></a></dt>
+<dd><p>Remap PA labels for LAMMPS. Takes (tabulated) PA labels enumerated with n and l multisets, and adds in chemical basis indices.</p>
+<p>In other words, this function maps munl PA labels to nl labels compatible with lammps .yace basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>PA_labels</strong> (<em>List</em>) – List of PA labels to be remapped.</p></li>
+<li><p><strong>rank</strong> (<em>int</em>) – Rank used for the remapping.</p></li>
+<li><p><strong>allowed_mus</strong> (<em>List</em>) – Allowed mu values for the remapping.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>remapped</strong> – Tuple contain the remapped labels that are compatible with lammps descriptor calculators and,
+in very rare cases, labels that are not compatible.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.read_from_tabulated">
+<span class="sig-name descname"><span class="pre">read_from_tabulated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_mus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tabulated_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#read_from_tabulated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.read_from_tabulated" title="Link to this definition"></a></dt>
+<dd><p>Read PA ACE descriptor labels from tabulated data saved to a json file (by build_tabulated).</p>
+<p>Since functions are only tabulated for n-l a conversion is made to include chemical basis indices as well and make sure that they are permutation-adapted independent as well.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mu</strong> (<em>List</em>) – list of chemical basis indices mu1,mu2,…muN</p></li>
+<li><p><strong>n</strong> (<em>List</em>) – list of radial basis indices n1,n2,…nN</p></li>
+<li><p><strong>l</strong> (<em>List</em>) – list of radial basis indices l1,l2,…lN</p></li>
+<li><p><strong>allowed_mus</strong> (<em>List</em>) – all possible allowed chemical basis function indices. (generated by range(mumax))</p></li>
+<li><p><strong>tabulated_all</strong> (<em>dict</em>) – optionally, pass in tabulated PA ACE descriptor labels as a dictionary</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>chem_labels</strong> – Labels read from json file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.coupling_utils.simple_parity_filter">
+<span class="sig-name descname"><span class="pre">simple_parity_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">even</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/coupling_utils.html#simple_parity_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.coupling_utils.simple_parity_filter" title="Link to this definition"></a></dt>
+<dd><p>Filter possible couplings according to parity of intermediates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>l</strong> (<em>List</em>) – collection of angular momentum quantum numbers [l1,l2,…lN]</p></li>
+<li><p><strong>inters</strong> – possible multisets of intermediates [(L1,L2…L_{N-2}),(L1’,L2’,…L_{N-2})’ …]</p></li>
+<li><p><strong>even</strong> (<em>bool</em>) – Control for which parity to filter according to. (For L_R=0 - will use ‘even’)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>inters_filt</strong> – Filtered multisets of intermediates obeying parity constraints.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mala.descriptors.acelib.common_utils.html" class="btn btn-neutral float-left" title="common_utils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.descriptors.acelib.symmetric_group_manipulations.html" class="btn btn-neutral float-right" title="symmetric_group_manipulations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

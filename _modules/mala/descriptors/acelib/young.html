@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.descriptors.acelib.young &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=33f2f6c7" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html">
+            
+              <img src="../../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mala.descriptors.acelib.young</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.descriptors.acelib.young</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Library of functions and classes for building Young diagrams and filling them.</span>
+
+<span class="sd">This includes young subgroup fillings within orbits of irreproducible</span>
+<span class="sd">representations of S_N.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.acelib.common_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">flatten</span><span class="p">,</span>
+    <span class="n">group_vector_by_nodes</span><span class="p">,</span>
+    <span class="n">group_vector_by_orbits</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.acelib.tree_sorting</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_quick_tree</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+
+
+<div class="viewcode-block" id="YoungSubgroup">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.young.html#mala.descriptors.acelib.young.YoungSubgroup">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">YoungSubgroup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for Young tableau with subgroup filling options.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rank : int</span>
+<span class="sd">        Rank of the Young tableau.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rank : int</span>
+<span class="sd">        Rank of the Young tableau.</span>
+
+<span class="sd">    partition : List</span>
+<span class="sd">        Partition of the Young tableau.</span>
+
+<span class="sd">    fills : List</span>
+<span class="sd">        List of subgroup fillings.</span>
+
+<span class="sd">    nodes : List or tuple</span>
+<span class="sd">        List of nodes.</span>
+
+<span class="sd">    remainder : any</span>
+<span class="sd">        Remainder of building trees during filling of the subgroups.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rank</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">=</span> <span class="n">rank</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partition</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fills</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remainder</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="YoungSubgroup.sigma_c_partitions">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.young.html#mala.descriptors.acelib.young.YoungSubgroup.sigma_c_partitions">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sigma_c_partitions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_orbit</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a list of partitions compatible with sigma_c.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        max_orbit : int</span>
+<span class="sd">            Maximum orbit size for permutation (P-cycle where P&lt;N)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        partitions : List</span>
+<span class="sd">            List of partitions compatible with sigma_c.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># returns a list of partitions compatible with sigma_c</span>
+        <span class="n">nodes</span><span class="p">,</span> <span class="n">remainder</span> <span class="o">=</span> <span class="n">build_quick_tree</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remainder</span> <span class="o">=</span> <span class="n">remainder</span>
+
+        <span class="n">max_nc2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">min_orbits</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">min_orbits</span> <span class="o">+=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+
+        <span class="n">min_nc1</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">remainder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">min_nc1</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">max_orbit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">max_orbits</span> <span class="o">=</span> <span class="n">max_orbit</span>
+        <span class="k">elif</span> <span class="n">max_orbit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">max_orbits</span> <span class="o">=</span> <span class="n">max_nc2</span> <span class="o">+</span> <span class="n">min_nc1</span>
+        <span class="c1"># orb_base = [i for i in range(1,self.rank+1) if i %2 ==0 or i == 1]</span>
+        <span class="n">orb_base</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">remainder</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">orb_base</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">global_sigma_c_parts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">good_partitions</span> <span class="o">=</span> <span class="n">global_sigma_c_parts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">good_partitions</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">norbits</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">min_orbits</span><span class="p">,</span> <span class="n">max_orbits</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">possible_parts</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reverse_vector</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">p</span><span class="p">)))</span>
+                    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">orb_base</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="n">norbits</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="ow">and</span> <span class="nb">max</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="o">**</span><span class="n">max_nc2</span>
+                <span class="p">]</span>
+                <span class="n">good_partitions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">possible_parts</span><span class="p">)</span>
+            <span class="n">global_sigma_c_parts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">good_partitions</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">good_partitions</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="YoungSubgroup.check_single_fill">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.young.html#mala.descriptors.acelib.young.YoungSubgroup.check_single_fill">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_single_fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partition</span><span class="p">,</span> <span class="n">inds</span><span class="p">,</span> <span class="n">semistandard</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check a that a collection of indices is sorted in a young tableau.</span>
+
+<span class="sd">        This tableau will typically correspond to a young subgroup relevant for pairwise reduction of N spherical harmonics.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        partition : List</span>
+<span class="sd">            Partition of N determining shape of the Young tableau.</span>
+
+<span class="sd">        inds : List</span>
+<span class="sd">            Indices (filling) of the Young tableau.</span>
+
+<span class="sd">        semistandard : bool</span>
+<span class="sd">            Whether the Young tableau filling is semistandard.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if the fill is correct, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tmpi</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">inds</span><span class="p">)</span>
+        <span class="n">unique_tmpi</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tmpi</span><span class="p">))</span>
+        <span class="n">ii_to_inds</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">indi_to_ii</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">indi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_tmpi</span><span class="p">)),</span> <span class="n">unique_tmpi</span><span class="p">):</span>
+            <span class="n">ii_to_inds</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">indi</span>
+            <span class="n">indi_to_ii</span><span class="p">[</span><span class="n">indi</span><span class="p">]</span> <span class="o">=</span> <span class="n">ii</span>
+
+        <span class="n">place_holders</span> <span class="o">=</span> <span class="p">[</span><span class="n">indi_to_ii</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">partition</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">partition</span> <span class="o">=</span> <span class="n">partition</span>
+        <span class="n">mapped_perm</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">place_holders</span><span class="p">)</span>
+        <span class="n">fill</span> <span class="o">=</span> <span class="n">group_vector_by_orbits</span><span class="p">(</span><span class="n">mapped_perm</span><span class="p">,</span> <span class="n">partition</span><span class="p">)</span>
+        <span class="n">row_sort</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_row_sort</span><span class="p">(</span><span class="n">fill</span><span class="p">)</span>
+        <span class="n">col_sort</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_column_sort</span><span class="p">(</span><span class="n">fill</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">semistandard</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">row_sort</span> <span class="ow">and</span> <span class="n">col_sort</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">semistandard</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">row_sort</span></div>
+
+
+<div class="viewcode-block" id="YoungSubgroup.subgroup_fill">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.young.html#mala.descriptors.acelib.young.YoungSubgroup.subgroup_fill">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">subgroup_fill</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">inds</span><span class="p">,</span>
+        <span class="n">partitions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_orbit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">semistandard</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">lreduce</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fill the young subgroup subgroup according to standard, semistandard, etc conventions.</span>
+<span class="sd">        </span>
+<span class="sd">        This will generate multiple fillings relevant for the pairwise reduction of N spherical harmonics. </span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        inds : List</span>
+<span class="sd">            Indices to be filled in the Young tableau.</span>
+
+<span class="sd">        partitions : List</span>
+<span class="sd">            Partitions of N determining the shape of the Young tableau.</span>
+
+<span class="sd">        max_orbit : int</span>
+<span class="sd">            Maximum orbit, aka max row size in the tableau.</span>
+
+<span class="sd">        semistandard : bool</span>
+<span class="sd">            Whether the Young tableau filling is semistandard.</span>
+
+<span class="sd">        lreduce : bool</span>
+<span class="sd">            Whether to reduce the Young tableau fillings according to 2-cycles (according to pairwise angular momentum coupling scheme)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">partitions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">partitions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_c_partitions</span><span class="p">(</span><span class="n">max_orbit</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">inds</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">partitions</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">inds</span><span class="p">)])]</span> <span class="o">+</span> <span class="n">partitions</span>
+        <span class="n">subgroup_fills</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">fills_perpart</span> <span class="o">=</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">partition</span><span class="p">):</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">partition</span> <span class="ow">in</span> <span class="n">partitions</span><span class="p">}</span>
+        <span class="n">part_perfill</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">all_perms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_permutations</span><span class="p">(</span><span class="n">inds</span><span class="p">)</span>
+
+        <span class="c1"># UNUSED CODE, maybe we will need this laterm, so I am not deleting it</span>
+        <span class="c1"># directly.</span>
+
+        <span class="c1"># get the full automorphism group including any expansion due to</span>
+        <span class="c1"># degeneracy</span>
+        <span class="c1"># G_N = get_auto_part(inds,partitions[0],add_degen_autos=True,part_</span>
+        <span class="c1"># only=False)</span>
+        <span class="c1"># applied_perms = [tuple(Permutation(filled_perm(pi,len(inds)))(inds))</span>
+        <span class="c1"># for pi in G_N]</span>
+        <span class="c1"># collect a group of permutations \sigma \in S_N \notin G_N</span>
+        <span class="c1"># idi = [tuple([ki]) for ki in range(len(inds))]</span>
+        <span class="c1"># H_N = [tuple(idi) ]</span>
+        <span class="c1"># for raw_perm in perms_raw:</span>
+        <span class="c1">#    P = Permutation(raw_perm)</span>
+        <span class="c1">#    cyc = P.full_cyclic_form</span>
+        <span class="c1">#    cyc = tuple([tuple(k) for k in cyc])</span>
+        <span class="c1">#    this_applied = P(inds)</span>
+        <span class="c1">#    if tuple(this_applied) not in applied_perms:</span>
+        <span class="c1">#        H_N.append(cyc)</span>
+        <span class="c1"># not_equals  = [tuple(Permutation(filled_perm(pi,len(inds)))(inds))</span>
+        <span class="c1"># for pi in H_N]</span>
+        <span class="c1"># if len(not_equals) != 0:</span>
+        <span class="c1">#    loopperms = not_equals.copy()</span>
+        <span class="c1"># elif len(not_equals) == 0:</span>
+        <span class="n">loopperms</span> <span class="o">=</span> <span class="n">all_perms</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">lreduce</span><span class="p">:</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">nodes</span><span class="p">,</span> <span class="n">remainder</span> <span class="o">=</span> <span class="n">build_quick_tree</span><span class="p">(</span><span class="n">inds</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">loopperm</span> <span class="ow">in</span> <span class="n">loopperms</span><span class="p">:</span>
+                <span class="n">grouped</span> <span class="o">=</span> <span class="n">group_vector_by_nodes</span><span class="p">(</span><span class="n">loopperm</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">remainder</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">remainder</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">srted</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">grouped</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">srted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grouped</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">srted</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">srted</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">remainder</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">srted</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">grouped</span><span class="p">)</span>
+                    <span class="n">srted</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">srted</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">grouped</span><span class="p">)</span> <span class="o">==</span> <span class="n">srted</span><span class="p">:</span>
+                    <span class="n">tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loopperm</span><span class="p">)</span>
+            <span class="n">loopperms</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">partition</span> <span class="ow">in</span> <span class="n">partitions</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">fill</span> <span class="ow">in</span> <span class="n">loopperms</span><span class="p">:</span>
+                <span class="c1"># flag,subgroup_fillings = self.check_subgroup_fill(partition,fill,sigma_c_symmetric=sigma_c_symmetric,semistandard=semistandard)</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_single_fill</span><span class="p">(</span>
+                    <span class="n">partition</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">semistandard</span><span class="o">=</span><span class="n">semistandard</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">flag</span> <span class="ow">and</span> <span class="n">fill</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">subgroup_fills</span><span class="p">:</span>
+                    <span class="n">subgroup_fills</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fill</span><span class="p">)</span>
+                <span class="n">fills_perpart</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">partition</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fill</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">part_perfill</span><span class="p">[</span><span class="n">fill</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">partition</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">part_perfill</span><span class="p">[</span><span class="n">fill</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">partition</span><span class="p">)]</span>
+        <span class="n">all_fills</span> <span class="o">=</span> <span class="n">subgroup_fills</span>  <span class="c1"># list(set(subgroup_fills))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fills</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">all_fills</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sgf</span><span class="p">,</span> <span class="n">pts</span> <span class="ow">in</span> <span class="n">part_perfill</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">pts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">pts</span><span class="p">))</span>
+            <span class="n">pts</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">pts</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">i</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="n">pts</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">part_perfill</span><span class="p">[</span><span class="n">sgf</span><span class="p">]</span> <span class="o">=</span> <span class="n">pts</span></div>
+
+
+<div class="viewcode-block" id="YoungSubgroup.unique_permutations">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.young.html#mala.descriptors.acelib.young.YoungSubgroup.unique_permutations">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unique_permutations</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the unique permutations of a vector.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        vec : List</span>
+<span class="sd">            Vector to get the permutations of.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        unique_perms : List</span>
+<span class="sd">            List of unique permutations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">all_perms</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">permutations</span><span class="p">(</span><span class="n">vec</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_perms</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="YoungSubgroup.is_column_sort">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.young.html#mala.descriptors.acelib.young.YoungSubgroup.is_column_sort">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_column_sort</span><span class="p">(</span><span class="n">partitionfill</span><span class="p">,</span> <span class="n">strict_col_sort</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the young tableau is column sorted.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        partitionfill : List</span>
+<span class="sd">            Partition fill to check.</span>
+
+<span class="sd">        strict_col_sort : bool</span>
+<span class="sd">            Whether to check for strict column sorting in the young tableau. If True, </span>
+<span class="sd">            entries in columns of the tableau must be strictly increasing. </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        sorted : bool</span>
+<span class="sd">            True if the columns are sorted, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lens</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">partitionfill</span><span class="p">]</span>
+        <span class="n">ranges</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ln</span><span class="p">))</span> <span class="k">for</span> <span class="n">ln</span> <span class="ow">in</span> <span class="n">lens</span><span class="p">]</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="n">ranges</span><span class="p">)))</span>
+        <span class="n">bycol</span> <span class="o">=</span> <span class="p">{</span><span class="n">col</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">subrange</span><span class="p">,</span> <span class="n">orbitlst</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ranges</span><span class="p">,</span> <span class="n">partitionfill</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">colidx</span><span class="p">,</span> <span class="n">orbitval</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">subrange</span><span class="p">,</span> <span class="n">orbitlst</span><span class="p">):</span>
+                <span class="n">bycol</span><span class="p">[</span><span class="n">colidx</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">orbitval</span><span class="p">)</span>
+        <span class="n">coltups</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">bycol</span><span class="p">[</span><span class="n">colidx</span><span class="p">])</span> <span class="k">for</span> <span class="n">colidx</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">]</span>
+        <span class="n">sortedcols</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">bycol</span><span class="p">[</span><span class="n">colidx</span><span class="p">]))</span> <span class="k">for</span> <span class="n">colidx</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">]</span>
+        <span class="c1"># check to see if columns are sorted</span>
+        <span class="n">sortedcol_flag</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span><span class="n">a</span> <span class="o">==</span> <span class="n">b</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">coltups</span><span class="p">,</span> <span class="n">sortedcols</span><span class="p">)])</span>
+        <span class="k">if</span> <span class="n">strict_col_sort</span><span class="p">:</span>
+            <span class="n">sortedcol_flag</span> <span class="o">=</span> <span class="n">sortedcol_flag</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
+                <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">)))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">coltups</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">sortedcol_flag</span></div>
+
+
+<div class="viewcode-block" id="YoungSubgroup.is_row_sort">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.young.html#mala.descriptors.acelib.young.YoungSubgroup.is_row_sort">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_row_sort</span><span class="p">(</span><span class="n">partitionfill</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the Young Tableau filling is row sorted.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        partitionfill : List</span>
+<span class="sd">            Partition fill to check.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        sorted : bool</span>
+<span class="sd">            True if the rows are sorted, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">all_srt</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">orbit</span> <span class="ow">in</span> <span class="n">partitionfill</span><span class="p">:</span>
+            <span class="n">logi</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">orbit</span><span class="p">))</span> <span class="o">==</span> <span class="n">orbit</span>
+            <span class="n">all_srt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">logi</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">all_srt</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="YoungSubgroup.reverse_vector">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.young.html#mala.descriptors.acelib.young.YoungSubgroup.reverse_vector">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reverse_vector</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reverse a vector.</span>
+
+<span class="sd">        Returns a copy of the vector, to allow reverse and actual vector</span>
+<span class="sd">        to both be present. This is just a wrapper for the python reverse() function.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v : List</span>
+<span class="sd">            Vector to reverse.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        v_reversed : List</span>
+<span class="sd">            Reversed vector.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vtmp</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">vtmp</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">vtmp</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

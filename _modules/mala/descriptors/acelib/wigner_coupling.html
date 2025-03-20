@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.descriptors.acelib.wigner_coupling &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=33f2f6c7" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html">
+            
+              <img src="../../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mala.descriptors.acelib.wigner_coupling</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.descriptors.acelib.wigner_coupling</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Wigner 3j coupling functions.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">mala.descriptors.acelib.common_utils</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.acelib</span><span class="w"> </span><span class="kn">import</span> <span class="n">coupling_utils</span> <span class="k">as</span> <span class="n">ace_coupling_utils</span>
+
+
+<div class="viewcode-block" id="wigner_3j_coupling">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.wigner_coupling.html#mala.descriptors.acelib.wigner_coupling.wigner_3j_coupling">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">wigner_3j_coupling</span><span class="p">(</span><span class="n">wigner_3j_coefficients</span><span class="p">,</span> <span class="n">ldict</span><span class="p">,</span> <span class="n">L_R</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute generalized Wigner symbols for a given L_R. These, like the generalized Clebsch-Gordan coefficients, may be used to reduce products of arbitrary numbers of spherical harmonics.</span>
+
+<span class="sd">    The approach to construct generalized Wigner symbols is manually defined for each rank for pedagogical and clarity purposes.</span>
+
+<span class="sd">    TODO: Change name to generalized_wigner_coupling.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    wigner_3j_coefficients : dict</span>
+<span class="sd">        Precomputed Wigner 3j coefficients.</span>
+
+<span class="sd">    ldict : dict</span>
+<span class="sd">        Dictionary of ranks and their corresponding L values.</span>
+
+<span class="sd">    L_R : int</span>
+<span class="sd">        Resultant angular momentum quantum number. This determines the equivariant</span>
+<span class="sd">        character of the rank N descriptor after reduction. L_R=0 corresponds to</span>
+<span class="sd">        a rotationally invariant feature, L_R=1 corresponds to a feature that</span>
+<span class="sd">        transforms like a vector, L_R=2 a tensor, etc.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    coupling : dict</span>
+<span class="sd">        Generalized Wigner symbols, {M_R:{rank:{l:{m:coupling_coefficient}}}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_rank_1_tree</span><span class="p">(</span><span class="n">_wigner_3j_coefficients</span><span class="p">,</span> <span class="n">_l</span><span class="p">,</span> <span class="n">_L_R</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">_M_R</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the coupling for rank 1.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        _wigner_3j_coefficients : dict</span>
+<span class="sd">        Precomputed Wigner 3j coefficients.</span>
+
+<span class="sd">        _l : List</span>
+<span class="sd">            list of angular momentum quantum numbers [l1]</span>
+
+<span class="sd">        _L_R : int</span>
+<span class="sd">            Resultant angular momentum quantum number. This determines the equivariant</span>
+<span class="sd">            character of the rank N descriptor after reduction. L_R=0 corresponds to</span>
+<span class="sd">            a rotationally invariant feature, L_R=1 corresponds to a feature that</span>
+<span class="sd">            transforms like a vector, L_R=2 a tensor, etc.</span>
+
+<span class="sd">        _M_R : int</span>
+<span class="sd">            Resultant projection quantum number. This also determines the equivariant</span>
+<span class="sd">            character of the rank N descriptor after reduction. M_R must obey</span>
+<span class="sd">            -L_R &lt;= M_R &lt;= L_R</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        decomposed : dict</span>
+<span class="sd">            Generalized Wigner symbol for rank 1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># no nodes for rank 1</span>
+
+        <span class="n">mstrs</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">acelib</span><span class="o">.</span><span class="n">common_utils</span><span class="o">.</span><span class="n">get_ms</span><span class="p">(</span><span class="n">_l</span><span class="p">,</span> <span class="n">_M_R</span><span class="p">)</span>
+        <span class="n">full_inter_tuples</span> <span class="o">=</span> <span class="p">[()]</span>
+        <span class="k">assert</span> <span class="n">_l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">_L_R</span><span class="p">,</span> <span class="s2">&quot;invalid l=</span><span class="si">%d</span><span class="s2"> for irrep L_R = </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">_L_R</span><span class="p">)</span>
+
+        <span class="n">decomposed</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">full_inter_tup</span><span class="p">:</span> <span class="p">{</span><span class="n">mstr</span><span class="p">:</span> <span class="mf">0.0</span> <span class="k">for</span> <span class="n">mstr</span> <span class="ow">in</span> <span class="n">mstrs</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">full_inter_tup</span> <span class="ow">in</span> <span class="n">full_inter_tuples</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="n">full_inter_tuples</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">mstr</span> <span class="ow">in</span> <span class="n">mstrs</span><span class="p">:</span>
+                <span class="n">m_ints</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">mstr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+                <span class="c1"># m_1  = - M_R</span>
+                <span class="n">conds</span> <span class="o">=</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="n">_M_R</span>
+                <span class="k">if</span> <span class="n">conds</span><span class="p">:</span>
+                    <span class="n">w1</span> <span class="o">=</span> <span class="n">_wigner_3j_coefficients</span><span class="p">[</span>
+                        <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">&quot;</span>
+                        <span class="o">%</span> <span class="p">(</span><span class="n">_l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">_L_R</span><span class="p">,</span> <span class="n">_M_R</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="p">]</span>
+                    <span class="n">phase_power</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">phase</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="n">phase_power</span>
+                    <span class="n">w</span> <span class="o">=</span> <span class="n">phase</span> <span class="o">*</span> <span class="n">w1</span>
+
+                    <span class="n">decomposed</span><span class="p">[</span><span class="n">inter</span><span class="p">][</span><span class="n">mstr</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">decomposed</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_rank_2_tree</span><span class="p">(</span><span class="n">_wigner_3j_coefficients</span><span class="p">,</span> <span class="n">_l</span><span class="p">,</span> <span class="n">_L_R</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">_M_R</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the coupling for rank 2.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        _wigner_3j_coefficients : dict</span>
+<span class="sd">        Precomputed Wigner 3j coefficients.</span>
+
+<span class="sd">        _l : List</span>
+<span class="sd">            list of angular momentum quantum numbers [l1,l2]</span>
+
+<span class="sd">        _L_R : int</span>
+<span class="sd">            Resultant angular momentum quantum number. This determines the equivariant</span>
+<span class="sd">            character of the rank N descriptor after reduction. L_R=0 corresponds to</span>
+<span class="sd">            a rotationally invariant feature, L_R=1 corresponds to a feature that</span>
+<span class="sd">            transforms like a vector, L_R=2 a tensor, etc.</span>
+
+<span class="sd">        _M_R : int</span>
+<span class="sd">            Resultant projection quantum number. This also determines the equivariant</span>
+<span class="sd">            character of the rank N descriptor after reduction. M_R must obey</span>
+<span class="sd">            -L_R &lt;= M_R &lt;= L_R</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        decomposed : dict</span>
+<span class="sd">            Generalized Wigner symbol for rank 2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nodes</span><span class="p">,</span> <span class="n">remainder</span> <span class="o">=</span> <span class="n">ace_coupling_utils</span><span class="o">.</span><span class="n">build_quick_tree</span><span class="p">(</span><span class="n">_l</span><span class="p">)</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">mstrs</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">acelib</span><span class="o">.</span><span class="n">common_utils</span><span class="o">.</span><span class="n">get_ms</span><span class="p">(</span><span class="n">_l</span><span class="p">,</span> <span class="n">_M_R</span><span class="p">)</span>
+        <span class="n">full_inter_tuples</span> <span class="o">=</span> <span class="p">[()]</span>
+
+        <span class="k">assert</span> <span class="n">mala</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">acelib</span><span class="o">.</span><span class="n">common_utils</span><span class="o">.</span><span class="n">check_triangle</span><span class="p">(</span>
+            <span class="n">_l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">_l</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">_L_R</span>
+        <span class="p">),</span> <span class="s2">&quot;invalid l=(</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">) for irrep L_R = </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">_l</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">_L_R</span><span class="p">)</span>
+
+        <span class="n">decomposed</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">full_inter_tup</span><span class="p">:</span> <span class="p">{</span><span class="n">mstr</span><span class="p">:</span> <span class="mf">0.0</span> <span class="k">for</span> <span class="n">mstr</span> <span class="ow">in</span> <span class="n">mstrs</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">full_inter_tup</span> <span class="ow">in</span> <span class="n">full_inter_tuples</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="n">full_inter_tuples</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">mstr</span> <span class="ow">in</span> <span class="n">mstrs</span><span class="p">:</span>
+                <span class="n">m_ints</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">mstr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+                <span class="c1"># m_1 + m_2 = M1</span>
+                <span class="n">conds</span> <span class="o">=</span> <span class="p">(</span><span class="n">m_ints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="n">_M_R</span>
+                <span class="k">if</span> <span class="n">conds</span><span class="p">:</span>
+                    <span class="n">w1</span> <span class="o">=</span> <span class="n">_wigner_3j_coefficients</span><span class="p">[</span>
+                        <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">&quot;</span>
+                        <span class="o">%</span> <span class="p">(</span><span class="n">_l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">_l</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">_L_R</span><span class="p">,</span> <span class="o">-</span><span class="n">_M_R</span><span class="p">)</span>
+                    <span class="p">]</span>
+                    <span class="n">phase_power</span> <span class="o">=</span> <span class="n">_L_R</span> <span class="o">-</span> <span class="n">_M_R</span>
+                    <span class="n">phase</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="n">phase_power</span>
+                    <span class="n">w</span> <span class="o">=</span> <span class="n">phase</span> <span class="o">*</span> <span class="n">w1</span>
+
+                    <span class="n">decomposed</span><span class="p">[</span><span class="n">inter</span><span class="p">][</span><span class="n">mstr</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span>
+        <span class="k">return</span> <span class="n">decomposed</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_rank_3_tree</span><span class="p">(</span><span class="n">_wigner_3j_coefficients</span><span class="p">,</span> <span class="n">_l</span><span class="p">,</span> <span class="n">_L_R</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">_M_R</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the coupling for rank 3.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        _wigner_3j_coefficients : dict</span>
+<span class="sd">        Precomputed Wigner 3j coefficients.</span>
+
+<span class="sd">        _l : List</span>
+<span class="sd">            list of angular momentum quantum numbers [l1,l2,l3]</span>
+
+<span class="sd">        _L_R : int</span>
+<span class="sd">            Resultant angular momentum quantum number. This determines the equivariant</span>
+<span class="sd">            character of the rank N descriptor after reduction. L_R=0 corresponds to</span>
+<span class="sd">            a rotationally invariant feature, L_R=1 corresponds to a feature that</span>
+<span class="sd">            transforms like a vector, L_R=2 a tensor, etc.</span>
+
+<span class="sd">        _M_R : int</span>
+<span class="sd">            Resultant projection quantum number. This also determines the equivariant</span>
+<span class="sd">            character of the rank N descriptor after reduction. M_R must obey</span>
+<span class="sd">            -L_R &lt;= M_R &lt;= L_R</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        decomposed : dict</span>
+<span class="sd">            Generalized Wigner symbol for rank 3</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">full_inter_tuples</span> <span class="o">=</span> <span class="n">ace_coupling_utils</span><span class="o">.</span><span class="n">build_tree_for_l_intermediates</span><span class="p">(</span>
+            <span class="n">_l</span><span class="p">,</span> <span class="n">L_R</span><span class="o">=</span><span class="n">_L_R</span>
+        <span class="p">)</span>
+        <span class="n">mstrs</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">acelib</span><span class="o">.</span><span class="n">common_utils</span><span class="o">.</span><span class="n">get_ms</span><span class="p">(</span><span class="n">_l</span><span class="p">,</span> <span class="n">_M_R</span><span class="p">)</span>
+        <span class="n">decomposed</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">full_inter_tup</span><span class="p">:</span> <span class="p">{</span><span class="n">mstr</span><span class="p">:</span> <span class="mf">0.0</span> <span class="k">for</span> <span class="n">mstr</span> <span class="ow">in</span> <span class="n">mstrs</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">full_inter_tup</span> <span class="ow">in</span> <span class="n">full_inter_tuples</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="n">full_inter_tuples</span><span class="p">:</span>
+            <span class="n">L1</span> <span class="o">=</span> <span class="n">inter</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">mstr</span> <span class="ow">in</span> <span class="n">mstrs</span><span class="p">:</span>
+                <span class="n">m_ints</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">mstr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+                <span class="k">for</span> <span class="n">M1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">L1</span><span class="p">,</span> <span class="n">L1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="c1"># m_1 + m_2 = M1</span>
+                    <span class="c1"># M1 + m_3 = M_R</span>
+                    <span class="n">conds</span> <span class="o">=</span> <span class="p">(</span><span class="n">m_ints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="n">M1</span> <span class="ow">and</span> <span class="p">(</span>
+                        <span class="n">M1</span> <span class="o">+</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="p">)</span> <span class="o">==</span> <span class="n">_M_R</span>
+                    <span class="k">if</span> <span class="n">conds</span><span class="p">:</span>
+                        <span class="n">w1</span> <span class="o">=</span> <span class="n">_wigner_3j_coefficients</span><span class="p">[</span>
+                            <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">&quot;</span>
+                            <span class="o">%</span> <span class="p">(</span><span class="n">_l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">_l</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">L1</span><span class="p">,</span> <span class="o">-</span><span class="n">M1</span><span class="p">)</span>
+                        <span class="p">]</span>
+                        <span class="n">w2</span> <span class="o">=</span> <span class="n">_wigner_3j_coefficients</span><span class="p">[</span>
+                            <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">&quot;</span>
+                            <span class="o">%</span> <span class="p">(</span><span class="n">L1</span><span class="p">,</span> <span class="n">M1</span><span class="p">,</span> <span class="n">_l</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">_L_R</span><span class="p">,</span> <span class="o">-</span><span class="n">_M_R</span><span class="p">)</span>
+                        <span class="p">]</span>
+                        <span class="n">phase_power</span> <span class="o">=</span> <span class="p">(</span><span class="n">L1</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">M1</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">_L_R</span> <span class="o">-</span> <span class="n">_M_R</span><span class="p">)</span>
+                        <span class="n">phase</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="n">phase_power</span>
+                        <span class="n">w</span> <span class="o">=</span> <span class="n">phase</span> <span class="o">*</span> <span class="n">w1</span> <span class="o">*</span> <span class="n">w2</span>
+                        <span class="n">decomposed</span><span class="p">[</span><span class="n">inter</span><span class="p">][</span><span class="n">mstr</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span>
+        <span class="k">return</span> <span class="n">decomposed</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_rank_4_tree</span><span class="p">(</span><span class="n">_wigner_3j_coefficients</span><span class="p">,</span> <span class="n">_l</span><span class="p">,</span> <span class="n">_L_R</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">_M_R</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the coupling for rank 4.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        _wigner_3j_coefficients : dict</span>
+<span class="sd">        Precomputed Wigner 3j coefficients.</span>
+
+<span class="sd">        _l : List</span>
+<span class="sd">            list of angular momentum quantum numbers [l1,l2,l3,l4]</span>
+
+<span class="sd">        _L_R : int</span>
+<span class="sd">            Resultant angular momentum quantum number. This determines the equivariant</span>
+<span class="sd">            character of the rank N descriptor after reduction. L_R=0 corresponds to</span>
+<span class="sd">            a rotationally invariant feature, L_R=1 corresponds to a feature that</span>
+<span class="sd">            transforms like a vector, L_R=2 a tensor, etc.</span>
+
+<span class="sd">        _M_R : int</span>
+<span class="sd">            Resultant projection quantum number. This also determines the equivariant</span>
+<span class="sd">            character of the rank N descriptor after reduction. M_R must obey</span>
+<span class="sd">            -L_R &lt;= M_R &lt;= L_R</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        decomposed : dict</span>
+<span class="sd">            Generalized Wigner symbol for rank 4</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nodes</span><span class="p">,</span> <span class="n">remainder</span> <span class="o">=</span> <span class="n">ace_coupling_utils</span><span class="o">.</span><span class="n">build_quick_tree</span><span class="p">(</span><span class="n">_l</span><span class="p">)</span>
+        <span class="n">mstrs</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">acelib</span><span class="o">.</span><span class="n">common_utils</span><span class="o">.</span><span class="n">get_ms</span><span class="p">(</span><span class="n">_l</span><span class="p">,</span> <span class="n">_M_R</span><span class="p">)</span>
+        <span class="n">full_inter_tuples</span> <span class="o">=</span> <span class="n">ace_coupling_utils</span><span class="o">.</span><span class="n">build_tree_for_l_intermediates</span><span class="p">(</span>
+            <span class="n">_l</span><span class="p">,</span> <span class="n">L_R</span><span class="o">=</span><span class="n">_L_R</span>
+        <span class="p">)</span>
+        <span class="n">decomposed</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">full_inter_tup</span><span class="p">:</span> <span class="p">{</span><span class="n">mstr</span><span class="p">:</span> <span class="mf">0.0</span> <span class="k">for</span> <span class="n">mstr</span> <span class="ow">in</span> <span class="n">mstrs</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">full_inter_tup</span> <span class="ow">in</span> <span class="n">full_inter_tuples</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="n">full_inter_tuples</span><span class="p">:</span>
+            <span class="n">L1</span><span class="p">,</span> <span class="n">L2</span> <span class="o">=</span> <span class="n">inter</span>
+            <span class="k">for</span> <span class="n">mstr</span> <span class="ow">in</span> <span class="n">mstrs</span><span class="p">:</span>
+                <span class="n">m_ints</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">mstr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+                <span class="k">for</span> <span class="n">M1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">L1</span><span class="p">,</span> <span class="n">L1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">M2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">L2</span><span class="p">,</span> <span class="n">L2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="c1"># m_1 + m_2 = M1</span>
+                        <span class="c1"># m_4 + m_3 = M2</span>
+                        <span class="c1"># M1 + M2 = M_R</span>
+                        <span class="n">conds</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="p">(</span><span class="n">m_ints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="n">M1</span>
+                            <span class="ow">and</span> <span class="p">(</span><span class="n">m_ints</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">==</span> <span class="n">M2</span>
+                            <span class="ow">and</span> <span class="p">(</span><span class="n">M1</span> <span class="o">+</span> <span class="n">M2</span><span class="p">)</span> <span class="o">==</span> <span class="n">_M_R</span>
+                        <span class="p">)</span>
+                        <span class="k">if</span> <span class="n">conds</span><span class="p">:</span>
+                            <span class="n">w1</span> <span class="o">=</span> <span class="n">_wigner_3j_coefficients</span><span class="p">[</span>
+                                <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">&quot;</span>
+                                <span class="o">%</span> <span class="p">(</span><span class="n">_l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">_l</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">L1</span><span class="p">,</span> <span class="o">-</span><span class="n">M1</span><span class="p">)</span>
+                            <span class="p">]</span>
+                            <span class="n">w2</span> <span class="o">=</span> <span class="n">_wigner_3j_coefficients</span><span class="p">[</span>
+                                <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">&quot;</span>
+                                <span class="o">%</span> <span class="p">(</span><span class="n">_l</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">_l</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">m_ints</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">L2</span><span class="p">,</span> <span class="o">-</span><span class="n">M2</span><span class="p">)</span>
+                            <span class="p">]</span>
+                            <span class="n">w3</span> <span class="o">=</span> <span class="n">_wigner_3j_coefficients</span><span class="p">[</span>
+                                <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">&quot;</span>
+                                <span class="o">%</span> <span class="p">(</span><span class="n">L1</span><span class="p">,</span> <span class="n">M1</span><span class="p">,</span> <span class="n">L2</span><span class="p">,</span> <span class="n">M2</span><span class="p">,</span> <span class="n">_L_R</span><span class="p">,</span> <span class="o">-</span><span class="n">_M_R</span><span class="p">)</span>
+                            <span class="p">]</span>
+                            <span class="n">phase_power</span> <span class="o">=</span> <span class="p">(</span><span class="n">L1</span> <span class="o">+</span> <span class="n">L2</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">M1</span> <span class="o">+</span> <span class="n">M2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">_L_R</span> <span class="o">-</span> <span class="n">_M_R</span><span class="p">)</span>
+                            <span class="n">phase</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="n">phase_power</span>
+                            <span class="n">w</span> <span class="o">=</span> <span class="n">phase</span> <span class="o">*</span> <span class="n">w1</span> <span class="o">*</span> <span class="n">w2</span> <span class="o">*</span> <span class="n">w3</span>
+
+                            <span class="n">decomposed</span><span class="p">[</span><span class="n">inter</span><span class="p">][</span><span class="n">mstr</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span>
+        <span class="k">return</span> <span class="n">decomposed</span>
+
+    <span class="c1"># for now we restrict up to rank 4 trees</span>
+    <span class="n">M_Rs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">L_R</span><span class="p">,</span> <span class="n">L_R</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="c1"># generic coupling for any L_R - support must be added to call</span>
+    <span class="n">ranks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ldict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">coupling</span> <span class="o">=</span> <span class="p">{</span><span class="n">M_R</span><span class="p">:</span> <span class="p">{</span><span class="n">rank</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">rank</span> <span class="ow">in</span> <span class="n">ranks</span><span class="p">}</span> <span class="k">for</span> <span class="n">M_R</span> <span class="ow">in</span> <span class="n">M_Rs</span><span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">M_R</span> <span class="ow">in</span> <span class="n">M_Rs</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">rank</span> <span class="ow">in</span> <span class="n">ranks</span><span class="p">:</span>
+            <span class="n">rnk</span> <span class="o">=</span> <span class="n">rank</span>
+            <span class="n">ls_per_rnk</span> <span class="o">=</span> <span class="n">ace_coupling_utils</span><span class="o">.</span><span class="n">generate_l_LR</span><span class="p">(</span>
+                <span class="nb">range</span><span class="p">(</span><span class="n">ldict</span><span class="p">[</span><span class="n">rank</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">rank</span><span class="p">,</span> <span class="n">L_R</span><span class="p">,</span> <span class="n">M_R</span><span class="p">,</span> <span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">lstr</span> <span class="ow">in</span> <span class="n">ls_per_rnk</span><span class="p">:</span>
+                <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">lstr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">decomped</span> <span class="o">=</span> <span class="n">_rank_1_tree</span><span class="p">(</span>
+                        <span class="n">wigner_3j_coefficients</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">L_R</span><span class="p">,</span> <span class="n">M_R</span>
+                    <span class="p">)</span>
+                    <span class="n">coupling</span><span class="p">[</span><span class="n">M_R</span><span class="p">][</span><span class="n">rnk</span><span class="p">][</span><span class="n">lstr</span><span class="p">]</span> <span class="o">=</span> <span class="n">decomped</span>
+                <span class="k">elif</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">decomped</span> <span class="o">=</span> <span class="n">_rank_2_tree</span><span class="p">(</span>
+                        <span class="n">wigner_3j_coefficients</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">L_R</span><span class="p">,</span> <span class="n">M_R</span>
+                    <span class="p">)</span>
+                    <span class="n">coupling</span><span class="p">[</span><span class="n">M_R</span><span class="p">][</span><span class="n">rnk</span><span class="p">][</span><span class="n">lstr</span><span class="p">]</span> <span class="o">=</span> <span class="n">decomped</span>
+                <span class="k">elif</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">decomped</span> <span class="o">=</span> <span class="n">_rank_3_tree</span><span class="p">(</span>
+                        <span class="n">wigner_3j_coefficients</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">L_R</span><span class="p">,</span> <span class="n">M_R</span>
+                    <span class="p">)</span>
+                    <span class="n">coupling</span><span class="p">[</span><span class="n">M_R</span><span class="p">][</span><span class="n">rnk</span><span class="p">][</span><span class="n">lstr</span><span class="p">]</span> <span class="o">=</span> <span class="n">decomped</span>
+                <span class="k">elif</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="n">decomped</span> <span class="o">=</span> <span class="n">_rank_4_tree</span><span class="p">(</span>
+                        <span class="n">wigner_3j_coefficients</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">L_R</span><span class="p">,</span> <span class="n">M_R</span>
+                    <span class="p">)</span>
+                    <span class="n">coupling</span><span class="p">[</span><span class="n">M_R</span><span class="p">][</span><span class="n">rnk</span><span class="p">][</span><span class="n">lstr</span><span class="p">]</span> <span class="o">=</span> <span class="n">decomped</span>
+                <span class="k">elif</span> <span class="n">rank</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;Cannot generate couplings for rank </span><span class="si">%d</span><span class="s2">. Symmetric L_R &quot;</span>
+                        <span class="s2">&quot;couplings have been implemented only up to rank 4.&quot;</span>
+                        <span class="o">%</span> <span class="n">rank</span>
+                    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">coupling</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

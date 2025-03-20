@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tree_sorting &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="wigner_coupling" href="mala.descriptors.acelib.wigner_coupling.html" />
+    <link rel="prev" title="symmetric_group_manipulations" href="mala.descriptors.acelib.symmetric_group_manipulations.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datageneration.html">datageneration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="mala.descriptors.html">descriptors</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="mala.descriptors.acelib.html">acelib</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.ace.html">ace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.atomic_density.html">atomic_density</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.bispectrum.html">bispectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html">descriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.lammps_utils.html">lammps_utils</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.minterpy_descriptors.html">minterpy_descriptors</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.html">network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.html">targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="mala.html">mala</a></li>
+          <li class="breadcrumb-item"><a href="mala.descriptors.html">descriptors</a></li>
+          <li class="breadcrumb-item"><a href="mala.descriptors.acelib.html">acelib</a></li>
+      <li class="breadcrumb-item active">tree_sorting</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.descriptors.acelib.tree_sorting.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mala.descriptors.acelib.tree_sorting">
+<span id="tree-sorting"></span><h1>tree_sorting<a class="headerlink" href="#module-mala.descriptors.acelib.tree_sorting" title="Link to this heading"></a></h1>
+<p>Class and functions for building binary trees.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/tree_sorting.html#Node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class encapsulating a node in a binary tree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>i</strong> (<em>any</em>) – Value of this node.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.value">
+<span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.value" title="Link to this definition"></a></dt>
+<dd><p>Value of this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.value_tuple">
+<span class="sig-name descname"><span class="pre">value_tuple</span></span><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.value_tuple" title="Link to this definition"></a></dt>
+<dd><p>Tuple of the value of this node and the values of its children.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.children">
+<span class="sig-name descname"><span class="pre">children</span></span><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.children" title="Link to this definition"></a></dt>
+<dd><p>List of the children of this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.leaves">
+<span class="sig-name descname"><span class="pre">leaves</span></span><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.leaves" title="Link to this definition"></a></dt>
+<dd><p>List of the leaves of this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.left">
+<span class="sig-name descname"><span class="pre">left</span></span><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.left" title="Link to this definition"></a></dt>
+<dd><p>Left child of this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.descriptors.acelib.tree_sorting.Node" title="mala.descriptors.acelib.tree_sorting.Node">Node</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.right">
+<span class="sig-name descname"><span class="pre">right</span></span><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.right" title="Link to this definition"></a></dt>
+<dd><p>Right child of this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.descriptors.acelib.tree_sorting.Node" title="mala.descriptors.acelib.tree_sorting.Node">Node</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.is_sorted">
+<span class="sig-name descname"><span class="pre">is_sorted</span></span><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.is_sorted" title="Link to this definition"></a></dt>
+<dd><p>Whether the children of this node are sorted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.parent">
+<span class="sig-name descname"><span class="pre">parent</span></span><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.parent" title="Link to this definition"></a></dt>
+<dd><p>Parent of this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.descriptors.acelib.tree_sorting.Node" title="mala.descriptors.acelib.tree_sorting.Node">Node</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.tree_id">
+<span class="sig-name descname"><span class="pre">tree_id</span></span><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.tree_id" title="Link to this definition"></a></dt>
+<dd><p>Identifier of the tree this node belongs to.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.check_sorted">
+<span class="sig-name descname"><span class="pre">check_sorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sort_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/tree_sorting.html#Node.check_sorted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.check_sorted" title="Link to this definition"></a></dt>
+<dd><p>Check if the children of this node are sorted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sort_depth</strong> (<em>int</em>) – Depth to check sorting at.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>is_sorted</strong> – Whether the children of this node are sorted.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.flip_children">
+<span class="sig-name descname"><span class="pre">flip_children</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/tree_sorting.html#Node.flip_children"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.flip_children" title="Link to this definition"></a></dt>
+<dd><p>Flip children (left/right) of node.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.get_current_value_tuple">
+<span class="sig-name descname"><span class="pre">get_current_value_tuple</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/tree_sorting.html#Node.get_current_value_tuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.get_current_value_tuple" title="Link to this definition"></a></dt>
+<dd><p>Return current value tuple of this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>this_tup</strong> – Tuple of the value of this node and the values of its children.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.return_children_vals">
+<span class="sig-name descname"><span class="pre">return_children_vals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/tree_sorting.html#Node.return_children_vals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.return_children_vals" title="Link to this definition"></a></dt>
+<dd><p>Return the values of the children of this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>depth</strong> (<em>int</em>) – Depth up to which to return values.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>vals</strong> – Values of the children of this node.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.set_children">
+<span class="sig-name descname"><span class="pre">set_children</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">children</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_sorted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/tree_sorting.html#Node.set_children"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.set_children" title="Link to this definition"></a></dt>
+<dd><p>Set the children of this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>children</strong> (<em>List</em><em> or </em><em>tuple</em>) – Children to be set.</p></li>
+<li><p><strong>set_sorted</strong> (<em>bool</em>) – If True, set the children in a sorted fashion.</p></li>
+<li><p><strong>sort_depth</strong> (<em>int</em>) – Depth to sort children at, if set_sorted is True.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.Node.update_children">
+<span class="sig-name descname"><span class="pre">update_children</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set_sorted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/tree_sorting.html#Node.update_children"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.Node.update_children" title="Link to this definition"></a></dt>
+<dd><p>Update the children of this node.</p>
+<p>Essentially calls set_children with children already attached to node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>set_sorted</strong> (<em>bool</em>) – If True, set the children in a sorted fashion.</p></li>
+<li><p><strong>sort_depth</strong> (<em>int</em>) – Depth to sort children at, if set_sorted is True.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.build_full_tree">
+<span class="sig-name descname"><span class="pre">build_full_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_R</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/tree_sorting.html#build_full_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.build_full_tree" title="Link to this definition"></a></dt>
+<dd><p>Build a full binary tree from the given lists.</p>
+<p>Works for rank 4, 5 and 6.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>l</strong> (<em>List</em>) – list (multiset) of angular momentum indices l1,l2,…lN</p></li>
+<li><p><strong>L</strong> (<em>List</em>) – list (multiset) of intermediate angular momentum indices l1,l2,…lN</p></li>
+<li><p><strong>L_R</strong> (<em>int</em>) – Resultant angular momentum quantum number. This determines the equivariant
+character of the rank N descriptor after reduction. L_R=0 corresponds to
+a rotationally invariant feature, L_R=1 corresponds to a feature that
+transforms like a vector, L_R=2 a tensor, etc.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>root</strong> – Root node of the constructed tree.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.descriptors.acelib.tree_sorting.Node" title="mala.descriptors.acelib.tree_sorting.Node">Node</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.tree_sorting.build_quick_tree">
+<span class="sig-name descname"><span class="pre">build_quick_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/tree_sorting.html#build_quick_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.tree_sorting.build_quick_tree" title="Link to this definition"></a></dt>
+<dd><p>Build a binary tree from the given list.</p>
+<p>Rank is assumed to be the length of the list. If the rank is odd, a
+remainder is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>l</strong> (<em>List</em>) – List to build the tree from.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>tree</strong> – Tuple containing the tree and the remainder which could not fit in the
+tree.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mala.descriptors.acelib.symmetric_group_manipulations.html" class="btn btn-neutral float-left" title="symmetric_group_manipulations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.descriptors.acelib.wigner_coupling.html" class="btn btn-neutral float-right" title="wigner_coupling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

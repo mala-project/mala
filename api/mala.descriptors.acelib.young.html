@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>young &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=33f2f6c7" />
+
+  
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ace" href="mala.descriptors.ace.html" />
+    <link rel="prev" title="wigner_coupling" href="mala.descriptors.acelib.wigner_coupling.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datageneration.html">datageneration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="mala.descriptors.html">descriptors</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="mala.descriptors.acelib.html">acelib</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.ace.html">ace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.atomic_density.html">atomic_density</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.bispectrum.html">bispectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html">descriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.lammps_utils.html">lammps_utils</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.minterpy_descriptors.html">minterpy_descriptors</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.html">network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.html">targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="mala.html">mala</a></li>
+          <li class="breadcrumb-item"><a href="mala.descriptors.html">descriptors</a></li>
+          <li class="breadcrumb-item"><a href="mala.descriptors.acelib.html">acelib</a></li>
+      <li class="breadcrumb-item active">young</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.descriptors.acelib.young.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mala.descriptors.acelib.young">
+<span id="young"></span><h1>young<a class="headerlink" href="#module-mala.descriptors.acelib.young" title="Link to this heading"></a></h1>
+<p>Library of functions and classes for building Young diagrams and filling them.</p>
+<p>This includes young subgroup fillings within orbits of irreproducible
+representations of S_N.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.young.YoungSubgroup">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">YoungSubgroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rank</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/young.html#YoungSubgroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.young.YoungSubgroup" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for Young tableau with subgroup filling options.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rank</strong> (<em>int</em>) – Rank of the Young tableau.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.young.YoungSubgroup.rank">
+<span class="sig-name descname"><span class="pre">rank</span></span><a class="headerlink" href="#mala.descriptors.acelib.young.YoungSubgroup.rank" title="Link to this definition"></a></dt>
+<dd><p>Rank of the Young tableau.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.young.YoungSubgroup.partition">
+<span class="sig-name descname"><span class="pre">partition</span></span><a class="headerlink" href="#mala.descriptors.acelib.young.YoungSubgroup.partition" title="Link to this definition"></a></dt>
+<dd><p>Partition of the Young tableau.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.young.YoungSubgroup.fills">
+<span class="sig-name descname"><span class="pre">fills</span></span><a class="headerlink" href="#mala.descriptors.acelib.young.YoungSubgroup.fills" title="Link to this definition"></a></dt>
+<dd><p>List of subgroup fillings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.young.YoungSubgroup.nodes">
+<span class="sig-name descname"><span class="pre">nodes</span></span><a class="headerlink" href="#mala.descriptors.acelib.young.YoungSubgroup.nodes" title="Link to this definition"></a></dt>
+<dd><p>List of nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List or tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.young.YoungSubgroup.remainder">
+<span class="sig-name descname"><span class="pre">remainder</span></span><a class="headerlink" href="#mala.descriptors.acelib.young.YoungSubgroup.remainder" title="Link to this definition"></a></dt>
+<dd><p>Remainder of building trees during filling of the subgroups.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.young.YoungSubgroup.check_single_fill">
+<span class="sig-name descname"><span class="pre">check_single_fill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semistandard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/young.html#YoungSubgroup.check_single_fill"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.young.YoungSubgroup.check_single_fill" title="Link to this definition"></a></dt>
+<dd><p>Check a that a collection of indices is sorted in a young tableau.</p>
+<p>This tableau will typically correspond to a young subgroup relevant for pairwise reduction of N spherical harmonics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>partition</strong> (<em>List</em>) – Partition of N determining shape of the Young tableau.</p></li>
+<li><p><strong>inds</strong> (<em>List</em>) – Indices (filling) of the Young tableau.</p></li>
+<li><p><strong>semistandard</strong> (<em>bool</em>) – Whether the Young tableau filling is semistandard.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the fill is correct, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.young.YoungSubgroup.is_column_sort">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_column_sort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partitionfill</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict_col_sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/young.html#YoungSubgroup.is_column_sort"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.young.YoungSubgroup.is_column_sort" title="Link to this definition"></a></dt>
+<dd><p>Check if the young tableau is column sorted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>partitionfill</strong> (<em>List</em>) – Partition fill to check.</p></li>
+<li><p><strong>strict_col_sort</strong> (<em>bool</em>) – Whether to check for strict column sorting in the young tableau. If True,
+entries in columns of the tableau must be strictly increasing.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>sorted</strong> – True if the columns are sorted, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.young.YoungSubgroup.is_row_sort">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_row_sort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partitionfill</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/young.html#YoungSubgroup.is_row_sort"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.young.YoungSubgroup.is_row_sort" title="Link to this definition"></a></dt>
+<dd><p>Check if the Young Tableau filling is row sorted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>partitionfill</strong> (<em>List</em>) – Partition fill to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>sorted</strong> – True if the rows are sorted, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.young.YoungSubgroup.reverse_vector">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reverse_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/young.html#YoungSubgroup.reverse_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.young.YoungSubgroup.reverse_vector" title="Link to this definition"></a></dt>
+<dd><p>Reverse a vector.</p>
+<p>Returns a copy of the vector, to allow reverse and actual vector
+to both be present. This is just a wrapper for the python reverse() function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>v</strong> (<em>List</em>) – Vector to reverse.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>v_reversed</strong> – Reversed vector.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.young.YoungSubgroup.sigma_c_partitions">
+<span class="sig-name descname"><span class="pre">sigma_c_partitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_orbit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/young.html#YoungSubgroup.sigma_c_partitions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.young.YoungSubgroup.sigma_c_partitions" title="Link to this definition"></a></dt>
+<dd><p>Get a list of partitions compatible with sigma_c.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>max_orbit</strong> (<em>int</em>) – Maximum orbit size for permutation (P-cycle where P&lt;N)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>partitions</strong> – List of partitions compatible with sigma_c.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.young.YoungSubgroup.subgroup_fill">
+<span class="sig-name descname"><span class="pre">subgroup_fill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_orbit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semistandard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lreduce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/young.html#YoungSubgroup.subgroup_fill"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.young.YoungSubgroup.subgroup_fill" title="Link to this definition"></a></dt>
+<dd><p>Fill the young subgroup subgroup according to standard, semistandard, etc conventions.</p>
+<p>This will generate multiple fillings relevant for the pairwise reduction of N spherical harmonics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inds</strong> (<em>List</em>) – Indices to be filled in the Young tableau.</p></li>
+<li><p><strong>partitions</strong> (<em>List</em>) – Partitions of N determining the shape of the Young tableau.</p></li>
+<li><p><strong>max_orbit</strong> (<em>int</em>) – Maximum orbit, aka max row size in the tableau.</p></li>
+<li><p><strong>semistandard</strong> (<em>bool</em>) – Whether the Young tableau filling is semistandard.</p></li>
+<li><p><strong>lreduce</strong> (<em>bool</em>) – Whether to reduce the Young tableau fillings according to 2-cycles (according to pairwise angular momentum coupling scheme)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.young.YoungSubgroup.unique_permutations">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unique_permutations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/young.html#YoungSubgroup.unique_permutations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.young.YoungSubgroup.unique_permutations" title="Link to this definition"></a></dt>
+<dd><p>Get the unique permutations of a vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vec</strong> (<em>List</em>) – Vector to get the permutations of.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>unique_perms</strong> – List of unique permutations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mala.descriptors.acelib.wigner_coupling.html" class="btn btn-neutral float-left" title="wigner_coupling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.descriptors.ace.html" class="btn btn-neutral float-right" title="ace" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

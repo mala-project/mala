@@ -500,10 +500,12 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span><span class="p">:</span>
                     <span class="n">scaled</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span>
                     <span class="n">scaled</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stds</span>
+                    <span class="n">unscaled</span><span class="o">.</span><span class="n">nan_to_num_</span><span class="p">(</span><span class="n">nan</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="c1">#account for possible 0 valued ACE descriptors</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span><span class="p">:</span>
                     <span class="n">scaled</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span>
                     <span class="n">scaled</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxs</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span>
+                    <span class="n">unscaled</span><span class="o">.</span><span class="n">nan_to_num_</span><span class="p">(</span><span class="n">nan</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="c1">#account for possible 0 valued ACE descriptors</span>
 
             <span class="k">else</span><span class="p">:</span>
 
@@ -514,10 +516,12 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span><span class="p">:</span>
                     <span class="n">scaled</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span>
                     <span class="n">scaled</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span>
+                    <span class="n">scaled</span><span class="o">.</span><span class="n">nan_to_num_</span><span class="p">(</span><span class="n">nan</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="c1">#account for possible 0 valued ACE descriptors</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span><span class="p">:</span>
                     <span class="n">scaled</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span>
                     <span class="n">scaled</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span>
+                    <span class="n">scaled</span><span class="o">.</span><span class="n">nan_to_num_</span><span class="p">(</span><span class="n">nan</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="c1">#account for possible 0 valued ACE descriptors</span>
 
         <span class="k">return</span> <span class="n">scaled</span></div>
 

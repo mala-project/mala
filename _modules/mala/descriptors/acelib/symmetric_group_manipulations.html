@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.descriptors.acelib.symmetric_group_manipulations &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=33f2f6c7" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html">
+            
+              <img src="../../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mala.descriptors.acelib.symmetric_group_manipulations</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.descriptors.acelib.symmetric_group_manipulations</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Functions for computations related to group symmetry.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.acelib.young</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">flatten</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.acelib.common_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">group_vector_by_orbits</span><span class="p">,</span>
+    <span class="n">local_sigma_c_partitions</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="leaf_filter">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.symmetric_group_manipulations.html#mala.descriptors.acelib.symmetric_group_manipulations.leaf_filter">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">leaf_filter</span><span class="p">(</span><span class="n">lperms</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filter permutations based on 2-cycles (to reflect full binary trees).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lperms : List</span>
+<span class="sd">        Permutations of l.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    filtered : List</span>
+<span class="sd">        Filtered permutations of l.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rank</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lperms</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">part</span> <span class="o">=</span> <span class="n">local_sigma_c_partitions</span><span class="p">[</span><span class="n">rank</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">filtered</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">rank</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">lperm</span> <span class="ow">in</span> <span class="n">lperms</span><span class="p">:</span>
+            <span class="n">grouped</span> <span class="o">=</span> <span class="n">group_vector_by_orbits</span><span class="p">(</span><span class="n">lperm</span><span class="p">,</span> <span class="n">part</span><span class="p">)</span>
+            <span class="n">subgroup</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">grouped</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">subgroup</span><span class="p">))</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">subgroup</span><span class="p">):</span>
+                <span class="n">filtered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lperm</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">rank</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">lperm</span> <span class="ow">in</span> <span class="n">lperms</span><span class="p">:</span>
+            <span class="n">grouped</span> <span class="o">=</span> <span class="n">group_vector_by_orbits</span><span class="p">(</span><span class="n">lperm</span><span class="p">,</span> <span class="n">part</span><span class="p">)</span>
+            <span class="n">subgroup</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">[:</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">subgroup</span><span class="p">))</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">subgroup</span><span class="p">):</span>
+                <span class="n">filtered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lperm</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;manual orbit construction for rank </span><span class="si">%d</span><span class="s2"> not implemented yet&quot;</span> <span class="o">%</span> <span class="n">rank</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">filtered</span></div>
+
+
+
+<div class="viewcode-block" id="find_degenerate_indices">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.symmetric_group_manipulations.html#mala.descriptors.acelib.symmetric_group_manipulations.find_degenerate_indices">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_degenerate_indices</span><span class="p">(</span><span class="n">indices_list</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find degenarate indices in a list.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    indices_list : List</span>
+<span class="sd">        List of indices</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    degenerate_indices : dict</span>
+<span class="sd">        Dictionary of degenerate indices.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">degenerate_indices</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">indices_list</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">indices_list</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">indices_list</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">indices_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">degenerate_indices</span><span class="p">:</span>
+                <span class="n">degenerate_indices</span><span class="p">[</span><span class="n">indices_list</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">degenerate_indices</span><span class="p">[</span><span class="n">indices_list</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">degenerate_indices</span></div>
+
+
+
+<div class="viewcode-block" id="check_sequential">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.symmetric_group_manipulations.html#mala.descriptors.acelib.symmetric_group_manipulations.check_sequential">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_sequential</span><span class="p">(</span><span class="n">list_to_check</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if a list is sequential/ordered.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    list_to_check : List</span>
+<span class="sd">        List which _may_ be sequential.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    is_sequential : bool</span>
+<span class="sd">        If True, list is sequential (i.e., ordered).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">flags</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_to_check</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_to_check</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">list_to_check</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">list_to_check</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+
+<div class="viewcode-block" id="calculate_degenerate_orbit">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.symmetric_group_manipulations.html#mala.descriptors.acelib.symmetric_group_manipulations.calculate_degenerate_orbit">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_degenerate_orbit</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate frequency partitions of a list AS ORDERED.</span>
+<span class="sd">    </span>
+<span class="sd">    For example: l=[1,1,2,3] -&gt; ((2, 1, 1), ((0, 1), (2,), (3,))).</span>
+
+<span class="sd">    For example: l=[1,2,2,3] -&gt; ((1, 2, 1), ((0,), (1, 2), (3,)))</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    l : List</span>
+<span class="sd">        multiset of indices to find frequency partitions for</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    degenerate_orbit : Tuple</span>
+<span class="sd">        returns partiton of N corresponding to frequency partition and</span>
+<span class="sd">        the cycles of the frequency partition ((&lt;partition&gt;),(&lt;cycles&gt;)) </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">degen_ind_dict</span> <span class="o">=</span> <span class="n">find_degenerate_indices</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+    <span class="n">partition</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">inds_per_orbit</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">degenval</span><span class="p">,</span> <span class="n">matching_inds</span> <span class="ow">in</span> <span class="n">degen_ind_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">this_orbit</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">matching_inds</span><span class="p">)</span>
+        <span class="n">partition</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_orbit</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">inds_per_orbit</span><span class="p">[</span><span class="n">degenval</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">matching_inds</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">inds_per_orbit</span><span class="p">[</span><span class="n">degenval</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">inds_per_orbit</span><span class="p">[</span><span class="n">degenval</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">matching_inds</span><span class="p">)</span>
+    <span class="n">partition</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+    <span class="n">part_tup</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">ki</span><span class="p">)</span> <span class="k">for</span> <span class="n">ki</span> <span class="ow">in</span> <span class="n">partition</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">part_tup</span><span class="p">,</span> <span class="n">partition</span></div>
+
+
+
+<div class="viewcode-block" id="enforce_sorted_orbit">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.symmetric_group_manipulations.html#mala.descriptors.acelib.symmetric_group_manipulations.enforce_sorted_orbit">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">enforce_sorted_orbit</span><span class="p">(</span><span class="n">partition_indices</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Resorts partitions of N to be compatible in increasing cycle size.</span>
+
+<span class="sd">    Also breaks apart frequency partitions that aren&#39;t even to make them compatible with ladder relationships.</span>
+
+<span class="sd">    For example enforce_sorted_orbit(((1,2,3),(0,))) returns the partition (1,1,2) corresponding to the permutation compatible with ladder relationships in the pairwise coupling scheme ((0,), (1,), (2, 3))). In this case, it took the (1,2,3) cycle and broke it into (1)(2,3).</span>
+
+<span class="sd">    TODO: change partition_indices to permutation_indices.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    partition_indices : List</span>
+<span class="sd">        A list (presumably of lists) of indices.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    part_tup : Tuple</span>
+<span class="sd">        Partition of N, sorted by increasing cycle size, that is obtained from</span>
+<span class="sd">        the input permutation indices</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rank</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="n">partition_indices</span><span class="p">))</span>
+    <span class="n">couple_ref</span> <span class="o">=</span> <span class="n">group_vector_by_orbits</span><span class="p">(</span>
+        <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">rank</span><span class="p">)),</span> <span class="n">local_sigma_c_partitions</span><span class="p">[</span><span class="n">rank</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">new_partition</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">flag</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">check_sequential</span><span class="p">(</span><span class="n">oi</span><span class="p">)</span> <span class="ow">and</span> <span class="n">oi</span> <span class="ow">in</span> <span class="n">couple_ref</span> <span class="k">for</span> <span class="n">oi</span> <span class="ow">in</span> <span class="n">partition_indices</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">flag</span><span class="p">:</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">check_sequential</span><span class="p">(</span><span class="n">oi</span><span class="p">)</span> <span class="o">==</span> <span class="n">oi</span> <span class="ow">and</span> <span class="n">oi</span> <span class="ow">in</span> <span class="n">couple_ref</span>
+            <span class="k">for</span> <span class="n">oi</span> <span class="ow">in</span> <span class="n">partition_indices</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">iflag</span><span class="p">,</span> <span class="n">orbit_flag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">flags</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">orbit_flag</span><span class="p">:</span>
+                <span class="n">symmetric_sub_orbits</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">couple_orb</span> <span class="ow">in</span> <span class="n">couple_ref</span><span class="p">:</span>
+                    <span class="n">has_symmetric_sub_orbit</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">oo</span> <span class="ow">in</span> <span class="n">partition_indices</span><span class="p">[</span><span class="n">iflag</span><span class="p">]</span> <span class="k">for</span> <span class="n">oo</span> <span class="ow">in</span> <span class="n">couple_orb</span><span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">has_symmetric_sub_orbit</span>
+                        <span class="ow">and</span> <span class="n">couple_orb</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">symmetric_sub_orbits</span>
+                    <span class="p">):</span>
+                        <span class="n">symmetric_sub_orbits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">couple_orb</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">symmetric_sub_orbits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">new_orbit</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">tuple</span><span class="p">([</span><span class="n">ki</span><span class="p">])</span> <span class="k">for</span> <span class="n">ki</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="n">partition_indices</span><span class="p">[</span><span class="n">iflag</span><span class="p">])</span>
+                    <span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">remain</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">tuple</span><span class="p">([</span><span class="n">ki</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">ki</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="n">partition_indices</span><span class="p">[</span><span class="n">iflag</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="n">ki</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="n">symmetric_sub_orbits</span><span class="p">)</span>
+                    <span class="p">]</span>
+                    <span class="n">new_orbit</span> <span class="o">=</span> <span class="n">symmetric_sub_orbits</span> <span class="o">+</span> <span class="n">remain</span>
+                <span class="n">new_partition</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">new_orbit</span><span class="p">)</span>
+                <span class="n">new_partition</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">new_partition</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_partition</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">partition_indices</span><span class="p">[</span><span class="n">iflag</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">new_partition</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">partition_indices</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+    <span class="n">part_tup</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">ki</span><span class="p">)</span> <span class="k">for</span> <span class="n">ki</span> <span class="ow">in</span> <span class="n">new_partition</span><span class="p">])</span>
+
+    <span class="c1"># The tuple(new_partition) never seems to be used in all the functions</span>
+    <span class="c1"># that call this function. I&#39;ll comment it out for now, in case it is</span>
+    <span class="c1"># important for later debugging.</span>
+    <span class="k">return</span> <span class="n">part_tup</span>  <span class="c1"># , tuple(new_partition)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

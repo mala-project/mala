@@ -1,0 +1,7 @@
+clebsch\_gordan\_coupling
+=========================
+
+.. automodule:: mala.descriptors.acelib.clebsch_gordan_coupling
+   :members:
+   :undoc-members:
+   :show-inheritance:

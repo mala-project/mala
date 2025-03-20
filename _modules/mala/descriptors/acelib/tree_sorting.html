@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.descriptors.acelib.tree_sorting &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=33f2f6c7" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html">
+            
+              <img src="../../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mala.descriptors.acelib.tree_sorting</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.descriptors.acelib.tree_sorting</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Class and functions for building binary trees.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="Node">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.tree_sorting.html#mala.descriptors.acelib.tree_sorting.Node">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Node</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class encapsulating a node in a binary tree.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    i : any</span>
+<span class="sd">        Value of this node.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    value : any</span>
+<span class="sd">        Value of this node.</span>
+
+<span class="sd">    value_tuple : tuple</span>
+<span class="sd">        Tuple of the value of this node and the values of its children.</span>
+
+<span class="sd">    children : List</span>
+<span class="sd">        List of the children of this node.</span>
+
+<span class="sd">    leaves : List</span>
+<span class="sd">        List of the leaves of this node.</span>
+
+<span class="sd">    left : Node</span>
+<span class="sd">        Left child of this node.</span>
+
+<span class="sd">    right : Node</span>
+<span class="sd">        Right child of this node.</span>
+
+<span class="sd">    is_sorted : bool</span>
+<span class="sd">        Whether the children of this node are sorted.</span>
+
+<span class="sd">    parent : Node</span>
+<span class="sd">        Parent of this node.</span>
+
+<span class="sd">    tree_id : any</span>
+<span class="sd">        Identifier of the tree this node belongs to.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_tuple</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leaves</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree_id</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Node.check_sorted">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.tree_sorting.html#mala.descriptors.acelib.tree_sorting.Node.check_sorted">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_sorted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sort_depth</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the children of this node are sorted.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sort_depth : int</span>
+<span class="sd">            Depth to check sorting at.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        is_sorted : bool</span>
+<span class="sd">            Whether the children of this node are sorted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">sort_depth</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">returnval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span>
+        <span class="k">elif</span> <span class="n">sort_depth</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">),</span> <span class="s2">&quot;Must have parent nodes to compare children&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">get_current_value_tuple</span><span class="p">()</span>
+            <span class="n">lv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">value_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">get_current_value_tuple</span><span class="p">()</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">value_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">value_tuple</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">value_tuple</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">lv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">lv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">rv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">rv</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">lv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">lv</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">flip_children</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">get_current_value_tuple</span><span class="p">()</span>
+                        <span class="n">lv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">value_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">rv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">rv</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">flip_children</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">get_current_value_tuple</span><span class="p">()</span>
+                        <span class="n">rv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">value_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">lv</span> <span class="o">&gt;</span> <span class="n">rv</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">lv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">lv</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">flip_children</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">get_current_value_tuple</span><span class="p">()</span>
+                    <span class="n">lv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">value_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">check_sorted</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">rv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">rv</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">flip_children</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">get_current_value_tuple</span><span class="p">()</span>
+                    <span class="n">rv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">value_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">check_sorted</span><span class="p">()</span>
+            <span class="n">returnval</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">is_sorted</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">is_sorted</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot sort deeper than depth 2 currently.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">returnval</span></div>
+
+
+<div class="viewcode-block" id="Node.return_children_vals">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.tree_sorting.html#mala.descriptors.acelib.tree_sorting.Node.return_children_vals">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">return_children_vals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the values of the children of this node.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        depth : int</span>
+<span class="sd">            Depth up to which to return values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        vals : tuple</span>
+<span class="sd">            Values of the children of this node.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">depth</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">get_current_value_tuple</span><span class="p">()</span>
+            <span class="n">lv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">value_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">get_current_value_tuple</span><span class="p">()</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">value_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="n">lv</span> <span class="o">+</span> <span class="n">rv</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot sort deeper than depth 2 currently.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vals</span></div>
+
+
+<div class="viewcode-block" id="Node.set_children">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.tree_sorting.html#mala.descriptors.acelib.tree_sorting.Node.set_children">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_children</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">children</span><span class="p">,</span> <span class="n">set_sorted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sort_depth</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the children of this node.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        children : List or tuple</span>
+<span class="sd">            Children to be set.</span>
+
+<span class="sd">        set_sorted : bool</span>
+<span class="sd">            If True, set the children in a sorted fashion.</span>
+
+<span class="sd">        sort_depth : int</span>
+<span class="sd">            Depth to sort children at, if set_sorted is True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">children</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">children</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="p">),</span> <span class="s2">&quot;list of children must be of length 2 for binary tree&quot;</span>
+        <span class="k">if</span> <span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+            <span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_sorted</span><span class="p">(</span><span class="n">sort_depth</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">set_sorted</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">sort_depth</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">elif</span> <span class="n">sort_depth</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">is_sorted</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">lft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">rght</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">is_sorted</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">lft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">rght</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">is_sorted</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">lft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">rght</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">is_sorted</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">lft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">rght</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">sort_depth</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">elif</span> <span class="n">sort_depth</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">check_sorted</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">check_sorted</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">is_sorted</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">lft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">rght</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">is_sorted</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">lft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">rght</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">is_sorted</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">lft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">rght</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">is_sorted</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">lft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">rght</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">is_sorted</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Node.update_children">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.tree_sorting.html#mala.descriptors.acelib.tree_sorting.Node.update_children">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_children</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">set_sorted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sort_depth</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the children of this node.</span>
+
+<span class="sd">        Essentially calls set_children with children already attached to node.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        set_sorted : bool</span>
+<span class="sd">            If True, set the children in a sorted fashion.</span>
+
+<span class="sd">        sort_depth : int</span>
+<span class="sd">            Depth to sort children at, if set_sorted is True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_children</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">set_sorted</span><span class="p">,</span> <span class="n">sort_depth</span><span class="o">=</span><span class="n">sort_depth</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Node.get_current_value_tuple">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.tree_sorting.html#mala.descriptors.acelib.tree_sorting.Node.get_current_value_tuple">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_current_value_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return current value tuple of this node.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        this_tup : tuple</span>
+<span class="sd">            Tuple of the value of this node and the values of its children.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">this_tup</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_tuple</span> <span class="o">=</span> <span class="n">this_tup</span>
+        <span class="k">return</span> <span class="n">this_tup</span></div>
+
+
+<div class="viewcode-block" id="Node.flip_children">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.tree_sorting.html#mala.descriptors.acelib.tree_sorting.Node.flip_children">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">flip_children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flip children (left/right) of node.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_children</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="build_full_tree">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.tree_sorting.html#mala.descriptors.acelib.tree_sorting.build_full_tree">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_full_tree</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">L_R</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build a full binary tree from the given lists.</span>
+
+<span class="sd">    Works for rank 4, 5 and 6.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    l : List</span>
+<span class="sd">        list (multiset) of angular momentum indices l1,l2,...lN</span>
+
+<span class="sd">    L : List</span>
+<span class="sd">        list (multiset) of intermediate angular momentum indices l1,l2,...lN</span>
+
+<span class="sd">    L_R : int</span>
+<span class="sd">        Resultant angular momentum quantum number. This determines the equivariant</span>
+<span class="sd">        character of the rank N descriptor after reduction. L_R=0 corresponds to</span>
+<span class="sd">        a rotationally invariant feature, L_R=1 corresponds to a feature that</span>
+<span class="sd">        transforms like a vector, L_R=2 a tensor, etc.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    root : Node</span>
+<span class="sd">        Root node of the constructed tree.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span>
+        <span class="n">l</span><span class="p">,</span> <span class="nb">tuple</span>
+    <span class="p">),</span> <span class="s2">&quot;convert l to list or tuple&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span>
+        <span class="n">L</span><span class="p">,</span> <span class="nb">tuple</span>
+    <span class="p">),</span> <span class="s2">&quot;convert l to list or tuple&quot;</span>
+    <span class="n">rank</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">rank_2_binary</span><span class="p">(</span><span class="n">l_parent</span><span class="p">,</span> <span class="n">l_left</span><span class="p">,</span> <span class="n">l_right</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build a rank 2 binary tree from the given lists.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        l_parent : int</span>
+<span class="sd">            Parent node value.</span>
+
+<span class="sd">        l_left : int</span>
+<span class="sd">            Value of the left child.</span>
+
+<span class="sd">        l_right : int</span>
+<span class="sd">            Value of the right child.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tree : tuple</span>
+<span class="sd">            Tuple containing the root node and the leaves of the tree.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">l_parent</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">root2</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">l_parent</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">root2</span> <span class="o">=</span> <span class="n">l_parent</span>
+        <span class="n">root2</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">l_left</span><span class="p">)</span>
+        <span class="n">root2</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">l_right</span><span class="p">)</span>
+        <span class="n">root2</span><span class="o">.</span><span class="n">update_children</span><span class="p">(</span><span class="n">set_sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">leaves</span> <span class="o">=</span> <span class="p">(</span><span class="n">root2</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">root2</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">root2</span><span class="p">,</span> <span class="n">leaves</span>
+
+    <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">L_R</span><span class="p">)</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">rank_2_binary</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">rank_2_binary</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">update_children</span><span class="p">(</span><span class="n">set_sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sort_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">test_leaves</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">return_children_vals</span><span class="p">(</span><span class="n">depth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">leaves</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">test_leaves</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">L_R</span><span class="p">)</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">rank_2_binary</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">rank_2_binary</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">update_children</span><span class="p">(</span><span class="n">set_sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sort_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">test_leaves</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">return_children_vals</span><span class="p">(</span><span class="n">depth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">leaves</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">test_leaves</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">l</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span>
+
+    <span class="k">elif</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">L_R</span><span class="p">)</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">leaves_3</span> <span class="o">=</span> <span class="n">rank_2_binary</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">update_children</span><span class="p">(</span><span class="n">set_sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">update_children</span><span class="p">(</span><span class="n">set_sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">rank_2_binary</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">rank_2_binary</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">update_children</span><span class="p">(</span><span class="n">set_sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sort_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">test_leaves</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">return_children_vals</span><span class="p">(</span><span class="n">depth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">leaves</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">test_leaves</span> <span class="o">+</span> <span class="n">leaves_3</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;rank </span><span class="si">%d</span><span class="s2"> not implemented yet for full tree construction&quot;</span> <span class="o">%</span> <span class="n">rank</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">root</span></div>
+
+
+
+<div class="viewcode-block" id="build_quick_tree">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.tree_sorting.html#mala.descriptors.acelib.tree_sorting.build_quick_tree">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_quick_tree</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build a binary tree from the given list.</span>
+
+<span class="sd">    Rank is assumed to be the length of the list. If the rank is odd, a</span>
+<span class="sd">    remainder is returned.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    l : List</span>
+<span class="sd">        List to build the tree from.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tree : tuple</span>
+<span class="sd">        Tuple containing the tree and the remainder which could not fit in the</span>
+<span class="sd">        tree.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># quick construction of tree leaves</span>
+    <span class="n">rank</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+    <span class="n">rngs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">rank</span><span class="p">))</span>
+    <span class="n">rngs</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">rngs</span><span class="p">)</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">tup</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">rank</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">rngs</span><span class="p">)</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">rngs</span><span class="p">)</span>
+        <span class="n">tup</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">))</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">remainder</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">rank</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">remainder</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">rank</span><span class="p">))[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tup</span><span class="p">),</span> <span class="n">remainder</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

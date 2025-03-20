@@ -1,0 +1,27 @@
+
+.. automodule:: mala.descriptors.acelib
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+
+
+
+acelib
+======
+
+
+
+.. toctree::
+   :maxdepth: 6
+
+   mala.descriptors.acelib.ace_potential
+   mala.descriptors.acelib.clebsch_gordan_coupling
+   mala.descriptors.acelib.common_utils
+   mala.descriptors.acelib.coupling_utils
+   mala.descriptors.acelib.symmetric_group_manipulations
+   mala.descriptors.acelib.tree_sorting
+   mala.descriptors.acelib.wigner_coupling
+   mala.descriptors.acelib.young
+

@@ -1,0 +1,7 @@
+wigner\_coupling
+================
+
+.. automodule:: mala.descriptors.acelib.wigner_coupling
+   :members:
+   :undoc-members:
+   :show-inheritance:

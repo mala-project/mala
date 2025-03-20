@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>atomic_density &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>ace &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -26,8 +26,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="bispectrum" href="mala.descriptors.bispectrum.html" />
-    <link rel="prev" title="ace" href="mala.descriptors.ace.html" /> 
+    <link rel="next" title="atomic_density" href="mala.descriptors.atomic_density.html" />
+    <link rel="prev" title="young" href="mala.descriptors.acelib.young.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -63,8 +63,8 @@
 <li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="mala.descriptors.html">descriptors</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="mala.descriptors.acelib.html">acelib</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.ace.html">ace</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">atomic_density</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">ace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.atomic_density.html">atomic_density</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.descriptors.bispectrum.html">bispectrum</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html">descriptor</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.descriptors.lammps_utils.html">lammps_utils</a></li>
@@ -98,9 +98,9 @@
           <li class="breadcrumb-item"><a href="modules.html">API reference</a></li>
           <li class="breadcrumb-item"><a href="mala.html">mala</a></li>
           <li class="breadcrumb-item"><a href="mala.descriptors.html">descriptors</a></li>
-      <li class="breadcrumb-item active">atomic_density</li>
+      <li class="breadcrumb-item active">ace</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.descriptors.atomic_density.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.descriptors.ace.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -108,28 +108,41 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-mala.descriptors.atomic_density">
-<span id="atomic-density"></span><h1>atomic_density<a class="headerlink" href="#module-mala.descriptors.atomic_density" title="Link to this heading"></a></h1>
-<p>Gaussian descriptor class.</p>
+  <section id="module-mala.descriptors.ace">
+<span id="ace"></span><h1>ace<a class="headerlink" href="#module-mala.descriptors.ace" title="Link to this heading"></a></h1>
+<p>ACE descriptor class.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="mala.descriptors.atomic_density.AtomicDensity">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AtomicDensity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">Parameters</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/atomic_density.html#AtomicDensity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.atomic_density.AtomicDensity" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="mala.descriptors.ace.ACE">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ACE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">Parameters</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/ace.html#ACE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.ace.ACE" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor" title="mala.descriptors.descriptor.Descriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Descriptor</span></code></a></p>
-<p>Class for calculation and parsing of Gaussian descriptors.</p>
+<p>Class for calculation and parsing of ACE descriptors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>parameters</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters object used to create this object.</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.descriptors.ace.ACE.couplings_yace_file">
+<span class="sig-name descname"><span class="pre">couplings_yace_file</span></span><a class="headerlink" href="#mala.descriptors.ace.ACE.couplings_yace_file" title="Link to this definition"></a></dt>
+<dd><p>File which holds the coupling coefficients. Can be provided by users,
+in which case consistency will be checked. If no file is detected, a
+new file is computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.descriptors.atomic_density.AtomicDensity.backconvert_units">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backconvert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/atomic_density.html#AtomicDensity.backconvert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.atomic_density.AtomicDensity.backconvert_units" title="Link to this definition"></a></dt>
-<dd><p>Convert the units of a Gaussian descriptor.</p>
+<dt class="sig sig-object py" id="mala.descriptors.ace.ACE.backconvert_units">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backconvert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/ace.html#ACE.backconvert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.ace.ACE.backconvert_units" title="Link to this definition"></a></dt>
+<dd><p>Convert the units of a bispectrum descriptor.</p>
 <p>Since these do not really have units this function does nothing yet.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Data in MALA units.</p></li>
+<li><p><strong>array</strong> (<em>numpy.array</em>) – Data in MALA units.</p></li>
 <li><p><strong>out_units</strong> (<em>string</em>) – Desired units of output array.</p></li>
 </ul>
 </dd>
@@ -137,20 +150,42 @@
 <dd class="field-even"><p><strong>converted_array</strong> – Data in out_units.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>numpy.ndarray</p>
+<dd class="field-odd"><p>numpy.array</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.descriptors.atomic_density.AtomicDensity.convert_units">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/atomic_density.html#AtomicDensity.convert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.atomic_density.AtomicDensity.convert_units" title="Link to this definition"></a></dt>
-<dd><p>Convert the units of a Gaussian descriptor.</p>
+<dt class="sig sig-object py" id="mala.descriptors.ace.ACE.check_coupling_coeffs">
+<span class="sig-name descname"><span class="pre">check_coupling_coeffs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coupling_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/ace.html#ACE.check_coupling_coeffs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.ace.ACE.check_coupling_coeffs" title="Link to this definition"></a></dt>
+<dd><p>Check the coupling coefficients for consistency.</p>
+<p>This reads the first line of the coupling coefficients file, which
+contains a list of the elements the coupling coefficients have been
+computed for, and checks whether this is consistent with the
+elements for this calculation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coupling_file</strong> (<em>str</em>) – Path to the coupling coefficients file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>coupling_file</strong> – Path to the coupling coefficients file. None if the file was
+found incompatible.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.ace.ACE.convert_units">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/ace.html#ACE.convert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.ace.ACE.convert_units" title="Link to this definition"></a></dt>
+<dd><p>Convert the units of a bispectrum descriptor.</p>
 <p>Since these do not really have units this function does nothing yet.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Data for which the units should be converted.</p></li>
+<li><p><strong>array</strong> (<em>numpy.array</em>) – Data for which the units should be converted.</p></li>
 <li><p><strong>in_units</strong> (<em>string</em>) – Units of array.</p></li>
 </ul>
 </dd>
@@ -158,31 +193,14 @@
 <dd class="field-even"><p><strong>converted_array</strong> – Data in MALA units.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>numpy.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.descriptors.atomic_density.AtomicDensity.get_optimal_sigma">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_optimal_sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voxel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/atomic_density.html#AtomicDensity.get_optimal_sigma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.atomic_density.AtomicDensity.get_optimal_sigma" title="Link to this definition"></a></dt>
-<dd><p>Calculate the optimal width of the Gaussians based on the grid voxel.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>voxel</strong> (<em>ase.Cell</em>) – An ASE Cell object characterizing the voxel.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>optimal_sigma</strong> – The optimal sigma value.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-odd"><p>numpy.array</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="mala.descriptors.atomic_density.AtomicDensity.data_name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_name</span></span><a class="headerlink" href="#mala.descriptors.atomic_density.AtomicDensity.data_name" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="mala.descriptors.ace.ACE.data_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_name</span></span><a class="headerlink" href="#mala.descriptors.ace.ACE.data_name" title="Link to this definition"></a></dt>
 <dd><p>Get a string that describes the target (for e.g. metadata).</p>
 </dd></dl>
 
@@ -194,8 +212,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="mala.descriptors.ace.html" class="btn btn-neutral float-left" title="ace" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mala.descriptors.bispectrum.html" class="btn btn-neutral float-right" title="bispectrum" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.descriptors.acelib.young.html" class="btn btn-neutral float-left" title="young" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.descriptors.atomic_density.html" class="btn btn-neutral float-right" title="atomic_density" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

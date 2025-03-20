@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.descriptors.acelib.ace_potential &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=33f2f6c7" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html">
+            
+              <img src="../../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../basic_usage.html">Getting started with MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../advanced_usage.html">Advanced options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../citing.html">Citing MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../CONTRIBUTE.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mala.descriptors.acelib.ace_potential</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.descriptors.acelib.ace_potential</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">ACE potential class.</span>
+
+<span class="sd">It writes a .yace file (ACE potential file) that is readable by LAMMPS. When only the</span>
+<span class="sd">coupling coefficients are saved to the .yace file, this acts as a parameter</span>
+<span class="sd">file with which one can evaluate ACE descriptors.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">mala.descriptors.acelib.coupling_utils</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ace_coupling_utils</span>
+
+
+<div class="viewcode-block" id="ACEPotential">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.ace_potential.html#mala.descriptors.acelib.ace_potential.ACEPotential">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ACEPotential</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to manage interface between ACE descriptor enumeration library and LAMMPS. By default, it will enumerate ACE descriptors according to the Permutation-adapted approach described in https://doi.org/10.1016/j.jcp.2024.113073.</span>
+
+<span class="sd">    However, there are options for assigning descriptor labels if desired, manually for example.</span>
+
+<span class="sd">    After enumerating descriptors, it assigns all relevant hyperparamters needed to evaluate the ACE descriptors in LAMMPS. It saves a .yace file needed to evaluate ACE descriptors in LAMMPS (containing coupling coefficients). It does this by writing an ACE potential file, readable by LAMNMPS, that contains only information to evaluate descriptors, not energy models.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    elements : List</span>
+<span class="sd">        List of elements (symbols), including &#39;G&#39; for the grid points. In ACE, all possible</span>
+<span class="sd">        combinations of these elements determine the &quot;bond types&quot; spanned by the ACE chemical</span>
+<span class="sd">        basis (the chemical basis is the delta function basis used in Drautz 2019). For</span>
+<span class="sd">        example, the &quot;bond types&quot; resulting from all possible combinations of [&#39;Al&#39;,&#39;G&#39;] are</span>
+<span class="sd">        determined with :code:`itertools.product()` in python. They are (Al,Al)(Al,G)(G,Al)(G,G).</span>
+<span class="sd">        For mala, only those of type (G,X) are kept, (grid-atom interactions) and only a placeholder</span>
+<span class="sd">        is kept for other interaction types.</span>
+
+<span class="sd">    reference_ens : List</span>
+<span class="sd">        List of reference energies. (To be applied only for linear models) with a constant</span>
+<span class="sd">        shift to the energy per element type. Values other than 0 not be necessary in MALA.</span>
+
+<span class="sd">    ranks : List</span>
+<span class="sd">        Orders of the expansion, referred to as `N` in Drautz 2019, of the</span>
+<span class="sd">        descriptors to be enumerated</span>
+
+<span class="sd">    nmax: List</span>
+<span class="sd">        Maximum radial basis function index per descriptor rank</span>
+
+<span class="sd">    lmax: List</span>
+<span class="sd">        Maximum angular momentum number per descriptor rank (maximum angular function index)</span>
+
+<span class="sd">    nradbase : int</span>
+<span class="sd">        Maximum radial basis function index OVERALL: max(nmax) - in the future, may be used</span>
+<span class="sd">        to define the number of g_k(r) comprising R_nl from Drautz 2019 radial basis.</span>
+
+<span class="sd">    rcut : float/list</span>
+<span class="sd">        radial basis function cutoff per bond type. For example, if elements are [&#39;Al&#39;,&#39;G&#39;]</span>
+<span class="sd">        then rcut must be supplied for each:(Al,Al)(Al,G)(G,Al)(G,G)</span>
+
+<span class="sd">    lmbda : float/list</span>
+<span class="sd">        Exponential factor for scaled distance in Drautz 2019 used in the radial basis</span>
+<span class="sd">        functions. As with the radial cutoff, lambda must be supplied per bond type. For</span>
+<span class="sd">        example, if elements are [&#39;Al&#39;,&#39;G&#39;] then lambda must be supplied for </span>
+<span class="sd">        each:(Al,Al)(Al,G)(G,Al)(G,G)</span>
+
+<span class="sd">    css : dict</span>
+<span class="sd">        Dictionary of coupling coefficients of the format: {rank:{l:{m:coupling_coefficient}}</span>
+
+<span class="sd">    rcutinner : List</span>
+<span class="sd">        Inner cutoff to turn on soft-core repulsions. This parameter should be 0.0 (OFF) for</span>
+<span class="sd">        each bond type in MALA. </span>
+
+<span class="sd">    drcutinner : List</span>
+<span class="sd">        Parameter for soft-core repulsions. This parameter should not matter if rcutinner is</span>
+<span class="sd">         0.0 (OFF) for each bond type in MALA. </span>
+
+<span class="sd">    lmin : int/list</span>
+<span class="sd">        Lower bound on angular momentum quantum number per rank.</span>
+
+<span class="sd">    manual_labels : str</span>
+<span class="sd">        File for loading labels. If not None, then labels will be loaded from</span>
+<span class="sd">        this json file. If None, then labels will be generated using the</span>
+<span class="sd">        pa_labels_raw function (default).</span>
+
+<span class="sd">    **kwarg : dict</span>
+<span class="sd">        Additional keyword arguments.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ACEPotential : class</span>
+<span class="sd">        Class containing ACE descriptor and hyperparamter info.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">elements</span><span class="p">,</span>
+        <span class="n">reference_energy</span><span class="p">,</span>
+        <span class="n">ranks</span><span class="p">,</span>
+        <span class="n">nmax</span><span class="p">,</span>
+        <span class="n">lmax</span><span class="p">,</span>
+        <span class="n">nradbase</span><span class="p">,</span>
+        <span class="n">rcut</span><span class="p">,</span>
+        <span class="n">lmbda</span><span class="p">,</span>
+        <span class="n">css</span><span class="p">,</span>
+        <span class="n">rcutinner</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">drcutinner</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">lmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">manual_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1">#NOTE Our unused variable names here match exactly what is in LAMMPS</span>
+        <span class="c1"># I&#39;m hesitant to change these to something else. We wont use them in MALA</span>
+        <span class="c1"># and if people are really interested, they can find them in the lammps</span>
+        <span class="c1"># source code directly</span>
+        <span class="c1">#coupling coefficients (generalized Wigner symbols or Generalized Clebsch-Gordan coefficients)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__global_ccs</span> <span class="o">=</span> <span class="n">css</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__global_ccs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">([]):</span> <span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}}}</span>
+        <span class="c1">#0th-order expansion term in ACE (e.g., constant energy shift)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__E0</span> <span class="o">=</span> <span class="n">reference_energy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ranks</span> <span class="o">=</span> <span class="n">ranks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__elements</span> <span class="o">=</span> <span class="n">elements</span>
+        <span class="c1">#linear model coefficients</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__betas</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1">#descriptor labels in FitSNAP/LAMMPS format - as described elsewhere</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__nus</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1">#hyperparameters for ACE basis (relevant for density embeddings)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__deltaSplineBins</span> <span class="o">=</span> <span class="mf">0.001</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__global_ndensity</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__global_rhocut</span> <span class="o">=</span> <span class="mi">100000</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__global_drhocut</span> <span class="o">=</span> <span class="mi">250</span>
+
+        <span class="c1"># assert the same nmax,lmax,nradbase (e.g. same basis) for each bond</span>
+        <span class="c1"># type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__radbasetype</span> <span class="o">=</span> <span class="s2">&quot;ChebExpCos&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__global_nmax</span> <span class="o">=</span> <span class="n">nmax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__global_lmax</span> <span class="o">=</span> <span class="n">lmax</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmax</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">lmax</span><span class="p">),</span> <span class="s2">&quot;nmax and lmax arrays must be same size&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__global_nradbase</span> <span class="o">=</span> <span class="n">nradbase</span>
+
+        <span class="c1"># These can be global or per bond type, global_mode controls which</span>
+        <span class="c1"># of these settings is used.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rcut</span> <span class="o">=</span> <span class="n">rcut</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lmbda</span> <span class="o">=</span> <span class="n">lmbda</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rcutinner</span> <span class="o">=</span> <span class="n">rcutinner</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__drcutinner</span> <span class="o">=</span> <span class="n">drcutinner</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lmin</span> <span class="o">=</span> <span class="n">lmin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__global_mode</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__rcut</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__rcut</span><span class="p">,</span> <span class="nb">list</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__global_mode</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__manual_labels</span> <span class="o">=</span> <span class="n">manual_labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__bondlsts</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__embeddings</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__bonds</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_embeddings</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_bonds</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_bond_base</span><span class="p">()</span>
+
+        <span class="n">lmax_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">rank</span><span class="p">:</span> <span class="n">lv</span> <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">lv</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ranks</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__global_lmax</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">lmin_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">rank</span><span class="p">:</span> <span class="n">lv</span> <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">lv</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ranks</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lmin</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">lmin_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">rank</span><span class="p">:</span> <span class="n">lv</span>
+                <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">lv</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__ranks</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_lmin</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ranks</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">}</span>
+        <span class="n">nradmax_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">rank</span><span class="p">:</span> <span class="n">nv</span> <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">nv</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ranks</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__global_nmax</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">mumax_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">rank</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__elements</span><span class="p">)</span> <span class="k">for</span> <span class="n">rank</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ranks</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__manual_labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__manual_labels</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">readjson</span><span class="p">:</span>
+                <span class="n">labdata</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">readjson</span><span class="p">)</span>
+            <span class="n">nulst_1</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">ik</span><span class="p">)</span> <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">labdata</span><span class="o">.</span><span class="n">values</span><span class="p">())]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nulst_1</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">rank</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ranks</span><span class="p">:</span>
+                <span class="n">PA_lammps</span> <span class="o">=</span> <span class="n">ace_coupling_utils</span><span class="o">.</span><span class="n">compute_pa_labels_raw</span><span class="p">(</span>
+                    <span class="n">rank</span><span class="p">,</span>
+                    <span class="n">nradmax_dict</span><span class="p">[</span><span class="n">rank</span><span class="p">],</span>
+                    <span class="n">lmax_dict</span><span class="p">[</span><span class="n">rank</span><span class="p">],</span>
+                    <span class="n">mumax_dict</span><span class="p">[</span><span class="n">rank</span><span class="p">],</span>
+                    <span class="n">lmin_dict</span><span class="p">[</span><span class="n">rank</span><span class="p">],</span>
+                <span class="p">)</span>
+                <span class="n">nulst_1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">PA_lammps</span><span class="p">)</span>
+
+        <span class="n">nus_unsort</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">nulst_1</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
+        <span class="n">nus</span> <span class="o">=</span> <span class="n">nus_unsort</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">mu0s</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">mus</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ls</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">nu</span> <span class="ow">in</span> <span class="n">nus_unsort</span><span class="p">:</span>
+            <span class="n">mu0ii</span><span class="p">,</span> <span class="n">muii</span><span class="p">,</span> <span class="n">nii</span><span class="p">,</span> <span class="n">lii</span> <span class="o">=</span> <span class="n">ace_coupling_utils</span><span class="o">.</span><span class="n">calculate_mu_n_l</span><span class="p">(</span><span class="n">nu</span><span class="p">)</span>
+            <span class="n">mu0s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mu0ii</span><span class="p">)</span>
+            <span class="n">mus</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">muii</span><span class="p">))</span>
+            <span class="n">ns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">nii</span><span class="p">))</span>
+            <span class="n">ls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">lii</span><span class="p">))</span>
+        <span class="n">nus</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mus</span><span class="p">[</span><span class="n">nus_unsort</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">nus</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">ns</span><span class="p">[</span><span class="n">nus_unsort</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">nus</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">ls</span><span class="p">[</span><span class="n">nus_unsort</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">nus</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mu0s</span><span class="p">[</span><span class="n">nus_unsort</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">nus</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">nus</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mu0s</span><span class="p">[</span><span class="n">nus_unsort</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__nus</span> <span class="o">=</span> <span class="n">nus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_funcs</span><span class="p">(</span><span class="n">nus</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__nus_per_rank</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__funcs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__permunu</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__set_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npoti</span><span class="o">=</span><span class="s2">&quot;FinnisSinclair&quot;</span><span class="p">,</span> <span class="n">FSparams</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set &#39;embeddings&#39; in the .yace file for lammps. Some terms here control if a square-root embedding term is added.</span>
+
+<span class="sd">        This should always be OFF for descriptor calculations in MALA.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        npoti : str</span>
+<span class="sd">            paramter to specify descriptor type in LAMMPS</span>
+
+<span class="sd">        FSparams : List</span>
+<span class="sd">            parameters to specify embedding terms in LAMMPS</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># embeddings =dict()#OrderedDict() #{ind:None for ind in range(len(self.elements))}</span>
+        <span class="n">embeddings</span> <span class="o">=</span> <span class="p">{</span><span class="n">ind</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__elements</span><span class="p">))}</span>
+        <span class="k">for</span> <span class="n">elemind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__elements</span><span class="p">)):</span>
+            <span class="n">embeddings</span><span class="p">[</span><span class="n">elemind</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;ndensity&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__global_ndensity</span><span class="p">,</span>
+                <span class="s2">&quot;FS_parameters&quot;</span><span class="p">:</span> <span class="n">FSparams</span><span class="p">,</span>
+                <span class="s2">&quot;npoti&quot;</span><span class="p">:</span> <span class="n">npoti</span><span class="p">,</span>
+                <span class="s2">&quot;rho_core_cutoff&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__global_rhocut</span><span class="p">,</span>
+                <span class="s2">&quot;drho_core_cutoff&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__global_drhocut</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__embeddings</span> <span class="o">=</span> <span class="n">embeddings</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__set_bonds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Define a list of bonds, as given by element list.&quot;&quot;&quot;</span>
+        <span class="n">bondinds</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__elements</span><span class="p">))</span>
+        <span class="n">bond_lsts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">bondinds</span><span class="p">,</span> <span class="n">bondinds</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__bondlsts</span> <span class="o">=</span> <span class="n">bond_lsts</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__set_bond_base</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the per-bond radial basis parameters. The &#39;bonds&#39; are determined based on the elements.</span>
+
+<span class="sd">        If the elements are [&#39;Al&#39;,&#39;G&#39;], the bonds may be determined with :code:`itertools.product()` in python. They are (Al,Al)(Al,G)(G,Al)(G,G).</span>
+
+<span class="sd">        Some hyperparameters must be specified per bond label shown here.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bondstrs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;[</span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bondlsts</span><span class="p">]</span>
+        <span class="n">bonds</span> <span class="o">=</span> <span class="p">{</span><span class="n">bondstr</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">bondstr</span> <span class="ow">in</span> <span class="n">bondstrs</span><span class="p">}</span>
+
+        <span class="c1"># radial basis function expansion coefficients</span>
+        <span class="c1"># saved in n,l,k shape</span>
+        <span class="c1"># defaults to orthogonal delta function [g(n,k)] basis of drautz 2019</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">nradmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__global_nmax</span><span class="p">[:])</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">nradmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__global_nmax</span><span class="p">)</span>
+        <span class="n">lmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__global_lmax</span><span class="p">)</span>
+        <span class="n">nradbase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__global_nradbase</span>
+        <span class="n">crad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nradmax</span><span class="p">,</span> <span class="n">lmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nradbase</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nradmax</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">crad</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">n</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nradbase</span><span class="p">)]</span>
+                <span class="p">)</span>
+
+        <span class="n">cnew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nradbase</span><span class="p">,</span> <span class="n">nradmax</span><span class="p">,</span> <span class="n">lmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nradmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nradbase</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">cnew</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">crad</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="n">l</span><span class="p">][</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">bondind</span><span class="p">,</span> <span class="n">bondlst</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bondlsts</span><span class="p">):</span>
+            <span class="n">bstr</span> <span class="o">=</span> <span class="s2">&quot;[</span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bondlst</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bondlst</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__global_mode</span><span class="p">:</span>
+                <span class="n">bonds</span><span class="p">[</span><span class="n">bstr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;nradmax&quot;</span><span class="p">:</span> <span class="n">nradmax</span><span class="p">,</span>
+                    <span class="s2">&quot;lmax&quot;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__global_lmax</span><span class="p">),</span>
+                    <span class="s2">&quot;nradbasemax&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__global_nradbase</span><span class="p">,</span>
+                    <span class="s2">&quot;radbasename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__radbasetype</span><span class="p">,</span>
+                    <span class="s2">&quot;radparameters&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">global_lmbda</span><span class="p">],</span>
+                    <span class="s2">&quot;radcoefficients&quot;</span><span class="p">:</span> <span class="n">crad</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                    <span class="s2">&quot;prehc&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;lambdahc&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lmbda</span><span class="p">,</span>
+                    <span class="s2">&quot;rcut&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rcut</span><span class="p">,</span>
+                    <span class="s2">&quot;dcut&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+                    <span class="s2">&quot;rcut_in&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rcutinner</span><span class="p">,</span>
+                    <span class="s2">&quot;dcut_in&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__drcutinner</span><span class="p">,</span>
+                    <span class="s2">&quot;inner_cutoff_type&quot;</span><span class="p">:</span> <span class="s2">&quot;distance&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__rcut</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="n">bonds</span><span class="p">[</span><span class="n">bstr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;nradmax&quot;</span><span class="p">:</span> <span class="n">nradmax</span><span class="p">,</span>
+                        <span class="s2">&quot;lmax&quot;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__global_lmax</span><span class="p">),</span>
+                        <span class="s2">&quot;nradbasemax&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__global_nradbase</span><span class="p">,</span>
+                        <span class="s2">&quot;radbasename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__radbasetype</span><span class="p">,</span>
+                        <span class="s2">&quot;radparameters&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__lmbda</span><span class="p">[</span><span class="n">bstr</span><span class="p">]],</span>
+                        <span class="s2">&quot;radcoefficients&quot;</span><span class="p">:</span> <span class="n">crad</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                        <span class="s2">&quot;prehc&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="s2">&quot;lambdahc&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lmbda</span><span class="p">[</span><span class="n">bstr</span><span class="p">],</span>
+                        <span class="s2">&quot;rcut&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rcut</span><span class="p">[</span><span class="n">bstr</span><span class="p">],</span>
+                        <span class="s2">&quot;dcut&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+                        <span class="s2">&quot;rcut_in&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rcutinner</span><span class="p">[</span><span class="n">bstr</span><span class="p">],</span>
+                        <span class="s2">&quot;dcut_in&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__drcutinner</span><span class="p">[</span><span class="n">bstr</span><span class="p">],</span>
+                        <span class="s2">&quot;inner_cutoff_type&quot;</span><span class="p">:</span> <span class="s2">&quot;distance&quot;</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__rcut</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="n">bonds</span><span class="p">[</span><span class="n">bstr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;nradmax&quot;</span><span class="p">:</span> <span class="n">nradmax</span><span class="p">,</span>
+                        <span class="s2">&quot;lmax&quot;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__global_lmax</span><span class="p">),</span>
+                        <span class="s2">&quot;nradbasemax&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__global_nradbase</span><span class="p">,</span>
+                        <span class="s2">&quot;radbasename&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__radbasetype</span><span class="p">,</span>
+                        <span class="s2">&quot;radparameters&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__lmbda</span><span class="p">[</span><span class="n">bondind</span><span class="p">]],</span>
+                        <span class="s2">&quot;radcoefficients&quot;</span><span class="p">:</span> <span class="n">crad</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                        <span class="s2">&quot;prehc&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="s2">&quot;lambdahc&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lmbda</span><span class="p">[</span><span class="n">bondind</span><span class="p">],</span>
+                        <span class="s2">&quot;rcut&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rcut</span><span class="p">[</span><span class="n">bondind</span><span class="p">],</span>
+                        <span class="s2">&quot;dcut&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+                        <span class="s2">&quot;rcut_in&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rcutinner</span><span class="p">[</span><span class="n">bondind</span><span class="p">],</span>
+                        <span class="s2">&quot;dcut_in&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__drcutinner</span><span class="p">[</span><span class="n">bondind</span><span class="p">],</span>
+                        <span class="s2">&quot;inner_cutoff_type&quot;</span><span class="p">:</span> <span class="s2">&quot;distance&quot;</span><span class="p">,</span>
+                    <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__bonds</span> <span class="o">=</span> <span class="n">bonds</span>
+
+<div class="viewcode-block" id="ACEPotential.set_funcs">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.ace_potential.html#mala.descriptors.acelib.ace_potential.ACEPotential.set_funcs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_funcs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nulst</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">print_0s</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set ctilde &#39;functions&#39; in the .yace file, used to calculate descriptors in lammps.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        nulst : List</span>
+<span class="sd">            List of nus, a.k.a. ACE descriptor labels to write to </span>
+<span class="sd">            the .yace file.</span>
+
+<span class="sd">        print_0s : bool</span>
+<span class="sd">            Logical to include 0-valued descriptors, this should always</span>
+<span class="sd">            be True in MALA as 0-valued descriptors only arise after </span>
+<span class="sd">            training linear models with sparsifying solvers like LASSO</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">nulst</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__nus</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">nulst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__nus</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;No list of descriptors found/specified&quot;</span><span class="p">)</span>
+        <span class="n">nus_per_rank</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">permu0</span> <span class="o">=</span> <span class="p">{</span><span class="n">b</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__elements</span><span class="p">))}</span>
+        <span class="n">permunu</span> <span class="o">=</span> <span class="p">{</span><span class="n">b</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__elements</span><span class="p">))}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__betas</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">betas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__betas</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># betas = {ind:{nu:1.0 for nu in nulst} for ind in range(len(self.elements))}</span>
+            <span class="n">betas</span> <span class="o">=</span> <span class="p">{</span><span class="n">ind</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__elements</span><span class="p">))}</span>
+            <span class="k">for</span> <span class="n">nu</span> <span class="ow">in</span> <span class="n">nulst</span><span class="p">:</span>
+                <span class="n">mu0</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">L</span> <span class="o">=</span> <span class="n">ace_coupling_utils</span><span class="o">.</span><span class="n">calculate_mu_n_l</span><span class="p">(</span>
+                    <span class="n">nu</span><span class="p">,</span> <span class="n">return_L</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
+                <span class="n">betas</span><span class="p">[</span><span class="n">mu0</span><span class="p">][</span><span class="n">nu</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">for</span> <span class="n">nu</span> <span class="ow">in</span> <span class="n">nulst</span><span class="p">:</span>
+            <span class="n">mu0</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">L</span> <span class="o">=</span> <span class="n">ace_coupling_utils</span><span class="o">.</span><span class="n">calculate_mu_n_l</span><span class="p">(</span>
+                <span class="n">nu</span><span class="p">,</span> <span class="n">return_L</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="n">rank</span> <span class="o">=</span> <span class="n">ace_coupling_utils</span><span class="o">.</span><span class="n">calculate_mu_nu_rank</span><span class="p">(</span><span class="n">nu</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">nus_per_rank</span><span class="p">[</span><span class="n">rank</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nu</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">nus_per_rank</span><span class="p">[</span><span class="n">rank</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">nu</span><span class="p">]</span>
+            <span class="n">llst</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">rank</span>
+            <span class="c1"># print (nu,l,oldfmt,muflg)</span>
+            <span class="n">lstr</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">llst</span><span class="p">)</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">L</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ccs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__global_ccs</span><span class="p">[</span><span class="n">rank</span><span class="p">][</span><span class="n">lstr</span><span class="p">][</span><span class="nb">tuple</span><span class="p">(</span><span class="n">L</span><span class="p">)]</span>
+            <span class="k">elif</span> <span class="n">L</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ccs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__global_ccs</span><span class="p">[</span><span class="n">rank</span><span class="p">][</span><span class="n">lstr</span><span class="p">][()]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">ccs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__global_ccs</span><span class="p">[</span><span class="n">rank</span><span class="p">][</span><span class="n">lstr</span><span class="p">]</span>
+            <span class="n">ms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ccs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">mslsts</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">int</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">ms</span><span class="p">]</span>
+            <span class="n">msflat</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">mslsts</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">print_0s</span> <span class="ow">or</span> <span class="n">betas</span><span class="p">[</span><span class="n">mu0</span><span class="p">][</span><span class="n">nu</span><span class="p">]</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="n">ccoeffs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">ccs</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span> <span class="o">*</span> <span class="n">betas</span><span class="p">[</span><span class="n">mu0</span><span class="p">][</span><span class="n">nu</span><span class="p">])</span>
+                <span class="n">permu0</span><span class="p">[</span><span class="n">mu0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;mu0&quot;</span><span class="p">:</span> <span class="n">mu0</span><span class="p">,</span>
+                        <span class="s2">&quot;rank&quot;</span><span class="p">:</span> <span class="n">rank</span><span class="p">,</span>
+                        <span class="s2">&quot;ndensity&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__global_ndensity</span><span class="p">,</span>
+                        <span class="s2">&quot;num_ms_combs&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">ms</span><span class="p">),</span>
+                        <span class="s2">&quot;mus&quot;</span><span class="p">:</span> <span class="n">mu</span><span class="p">,</span>
+                        <span class="s2">&quot;ns&quot;</span><span class="p">:</span> <span class="n">n</span><span class="p">,</span>
+                        <span class="s2">&quot;ls&quot;</span><span class="p">:</span> <span class="n">l</span><span class="p">,</span>
+                        <span class="s2">&quot;ms_combs&quot;</span><span class="p">:</span> <span class="n">msflat</span><span class="p">,</span>
+                        <span class="s2">&quot;ctildes&quot;</span><span class="p">:</span> <span class="n">ccoeffs</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+                <span class="n">permunu</span><span class="p">[</span><span class="n">mu0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nu</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">betas</span><span class="p">[</span><span class="n">mu0</span><span class="p">][</span><span class="n">nu</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">print_0s</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not printing descriptor: </span><span class="si">%s</span><span class="s2">, coefficient is 0&quot;</span> <span class="o">%</span> <span class="n">nu</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__nus_per_rank</span> <span class="o">=</span> <span class="n">nus_per_rank</span>
+
+        <span class="c1"># for b in range(len(self.elements)):</span>
+        <span class="c1">#   for i in permunu[b]:</span>
+        <span class="c1">#       print (b,i)</span>
+        <span class="c1"># for b in range(len(self.elements)):</span>
+        <span class="c1">#   print (b,len(permu0[b]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__funcs</span> <span class="o">=</span> <span class="n">permu0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__permunu</span> <span class="o">=</span> <span class="n">permunu</span></div>
+
+
+<div class="viewcode-block" id="ACEPotential.write_pot">
+<a class="viewcode-back" href="../../../../api/mala.descriptors.acelib.ace_potential.html#mala.descriptors.acelib.ace_potential.ACEPotential.write_pot">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_pot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write coupling coefficients to file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            Name (without file ending) of the file to write to.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            Filename of the written file (with file ending)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">class</span><span class="w"> </span><span class="nc">_NPEncoder</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Helper class for encoding numpy arrays.&quot;&quot;&quot;</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Provdide conversion for numpy default types.</span>
+
+<span class="sd">                Parameters</span>
+<span class="sd">                ----------</span>
+<span class="sd">                obj : any</span>
+<span class="sd">                    Object to convert.</span>
+
+<span class="sd">                Returns</span>
+<span class="sd">                -------</span>
+<span class="sd">                converted_obj : any</span>
+<span class="sd">                    Converted object.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">_NPEncoder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.yace&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writeout</span><span class="p">:</span>
+            <span class="n">e0lst</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__elements</span><span class="p">)</span>
+            <span class="n">e0str</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">e0lst</span><span class="p">)</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__E0</span><span class="p">)</span>
+            <span class="n">elemlst</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__elements</span><span class="p">)</span>
+            <span class="n">elemstr</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">elemlst</span><span class="p">)</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__elements</span><span class="p">)</span>
+            <span class="n">writeout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;elements: [</span><span class="si">%s</span><span class="s2">] </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">elemstr</span><span class="p">)</span>
+            <span class="n">writeout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;E0: [</span><span class="si">%s</span><span class="s2">] </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e0str</span><span class="p">)</span>
+            <span class="n">writeout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;deltaSplineBins: </span><span class="si">%f</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__deltaSplineBins</span><span class="p">)</span>
+            <span class="n">writeout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;embeddings:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">mu0</span><span class="p">,</span> <span class="n">embed</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__embeddings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">writeout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  </span><span class="si">%d</span><span class="s2">: &quot;</span> <span class="o">%</span> <span class="n">mu0</span><span class="p">)</span>
+                <span class="n">ystr</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">embed</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">ystr</span> <span class="o">=</span> <span class="n">ystr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">writeout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ystr</span><span class="p">)</span>
+            <span class="n">writeout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;bonds:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">bondstrs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;[</span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bondlsts</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">bondstr</span> <span class="ow">in</span> <span class="n">bondstrs</span><span class="p">:</span>
+                <span class="n">writeout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  </span><span class="si">%s</span><span class="s2">: &quot;</span> <span class="o">%</span> <span class="n">bondstr</span><span class="p">)</span>
+                <span class="n">bstr</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bonds</span><span class="p">[</span><span class="n">bondstr</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">bstr</span> <span class="o">=</span> <span class="n">bstr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">writeout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">bstr</span><span class="p">)</span>
+            <span class="n">writeout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;functions:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">mu0</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__elements</span><span class="p">)):</span>
+                <span class="n">writeout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  </span><span class="si">%d</span><span class="s2">:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mu0</span><span class="p">))</span>
+                <span class="n">mufuncs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__funcs</span><span class="p">[</span><span class="n">mu0</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">mufunc</span> <span class="ow">in</span> <span class="n">mufuncs</span><span class="p">:</span>
+                    <span class="n">mufuncstr</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="s2">&quot;    - &quot;</span> <span class="o">+</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">mufunc</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">_NPEncoder</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+                    <span class="n">mufuncstr</span> <span class="o">=</span> <span class="n">mufuncstr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="n">writeout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">mufuncstr</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.yace&quot;</span> <span class="o">%</span> <span class="n">name</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

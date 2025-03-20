@@ -1,0 +1,7 @@
+ace\_potential
+==============
+
+.. automodule:: mala.descriptors.acelib.ace_potential
+   :members:
+   :undoc-members:
+   :show-inheritance:

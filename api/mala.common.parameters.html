@@ -931,6 +931,152 @@ descriptor calculation.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.ace_included_expansion_ranks">
+<span class="sig-name descname"><span class="pre">ace_included_expansion_ranks</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.ace_included_expansion_ranks" title="Link to this definition"></a></dt>
+<dd><p>List of all included expansion ranks for the ACE descriptors.
+These expansion ranks correspond to the many body order in the
+expansion of the atomic energy in many body terms. The list does
+can exclude terms, i.e., [1,2,4] is a valid option.
+Lengths have to be consistent between ace_included_expansion_ranks,
+ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+ace_minimum_l_per_rank.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.ace_maximum_n_per_rank">
+<span class="sig-name descname"><span class="pre">ace_maximum_n_per_rank</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.ace_maximum_n_per_rank" title="Link to this definition"></a></dt>
+<dd><p>Maximum n for each expansion rank in the ACE descriptors. These
+n correspond to the n starting from equation 27 in the original
+ACE paper (doi.org/10.1103/PhysRevB.99.014104)
+Lengths have to be consistent between ace_included_expansion_ranks,
+ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+ace_minimum_l_per_rank.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.ace_maximum_l_per_rank">
+<span class="sig-name descname"><span class="pre">ace_maximum_l_per_rank</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.ace_maximum_l_per_rank" title="Link to this definition"></a></dt>
+<dd><p>Maximum l for each expansion rank in the ACE descriptors. These
+n correspond to the n starting from equation 27 in the original
+ACE paper (doi.org/10.1103/PhysRevB.99.014104).
+Lengths have to be consistent between ace_included_expansion_ranks,
+ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+ace_minimum_l_per_rank.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.ace_minimum_l_per_rank">
+<span class="sig-name descname"><span class="pre">ace_minimum_l_per_rank</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.ace_minimum_l_per_rank" title="Link to this definition"></a></dt>
+<dd><p>Minimum l for each expansion rank in the ACE descriptors. These
+n correspond to the n starting from equation 27 in the original
+ACE paper (doi.org/10.1103/PhysRevB.99.014104)
+Lengths have to be consistent between ace_included_expansion_ranks,
+ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+ace_minimum_l_per_rank.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.ace_balance_cutoff_radii_for_elements">
+<span class="sig-name descname"><span class="pre">ace_balance_cutoff_radii_for_elements</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.ace_balance_cutoff_radii_for_elements" title="Link to this definition"></a></dt>
+<dd><p>If True, cutoff radii will be balanced between element types.
+This is helpful when dealing with elements varying drastically in size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.ace_larger_cutoff_for_metals">
+<span class="sig-name descname"><span class="pre">ace_larger_cutoff_for_metals</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.ace_larger_cutoff_for_metals" title="Link to this definition"></a></dt>
+<dd><p>If True (default) a slightly larger cutoff is used for metals. This
+is recommended.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.ace_use_maximum_cutoff_per_element">
+<span class="sig-name descname"><span class="pre">ace_use_maximum_cutoff_per_element</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.ace_use_maximum_cutoff_per_element" title="Link to this definition"></a></dt>
+<dd><p>If True, the maximum chemically reasonable cutoff will be used
+for all bonds. These maximum cutoff radii are based on the
+Van-der-Waals radii. Note that this may increase computation time!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.ace_coupling_coefficients_type">
+<span class="sig-name descname"><span class="pre">ace_coupling_coefficients_type</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.ace_coupling_coefficients_type" title="Link to this definition"></a></dt>
+<dd><p>Coupling type used for reduction of spherical harmonic products.
+These come into play starting from equation 28 in the original
+ACE paper (doi.org/10.1103/PhysRevB.99.014104).
+Can be “clebsch_gordan” or “wigner_3j”. This parameter usually does
+not have to be changed. The default is “clebsch_gordan”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.ace_coupling_coefficients_maximum_l">
+<span class="sig-name descname"><span class="pre">ace_coupling_coefficients_maximum_l</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.ace_coupling_coefficients_maximum_l" title="Link to this definition"></a></dt>
+<dd><p>The maximum l up to which to precompute the Clebsch-Gordan/Wigner 3j
+symbols. These are precomputed within MALA to reduce overall
+computation time, but to save on storage space, precomputation is only
+done to a certain l (for the meaning of l, refer to the original ACE
+paper, doi.org/10.1103/PhysRevB.99.014104, page 5). MALA automatically
+recomputes the coefficients if ace_coupling_coefficients_maximum_l is
+increased.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.ace_cutoff_factor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ace_cutoff_factor</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.ace_cutoff_factor" title="Link to this definition"></a></dt>
+<dd><p>Cutoff radius factor for ACE descriptor calculation.</p>
+<p>This is NOT a cutoff radius itself. Rather, ACE computes on cutoff
+radius for every bond between element types (with grid points counting
+as an element type). These cutoff radii are then multiplied by this
+factor to get the actual cutoff radii. This factor is a global factor,
+and by default 2.0. Chage it carefully, since changing it may lead to
+an increase in computation time.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.bispectrum_cutoff">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bispectrum_cutoff</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.bispectrum_cutoff" title="Link to this definition"></a></dt>

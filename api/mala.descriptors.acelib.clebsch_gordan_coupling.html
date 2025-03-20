@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bispectrum &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>clebsch_gordan_coupling &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -26,8 +26,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="descriptor" href="mala.descriptors.descriptor.html" />
-    <link rel="prev" title="atomic_density" href="mala.descriptors.atomic_density.html" /> 
+    <link rel="next" title="common_utils" href="mala.descriptors.acelib.common_utils.html" />
+    <link rel="prev" title="ace_potential" href="mala.descriptors.acelib.ace_potential.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -62,10 +62,10 @@
 <li class="toctree-l3"><a class="reference internal" href="mala.datageneration.html">datageneration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="mala.descriptors.html">descriptors</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.acelib.html">acelib</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="mala.descriptors.acelib.html">acelib</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.descriptors.ace.html">ace</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.descriptors.atomic_density.html">atomic_density</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">bispectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.bispectrum.html">bispectrum</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.descriptors.descriptor.html">descriptor</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.descriptors.lammps_utils.html">lammps_utils</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.descriptors.minterpy_descriptors.html">minterpy_descriptors</a></li>
@@ -98,9 +98,10 @@
           <li class="breadcrumb-item"><a href="modules.html">API reference</a></li>
           <li class="breadcrumb-item"><a href="mala.html">mala</a></li>
           <li class="breadcrumb-item"><a href="mala.descriptors.html">descriptors</a></li>
-      <li class="breadcrumb-item active">bispectrum</li>
+          <li class="breadcrumb-item"><a href="mala.descriptors.acelib.html">acelib</a></li>
+      <li class="breadcrumb-item active">clebsch_gordan_coupling</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.descriptors.bispectrum.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.descriptors.acelib.clebsch_gordan_coupling.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -108,67 +109,34 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-mala.descriptors.bispectrum">
-<span id="bispectrum"></span><h1>bispectrum<a class="headerlink" href="#module-mala.descriptors.bispectrum" title="Link to this heading"></a></h1>
-<p>Bispectrum descriptor class.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="mala.descriptors.bispectrum.Bispectrum">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Bispectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">Parameters</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/bispectrum.html#Bispectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.bispectrum.Bispectrum" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor" title="mala.descriptors.descriptor.Descriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Descriptor</span></code></a></p>
-<p>Class for calculation and parsing of bispectrum descriptors.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>parameters</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters object used to create this object.</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.descriptors.bispectrum.Bispectrum.backconvert_units">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backconvert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/bispectrum.html#Bispectrum.backconvert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.bispectrum.Bispectrum.backconvert_units" title="Link to this definition"></a></dt>
-<dd><p>Convert the units of a bispectrum descriptor.</p>
-<p>Since these do not really have units this function does nothing yet.</p>
+  <section id="module-mala.descriptors.acelib.clebsch_gordan_coupling">
+<span id="clebsch-gordan-coupling"></span><h1>clebsch_gordan_coupling<a class="headerlink" href="#module-mala.descriptors.acelib.clebsch_gordan_coupling" title="Link to this heading"></a></h1>
+<p>Clebsch-Gordan coupling functions.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.descriptors.acelib.clebsch_gordan_coupling.clebsch_gordan_coupling">
+<span class="sig-name descname"><span class="pre">clebsch_gordan_coupling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clebsch_gordan_coefficients</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ldict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_permutations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/acelib/clebsch_gordan_coupling.html#clebsch_gordan_coupling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.acelib.clebsch_gordan_coupling.clebsch_gordan_coupling" title="Link to this definition"></a></dt>
+<dd><p>Compute generalized Clebsch-Gordan coefficients for a given L_R.</p>
+<p>These are all defined according to the pairwise coupling scheme in Goff et al. 2024.</p>
+<p>The approach to construct generalized Clebsch-Gordan coefficients is manually defined for each rank for pedagogical and clarity purposes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Data in MALA units.</p></li>
-<li><p><strong>out_units</strong> (<em>string</em>) – Desired units of output array.</p></li>
+<li><p><strong>clebsch_gordan_coefficients</strong> (<em>dict</em>) – Precomputed Clebsch-Gordan coefficients.</p></li>
+<li><p><strong>ldict</strong> (<em>dict</em>) – Dictionary of ranks and their corresponding l values.</p></li>
+<li><p><strong>L_R</strong> (<em>int</em>) – Resultant angular momentum quantum number. This determines the equivariant
+character of the rank N descriptor after reduction. L_R=0 corresponds to
+a rotationally invariant feature, L_R=1 corresponds to a feature that
+transforms like a vector, L_R=2 a tensor, etc.</p></li>
+<li><p><strong>use_permutations</strong> (<em>bool</em>) – Flag to consider permutations of l in generation of coupling coefficients.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>converted_array</strong> – Data in out_units.</p>
+<dd class="field-even"><p><strong>coupling</strong> – Generalized Clebsch-Gordan coefficients, {M_R:{rank:{l:{m:coupling_coefficient}}}</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>numpy.ndarray</p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.descriptors.bispectrum.Bispectrum.convert_units">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/bispectrum.html#Bispectrum.convert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.bispectrum.Bispectrum.convert_units" title="Link to this definition"></a></dt>
-<dd><p>Convert the units of a bispectrum descriptor.</p>
-<p>Since these do not really have units this function does nothing yet.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Data for which the units should be converted.</p></li>
-<li><p><strong>in_units</strong> (<em>string</em>) – Units of array.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>converted_array</strong> – Data in MALA units.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>numpy.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mala.descriptors.bispectrum.Bispectrum.data_name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_name</span></span><a class="headerlink" href="#mala.descriptors.bispectrum.Bispectrum.data_name" title="Link to this definition"></a></dt>
-<dd><p>Get a string that describes the target (for e.g. metadata).</p>
-</dd></dl>
-
 </dd></dl>
 
 </section>
@@ -177,8 +145,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="mala.descriptors.atomic_density.html" class="btn btn-neutral float-left" title="atomic_density" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mala.descriptors.descriptor.html" class="btn btn-neutral float-right" title="descriptor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.descriptors.acelib.ace_potential.html" class="btn btn-neutral float-left" title="ace_potential" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.descriptors.acelib.common_utils.html" class="btn btn-neutral float-right" title="common_utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

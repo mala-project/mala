@@ -12,10 +12,17 @@ descriptors
 ===========
 
 
+.. toctree::
+   :maxdepth: 6
+
+   mala.descriptors.acelib
+
+
 
 .. toctree::
    :maxdepth: 6
 
+   mala.descriptors.ace
    mala.descriptors.atomic_density
    mala.descriptors.bispectrum
    mala.descriptors.descriptor
