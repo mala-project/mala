@@ -106,7 +106,6 @@ class TestDescriptorImplementation:
         """Calculate ACE descriptors and check nothing has changed."""
         params = mala.Parameters()
         params.descriptors.descriptor_type = "ACE"
-        params.descriptors.ace_cutoff_factor = 5.8
         params.descriptors.ace_included_expansion_ranks = [1, 2, 3]
         params.descriptors.ace_maximum_l_per_rank = [0, 1, 1]
         params.descriptors.ace_maximum_n_per_rank = [1, 1, 1]
