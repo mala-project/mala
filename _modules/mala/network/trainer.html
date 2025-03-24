@@ -723,7 +723,7 @@
 <span class="sd">            The data set fractions to validate on. Can be &quot;train&quot; or</span>
 <span class="sd">            &quot;validation&quot;. &quot;test&quot; is not supported.</span>
 
-<span class="sd">        metrics : list</span>
+<span class="sd">        metrics : List</span>
 <span class="sd">            List of metrics to calculate. Can be &quot;ldos&quot;, or a number of</span>
 <span class="sd">            error metrics (see Tester class). Most common apart from &quot;ldos&quot;</span>
 <span class="sd">            is arguably &quot;band_energy&quot;.</span>
@@ -809,10 +809,7 @@
                 <span class="c1"># case for, e.g., distributed network trainings), we can</span>
                 <span class="c1"># use a faster (or at least better parallelizing) code</span>
 
-                <span class="k">if</span> <span class="p">(</span>
-                    <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">validation_metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">validation_metrics</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ldos&quot;</span>
-                <span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">metrics</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ldos&quot;</span><span class="p">:</span>
 
                     <span class="n">errors</span><span class="p">[</span><span class="n">data_set_type</span><span class="p">][</span><span class="s2">&quot;ldos&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_validation_error_ldos_only</span><span class="p">(</span>
