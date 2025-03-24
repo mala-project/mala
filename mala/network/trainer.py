@@ -629,7 +629,7 @@ class Trainer(Runner):
             The data set fractions to validate on. Can be "train" or
             "validation". "test" is not supported.
 
-        metrics : list
+        metrics : List
             List of metrics to calculate. Can be "ldos", or a number of
             error metrics (see Tester class). Most common apart from "ldos"
             is arguably "band_energy".
@@ -715,10 +715,7 @@ class Trainer(Runner):
                 # case for, e.g., distributed network trainings), we can
                 # use a faster (or at least better parallelizing) code
 
-                if (
-                    len(self.parameters.validation_metrics) == 1
-                    and self.parameters.validation_metrics[0] == "ldos"
-                ):
+                if len(metrics) == 1 and metrics[0] == "ldos":
 
                     errors[data_set_type]["ldos"] = (
                         self.__calculate_validation_error_ldos_only(
