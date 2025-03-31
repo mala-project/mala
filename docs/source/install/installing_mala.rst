@@ -7,19 +7,15 @@ Prerequisites
 MALA supports any Python version starting from ``3.10.4``. No upper limit on
 Python versions are enforced. The most recent *tested* version is ``3.10.12``.
 
-MALA requires ``torch`` (https://pytorch.org). Most install sites will want to
-use an already installed ``torch`` or install a specific version before
-installing the MALA package itself, for instance
-
-.. code-block:: sh
-
-    pip install --index-url https://download.pytorch.org/whl/cu<cuda_version> torch==<torch_version>
-
-If no ``torch`` is found, we install the latest GPU-enabled version via ``pip
-install torch`` (see ``requirements.txt``).
-
 Installing the Python library
 *****************************
+
+MALA requires ``torch`` (https://pytorch.org). We install the latest
+GPU-enabled version (see ``requirements.txt``),
+unless you have ``torch`` already installed (for example a version that supports
+AMD's ROCm a specific CUDA version).
+
+To install the MALA package
 
 * Download the MALA repository, e.g., with ``git clone git@github.com:mala-project/mala.git``
 * Change into the directory you cloned the repository to
