@@ -363,6 +363,7 @@ class ParametersNetwork(ParametersBase):
             - "Sigmoid"
             - "ReLU"
             - "LeakyReLU" (default)
+            - "Tanh"
 
     layer_activations_include_output_layer : bool
         If False, no activation function is added to the output layer. This
