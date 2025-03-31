@@ -344,25 +344,32 @@ class ParametersNetwork(ParametersBase):
         network. Please note that the input layer is included therein.
         Default: [10,10,0]
 
-    layer_activations : list or str
-        A list of strings detailing the activation functions to be used
-        by the neural network. If a single string is supplied, then this
-        activation function is used for all layers (including the output layer,
-        i.e., an output activation is used!). Otherwise, the activation
-        functions are added layer by layer.
+    layer_activations : list or str or class or nn.Module
+        Detailing the activation functions to be used
+        by the neural network. If a single object is supplied, then this
+        activation function is used for all layers (whether this applies to the
+        output layer is controlled by layer_activations_include_output_layer).
+        Otherwise, the activation functions are added layer by layer.
         Note that no activation function is applied between input layer and
         first hidden layer!
         The items in the list can either be strings, which MALA
-        will map them directly to the correct activation functions or
-        torch.nn.Module objects containing the activation functions directly
-        OR None, in which case no activation function is used. The None
-        can be ommitted at the end, but is useful when layers without
+        will map to the correct activation functions,
+        torch.nn.Module objects, torch.nn.Module classes (which MALA will
+        instantiate) OR None, in which case no activation function is used.
+        The None can be ommitted at the end, but is useful when layers without
         activation functions are to be added in the middle
         Currently supported activation function strings are:
 
             - "Sigmoid"
             - "ReLU"
             - "LeakyReLU" (default)
+
+    layer_activations_include_output_layer : bool
+        If False, no activation function is added to the output layer. This
+        can of course also be done by supplying just the right amount of
+        activation functions and this parameter mainly exist to control the
+        last layer of activation functions in the case of using
+        layer_activations with only a single object.
 
     loss_function_type : string
         Loss function for the neural network
@@ -398,6 +405,7 @@ class ParametersNetwork(ParametersBase):
         self.nn_type = "feed-forward"
         self.layer_sizes = [10, 10, 10]
         self.layer_activations = "LeakyReLU"
+        self.layer_activations_include_output_layer = True
         self.loss_function_type = "mse"
 
         # for LSTM/Gru
