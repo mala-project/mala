@@ -637,12 +637,24 @@ class Runner:
         load_with_mpi=None,
         load_with_gpu=None,
         load_with_ddp=None,
+        activation_list_legacy_load=False,
     ):
         """
         Load a run.
 
         Parameters
         ----------
+        activation_list_legacy_load : bool
+            Enables correct loading of old (<v1.3.1) MALA models, if these
+            models used only a single activation function for all layers.
+            In older MALA versions, the usage of the same activation function
+            across all layers was denoted via a list with only a single
+            element. Beginning with MALA v1.3.1, this is denoted by
+            the layer_activations being a single string rather than a list.
+            If activation_list_legacy_load is set to True, and a list with
+            a single element is found in the stored model, than this list will
+            be transformed into a single string.
+
         run_name : str
             Name under which the run is saved.
 
@@ -738,6 +750,18 @@ class Runner:
             loaded_params = Parameters.load_from_json(
                 loaded_params, force_no_ddp=True
             )
+
+        # In older MALA versions, the usage of the same activation function
+        # across all layers was denoted via a list with only a single element.
+        # This was changed prior to the release of v1.3.1, and a list with
+        # a single element is now interpreted as exactly that. For backwards
+        # compatability the expected behavior can be recovered by extracting
+        # the one and only element of the list.
+        if activation_list_legacy_load:
+            if len(loaded_params.network.layer_activations) == 1:
+                loaded_params.network.layer_activations = (
+                    loaded_params.network.layer_activations[0]
+                )
 
         # MPI has to be specified upon loading, in contrast to GPU.
         if load_with_mpi is not None:

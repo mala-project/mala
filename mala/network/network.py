@@ -94,14 +94,6 @@ class Network(nn.Module):
         # initialize the parent class
         super(Network, self).__init__()
 
-        # Mappings for parsing of the activation layers.
-        self._activation_mappings = {
-            "Sigmoid": nn.Sigmoid,
-            "ReLU": nn.ReLU,
-            "LeakyReLU": nn.LeakyReLU,
-            "Tanh": nn.Tanh,
-        }
-
         # initialize the layers
         self.number_of_layers = len(self.params.layer_sizes) - 1
 
@@ -231,22 +223,27 @@ class FeedForwardNet(Network):
         # We should NOT modify the list itself. This would break the
         # hyperparameter algorithms.
         use_only_one_activation_type = False
-        if len(self.params.layer_activations) == 1:
-            use_only_one_activation_type = True
-        elif len(self.params.layer_activations) < self.number_of_layers:
-            raise Exception("Not enough activation layers provided.")
-        elif len(self.params.layer_activations) > self.number_of_layers:
-            printout(
-                "Too many activation layers provided. The last",
-                str(
+        if isinstance(self.params.layer_activations, list):
+            if len(self.params.layer_activations) > self.number_of_layers:
+
+                number_of_ignored_layers = (
                     len(self.params.layer_activations) - self.number_of_layers
-                ),
-                "activation function(s) will be ignored.",
-                min_verbosity=1,
-            )
+                )
+                number_of_ignored_layers += (
+                    1
+                    if self.params.layer_activations_include_output_layer
+                    is False
+                    else 0
+                )
+                printout(
+                    "Too many activation layers provided. The last",
+                    str(number_of_ignored_layers),
+                    "activation function(s) will be ignored.",
+                    min_verbosity=1,
+                )
 
         # Add the layers.
-        # As this is a feedforward layer we always add linear layers, and then
+        # As this is a feedforward NN we always add linear layers, and then
         # an activation function
         for i in range(0, self.number_of_layers):
             self.layers.append(
@@ -257,21 +254,24 @@ class FeedForwardNet(Network):
                     )
                 )
             )
-            try:
-                if use_only_one_activation_type:
-                    self.layers.append(
-                        self._activation_mappings[
-                            self.params.layer_activations[0]
-                        ]()
-                    )
-                else:
-                    self.layers.append(
-                        self._activation_mappings[
+            if (
+                i < self.number_of_layers - 1
+            ) or self.params.layer_activations_include_output_layer:
+                try:
+                    if isinstance(self.params.layer_activations, list):
+                        self._append_activation_function(
                             self.params.layer_activations[i]
-                        ]()
-                    )
-            except KeyError:
-                raise Exception("Invalid activation type seleceted.")
+                        )
+                    else:
+                        self._append_activation_function(
+                            self.params.layer_activations
+                        )
+
+                except KeyError:
+                    raise Exception("Invalid activation type seleceted.")
+                except IndexError:
+                    # No activation functions left to append at the end.
+                    pass
 
         # Once everything is done, we can move the Network on the target
         # device.
@@ -295,6 +295,30 @@ class FeedForwardNet(Network):
         for layer in self.layers:
             inputs = layer(inputs)
         return inputs
+
+    def _append_activation_function(self, activation_function):
+        """
+        Append an activation function to the network.
+
+        Parameters
+        ----------
+        activation_function : str or nn.Module or class
+            Activation function to be appended.
+        """
+        if activation_function is None:
+            pass
+        elif isinstance(activation_function, str):
+            try:
+                self.layers.append(getattr(torch.nn, activation_function)())
+            except AttributeError:
+                raise Exception(
+                    "Torch does not contain the specified "
+                    "activation function: " + activation_function
+                )
+        elif isinstance(activation_function, nn.Module):
+            self.layers.append(activation_function)
+        elif issubclass(activation_function, nn.Module):
+            self.layers.append(activation_function())
 
 
 class LSTM(Network):
@@ -339,9 +363,7 @@ class LSTM(Network):
                 self.params.num_hidden_layers,
                 batch_first=True,
             )
-        self.activation = self._activation_mappings[
-            self.params.layer_activations[0]
-        ]()
+        self.activation = getattr(torch.nn, self.params.layer_activations[0])()
 
         self.batch_size = None
         # Once everything is done, we can move the Network on the target
@@ -477,9 +499,7 @@ class GRU(LSTM):
                 self.params.num_hidden_layers,
                 batch_first=True,
             )
-        self.activation = self._activation_mappings[
-            self.params.layer_activations[0]
-        ]()
+        self.activation = getattr(torch.nn, self.params.layer_activations[0])()
 
         if params.use_gpu:
             self.to("cuda")

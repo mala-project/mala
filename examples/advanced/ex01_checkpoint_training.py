@@ -22,7 +22,7 @@ def initial_setup():
     parameters.data.data_splitting_type = "by_snapshot"
     parameters.data.input_rescaling_type = "feature-wise-standard"
     parameters.data.output_rescaling_type = "minmax"
-    parameters.network.layer_activations = ["ReLU"]
+    parameters.network.layer_activations = "ReLU"
     parameters.running.max_number_epochs = 9
     parameters.running.mini_batch_size = 8
     parameters.running.learning_rate = 0.00001

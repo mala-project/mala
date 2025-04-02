@@ -140,7 +140,7 @@ class TestTrainingCheckpoint:
         test_parameters.data.output_rescaling_type = "minmax"
 
         # Specify the used activation function.
-        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.network.layer_activations = "ReLU"
 
         # Specify the training parameters.
         test_parameters.running.max_number_epochs = maxepochs
