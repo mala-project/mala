@@ -352,18 +352,18 @@ class ParametersNetwork(ParametersBase):
         Otherwise, the activation functions are added layer by layer.
         Note that no activation function is applied between input layer and
         first hidden layer!
-        The items in the list can either be strings, which MALA
-        will map to the correct activation functions,
-        torch.nn.Module objects, torch.nn.Module classes (which MALA will
-        instantiate) OR None, in which case no activation function is used.
+        The items in the list can either be strings (=names of torch.nn.Module
+        activation functions), which MALA will map to the correct activation
+        functions, torch.nn.Module objects, torch.nn.Module classes (which MALA
+        will instantiate) OR None, in which case no activation function is
+        used.
         The None can be ommitted at the end, but is useful when layers without
-        activation functions are to be added in the middle
-        Currently supported activation function strings are:
-
-            - "Sigmoid"
-            - "ReLU"
-            - "LeakyReLU" (default)
-            - "Tanh"
+        activation functions are to be skipped in the middle.
+        Note that output from the output layer is by default restricted to
+        only have positive values via restrict_targets in the ParameterTargets
+        subclass. This is similar to having a ReLU function as a final
+        activation function and ensures the physicality of the outputs (since
+        the (L)DOS can never be negative).
 
     layer_activations_include_output_layer : bool
         If False, no activation function is added to the output layer. This

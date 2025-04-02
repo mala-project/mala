@@ -94,14 +94,6 @@ class Network(nn.Module):
         # initialize the parent class
         super(Network, self).__init__()
 
-        # Mappings for parsing of the activation layers.
-        self._activation_mappings = {
-            "Sigmoid": nn.Sigmoid,
-            "ReLU": nn.ReLU,
-            "LeakyReLU": nn.LeakyReLU,
-            "Tanh": nn.Tanh,
-        }
-
         # initialize the layers
         self.number_of_layers = len(self.params.layer_sizes) - 1
 
@@ -316,9 +308,13 @@ class FeedForwardNet(Network):
         if activation_function is None:
             pass
         elif isinstance(activation_function, str):
-            self.layers.append(
-                self._activation_mappings[activation_function]()
-            )
+            try:
+                self.layers.append(getattr(torch.nn, activation_function)())
+            except AttributeError:
+                raise Exception(
+                    "Torch does not contain the specified "
+                    "activation function: " + activation_function
+                )
         elif isinstance(activation_function, nn.Module):
             self.layers.append(activation_function)
         elif issubclass(activation_function, nn.Module):
@@ -367,9 +363,7 @@ class LSTM(Network):
                 self.params.num_hidden_layers,
                 batch_first=True,
             )
-        self.activation = self._activation_mappings[
-            self.params.layer_activations[0]
-        ]()
+        self.activation = getattr(torch.nn, self.params.layer_activations[0])()
 
         self.batch_size = None
         # Once everything is done, we can move the Network on the target
@@ -505,9 +499,7 @@ class GRU(LSTM):
                 self.params.num_hidden_layers,
                 batch_first=True,
             )
-        self.activation = self._activation_mappings[
-            self.params.layer_activations[0]
-        ]()
+        self.activation = getattr(torch.nn, self.params.layer_activations[0])()
 
         if params.use_gpu:
             self.to("cuda")
