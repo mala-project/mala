@@ -179,14 +179,6 @@
         <span class="c1"># initialize the parent class</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-        <span class="c1"># Mappings for parsing of the activation layers.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_activation_mappings</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;Sigmoid&quot;</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sigmoid</span><span class="p">,</span>
-            <span class="s2">&quot;ReLU&quot;</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span>
-            <span class="s2">&quot;LeakyReLU&quot;</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">LeakyReLU</span><span class="p">,</span>
-            <span class="s2">&quot;Tanh&quot;</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">,</span>
-        <span class="p">}</span>
-
         <span class="c1"># initialize the layers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_sizes</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
@@ -334,22 +326,27 @@
         <span class="c1"># We should NOT modify the list itself. This would break the</span>
         <span class="c1"># hyperparameter algorithms.</span>
         <span class="n">use_only_one_activation_type</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">use_only_one_activation_type</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Not enough activation layers provided.&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span><span class="p">:</span>
-            <span class="n">printout</span><span class="p">(</span>
-                <span class="s2">&quot;Too many activation layers provided. The last&quot;</span><span class="p">,</span>
-                <span class="nb">str</span><span class="p">(</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span><span class="p">:</span>
+
+                <span class="n">number_of_ignored_layers</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span>
-                <span class="p">),</span>
-                <span class="s2">&quot;activation function(s) will be ignored.&quot;</span><span class="p">,</span>
-                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">number_of_ignored_layers</span> <span class="o">+=</span> <span class="p">(</span>
+                    <span class="mi">1</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations_include_output_layer</span>
+                    <span class="ow">is</span> <span class="kc">False</span>
+                    <span class="k">else</span> <span class="mi">0</span>
+                <span class="p">)</span>
+                <span class="n">printout</span><span class="p">(</span>
+                    <span class="s2">&quot;Too many activation layers provided. The last&quot;</span><span class="p">,</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">number_of_ignored_layers</span><span class="p">),</span>
+                    <span class="s2">&quot;activation function(s) will be ignored.&quot;</span><span class="p">,</span>
+                    <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="p">)</span>
 
         <span class="c1"># Add the layers.</span>
-        <span class="c1"># As this is a feedforward layer we always add linear layers, and then</span>
+        <span class="c1"># As this is a feedforward NN we always add linear layers, and then</span>
         <span class="c1"># an activation function</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -360,21 +357,24 @@
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">use_only_one_activation_type</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_activation_mappings</span><span class="p">[</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                        <span class="p">]()</span>
-                    <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_activation_mappings</span><span class="p">[</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">i</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations_include_output_layer</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_append_activation_function</span><span class="p">(</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                        <span class="p">]()</span>
-                    <span class="p">)</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid activation type seleceted.&quot;</span><span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_append_activation_function</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span>
+                        <span class="p">)</span>
+
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid activation type seleceted.&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                    <span class="c1"># No activation functions left to append at the end.</span>
+                    <span class="k">pass</span>
 
         <span class="c1"># Once everything is done, we can move the Network on the target</span>
         <span class="c1"># device.</span>
@@ -400,7 +400,31 @@
         <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
             <span class="n">inputs</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">inputs</span></div>
-</div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_append_activation_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">activation_function</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Append an activation function to the network.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        activation_function : str or nn.Module or class</span>
+<span class="sd">            Activation function to be appended.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">activation_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">activation_function</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="p">,</span> <span class="n">activation_function</span><span class="p">)())</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Torch does not contain the specified &quot;</span>
+                    <span class="s2">&quot;activation function: &quot;</span> <span class="o">+</span> <span class="n">activation_function</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">activation_function</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">activation_function</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">activation_function</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">activation_function</span><span class="p">())</span></div>
 
 
 
@@ -448,9 +472,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">num_hidden_layers</span><span class="p">,</span>
                 <span class="n">batch_first</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation_mappings</span><span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="p">]()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">[</span><span class="mi">0</span><span class="p">])()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># Once everything is done, we can move the Network on the target</span>
@@ -595,9 +617,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">num_hidden_layers</span><span class="p">,</span>
                 <span class="n">batch_first</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation_mappings</span><span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="p">]()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">[</span><span class="mi">0</span><span class="p">])()</span>
 
         <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">use_gpu</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>

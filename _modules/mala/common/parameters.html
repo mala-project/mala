@@ -441,16 +441,33 @@
 <span class="sd">        network. Please note that the input layer is included therein.</span>
 <span class="sd">        Default: [10,10,0]</span>
 
-<span class="sd">    layer_activations : list</span>
-<span class="sd">        A list of strings detailing the activation functions to be used</span>
-<span class="sd">        by the neural network. If the dimension of layer_activations is</span>
-<span class="sd">        smaller than the dimension of layer_sizes-1, than the first entry</span>
-<span class="sd">        is used for all layers.</span>
-<span class="sd">        Currently supported activation functions are:</span>
+<span class="sd">    layer_activations : list or str or class or nn.Module</span>
+<span class="sd">        Detailing the activation functions to be used</span>
+<span class="sd">        by the neural network. If a single object is supplied, then this</span>
+<span class="sd">        activation function is used for all layers (whether this applies to the</span>
+<span class="sd">        output layer is controlled by layer_activations_include_output_layer).</span>
+<span class="sd">        Otherwise, the activation functions are added layer by layer.</span>
+<span class="sd">        Note that no activation function is applied between input layer and</span>
+<span class="sd">        first hidden layer!</span>
+<span class="sd">        The items in the list can either be strings (=names of torch.nn.Module</span>
+<span class="sd">        activation functions), which MALA will map to the correct activation</span>
+<span class="sd">        functions, torch.nn.Module objects, torch.nn.Module classes (which MALA</span>
+<span class="sd">        will instantiate) OR None, in which case no activation function is</span>
+<span class="sd">        used.</span>
+<span class="sd">        The None can be ommitted at the end, but is useful when layers without</span>
+<span class="sd">        activation functions are to be skipped in the middle.</span>
+<span class="sd">        Note that output from the output layer is by default restricted to</span>
+<span class="sd">        only have positive values via restrict_targets in the ParameterTargets</span>
+<span class="sd">        subclass. This is similar to having a ReLU function as a final</span>
+<span class="sd">        activation function and ensures the physicality of the outputs (since</span>
+<span class="sd">        the (L)DOS can never be negative).</span>
 
-<span class="sd">            - Sigmoid (default)</span>
-<span class="sd">            - ReLU</span>
-<span class="sd">            - LeakyReLU</span>
+<span class="sd">    layer_activations_include_output_layer : bool</span>
+<span class="sd">        If False, no activation function is added to the output layer. This</span>
+<span class="sd">        can of course also be done by supplying just the right amount of</span>
+<span class="sd">        activation functions and this parameter mainly exist to control the</span>
+<span class="sd">        last layer of activation functions in the case of using</span>
+<span class="sd">        layer_activations with only a single object.</span>
 
 <span class="sd">    loss_function_type : string</span>
 <span class="sd">        Loss function for the neural network</span>
@@ -485,7 +502,8 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersNetwork</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nn_type</span> <span class="o">=</span> <span class="s2">&quot;feed-forward&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layer_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layer_activations</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Sigmoid&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layer_activations</span> <span class="o">=</span> <span class="s2">&quot;LeakyReLU&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layer_activations_include_output_layer</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_function_type</span> <span class="o">=</span> <span class="s2">&quot;mse&quot;</span>
 
         <span class="c1"># for LSTM/Gru</span>

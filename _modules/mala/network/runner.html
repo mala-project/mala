@@ -727,12 +727,24 @@
         <span class="n">load_with_mpi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">load_with_gpu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">load_with_ddp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">activation_list_legacy_load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a run.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
+<span class="sd">        activation_list_legacy_load : bool</span>
+<span class="sd">            Enables correct loading of old (&lt;v1.3.1) MALA models, if these</span>
+<span class="sd">            models used only a single activation function for all layers.</span>
+<span class="sd">            In older MALA versions, the usage of the same activation function</span>
+<span class="sd">            across all layers was denoted via a list with only a single</span>
+<span class="sd">            element. Beginning with MALA v1.3.1, this is denoted by</span>
+<span class="sd">            the layer_activations being a single string rather than a list.</span>
+<span class="sd">            If activation_list_legacy_load is set to True, and a list with</span>
+<span class="sd">            a single element is found in the stored model, than this list will</span>
+<span class="sd">            be transformed into a single string.</span>
+
 <span class="sd">        run_name : str</span>
 <span class="sd">            Name under which the run is saved.</span>
 
@@ -828,6 +840,18 @@
             <span class="n">loaded_params</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">load_from_json</span><span class="p">(</span>
                 <span class="n">loaded_params</span><span class="p">,</span> <span class="n">force_no_ddp</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
+
+        <span class="c1"># In older MALA versions, the usage of the same activation function</span>
+        <span class="c1"># across all layers was denoted via a list with only a single element.</span>
+        <span class="c1"># This was changed prior to the release of v1.3.1, and a list with</span>
+        <span class="c1"># a single element is now interpreted as exactly that. For backwards</span>
+        <span class="c1"># compatability the expected behavior can be recovered by extracting</span>
+        <span class="c1"># the one and only element of the list.</span>
+        <span class="k">if</span> <span class="n">activation_list_legacy_load</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">loaded_params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">loaded_params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_activations</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">loaded_params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">)</span>
 
         <span class="c1"># MPI has to be specified upon loading, in contrast to GPU.</span>
         <span class="k">if</span> <span class="n">load_with_mpi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
