@@ -101,14 +101,14 @@
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
 <p>MALA supports any Python version starting from <code class="docutils literal notranslate"><span class="pre">3.10.4</span></code>. No upper limit on
 Python versions are enforced. The most recent <em>tested</em> version is <code class="docutils literal notranslate"><span class="pre">3.10.12</span></code>.</p>
-<p>MALA requires <code class="docutils literal notranslate"><span class="pre">torch</span></code> in order to function. As the installation of torch
-depends highly on the architecture you are using, <code class="docutils literal notranslate"><span class="pre">torch</span></code> will not
-automatically be installed alongside MALA. Please obtain a suitable version
-of <code class="docutils literal notranslate"><span class="pre">torch</span></code> from the <a class="reference external" href="https://pytorch.org/">official website</a> before
-continuing.</p>
 </section>
 <section id="installing-the-python-library">
 <h2>Installing the Python library<a class="headerlink" href="#installing-the-python-library" title="Link to this heading"></a></h2>
+<p>MALA requires <code class="docutils literal notranslate"><span class="pre">torch</span></code> (<a class="reference external" href="https://pytorch.org">https://pytorch.org</a>). We install the latest
+GPU-enabled version (see <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code>),
+unless you have <code class="docutils literal notranslate"><span class="pre">torch</span></code> already installed (for example a version that supports
+AMD’s ROCm a specific CUDA version).</p>
+<p>To install the MALA package</p>
 <ul class="simple">
 <li><p>Download the MALA repository, e.g., with <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">git&#64;github.com:mala-project/mala.git</span></code></p></li>
 <li><p>Change into the directory you cloned the repository to</p></li>
@@ -120,6 +120,7 @@ continuing.</p>
 the version and thus needed for large code development (developers)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">opt</span></code>: Installs <code class="docutils literal notranslate"><span class="pre">oapackage</span></code>, so that the orthogonal array
 method may be used for large scale hyperparameter optimization (advanced users)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mpi</span></code>: Installs <code class="docutils literal notranslate"><span class="pre">mpi4py</span></code> for MPI parallelization (advanced users)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">test</span></code>: Installs <code class="docutils literal notranslate"><span class="pre">pytest</span></code> which allows users to test the code (developers)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">doc</span></code>: Installs all dependencies for building the documentary locally (developers)</p></li>
 </ul>
