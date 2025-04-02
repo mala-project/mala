@@ -17,6 +17,7 @@ with open("LICENSE") as f:
 extras = {
     "dev": ["bump2version"],
     "opt": ["oapackage", "scikit-learn"],
+    "mpi": ["mpi4py"],
     "test": ["pytest", "pytest-cov"],
     "doc": open("docs/requirements.txt").read().splitlines(),
     "experimental": ["asap3", "dftpy", "minterpy"],
