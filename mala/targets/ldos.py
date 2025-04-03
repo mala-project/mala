@@ -1611,39 +1611,24 @@ class LDOS(Target):
             #################################
 
             if self.input_data_derivative is not None:
-                # OLD: This is how the code was until 14.03.2025.
-                # I think it is not yet correct - d_E_d_d is still scaled,
-                # and d_d_d_B is never unscaled.
-                if False:
-                    self.output_data_torch.backward(torch.from_numpy(d_E_d_d))
-                    d_d_d_B = self.input_data_derivative.grad
-                else:
-                    # I think this is how it is supposed to read:
+                # Scale energy derivative.
+                d_E_d_d = torch.from_numpy(d_E_d_d)
+                d_E_d_d = self.output_data_scaler.transform_backpropagation(
+                    d_E_d_d
+                )
 
-                    d_E_d_d = torch.from_numpy(d_E_d_d)
-                    print(d_E_d_d[0])
-                    d_E_d_d = self.output_data_scaler.transform_gradient(
-                        d_E_d_d
+                # Backprop it through the network.
+                self.output_data_torch.backward(d_E_d_d)
+
+                # Get new energy derivative and return it.
+                d_E_d_B = self.input_data_derivative.grad
+                d_E_d_B = (
+                    self.input_data_scaler.inverse_transform_backpropagation(
+                        d_E_d_B
                     )
-                    print(d_E_d_d[0])
-                    # self.output_data_torch.backward(
-                    #     self.output_data_scaler.transform_gradient(
-                    #         torch.from_numpy(d_E_d_d)
-                    #     )
-                    # )
-                    self.output_data_torch.backward(d_E_d_d)
+                )
 
-                    # d_d_d_B = self.input_data_scaler.inverse_transform(
-                    #     self.input_data_derivative.grad
-                    # )
-                    d_d_d_B = self.input_data_derivative.grad
-                    d_d_d_B = (
-                        self.input_data_scaler.inverse_transform_gradient(
-                            d_d_d_B
-                        )
-                    )
-
-                return -1.0 * d_d_d_B.detach().numpy().astype(np.float64)
+                return -1.0 * d_E_d_B.detach().numpy().astype(np.float64)
 
             else:
                 return d_E_d_d

@@ -437,9 +437,9 @@ class DataScaler:
 
         return scaled
 
-    def transform_gradient(self, unscaled, copy=False):
+    def transform_backpropagation(self, unscaled, copy=False):
         """
-        Transform data from unscaled to scaled.
+        Transform data from unscaled to scaled during backpropagation.
 
         Unscaled means real world data, scaled means data as is used in
         the network. Data is transformed in-place.
@@ -510,7 +510,7 @@ class DataScaler:
                 ##########################
 
                 if self.scale_standard:
-                    scaled /= self.total_std
+                    scaled *= self.total_std
                     scaled.nan_to_num_(
                         nan=0.0
                     )  # account for possible 0 valued ACE descriptors
@@ -611,9 +611,11 @@ class DataScaler:
         else:
             return unscaled
 
-    def inverse_transform_gradient(self, scaled, copy=False, as_numpy=False):
+    def inverse_transform_backpropagation(
+        self, scaled, copy=False, as_numpy=False
+    ):
         """
-        Transform data from scaled to unscaled.
+        Transform data from scaled to unscaled during backpropagation.
 
         Unscaled means real world data, scaled means data as is used in
         the network.
