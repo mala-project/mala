@@ -1614,19 +1614,34 @@ class LDOS(Target):
                 # OLD: This is how the code was until 14.03.2025.
                 # I think it is not yet correct - d_E_d_d is still scaled,
                 # and d_d_d_B is never unscaled.
-                # self.output_data_torch.backward(torch.from_numpy(d_E_d_d))
-                # d_d_d_B = self.input_data_derivative.grad
-
-                # I think this is how it is supposed to read:
-                self.output_data_torch.backward(
-                    self.output_data_scaler.transform(
-                        torch.from_numpy(d_E_d_d)
+                if False:
+                    self.output_data_torch.backward(torch.from_numpy(d_E_d_d))
+                    d_d_d_B = self.input_data_derivative.grad
+                else:
+                    print("Before", torch.from_numpy(d_E_d_d)[0])
+                    print(
+                        "After",
+                        self.output_data_scaler.transform(
+                            torch.from_numpy(d_E_d_d)
+                        )[0],
                     )
-                )
-                d_d_d_B = self.input_data_scaler.inverse_transform(
-                    self.input_data_derivative.grad
-                )
-                return d_d_d_B
+
+                    # I think this is how it is supposed to read:
+                    self.output_data_torch.backward(
+                        self.output_data_scaler.transform(
+                            torch.from_numpy(d_E_d_d)
+                        )
+                    )
+
+                    # d_d_d_B = self.input_data_scaler.inverse_transform(
+                    #     self.input_data_derivative.grad
+                    # )
+                    d_d_d_B = self.input_data_derivative.grad
+                    print("Before2", d_d_d_B[0])
+                    d_d_d_B = self.input_data_scaler.inverse_transform(d_d_d_B)
+                    print("After2", d_d_d_B[0])
+
+                return d_d_d_B.detach().numpy().astype(np.float64)
 
             else:
                 return d_E_d_d
