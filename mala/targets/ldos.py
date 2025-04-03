@@ -1618,30 +1618,32 @@ class LDOS(Target):
                     self.output_data_torch.backward(torch.from_numpy(d_E_d_d))
                     d_d_d_B = self.input_data_derivative.grad
                 else:
-                    print("Before", torch.from_numpy(d_E_d_d)[0])
-                    print(
-                        "After",
-                        self.output_data_scaler.transform(
-                            torch.from_numpy(d_E_d_d)
-                        )[0],
-                    )
-
                     # I think this is how it is supposed to read:
-                    self.output_data_torch.backward(
-                        self.output_data_scaler.transform(
-                            torch.from_numpy(d_E_d_d)
-                        )
+
+                    d_E_d_d = torch.from_numpy(d_E_d_d)
+                    print(d_E_d_d[0])
+                    d_E_d_d = self.output_data_scaler.transform_gradient(
+                        d_E_d_d
                     )
+                    print(d_E_d_d[0])
+                    # self.output_data_torch.backward(
+                    #     self.output_data_scaler.transform_gradient(
+                    #         torch.from_numpy(d_E_d_d)
+                    #     )
+                    # )
+                    self.output_data_torch.backward(d_E_d_d)
 
                     # d_d_d_B = self.input_data_scaler.inverse_transform(
                     #     self.input_data_derivative.grad
                     # )
                     d_d_d_B = self.input_data_derivative.grad
-                    print("Before2", d_d_d_B[0])
-                    d_d_d_B = self.input_data_scaler.inverse_transform(d_d_d_B)
-                    print("After2", d_d_d_B[0])
+                    d_d_d_B = (
+                        self.input_data_scaler.inverse_transform_gradient(
+                            d_d_d_B
+                        )
+                    )
 
-                return d_d_d_B.detach().numpy().astype(np.float64)
+                return -1.0 * d_d_d_B.detach().numpy().astype(np.float64)
 
             else:
                 return d_E_d_d

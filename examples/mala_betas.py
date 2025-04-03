@@ -21,6 +21,9 @@ def run_prediction(backprop=False, atoms=None, pass_descriptors=None):
     """
     This just runs a regular MALA prediction for a two-atom Beryllium model.
     """
+    # parameters, network, data_handler, predictor = mala.Predictor.load_run(
+    #     "Be_ACE_model_NOSCALING"
+    # )
     parameters, network, data_handler, predictor = mala.Predictor.load_run(
         "Be_ACE_model"
     )
