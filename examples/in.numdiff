@@ -7,8 +7,8 @@ variable         ngridz equal 27 # how many grid points
 variable         nthermo equal 1 #frequency for printing thermodynamic data
 variable         nrep index 3 # number of repeated unit cells for Ca
 variable         a index 4.1 # fake lattice constant
-variable         fdelta equal 1.0e-6
-variable         fdeltam equal -2.0e-6
+variable         fdelta equal 5.0e-7
+variable         fdeltam equal -1.0e-6
 
 units            metal
 atom_modify      map hash
