@@ -116,7 +116,7 @@ def pre_force_callback(lmp):
         fingerprint_length,
         True,
     )
-    print("ace descs", ace_descriptors_np[1][1][1])
+    print("ace descs", ace_descriptors_np[0][0][0])
     print("positions", atoms.positions)
     ldos, ldos_calculator, parameters, predictor = run_prediction(
         backprop=True, atoms=atoms, pass_descriptors=pass_descriptors
@@ -136,7 +136,7 @@ def pre_force_callback(lmp):
     mala_test = mala_forces.reshape(27, 18, 18, feature_length)
     # mala_test = mala_forces.reshape(18,18,27,feature_length)
     mala_test = mala_test.transpose([2, 1, 0, 3])
-    print("mala_betas", mala_test[1][1][1])
+    print("mala_betas", mala_test[0][0][0])
     print(
         "mala force coeffs info:",
         mala_forces.shape,

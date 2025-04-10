@@ -1618,10 +1618,10 @@ class LDOS(Target):
                 )
 
                 # Backprop it through the network.
-                self.output_data_torch.backward(d_E_d_d)
+                self.output_data_torch.backward(d_E_d_d, retain_graph=True)
 
                 # Get new energy derivative and return it.
-                d_E_d_B = self.input_data_derivative.grad
+                d_E_d_B = self.input_data_derivative.grad.clone()
                 d_E_d_B = (
                     self.input_data_scaler.inverse_transform_backpropagation(
                         d_E_d_B

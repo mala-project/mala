@@ -78,7 +78,12 @@ class Predictor(Runner):
         )
 
     def predict_for_atoms(
-        self, atoms, gather_ldos=False, temperature=None, save_grads=False, pass_descriptors=None
+        self,
+        atoms,
+        gather_ldos=False,
+        temperature=None,
+        save_grads=False,
+        pass_descriptors=None,
     ):
         """
         Get predicted LDOS for an atomic configuration.
@@ -134,7 +139,6 @@ class Predictor(Runner):
 
         # Calculate descriptors.
 
-
         if pass_descriptors is None:
             time_before = perf_counter()
             snap_descriptors, local_size = (
@@ -149,9 +153,13 @@ class Predictor(Runner):
                 min_verbosity=2,
             )
             feature_length = self.data.descriptor_calculator.feature_size
-            descs_with_xyz = self.data.descriptor_calculator.descriptors_contain_xyz
+            descs_with_xyz = (
+                self.data.descriptor_calculator.descriptors_contain_xyz
+            )
         else:
-            snap_descriptors, local_size, feature_length, descs_with_xyz = pass_descriptors
+            snap_descriptors, local_size, feature_length, descs_with_xyz = (
+                pass_descriptors
+            )
         # Provide info from current snapshot to target calculator.
         self.data.target_calculator.read_additional_calculation_data(
             [atoms, self.data.grid_dimension], "atoms+grid"
@@ -201,7 +209,7 @@ class Predictor(Runner):
                 )
 
         if get_rank() == 0:
-            #if self.data.descriptor_calculator.descriptors_contain_xyz:
+            # if self.data.descriptor_calculator.descriptors_contain_xyz:
             if descs_with_xyz:
                 snap_descriptors = snap_descriptors[:, :, :, 3:]
                 feature_length -= 3
@@ -214,8 +222,9 @@ class Predictor(Runner):
             if save_grads is True:
                 self.input_data = snap_descriptors
                 self.input_data.requires_grad = True
-                return self._forward_snap_descriptors(snap_descriptors,
-                                                      save_torch_outputs=True)
+                return self._forward_snap_descriptors(
+                    snap_descriptors, save_torch_outputs=True
+                )
             else:
                 return self._forward_snap_descriptors(snap_descriptors)
 
