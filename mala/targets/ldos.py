@@ -1628,7 +1628,7 @@ class LDOS(Target):
                     )
                 )
 
-                return -1.0 * d_E_d_B.detach().numpy().astype(np.float64)
+                return d_E_d_B.detach().numpy().astype(np.float64)
 
             else:
                 return d_E_d_d
