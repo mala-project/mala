@@ -4,6 +4,7 @@ from ase.io import read
 import mala
 from mala import printout
 import numpy as np
+import torch
 
 from mala.datahandling.data_repo import data_repo_path
 
@@ -166,32 +167,237 @@ def hartree_contribution():
         print(mala_forces[point, :] / np.array(numerical_forces))
 
 
-def backpropagation_pieces():
-    """
-    Check the individual parts of the backpropagation.
-    """
-    # Only compute a specific part of the forces.
-    ldos_calculator: mala.LDOS
+def check_input_gradient_scaling():
+    # Load a model, set paramters.
     predictor: mala.Predictor
-    ldos, ldos_calculator, parameters, predictor = run_prediction(
-        backprop=True
+    parameters: mala.Parameters
+    parameters, network, data_handler, predictor = mala.Predictor.load_run(
+        "Be_ACE_model_FULLSCALING"
     )
-    # For easier testing, can also be commented out.
-    ldos_calculator.debug_forces_flag = "band_energy"
+    parameters.targets.target_type = "LDOS"
+    parameters.targets.ldos_gridsize = 11
+    parameters.targets.ldos_gridspacing_ev = 2.5
+    parameters.targets.ldos_gridoffset_ev = -5
+    parameters.targets.restrict_targets = None
+    parameters.descriptors.descriptors_contain_xyz = False
+    parameters.descriptors.descriptor_type = "ACE"
 
-    # This next line can later be part of the prediction itself within the
-    # Predictor class.
-    ldos_calculator.setup_for_forces(predictor)
+    # Compute descriptors, only do further computations for one point.
+    atoms1 = read("/home/fiedlerl/data/mala_data_repo/Be2/Be_snapshot1.out")
+    descriptors, ngrid = (
+        predictor.data.descriptor_calculator.calculate_from_atoms(
+            atoms1, [18, 18, 27]
+        )
+    )
+    snap_descriptors = torch.from_numpy(np.array([descriptors[0, 0, 0]]))
+    snap_descriptors_work = snap_descriptors.clone()
+    snap_descriptors = predictor.data.input_data_scaler.transform(
+        snap_descriptors
+    )
+    snap_descriptors.requires_grad = True
 
-    # Performs the calculation internally.
-    mala_forces = ldos_calculator.atomic_forces
+    # Forward pass through the network.
+    ldos = network(snap_descriptors)
+    d_d_d_B = []
 
-    # Should be 8748, 91
-    print("FORCE TEST: Backpropagation machinery.")
-    print(mala_forces.size())
+    # Compute "gradient". This is ACTUALLY the Jacobian matrix, i.e., the one
+    # we can compare with finite differences.
+    for i in range(0, 11):
+        if snap_descriptors.grad is not None:
+            snap_descriptors.grad.zero_()
+
+        ldos[0, i].backward(retain_graph=True)
+        # d_d_d_B = snap_descriptors.grad.clone()
+        d_d_d_B.append(
+            predictor.data.input_data_scaler.inverse_transform_backpropagation(
+                snap_descriptors.grad.clone()
+            )
+        )
+
+    # Just for debugging purposes, not part of the actual test.
+    # if False:
+    #     # This would be the direct application of the autograd.
+    #     # Autograd computes the vector Jacobian product, see
+    #     # https://pytorch.org/tutorials/beginner/blitz/autograd_tutorial.html
+    #     # Here: compare same_as_sum with d_d_d_B_sum.
+    #     ldos = network(snap_descriptors)
+    #     snap_descriptors.grad.zero_()
+    #     # print(ldos / ldos)
+    #     ldos.backward(ldos / ldos, retain_graph=True)
+    #     same_as_sum = (
+    #         predictor.data.input_data_scaler.inverse_transform_backpropagation(
+    #             snap_descriptors.grad.clone()
+    #         )
+    #     )
+    #     d_d_d_B_sum = d_d_d_B[0]
+    #     for i in range(1, 11):
+    #         d_d_d_B_sum += d_d_d_B[i]
+
+    with torch.no_grad():
+        # In case we want to compare different levels of finite differences.
+        for diff in [
+            # 5.0e-1,
+            # 5.0e-2,
+            # 5.0e-3,
+            5.0e-4,
+            # 5.0e-5,
+            # 5.0e-6,
+        ]:
+
+            # Compute finite differences. j theoretically goes up to
+            # 36, but for a simple check this is completely enough.
+            for j in range(0, 5):
+                snap_descriptors_work[0, j] += diff
+                descriptors_scaled1 = snap_descriptors_work.clone()
+                ldos_1 = network(
+                    predictor.data.input_data_scaler.transform(
+                        descriptors_scaled1
+                    )
+                ).clone()
+
+                snap_descriptors_work[0, j] -= 2.0 * diff
+                descriptors_scaled2 = snap_descriptors_work.clone()
+                ldos_2 = network(
+                    predictor.data.input_data_scaler.transform(
+                        descriptors_scaled2
+                    )
+                ).clone()
+
+                # Comparison - we only compare the first component of the
+                # LDOS for brevity, but this works for all components.
+                snap_descriptors_work[0, j] += diff
+                force = -1.0 * ((ldos_2[0, 0] - ldos_1[0, 0]) / (2 * diff))
+                print(
+                    diff,
+                    force.double().numpy(),
+                    d_d_d_B[0][0, j],
+                    force.double().numpy() / d_d_d_B[0][0, j],
+                )
 
 
+def check_output_gradient_scaling():
+    # Load a model, set paramters.
+    predictor: mala.Predictor
+    parameters: mala.Parameters
+    parameters, network, data_handler, predictor = mala.Predictor.load_run(
+        "Be_ACE_model_FULLSCALING"
+    )
+    parameters.targets.target_type = "LDOS"
+    parameters.targets.ldos_gridsize = 11
+    parameters.targets.ldos_gridspacing_ev = 2.5
+    parameters.targets.ldos_gridoffset_ev = -5
+    parameters.targets.restrict_targets = None
+    parameters.descriptors.descriptors_contain_xyz = False
+    parameters.descriptors.descriptor_type = "ACE"
+
+    # Compute descriptors, only do further computations for one point.
+    atoms1 = read("/home/fiedlerl/data/mala_data_repo/Be2/Be_snapshot1.out")
+    descriptors, ngrid = (
+        predictor.data.descriptor_calculator.calculate_from_atoms(
+            atoms1, [18, 18, 27]
+        )
+    )
+    snap_descriptors = torch.from_numpy(np.array([descriptors[0, 0, 0]]))
+    snap_descriptors_work = snap_descriptors.clone()
+    snap_descriptors = predictor.data.input_data_scaler.transform(
+        snap_descriptors
+    )
+    snap_descriptors.requires_grad = True
+
+    # Forward pass through the network.
+    # ldos = network(snap_descriptors)
+    # d_d_d_B = []
+
+    # Compute "gradient". This is ACTUALLY the Jacobian matrix, i.e., the one
+    # we can compare with finite differences.
+    # for i in range(0, 11):
+    #     if snap_descriptors.grad is not None:
+    #         snap_descriptors.grad.zero_()
+    #
+    #     ldos[0, i].backward(retain_graph=True)
+    #     # d_d_d_B = snap_descriptors.grad.clone()
+    #     d_d_d_B.append(
+    #         predictor.data.input_data_scaler.inverse_transform_backpropagation(
+    #             snap_descriptors.grad.clone()
+    #         )
+    #     )
+
+    if True:
+        # This would be the direct application of the autograd.
+        # Autograd computes the vector Jacobian product, see
+        # https://pytorch.org/tutorials/beginner/blitz/autograd_tutorial.html
+        ldos = network(snap_descriptors)
+        ldos_unscaled = predictor.data.output_data_scaler.inverse_transform(
+            ldos, copy=True
+        )
+        if snap_descriptors.grad is not None:
+            snap_descriptors.grad.zero_()
+        ldos.backward(
+            predictor.data.output_data_scaler.transform_backpropagation(
+                2 * ldos_unscaled
+            ),
+            retain_graph=True,
+        )
+        d_d_d_B = (
+            predictor.data.input_data_scaler.inverse_transform_backpropagation(
+                snap_descriptors.grad.clone()
+            )
+        )
+
+    with torch.no_grad():
+        # In case we want to compare different levels of finite differences.
+        for diff in [
+            # 5.0e-1,
+            # 5.0e-2,
+            # 5.0e-3,
+            5.0e-4,
+            # 5.0e-5,
+            # 5.0e-6,
+        ]:
+
+            # Compute finite differences. j theoretically goes up to
+            # 36, but for a simple check this is completely enough.
+            for j in range(0, 5):
+                snap_descriptors_work[0, j] += diff
+                descriptors_scaled1 = snap_descriptors_work.clone()
+                ldos_1 = predictor.data.output_data_scaler.inverse_transform(
+                    network(
+                        predictor.data.input_data_scaler.transform(
+                            descriptors_scaled1
+                        )
+                    ).clone()
+                )
+                energy_1 = 0
+                for i in range(0, 11):
+                    energy_1 += ldos_1[0, i] * ldos_1[0, i]
+
+                snap_descriptors_work[0, j] -= 2.0 * diff
+                descriptors_scaled2 = snap_descriptors_work.clone()
+                ldos_2 = predictor.data.output_data_scaler.inverse_transform(
+                    network(
+                        predictor.data.input_data_scaler.transform(
+                            descriptors_scaled2
+                        )
+                    ).clone()
+                )
+                energy_2 = 0
+                for i in range(0, 11):
+                    energy_2 += ldos_2[0, i] * ldos_2[0, i]
+
+                # Comparison - we only compare the first component of the
+                # LDOS for brevity, but this works for all components.
+                snap_descriptors_work[0, j] += diff
+                force = -1.0 * ((energy_2 - energy_1) / (2 * diff))
+                print(
+                    diff,
+                    force.double().numpy(),
+                    d_d_d_B[0, j],
+                    force.double().numpy() / d_d_d_B[0, j],
+                )
+
+
+# check_input_gradient_scaling()
+# check_output_gradient_scaling()
 # band_energy_contribution()
 # entropy_contribution()
 # hartree_contribution()
-backpropagation_pieces()
