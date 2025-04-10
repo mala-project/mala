@@ -396,8 +396,105 @@ def check_output_gradient_scaling():
                 )
 
 
+def check_backpropagation():
+    predictor: mala.Predictor
+    parameters: mala.Parameters
+    parameters, network, data_handler, predictor = mala.Predictor.load_run(
+        "Be_ACE_model_FULLSCALING"
+    )
+    parameters.targets.target_type = "LDOS"
+    parameters.targets.ldos_gridsize = 11
+    parameters.targets.ldos_gridspacing_ev = 2.5
+    parameters.targets.ldos_gridoffset_ev = -5
+    parameters.targets.restrict_targets = None
+    parameters.descriptors.descriptors_contain_xyz = False
+    parameters.descriptors.descriptor_type = "ACE"
+
+    # Compute descriptors, only do further computations for one point.
+    atoms1 = read("/home/fiedlerl/data/mala_data_repo/Be2/Be_snapshot1.out")
+    descriptors, ngrid = (
+        predictor.data.descriptor_calculator.calculate_from_atoms(
+            atoms1, [18, 18, 27]
+        )
+    )
+    snap_descriptors = torch.from_numpy(
+        descriptors.reshape([ngrid, descriptors.shape[-1]])
+    )
+    snap_descriptors_work = snap_descriptors.clone()
+
+    ldos = predictor.predict_for_atoms(
+        atoms1,
+        save_grads=True,
+        pass_descriptors=[
+            descriptors,
+            ngrid,
+            descriptors.shape[-1],
+            parameters.descriptors.descriptors_contain_xyz,
+        ],
+    )
+    ldos_calculator: mala.LDOS = predictor.target_calculator
+    ldos_calculator.read_from_array(ldos)
+    ldos_calculator.read_additional_calculation_data(
+        os.path.join(data_path, "Be_snapshot1.out")
+    )
+    ldos_calculator.debug_forces_flag = "band_energy"
+    ldos_calculator.setup_for_forces(predictor)
+    mala_forces = ldos_calculator.atomic_forces.copy()
+
+    for point in [0, 2000, 4000]:
+        for diff in [
+            # 5.0e-1,
+            # 5.0e-2,
+            # 5.0e-3,
+            5.0e-4,
+            # 5.0e-5,
+            # 5.0e-6,
+        ]:
+
+            # Compute finite differences. j theoretically goes up to
+            # 36, but for a simple check this is completely enough.
+            for j in range(0, 5):
+                snap_descriptors_work[point, j] += diff
+                descriptors_scaled1 = snap_descriptors_work.clone()
+                ldos_1 = predictor.data.output_data_scaler.inverse_transform(
+                    network(
+                        predictor.data.input_data_scaler.transform(
+                            descriptors_scaled1
+                        )
+                    ),
+                    as_numpy=True,
+                ).copy()
+                ldos_calculator.read_from_array(ldos_1)
+                energy_1 = ldos_calculator.band_energy
+
+                snap_descriptors_work[point, j] -= 2.0 * diff
+                descriptors_scaled2 = snap_descriptors_work.clone()
+                ldos_2 = predictor.data.output_data_scaler.inverse_transform(
+                    network(
+                        predictor.data.input_data_scaler.transform(
+                            descriptors_scaled2
+                        )
+                    ),
+                    as_numpy=True,
+                ).copy()
+                ldos_calculator.read_from_array(ldos_2)
+                energy_2 = ldos_calculator.band_energy
+
+                # Comparison - we only compare the first component of the
+                # LDOS for brevity, but this works for all components.
+                snap_descriptors_work[point, j] += diff
+                force = -1.0 * ((energy_2 - energy_1) / (2 * diff))
+                print(
+                    diff,
+                    force,
+                    mala_forces[point, j],
+                    force / mala_forces[point, j],
+                )
+
+
 # check_input_gradient_scaling()
 # check_output_gradient_scaling()
+check_backpropagation()
 # band_energy_contribution()
 # entropy_contribution()
 # hartree_contribution()
