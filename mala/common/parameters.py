@@ -41,6 +41,7 @@ class ParametersBase(JSONSerializable):
             "openpmd_granularity": 1,
             "lammps": True,
             "atomic_density_formula": False,
+            "manual_seed": 0,
         }
         pass
 
@@ -161,6 +162,17 @@ class ParametersBase(JSONSerializable):
         self._configuration["atomic_density_formula"] = (
             new_atomic_density_formula
         )
+
+    def _update_manual_seed(self, new_seed):
+        """
+        Propagate new random seed to parameter subclasses.
+
+        Parameters
+        ----------
+        new_seed : bool
+            New random seed.
+        """
+        self._configuration["manual_seed"] = new_seed
 
     @staticmethod
     def _member_to_json(member):
@@ -1552,10 +1564,6 @@ class Parameters:
     hyperparameters : ParametersHyperparameterOptimization
         Parameters used for hyperparameter optimization.
 
-    manual_seed: int
-        If not none, this value is used as manual seed for the neural networks.
-        Can be used to make experiments comparable. Default: None.
-
     datageneration : ParametersDataGeneration
         Parameters used for data generation routines.
     """
@@ -1738,6 +1746,26 @@ class Parameters:
         self.data._update_mpi(self.use_mpi)
         self.running._update_mpi(self.use_mpi)
         self.hyperparameters._update_mpi(self.use_mpi)
+
+    @property
+    def manual_seed(self):
+        """
+        If not none, this value is used as manual seed for the neural networks.
+
+        Can be used to make experiments comparable. Default: None.
+        """
+        return self._manual_seed
+
+    @manual_seed.setter
+    def manual_seed(self, value):
+        self._manual_seed = value
+
+        self.network._update_manual_seed(self.manual_seed)
+        self.descriptors._update_manual_seed(self.manual_seed)
+        self.targets._update_manual_seed(self.manual_seed)
+        self.data._update_manual_seed(self.manual_seed)
+        self.running._update_manual_seed(self.manual_seed)
+        self.hyperparameters._update_manual_seed(self.manual_seed)
 
     @property
     def openpmd_configuration(self):
