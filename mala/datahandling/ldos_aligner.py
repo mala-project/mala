@@ -302,30 +302,34 @@ class LDOSAligner(DataHandlerBase):
                 snapshot.output_npy_directory, save_path_ext
             )
             save_name = snapshot.output_npy_file
-
-            stripped_output_file_name = snapshot.output_npy_file.replace(
-                ".out", ""
-            )
-            ldos_shift_info_save_name = stripped_output_file_name.replace(
-                ".npy", ".ldos_shift.info.json"
-            )
-
+            target_name = os.path.join(save_path, save_name)
             os.makedirs(save_path, exist_ok=True)
 
-            if "*" in save_name:
-                save_name = save_name.replace("*", str(idx))
-                ldos_shift_info_save_name.replace("*", str(idx))
+            self.ldos_parameters.ldos_gridsize = ldos_shifted.shape[-1]
 
-            target_name = os.path.join(save_path, save_name)
+            if snapshot.snapshot_type == 'numpy':
+                stripped_output_file_name = snapshot.output_npy_file.replace(
+                    ".out", ""
+                )
+                ldos_shift_info_save_name = stripped_output_file_name.replace(
+                    ".npy", ".ldos_shift.info.json"
+                )
 
-            self.target_calculator.write_to_numpy_file(
-                target_name, ldos_shifted
-            )
+                if "*" in save_name:
+                    save_name = save_name.replace("*", str(idx))
+                    ldos_shift_info_save_name.replace("*", str(idx))
 
-            with open(
-                os.path.join(save_path, ldos_shift_info_save_name), "w"
-            ) as f:
-                json.dump(ldos_shift_info, f, indent=2)
+                self.target_calculator.write_to_numpy_file(
+                    target_name, ldos_shifted
+                )
+
+                with open(
+                    os.path.join(save_path, ldos_shift_info_save_name), "w"
+                ) as f:
+                    json.dump(ldos_shift_info, f, indent=2)
+            else:
+                self.target_calculator.write_to_openpmd_file(
+                    target_name, ldos_shifted, additional_attributes=ldos_shift_info)
 
         barrier()
 
