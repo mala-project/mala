@@ -22,9 +22,9 @@ parameters.targets.ldos_gridspacing_ev = 2.5
 # initialize and add snapshots to workflow
 ldos_aligner = mala.LDOSAligner(parameters)
 ldos_aligner.clear_data()
-ldos_aligner.add_snapshot("Be_snapshot0.out.npy", data_path)
-ldos_aligner.add_snapshot("Be_snapshot1.out.npy", data_path)
-ldos_aligner.add_snapshot("Be_snapshot2.out.npy", data_path)
+ldos_aligner.add_snapshot("Be_snapshot0.out.h5", data_path, snapshot_type='openpmd')
+ldos_aligner.add_snapshot("Be_snapshot1.out.h5", data_path, snapshot_type='openpmd')
+ldos_aligner.add_snapshot("Be_snapshot2.out.h5", data_path, snapshot_type='openpmd')
 
 # align and cut the snapshots from the left and right-hand sides
 ldos_aligner.align_ldos_to_ref(

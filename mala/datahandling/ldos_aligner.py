@@ -85,8 +85,8 @@ class LDOSAligner(DataHandlerBase):
             snapshot_type=snapshot_type,
         )
 
-        if snapshot_type != "numpy":
-            raise Exception("Snapshot type must be numpy for LDOS alignment")
+        # if snapshot_type != "numpy":
+        #     raise Exception("Snapshot type must be numpy for LDOS alignment")
 
     def align_ldos_to_ref(
         self,
@@ -141,18 +141,31 @@ class LDOSAligner(DataHandlerBase):
             rank = 0
             size = 1
 
+        # import ipdb
+        # ipdb.set_trace(context=30)
+
         if rank == 0:
             # load in the reference snapshot
             snapshot_ref = self.parameters.snapshot_directories_list[
                 reference_index
             ]
-            ldos_ref = np.load(
-                os.path.join(
+            from mala.common.physical_data import PhysicalData
+            self.data_name = "LDOS"
+            self._process_openpmd_attributes = lambda *args: args
+            self._feature_mask = lambda: 0
+            self.si_unit_conversion = None
+            self._process_loaded_array = lambda *args, **kwargs: args
+            ldos_ref = PhysicalData.read_from_openpmd_file(self, os.path.join(
                     snapshot_ref.output_npy_directory,
                     snapshot_ref.output_npy_file,
-                ),
-                mmap_mode="r",
-            )
+                ))
+            # ldos_ref = np.load(
+            #     os.path.join(
+            #         snapshot_ref.output_npy_directory,
+            #         snapshot_ref.output_npy_file,
+            #     ),
+            #     mmap_mode="r",
+            # )
 
             # get the mean
             n_target = ldos_ref.shape[-1]
@@ -205,13 +218,23 @@ class LDOSAligner(DataHandlerBase):
         for idx in local_snapshots:
             snapshot = self.parameters.snapshot_directories_list[idx]
             print(f"Aligning snapshot {idx+1} of {N_snapshots}")
-            ldos = np.load(
-                os.path.join(
-                    snapshot.output_npy_directory,
-                    snapshot.output_npy_file,
-                ),
-                mmap_mode="r",
-            )
+            from mala.common.physical_data import PhysicalData
+            self.data_name = "LDOS"
+            self._process_openpmd_attributes = lambda *args: args
+            self._feature_mask = lambda: 0
+            self.si_unit_conversion = None
+            self._process_loaded_array = lambda *args, **kwargs: args
+            ldos = PhysicalData.read_from_openpmd_file(self, os.path.join(
+                    snapshot_ref.output_npy_directory,
+                    snapshot_ref.output_npy_file,
+                ))
+            # ldos = np.load(
+            #     os.path.join(
+            #         snapshot.output_npy_directory,
+            #         snapshot.output_npy_file,
+            #     ),
+            #     mmap_mode="r",
+            # )
 
             # get the mean
             nx = ldos.shape[0]
