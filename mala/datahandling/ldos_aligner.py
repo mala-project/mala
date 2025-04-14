@@ -139,9 +139,6 @@ class LDOSAligner(DataHandlerBase):
             rank = 0
             size = 1
 
-        # import ipdb
-        # ipdb.set_trace(context=30)
-
         if rank == 0:
             # load in the reference snapshot
             snapshot_ref = self.parameters.snapshot_directories_list[

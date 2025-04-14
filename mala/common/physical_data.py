@@ -220,7 +220,7 @@ class PhysicalData(ABC):
         # units throughout the feature dimension.
         # Later, we can merge this unit check with the unit conversion
         # MALA does naturally.
-        if self.si_unit_conversion and not np.isclose(mesh[str(0)].unit_SI, self.si_unit_conversion):
+        if not np.isclose(mesh[str(0)].unit_SI, self.si_unit_conversion):
             raise Exception(
                 "MALA currently cannot operate with OpenPMD "
                 "files with non-MALA units."
