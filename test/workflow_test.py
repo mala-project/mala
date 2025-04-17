@@ -1,3 +1,4 @@
+import copy
 import importlib
 import os
 
@@ -456,6 +457,41 @@ class TestFullWorkflow:
         assert np.isclose(
             band_energy_predictor_class,
             band_energy_tester_class,
+            atol=accuracy_strict,
+        )
+
+    def test_model_copying(self):
+        parameters, network, data_handler, tester = mala.Tester.load_run(
+            "Be_model", path=data_path
+        )
+        data_handler.add_snapshot(
+            "Be_snapshot3.in.npy",
+            data_path,
+            "Be_snapshot3.out.npy",
+            data_path,
+            "te",
+        )
+        data_handler.prepare_data(reparametrize_scaler=False)
+
+        actual_ldos, predicted_ldos = tester.predict_targets(0)
+        ldos_calculator = data_handler.target_calculator
+        ldos_calculator.read_additional_calculation_data(
+            os.path.join(data_path, "Be_snapshot3.out"), "espresso-out"
+        )
+        band_energy_1 = ldos_calculator.get_band_energy(predicted_ldos)
+
+        copied_network = copy.deepcopy(network)
+        tester.network = copied_network
+
+        actual_ldos, predicted_ldos = tester.predict_targets(0)
+        ldos_calculator = data_handler.target_calculator
+        ldos_calculator.read_additional_calculation_data(
+            os.path.join(data_path, "Be_snapshot3.out"), "espresso-out"
+        )
+        band_energy_2 = ldos_calculator.get_band_energy(predicted_ldos)
+        assert np.isclose(
+            band_energy_1,
+            band_energy_2,
             atol=accuracy_strict,
         )
 
