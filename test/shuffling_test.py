@@ -120,7 +120,7 @@ class TestDataShuffling:
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "minmax"
-        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.network.layer_activations = "ReLU"
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
@@ -164,7 +164,7 @@ class TestDataShuffling:
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "minmax"
-        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.network.layer_activations = "ReLU"
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
@@ -216,7 +216,7 @@ class TestDataShuffling:
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "minmax"
-        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.network.layer_activations = "ReLU"
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
@@ -262,7 +262,7 @@ class TestDataShuffling:
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "minmax"
-        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.network.layer_activations = "ReLU"
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
@@ -370,7 +370,10 @@ class TestDataShuffling:
             "Be_shuffled%T.out.h5", opmd.Access.read_only
         )
         for i in range(5):
-            for name, series in [("Bispectrum", bispectrum_series), ("LDOS", ldos_series)]:
+            for name, series in [
+                ("Bispectrum", bispectrum_series),
+                ("LDOS", ldos_series),
+            ]:
                 loaded_array = [
                     component.load_chunk().squeeze()
                     for _, component in series.iterations[i]

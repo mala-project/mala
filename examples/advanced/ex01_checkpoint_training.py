@@ -22,7 +22,7 @@ def initial_setup():
     parameters.data.data_splitting_type = "by_snapshot"
     parameters.data.input_rescaling_type = "feature-wise-standard"
     parameters.data.output_rescaling_type = "minmax"
-    parameters.network.layer_activations = ["ReLU"]
+    parameters.network.layer_activations = "ReLU"
     parameters.running.max_number_epochs = 9
     parameters.running.mini_batch_size = 8
     parameters.running.learning_rate = 0.00001
@@ -32,6 +32,7 @@ def initial_setup():
     # as "ex07".
     parameters.running.checkpoints_each_epoch = 5
     parameters.running.checkpoint_name = "ex01_checkpoint"
+    parameters.running.checkpoint_path = "./"
 
     data_handler = mala.DataHandler(parameters)
     data_handler.add_snapshot(
@@ -62,9 +63,9 @@ def initial_setup():
     return parameters, test_network, data_handler, test_trainer
 
 
-if mala.Trainer.run_exists("ex01_checkpoint"):
+if mala.Trainer.run_exists("ex01_checkpoint", path="./"):
     parameters, network, datahandler, trainer = mala.Trainer.load_run(
-        "ex01_checkpoint"
+        "ex01_checkpoint", path="./"
     )
     printout("Starting resumed training.")
 else:

@@ -124,7 +124,9 @@ class Trainer(Runner):
         self._validation_graph = None
 
     @classmethod
-    def run_exists(cls, run_name, params_format="json", zip_run=True):
+    def run_exists(
+        cls, run_name, path="./", params_format="json", zip_run=True
+    ):
         """
         Check if a hyperparameter optimization checkpoint exists.
 
@@ -132,6 +134,13 @@ class Trainer(Runner):
 
         Parameters
         ----------
+        path : str
+            Path to check for saved run.
+
+        zip_run : bool
+            If True, MALA will check for a .zip file. If False,
+            then separate files will be checked for.
+
         run_name : string
             Name of the checkpoint.
 
@@ -145,12 +154,14 @@ class Trainer(Runner):
 
         """
         if zip_run is True:
-            return os.path.isfile(run_name + ".zip")
+            return os.path.isfile(os.path.join(path, run_name + ".zip"))
         else:
-            network_name = run_name + ".network.pth"
-            iscaler_name = run_name + ".iscaler.pkl"
-            oscaler_name = run_name + ".oscaler.pkl"
-            param_name = run_name + ".params." + params_format
+            network_name = os.path.join(path, run_name + ".network.pth")
+            iscaler_name = os.path.join(path, run_name + ".iscaler.pkl")
+            oscaler_name = os.path.join(path, run_name + ".oscaler.pkl")
+            param_name = os.path.join(
+                path, run_name + ".params." + params_format
+            )
             optimizer_name = run_name + ".optimizer.pth"
             return all(
                 map(
@@ -618,7 +629,7 @@ class Trainer(Runner):
             The data set fractions to validate on. Can be "train" or
             "validation". "test" is not supported.
 
-        metrics : list
+        metrics : List
             List of metrics to calculate. Can be "ldos", or a number of
             error metrics (see Tester class). Most common apart from "ldos"
             is arguably "band_energy".
@@ -704,10 +715,7 @@ class Trainer(Runner):
                 # case for, e.g., distributed network trainings), we can
                 # use a faster (or at least better parallelizing) code
 
-                if (
-                    len(self.parameters.validation_metrics) == 1
-                    and self.parameters.validation_metrics[0] == "ldos"
-                ):
+                if len(metrics) == 1 and metrics[0] == "ldos":
 
                     errors[data_set_type]["ldos"] = (
                         self.__calculate_validation_error_ldos_only(
@@ -1281,7 +1289,10 @@ class Trainer(Runner):
         Follows https://pytorch.org/tutorials/recipes/recipes/saving_and_
         loading_a_general_checkpoint.html to some degree.
         """
-        optimizer_name = self.parameters.checkpoint_name + ".optimizer.pth"
+        optimizer_name = os.path.join(
+            self.parameters.checkpoint_path,
+            self.parameters.checkpoint_name + ".optimizer.pth",
+        )
 
         # Next, we save all the other objects.
 
@@ -1306,14 +1317,11 @@ class Trainer(Runner):
         torch.save(
             save_dict, optimizer_name, _use_new_zipfile_serialization=False
         )
-        if self.parameters.run_name != "":
-            self.save_run(
-                self.parameters.checkpoint_name,
-                save_runner=True,
-                path=self.parameters.run_name,
-            )
-        else:
-            self.save_run(self.parameters.checkpoint_name, save_runner=True)
+        self.save_run(
+            self.parameters.checkpoint_name,
+            save_runner=True,
+            path=self.parameters.checkpoint_path,
+        )
 
     @staticmethod
     def __average_validation(val, device="cpu"):

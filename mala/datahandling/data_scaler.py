@@ -404,10 +404,12 @@ class DataScaler:
                 if self.scale_standard:
                     scaled -= self.means
                     scaled /= self.stds
+                    unscaled.nan_to_num_(nan = 0.0) #account for possible 0 valued ACE descriptors
 
                 if self.scale_minmax:
                     scaled -= self.mins
                     scaled /= self.maxs - self.mins
+                    unscaled.nan_to_num_(nan = 0.0) #account for possible 0 valued ACE descriptors
 
             else:
 
@@ -418,10 +420,12 @@ class DataScaler:
                 if self.scale_standard:
                     scaled -= self.total_mean
                     scaled /= self.total_std
+                    scaled.nan_to_num_(nan = 0.0) #account for possible 0 valued ACE descriptors
 
                 if self.scale_minmax:
                     scaled -= self.total_min
                     scaled /= self.total_max - self.total_min
+                    scaled.nan_to_num_(nan = 0.0) #account for possible 0 valued ACE descriptors
 
         return scaled
 

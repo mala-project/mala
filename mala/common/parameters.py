@@ -344,16 +344,33 @@ class ParametersNetwork(ParametersBase):
         network. Please note that the input layer is included therein.
         Default: [10,10,0]
 
-    layer_activations : list
-        A list of strings detailing the activation functions to be used
-        by the neural network. If the dimension of layer_activations is
-        smaller than the dimension of layer_sizes-1, than the first entry
-        is used for all layers.
-        Currently supported activation functions are:
+    layer_activations : list or str or class or nn.Module
+        Detailing the activation functions to be used
+        by the neural network. If a single object is supplied, then this
+        activation function is used for all layers (whether this applies to the
+        output layer is controlled by layer_activations_include_output_layer).
+        Otherwise, the activation functions are added layer by layer.
+        Note that no activation function is applied between input layer and
+        first hidden layer!
+        The items in the list can either be strings (=names of torch.nn.Module
+        activation functions), which MALA will map to the correct activation
+        functions, torch.nn.Module objects, torch.nn.Module classes (which MALA
+        will instantiate) OR None, in which case no activation function is
+        used.
+        The None can be ommitted at the end, but is useful when layers without
+        activation functions are to be skipped in the middle.
+        Note that output from the output layer is by default restricted to
+        only have positive values via restrict_targets in the ParameterTargets
+        subclass. This is similar to having a ReLU function as a final
+        activation function and ensures the physicality of the outputs (since
+        the (L)DOS can never be negative).
 
-            - Sigmoid (default)
-            - ReLU
-            - LeakyReLU
+    layer_activations_include_output_layer : bool
+        If False, no activation function is added to the output layer. This
+        can of course also be done by supplying just the right amount of
+        activation functions and this parameter mainly exist to control the
+        last layer of activation functions in the case of using
+        layer_activations with only a single object.
 
     loss_function_type : string
         Loss function for the neural network
@@ -388,7 +405,8 @@ class ParametersNetwork(ParametersBase):
         super(ParametersNetwork, self).__init__()
         self.nn_type = "feed-forward"
         self.layer_sizes = [10, 10, 10]
-        self.layer_activations = ["Sigmoid"]
+        self.layer_activations = "LeakyReLU"
+        self.layer_activations_include_output_layer = True
         self.loss_function_type = "mse"
 
         # for LSTM/Gru
@@ -469,6 +487,68 @@ class ParametersDescriptors(ParametersBase):
     minterpy_polynomial_degree : int
         WILL BE DEPRECATED IN MALA v1.4.0 - polynomial degree for minterpy
         descriptor calculation.
+
+    ace_included_expansion_ranks : list
+        List of all included expansion ranks for the ACE descriptors.
+        These expansion ranks correspond to the many body order in the
+        expansion of the atomic energy in many body terms. The list does
+        can exclude terms, i.e., [1,2,4] is a valid option.
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
+
+    ace_maximum_n_per_rank  : list
+        Maximum n for each expansion rank in the ACE descriptors. These
+        n correspond to the n starting from equation 27 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104)
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
+
+    ace_maximum_l_per_rank : list
+        Maximum l for each expansion rank in the ACE descriptors. These
+        n correspond to the n starting from equation 27 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104).
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
+
+    ace_minimum_l_per_rank : list
+        Minimum l for each expansion rank in the ACE descriptors. These
+        n correspond to the n starting from equation 27 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104)
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
+
+    ace_balance_cutoff_radii_for_elements : bool
+        If True, cutoff radii will be balanced between element types.
+        This is helpful when dealing with elements varying drastically in size.
+
+    ace_larger_cutoff_for_metals : list
+        If True (default) a slightly larger cutoff is used for metals. This
+        is recommended.
+
+    ace_use_maximum_cutoff_per_element : list
+        If True, the maximum chemically reasonable cutoff will be used
+        for all bonds. These maximum cutoff radii are based on the
+        Van-der-Waals radii. Note that this may increase computation time!
+
+    ace_coupling_coefficients_type : str
+        Coupling type used for reduction of spherical harmonic products.
+        These come into play starting from equation 28 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104).
+        Can be "clebsch_gordan" or "wigner_3j". This parameter usually does
+        not have to be changed. The default is "clebsch_gordan".
+
+    ace_coupling_coefficients_maximum_l : int
+        The maximum l up to which to precompute the Clebsch-Gordan/Wigner 3j
+        symbols. These are precomputed within MALA to reduce overall
+        computation time, but to save on storage space, precomputation is only
+        done to a certain l (for the meaning of l, refer to the original ACE
+        paper, doi.org/10.1103/PhysRevB.99.014104, page 5). MALA automatically
+        recomputes the coefficients if ace_coupling_coefficients_maximum_l is
+        increased.
     """
 
     def __init__(self):
@@ -507,6 +587,24 @@ class ParametersDescriptors(ParametersBase):
         self.minterpy_cutoff_cube_size = 0.0
         self.minterpy_polynomial_degree = 4
         self.minterpy_lp_norm = 2
+
+        # Everything pertaining to the ACE descriptors.
+        self.ace_cutoff_factor = 2.0
+
+        # Many body orders
+        self.ace_included_expansion_ranks = [1, 2, 3]
+        self.ace_maximum_n_per_rank = [6, 2, 2]
+        self.ace_maximum_l_per_rank = [0, 2, 2]
+        self.ace_minimum_l_per_rank = [0, 0, 0]
+
+        # Flavors/extra options for the ACE descriptors.
+        self.ace_balance_cutoff_radii_for_elements = False
+        self.ace_larger_cutoff_for_metals = True
+        self.ace_use_maximum_cutoff_per_element = False
+
+        # Other value could be "wigner3j".
+        self.ace_coupling_coefficients_type = "clebsch_gordan"
+        self.ace_coupling_coefficients_maximum_l = 12
 
     @property
     def use_z_splitting(self):
@@ -556,6 +654,32 @@ class ParametersDescriptors(ParametersBase):
     def bispectrum_cutoff(self, value):
         self._rcutfac = value
         self.atomic_density_cutoff = value
+
+    @property
+    def ace_cutoff_factor(self):
+        """
+        Cutoff radius factor for ACE descriptor calculation.
+
+        This is NOT a cutoff radius itself. Rather, ACE computes on cutoff
+        radius for every bond between element types (with grid points counting
+        as an element type). These cutoff radii are then multiplied by this
+        factor to get the actual cutoff radii. This factor is a global factor,
+        and by default 2.0. Chage it carefully, since changing it may lead to
+        an increase in computation time.
+        """
+        return self._ace_cutoff
+
+    @ace_cutoff_factor.setter
+    def ace_cutoff_factor(self, value):
+        if value <= 0.0:
+            printout(
+                "ACE cutoff factor must be larger than 0.0, defaulting"
+                " to 2.0.",
+                min_verbosity=0,
+            )
+            self._ace_cutoff = 2.0
+        else:
+            self._ace_cutoff = value
 
     @property
     def bispectrum_switchflag(self):
@@ -906,6 +1030,9 @@ class ParametersRunning(ParametersBase):
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
 
+    checkpoint_path : string
+        Path where the checkpoints will be saved (and loaded from)
+
     run_name : string
         Name of the run used for logging.
 
@@ -997,6 +1124,7 @@ class ParametersRunning(ParametersBase):
         self.checkpoints_each_epoch = 0
         # self.checkpoint_best_so_far = False
         self.checkpoint_name = "checkpoint_mala"
+        self.checkpoint_path = "./"
         self.run_name = ""
         self.logging_dir = "./mala_logging"
         self.logging_dir_append_date = True

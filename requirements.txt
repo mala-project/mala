@@ -1,5 +1,7 @@
-# See install/README.md
-##torch
+# The requirement below makes sure we have torch installed, even if that will
+# pull the latest GPU torch in case the user's environment may be misconfigured
+# such that a pre-installed torch is not found.
+torch
 
 ase
 mpmath
@@ -11,3 +13,5 @@ tensorboard
 openpmd-api
 scikit-spatial
 tqdm
+mendeleev
+sympy
