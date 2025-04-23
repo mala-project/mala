@@ -471,6 +471,7 @@ class TestFullWorkflow:
             data_path,
             "te",
         )
+        parameters.manual_seed = 123456252
         data_handler.prepare_data(reparametrize_scaler=False)
 
         actual_ldos, predicted_ldos = tester.predict_targets(0)
@@ -489,10 +490,18 @@ class TestFullWorkflow:
             os.path.join(data_path, "Be_snapshot3.out"), "espresso-out"
         )
         band_energy_2 = ldos_calculator.get_band_energy(predicted_ldos)
+        print(
+            network.params._configuration, copied_network.params._configuration
+        )
         assert np.isclose(
             band_energy_1,
             band_energy_2,
             atol=accuracy_strict,
+        )
+        assert (
+            network.params._configuration["manual_seed"]
+            == copied_network.params._configuration["manual_seed"]
+            == 123456252
         )
 
     @pytest.mark.skipif(

@@ -1,7 +1,5 @@
 """Neural network for MALA."""
 
-from copy import deepcopy
-
 from abc import abstractmethod
 import numpy as np
 import torch
@@ -9,7 +7,7 @@ import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as functional
 
-from mala.common.parameters import Parameters, ParametersNetwork
+from mala.common.parameters import Parameters
 from mala.common.parallelizer import printout, parallel_warn
 
 
@@ -44,7 +42,7 @@ class Network(nn.Module):
         If True, the torch distributed data parallel formalism will be used.
     """
 
-    def __new__(cls, params: Parameters):
+    def __new__(cls, params: Parameters = None):
         """
         Create a neural network instance.
 
@@ -59,46 +57,34 @@ class Network(nn.Module):
         """
         model = None
 
-        # Check if we're accessing through base class.
-        # If not, we need to return the correct object directly.
-        if cls == Network:
-            if isinstance(params, Parameters):
-                params_network = params.network
-            elif isinstance(params, ParametersNetwork):
-                params_network = params
-            else:
-                raise Exception("Incompativle parameters supplied")
+        # Check if we're accessing through base class. If not, we need to
+        # return the correct object directly.
+        #
+        # params=None if we load a serialized object, for instance. Then we
+        # just want an empty object which gets populated during
+        # deserialization.
 
-            if params_network.nn_type == "feed-forward":
+        if params is None or cls != Network:
+            model = super().__new__(cls)
+        else:
+            if params.network.nn_type == "feed-forward":
                 model = super(Network, FeedForwardNet).__new__(FeedForwardNet)
 
-            if model is None:
+            else:
                 raise Exception("Unsupported network architecture.")
-        else:
-            model = super(Network, cls).__new__(cls)
 
         return model
 
     def __init__(self, params: Parameters):
-        if isinstance(params, Parameters):
-            params_network = params.network
-            self.use_ddp = params.use_ddp
-            seed = params.manual_seed
-        elif isinstance(params, ParametersNetwork):
-            params_network = params
-            self.use_ddp = params_network._configuration["ddp"]
-            seed = params._configuration["manual_seed"]
-        else:
-            raise Exception("Incompativle parameters supplied")
-
         # copy the network params from the input parameter object
-        self.params = params_network
+        self.use_ddp = params.use_ddp
+        self.params = params.network
 
         # if the user has planted a seed (for comparibility purposes) we
         # should use it.
-        if seed is not None:
-            torch.manual_seed(seed)
-            torch.cuda.manual_seed(seed)
+        if params.manual_seed is not None:
+            torch.manual_seed(params.manual_seed)
+            torch.cuda.manual_seed(params.manual_seed)
 
         # initialize the parent class
         super(Network, self).__init__()
@@ -111,20 +97,6 @@ class Network(nn.Module):
             self.loss_func = functional.mse_loss
         else:
             raise Exception("Unsupported loss function.")
-
-    def __copy__(self):
-        """Copy a Network instance."""
-        result = Network.__new__(Network, params=self.params)
-        result.__dict__.update(self.__dict__)
-        return result
-
-    def __deepcopy__(self, memo):
-        """Deepcopy a Network instance."""
-        result = Network.__new__(Network, params=self.params)
-        memo[id(self)] = result
-        for k, v in self.__dict__.items():
-            setattr(result, k, deepcopy(v, memo))
-        return result
 
     @abstractmethod
     def forward(self, inputs):
