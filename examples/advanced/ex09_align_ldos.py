@@ -33,6 +33,8 @@ ldos_aligner.align_ldos_to_ref(
     left_truncate=True, right_truncate_value=11, number_of_electrons=4
 )
 
+# The same thing works also with openPMD-based data
+
 try:
     import openpmd_api
     use_openpmd = True
@@ -55,14 +57,5 @@ if use_openpmd:
         left_truncate=True, right_truncate_value=11, number_of_electrons=4
     )
 
-    parameters = mala.Parameters()
-    data_handler = mala.DataHandler(parameters)
-    for i in range(1, 4):
-        data_openpmd = data_handler.target_calculator.read_from_openpmd_file(
-            f"{data_path}/aligned/Be_snapshot0.out.h5")
-        data_numpy = data_handler.target_calculator.read_from_numpy_file(
-            f"{data_path}/aligned/Be_snapshot0.out.npy")
-        if not numpy.allclose(data_numpy, data_openpmd):
-            raise Exception("Inconsistency in snapshot", i)
-        else:
-            print("All close.")
+    # A test that checks for data equivalence between the Numpy-based
+    # and openPMD-based implementations can be found under test/align_ldos.py.
