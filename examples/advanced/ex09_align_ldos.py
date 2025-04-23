@@ -58,4 +58,5 @@ if use_openpmd:
     )
 
     # A test that checks for data equivalence between the Numpy-based
-    # and openPMD-based implementations can be found under test/align_ldos.py.
+    # and openPMD-based implementations can be found under
+    # test/align_ldos_test.py.
