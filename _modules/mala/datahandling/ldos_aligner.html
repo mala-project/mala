@@ -170,10 +170,8 @@
             <span class="n">input_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
             <span class="n">calculation_output_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="n">snapshot_type</span><span class="o">=</span><span class="n">snapshot_type</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-        <span class="k">if</span> <span class="n">snapshot_type</span> <span class="o">!=</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Snapshot type must be numpy for LDOS alignment&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="LDOSAligner.align_ldos_to_ref">
@@ -226,6 +224,9 @@
             <span class="n">comm</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span>
             <span class="n">rank</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span>
             <span class="n">size</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">size</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;[mala.LDOSAligner.align_ldos_to_ref] Warning: MPI support is experimental. Use with caution.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">comm</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">rank</span> <span class="o">=</span> <span class="mi">0</span>
@@ -236,13 +237,23 @@
             <span class="n">snapshot_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">[</span>
                 <span class="n">reference_index</span>
             <span class="p">]</span>
-            <span class="n">ldos_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                    <span class="n">snapshot_ref</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
-                    <span class="n">snapshot_ref</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
-                <span class="p">),</span>
-                <span class="n">mmap_mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">snapshot_ref</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s1">&#39;numpy&#39;</span><span class="p">:</span>
+                <span class="n">ldos_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">snapshot_ref</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                        <span class="n">snapshot_ref</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">snapshot_ref</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s1">&#39;openpmd&#39;</span><span class="p">:</span>
+                <span class="n">ldos_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_openpmd_file</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">snapshot_ref</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                        <span class="n">snapshot_ref</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Unknown snapshot type &#39;</span><span class="si">{snapshot_ref.snapshot_type}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
 
             <span class="c1"># get the mean</span>
             <span class="n">n_target</span> <span class="o">=</span> <span class="n">ldos_ref</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -295,13 +306,23 @@
         <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">local_snapshots</span><span class="p">:</span>
             <span class="n">snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Aligning snapshot </span><span class="si">{</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">N_snapshots</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">ldos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                    <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
-                    <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
-                <span class="p">),</span>
-                <span class="n">mmap_mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">snapshot_ref</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s1">&#39;numpy&#39;</span><span class="p">:</span>
+                <span class="n">ldos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">snapshot_ref</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s1">&#39;openpmd&#39;</span><span class="p">:</span>
+                <span class="n">ldos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_openpmd_file</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                        <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Unknown snapshot type &#39;</span><span class="si">{snapshot_ref.snapshot_type}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
 
             <span class="c1"># get the mean</span>
             <span class="n">nx</span> <span class="o">=</span> <span class="n">ldos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -369,30 +390,34 @@
                 <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span> <span class="n">save_path_ext</span>
             <span class="p">)</span>
             <span class="n">save_name</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span>
-
-            <span class="n">stripped_output_file_name</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-                <span class="s2">&quot;.out&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span>
-            <span class="p">)</span>
-            <span class="n">ldos_shift_info_save_name</span> <span class="o">=</span> <span class="n">stripped_output_file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-                <span class="s2">&quot;.npy&quot;</span><span class="p">,</span> <span class="s2">&quot;.ldos_shift.info.json&quot;</span>
-            <span class="p">)</span>
-
+            <span class="n">target_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">save_name</span><span class="p">)</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="s2">&quot;*&quot;</span> <span class="ow">in</span> <span class="n">save_name</span><span class="p">:</span>
-                <span class="n">save_name</span> <span class="o">=</span> <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
-                <span class="n">ldos_shift_info_save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ldos_parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">=</span> <span class="n">ldos_shifted</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-            <span class="n">target_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">save_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s1">&#39;numpy&#39;</span><span class="p">:</span>
+                <span class="n">stripped_output_file_name</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                    <span class="s2">&quot;.out&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span>
+                <span class="p">)</span>
+                <span class="n">ldos_shift_info_save_name</span> <span class="o">=</span> <span class="n">stripped_output_file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                    <span class="s2">&quot;.npy&quot;</span><span class="p">,</span> <span class="s2">&quot;.ldos_shift.info.json&quot;</span>
+                <span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">write_to_numpy_file</span><span class="p">(</span>
-                <span class="n">target_name</span><span class="p">,</span> <span class="n">ldos_shifted</span>
-            <span class="p">)</span>
+                <span class="k">if</span> <span class="s2">&quot;*&quot;</span> <span class="ow">in</span> <span class="n">save_name</span><span class="p">:</span>
+                    <span class="n">save_name</span> <span class="o">=</span> <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
+                    <span class="n">ldos_shift_info_save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
 
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">ldos_shift_info_save_name</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span>
-            <span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">ldos_shift_info</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">write_to_numpy_file</span><span class="p">(</span>
+                    <span class="n">target_name</span><span class="p">,</span> <span class="n">ldos_shifted</span>
+                <span class="p">)</span>
+
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">ldos_shift_info_save_name</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span>
+                <span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">ldos_shift_info</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">write_to_openpmd_file</span><span class="p">(</span>
+                    <span class="n">target_name</span><span class="p">,</span> <span class="n">ldos_shifted</span><span class="p">,</span> <span class="n">additional_attributes</span><span class="o">=</span><span class="n">ldos_shift_info</span><span class="p">)</span>
 
         <span class="n">barrier</span><span class="p">()</span></div>
 
