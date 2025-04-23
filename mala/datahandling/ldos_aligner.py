@@ -134,6 +134,9 @@ class LDOSAligner(DataHandlerBase):
             comm = get_comm()
             rank = comm.rank
             size = comm.size
+            import sys
+            print(
+                "[mala.LDOSAligner.align_ldos_to_ref] Warning: MPI support is experimental. Use with caution.")
         else:
             comm = None
             rank = 0
