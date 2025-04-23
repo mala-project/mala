@@ -145,12 +145,11 @@ class LDOSAligner(DataHandlerBase):
                 reference_index
             ]
             if snapshot_ref.snapshot_type == 'numpy':
-                ldos_ref = np.load(
+                ldos_ref = self.target_calculator.read_from_numpy_file(
                     os.path.join(
                         snapshot_ref.output_npy_directory,
                         snapshot_ref.output_npy_file,
-                    ),
-                    mmap_mode="r",
+                    )
                 )
             elif snapshot_ref.snapshot_type == 'openpmd':
                 ldos_ref = self.target_calculator.read_from_openpmd_file(
@@ -215,12 +214,11 @@ class LDOSAligner(DataHandlerBase):
             snapshot = self.parameters.snapshot_directories_list[idx]
             print(f"Aligning snapshot {idx+1} of {N_snapshots}")
             if snapshot_ref.snapshot_type == 'numpy':
-                ldos = np.load(
+                ldos = self.target_calculator.read_from_numpy_file(
                     os.path.join(
                         snapshot.output_npy_directory,
                         snapshot.output_npy_file,
-                    ),
-                    mmap_mode="r",
+                    )
                 )
             elif snapshot_ref.snapshot_type == 'openpmd':
                 ldos = self.target_calculator.read_from_openpmd_file(
