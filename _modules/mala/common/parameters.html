@@ -126,6 +126,7 @@
             <span class="s2">&quot;openpmd_granularity&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
             <span class="s2">&quot;lammps&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;atomic_density_formula&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;manual_seed&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">pass</span>
 
@@ -249,6 +250,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;atomic_density_formula&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">new_atomic_density_formula</span>
         <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_manual_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_seed</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Propagate new random seed to parameter subclasses.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_seed : bool</span>
+<span class="sd">            New random seed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;manual_seed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_seed</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_member_to_json</span><span class="p">(</span><span class="n">member</span><span class="p">):</span>
@@ -1673,10 +1685,6 @@
 <span class="sd">    hyperparameters : ParametersHyperparameterOptimization</span>
 <span class="sd">        Parameters used for hyperparameter optimization.</span>
 
-<span class="sd">    manual_seed: int</span>
-<span class="sd">        If not none, this value is used as manual seed for the neural networks.</span>
-<span class="sd">        Can be used to make experiments comparable. Default: None.</span>
-
 <span class="sd">    datageneration : ParametersDataGeneration</span>
 <span class="sd">        Parameters used for data generation routines.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1859,6 +1867,26 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_update_mpi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">_update_mpi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_mpi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">manual_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If not none, this value is used as manual seed for the neural networks.</span>
+
+<span class="sd">        Can be used to make experiments comparable. Default: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manual_seed</span>
+
+    <span class="nd">@manual_seed</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">manual_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_manual_seed</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">_update_manual_seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_update_manual_seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">_update_manual_seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_update_manual_seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">_update_manual_seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_manual_seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

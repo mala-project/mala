@@ -142,7 +142,6 @@ predict LDOS and postprocess LDOS into energies (and forces, soon).</p>
 <li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.data"><code class="docutils literal notranslate"><span class="pre">Parameters.data</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.running"><code class="docutils literal notranslate"><span class="pre">Parameters.running</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.hyperparameters"><code class="docutils literal notranslate"><span class="pre">Parameters.hyperparameters</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.manual_seed"><code class="docutils literal notranslate"><span class="pre">Parameters.manual_seed</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.datageneration"><code class="docutils literal notranslate"><span class="pre">Parameters.datageneration</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.load_from_file"><code class="docutils literal notranslate"><span class="pre">Parameters.load_from_file()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.load_from_json"><code class="docutils literal notranslate"><span class="pre">Parameters.load_from_json()</span></code></a></li>
@@ -153,6 +152,7 @@ predict LDOS and postprocess LDOS into energies (and forces, soon).</p>
 <li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.save_as_pickle"><code class="docutils literal notranslate"><span class="pre">Parameters.save_as_pickle()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.show"><code class="docutils literal notranslate"><span class="pre">Parameters.show()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.device"><code class="docutils literal notranslate"><span class="pre">Parameters.device</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.manual_seed"><code class="docutils literal notranslate"><span class="pre">Parameters.manual_seed</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.openpmd_configuration"><code class="docutils literal notranslate"><span class="pre">Parameters.openpmd_configuration</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.openpmd_granularity"><code class="docutils literal notranslate"><span class="pre">Parameters.openpmd_granularity</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters.use_atomic_density_formula"><code class="docutils literal notranslate"><span class="pre">Parameters.use_atomic_density_formula</span></code></a></li>
@@ -844,16 +844,6 @@ predict LDOS and postprocess LDOS into energies (and forces, soon).</p>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.FeedForwardNet.forward"><code class="docutils literal notranslate"><span class="pre">FeedForwardNet.forward()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="mala.network.network.html#mala.network.network.GRU"><code class="docutils literal notranslate"><span class="pre">GRU</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.GRU.forward"><code class="docutils literal notranslate"><span class="pre">GRU.forward()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.GRU.init_hidden"><code class="docutils literal notranslate"><span class="pre">GRU.init_hidden()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="mala.network.network.html#mala.network.network.LSTM"><code class="docutils literal notranslate"><span class="pre">LSTM</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.LSTM.forward"><code class="docutils literal notranslate"><span class="pre">LSTM.forward()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.LSTM.init_hidden"><code class="docutils literal notranslate"><span class="pre">LSTM.init_hidden()</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="mala.network.network.html#mala.network.network.Network"><code class="docutils literal notranslate"><span class="pre">Network</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.Network.loss_func"><code class="docutils literal notranslate"><span class="pre">Network.loss_func</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.Network.mini_batch_size"><code class="docutils literal notranslate"><span class="pre">Network.mini_batch_size</span></code></a></li>
@@ -865,16 +855,6 @@ predict LDOS and postprocess LDOS into energies (and forces, soon).</p>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.Network.forward"><code class="docutils literal notranslate"><span class="pre">Network.forward()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.Network.load_from_file"><code class="docutils literal notranslate"><span class="pre">Network.load_from_file()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.Network.save_network"><code class="docutils literal notranslate"><span class="pre">Network.save_network()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="mala.network.network.html#mala.network.network.PositionalEncoding"><code class="docutils literal notranslate"><span class="pre">PositionalEncoding</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.PositionalEncoding.forward"><code class="docutils literal notranslate"><span class="pre">PositionalEncoding.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="mala.network.network.html#mala.network.network.TransformerNet"><code class="docutils literal notranslate"><span class="pre">TransformerNet</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.TransformerNet.forward"><code class="docutils literal notranslate"><span class="pre">TransformerNet.forward()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.TransformerNet.generate_square_subsequent_mask"><code class="docutils literal notranslate"><span class="pre">TransformerNet.generate_square_subsequent_mask()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html#mala.network.network.TransformerNet.init_weights"><code class="docutils literal notranslate"><span class="pre">TransformerNet.init_weights()</span></code></a></li>
 </ul>
 </li>
 </ul>
