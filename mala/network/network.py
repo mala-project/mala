@@ -55,8 +55,6 @@ class Network(nn.Module):
         params : mala.common.parametes.Parameters
             Parameters used to create this neural network.
         """
-        model = None
-
         # Check if we're accessing through base class. If not, we need to
         # return the correct object directly.
         #
