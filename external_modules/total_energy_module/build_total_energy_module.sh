@@ -44,13 +44,16 @@ fftw="-lfftw3"
 here=$(pwd)
 mod_name=total_energy
 src=${mod_name}.f90
-cp -v $src $pw_src_path/
-cd $pw_src_path
+#cp -v $src $pw_src_path/
+#cd $pw_src_path
 rm -vf ${mod_name}.*.so
 
-${F2PY:=f2py} \
-    --f90exec=mpif90 \
-    --f77exec=mpif90 \
+# I think the -I$pw_src_path is necessary now or else
+# the compiler won't find the .mod files anymore since
+# the build is done in some temporary directory.
+# As far as I understand it, the issue lies with the compiler
+# ignoring the *.o files.
+FC="mpif90" python3 -m numpy.f2py \
     -c $src \
     -m $mod_name \
     $project_inc_folders \
@@ -61,8 +64,13 @@ ${F2PY:=f2py} \
     $modobjs \
     $linalg \
     $fftw \
-    $root_dir/XClib/xc_lib.a
+    $root_dir/XClib/xc_lib.a \
+    -I$pw_src_path \
 
-rm $src
-mv -v ${mod_name}.*.so $here/
-cd $here
+#${F2PY:=f2py} \
+#    --f90exec=mpif90 \
+#    --f77exec=mpif90 \
+
+#rm $src
+#mv -v ${mod_name}.*.so $here/
+#cd $here
