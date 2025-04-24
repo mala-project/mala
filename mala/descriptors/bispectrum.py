@@ -258,21 +258,21 @@ class Bispectrum(Descriptor):
             filepath = os.path.join(os.path.dirname(__file__), "inputfiles")
             if self.parameters._configuration["mpi"]:
                 if self.parameters.use_z_splitting:
-                    self.parameters.lammps_compute_file = os.path.join(
+                    lammps_compute_file = os.path.join(
                         filepath,
                         "in.bgridlocal_n{0}.python".format(
                             len(set(self._atoms.numbers))
                         ),
                     )
                 else:
-                    self.parameters.lammps_compute_file = os.path.join(
+                    lammps_compute_file = os.path.join(
                         filepath,
                         "in.bgridlocal_defaultproc_n{0}.python".format(
                             len(set(self._atoms.numbers))
                         ),
                     )
             else:
-                self.parameters.lammps_compute_file = os.path.join(
+                lammps_compute_file = os.path.join(
                     filepath,
                     "in.bgrid_n{0}.python".format(
                         len(set(self._atoms.numbers))
