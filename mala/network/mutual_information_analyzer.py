@@ -47,7 +47,9 @@ class MutualInformationAnalyzer(DescriptorScoringOptimizer):
 
     def _get_best_trial(self):
         """Determine the best trial as given by this study."""
-        return self._study[np.argmax(self._study[:, -1])]
+        return self.averaged_study[
+            np.argmax(np.array(self.averaged_study[:, -1]))
+        ]
 
     def _update_logging(self, score, index):
         """

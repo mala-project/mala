@@ -87,11 +87,8 @@ Once this is done, you can start the optimization via
 
       .. code-block:: python
 
-            hyperoptimizer.perform_study(return_plotting=False)
+            hyperoptimizer.perform_study()
             hyperoptimizer.set_optimal_parameters()
-
-If ``return_plotting`` is set to ``True``, relevant plotting data for the
-analysis are returned. This is useful for exploratory searches.
 
 Since the ACSD re-calculates the bispectrum descriptors for each combination
 of hyperparameters, it is useful to use parallel descriptor calculation.

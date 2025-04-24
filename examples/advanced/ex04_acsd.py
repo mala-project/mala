@@ -21,6 +21,9 @@ parameters.descriptors.acsd_points = 100
 hyperoptimizer = mala.ACSDAnalyzer(parameters)
 hyperoptimizer.add_hyperparameter("bispectrum_twojmax", [2, 4])
 hyperoptimizer.add_hyperparameter("bispectrum_cutoff", [1.0, 2.0])
+hyperoptimizer.add_hyperparameter(
+    "bispectrum_element_weights", ["1.0, 0.5", "0.5, 1.0"]
+)
 
 ####################
 # 2. DATA
@@ -44,5 +47,5 @@ hyperoptimizer.add_snapshot(
 
 # If you plan to plot the results (recommended for exploratory searches),
 # the optimizer can return the necessary quantities to plot.
-hyperoptimizer.perform_study(return_plotting=False)
+hyperoptimizer.perform_study()
 hyperoptimizer.set_optimal_parameters()
