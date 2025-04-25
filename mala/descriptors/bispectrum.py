@@ -232,11 +232,6 @@ class Bispectrum(Descriptor):
             "rcutfac": self.parameters.bispectrum_cutoff,
         }
         if len(set(self._atoms.numbers)) > 1:
-            if self.parameters._configuration["gpu"]:
-                raise ValueError(
-                    "MALA cannot compute bispectrum descriptors for "
-                    "multi-element systems with GPU currently."
-                )
 
             if self.parameters.bispectrum_element_weights is None:
                 self.parameters.bispectrum_element_weights = [1] * len(
@@ -247,6 +242,17 @@ class Bispectrum(Descriptor):
                     "weights. Set weights to: ",
                     self.parameters.bispectrum_element_weights,
                 )
+            if (
+                self.parameters._configuration["gpu"]
+                and np.all(self.parameters.bispectrum_element_weights == 1.0)
+                is False
+            ):
+                raise ValueError(
+                    "MALA cannot compute bispectrum descriptors for "
+                    "multi-element systems with GPU currently if weights "
+                    "are not all 1.0. Please adjust weights or disable GPU."
+                )
+
             for i in range(len(self.parameters.bispectrum_element_weights)):
                 lammps_dict["wj" + str(i + 1)] = (
                     self.parameters.bispectrum_element_weights[i]
