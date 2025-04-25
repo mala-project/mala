@@ -232,6 +232,11 @@ class Bispectrum(Descriptor):
             "rcutfac": self.parameters.bispectrum_cutoff,
         }
         if len(set(self._atoms.numbers)) > 1:
+            if self.parameters._configuration["gpu"]:
+                raise ValueError(
+                    "MALA cannot compute bispectrum descriptors for "
+                    "multi-element systems with GPU currently."
+                )
 
             if self.parameters.bispectrum_element_weights is None:
                 self.parameters.bispectrum_element_weights = [1] * len(
