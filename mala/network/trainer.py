@@ -465,7 +465,7 @@ class Trainer(Runner):
             logging_metrics = ["ldos"]
             if (
                 epoch != 0
-                and (epoch - 1) % self.parameters.logging_metrics_freq == 0
+                and (epoch - 1) % self.parameters.logging_metrics_interval == 0
             ):
                 logging_metrics = self.parameters.logging_metrics
             errors = self._evaluate_metrics(

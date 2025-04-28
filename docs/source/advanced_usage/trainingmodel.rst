@@ -212,7 +212,7 @@ in the file ``advanced/ex03_tensor_board``. Simply select a logger prior to trai
       .. code-block:: python
 
             parameters.running.logger = "tensorboard"
-            parameters.running.logging_dir = "mala_vis"
+            parameters.running.logging_dir = "mala_logs"
 
 or
 
@@ -224,7 +224,7 @@ or
                   entity="your_wandb_entity"
             )
             parameters.running.logger = "wandb"
-            parameters.running.logging_dir = "mala_vis"
+            parameters.running.logging_dir = "mala_logs"
 
 where ``logging_dir`` specifies some directory in which to save the
 MALA logging data. You can also select which metrics to record via
@@ -249,7 +249,7 @@ To save time and resources you can specify the logging interval via
 
       .. code-block:: python
 
-            parameters.running.logging_metrics_freq = 10
+            parameters.running.logging_metrics_interval = 10
 
 If you want to monitor the degree to which the model overfits to the training data,
 you can use the option

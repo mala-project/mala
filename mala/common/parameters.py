@@ -1039,7 +1039,7 @@ class ParametersRunning(ParametersBase):
             - "wandb": Weights and Biases logger.
 
     logging_metrics : list
-        List of metrics to be used for validation. Default is ["ldos"].
+        List of metrics to be used for logging. Default is ["ldos"].
         Possible options are:
 
             - "ldos": MSE of the LDOS.
@@ -1049,15 +1049,21 @@ class ParametersRunning(ParametersBase):
             - "total_energy_actual_fe": Total energy computed with ground truth Fermi energy.
             - "fermi_energy": Fermi energy.
             - "density": Electron density.
-            - "density_relative": Rlectron density (MAPE).
+            - "density_relative": Electron density (MAPE).
             - "dos": Density of states.
             - "dos_relative": Density of states (MAPE).
+            
+        The units for energy metrics are meV/atom.
+        Selected metrics are evalauted every `logging_metrics_interval` (see below) epochs.
+        To use the energy metrics the validation snapshots need not be shuffled.
+        Note that evaluating the energy metrics takes considerably longer than just LDOS
+        and therefore it is discouraged.
 
     log_metrics_on_train_set : bool
-        Whether to validate on the training data as well. Default is False.
+        Whether to also log metrics evaluated on the training set. Default is False.
 
-    logging_metrics_freq : int
-        Determines how often validation is performed. Default is 1.
+    logging_metrics_interval : int
+        Determines how often (in the unit of epochs) metrics are logged. Default is 1.
 
     training_log_interval : int
         Determines how often detailed performance info is printed during
@@ -1118,7 +1124,7 @@ class ParametersRunning(ParametersBase):
         self.logger = None
         self.logging_metrics = ["ldos"]
         self.log_metrics_on_train_set = False
-        self.logging_metrics_freq = 1
+        self.logging_metrics_interval = 1
         self.inference_data_grid = [0, 0, 0]
         self.use_mixed_precision = False
         self.use_graphs = False
@@ -1147,11 +1153,27 @@ class ParametersRunning(ParametersBase):
 
         Metric for evaluated on the validation set during training.
         Default is "ldos", meaning that the regular loss on the LDOS will be
-        used as a metric. Possible options are "band_energy" and
-        "total_energy". For these, the band resp. total energy of the
-        validation snapshots will be calculated and compared to the provided
-        DFT results. Of these, the mean average error in eV/atom will be
-        calculated.
+        used as a metric.
+        
+        Possible options are:
+
+            - "ldos": MSE of the LDOS.
+            - "band_energy": Band energy.
+            - "band_energy_actual_fe": Band energy computed with ground truth Fermi energy.
+            - "total_energy": Total energy.
+            - "total_energy_actual_fe": Total energy computed with ground truth Fermi energy.
+            - "fermi_energy": Fermi energy.
+            - "density": Electron density.
+            - "density_relative": Electron density (MAPE).
+            - "dos": Density of states.
+            - "dos_relative": Density of states (MAPE).
+        
+        The units for energy metrics are meV/atom.
+        Selected metric is evalauted every epoch.
+        The validation metric is used as a criterion for early stopping and also
+        for checkpointing the best model.
+        Note that evaluating the energy metrics takes considerably longer than LDOS
+        and therefore it is discouraged.
         """
         return self._validation_metric
 
@@ -1170,15 +1192,14 @@ class ParametersRunning(ParametersBase):
     @property
     def final_validation_metric(self):
         """
-        Get the metric used during training.
+        Metric for final model evaluation.
 
-        Metric for evaluated on the validation and test set before and after
-        training. Default is "LDOS", meaning that the regular loss on the LDOS
-        will be used as a metric. Possible options are "band_energy" and
-        "total_energy". For these, the band resp. total energy of the
-        validation snapshots will be calculated and compared to the provided
-        DFT results. Of these, the mean average error in eV/atom will be
-        calculated.
+        This metric is evaluated on the validation set after training.
+        Available options are the same as for `validation_metric`.
+        Default is "LDOS", meaning that MSE of the LDOS
+        will be used as a metric.
+        The final validation metric is used as a target
+        for hyperparameter optimization.
         """
         return self._final_validation_metric
 
