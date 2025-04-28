@@ -251,6 +251,7 @@ class Bispectrum(Descriptor):
                     "MALA cannot compute bispectrum descriptors for "
                     "multi-element systems with GPU currently if weights "
                     "are not all 1.0. Please adjust weights or disable GPU."
+                    ""
                 )
 
             for i in range(len(self.parameters.bispectrum_element_weights)):
