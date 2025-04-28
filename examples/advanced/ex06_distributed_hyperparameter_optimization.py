@@ -42,14 +42,14 @@ parameters.targets.ldos_gridoffset_ev = -5
 parameters.hyperparameters.number_training_per_trial = 3
 
 # Hyperparameter optimization can be further refined by using ensemble training
-# at each step and by using a different metric then the validation loss
+# at each step and by using a different metric then the test metric
 # (e.g. the band energy). It is recommended not to use the ensemble training
 # method in Single-GPU use, as it naturally drastically decreases performance.
-# For this small example setting, using the band energy as the after training
+# For this small example setting, using the band energy as the test
 # metric is not recommended, since the small data size makes
 # an accurate hyperparameter search difficult. For larger systems, enabling
 # this option is recommended.
-# parameters.running.after_training_metric = "band_energy"
+# parameters.running.final_validation_metric = "band_energy"
 
 data_handler = mala.DataHandler(parameters)
 

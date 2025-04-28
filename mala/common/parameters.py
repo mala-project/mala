@@ -1038,7 +1038,7 @@ class ParametersRunning(ParametersBase):
             - "tensorboard": Tensorboard logger.
             - "wandb": Weights and Biases logger.
 
-    validation_metrics : list
+    logging_metrics : list
         List of metrics to be used for validation. Default is ["ldos"].
         Possible options are:
 
@@ -1053,10 +1053,10 @@ class ParametersRunning(ParametersBase):
             - "dos": Density of states.
             - "dos_relative": Density of states (MAPE).
 
-    validate_on_training_data : bool
+    log_metrics_on_train_set : bool
         Whether to validate on the training data as well. Default is False.
 
-    validate_every_n_epochs : int
+    logging_metrics_freq : int
         Determines how often validation is performed. Default is 1.
 
     training_log_interval : int
@@ -1103,8 +1103,8 @@ class ParametersRunning(ParametersBase):
         self.learning_rate_scheduler = None
         self.learning_rate_decay = 0.1
         self.learning_rate_patience = 0
-        self._during_training_metric = "ldos"
-        self._after_training_metric = "ldos"
+        self._validation_metric = "ldos"
+        self._final_validation_metric = "ldos"
         # self.use_compression = False
         self.num_workers = 0
         self.use_shuffling_for_samplers = True
@@ -1116,9 +1116,9 @@ class ParametersRunning(ParametersBase):
         self.logging_dir = "./mala_logging"
         self.logging_dir_append_date = True
         self.logger = None
-        self.validation_metrics = ["ldos"]
-        self.validate_on_training_data = False
-        self.validate_every_n_epochs = 1
+        self.logging_metrics = ["ldos"]
+        self.log_metrics_on_train_set = False
+        self.logging_metrics_freq = 1
         self.inference_data_grid = [0, 0, 0]
         self.use_mixed_precision = False
         self.use_graphs = False
@@ -1137,11 +1137,11 @@ class ParametersRunning(ParametersBase):
             New DDP setting.
         """
         super(ParametersRunning, self)._update_ddp(new_ddp)
-        self.during_training_metric = self.during_training_metric
-        self.after_training_metric = self.after_training_metric
+        self.validation_metric = self.validation_metric
+        self.final_validation_metric = self.final_validation_metric
 
     @property
-    def during_training_metric(self):
+    def validation_metric(self):
         """
         Control the metric used during training.
 
@@ -1153,22 +1153,22 @@ class ParametersRunning(ParametersBase):
         DFT results. Of these, the mean average error in eV/atom will be
         calculated.
         """
-        return self._during_training_metric
+        return self._validation_metric
 
-    @during_training_metric.setter
-    def during_training_metric(self, value):
+    @validation_metric.setter
+    def validation_metric(self, value):
         if value != "ldos":
             if self._configuration["ddp"]:
                 raise Exception(
                     "Currently, MALA can only operate with the "
                     '"ldos" metric for ddp runs.'
                 )
-            if value not in self.validation_metrics:
-                self.validation_metrics.append(value)
-        self._during_training_metric = value
+            if value not in self.logging_metrics:
+                self.logging_metrics.append(value)
+        self._validation_metric = value
 
     @property
-    def after_training_metric(self):
+    def final_validation_metric(self):
         """
         Get the metric used during training.
 
@@ -1180,17 +1180,17 @@ class ParametersRunning(ParametersBase):
         DFT results. Of these, the mean average error in eV/atom will be
         calculated.
         """
-        return self._after_training_metric
+        return self._final_validation_metric
 
-    @after_training_metric.setter
-    def after_training_metric(self, value):
+    @final_validation_metric.setter
+    def final_validation_metric(self, value):
         if value != "ldos":
             if self._configuration["ddp"]:
                 raise Exception(
                     "Currently, MALA can only operate with the "
                     '"ldos" metric for ddp runs.'
                 )
-        self._after_training_metric = value
+        self._final_validation_metric = value
 
     @property
     def use_graphs(self):

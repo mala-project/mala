@@ -27,8 +27,8 @@ parameters.running.optimizer = "Adam"
 # files into.
 parameters.running.logger = "tensorboard"
 parameters.running.logging_dir = "mala_vis"
-parameters.running.validation_metrics = ["ldos", "band_energy"]
-parameters.running.validate_every_n_epochs = 5
+parameters.running.logging_metrics = ["ldos", "band_energy"]
+parameters.running.logging_metrics_freq = 5
 
 data_handler = mala.DataHandler(parameters)
 data_handler.add_snapshot(
