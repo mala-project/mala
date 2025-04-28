@@ -1149,9 +1149,9 @@ class ParametersRunning(ParametersBase):
     @property
     def validation_metric(self):
         """
-        Control the metric used during training.
+        Control the metric used for validation.
 
-        Metric for evaluated on the validation set during training.
+        Metric to be evaluated on the validation set during training.
         Default is "ldos", meaning that the regular loss on the LDOS will be
         used as a metric.
         
@@ -1169,7 +1169,7 @@ class ParametersRunning(ParametersBase):
             - "dos_relative": Density of states (MAPE).
         
         The units for energy metrics are meV/atom.
-        Selected metric is evalauted every epoch.
+        Selected metric is evalauted after every epoch on the validation set.
         The validation metric is used as a criterion for early stopping and also
         for checkpointing the best model.
         Note that evaluating the energy metrics takes considerably longer than LDOS
