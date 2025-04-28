@@ -206,13 +206,10 @@ class AtomicDensity(Descriptor):
         lammps_dict = {
             "rcutfac": self.parameters.atomic_density_cutoff,
         }
-        if len(set(self._atoms.numbers)) == 1:
-            lammps_dict["sigma"] = self.parameters.atomic_density_sigma
-        else:
-            for i in range(len(set(self._atoms.numbers))):
-                lammps_dict["sigma" + str(i + 1)] = (
-                    self.parameters.atomic_density_sigma
-                )
+        for i in range(len(set(self._atoms.numbers))):
+            lammps_dict["sigma" + str(i + 1)] = (
+                self.parameters.atomic_density_sigma
+            )
 
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 

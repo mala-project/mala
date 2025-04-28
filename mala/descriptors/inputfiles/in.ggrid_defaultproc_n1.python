@@ -11,13 +11,13 @@ mass * 1.0
 
 
 # is this important? or does it just need to be big enough?
-variable	radelem equal 0.5
+variable	radelem1 equal 0.5
 variable rcutneigh equal 2.0*${rcutfac}*${radelem}
 
 pair_style zero ${rcutneigh}
 pair_coeff * *
 
-compute ggrid all gaussian/grid/local  grid ${ngridx} ${ngridy} ${ngridz}  ${rcutfac}  ${radelem}  ${sigma}
+compute ggrid all gaussian/grid/local  grid ${ngridx} ${ngridy} ${ngridz}  ${rcutfac}  ${radelem1}  ${sigma1}
 
 thermo_modify norm yes
 
