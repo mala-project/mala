@@ -580,6 +580,7 @@ class DataScaler:
     def load_from_file(cls, file, save_format="json", auto_convert=True):
         """
         Load a saved Scaler object.
+        
         Parameters
         ----------
         file : string or ZipExtFile
