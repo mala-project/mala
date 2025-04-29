@@ -114,7 +114,7 @@ a physical validation metric such as
 
       .. code-block:: python
 
-            parameters.running.after_training_metric = "band_energy"
+            parameters.running.final_validation_metric = "band_energy"
 
 Advanced optimization algorithms
 ********************************
