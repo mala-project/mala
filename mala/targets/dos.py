@@ -519,7 +519,7 @@ class DOS(Target):
             atoms_object = self.atoms
         else:
             atoms_object = ase.io.read(path, format="espresso-out")
-        kweights = atoms_object.get_calculator().get_k_point_weights()
+        kweights = atoms_object.calc.get_k_point_weights()
         if kweights is None:
             raise Exception(
                 "QE output file does not contain band information."
@@ -551,9 +551,7 @@ class DOS(Target):
 
             dos_per_band = gaussians(
                 self.energy_grid[previous_beginning:size_for_spacing],
-                atoms_object.get_calculator()
-                .band_structure()
-                .energies[0, :, :],
+                atoms_object.calc.band_structure().energies[0, :, :],
                 _smearing_factors[spacing_idx] * grid_spacing,
             )
             dos_per_band = kweights[:, np.newaxis, np.newaxis] * dos_per_band
