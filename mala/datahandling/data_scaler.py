@@ -580,7 +580,6 @@ class DataScaler:
     def load_from_file(cls, file, save_format="json", auto_convert=True):
         """
         Load a saved Scaler object.
-
         Parameters
         ----------
         file : string or ZipExtFile
@@ -597,7 +596,6 @@ class DataScaler:
         data_scaler : DataScaler
             DataScaler which was read from the file.
         """
-
         if isinstance(file, str):
             filename = file
         elif hasattr(file, 'name'): # getting fname from zip file
