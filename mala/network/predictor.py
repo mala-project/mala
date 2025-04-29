@@ -47,6 +47,9 @@ class Predictor(Runner):
         self._number_of_batches_per_snapshot = 0
         self.target_calculator = data.target_calculator
 
+        self.input_data = None
+        self.output_data = None
+
     def predict_from_qeout(self, path_to_file, gather_ldos=False):
         """
         Get predicted LDOS for the atomic configuration of a QE.out file.
@@ -74,7 +77,14 @@ class Predictor(Runner):
             self.data.target_calculator.atoms, gather_ldos=gather_ldos
         )
 
-    def predict_for_atoms(self, atoms, gather_ldos=False, temperature=None):
+    def predict_for_atoms(
+        self,
+        atoms,
+        gather_ldos=False,
+        temperature=None,
+        save_grads=False,
+        pass_descriptors=None,
+    ):
         """
         Get predicted LDOS for an atomic configuration.
 
@@ -128,24 +138,32 @@ class Predictor(Runner):
         self.data.target_calculator.invalidate_target()
 
         # Calculate descriptors.
-        time_before = perf_counter()
-        snap_descriptors, local_size = (
-            self.data.descriptor_calculator.calculate_from_atoms(
-                atoms, self.data.grid_dimension
-            )
-        )
-        printout(
-            "Time for descriptor calculation: {:.8f}s".format(
-                perf_counter() - time_before
-            ),
-            min_verbosity=2,
-        )
 
+        if pass_descriptors is None:
+            time_before = perf_counter()
+            snap_descriptors, local_size = (
+                self.data.descriptor_calculator.calculate_from_atoms(
+                    atoms, self.data.grid_dimension
+                )
+            )
+            printout(
+                "Time for descriptor calculation: {:.8f}s".format(
+                    perf_counter() - time_before
+                ),
+                min_verbosity=2,
+            )
+            feature_length = self.data.descriptor_calculator.feature_size
+            descs_with_xyz = (
+                self.data.descriptor_calculator.descriptors_contain_xyz
+            )
+        else:
+            snap_descriptors, local_size, feature_length, descs_with_xyz = (
+                pass_descriptors
+            )
         # Provide info from current snapshot to target calculator.
         self.data.target_calculator.read_additional_calculation_data(
             [atoms, self.data.grid_dimension], "atoms+grid"
         )
-        feature_length = self.data.descriptor_calculator.feature_size
 
         # The actual calculation of the LDOS from the descriptors depends
         # on whether we run in parallel or serial. In the former case,
@@ -166,7 +184,7 @@ class Predictor(Runner):
                     return None
 
             else:
-                if self.data.descriptor_calculator.descriptors_contain_xyz:
+                if descs_with_xyz:
                     self.data.target_calculator.local_grid = snap_descriptors[
                         :, 0:3
                     ].copy()
@@ -191,7 +209,8 @@ class Predictor(Runner):
                 )
 
         if get_rank() == 0:
-            if self.data.descriptor_calculator.descriptors_contain_xyz:
+            # if self.data.descriptor_calculator.descriptors_contain_xyz:
+            if descs_with_xyz:
                 snap_descriptors = snap_descriptors[:, :, :, 3:]
                 feature_length -= 3
 
@@ -200,10 +219,17 @@ class Predictor(Runner):
             )
             snap_descriptors = torch.from_numpy(snap_descriptors).float()
             self.data.input_data_scaler.transform(snap_descriptors)
-            return self._forward_snap_descriptors(snap_descriptors)
+            if save_grads is True:
+                self.input_data = snap_descriptors
+                self.input_data.requires_grad = True
+                return self._forward_snap_descriptors(
+                    snap_descriptors, save_torch_outputs=True
+                )
+            else:
+                return self._forward_snap_descriptors(snap_descriptors)
 
     def _forward_snap_descriptors(
-        self, snap_descriptors, local_data_size=None
+        self, snap_descriptors, local_data_size=None, save_torch_outputs=False
     ):
         """
         Forward a scaled tensor of descriptors through the neural network.
@@ -238,6 +264,10 @@ class Predictor(Runner):
         predicted_outputs = np.zeros(
             (local_data_size, self.data.target_calculator.feature_size)
         )
+        if save_torch_outputs:
+            self.output_data = torch.zeros(
+                (local_data_size, self.data.target_calculator.feature_size)
+            )
 
         # Only predict if there is something to predict.
         # Elsewise, we just wait at the barrier down below.
@@ -267,6 +297,8 @@ class Predictor(Runner):
                 inputs = snap_descriptors[sl].to(
                     self.parameters._configuration["device"]
                 )
+                if save_torch_outputs:
+                    self.output_data[sl] = self.network(inputs)
                 predicted_outputs[sl] = (
                     self.data.output_data_scaler.inverse_transform(
                         self.network(inputs).to("cpu"), as_numpy=True

@@ -17,6 +17,7 @@ from mala.targets.calculation_helpers import (
     analytical_integration,
     get_beta,
     entropy_multiplicator,
+   analytical_integration_weights,
 )
 
 
@@ -293,6 +294,15 @@ class DOS(Target):
             )
 
     @cached_property
+    def d_band_energy_d_dos(self):
+        """Derivative of band energy, calculated via cached DOS."""
+        if self.density_of_states is not None:
+            return self.get_d_band_energy_d_dos()
+        else:
+            raise Exception("No cached DOS available to calculate this "
+                            "property.")
+
+    @cached_property
     def number_of_electrons(self):
         """
         Number of electrons in the system, calculated via cached DOS.
@@ -343,6 +353,24 @@ class DOS(Target):
                 "No cached DOS available to calculate this property."
             )
 
+    @cached_property
+    def d_entropy_contribution_d_dos(self):
+        """Derivative of band energy, calculated via cached DOS."""
+        if self.density_of_states is not None:
+            return self.get_d_entropy_contribution_d_dos()
+        else:
+            raise Exception("No cached DOS available to calculate this "
+                            "property.")
+
+    @cached_property
+    def d_number_of_electrons_d_mu(self):
+        """   """
+        if self.density_of_states is not None:
+            return self.get_d_number_of_electrons_d_mu()
+        else:
+            raise Exception("No cached DOS available to calculate this "
+                            "property.")
+
     def uncache_properties(self):
         """Uncache all cached properties of this calculator."""
         if self._is_property_cached("number_of_electrons"):
@@ -351,8 +379,16 @@ class DOS(Target):
             del self.energy_grid
         if self._is_property_cached("band_energy"):
             del self.band_energy
+        if self._is_property_cached("entropy_contribution"):
+            del self.entropy_contribution
         if self._is_property_cached("fermi_energy"):
             del self.fermi_energy
+        if self._is_property_cached("d_band_energy_dos"):
+            del self.d_band_energy_d_dos
+        if self._is_property_cached("d_entropy_contribution_d_dos"):
+            del self.d_entropy_contribution_d_dos
+        if self._is_property_cached("d_number_of_electrons_d_mu"):
+            del self.d_number_of_electrons_d_mu
 
     ##############################
     # Methods
@@ -659,7 +695,6 @@ class DOS(Target):
             Band energy in eV.
         """
         # Parse the parameters.
-        # Parse the parameters.
         if dos_data is None and self.density_of_states is None:
             raise Exception(
                 "No DOS data provided, cannot calculate this quantity."
@@ -709,13 +744,81 @@ class DOS(Target):
                 integration_method,
             )
 
-        return self.__band_energy_from_dos(
-            dos_data,
-            energy_grid,
-            fermi_energy,
-            temperature,
-            integration_method,
-        )
+    def get_d_band_energy_d_dos(self, dos_data=None, fermi_energy=None,
+                                temperature=None, broadcast_derivative=True,
+                                number_of_electrons=None):
+        """
+        Calculate the derivative of the band energy with respect to the DOS.
+
+        Note that the derivative is taken at a constant number of electrons
+        with the assumption that the change in the number of electrons is
+        compensated by a change in the Fermi energy. This makes sense in
+        metals, but probably does not make sense in insulators or
+        semiconductors.
+
+        Parameters
+        ----------
+        dos_data : numpy.array
+            DOS data with dimension [energygrid].
+
+        fermi_energy : float
+            Fermi energy level in eV.
+
+        temperature : float
+            Temperature in K.
+
+        broadcast_derivative : bool
+            If True then the band energy will only be calculated on one
+            rank and thereafter be distributed to all other ranks.
+
+        Returns
+        -------
+        d_band_energy_d_DOS : numpy.array with dimension [energygrid].
+            Derivative of the band energy (in eV) with respect to the DOS.
+        """
+        # Parse the parameters.
+        if dos_data is None and self.density_of_states is None:
+            raise Exception("No DOS data provided, cannot calculate"
+                            " this quantity.")
+
+        # Here we check whether we will use our internal, cached
+        # DOS, or calculate everything from scratch.
+        if dos_data is not None:
+            if fermi_energy is None:
+                printout("Warning: No fermi energy was provided or could be "
+                         "calculated from electronic structure data. "
+                         "Using the DFT fermi energy, this may "
+                         "yield unexpected results", min_verbosity=1)
+                fermi_energy = self.fermi_energy_dft
+                number_of_electrons = self.number_of_electrons_exact
+        else:
+            dos_data = self.density_of_states
+            fermi_energy = self.fermi_energy
+            number_of_electrons = self.number_of_electrons
+
+        if temperature is None:
+            temperature = self.temperature
+
+        if self.parameters._configuration["mpi"] and broadcast_derivative:
+            if get_rank() == 0:
+                energy_grid = self.energy_grid
+                d_band_energy_d_dos = self.\
+                    __d_band_energy_d_dos_from_dos(dos_data, energy_grid,
+                                                   fermi_energy, temperature,
+                                                   number_of_electrons)
+            else:
+                d_band_energy_d_dos = None
+
+            d_band_energy_d_dos = get_comm().bcast(d_band_energy_d_dos,
+                                                   root=0)
+            barrier()
+            return d_band_energy_d_dos
+        else:
+            energy_grid = self.energy_grid
+            return self.\
+                __d_band_energy_d_dos_from_dos(dos_data, energy_grid,
+                                               fermi_energy, temperature,
+                                               number_of_electrons)
 
     def get_number_of_electrons(
         self,
@@ -872,6 +975,132 @@ class DOS(Target):
                 temperature,
                 integration_method,
             )
+
+    def get_d_entropy_contribution_d_dos(self, dos_data=None,
+                                         fermi_energy=None,
+                                         temperature=None,
+                                         broadcast_derivative=True):
+        """
+        Calculate the derivative of the entropy contribution w.r.t the DOS.
+
+        Note that the derivative is taken at a constant number of electrons
+        with the assumption that the change in the number of electrons is
+        compensated by a change in the Fermi energy. This makes sense in
+        metals, but probably does not make sense in insulators or
+        semiconductors.
+
+        Parameters
+        ----------
+        dos_data : numpy.array
+            DOS data with dimension [energygrid]. If None, then the cached
+            DOS will be used for the calculation.
+
+        fermi_energy : float
+            Fermi energy level in eV.
+
+        temperature : float
+            Temperature in K.
+
+        broadcast_derivative : bool
+            If True then the derivative will only be calculated on one
+            rank and thereafter be distributed to all other ranks.
+
+        Returns
+        -------
+        entropy_contribution : float
+            S/beta in eV.
+        """
+        # Parse the parameters.
+        if dos_data is None and self.density_of_states is None:
+            raise Exception("No DOS data provided, cannot calculate"
+                            " this quantity.")
+
+        # Here we check whether we will use our internal, cached
+        # DOS, or calculate everything from scratch.
+        if dos_data is not None:
+            if fermi_energy is None:
+                printout("Warning: No fermi energy was provided or could be "
+                         "calculated from electronic structure data. "
+                         "Using the DFT fermi energy, this may "
+                         "yield unexpected results", min_verbosity=1)
+                fermi_energy = self.fermi_energy_dft
+        else:
+            dos_data = self.density_of_states
+            fermi_energy = self.fermi_energy
+        if temperature is None:
+            temperature = self.temperature
+
+        if self.parameters._configuration["mpi"] and broadcast_derivative:
+            if get_rank() == 0:
+                energy_grid = self.energy_grid
+                entropy = self. \
+                    __d_entropy_contribution_d_dos_from_dos(dos_data, energy_grid,
+                                                            fermi_energy, temperature)
+            else:
+                entropy = None
+
+            entropy = get_comm().bcast(entropy, root=0)
+            barrier()
+            return entropy
+        else:
+            energy_grid = self.energy_grid
+            return self. \
+                __d_entropy_contribution_d_dos_from_dos(dos_data, energy_grid,
+                                                fermi_energy, temperature)
+
+    def get_d_number_of_electrons_d_mu(self, dos_data=None,
+                                       fermi_energy=None,
+                                       temperature=None,
+                                       broadcast_derivative=True,
+                                       delta=None):
+        """
+
+        Returns
+        -------
+
+        """
+        # Parse the parameters.
+        if dos_data is None and self.density_of_states is None:
+            raise Exception("No DOS data provided, cannot calculate"
+                            " this quantity.")
+
+        # Here we check whether we will use our internal, cached
+        # DOS, or calculate everything from scratch.
+        if dos_data is not None:
+            if fermi_energy is None:
+                printout("Warning: No fermi energy was provided or could be "
+                         "calculated from electronic structure data. "
+                         "Using the DFT fermi energy, this may "
+                         "yield unexpected results", min_verbosity=1)
+                fermi_energy = self.fermi_energy_dft
+        else:
+            dos_data = self.density_of_states
+            fermi_energy = self.fermi_energy
+        if temperature is None:
+            temperature = self.temperature
+
+        if delta is None:
+            delta = self.parameters.delta_forces
+
+        if self.parameters._configuration["mpi"] and broadcast_derivative:
+            if get_rank() == 0:
+                energy_grid = self.energy_grid
+                derivative = self. \
+                    __d_number_of_electrons_d_mu(dos_data, energy_grid,
+                                                 fermi_energy, temperature,
+                                                 delta)
+            else:
+                derivative = None
+
+            derivative = get_comm().bcast(derivative, root=0)
+            barrier()
+            return derivative
+        else:
+            energy_grid = self.energy_grid
+            return self. \
+                __d_number_of_electrons_d_mu(dos_data, energy_grid,
+                                                fermi_energy, temperature,
+                                             delta)
 
     def get_self_consistent_fermi_energy(
         self,
@@ -1158,6 +1387,76 @@ class DOS(Target):
         return band_energy
 
     @staticmethod
+    def __d_band_energy_d_dos_from_dos(dos_data, energy_grid, fermi_energy,
+                                       temperature, number_of_electrons):
+        """Calculate the derivative of the band energy w.r.t. the DOS."""
+        d_band_energy_minus_uN_d_dos = \
+            analytical_integration_weights("F1", "F2", fermi_energy,
+                                           energy_grid, temperature)
+        d_number_of_electrons_d_dos = \
+            analytical_integration_weights("F0", "F1", fermi_energy,
+                                           energy_grid, temperature)
+
+        # The following crude numerical derivatives could be replaced with
+        # analytic derivatives with some work.Or they could be replaced with
+        # more sophisticated numerical derivatives.
+        delta = 0.001
+        d_number_of_electrons_d_mu = (analytical_integration(dos_data, "F0",
+                                                             "F1",
+                                                             fermi_energy +
+                                                             delta,
+                                                             energy_grid,
+                                                             temperature)
+                                      - analytical_integration(dos_data, "F0",
+                                                               "F1",
+                                                               fermi_energy -
+                                                               delta,
+                                                               energy_grid,
+                                                               temperature)) /\
+                                     (2.0*delta)
+        d_band_energy_minus_uN_d_mu = (analytical_integration(dos_data, "F1",
+                                                              "F2",
+                                                              fermi_energy +
+                                                              delta,
+                                                              energy_grid,
+                                                              temperature)
+                                       - analytical_integration(dos_data, "F1",
+                                                                "F2",
+                                                                fermi_energy
+                                                                - delta,
+                                                                energy_grid,
+                                                                temperature))/\
+                                      (2.0*delta)
+        d_band_energy_d_mu = d_band_energy_minus_uN_d_mu + number_of_electrons
+
+        # Since the number of electrons is constant
+        # \frac{dN}{dDOS} = (\partial{dN}{dDOS})_{\mu} +
+        # \frac{dN}{d\mu}*\frac{d\mu}{dDOS} = 0
+        # So,
+        #   \frac{d\mu}{dDOS} = - (\partial{dN}{dDOS})_{\mu} / \frac{dN}{d\mu}
+        #
+        # Also,
+        #   \frac{d(E - \mu*N)}{dDOS} = (\partial{d(E - \mu*N)}{dDOS})_{\mu} +
+        #   \frac{d(E - \mu*N)}{d\mu}*\frac{d\mu}{dDOS}
+        #   \frac{dE}{dDOS} - \frac{d\mu}{dDOS}*N = (\partial{d(E -
+        #   \mu*N)}{dDOS})_{\mu} + \frac{dE}{d\mu}*\frac{d\mu}{dDOS} -
+        #   N*\frac{d\mu}{dDOS}
+        #   \frac{dE}{dDOS} = (\partial{d(E - \mu*N)}{dDOS})_{\mu} +
+        #   \frac{dE}{d\mu}*\frac{d\mu}{dDOS}
+        #
+        # Combining and rearranging,
+        #   \frac{dE}{dDOS} = (\partial{d(E - \mu*N)}{dDOS})_{\mu} -
+        #   \frac{dE}{d\mu}*(\partial{dN}{dDOS})_{\mu} / \frac{dN}{d\mu}
+        #                   = (\partial{d(E - \mu*N)}{dDOS})_{\mu} -
+        #                   (\partial{dN}{dDOS})_{\mu}*\frac{dE}{d\mu}/\frac{dN}{d\mu}
+
+        d_band_energy_d_dos = d_band_energy_minus_uN_d_dos \
+                              - d_number_of_electrons_d_dos * \
+                              d_band_energy_d_mu / d_number_of_electrons_d_mu
+
+        return d_band_energy_d_dos
+
+    @staticmethod
     def __entropy_contribution_from_dos(
         dos_data, energy_grid, fermi_energy, temperature, integration_method
     ):
@@ -1228,3 +1527,76 @@ class DOS(Target):
             raise Exception("Unknown integration method.")
 
         return entropy_contribution
+
+
+    @staticmethod
+    def __d_entropy_contribution_d_dos_from_dos(dos_data, energy_grid, fermi_energy,
+                                                temperature):
+        """Calculate the derivative of the entropy  w.r.t the DOS."""
+        d_entropy_contribution_d_dos = \
+            analytical_integration_weights("S0", "S1", fermi_energy,
+                                           energy_grid, temperature)
+        d_number_of_electrons_d_dos = \
+            analytical_integration_weights("F0", "F1", fermi_energy,
+                                           energy_grid, temperature)
+        # The following crude numerical derivatives could be replaced with
+        # analytic derivatives with some work.
+        # Or they could be replaced with more sophisticated numerical
+        # derivatives.
+        delta = 1e-10
+        d_number_of_electrons_d_mu = (analytical_integration(dos_data, "F0", "F1",
+                                                             fermi_energy + delta,
+                                                             energy_grid,
+                                                             temperature) \
+                                      - analytical_integration(dos_data, "F0", "F1",
+                                                               fermi_energy - delta,
+                                                               energy_grid,
+                                                               temperature)) / (
+                                                 2.0 * delta)
+        d_entropy_contribution_d_mu = (analytical_integration(dos_data, "S0", "S1",
+                                                              fermi_energy + delta,
+                                                              energy_grid,
+                                                              temperature) \
+                                       - analytical_integration(dos_data, "S0", "S1",
+                                                                fermi_energy - delta,
+                                                                energy_grid,
+                                                                temperature)) / (
+                                                  2.0 * delta)
+
+        # Since the number of electrons is constant
+        # \frac{dN}{dDOS} = (\partial{dN}{dDOS})_{\mu} +
+        # \frac{dN}{d\mu}*\frac{d\mu}{dDOS} = 0
+        # So,
+        #   \frac{d\mu}{dDOS} = - (\partial{dN}{dDOS})_{\mu} /
+        #                      \frac{dN}{d\mu}
+        #
+        # Also,
+        #   \frac{dTS}{dDOS} = (\partial{dTS}{dDOS})_{\mu} +
+        #                      \frac{dTS}{d\mu}*\frac{d\mu}{dDOS}
+        #                    = (\partial{dTS}{dDOS})_{\mu} -
+        #                    \frac{dTS}{d\mu}*(\partial{dN}{dDOS})_{\mu} / \frac{dN}{d\mu}
+        #                    = (\partial{dTS}{dDOS})_{\mu} -
+        #                    (\partial{dN}{dDOS})_{\mu} * \frac{dTS}{d\mu}/\frac{dN}{d\mu}
+
+        d_entropy_contribution_d_dos = d_entropy_contribution_d_dos \
+                                       - d_number_of_electrons_d_dos * d_entropy_contribution_d_mu / d_number_of_electrons_d_mu
+        return d_entropy_contribution_d_dos
+
+    @staticmethod
+    def __d_number_of_electrons_d_mu(dos_data, energy_grid, fermi_energy,
+                                     temperature, delta):
+        d_number_of_electrons_d_mu = (analytical_integration(dos_data, "F0",
+                                                             "F1",
+                                                             fermi_energy +
+                                                             delta,
+                                                             energy_grid,
+                                                             temperature)
+                                      - analytical_integration(dos_data, "F0",
+                                                               "F1",
+                                                               fermi_energy -
+                                                               delta,
+                                                               energy_grid,
+                                                               temperature)) /\
+                                     (2.0*delta)
+        return d_number_of_electrons_d_mu
+

@@ -329,6 +329,19 @@ class Density(Target):
                 "No cached density available to calculate this property."
             )
 
+    @cached_property
+    def force_contributions(self):
+        """
+        All density based contributions to the forces.
+
+        Calculated via the cached density.
+        """
+        if self.density is not None:
+            return self.get_force_contributions()
+        else:
+            raise Exception("No cached density available to "
+                            "calculate this property.")
+
     def uncache_properties(self):
         """Uncache all cached properties of this calculator."""
         if self._is_property_cached("number_of_electrons"):
@@ -336,6 +349,9 @@ class Density(Target):
 
         if self._is_property_cached("total_energy_contributions"):
             del self.total_energy_contributions
+
+        if self._is_property_cached("force_contributions"):
+            del self.force_contributions
 
     ##############################
     # Methods
@@ -836,54 +852,9 @@ class Density(Target):
         }
         return energies_dict
 
-    def get_atomic_forces(
-        self,
-        density_data=None,
-        create_file=True,
-        atoms_Angstrom=None,
-        qe_input_data=None,
-        qe_pseudopotentials=None,
-    ):
-        """
-        Calculate the atomic forces.
-
-        This function uses an interface to QE. The atomic forces are
-        calculated via the Hellman-Feynman theorem, although only the local
-        contributions are calculated. The non-local contributions, as well
-        as the SCF correction (so anything wavefunction dependent) are ignored.
-        Therefore, this function is best used for data that was created using
-        local pseudopotentials.
-
-        Parameters
-        ----------
-        density_data : numpy.ndarray
-            Density data on a grid. If None, then the cached
-            density will be used for the calculation.
-
-        create_file : bool
-            If False, the last mala.pw.scf.in file will be used as input for
-            Quantum Espresso. If True (recommended), MALA will create this
-            file according to calculation parameters.
-
-        atoms_Angstrom : ase.Atoms
-            ASE atoms object for the current system. If None, MALA will
-            create one.
-
-        qe_input_data : dict
-            Quantum Espresso parameters dictionary for the ASE<->QE interface.
-            If None (recommended), MALA will create one.
-
-        qe_pseudopotentials : dict
-            Quantum Espresso pseudopotential dictionaty for the ASE<->QE
-            interface. If None (recommended), MALA will create one.
-
-        Returns
-        -------
-        atomic_forces : numpy.ndarray
-            An array of the form (natoms, 3), containing the atomic forces
-            in eV/Ang.
-
-        """
+    def get_force_contributions(self, density_data=None, create_file=True,
+                                atoms_Angstrom=None, qe_input_data=None,
+                                qe_pseudopotentials=None):
         if density_data is None:
             density_data = self.density
             if density_data is None:
@@ -892,27 +863,48 @@ class Density(Target):
                     " this quantity."
                 )
 
-        # First, set up the total energy module for calculation.
         if atoms_Angstrom is None:
             atoms_Angstrom = self.atoms
-        self.__setup_total_energy_module(
-            density_data,
-            atoms_Angstrom,
-            create_file=create_file,
-            qe_input_data=qe_input_data,
-            qe_pseudopotentials=qe_pseudopotentials,
-        )
 
-        # Now calculate the forces.
-        atomic_forces = np.array(
-            te.calc_forces(len(atoms_Angstrom))
-        ).transpose()
+        # If the total energy has been calculated, we don't need to
+        # re-execute this particular code.
+        if self._is_property_cached("total_energy_contributions"):
+            pass
+        else:
+            self.__setup_total_energy_module(density_data, atoms_Angstrom,
+                                             create_file=create_file,
+                                             qe_input_data=qe_input_data,
+                                             qe_pseudopotentials=
+                                             qe_pseudopotentials)
 
-        # QE returns the forces in Ry/Bohr.
-        atomic_forces = AtomicForce.convert_units(
-            atomic_forces, in_units="Ry/Bohr"
-        )
-        return atomic_forces
+        # Get the number of gridpoints in QE and MALA.
+        number_of_gridpoints = te.get_nnr()
+        if len(density_data.shape) == 4:
+            number_of_gridpoints_mala = density_data.shape[0] * \
+                                        density_data.shape[1] * \
+                                        density_data.shape[2]
+        elif len(density_data.shape) == 2:
+            number_of_gridpoints_mala = density_data.shape[0]
+        else:
+            raise Exception("Density data has wrong dimensions. ")
+
+        spin = te.get_nspin()
+
+        # Putting the force contributions together.
+        # @Normand: If you add more things to be extracted from QE,
+        # I would suggest you do it here.
+        # Hartree potential
+        hartree_potential = np.zeros([number_of_gridpoints, 1])
+        te.v_h_wrapper(hartree_potential, number_of_gridpoints, spin)
+        hartree_potential = np.reshape(hartree_potential,
+                                       self.grid_dimensions+[1], order="F")
+        force_contribution = {"hartree": np.reshape(hartree_potential,
+                                                    [number_of_gridpoints_mala,
+                                                     1],
+                                                    order="C") * Rydberg * \
+                                         self.voxel.volume}
+
+        return force_contribution
 
     @staticmethod
     def get_scaled_positions_for_qe(atoms):

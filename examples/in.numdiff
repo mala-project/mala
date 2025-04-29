@@ -1,0 +1,89 @@
+# example with unique grid type
+
+variable         nfreq equal 1 # how frequently to run fix (should be every step)
+variable         ngridx equal 18 # how many grid points
+variable         ngridy equal 18 # how many grid points
+variable         ngridz equal 27 # how many grid points
+variable         nthermo equal 1 #frequency for printing thermodynamic data
+variable         nrep index 3 # number of repeated unit cells for Ca
+variable         a index 4.1 # fake lattice constant
+variable         fdelta equal 5.0e-7
+variable         fdeltam equal -1.0e-6
+
+units            metal
+atom_modify      map hash
+
+
+boundary         p p p
+#boundary         f f f
+
+read_data        Be_snapshot1.data
+#make a fictitious system to test grid force calculations
+mass             1 9.0
+
+
+pair_style       zero 6.0
+pair_coeff       * *
+
+group            acegroup type 1
+group            first id 1
+group            second id 2
+variable         rcutfac equal 6.0 # define rcutfac for pairstyle_zero (must be bigger than radial cutoffs in coupling_coefficients_Be.yace
+
+variable         ace_options string "coupling_coefficients_Be.yace ugridtype 1"
+
+pair_style       zero ${rcutfac}
+pair_coeff       * * 
+#
+timestep         0.5e-3
+neighbor         0.3 bin
+neigh_modify     every 1 delay 0 check yes
+
+compute          mygrid all pace/grid  grid ${ngridx} ${ngridy} ${ngridz} ${ace_options}
+
+#define lammps python command
+python           pre_force_callback file mala_betas.py
+#python          pre_force_callback file dummy_betas.py
+
+fix             4 all python/acegridforce ${nfreq} pre_force pre_force_callback grid ${ngridx} ${ngridy} ${ngridz} ${ace_options} 
+
+thermo          ${nthermo}
+variable        fsq atom fx^2+fy^2+fz^2
+compute         favsq all reduce ave v_fsq
+
+thermo_style    custom step temp pe etotal press c_favsq
+
+
+dump            1 all custom 1 dump.*.mala id type x y z fx fy fz
+run             0
+
+displace_atoms  first move ${fdelta} 0.0 0.0 units box
+undump 1
+reset_timestep  1
+dump 1 all custom 1 dump.*.mala id type x y z fx fy fz
+run             0
+displace_atoms  first move ${fdeltam} 0.0 0.0 units box
+undump 1
+reset_timestep  2
+dump 1 all custom 1 dump.*.mala id type x y z fx fy fz
+run             0
+displace_atoms  first move ${fdelta} ${fdelta} 0.0 units box
+undump 1
+reset_timestep  3
+dump 1 all custom 1 dump.*.mala id type x y z fx fy fz
+run             0
+displace_atoms  first move 0.0 ${fdeltam} 0.0 units box
+undump 1
+reset_timestep  4
+dump 1 all custom 1 dump.*.mala id type x y z fx fy fz
+run             0
+displace_atoms  first move 0.0 ${fdelta} ${fdelta} units box
+undump 1
+reset_timestep  5
+dump 1 all custom 1 dump.*.mala id type x y z fx fy fz
+run             0
+displace_atoms  first move 0.0 0.0 ${fdeltam} units box
+undump 1
+reset_timestep  6
+dump 1 all custom 1 dump.*.mala id type x y z fx fy fz
+run             0

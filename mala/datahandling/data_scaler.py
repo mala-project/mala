@@ -404,12 +404,16 @@ class DataScaler:
                 if self.scale_standard:
                     scaled -= self.means
                     scaled /= self.stds
-                    unscaled.nan_to_num_(nan = 0.0) #account for possible 0 valued ACE descriptors
+                    scaled.nan_to_num_(
+                        nan=0.0
+                    )  # account for possible 0 valued ACE descriptors
 
                 if self.scale_minmax:
                     scaled -= self.mins
                     scaled /= self.maxs - self.mins
-                    unscaled.nan_to_num_(nan = 0.0) #account for possible 0 valued ACE descriptors
+                    scaled.nan_to_num_(
+                        nan=0.0
+                    )  # account for possible 0 valued ACE descriptors
 
             else:
 
@@ -420,12 +424,102 @@ class DataScaler:
                 if self.scale_standard:
                     scaled -= self.total_mean
                     scaled /= self.total_std
-                    scaled.nan_to_num_(nan = 0.0) #account for possible 0 valued ACE descriptors
+                    scaled.nan_to_num_(
+                        nan=0.0
+                    )  # account for possible 0 valued ACE descriptors
 
                 if self.scale_minmax:
                     scaled -= self.total_min
                     scaled /= self.total_max - self.total_min
-                    scaled.nan_to_num_(nan = 0.0) #account for possible 0 valued ACE descriptors
+                    scaled.nan_to_num_(
+                        nan=0.0
+                    )  # account for possible 0 valued ACE descriptors
+
+        return scaled
+
+    def transform_backpropagation(self, unscaled, copy=False):
+        """
+        Transform data from unscaled to scaled during backpropagation.
+
+        Unscaled means real world data, scaled means data as is used in
+        the network. Data is transformed in-place.
+
+        Parameters
+        ----------
+        unscaled : torch.Tensor
+            Real world data.
+
+        copy : bool
+            If False, data is modified in-place. If True, a copy of the
+            data is modified. Default is False.
+
+        Returns
+        -------
+        scaled : torch.Tensor
+            Scaled data.
+        """
+        if len(unscaled.size()) != 2:
+            raise ValueError(
+                "MALA DataScaler are designed for 2D-arrays, "
+                "while a {0}D-array has been provided.".format(
+                    len(unscaled.size())
+                )
+            )
+
+        # Backward compatability.
+        if not hasattr(self, "scale_minmax") and hasattr(self, "scale_normal"):
+            self.scale_minmax = self.scale_normal
+
+        # First we need to find out if we even have to do anything.
+        if self.scale_standard is False and self.scale_minmax is False:
+            pass
+
+        elif self.cantransform is False:
+            raise Exception(
+                "Transformation cannot be done, this DataScaler "
+                "was never initialized"
+            )
+
+        # Perform the actual scaling, but use no_grad to make sure
+        # that the next couple of iterations stay untracked.
+        scaled = unscaled.clone() if copy else unscaled
+
+        with torch.no_grad():
+            if self.feature_wise:
+
+                ##########################
+                # Feature-wise-scaling
+                ##########################
+
+                if self.scale_standard:
+                    scaled *= self.stds
+                    scaled.nan_to_num_(
+                        nan=0.0
+                    )  # account for possible 0 valued ACE descriptors
+
+                if self.scale_minmax:
+                    scaled *= self.maxs - self.mins
+                    scaled.nan_to_num_(
+                        nan=0.0
+                    )  # account for possible 0 valued ACE descriptors
+
+            else:
+
+                ##########################
+                # Total scaling
+                ##########################
+
+                if self.scale_standard:
+                    scaled *= self.total_std
+                    scaled.nan_to_num_(
+                        nan=0.0
+                    )  # account for possible 0 valued ACE descriptors
+
+                if self.scale_minmax:
+                    scaled *= self.total_max - self.total_min
+                    scaled.nan_to_num_(
+                        nan=0.0
+                    )  # account for possible 0 valued ACE descriptors
 
         return scaled
 
@@ -511,6 +605,94 @@ class DataScaler:
                     if self.scale_minmax:
                         unscaled *= self.total_max - self.total_min
                         unscaled += self.total_min
+
+        if as_numpy:
+            return unscaled.detach().numpy().astype(np.float64)
+        else:
+            return unscaled
+
+    def inverse_transform_backpropagation(
+        self, scaled, copy=False, as_numpy=False
+    ):
+        """
+        Transform data from scaled to unscaled during backpropagation.
+
+        Unscaled means real world data, scaled means data as is used in
+        the network.
+
+        Parameters
+        ----------
+        scaled : torch.Tensor
+            Scaled data.
+
+        as_numpy : bool
+            If True, a numpy array is returned, otherwise a torch tensor.
+
+        copy : bool
+            If False, data is modified in-place. If True, a copy of the
+            data is modified. Default is False.
+
+        Returns
+        -------
+        unscaled : torch.Tensor
+            Real world data.
+
+        """
+        if len(scaled.size()) != 2:
+            raise ValueError(
+                "MALA DataScaler are designed for 2D-arrays, "
+                "while a {0}D-array has been provided.".format(
+                    len(scaled.size())
+                )
+            )
+
+        # Backward compatability.
+        if not hasattr(self, "scale_minmax") and hasattr(self, "scale_normal"):
+            self.scale_minmax = self.scale_normal
+
+        # Perform the actual scaling, but use no_grad to make sure
+        # that the next couple of iterations stay untracked.
+        unscaled = scaled.clone() if copy else scaled
+
+        # First we need to find out if we even have to do anything.
+        if self.scale_standard is False and self.scale_minmax is False:
+            pass
+
+        else:
+            if self.cantransform is False:
+                raise Exception(
+                    "Backtransformation cannot be done, this "
+                    "DataScaler was never initialized"
+                )
+
+            # Perform the actual scaling, but use no_grad to make sure
+            # that the next couple of iterations stay untracked.
+            with torch.no_grad():
+                if self.feature_wise:
+
+                    ##########################
+                    # Feature-wise-scaling
+                    ##########################
+
+                    if self.scale_standard:
+                        unscaled /= self.stds
+                        # unscaled += self.means
+
+                    if self.scale_minmax:
+                        unscaled /= self.maxs - self.mins
+                        # unscaled += self.mins
+
+                else:
+
+                    ##########################
+                    # Total scaling
+                    ##########################
+
+                    if self.scale_standard:
+                        unscaled /= self.total_std
+
+                    if self.scale_minmax:
+                        unscaled /= self.total_max - self.total_min
 
         if as_numpy:
             return unscaled.detach().numpy().astype(np.float64)
