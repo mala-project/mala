@@ -1,9 +1,11 @@
 """Runner class for running networks."""
 
 import os
+import tempfile
 from zipfile import ZipFile, ZIP_STORED
 
 from mala.common.parallelizer import printout
+from mala.common.parallelizer import parallel_warn
 
 import numpy as np
 import torch
@@ -580,8 +582,8 @@ class Runner:
         # performed on rank 0.
         if get_rank() == 0:
             model_file = run_name + ".network.pth"
-            iscaler_file = run_name + ".iscaler.pkl"
-            oscaler_file = run_name + ".oscaler.pkl"
+            iscaler_file = run_name + ".iscaler.json"
+            oscaler_file = run_name + ".oscaler.json"
             params_file = run_name + ".params.json"
             if save_runner:
                 optimizer_file = run_name + ".optimizer.pth"
@@ -632,6 +634,7 @@ class Runner:
         path="./",
         zip_run=True,
         params_format="json",
+        scalers_format="json",
         load_runner=True,
         prepare_data=False,
         load_with_mpi=None,
@@ -666,6 +669,10 @@ class Runner:
             then separate files will be attempted to be loaded.
 
         params_format : str
+            Can be "json" or "pkl", depending on what was saved by the model.
+            Default is "json".
+
+        scalers_format: str
             Can be "json" or "pkl", depending on what was saved by the model.
             Default is "json".
 
@@ -719,17 +726,31 @@ class Runner:
         loaded_info = None
         if zip_run is True:
             loaded_network = run_name + ".network.pth"
-            loaded_iscaler = run_name + ".iscaler.pkl"
-            loaded_oscaler = run_name + ".oscaler.pkl"
+            loaded_iscaler = run_name + ".iscaler." + scalers_format
+            loaded_oscaler = run_name + ".oscaler." + scalers_format
             loaded_params = run_name + ".params." + params_format
             loaded_info = run_name + ".info.json"
+
+            iscale_pickle_flag = False
+            oscale_pickle_flag = False
 
             zip_path = os.path.join(path, run_name + ".zip")
             with ZipFile(zip_path, "r") as zip_obj:
                 loaded_params = zip_obj.open(loaded_params)
                 loaded_network = zip_obj.open(loaded_network)
-                loaded_iscaler = zip_obj.open(loaded_iscaler)
-                loaded_oscaler = zip_obj.open(loaded_oscaler)
+                
+                # If json scaler files not found, try pickle format
+                try:
+                    loaded_iscaler = zip_obj.open(loaded_iscaler)
+                except KeyError:
+                    iscale_pickle_flag = True
+                    loaded_iscaler = zip_obj.open(loaded_iscaler.replace(".json", ".pkl"))   
+                try:
+                    loaded_oscaler = zip_obj.open(loaded_oscaler)
+                except KeyError:
+                    oscale_pickle_flag = True
+                    loaded_oscaler = zip_obj.open(loaded_oscaler.replace(".json", ".pkl"))
+
                 if loaded_info in zip_obj.namelist():
                     loaded_info = zip_obj.open(loaded_info)
                 else:
@@ -737,8 +758,12 @@ class Runner:
 
         else:
             loaded_network = os.path.join(path, run_name + ".network.pth")
-            loaded_iscaler = os.path.join(path, run_name + ".iscaler.pkl")
-            loaded_oscaler = os.path.join(path, run_name + ".oscaler.pkl")
+            loaded_iscaler = os.path.join(
+                path, run_name + ".iscaler." + scalers_format
+            )
+            loaded_oscaler = os.path.join(
+                path, run_name + ".oscaler." + scalers_format
+            )
             loaded_params = os.path.join(
                 path, run_name + ".params." + params_format
             )
@@ -772,6 +797,37 @@ class Runner:
         loaded_network = Network.load_from_file(loaded_params, loaded_network)
         loaded_iscaler = DataScaler.load_from_file(loaded_iscaler)
         loaded_oscaler = DataScaler.load_from_file(loaded_oscaler)
+
+        # only on rank 0, if pickle scaler files are found,
+        # add their json versions to the existing zip file
+        if get_rank() == 0 and (zip_run and (iscale_pickle_flag or oscale_pickle_flag)):
+            parallel_warn(
+                        "Pickle file has been automatically converted to JSON format.",
+                        min_verbosity=0,
+                        category=FutureWarning,
+                    )
+            with tempfile.TemporaryDirectory() as temp_dir:
+                with ZipFile(zip_path, 'r') as zip_read:
+                    zip_read.extractall(temp_dir)
+
+                iscaler_file = run_name + ".iscaler.json"
+                oscaler_file = run_name + ".oscaler.json"
+                
+                loaded_iscaler.save(os.path.join(temp_dir, iscaler_file))
+                loaded_oscaler.save(os.path.join(temp_dir, oscaler_file))
+
+                temp_zip_path = zip_path + ".temp"
+                with ZipFile(temp_zip_path, 'w') as zip_write:
+                    for foldername, subfolders, filenames in os.walk(temp_dir):
+                        for filename in filenames:
+                            file_path = os.path.join(foldername, filename)
+                            arcname = os.path.relpath(file_path, temp_dir)
+                            zip_write.write(file_path, arcname)
+
+                os.replace(temp_zip_path, zip_path)
+            
+
+
         new_datahandler = DataHandler(
             loaded_params,
             input_data_scaler=loaded_iscaler,

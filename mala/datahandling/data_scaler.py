@@ -4,6 +4,8 @@ import pickle
 import numpy as np
 import torch
 import torch.distributed as dist
+import json
+import io
 
 from mala.common.parameters import printout
 from mala.common.parallelizer import parallel_warn
@@ -517,7 +519,7 @@ class DataScaler:
         else:
             return unscaled
 
-    def save(self, filename, save_format="pickle"):
+    def save(self, filename, save_format="json"):
         """
         Save the Scaler object so that it can be accessed again later.
 
@@ -527,23 +529,58 @@ class DataScaler:
             File in which the parameters will be saved.
 
         save_format :
-            File format which will be used for saving.
+            File format which will be used for saving. Default is "json".  
+            Pickle format is deprecated and will be removed in future versions.
         """
         # If we use ddp, only save the network on root.
         if self.use_ddp:
             if dist.get_rank() != 0:
                 return
-        if save_format == "pickle":
+        
+        filename_format = filename.rsplit(".", 1)[1]
+        if save_format == "pickle" or filename_format == "pkl": # similar to "normal" string warning
+            parallel_warn(
+            "Pickle format is deprecated and will be removed in future versions. "
+            "Please use JSON format instead.",
+            min_verbosity=0,
+            category=FutureWarning,
+        )
             with open(filename, "wb") as handle:
                 pickle.dump(self, handle, protocol=4)
+        elif save_format == "json" or filename_format == "json":
+            # saving tensors as lists for json
+            # if scale_normal is used, it will be converted to scale_minmax
+            data_dict = {
+                "typestring": self.typestring,
+                "use_ddp": self.use_ddp,
+                "scale_standard": self.scale_standard,
+                "scale_minmax": (self.scale_minmax 
+                               if hasattr(self, "scale_minmax") 
+                               else self.scale_normal),
+                "feature_wise": self.feature_wise,
+                "cantransform": self.cantransform,
+                "means": self.means.tolist() if hasattr(self.means, "tolist") else [],
+                "stds": self.stds.tolist() if hasattr(self.stds, "tolist") else [],
+                "maxs": self.maxs.tolist() if hasattr(self.maxs, "tolist") else [],
+                "mins": self.mins.tolist() if hasattr(self.mins, "tolist") else [],
+                "total_mean": float(self.total_mean),
+                "total_std": float(self.total_std),
+                "total_max": float(self.total_max),
+                "total_min": float(self.total_min),
+                "total_data_count": self.total_data_count
+            }
+            
+            with open(filename, "w") as handle:
+                json.dump(data_dict, handle, indent=4)
+                
         else:
             raise Exception("Unsupported parameter save format.")
 
     @classmethod
-    def load_from_file(cls, file, save_format="pickle"):
+    def load_from_file(cls, file, save_format="json", auto_convert=True):
         """
         Load a saved Scaler object.
-
+        
         Parameters
         ----------
         file : string or ZipExtFile
@@ -552,17 +589,73 @@ class DataScaler:
         save_format :
             File format which was used for saving.
 
+        auto_convert : bool
+            If True and loading from pickle format, automatically save as JSON for future use.
+
         Returns
         -------
         data_scaler : DataScaler
             DataScaler which was read from the file.
         """
-        if save_format == "pickle":
+        if isinstance(file, str):
+            filename = file
+        elif hasattr(file, 'name'): # getting fname from zip file
+            filename = file.name
+        else:
+            raise Exception("File must be either a string path or a ZipFile object")
+        
+        filename_format = filename.rsplit(".", 1)[1]
+
+        if save_format == "pickle" or filename_format == "pkl":
+            parallel_warn(
+                "Loading from pickle format is deprecated and will be removed in future versions. "
+                "Please convert your files to JSON format.",
+                min_verbosity=0,
+                category=FutureWarning,
+            )
             if isinstance(file, str):
                 loaded_scaler = pickle.load(open(file, "rb"))
-            else:
-                loaded_scaler = pickle.load(file)
-        else:
-            raise Exception("Unsupported parameter save format.")
 
+                if auto_convert:
+                    json_file_path = filename.rsplit(".", 1)[0] + ".json"
+                    loaded_scaler.save(json_file_path, save_format="json")
+                    
+
+            elif hasattr(file, 'name'):
+                loaded_scaler = pickle.load(file)
+
+            parallel_warn(
+                        "Pickle file has been automatically converted to JSON format.",
+                        min_verbosity=0,
+                        category=FutureWarning,
+                    )            
+            
+        elif save_format == "json" or filename_format == "json":
+            if isinstance(file, str):
+                with open(file, "r") as handle:
+                    data_dict = json.load(handle)
+            elif hasattr(file, 'name'):
+                text_handle = io.TextIOWrapper(file, encoding="utf-8")
+                data_dict = json.load(text_handle)
+            
+                loaded_scaler = cls(data_dict["typestring"], data_dict["use_ddp"])
+                
+                loaded_scaler.scale_standard = data_dict["scale_standard"]
+                loaded_scaler.scale_minmax = data_dict["scale_minmax"]
+                loaded_scaler.feature_wise = data_dict["feature_wise"]
+                loaded_scaler.cantransform = data_dict["cantransform"]
+                
+                loaded_scaler.means = torch.tensor(data_dict["means"])
+                loaded_scaler.stds = torch.tensor(data_dict["stds"])
+                loaded_scaler.maxs = torch.tensor(data_dict["maxs"])
+                loaded_scaler.mins = torch.tensor(data_dict["mins"])
+                
+                loaded_scaler.total_mean = torch.tensor(data_dict["total_mean"])
+                loaded_scaler.total_std = torch.tensor(data_dict["total_std"])
+                loaded_scaler.total_max = torch.tensor(data_dict["total_max"])
+                loaded_scaler.total_min = torch.tensor(data_dict["total_min"])
+                loaded_scaler.total_data_count = data_dict["total_data_count"]
+        else:
+            raise Exception("Unsupported parameter save format. Use 'json' or 'pickle'.")
+            
         return loaded_scaler
