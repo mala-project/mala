@@ -1703,9 +1703,9 @@ Currently supported are:</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.validation_metrics">
-<span class="sig-name descname"><span class="pre">validation_metrics</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.validation_metrics" title="Link to this definition"></a></dt>
-<dd><p>List of metrics to be used for validation. Default is [“ldos”].
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.logging_metrics">
+<span class="sig-name descname"><span class="pre">logging_metrics</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.logging_metrics" title="Link to this definition"></a></dt>
+<dd><p>List of metrics to be used for logging. Default is [“ldos”].
 Possible options are:</p>
 <blockquote>
 <div><ul class="simple">
@@ -1716,11 +1716,16 @@ Possible options are:</p>
 <li><p>“total_energy_actual_fe”: Total energy computed with ground truth Fermi energy.</p></li>
 <li><p>“fermi_energy”: Fermi energy.</p></li>
 <li><p>“density”: Electron density.</p></li>
-<li><p>“density_relative”: Rlectron density (MAPE).</p></li>
+<li><p>“density_relative”: Electron density (MAPE).</p></li>
 <li><p>“dos”: Density of states.</p></li>
 <li><p>“dos_relative”: Density of states (MAPE).</p></li>
 </ul>
 </div></blockquote>
+<p>The units for energy metrics are meV/atom.
+Selected metrics are evalauted every <cite>logging_metrics_interval</cite> (see below) epochs.
+To use the energy metrics the validation snapshots need not be shuffled.
+Note that evaluating the energy metrics takes considerably longer than just LDOS
+and therefore it is discouraged.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list</p>
@@ -1729,9 +1734,9 @@ Possible options are:</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.validate_on_training_data">
-<span class="sig-name descname"><span class="pre">validate_on_training_data</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.validate_on_training_data" title="Link to this definition"></a></dt>
-<dd><p>Whether to validate on the training data as well. Default is False.</p>
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.log_metrics_on_train_set">
+<span class="sig-name descname"><span class="pre">log_metrics_on_train_set</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.log_metrics_on_train_set" title="Link to this definition"></a></dt>
+<dd><p>Whether to also log metrics evaluated on the training set. Default is False.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
@@ -1740,9 +1745,9 @@ Possible options are:</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.validate_every_n_epochs">
-<span class="sig-name descname"><span class="pre">validate_every_n_epochs</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.validate_every_n_epochs" title="Link to this definition"></a></dt>
-<dd><p>Determines how often validation is performed. Default is 1.</p>
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.logging_metrics_interval">
+<span class="sig-name descname"><span class="pre">logging_metrics_interval</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.logging_metrics_interval" title="Link to this definition"></a></dt>
+<dd><p>Determines how often (in the unit of epochs) metrics are logged. Default is 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
@@ -1824,29 +1829,15 @@ be set. Thus, this parameter mainly exists for debugging purposes.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.after_training_metric">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">after_training_metric</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.after_training_metric" title="Link to this definition"></a></dt>
-<dd><p>Get the metric used during training.</p>
-<p>Metric for evaluated on the validation and test set before and after
-training. Default is “LDOS”, meaning that the regular loss on the LDOS
-will be used as a metric. Possible options are “band_energy” and
-“total_energy”. For these, the band resp. total energy of the
-validation snapshots will be calculated and compared to the provided
-DFT results. Of these, the mean average error in eV/atom will be
-calculated.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.during_training_metric">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">during_training_metric</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.during_training_metric" title="Link to this definition"></a></dt>
-<dd><p>Control the metric used during training.</p>
-<p>Metric for evaluated on the validation set during training.
-Default is “ldos”, meaning that the regular loss on the LDOS will be
-used as a metric. Possible options are “band_energy” and
-“total_energy”. For these, the band resp. total energy of the
-validation snapshots will be calculated and compared to the provided
-DFT results. Of these, the mean average error in eV/atom will be
-calculated.</p>
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.final_validation_metric">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">final_validation_metric</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.final_validation_metric" title="Link to this definition"></a></dt>
+<dd><p>Metric for final model evaluation.</p>
+<p>This metric is evaluated on the validation set after training.
+Available options are the same as for <cite>validation_metric</cite>.
+Default is “LDOS”, meaning that MSE of the LDOS
+will be used as a metric.
+The final validation metric is used as a target
+for hyperparameter optimization.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1855,6 +1846,36 @@ calculated.</p>
 <dd><p>Decide whether CUDA graphs are used during training.</p>
 <p>Doing so will improve performance, but CUDA graphs are only available
 from CUDA 11.0 upwards.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.validation_metric">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validation_metric</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.validation_metric" title="Link to this definition"></a></dt>
+<dd><p>Control the metric used for validation.</p>
+<p>Metric to be evaluated on the validation set during training.
+Default is “ldos”, meaning that the regular loss on the LDOS will be
+used as a metric.</p>
+<p>Possible options are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“ldos”: MSE of the LDOS.</p></li>
+<li><p>“band_energy”: Band energy.</p></li>
+<li><p>“band_energy_actual_fe”: Band energy computed with ground truth Fermi energy.</p></li>
+<li><p>“total_energy”: Total energy.</p></li>
+<li><p>“total_energy_actual_fe”: Total energy computed with ground truth Fermi energy.</p></li>
+<li><p>“fermi_energy”: Fermi energy.</p></li>
+<li><p>“density”: Electron density.</p></li>
+<li><p>“density_relative”: Electron density (MAPE).</p></li>
+<li><p>“dos”: Density of states.</p></li>
+<li><p>“dos_relative”: Density of states (MAPE).</p></li>
+</ul>
+</div></blockquote>
+<p>The units for energy metrics are meV/atom.
+Selected metric is evalauted after every epoch on the validation set.
+The validation metric is used as a criterion for early stopping and also
+for checkpointing the best model.
+Note that evaluating the energy metrics takes considerably longer than LDOS
+and therefore it is discouraged.</p>
 </dd></dl>
 
 </dd></dl>

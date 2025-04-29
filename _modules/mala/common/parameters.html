@@ -1147,8 +1147,8 @@
 <span class="sd">            - &quot;tensorboard&quot;: Tensorboard logger.</span>
 <span class="sd">            - &quot;wandb&quot;: Weights and Biases logger.</span>
 
-<span class="sd">    validation_metrics : list</span>
-<span class="sd">        List of metrics to be used for validation. Default is [&quot;ldos&quot;].</span>
+<span class="sd">    logging_metrics : list</span>
+<span class="sd">        List of metrics to be used for logging. Default is [&quot;ldos&quot;].</span>
 <span class="sd">        Possible options are:</span>
 
 <span class="sd">            - &quot;ldos&quot;: MSE of the LDOS.</span>
@@ -1158,15 +1158,21 @@
 <span class="sd">            - &quot;total_energy_actual_fe&quot;: Total energy computed with ground truth Fermi energy.</span>
 <span class="sd">            - &quot;fermi_energy&quot;: Fermi energy.</span>
 <span class="sd">            - &quot;density&quot;: Electron density.</span>
-<span class="sd">            - &quot;density_relative&quot;: Rlectron density (MAPE).</span>
+<span class="sd">            - &quot;density_relative&quot;: Electron density (MAPE).</span>
 <span class="sd">            - &quot;dos&quot;: Density of states.</span>
 <span class="sd">            - &quot;dos_relative&quot;: Density of states (MAPE).</span>
+<span class="sd">            </span>
+<span class="sd">        The units for energy metrics are meV/atom.</span>
+<span class="sd">        Selected metrics are evalauted every `logging_metrics_interval` (see below) epochs.</span>
+<span class="sd">        To use the energy metrics the validation snapshots need not be shuffled.</span>
+<span class="sd">        Note that evaluating the energy metrics takes considerably longer than just LDOS</span>
+<span class="sd">        and therefore it is discouraged.</span>
 
-<span class="sd">    validate_on_training_data : bool</span>
-<span class="sd">        Whether to validate on the training data as well. Default is False.</span>
+<span class="sd">    log_metrics_on_train_set : bool</span>
+<span class="sd">        Whether to also log metrics evaluated on the training set. Default is False.</span>
 
-<span class="sd">    validate_every_n_epochs : int</span>
-<span class="sd">        Determines how often validation is performed. Default is 1.</span>
+<span class="sd">    logging_metrics_interval : int</span>
+<span class="sd">        Determines how often (in the unit of epochs) metrics are logged. Default is 1.</span>
 
 <span class="sd">    training_log_interval : int</span>
 <span class="sd">        Determines how often detailed performance info is printed during</span>
@@ -1212,8 +1218,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_scheduler</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_decay</span> <span class="o">=</span> <span class="mf">0.1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_patience</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_during_training_metric</span> <span class="o">=</span> <span class="s2">&quot;ldos&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_after_training_metric</span> <span class="o">=</span> <span class="s2">&quot;ldos&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validation_metric</span> <span class="o">=</span> <span class="s2">&quot;ldos&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_final_validation_metric</span> <span class="o">=</span> <span class="s2">&quot;ldos&quot;</span>
         <span class="c1"># self.use_compression = False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_shuffling_for_samplers</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1225,9 +1231,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">logging_dir</span> <span class="o">=</span> <span class="s2">&quot;./mala_logging&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging_dir_append_date</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">validation_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ldos&quot;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">validate_on_training_data</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">validate_every_n_epochs</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ldos&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_metrics_on_train_set</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging_metrics_interval</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inference_data_grid</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_mixed_precision</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_graphs</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1246,60 +1252,75 @@
 <span class="sd">            New DDP setting.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersRunning</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_update_ddp</span><span class="p">(</span><span class="n">new_ddp</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">during_training_metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">during_training_metric</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">after_training_metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">after_training_metric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validation_metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_metric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">final_validation_metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_validation_metric</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">during_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validation_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Control the metric used during training.</span>
+<span class="sd">        Control the metric used for validation.</span>
 
-<span class="sd">        Metric for evaluated on the validation set during training.</span>
+<span class="sd">        Metric to be evaluated on the validation set during training.</span>
 <span class="sd">        Default is &quot;ldos&quot;, meaning that the regular loss on the LDOS will be</span>
-<span class="sd">        used as a metric. Possible options are &quot;band_energy&quot; and</span>
-<span class="sd">        &quot;total_energy&quot;. For these, the band resp. total energy of the</span>
-<span class="sd">        validation snapshots will be calculated and compared to the provided</span>
-<span class="sd">        DFT results. Of these, the mean average error in eV/atom will be</span>
-<span class="sd">        calculated.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_during_training_metric</span>
+<span class="sd">        used as a metric.</span>
+<span class="sd">        </span>
+<span class="sd">        Possible options are:</span>
 
-    <span class="nd">@during_training_metric</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">during_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="sd">            - &quot;ldos&quot;: MSE of the LDOS.</span>
+<span class="sd">            - &quot;band_energy&quot;: Band energy.</span>
+<span class="sd">            - &quot;band_energy_actual_fe&quot;: Band energy computed with ground truth Fermi energy.</span>
+<span class="sd">            - &quot;total_energy&quot;: Total energy.</span>
+<span class="sd">            - &quot;total_energy_actual_fe&quot;: Total energy computed with ground truth Fermi energy.</span>
+<span class="sd">            - &quot;fermi_energy&quot;: Fermi energy.</span>
+<span class="sd">            - &quot;density&quot;: Electron density.</span>
+<span class="sd">            - &quot;density_relative&quot;: Electron density (MAPE).</span>
+<span class="sd">            - &quot;dos&quot;: Density of states.</span>
+<span class="sd">            - &quot;dos_relative&quot;: Density of states (MAPE).</span>
+<span class="sd">        </span>
+<span class="sd">        The units for energy metrics are meV/atom.</span>
+<span class="sd">        Selected metric is evalauted after every epoch on the validation set.</span>
+<span class="sd">        The validation metric is used as a criterion for early stopping and also</span>
+<span class="sd">        for checkpointing the best model.</span>
+<span class="sd">        Note that evaluating the energy metrics takes considerably longer than LDOS</span>
+<span class="sd">        and therefore it is discouraged.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validation_metric</span>
+
+    <span class="nd">@validation_metric</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validation_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;ldos&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;ddp&quot;</span><span class="p">]:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                     <span class="s2">&quot;Currently, MALA can only operate with the &quot;</span>
                     <span class="s1">&#39;&quot;ldos&quot; metric for ddp runs.&#39;</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_metrics</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">validation_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_during_training_metric</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging_metrics</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logging_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validation_metric</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">after_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">final_validation_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the metric used during training.</span>
+<span class="sd">        Metric for final model evaluation.</span>
 
-<span class="sd">        Metric for evaluated on the validation and test set before and after</span>
-<span class="sd">        training. Default is &quot;LDOS&quot;, meaning that the regular loss on the LDOS</span>
-<span class="sd">        will be used as a metric. Possible options are &quot;band_energy&quot; and</span>
-<span class="sd">        &quot;total_energy&quot;. For these, the band resp. total energy of the</span>
-<span class="sd">        validation snapshots will be calculated and compared to the provided</span>
-<span class="sd">        DFT results. Of these, the mean average error in eV/atom will be</span>
-<span class="sd">        calculated.</span>
+<span class="sd">        This metric is evaluated on the validation set after training.</span>
+<span class="sd">        Available options are the same as for `validation_metric`.</span>
+<span class="sd">        Default is &quot;LDOS&quot;, meaning that MSE of the LDOS</span>
+<span class="sd">        will be used as a metric.</span>
+<span class="sd">        The final validation metric is used as a target</span>
+<span class="sd">        for hyperparameter optimization.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_after_training_metric</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_final_validation_metric</span>
 
-    <span class="nd">@after_training_metric</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">after_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="nd">@final_validation_metric</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">final_validation_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;ldos&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;ddp&quot;</span><span class="p">]:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                     <span class="s2">&quot;Currently, MALA can only operate with the &quot;</span>
                     <span class="s1">&#39;&quot;ldos&quot; metric for ddp runs.&#39;</span>
                 <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_after_training_metric</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_final_validation_metric</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">use_graphs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

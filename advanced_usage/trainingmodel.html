@@ -164,10 +164,10 @@ is directly outputted by MALA. By default, this validation loss gives the
 mean squared error between LDOS prediction and actual value. From a purely
 ML point of view, this is fine; however, the correctness of the LDOS itself
 does not hold much physical virtue. Thus, MALA implements physical validation
-metrics to be accessed before and after the training routine.</p>
+metrics which can be evaluated for example after the training.</p>
 <p>Specifically, when setting</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">after_training_metric</span> <span class="o">=</span> <span class="s2">&quot;band_energy&quot;</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">final_validation_metric</span> <span class="o">=</span> <span class="s2">&quot;band_energy&quot;</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -294,7 +294,7 @@ By default, the same number of snapshots as had been provided will be created
 in the file <code class="docutils literal notranslate"><span class="pre">advanced/ex03_tensor_board</span></code>. Simply select a logger prior to training as</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="s2">&quot;tensorboard&quot;</span>
-<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">logging_dir</span> <span class="o">=</span> <span class="s2">&quot;mala_vis&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">logging_dir</span> <span class="o">=</span> <span class="s2">&quot;mala_logs&quot;</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -306,14 +306,14 @@ in the file <code class="docutils literal notranslate"><span class="pre">advance
       <span class="n">entity</span><span class="o">=</span><span class="s2">&quot;your_wandb_entity&quot;</span>
 <span class="p">)</span>
 <span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="s2">&quot;wandb&quot;</span>
-<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">logging_dir</span> <span class="o">=</span> <span class="s2">&quot;mala_vis&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">logging_dir</span> <span class="o">=</span> <span class="s2">&quot;mala_logs&quot;</span>
 </pre></div>
 </div>
 </div></blockquote>
 <p>where <code class="docutils literal notranslate"><span class="pre">logging_dir</span></code> specifies some directory in which to save the
 MALA logging data. You can also select which metrics to record via</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">validation_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ldos&quot;</span><span class="p">,</span> <span class="s2">&quot;dos&quot;</span><span class="p">,</span> <span class="s2">&quot;density&quot;</span><span class="p">,</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">]</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">logging_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ldos&quot;</span><span class="p">,</span> <span class="s2">&quot;dos&quot;</span><span class="p">,</span> <span class="s2">&quot;density&quot;</span><span class="p">,</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -334,14 +334,14 @@ MALA logging data. You can also select which metrics to record via</p>
 </dl>
 <p>To save time and resources you can specify the logging interval via</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">validate_every_n_epochs</span> <span class="o">=</span> <span class="mi">10</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">logging_metrics_interval</span> <span class="o">=</span> <span class="mi">10</span>
 </pre></div>
 </div>
 </div></blockquote>
 <p>If you want to monitor the degree to which the model overfits to the training data,
 you can use the option</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">validate_on_training_data</span> <span class="o">=</span> <span class="kc">True</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">log_metrics_on_train_set</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
 </div></blockquote>

@@ -163,8 +163,6 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset">add_snapshot_to_dataset() (LazyLoadDataset method)</a>
 </li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.after_training_metric">after_training_metric (ParametersRunning property)</a>
-</li>
       <li><a href="api/mala.datahandling.ldos_aligner.html#mala.datahandling.ldos_aligner.LDOSAligner.align_ldos_to_ref">align_ldos_to_ref() (LDOSAligner method)</a>
 </li>
       <li><a href="api/mala.datahandling.lazy_load_dataset_single.html#mala.datahandling.lazy_load_dataset_single.LazyLoadDatasetSingle.allocate_shared_mem">allocate_shared_mem() (LazyLoadDatasetSingle method)</a>
@@ -439,10 +437,10 @@
 </li>
       <li><a href="api/mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler.delete_temporary_shuffled_snapshots">delete_temporary_shuffled_snapshots() (DataShuffler method)</a>
 </li>
-      <li><a href="api/mala.targets.density.html#mala.targets.density.Density">Density (class in mala.targets.density)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/mala.targets.density.html#mala.targets.density.Density">Density (class in mala.targets.density)</a>
+</li>
       <li><a href="api/mala.targets.density.html#mala.targets.density.Density.density">density (Density property)</a>
 
       <ul>
@@ -497,8 +495,6 @@
         <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.dropout">(ParametersRunning attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.during_training_metric">during_training_metric (ParametersRunning property)</a>
-</li>
   </ul></td>
 </tr></table>
 
@@ -579,6 +575,8 @@
 </li>
       <li><a href="api/mala.network.trainer.html#mala.network.trainer.Trainer.final_validation_loss">final_validation_loss (Trainer attribute)</a>
 </li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.final_validation_metric">final_validation_metric (ParametersRunning property)</a>
+</li>
       <li><a href="api/mala.common.parallelizer.html#mala.common.parallelizer.finalize">finalize() (in module mala.common.parallelizer)</a>
 </li>
       <li><a href="api/mala.descriptors.acelib.symmetric_group_manipulations.html#mala.descriptors.acelib.symmetric_group_manipulations.find_degenerate_indices">find_degenerate_indices() (in module mala.descriptors.acelib.symmetric_group_manipulations)</a>
@@ -589,10 +587,10 @@
 </li>
       <li><a href="api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.fit">fit() (DataScaler method)</a>
 </li>
-      <li><a href="api/mala.descriptors.acelib.common_utils.html#mala.descriptors.acelib.common_utils.flatten">flatten() (in module mala.descriptors.acelib.common_utils)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/mala.descriptors.acelib.common_utils.html#mala.descriptors.acelib.common_utils.flatten">flatten() (in module mala.descriptors.acelib.common_utils)</a>
+</li>
       <li><a href="api/mala.descriptors.acelib.tree_sorting.html#mala.descriptors.acelib.tree_sorting.Node.flip_children">flip_children() (Node method)</a>
 </li>
       <li><a href="api/mala.network.network.html#mala.network.network.FeedForwardNet.forward">forward() (FeedForwardNet method)</a>
@@ -979,8 +977,6 @@
 </li>
       <li><a href="api/mala.descriptors.acelib.tree_sorting.html#mala.descriptors.acelib.tree_sorting.Node.left">left (Node attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.load_from_file">load_from_file() (DataScaler class method)</a>
 
       <ul>
@@ -993,6 +989,8 @@
         <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_file">(Parameters class method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_json">load_from_json() (Parameters class method)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_pickle">load_from_pickle() (Parameters class method)</a>
@@ -1019,11 +1017,17 @@
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.local_psp_path">local_psp_path (ParametersDataGeneration attribute)</a>
 </li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.log_metrics_on_train_set">log_metrics_on_train_set (ParametersRunning attribute)</a>
+</li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.logger">logger (ParametersRunning attribute)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.logging_dir">logging_dir (ParametersRunning attribute)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.logging_dir_append_date">logging_dir_append_date (ParametersRunning attribute)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.logging_metrics">logging_metrics (ParametersRunning attribute)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.logging_metrics_interval">logging_metrics_interval (ParametersRunning attribute)</a>
 </li>
       <li><a href="api/mala.network.network.html#mala.network.network.Network.loss_func">loss_func (Network attribute)</a>
 </li>
@@ -2407,18 +2411,14 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.validate_every_n_epochs">validate_every_n_epochs (ParametersRunning attribute)</a>
-</li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.validate_on_training_data">validate_on_training_data (ParametersRunning attribute)</a>
-</li>
       <li><a href="api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.validation_data_sets">validation_data_sets (DataHandler attribute)</a>
 </li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.validation_metrics">validation_metrics (ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.validation_metric">validation_metric (ParametersRunning property)</a>
+</li>
+      <li><a href="api/mala.descriptors.acelib.tree_sorting.html#mala.descriptors.acelib.tree_sorting.Node.value">value (Node attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.descriptors.acelib.tree_sorting.html#mala.descriptors.acelib.tree_sorting.Node.value">value (Node attribute)</a>
-</li>
       <li><a href="api/mala.descriptors.acelib.tree_sorting.html#mala.descriptors.acelib.tree_sorting.Node.value_tuple">value_tuple (Node attribute)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.verbosity">verbosity (Parameters property)</a>
