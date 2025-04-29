@@ -1,12 +1,6 @@
 #!/bin/bash
 
-# usage:
-#
-#   $ ./this.sh
-# or
-#   $ F2PY=/usr/bin/f2py3 ./this.sh
-
-set -u
+set -ue
 
 err(){
     echo "error $@"
@@ -32,45 +26,42 @@ modobjs="$(find $root_dir/Modules/ -name "*.o")"
 [ -n "$utilobjs" ] || err "utilobjs empty"
 [ -n "$modobjs" ] || err "modobjs empty"
 
-project_lib_folders=" -L$root_dir/Modules -L$root_dir/KS_Solvers -L$root_dir/FFTXlib/src -L$root_dir/LAXlib -L$root_dir/UtilXlib -L$root_dir/dft-d3 -L$root_dir/upflib -L$root_dir/XClib -L$root_dir/external/devxlib/src -L$root_dir/external/mbd/src"
-project_libs="-lqemod -lks_solvers -lqefft -lqela -lutil -ldftd3qe -lupf -ldevXlib -lmbd"
-project_inc_folders="-I$root_dir/Modules -I$root_dir/FFTXlib/src -I$root_dir/LAXlib -I$root_dir/KS_Solvers -I$root_dir/UtilXlib -I$root_dir/upflib -I$root_dir/XClib -I$root_dir/external/devxlib/src -I$root_dir/external/mbd/src"
+
+# -lfoo will link shared libs (libfoo.so) as well as static ones (libfoo.a). In
+# qe_libs we list the ones we need in total_energy (which are almost all of
+# them anyway), but since we are lazy, we use all paths to them as link (-L)
+# and include (-I) dirs.
+qe_static_lib_dirs=$(find $root_dir -name "*.a" | xargs dirname | sort -u | paste -s -d '@')
+qe_lib_dirs=-L$(echo "$qe_static_lib_dirs" | sed -re 's/@/ -L/g')
+qe_inc_dirs=-I$(echo "$qe_static_lib_dirs" | sed -re 's/@/ -I/g')
+qe_libs="-lqemod -lks_solvers -lqefft -lqela -lutil -ldftd3qe -lupf -ldevXlib -lmbd"
+
+echo "qe_lib_dirs: $qe_lib_dirs"
+echo "qe_inc_dirs: $qe_inc_dirs"
 
 # default: system blas,lapack and fftw, adapt as needed
 linalg="-lblas -llapack"
 fftw="-lfftw3"
 
-
 here=$(pwd)
 mod_name=total_energy
-src=${mod_name}.f90
-#cp -v $src $pw_src_path/
-#cd $pw_src_path
-rm -vf ${mod_name}.*.so
+mkdir -p $here/libs
 
-# I think the -I$pw_src_path is necessary now or else
-# the compiler won't find the .mod files anymore since
-# the build is done in some temporary directory.
-# As far as I understand it, the issue lies with the compiler
-# ignoring the *.o files.
-FC="mpif90" python3 -m numpy.f2py \
-    -c $src \
+# xc_lib.a needs to be called lib<someting>.a to be linkable with -l<something>
+cp $root_dir/XClib/xc_lib.a $here/libs/libxclib.a
+
+# Stick all object files into a static lib so that we can link them, just
+# specifying them on the f2py CLI doesn't work with the meson backend, as it
+# seems.
+ar rcs $here/libs/liballobjs.a $pwobjs $utilobjs $modobjs
+
+FFLAGS="-I$here/libs -I$pw_src_path $qe_inc_dirs" \
+LDFLAGS="-L$here/libs -L$pw_src_path $qe_lib_dirs" \
+FC="mpif90" \
+python3 -m numpy.f2py --backend meson \
+    -c ${mod_name}.f90 \
     -m $mod_name \
-    $project_inc_folders \
-    $project_lib_folders \
-    $project_libs \
-    $pwobjs \
-    $utilobjs \
-    $modobjs \
     $linalg \
     $fftw \
-    $root_dir/XClib/xc_lib.a \
-    -I$pw_src_path \
-
-#${F2PY:=f2py} \
-#    --f90exec=mpif90 \
-#    --f77exec=mpif90 \
-
-#rm $src
-#mv -v ${mod_name}.*.so $here/
-#cd $here
+    $qe_libs \
+    -lallobjs -lxclib
