@@ -101,7 +101,7 @@ parameters.network.layer_sizes = [
     100,
     data_handler.output_dimension,
 ]
-test_network = mala.Network(parameters)
+network = mala.Network(parameters)
 
 ####################
 # 4. TRAINING THE NETWORK
@@ -113,9 +113,9 @@ test_network = mala.Network(parameters)
 # side the model. This makes inference easier.
 ####################
 
-test_trainer = mala.Trainer(parameters, test_network, data_handler)
-test_trainer.train_network()
+trainer = mala.Trainer(parameters, network, data_handler)
+trainer.train_network()
 additional_calculation_data = os.path.join(data_path, "Be_snapshot0.out")
-test_trainer.save_run(
+trainer.save_run(
     "Be_model", additional_calculation_data=additional_calculation_data
 )
