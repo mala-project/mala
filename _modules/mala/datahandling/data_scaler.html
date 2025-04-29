@@ -87,6 +87,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dist</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">parallel_warn</span>
@@ -619,7 +621,7 @@
 
 <div class="viewcode-block" id="DataScaler.save">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.save">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the Scaler object so that it can be accessed again later.</span>
 
@@ -629,15 +631,50 @@
 <span class="sd">            File in which the parameters will be saved.</span>
 
 <span class="sd">        save_format :</span>
-<span class="sd">            File format which will be used for saving.</span>
+<span class="sd">            File format which will be used for saving. Default is &quot;json&quot;.  </span>
+<span class="sd">            Pickle format is deprecated and will be removed in future versions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># If we use ddp, only save the network on root.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span>
-        <span class="k">if</span> <span class="n">save_format</span> <span class="o">==</span> <span class="s2">&quot;pickle&quot;</span><span class="p">:</span>
+        
+        <span class="n">filename_format</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">save_format</span> <span class="o">==</span> <span class="s2">&quot;pickle&quot;</span> <span class="ow">or</span> <span class="n">filename_format</span> <span class="o">==</span> <span class="s2">&quot;pkl&quot;</span><span class="p">:</span> <span class="c1"># similar to &quot;normal&quot; string warning</span>
+            <span class="n">parallel_warn</span><span class="p">(</span>
+            <span class="s2">&quot;Pickle format is deprecated and will be removed in future versions. &quot;</span>
+            <span class="s2">&quot;Please use JSON format instead.&quot;</span><span class="p">,</span>
+            <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">,</span>
+        <span class="p">)</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
                 <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">save_format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span> <span class="ow">or</span> <span class="n">filename_format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+            <span class="c1"># saving tensors as lists for json</span>
+            <span class="c1"># if scale_normal is used, it will be converted to scale_minmax</span>
+            <span class="n">data_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;typestring&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">typestring</span><span class="p">,</span>
+                <span class="s2">&quot;use_ddp&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_ddp</span><span class="p">,</span>
+                <span class="s2">&quot;scale_standard&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span><span class="p">,</span>
+                <span class="s2">&quot;scale_minmax&quot;</span><span class="p">:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_minmax</span> 
+                               <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;scale_minmax&quot;</span><span class="p">)</span> 
+                               <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">),</span>
+                <span class="s2">&quot;feature_wise&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_wise</span><span class="p">,</span>
+                <span class="s2">&quot;cantransform&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cantransform</span><span class="p">,</span>
+                <span class="s2">&quot;means&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">,</span> <span class="s2">&quot;tolist&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="p">[],</span>
+                <span class="s2">&quot;stds&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stds</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stds</span><span class="p">,</span> <span class="s2">&quot;tolist&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="p">[],</span>
+                <span class="s2">&quot;maxs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxs</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxs</span><span class="p">,</span> <span class="s2">&quot;tolist&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="p">[],</span>
+                <span class="s2">&quot;mins&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mins</span><span class="p">,</span> <span class="s2">&quot;tolist&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="p">[],</span>
+                <span class="s2">&quot;total_mean&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span><span class="p">),</span>
+                <span class="s2">&quot;total_std&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_std</span><span class="p">),</span>
+                <span class="s2">&quot;total_max&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_max</span><span class="p">),</span>
+                <span class="s2">&quot;total_min&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_min</span><span class="p">),</span>
+                <span class="s2">&quot;total_data_count&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_data_count</span>
+            <span class="p">}</span>
+            
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">handle</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+                
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported parameter save format.&quot;</span><span class="p">)</span></div>
 
@@ -645,10 +682,10 @@
 <div class="viewcode-block" id="DataScaler.load_from_file">
 <a class="viewcode-back" href="../../../api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.load_from_file">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">auto_convert</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a saved Scaler object.</span>
-
+<span class="sd">        </span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        file : string or ZipExtFile</span>
@@ -657,19 +694,75 @@
 <span class="sd">        save_format :</span>
 <span class="sd">            File format which was used for saving.</span>
 
+<span class="sd">        auto_convert : bool</span>
+<span class="sd">            If True and loading from pickle format, automatically save as JSON for future use.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        data_scaler : DataScaler</span>
 <span class="sd">            DataScaler which was read from the file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">save_format</span> <span class="o">==</span> <span class="s2">&quot;pickle&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">file</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">):</span> <span class="c1"># getting fname from zip file</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;File must be either a string path or a ZipFile object&quot;</span><span class="p">)</span>
+        
+        <span class="n">filename_format</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">save_format</span> <span class="o">==</span> <span class="s2">&quot;pickle&quot;</span> <span class="ow">or</span> <span class="n">filename_format</span> <span class="o">==</span> <span class="s2">&quot;pkl&quot;</span><span class="p">:</span>
+            <span class="n">parallel_warn</span><span class="p">(</span>
+                <span class="s2">&quot;Loading from pickle format is deprecated and will be removed in future versions. &quot;</span>
+                <span class="s2">&quot;Please convert your files to JSON format.&quot;</span><span class="p">,</span>
+                <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">loaded_scaler</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">loaded_scaler</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported parameter save format.&quot;</span><span class="p">)</span>
 
+                <span class="k">if</span> <span class="n">auto_convert</span><span class="p">:</span>
+                    <span class="n">json_file_path</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span>
+                    <span class="n">loaded_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">json_file_path</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span>
+                    
+
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">):</span>
+                <span class="n">loaded_scaler</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+            <span class="n">parallel_warn</span><span class="p">(</span>
+                        <span class="s2">&quot;Pickle file has been automatically converted to JSON format.&quot;</span><span class="p">,</span>
+                        <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">,</span>
+                    <span class="p">)</span>            
+            
+        <span class="k">elif</span> <span class="n">save_format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span> <span class="ow">or</span> <span class="n">filename_format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+                    <span class="n">data_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">):</span>
+                <span class="n">text_handle</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">TextIOWrapper</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+                <span class="n">data_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">text_handle</span><span class="p">)</span>
+            
+                <span class="n">loaded_scaler</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;typestring&quot;</span><span class="p">],</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;use_ddp&quot;</span><span class="p">])</span>
+                
+                <span class="n">loaded_scaler</span><span class="o">.</span><span class="n">scale_standard</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;scale_standard&quot;</span><span class="p">]</span>
+                <span class="n">loaded_scaler</span><span class="o">.</span><span class="n">scale_minmax</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;scale_minmax&quot;</span><span class="p">]</span>
+                <span class="n">loaded_scaler</span><span class="o">.</span><span class="n">feature_wise</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;feature_wise&quot;</span><span class="p">]</span>
+                <span class="n">loaded_scaler</span><span class="o">.</span><span class="n">cantransform</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;cantransform&quot;</span><span class="p">]</span>
+                
+                <span class="n">loaded_scaler</span><span class="o">.</span><span class="n">means</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;means&quot;</span><span class="p">])</span>
+                <span class="n">loaded_scaler</span><span class="o">.</span><span class="n">stds</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;stds&quot;</span><span class="p">])</span>
+                <span class="n">loaded_scaler</span><span class="o">.</span><span class="n">maxs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;maxs&quot;</span><span class="p">])</span>
+                <span class="n">loaded_scaler</span><span class="o">.</span><span class="n">mins</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;mins&quot;</span><span class="p">])</span>
+                
+                <span class="n">loaded_scaler</span><span class="o">.</span><span class="n">total_mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;total_mean&quot;</span><span class="p">])</span>
+                <span class="n">loaded_scaler</span><span class="o">.</span><span class="n">total_std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;total_std&quot;</span><span class="p">])</span>
+                <span class="n">loaded_scaler</span><span class="o">.</span><span class="n">total_max</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;total_max&quot;</span><span class="p">])</span>
+                <span class="n">loaded_scaler</span><span class="o">.</span><span class="n">total_min</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;total_min&quot;</span><span class="p">])</span>
+                <span class="n">loaded_scaler</span><span class="o">.</span><span class="n">total_data_count</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;total_data_count&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported parameter save format. Use &#39;json&#39; or &#39;pickle&#39;.&quot;</span><span class="p">)</span>
+            
         <span class="k">return</span> <span class="n">loaded_scaler</span></div>
 </div>
 
