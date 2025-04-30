@@ -55,13 +55,25 @@ cp $root_dir/XClib/xc_lib.a $here/libs/libxclib.a
 # seems.
 ar rcs $here/libs/liballobjs.a $pwobjs $utilobjs $modobjs
 
+FC="mpifort" \
+CC="mpicc" \
 FFLAGS="-I$here/libs -I$pw_src_path $qe_inc_dirs" \
 LDFLAGS="-L$here/libs -L$pw_src_path $qe_lib_dirs" \
-FC="mpif90" \
-python3 -m numpy.f2py --backend meson \
+python3 -m numpy.f2py \
+    --backend meson \
+    --dep mpi \
+    --build-dir meson_builddir \
     -c ${mod_name}.f90 \
     -m $mod_name \
     $linalg \
     $fftw \
     $qe_libs \
     -lallobjs -lxclib
+
+# Workaround for f2py+meson+mpi bug
+# (https://github.com/numpy/numpy/issues/28902)
+cd meson_builddir
+sed -i -re "s/dependency\('mpi'\)/dependency\('mpi', language: 'fortran')/" meson.build
+meson setup --reconfigure bbdir
+meson compile -C bbdir
+cp -v bbdir/${mod_name}.*.so $here/
