@@ -22,6 +22,7 @@ from mala.descriptors.minterpy_descriptors import MinterpyDescriptors
 descriptor_input_types_descriptor_scoring = descriptor_input_types + [
     "numpy",
     "openpmd",
+    "json",
 ]
 target_input_types_descriptor_scoring = target_input_types + [
     "numpy",
@@ -491,6 +492,14 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
         elif description["input"] is None:
             # In this case, only the output is processed.
             pass
+        elif description["input"] == "json":
+            # In this case, only the output is processed.
+            descriptor_calculation_kwargs["units"] = original_units["input"]
+            tmp_input, local_size = (
+                self._descriptor_calculator.calculate_from_json(
+                    snapshot["input"], **descriptor_calculation_kwargs
+                )
+            )
 
         else:
             raise Exception(
