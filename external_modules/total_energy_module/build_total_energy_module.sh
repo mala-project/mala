@@ -9,6 +9,23 @@ err(){
 
 [ $# -eq 1 ] || err "Please provide exactly one argument (the path to the QE directory)" && root_dir=$1
 
+
+# ----------------------------------------------------------------------------
+# Settings to adapt to your machine
+# ----------------------------------------------------------------------------
+
+# default: system blas,lapack and fftw, adapt as needed
+linalg="-lblas -llapack"
+fftw="-lfftw3"
+
+# This is for OpenMPI. Intel MPI's compiler wrappers are called mpiifort and
+# mpiicc. Both libraries provide other aliases like mpif90 and mpicc.
+f_compiler="mpifort"
+c_compiler="mpicc"
+
+# ----------------------------------------------------------------------------
+
+
 echo "Using QE root dir: $root_dir"
 
 pw_src_path=$root_dir/PW/src
@@ -39,10 +56,6 @@ qe_libs="-lqemod -lks_solvers -lqefft -lqela -lutil -ldftd3qe -lupf -ldevXlib -l
 echo "qe_lib_dirs: $qe_lib_dirs"
 echo "qe_inc_dirs: $qe_inc_dirs"
 
-# default: system blas,lapack and fftw, adapt as needed
-linalg="-lblas -llapack"
-fftw="-lfftw3"
-
 here=$(pwd)
 mod_name=total_energy
 mkdir -p $here/libs
@@ -55,8 +68,8 @@ cp $root_dir/XClib/xc_lib.a $here/libs/libxclib.a
 # seems.
 ar rcs $here/libs/liballobjs.a $pwobjs $utilobjs $modobjs
 
-FC="mpifort" \
-CC="mpicc" \
+FC="$f_compiler" \
+CC="$c_compiler" \
 FFLAGS="-I$here/libs -I$pw_src_path $qe_inc_dirs" \
 LDFLAGS="-L$here/libs -L$pw_src_path $qe_lib_dirs" \
 python3 -m numpy.f2py \
