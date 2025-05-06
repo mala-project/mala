@@ -185,6 +185,32 @@ instances via</p>
 are started with <code class="docutils literal notranslate"><span class="pre">wait_time</span></code> time interval in between (to avoid race
 conditions when accessing the same data base) and further only use the data
 base, not MPI, for communication.</p>
+<p>The batch job on your HPC cluster will get killed after the designated runtime.
+Then unfinished trials will remain in the Optuna database in state RUNNING.</p>
+<p>The current workflow for resuming the study which makes use of MALA’s own
+resume tooling
+(see <code class="docutils literal notranslate"><span class="pre">examples/advanced/ex05_checkpoint_hyperparameter_optimization.py</span></code>) is
+this: before submitting the batch job again and let the script do the resume
+work, a user needs to modify the database like so:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import mala; mala.HyperOptOptuna.requeue_zombie_trials(&#39;hyperopt01&#39;, &#39;sqlite:///hyperopt.db&#39;)&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>which will set the RUNNING trials to state WAITING.
+When Optuna resumes, it will pick up and re-run those, before carrying on
+running the resumed study.</p>
+<p>Common questions related to this feature:</p>
+<ul class="simple">
+<li><p>“Does “injecting” jobs like this disturb Optuna’s operation in any way?”:
+No, the study object takes all of its information directly from the
+data base, which in this case has “WAITING” trials now.</p></li>
+<li><p>“Do those trials have to be run?”: Technically not. One could simply ignore
+them and re-run without them. The problem is that in this case, the study
+will have missing data points from trials that have been suggested for a
+reason, so even if Optuna would resume fine, we still want to re-run them
+from an optimization point of view.</p></li>
+</ul>
 <p>If you do distributed hyperparameter optimization, another useful option
 is</p>
 <blockquote>
