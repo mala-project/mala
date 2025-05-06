@@ -10,7 +10,7 @@ from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
 from mala.version import __version__ as mala_version
 
-descriptor_input_types = ["espresso-out", "openpmd", "numpy"]
+descriptor_input_types = ["espresso-out", "openpmd", "numpy", "json"]
 target_input_types = [".cube", ".xsf", "openpmd", "numpy"]
 simulation_output_types = ["espresso-out"]
 
@@ -547,6 +547,15 @@ class DataConverter:
 
             tmp_input, local_size = (
                 self.descriptor_calculator.calculate_from_qe_out(
+                    snapshot["input"], **descriptor_calculation_kwargs
+                )
+            )
+        elif description["input"] == "json":
+            descriptor_calculation_kwargs["units"] = original_units["input"]
+            descriptor_calculation_kwargs["use_fp64"] = use_fp64
+
+            tmp_input, local_size = (
+                self.descriptor_calculator.calculate_from_json(
                     snapshot["input"], **descriptor_calculation_kwargs
                 )
             )
