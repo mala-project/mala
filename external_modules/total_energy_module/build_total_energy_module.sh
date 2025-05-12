@@ -51,7 +51,7 @@ modobjs="$(find $root_dir/Modules/ -name "*.o")"
 qe_static_lib_dirs=$(find $root_dir -name "*.a" | xargs dirname | sort -u | paste -s -d '@')
 qe_lib_dirs=-L$(echo "$qe_static_lib_dirs" | sed -re 's/@/ -L/g')
 qe_inc_dirs=-I$(echo "$qe_static_lib_dirs" | sed -re 's/@/ -I/g')
-qe_libs="-lqemod -lks_solvers -lqefft -lqela -lutil -ldftd3qe -lupf -ldevXlib -lmbd"
+qe_libs="-lks_solvers -lqefft -lqela -lutil -ldftd3qe -lupf -ldevXlib -lmbd"
 
 echo "qe_lib_dirs: $qe_lib_dirs"
 echo "qe_inc_dirs: $qe_inc_dirs"
