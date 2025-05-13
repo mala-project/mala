@@ -91,5 +91,6 @@ python3 -m numpy.f2py \
 cd $meson_builddir
 sed -i -re "s/dependency\('mpi'\)/dependency\('mpi', language: 'fortran')/" meson.build
 meson setup --reconfigure bbdir
+#meson configure bbdir -Db_lto=true
 meson compile -C bbdir
 cp -v bbdir/${mod_name}.*.so $here/
