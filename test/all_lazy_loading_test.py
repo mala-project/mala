@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import pytest
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 # This test compares the data scaling using the regular scaling procedure and
 # the lazy-loading one (incremental fitting).
@@ -70,37 +70,37 @@ class TestLazyLoading:
                 data_handler = DataHandler(test_parameters)
                 data_handler.add_snapshot(
                     "Be_snapshot0.in.npy",
-                    data_path,
+                    data_path_be,
                     "Be_snapshot0.out.npy",
-                    data_path,
+                    data_path_be,
                     "tr",
                 )
                 data_handler.add_snapshot(
                     "Be_snapshot1.in.npy",
-                    data_path,
+                    data_path_be,
                     "Be_snapshot1.out.npy",
-                    data_path,
+                    data_path_be,
                     "tr",
                 )
                 data_handler.add_snapshot(
                     "Be_snapshot2.in.npy",
-                    data_path,
+                    data_path_be,
                     "Be_snapshot2.out.npy",
-                    data_path,
+                    data_path_be,
                     "tr",
                 )
                 data_handler.add_snapshot(
                     "Be_snapshot1.in.npy",
-                    data_path,
+                    data_path_be,
                     "Be_snapshot1.out.npy",
-                    data_path,
+                    data_path_be,
                     "va",
                 )
                 data_handler.add_snapshot(
                     "Be_snapshot2.in.npy",
-                    data_path,
+                    data_path_be,
                     "Be_snapshot2.out.npy",
-                    data_path,
+                    data_path_be,
                     "te",
                 )
                 data_handler.prepare_data()
@@ -271,30 +271,30 @@ class TestLazyLoading:
         # Add a snapshot we want to use in to the list.
         data_handler.add_snapshot(
             "Be_snapshot0.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
             "tr",
         )
         data_handler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             "tr",
         )
         data_handler.add_snapshot(
             "Be_snapshot2.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot2.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.add_snapshot(
             "Be_snapshot3.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot3.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.prepare_data()

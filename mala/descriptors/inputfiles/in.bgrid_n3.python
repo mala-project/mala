@@ -11,20 +11,19 @@ read_data ${atom_config_fname}
 
 mass * 1.0
 
+# Needs to be defined for Kokkos
+run_style verlet
+
 # define grid compute and atom compute
 
-group 		snapgroup type 1 2
-#variable 	rcutfac equal 4.67637
+group 		snapgroup type 1 2 3
 variable 	rfac0 equal 0.99363
 variable 	rmin0 equal 0
-
-#variable 	wj equal 1
-variable 	wj1 equal 1
-variable 	wj2 equal 1
 
 #variable 	radelem equal 0.5
 variable 	radelem1 equal 0.5
 variable 	radelem2 equal 0.5
+variable 	radelem3 equal 0.5
 
 variable 	bzero equal 0
 variable 	quadratic equal 0
@@ -34,16 +33,16 @@ variable 	quadratic equal 0
 
 #compute bgrid all sna/grid grid ${ngridx} ${ngridy} ${ngridz} ${snap_options}
 
-compute bgrid all sna/grid grid ${ngridx} ${ngridy} ${ngridz} ${rcutfac} ${rfac0} ${twojmax} ${radelem1} ${radelem2} ${wj1} ${wj2} rmin0 ${rmin0} bzeroflag ${bzero} quadraticflag ${quadratic} switchflag ${switch}
+compute bgrid all sna/grid grid ${ngridx} ${ngridy} ${ngridz} ${rcutfac} ${rfac0} ${twojmax} ${radelem1} ${radelem2} ${radelem3} ${wj1} ${wj2} ${wj3} rmin0 ${rmin0} bzeroflag ${bzero} quadraticflag ${quadratic} switchflag ${switch}
 
 
 # create dummy potential for neighbor list
 
 
 # is this important? or does it just need to be big enough?
-#variable rcutneigh equal 2.0*${rcutfac}*${radelem}
+variable rcutneigh equal 2.0*${rcutfac}*${radelem1}
 # for water
-variable rcutneigh equal 4.0*${rcutfac}*${radelem1}
+#variable rcutneigh equal 4.0*${rcutfac}*${radelem1}
 
 pair_style zero ${rcutneigh}
 pair_coeff * *

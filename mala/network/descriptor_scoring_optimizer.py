@@ -22,6 +22,7 @@ from mala.descriptors.minterpy_descriptors import MinterpyDescriptors
 descriptor_input_types_descriptor_scoring = descriptor_input_types + [
     "numpy",
     "openpmd",
+    "json",
 ]
 target_input_types_descriptor_scoring = target_input_types + [
     "numpy",
@@ -58,6 +59,13 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
 
     best_trial_index : int
         Index of best-performing trial
+
+    labels : list
+        Contains the labels of all the hyperparameters sampled during analysis.
+
+    averaged_study : list
+        Contains results of the analysis averaged over all snapshots.
+        Can be used for plotting.
     """
 
     def __init__(
@@ -82,14 +90,16 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
         self._snapshot_units = []
 
         # Filled after the analysis.
-        self._labels = []
         self._study = []
-        self._reduced_study = None
         self._internal_hyperparam_list = None
 
         # Logging metrics.
         self.best_score = None
         self.best_trial_index = None
+
+        # For plotting.
+        self.labels = []
+        self.averaged_study = None
 
     def add_snapshot(
         self,
@@ -183,6 +193,7 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
         if name not in [
             "bispectrum_twojmax",
             "bispectrum_cutoff",
+            "bispectrum_element_weights",
             "atomic_density_sigma",
             "atomic_density_cutoff",
         ]:
@@ -200,9 +211,7 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
             )
         )
 
-    def perform_study(
-        self, file_based_communication=False, return_plotting=False
-    ):
+    def perform_study(self, file_based_communication=False):
         """
         Perform the study, i.e. the optimization.
 
@@ -240,6 +249,9 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
                     self.params.descriptors.bispectrum_twojmax = (
                         hyperparameter_tuple[1]
                     )
+                    self.params.descriptors.bispectrum_element_weights = [
+                        float(x) for x in hyperparameter_tuple[2].split(",")
+                    ]
                 elif isinstance(self._descriptor_calculator, AtomicDensity):
                     self.params.descriptors.atomic_density_cutoff = (
                         hyperparameter_tuple[0]
@@ -269,11 +281,11 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
                         )
 
                     outstring = "["
-                    for label_id, label in enumerate(self._labels):
+                    for label_id, label in enumerate(self.labels):
                         outstring += (
                             label + ": " + str(hyperparameter_tuple[label_id])
                         )
-                        if label_id < len(self._labels) - 1:
+                        if label_id < len(self.labels) - 1:
                             outstring += ", "
                     outstring += "]"
                     best_trial_string = ". No suitable trial found yet."
@@ -298,31 +310,14 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
                 self._study.append(current_list)
 
         if get_rank() == 0:
-            self._study = np.mean(self._study, axis=0)
+            averaged_results = np.mean(
+                np.float64(np.array(self._study)[:, :, -1]), axis=0
+            )
 
-            if return_plotting:
-                results_to_plot = []
-                if len(self._internal_hyperparam_list) == 2:
-                    len_first_dim = len(self._internal_hyperparam_list[0])
-                    len_second_dim = len(self._internal_hyperparam_list[1])
-                    for i in range(0, len_first_dim):
-                        results_to_plot.append(
-                            self._study[
-                                i * len_second_dim : (i + 1) * len_second_dim,
-                                2:,
-                            ]
-                        )
-
-                    if isinstance(self._descriptor_calculator, Bispectrum):
-                        return results_to_plot, {
-                            "twojmax": self._internal_hyperparam_list[1],
-                            "cutoff": self._internal_hyperparam_list[0],
-                        }
-                    if isinstance(self._descriptor_calculator, AtomicDensity):
-                        return results_to_plot, {
-                            "sigma": self._internal_hyperparam_list[1],
-                            "cutoff": self._internal_hyperparam_list[0],
-                        }
+            self.averaged_study = []
+            for i in range(0, len(hyperparameter_tuples)):
+                self.averaged_study.append(self._study[0][i])
+                self.averaged_study[i][-1] = averaged_results[i]
 
     def set_optimal_parameters(self):
         """
@@ -333,10 +328,12 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
         """
         if get_rank() == 0:
             best_trial = self._get_best_trial()
-            minimum_score = self._study[np.argmin(self._study[:, -1])]
             if isinstance(self._descriptor_calculator, Bispectrum):
                 self.params.descriptors.bispectrum_cutoff = best_trial[0]
                 self.params.descriptors.bispectrum_twojmax = int(best_trial[1])
+                self.params.descriptors.bispectrum_element_weights = [
+                    float(x) for x in best_trial[2].split(",")
+                ]
                 printout(
                     "Descriptor scoring analysis finished, optimal parameters: ",
                 )
@@ -347,6 +344,10 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
                 printout(
                     "Bispectrum cutoff: ",
                     self.params.descriptors.bispectrum_cutoff,
+                )
+                printout(
+                    "Bispectrum element weights: ",
+                    self.params.descriptors.bispectrum_element_weights,
                 )
             if isinstance(self._descriptor_calculator, AtomicDensity):
                 self.params.descriptors.atomic_density_cutoff = best_trial[0]
@@ -375,96 +376,79 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
         Based on a list of choices for descriptor hyperparameters, this
         function creates a list of trials to be tested.
         """
+
+        def hyperparameter_in_hlist(hyperparameter_name):
+            return (
+                list(
+                    map(
+                        lambda p: hyperparameter_name in p.name,
+                        self.params.hyperparameters.hlist,
+                    )
+                ).count(True)
+                > 0
+            )
+
+        def extract_choices_from_hlist(hyperparameter_name):
+            return self.params.hyperparameters.hlist[
+                list(
+                    map(
+                        lambda p: hyperparameter_name in p.name,
+                        self.params.hyperparameters.hlist,
+                    )
+                ).index(True)
+            ].choices
+
+        self._internal_hyperparam_list = []
+
         if isinstance(self._descriptor_calculator, Bispectrum):
-            if (
-                list(
-                    map(
-                        lambda p: "bispectrum_cutoff" in p.name,
-                        self.params.hyperparameters.hlist,
-                    )
-                ).count(True)
-                == 0
-            ):
-                first_dim_list = [self.params.descriptors.bispectrum_cutoff]
+            if hyperparameter_in_hlist("bispectrum_cutoff"):
+                self._internal_hyperparam_list.append(
+                    extract_choices_from_hlist("bispectrum_cutoff")
+                )
             else:
-                first_dim_list = self.params.hyperparameters.hlist[
-                    list(
-                        map(
-                            lambda p: "bispectrum_cutoff" in p.name,
-                            self.params.hyperparameters.hlist,
-                        )
-                    ).index(True)
-                ].choices
+                self._internal_hyperparam_list.append(
+                    [self.params.descriptors.bispectrum_cutoff]
+                )
 
-            if (
-                list(
-                    map(
-                        lambda p: "bispectrum_twojmax" in p.name,
-                        self.params.hyperparameters.hlist,
-                    )
-                ).count(True)
-                == 0
-            ):
-                second_dim_list = [self.params.descriptors.bispectrum_twojmax]
+            if hyperparameter_in_hlist("bispectrum_twojmax"):
+                self._internal_hyperparam_list.append(
+                    extract_choices_from_hlist("bispectrum_twojmax")
+                )
             else:
-                second_dim_list = self.params.hyperparameters.hlist[
-                    list(
-                        map(
-                            lambda p: "bispectrum_twojmax" in p.name,
-                            self.params.hyperparameters.hlist,
-                        )
-                    ).index(True)
-                ].choices
+                self._internal_hyperparam_list.append(
+                    [self.params.descriptors.bispectrum_twojmax]
+                )
 
-            self._internal_hyperparam_list = [first_dim_list, second_dim_list]
-            self._labels = ["cutoff", "twojmax"]
+            if hyperparameter_in_hlist("bispectrum_element_weights"):
+                self._internal_hyperparam_list.append(
+                    extract_choices_from_hlist("bispectrum_element_weights")
+                )
+            else:
+                self._internal_hyperparam_list.append(
+                    [self.params.descriptors.bispectrum_element_weights]
+                )
+
+            self.labels = ["cutoff", "twojmax", "element_weights"]
 
         elif isinstance(self._descriptor_calculator, AtomicDensity):
-            if (
-                list(
-                    map(
-                        lambda p: "atomic_density_cutoff" in p.name,
-                        self.params.hyperparameters.hlist,
-                    )
-                ).count(True)
-                == 0
-            ):
-                first_dim_list = [
-                    self.params.descriptors.atomic_density_cutoff
-                ]
+            if hyperparameter_in_hlist("atomic_density_cutoff"):
+                self._internal_hyperparam_list.append(
+                    extract_choices_from_hlist("atomic_density_cutoff")
+                )
             else:
-                first_dim_list = self.params.hyperparameters.hlist[
-                    list(
-                        map(
-                            lambda p: "atomic_density_cutoff" in p.name,
-                            self.params.hyperparameters.hlist,
-                        )
-                    ).index(True)
-                ].choices
+                self._internal_hyperparam_list.append(
+                    [self.params.descriptors.atomic_density_cutoff]
+                )
+            if hyperparameter_in_hlist("atomic_density_sigma"):
+                self._internal_hyperparam_list.append(
+                    extract_choices_from_hlist("atomic_density_sigma")
+                )
+            else:
+                self._internal_hyperparam_list.append(
+                    [self.params.descriptors.atomic_density_sigma]
+                )
 
-            if (
-                list(
-                    map(
-                        lambda p: "atomic_density_sigma" in p.name,
-                        self.params.hyperparameters.hlist,
-                    )
-                ).count(True)
-                == 0
-            ):
-                second_dim_list = [
-                    self.params.descriptors.atomic_density_sigma
-                ]
-            else:
-                second_dim_list = self.params.hyperparameters.hlist[
-                    list(
-                        map(
-                            lambda p: "atomic_density_sigma" in p.name,
-                            self.params.hyperparameters.hlist,
-                        )
-                    ).index(True)
-                ].choices
-            self._internal_hyperparam_list = [first_dim_list, second_dim_list]
-            self._labels = ["cutoff", "sigma"]
+            self.labels = ["cutoff", "sigma"]
 
         else:
             raise Exception(
@@ -508,6 +492,14 @@ class DescriptorScoringOptimizer(HyperOpt, ABC):
         elif description["input"] is None:
             # In this case, only the output is processed.
             pass
+        elif description["input"] == "json":
+            # In this case, only the output is processed.
+            descriptor_calculation_kwargs["units"] = original_units["input"]
+            tmp_input, local_size = (
+                self._descriptor_calculator.calculate_from_json(
+                    snapshot["input"], **descriptor_calculation_kwargs
+                )
+            )
 
         else:
             raise Exception(

@@ -4,7 +4,7 @@ import numpy
 
 import mala
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 """
 Shows how to align the energy spaces of different LDOS vectors to a reference.
@@ -24,9 +24,9 @@ parameters.targets.ldos_gridspacing_ev = 2.5
 # initialize and add snapshots to workflow
 ldos_aligner = mala.LDOSAligner(parameters)
 ldos_aligner.clear_data()
-ldos_aligner.add_snapshot("Be_snapshot0.out.npy", data_path)
-ldos_aligner.add_snapshot("Be_snapshot1.out.npy", data_path)
-ldos_aligner.add_snapshot("Be_snapshot2.out.npy", data_path)
+ldos_aligner.add_snapshot("Be_snapshot0.out.npy", data_path_be)
+ldos_aligner.add_snapshot("Be_snapshot1.out.npy", data_path_be)
+ldos_aligner.add_snapshot("Be_snapshot2.out.npy", data_path_be)
 
 # align and cut the snapshots from the left and right-hand sides
 ldos_aligner.align_ldos_to_ref(

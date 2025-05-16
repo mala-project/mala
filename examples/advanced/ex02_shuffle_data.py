@@ -1,6 +1,6 @@
 import mala
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 """
 Shows how data can be shuffled amongst multiple
@@ -45,28 +45,28 @@ data_shuffler = mala.DataShuffler(parameters)
 # as well. Here, we use precomputed ones.
 data_shuffler.add_snapshot(
     "Be_snapshot0.in.npy",
-    data_path,
+    data_path_be,
     "Be_snapshot0.out.npy",
-    data_path,
+    data_path_be,
 )
 data_shuffler.add_snapshot(
     "Be_snapshot1.in.npy",
-    data_path,
+    data_path_be,
     "Be_snapshot1.out.npy",
-    data_path,
+    data_path_be,
 )
 # On-the-fly snapshots can be added as well.
 # data_shuffler.add_snapshot(
 #     "Be_snapshot2.info.json",
-#     data_path,
+#     data_path_be,
 #     "Be_snapshot2.out.npy",
-#     data_path,
+#     data_path_be,
 # )
 
 
 # Shuffle the snapshots using the "shuffle_to_temporary" option.
 data_shuffler.shuffle_snapshots(
-    complete_save_path=data_path,
+    complete_save_path=data_path_be,
     save_name="Be_shuffled*",
     shuffle_to_temporary=True,
     number_of_shuffled_snapshots=2,
@@ -116,10 +116,10 @@ parameters.data.shuffling_seed = 1234
 
 data_shuffler = mala.DataShuffler(parameters)
 data_shuffler.add_snapshot(
-    "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path
+    "Be_snapshot0.in.npy", data_path_be, "Be_snapshot0.out.npy", data_path_be
 )
 data_shuffler.add_snapshot(
-    "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path
+    "Be_snapshot1.in.npy", data_path_be, "Be_snapshot1.out.npy", data_path_be
 )
 data_shuffler.shuffle_snapshots(
     complete_save_path=".", save_name="Be_shuffled*"

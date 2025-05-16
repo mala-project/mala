@@ -19,7 +19,7 @@ import numpy as np
 import pytest
 import torch
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 test_checkpoint_name = "test"
 
@@ -107,23 +107,23 @@ class TestGPUExecution:
         for i in range(0, 6):
             data_handler.add_snapshot(
                 "Be_snapshot0.in.npy",
-                data_path,
+                data_path_be,
                 "Be_snapshot0.out.npy",
-                data_path,
+                data_path_be,
                 "tr",
             )
         data_handler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.add_snapshot(
             "Be_snapshot2.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot2.out.npy",
-            data_path,
+            data_path_be,
             "te",
         )
         data_handler.prepare_data()

@@ -87,7 +87,7 @@ as a calculator and use the ASE interface to perform the calculation.
 
       .. code-block:: python
 
-            atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
+            atoms = read(os.path.join(data_path_be, "Be_snapshot1.out"))
             atoms.set_calculator(calculator)
             atoms.get_potential_energy()
 

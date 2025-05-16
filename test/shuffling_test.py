@@ -3,7 +3,7 @@ import os
 import mala
 import numpy as np
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 # Accuracy for the shuffling test.
 accuracy = np.finfo(float).eps
@@ -20,10 +20,16 @@ class TestDataShuffling:
 
         # Add a snapshot we want to use in to the list.
         data_shuffler.add_snapshot(
-            "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path
+            "Be_snapshot0.in.npy",
+            data_path_be,
+            "Be_snapshot0.out.npy",
+            data_path_be,
         )
         data_shuffler.add_snapshot(
-            "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path
+            "Be_snapshot1.in.npy",
+            data_path_be,
+            "Be_snapshot1.out.npy",
+            data_path_be,
         )
 
         # After shuffling, these snapshots can be loaded as regular snapshots
@@ -36,10 +42,16 @@ class TestDataShuffling:
 
         # Add a snapshot we want to use in to the list.
         data_shuffler.add_snapshot(
-            "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path
+            "Be_snapshot0.in.npy",
+            data_path_be,
+            "Be_snapshot0.out.npy",
+            data_path_be,
         )
         data_shuffler.add_snapshot(
-            "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path
+            "Be_snapshot1.in.npy",
+            data_path_be,
+            "Be_snapshot1.out.npy",
+            data_path_be,
         )
 
         # After shuffling, these snapshots can be loaded as regular snapshots
@@ -66,16 +78,16 @@ class TestDataShuffling:
         # Add a snapshot we want to use in to the list.
         data_shuffler.add_snapshot(
             "Be_snapshot0.in.h5",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.h5",
-            data_path,
+            data_path_be,
             snapshot_type="openpmd",
         )
         data_shuffler.add_snapshot(
             "Be_snapshot1.in.h5",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.h5",
-            data_path,
+            data_path_be,
             snapshot_type="openpmd",
         )
 
@@ -90,16 +102,16 @@ class TestDataShuffling:
         # Add a snapshot we want to use in to the list.
         data_shuffler.add_snapshot(
             "Be_snapshot0.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
             snapshot_type="numpy",
         )
         data_shuffler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             snapshot_type="numpy",
         )
 
@@ -132,16 +144,16 @@ class TestDataShuffling:
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot(
             "Be_snapshot0.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
             "tr",
         )
         data_handler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.prepare_data()
@@ -175,10 +187,16 @@ class TestDataShuffling:
 
         # Add a snapshot we want to use in to the list.
         data_shuffler.add_snapshot(
-            "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path
+            "Be_snapshot0.in.npy",
+            data_path_be,
+            "Be_snapshot0.out.npy",
+            data_path_be,
         )
         data_shuffler.add_snapshot(
-            "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path
+            "Be_snapshot1.in.npy",
+            data_path_be,
+            "Be_snapshot1.out.npy",
+            data_path_be,
         )
 
         # After shuffling, these snapshots can be loaded as regular snapshots
@@ -228,17 +246,17 @@ class TestDataShuffling:
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot(
             "Be_snapshot0.in.h5",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.h5",
-            data_path,
+            data_path_be,
             "tr",
             snapshot_type="openpmd",
         )
         data_handler.add_snapshot(
             "Be_snapshot1.in.h5",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.h5",
-            data_path,
+            data_path_be,
             "va",
             snapshot_type="openpmd",
         )
@@ -275,16 +293,16 @@ class TestDataShuffling:
         # Add a snapshot we want to use in to the list.
         data_shuffler.add_snapshot(
             "Be_snapshot0.in.h5",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.h5",
-            data_path,
+            data_path_be,
             snapshot_type="openpmd",
         )
         data_shuffler.add_snapshot(
             "Be_snapshot1.in.h5",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.h5",
-            data_path,
+            data_path_be,
             snapshot_type="openpmd",
         )
 
@@ -340,9 +358,9 @@ class TestDataShuffling:
         for i in range(5):
             data_shuffler.add_snapshot(
                 f"Be_snapshot0.in.{ext_in}",
-                data_path,
+                data_path_be,
                 f"Be_snapshot0.out.{ext_in}",
-                data_path,
+                data_path_be,
                 snapshot_type=snapshot_type,
             )
         data_shuffler.shuffle_snapshots(

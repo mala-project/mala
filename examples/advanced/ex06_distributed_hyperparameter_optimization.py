@@ -2,7 +2,7 @@ import os
 
 import mala
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 """
 ex09_distributed_hyperopt.py: Shows how a hyperparameter
@@ -55,19 +55,19 @@ data_handler = mala.DataHandler(parameters)
 
 data_handler.add_snapshot(
     "Be_snapshot1.in.npy",
-    data_path,
+    data_path_be,
     "Be_snapshot1.out.npy",
-    data_path,
+    data_path_be,
     "tr",
-    calculation_output_file=os.path.join(data_path, "Be_snapshot1.out"),
+    calculation_output_file=os.path.join(data_path_be, "Be_snapshot1.out"),
 )
 data_handler.add_snapshot(
     "Be_snapshot2.in.npy",
-    data_path,
+    data_path_be,
     "Be_snapshot2.out.npy",
-    data_path,
+    data_path_be,
     "va",
-    calculation_output_file=os.path.join(data_path, "Be_snapshot2.out"),
+    calculation_output_file=os.path.join(data_path_be, "Be_snapshot2.out"),
 )
 data_handler.prepare_data()
 

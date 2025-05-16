@@ -3,7 +3,7 @@ import os
 import mala
 import numpy as np
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 # Control the accuracies for the postprocessing routines.
 accuracy_predictions = 1.0
@@ -43,16 +43,16 @@ class TestOnTheFly:
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot(
             "Be_snapshot0.info.json",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
             "tr",
         )
         data_handler.add_snapshot(
             "Be_snapshot1.info.json",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.prepare_data()
@@ -128,15 +128,15 @@ class TestOnTheFly:
         # Add a snapshot we want to use in to the list.
         data_shuffler.add_snapshot(
             "Be_snapshot0.info.json",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
         )
         data_shuffler.add_snapshot(
             "Be_snapshot1.info.json",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
         )
 
         # After shuffling, these snapshots can be loaded as regular snapshots
