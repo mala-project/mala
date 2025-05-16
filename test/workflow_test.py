@@ -157,7 +157,7 @@ class TestFullWorkflow:
                     os.path.join(
                         configuration["data_path_be"],
                         "cubes",
-                        "tmp.pp00*BaO_ldos_0.cube",
+                        "tmp.pp0*BaO_ldos_0.cube",
                     ),
                     os.path.join(
                         configuration["data_path_be"],
