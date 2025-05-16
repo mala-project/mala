@@ -162,24 +162,22 @@ can be computed. Secondly, the <code class="docutils literal notranslate"><span 
 via the hyperparameter optimizer. No <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> instance is needed.
 An example would be this:</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot1.out&quot;</span><span class="p">),</span>
-                            <span class="s2">&quot;numpy&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot1.out.npy&quot;</span><span class="p">),</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path_be</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot1.out&quot;</span><span class="p">),</span>
+                            <span class="s2">&quot;numpy&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path_be</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot1.out.npy&quot;</span><span class="p">),</span>
                             <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;1/(Ry*Bohr^3)&quot;</span><span class="p">)</span>
-<span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot2.out&quot;</span><span class="p">),</span>
-                            <span class="s2">&quot;numpy&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot2.out.npy&quot;</span><span class="p">),</span>
+<span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path_be</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot2.out&quot;</span><span class="p">),</span>
+                            <span class="s2">&quot;numpy&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path_be</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot2.out.npy&quot;</span><span class="p">),</span>
                             <span class="n">target_units</span><span class="o">=</span><span class="s2">&quot;1/(Ry*Bohr^3)&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div></blockquote>
 <p>Once this is done, you can start the optimization via</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">perform_study</span><span class="p">(</span><span class="n">return_plotting</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">perform_study</span><span class="p">()</span>
 <span class="n">hyperoptimizer</span><span class="o">.</span><span class="n">set_optimal_parameters</span><span class="p">()</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>If <code class="docutils literal notranslate"><span class="pre">return_plotting</span></code> is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, relevant plotting data for the
-analysis are returned. This is useful for exploratory searches.</p>
 <p>Since the ACSD re-calculates the bispectrum descriptors for each combination
 of hyperparameters, it is useful to use parallel descriptor calculation.
 To do so, you can enable the <a class="reference external" href="https://www.mpi-forum.org/">MPI</a> capabilites

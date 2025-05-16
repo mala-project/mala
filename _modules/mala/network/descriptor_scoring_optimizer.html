@@ -105,6 +105,7 @@
 <span class="n">descriptor_input_types_descriptor_scoring</span> <span class="o">=</span> <span class="n">descriptor_input_types</span> <span class="o">+</span> <span class="p">[</span>
     <span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
     <span class="s2">&quot;openpmd&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;json&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 <span class="n">target_input_types_descriptor_scoring</span> <span class="o">=</span> <span class="n">target_input_types</span> <span class="o">+</span> <span class="p">[</span>
     <span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
@@ -143,6 +144,13 @@
 
 <span class="sd">    best_trial_index : int</span>
 <span class="sd">        Index of best-performing trial</span>
+
+<span class="sd">    labels : list</span>
+<span class="sd">        Contains the labels of all the hyperparameters sampled during analysis.</span>
+
+<span class="sd">    averaged_study : list</span>
+<span class="sd">        Contains results of the analysis averaged over all snapshots.</span>
+<span class="sd">        Can be used for plotting.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -167,14 +175,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot_units</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Filled after the analysis.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_study</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_reduced_study</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># Logging metrics.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">best_trial_index</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># For plotting.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">averaged_study</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="DescriptorScoringOptimizer.add_snapshot">
 <a class="viewcode-back" href="../../../api/mala.network.descriptor_scoring_optimizer.html#mala.network.descriptor_scoring_optimizer.DescriptorScoringOptimizer.add_snapshot">[docs]</a>
@@ -273,6 +283,7 @@
         <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
             <span class="s2">&quot;bispectrum_twojmax&quot;</span><span class="p">,</span>
             <span class="s2">&quot;bispectrum_cutoff&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;bispectrum_element_weights&quot;</span><span class="p">,</span>
             <span class="s2">&quot;atomic_density_sigma&quot;</span><span class="p">,</span>
             <span class="s2">&quot;atomic_density_cutoff&quot;</span><span class="p">,</span>
         <span class="p">]:</span>
@@ -293,9 +304,7 @@
 
 <div class="viewcode-block" id="DescriptorScoringOptimizer.perform_study">
 <a class="viewcode-back" href="../../../api/mala.network.descriptor_scoring_optimizer.html#mala.network.descriptor_scoring_optimizer.DescriptorScoringOptimizer.perform_study">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">perform_study</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">file_based_communication</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_plotting</span><span class="o">=</span><span class="kc">False</span>
-    <span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">perform_study</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_based_communication</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform the study, i.e. the optimization.</span>
 
@@ -333,6 +342,9 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">hyperparameter_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                     <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_element_weights</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">hyperparameter_tuple</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+                    <span class="p">]</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">AtomicDensity</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_cutoff</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">hyperparameter_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -362,11 +374,11 @@
                         <span class="p">)</span>
 
                     <span class="n">outstring</span> <span class="o">=</span> <span class="s2">&quot;[&quot;</span>
-                    <span class="k">for</span> <span class="n">label_id</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">label_id</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">):</span>
                         <span class="n">outstring</span> <span class="o">+=</span> <span class="p">(</span>
                             <span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">hyperparameter_tuple</span><span class="p">[</span><span class="n">label_id</span><span class="p">])</span>
                         <span class="p">)</span>
-                        <span class="k">if</span> <span class="n">label_id</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">label_id</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                             <span class="n">outstring</span> <span class="o">+=</span> <span class="s2">&quot;, &quot;</span>
                     <span class="n">outstring</span> <span class="o">+=</span> <span class="s2">&quot;]&quot;</span>
                     <span class="n">best_trial_string</span> <span class="o">=</span> <span class="s2">&quot;. No suitable trial found yet.&quot;</span>
@@ -391,31 +403,14 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_list</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_study</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">averaged_results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">return_plotting</span><span class="p">:</span>
-                <span class="n">results_to_plot</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">len_first_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="n">len_second_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">len_first_dim</span><span class="p">):</span>
-                        <span class="n">results_to_plot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="p">[</span>
-                                <span class="n">i</span> <span class="o">*</span> <span class="n">len_second_dim</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">len_second_dim</span><span class="p">,</span>
-                                <span class="mi">2</span><span class="p">:,</span>
-                            <span class="p">]</span>
-                        <span class="p">)</span>
-
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">):</span>
-                        <span class="k">return</span> <span class="n">results_to_plot</span><span class="p">,</span> <span class="p">{</span>
-                            <span class="s2">&quot;twojmax&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                            <span class="s2">&quot;cutoff&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                        <span class="p">}</span>
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">AtomicDensity</span><span class="p">):</span>
-                        <span class="k">return</span> <span class="n">results_to_plot</span><span class="p">,</span> <span class="p">{</span>
-                            <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                            <span class="s2">&quot;cutoff&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                        <span class="p">}</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">averaged_study</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">hyperparameter_tuples</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">averaged_study</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">averaged_study</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">averaged_results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="DescriptorScoringOptimizer.set_optimal_parameters">
@@ -429,10 +424,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">best_trial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_best_trial</span><span class="p">()</span>
-            <span class="n">minimum_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_study</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_cutoff</span> <span class="o">=</span> <span class="n">best_trial</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">best_trial</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_element_weights</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">best_trial</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+                <span class="p">]</span>
                 <span class="n">printout</span><span class="p">(</span>
                     <span class="s2">&quot;Descriptor scoring analysis finished, optimal parameters: &quot;</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -443,6 +440,10 @@
                 <span class="n">printout</span><span class="p">(</span>
                     <span class="s2">&quot;Bispectrum cutoff: &quot;</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_cutoff</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">printout</span><span class="p">(</span>
+                    <span class="s2">&quot;Bispectrum element weights: &quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_element_weights</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">AtomicDensity</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_cutoff</span> <span class="o">=</span> <span class="n">best_trial</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -472,96 +473,79 @@
 <span class="sd">        Based on a list of choices for descriptor hyperparameters, this</span>
 <span class="sd">        function creates a list of trials to be tested.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">hyperparameter_in_hlist</span><span class="p">(</span><span class="n">hyperparameter_name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="nb">list</span><span class="p">(</span>
+                    <span class="nb">map</span><span class="p">(</span>
+                        <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">hyperparameter_name</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">extract_choices_from_hlist</span><span class="p">(</span><span class="n">hyperparameter_name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">[</span>
+                <span class="nb">list</span><span class="p">(</span>
+                    <span class="nb">map</span><span class="p">(</span>
+                        <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">hyperparameter_name</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">choices</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">Bispectrum</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="nb">list</span><span class="p">(</span>
-                    <span class="nb">map</span><span class="p">(</span>
-                        <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;bispectrum_cutoff&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-                <span class="o">==</span> <span class="mi">0</span>
-            <span class="p">):</span>
-                <span class="n">first_dim_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_cutoff</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">hyperparameter_in_hlist</span><span class="p">(</span><span class="s2">&quot;bispectrum_cutoff&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">extract_choices_from_hlist</span><span class="p">(</span><span class="s2">&quot;bispectrum_cutoff&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">first_dim_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">[</span>
-                    <span class="nb">list</span><span class="p">(</span>
-                        <span class="nb">map</span><span class="p">(</span>
-                            <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;bispectrum_cutoff&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">,</span>
-                        <span class="p">)</span>
-                    <span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-                <span class="p">]</span><span class="o">.</span><span class="n">choices</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_cutoff</span><span class="p">]</span>
+                <span class="p">)</span>
 
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="nb">list</span><span class="p">(</span>
-                    <span class="nb">map</span><span class="p">(</span>
-                        <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;bispectrum_twojmax&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-                <span class="o">==</span> <span class="mi">0</span>
-            <span class="p">):</span>
-                <span class="n">second_dim_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">hyperparameter_in_hlist</span><span class="p">(</span><span class="s2">&quot;bispectrum_twojmax&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">extract_choices_from_hlist</span><span class="p">(</span><span class="s2">&quot;bispectrum_twojmax&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">second_dim_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">[</span>
-                    <span class="nb">list</span><span class="p">(</span>
-                        <span class="nb">map</span><span class="p">(</span>
-                            <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;bispectrum_twojmax&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">,</span>
-                        <span class="p">)</span>
-                    <span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-                <span class="p">]</span><span class="o">.</span><span class="n">choices</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">]</span>
+                <span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">first_dim_list</span><span class="p">,</span> <span class="n">second_dim_list</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cutoff&quot;</span><span class="p">,</span> <span class="s2">&quot;twojmax&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">hyperparameter_in_hlist</span><span class="p">(</span><span class="s2">&quot;bispectrum_element_weights&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">extract_choices_from_hlist</span><span class="p">(</span><span class="s2">&quot;bispectrum_element_weights&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_element_weights</span><span class="p">]</span>
+                <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cutoff&quot;</span><span class="p">,</span> <span class="s2">&quot;twojmax&quot;</span><span class="p">,</span> <span class="s2">&quot;element_weights&quot;</span><span class="p">]</span>
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="p">,</span> <span class="n">AtomicDensity</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="nb">list</span><span class="p">(</span>
-                    <span class="nb">map</span><span class="p">(</span>
-                        <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;atomic_density_cutoff&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-                <span class="o">==</span> <span class="mi">0</span>
-            <span class="p">):</span>
-                <span class="n">first_dim_list</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_cutoff</span>
-                <span class="p">]</span>
+            <span class="k">if</span> <span class="n">hyperparameter_in_hlist</span><span class="p">(</span><span class="s2">&quot;atomic_density_cutoff&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">extract_choices_from_hlist</span><span class="p">(</span><span class="s2">&quot;atomic_density_cutoff&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">first_dim_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">[</span>
-                    <span class="nb">list</span><span class="p">(</span>
-                        <span class="nb">map</span><span class="p">(</span>
-                            <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;atomic_density_cutoff&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">,</span>
-                        <span class="p">)</span>
-                    <span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-                <span class="p">]</span><span class="o">.</span><span class="n">choices</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_cutoff</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">hyperparameter_in_hlist</span><span class="p">(</span><span class="s2">&quot;atomic_density_sigma&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">extract_choices_from_hlist</span><span class="p">(</span><span class="s2">&quot;atomic_density_sigma&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_sigma</span><span class="p">]</span>
+                <span class="p">)</span>
 
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="nb">list</span><span class="p">(</span>
-                    <span class="nb">map</span><span class="p">(</span>
-                        <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;atomic_density_sigma&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-                <span class="o">==</span> <span class="mi">0</span>
-            <span class="p">):</span>
-                <span class="n">second_dim_list</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_sigma</span>
-                <span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">second_dim_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">[</span>
-                    <span class="nb">list</span><span class="p">(</span>
-                        <span class="nb">map</span><span class="p">(</span>
-                            <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;atomic_density_sigma&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">,</span>
-                        <span class="p">)</span>
-                    <span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-                <span class="p">]</span><span class="o">.</span><span class="n">choices</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_internal_hyperparam_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">first_dim_list</span><span class="p">,</span> <span class="n">second_dim_list</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cutoff&quot;</span><span class="p">,</span> <span class="s2">&quot;sigma&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cutoff&quot;</span><span class="p">,</span> <span class="s2">&quot;sigma&quot;</span><span class="p">]</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
@@ -605,6 +589,14 @@
         <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># In this case, only the output is processed.</span>
             <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+            <span class="c1"># In this case, only the output is processed.</span>
+            <span class="n">descriptor_calculation_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span>
+            <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor_calculator</span><span class="o">.</span><span class="n">calculate_from_json</span><span class="p">(</span>
+                    <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">descriptor_calculation_kwargs</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>

@@ -182,8 +182,8 @@ how these values can be determined by a newly developed method called
 and fill it with data, e.g., by</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_converter</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">DataConverter</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
-<span class="n">outfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot0.out&quot;</span><span class="p">)</span>
-<span class="n">ldosfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;cubes/tmp.pp*Be_ldos.cube&quot;</span><span class="p">)</span>
+<span class="n">outfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path_be</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot0.out&quot;</span><span class="p">)</span>
+<span class="n">ldosfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path_be</span><span class="p">,</span> <span class="s2">&quot;cubes/tmp.pp*Be_ldos.cube&quot;</span><span class="p">)</span>
 
 <span class="n">data_converter</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="n">descriptor_input_type</span><span class="o">=</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">,</span>
                             <span class="n">descriptor_input_path</span><span class="o">=</span><span class="n">outfile</span><span class="p">,</span>
@@ -214,12 +214,12 @@ if we let them be created by the <code class="docutils literal notranslate"><spa
                                  <span class="n">simulation_output_save_path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
                                  <span class="n">naming_scheme</span><span class="o">=</span><span class="s2">&quot;Be_snapshot*.npy&quot;</span><span class="p">,</span>
                                  <span class="n">descriptor_calculation_kwargs</span><span class="o">=</span>
-                                 <span class="p">{</span><span class="s2">&quot;working_directory&quot;</span><span class="p">:</span> <span class="n">data_path</span><span class="p">})</span>
+                                 <span class="p">{</span><span class="s2">&quot;working_directory&quot;</span><span class="p">:</span> <span class="n">data_path_be</span><span class="p">})</span>
 <span class="c1"># You can also provide only one path</span>
 <span class="c1"># data_converter.convert_snapshots(complete_save_path=&quot;./&quot;,</span>
 <span class="c1">#                                  naming_scheme=&quot;Be_snapshot*.npy&quot;,</span>
 <span class="c1">#                                  descriptor_calculation_kwargs=</span>
-<span class="c1">#                                  {&quot;working_directory&quot;: data_path})</span>
+<span class="c1">#                                  {&quot;working_directory&quot;: data_path_be})</span>
 </pre></div>
 </div>
 </div></blockquote>

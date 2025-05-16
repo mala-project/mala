@@ -91,7 +91,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">distance</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mala.common.parallelizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">parallel_warn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.lammps_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_compute_np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mala.descriptors.descriptor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Descriptor</span>
 
@@ -298,13 +298,18 @@
 
         <span class="c1"># Create LAMMPS instance.</span>
         <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">atomic_density_sigma</span><span class="p">,</span>
             <span class="s2">&quot;rcutfac&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">atomic_density_cutoff</span><span class="p">,</span>
         <span class="p">}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">))):</span>
+            <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">atomic_density_sigma</span>
+            <span class="p">)</span>
+
         <span class="n">lmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_lammps</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">)</span>
 
         <span class="c1"># For now the file is chosen automatically, because this is used</span>
         <span class="c1"># mostly under the hood anyway.</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">custom_lammps_compute_file</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
             <span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">custom_lammps_compute_file</span>
         <span class="k">else</span><span class="p">:</span>
@@ -312,15 +317,24 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_z_splitting</span><span class="p">:</span>
                     <span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                        <span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.ggrid.python&quot;</span>
+                        <span class="n">filepath</span><span class="p">,</span>
+                        <span class="s2">&quot;in.ggrid_n</span><span class="si">{0}</span><span class="s2">.python&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">))</span>
+                        <span class="p">),</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                        <span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.ggrid_defaultproc.python&quot;</span>
+                        <span class="n">filepath</span><span class="p">,</span>
+                        <span class="s2">&quot;in.ggrid_defaultproc_n</span><span class="si">{0}</span><span class="s2">.python&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">))</span>
+                        <span class="p">),</span>
                     <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                    <span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.ggrid_defaultproc.python&quot;</span>
+                    <span class="n">filepath</span><span class="p">,</span>
+                    <span class="s2">&quot;in.ggrid_defaultproc_n</span><span class="si">{0}</span><span class="s2">.python&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">))</span>
+                    <span class="p">),</span>
                 <span class="p">)</span>
 
         <span class="c1"># Do the LAMMPS calculation and clean up.</span>
@@ -348,7 +362,26 @@
             <span class="n">array_shape</span><span class="o">=</span><span class="p">(</span><span class="n">nrows_ggrid</span><span class="p">,</span> <span class="n">ncols_ggrid</span><span class="p">),</span>
             <span class="n">use_fp64</span><span class="o">=</span><span class="n">use_fp64</span><span class="p">,</span>
         <span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_clean_calculation</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="n">keep_logs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">parallel_warn</span><span class="p">(</span>
+                <span class="s2">&quot;Atomic density formula and multielement system detected: &quot;</span>
+                <span class="s2">&quot;Quantum ESPRESSO has a different internal order &quot;</span>
+                <span class="s2">&quot;for structure factors and atomic positions. &quot;</span>
+                <span class="s2">&quot;MALA recovers the correct ordering for multielement &quot;</span>
+                <span class="s2">&quot;systems, but the algorithm to do so is still &quot;</span>
+                <span class="s2">&quot;experimental. Please test on a small system before &quot;</span>
+                <span class="s2">&quot;using the atomic density formula at scale.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">symbols</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="p">],</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="n">permutation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                <span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">gaussian_descriptors_np</span> <span class="o">=</span> <span class="n">gaussian_descriptors_np</span><span class="p">[:,</span> <span class="n">permutation</span><span class="p">]</span>
 
         <span class="c1"># In comparison to bispectrum, the atomic density always returns</span>
         <span class="c1"># in the &quot;local mode&quot;. Thus we have to make some slight adjustments</span>
@@ -376,7 +409,7 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                        <span class="mi">7</span><span class="p">,</span>
+                        <span class="mi">6</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">)),</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
                 <span class="n">gaussian_descriptors_np</span> <span class="o">=</span> <span class="n">gaussian_descriptors_np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>

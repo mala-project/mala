@@ -100,8 +100,8 @@ and fill it with data, e.g., by
       .. code-block:: python
 
             data_converter = mala.DataConverter(parameters)
-            outfile = os.path.join(data_path, "Be_snapshot0.out")
-            ldosfile = os.path.join(data_path, "cubes/tmp.pp*Be_ldos.cube")
+            outfile = os.path.join(data_path_be, "Be_snapshot0.out")
+            ldosfile = os.path.join(data_path_be, "cubes/tmp.pp*Be_ldos.cube")
 
             data_converter.add_snapshot(descriptor_input_type="espresso-out",
                                         descriptor_input_path=outfile,
@@ -133,12 +133,12 @@ Once data is provided, the conversion itself is simple.
                                              simulation_output_save_path="./",
                                              naming_scheme="Be_snapshot*.npy",
                                              descriptor_calculation_kwargs=
-                                             {"working_directory": data_path})
+                                             {"working_directory": data_path_be})
             # You can also provide only one path
             # data_converter.convert_snapshots(complete_save_path="./",
             #                                  naming_scheme="Be_snapshot*.npy",
             #                                  descriptor_calculation_kwargs=
-            #                                  {"working_directory": data_path})
+            #                                  {"working_directory": data_path_be})
 
 The ``convert_snapshots`` function will convert ALL snapshots added via
 ``add_snapshot`` and save the resulting volumetric numpy files to the

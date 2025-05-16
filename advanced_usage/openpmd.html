@@ -119,16 +119,16 @@ be left untouched. Specifically, set</p>
 <span class="o">...</span>
 <span class="c1"># Changes for DataHandler</span>
 <span class="n">data_handler</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">DataHandler</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
-<span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot0.in.h5&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span>
-                           <span class="s2">&quot;Be_snapshot0.out.h5&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;tr&quot;</span><span class="p">,</span>
+<span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot0.in.h5&quot;</span><span class="p">,</span> <span class="n">data_path_be</span><span class="p">,</span>
+                           <span class="s2">&quot;Be_snapshot0.out.h5&quot;</span><span class="p">,</span> <span class="n">data_path_be</span><span class="p">,</span> <span class="s2">&quot;tr&quot;</span><span class="p">,</span>
                            <span class="n">snapshot_type</span><span class="o">=</span><span class="s2">&quot;openpmd&quot;</span><span class="p">)</span>
 <span class="o">...</span>
 <span class="c1"># Changes for DataShuffler</span>
 <span class="n">data_shuffler</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">DataShuffler</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
 <span class="c1"># Data can be shuffle FROM and TO openPMD - but also from</span>
 <span class="c1"># numpy to openPMD.</span>
-<span class="n">data_shuffler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot0.in.h5&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span>
-                            <span class="s2">&quot;Be_snapshot0.out.h5&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span>
+<span class="n">data_shuffler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot0.in.h5&quot;</span><span class="p">,</span> <span class="n">data_path_be</span><span class="p">,</span>
+                            <span class="s2">&quot;Be_snapshot0.out.h5&quot;</span><span class="p">,</span> <span class="n">data_path_be</span><span class="p">,</span>
                             <span class="n">snapshot_type</span><span class="o">=</span><span class="s2">&quot;openpmd&quot;</span><span class="p">)</span>
 <span class="n">data_shuffler</span><span class="o">.</span><span class="n">shuffle_snapshots</span><span class="p">(</span><span class="o">...</span><span class="p">,</span>
                                 <span class="n">save_name</span><span class="o">=</span><span class="s2">&quot;Be_shuffled*.h5&quot;</span><span class="p">)</span>

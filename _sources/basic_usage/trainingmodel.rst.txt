@@ -101,10 +101,10 @@ providing the respective types of data files.
       .. code-block:: python
 
             data_handler = mala.DataHandler(parameters)
-            data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
-                                      "Be_snapshot0.out.npy", data_path, "tr")
-            data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                      "Be_snapshot1.out.npy", data_path, "va")
+            data_handler.add_snapshot("Be_snapshot0.in.npy", data_path_be,
+                                      "Be_snapshot0.out.npy", data_path_be, "tr")
+            data_handler.add_snapshot("Be_snapshot1.in.npy", data_path_be,
+                                      "Be_snapshot1.out.npy", data_path_be, "va")
 
 2. On-the-fly descriptors: The LDOS is sampled into either OpenPMD or numpy
    files, while the volumetric descriptor data is computed on-the-fly during
@@ -122,10 +122,10 @@ providing the respective types of data files.
             parameters.descriptors.bispectrum_cutoff = 4.67637
 
             data_handler = mala.DataHandler(parameters)
-            data_handler.add_snapshot("Be_snapshot0.info.json", data_path,
-                                      "Be_snapshot0.out.npy", data_path, "tr")
-            data_handler.add_snapshot("Be_snapshot1.info.json", data_path,
-                                      "Be_snapshot1.out.npy", data_path, "va")
+            data_handler.add_snapshot("Be_snapshot0.info.json", data_path_be,
+                                      "Be_snapshot0.out.npy", data_path_be, "tr")
+            data_handler.add_snapshot("Be_snapshot1.info.json", data_path_be,
+                                      "Be_snapshot1.out.npy", data_path_be, "va")
 
 The ``"tr"`` and ``"va"`` flag signal that the respective snapshots are added as
 training and validation data, respectively. Training data is data the model
@@ -176,7 +176,7 @@ coarseness, etc., are available at inference time. By
 
       .. code-block:: python
 
-            additional_calculation_data = os.path.join(data_path, "Be_snapshot0.out")
+            additional_calculation_data = os.path.join(data_path_be, "Be_snapshot0.out")
             trainer.save_run("be_model",
                              additional_calculation_data=additional_calculation_data)
 

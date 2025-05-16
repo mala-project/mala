@@ -185,10 +185,10 @@ data is precomputed into either OpenPMD or numpy files
 (as described <a class="reference internal" href="more_data.html"><span class="doc">here</span></a>), and both can be loaded for training.</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">DataHandler</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
-<span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot0.in.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span>
-                          <span class="s2">&quot;Be_snapshot0.out.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;tr&quot;</span><span class="p">)</span>
-<span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot1.in.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span>
-                          <span class="s2">&quot;Be_snapshot1.out.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;va&quot;</span><span class="p">)</span>
+<span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot0.in.npy&quot;</span><span class="p">,</span> <span class="n">data_path_be</span><span class="p">,</span>
+                          <span class="s2">&quot;Be_snapshot0.out.npy&quot;</span><span class="p">,</span> <span class="n">data_path_be</span><span class="p">,</span> <span class="s2">&quot;tr&quot;</span><span class="p">)</span>
+<span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot1.in.npy&quot;</span><span class="p">,</span> <span class="n">data_path_be</span><span class="p">,</span>
+                          <span class="s2">&quot;Be_snapshot1.out.npy&quot;</span><span class="p">,</span> <span class="n">data_path_be</span><span class="p">,</span> <span class="s2">&quot;va&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -207,10 +207,10 @@ adding snapshots, see <a class="reference internal" href="more_data.html"><span 
 <span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_cutoff</span> <span class="o">=</span> <span class="mf">4.67637</span>
 
 <span class="n">data_handler</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">DataHandler</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
-<span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot0.info.json&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span>
-                          <span class="s2">&quot;Be_snapshot0.out.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;tr&quot;</span><span class="p">)</span>
-<span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot1.info.json&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span>
-                          <span class="s2">&quot;Be_snapshot1.out.npy&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;va&quot;</span><span class="p">)</span>
+<span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot0.info.json&quot;</span><span class="p">,</span> <span class="n">data_path_be</span><span class="p">,</span>
+                          <span class="s2">&quot;Be_snapshot0.out.npy&quot;</span><span class="p">,</span> <span class="n">data_path_be</span><span class="p">,</span> <span class="s2">&quot;tr&quot;</span><span class="p">)</span>
+<span class="n">data_handler</span><span class="o">.</span><span class="n">add_snapshot</span><span class="p">(</span><span class="s2">&quot;Be_snapshot1.info.json&quot;</span><span class="p">,</span> <span class="n">data_path_be</span><span class="p">,</span>
+                          <span class="s2">&quot;Be_snapshot1.out.npy&quot;</span><span class="p">,</span> <span class="n">data_path_be</span><span class="p">,</span> <span class="s2">&quot;va&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -261,7 +261,7 @@ sample calculation output (from the simulations used to gather the training
 data), so that critical parameters like simulation temperature, grid
 coarseness, etc., are available at inference time. By</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">additional_calculation_data</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot0.out&quot;</span><span class="p">)</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">additional_calculation_data</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path_be</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot0.out&quot;</span><span class="p">)</span>
 <span class="n">trainer</span><span class="o">.</span><span class="n">save_run</span><span class="p">(</span><span class="s2">&quot;be_model&quot;</span><span class="p">,</span>
                  <span class="n">additional_calculation_data</span><span class="o">=</span><span class="n">additional_calculation_data</span><span class="p">)</span>
 </pre></div>

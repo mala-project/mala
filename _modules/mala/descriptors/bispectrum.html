@@ -297,6 +297,12 @@
         <span class="c1"># general LAMMPS import.</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">lammps</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">lammps_constants</span>
 
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;MALA can only compute bispectrum descriptors up to &quot;</span>
+                <span class="s2">&quot;3-element systems currently.&quot;</span>
+            <span class="p">)</span>
+
         <span class="n">use_fp64</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_fp64&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="n">keep_logs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;keep_logs&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
@@ -316,6 +322,33 @@
             <span class="s2">&quot;twojmax&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">,</span>
             <span class="s2">&quot;rcutfac&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span><span class="p">,</span>
         <span class="p">}</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_element_weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_element_weights</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span>
+                    <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">printout</span><span class="p">(</span>
+                    <span class="s2">&quot;Multielement system selected without providing elemental &quot;</span>
+                    <span class="s2">&quot;weights. Set weights to: &quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_element_weights</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_element_weights</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">)</span>
+                <span class="ow">is</span> <span class="kc">False</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;MALA cannot compute bispectrum descriptors for &quot;</span>
+                    <span class="s2">&quot;multi-element systems with GPU currently if weights &quot;</span>
+                    <span class="s2">&quot;are not all 1.0. Please adjust weights or disable GPU.&quot;</span>
+                    <span class="s2">&quot;&quot;</span>
+                <span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_element_weights</span><span class="p">)):</span>
+                <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;wj&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_element_weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="p">)</span>
         <span class="n">lmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_lammps</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">)</span>
 
         <span class="c1"># An empty string means that the user wants to use the standard input.</span>
@@ -329,15 +362,25 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_z_splitting</span><span class="p">:</span>
                     <span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                        <span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgridlocal.python&quot;</span>
+                        <span class="n">filepath</span><span class="p">,</span>
+                        <span class="s2">&quot;in.bgridlocal_n</span><span class="si">{0}</span><span class="s2">.python&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">))</span>
+                        <span class="p">),</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                        <span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgridlocal_defaultproc.python&quot;</span>
+                        <span class="n">filepath</span><span class="p">,</span>
+                        <span class="s2">&quot;in.bgridlocal_defaultproc_n</span><span class="si">{0}</span><span class="s2">.python&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">))</span>
+                        <span class="p">),</span>
                     <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgrid.python&quot;</span><span class="p">)</span>
-
+                <span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="n">filepath</span><span class="p">,</span>
+                    <span class="s2">&quot;in.bgrid_n</span><span class="si">{0}</span><span class="s2">.python&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">))</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
         <span class="c1"># Do the LAMMPS calculation and clean up.</span>
         <span class="n">lmp</span><span class="o">.</span><span class="n">file</span><span class="p">(</span><span class="n">lammps_compute_file</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_feature_size</span><span class="p">()</span>
@@ -438,6 +481,12 @@
             <span class="s2">&quot;The resulting calculation will be slow for &quot;</span>
             <span class="s2">&quot;large systems.&quot;</span>
         <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot; MALA cannot compute bispectrum descriptors for &quot;</span>
+                <span class="s2">&quot;multi-element systems with python currently.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># The entire bispectrum calculation may be extensively profiled.</span>
         <span class="n">profile_calculation</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;profile_calculation&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>

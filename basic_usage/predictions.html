@@ -174,7 +174,7 @@ in use by ASE itself.</p>
 <p>Afterwards, define/load an ASE atoms object, set the <code class="docutils literal notranslate"><span class="pre">MALA</span></code> object
 as a calculator and use the ASE interface to perform the calculation.</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot1.out&quot;</span><span class="p">))</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path_be</span><span class="p">,</span> <span class="s2">&quot;Be_snapshot1.out&quot;</span><span class="p">))</span>
 <span class="n">atoms</span><span class="o">.</span><span class="n">set_calculator</span><span class="p">(</span><span class="n">calculator</span><span class="p">)</span>
 <span class="n">atoms</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
 </pre></div>
