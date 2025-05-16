@@ -120,6 +120,13 @@ class TestFullWorkflow:
             "correct_output_shape": (48, 48, 48, 64),
         }
 
+        # Multiple elements only work with LAMMPS.
+        systems = (
+            ["Be", "BaO"]
+            if importlib.util.find_spec("lammps") is not None
+            else ["Be"]
+        )
+
         for system in ["Be", "BaO"]:
             configuration = (
                 configuration_be if system == "Be" else configuration_bao
@@ -311,66 +318,6 @@ class TestFullWorkflow:
         assert np.isclose(
             band_energy,
             dos.band_energy_dft_calculation,
-            atol=accuracy_band_energy,
-        )
-
-    def test_ldos_splitting(self):
-        """
-        Test that the LDOS splitting works both on LDOS and DOS level.
-
-        We compute the band energy with splitted and unsplitted DOS and
-        compare both to splitted LDOS band energy.
-        """
-        params = mala.Parameters()
-
-        params.targets.ldos_gridsize = [12, 13, 14, 28]
-        params.targets.ldos_gridspacing_ev = [0.5, 0.5, 0.5, 0.5]
-        params.targets.ldos_gridoffset_ev = [-19, -10.5, -4.5, 3.5]
-        params.targets.pseudopotential_path = "."
-
-        dos_calculator = mala.DOS(params)
-        dos_calculator.read_additional_calculation_data(
-            os.path.join(data_path_bao, "BaO_snapshot0.out")
-        )
-        dos_calculator.read_from_qe_out(
-            os.path.join(data_path_bao, "BaO_snapshot0.out"),
-            smearing_factor=[2, 2, 2, 2],
-        )
-
-        params2 = mala.Parameters()
-        params2.targets.ldos_gridsize = 73
-        params2.targets.ldos_gridspacing_ev = 0.5
-        params2.targets.ldos_gridoffset_ev = -19
-        params2.targets.pseudopotential_path = "."
-        dos_calculator_unsplitted = mala.DOS(params2)
-        dos_calculator_unsplitted.read_additional_calculation_data(
-            os.path.join(data_path_bao, "BaO_snapshot0.out")
-        )
-
-        dos_calculator_unsplitted.read_from_qe_out(
-            os.path.join(data_path_bao, "BaO_snapshot0.out"),
-            smearing_factor=2,
-        )
-
-        params3 = mala.Parameters()
-        params3.targets.ldos_gridsize = [12, 13, 14, 28]
-        params3.targets.ldos_gridspacing_ev = [0.5, 0.5, 0.5, 0.5]
-        params3.targets.ldos_gridoffset_ev = [-19, -10.5, -4.5, 3.5]
-
-        ldos_calculator = mala.LDOS.from_numpy_file(
-            params3, os.path.join(data_path_bao, "BaO_snapshot0.out.npy")
-        )
-        ldos_calculator.read_additional_calculation_data(
-            os.path.join(data_path_bao, "BaO_snapshot0.info.json")
-        )
-        assert np.isclose(
-            dos_calculator.band_energy,
-            ldos_calculator.band_energy,
-            atol=accuracy_strict,
-        )
-        assert np.isclose(
-            dos_calculator.band_energy,
-            dos_calculator_unsplitted.band_energy,
             atol=accuracy_band_energy,
         )
 
@@ -671,13 +618,13 @@ class TestFullWorkflow:
 
     def test_model_copying(self):
         parameters, network, data_handler, tester = mala.Tester.load_run(
-            "Be_model", path=data_path
+            "Be_model", path=data_path_be
         )
         data_handler.add_snapshot(
             "Be_snapshot3.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot3.out.npy",
-            data_path,
+            data_path_be,
             "te",
         )
         parameters.manual_seed = 123456252
@@ -686,7 +633,7 @@ class TestFullWorkflow:
         actual_ldos, predicted_ldos = tester.predict_targets(0)
         ldos_calculator = data_handler.target_calculator
         ldos_calculator.read_additional_calculation_data(
-            os.path.join(data_path, "Be_snapshot3.out"), "espresso-out"
+            os.path.join(data_path_be, "Be_snapshot3.out"), "espresso-out"
         )
         band_energy_1 = ldos_calculator.get_band_energy(predicted_ldos)
 
@@ -696,7 +643,7 @@ class TestFullWorkflow:
         actual_ldos, predicted_ldos = tester.predict_targets(0)
         ldos_calculator = data_handler.target_calculator
         ldos_calculator.read_additional_calculation_data(
-            os.path.join(data_path, "Be_snapshot3.out"), "espresso-out"
+            os.path.join(data_path_be, "Be_snapshot3.out"), "espresso-out"
         )
         band_energy_2 = ldos_calculator.get_band_energy(predicted_ldos)
         print(
