@@ -127,7 +127,7 @@ class TestFullWorkflow:
             else ["Be"]
         )
 
-        for system in ["Be", "BaO"]:
+        for system in systems:
             configuration = (
                 configuration_be if system == "Be" else configuration_bao
             )
