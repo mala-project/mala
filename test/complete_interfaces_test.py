@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 
 # This test checks whether MALA interfaces to other codes, mainly the ASE
@@ -60,10 +60,10 @@ class TestInterfaces:
 
         # Read an LDOS and some additional data for it.
         ldos_calculator = mala.LDOS.from_numpy_file(
-            params, os.path.join(data_path, "Be_snapshot1.out.npy")
+            params, os.path.join(data_path_be, "Be_snapshot1.out.npy")
         )
         ldos_calculator.read_additional_calculation_data(
-            os.path.join(data_path, "Be_snapshot1.out"), "espresso-out"
+            os.path.join(data_path_be, "Be_snapshot1.out"), "espresso-out"
         )
 
         # Write and then read in via OpenPMD and make sure all the info is
@@ -102,11 +102,11 @@ class TestInterfaces:
             data_converter.add_snapshot(
                 descriptor_input_type="numpy",
                 descriptor_input_path=os.path.join(
-                    data_path, "Be_snapshot{}.in.npy".format(snapshot)
+                    data_path_be, "Be_snapshot{}.in.npy".format(snapshot)
                 ),
                 target_input_type="numpy",
                 target_input_path=os.path.join(
-                    data_path, "Be_snapshot{}.out.npy".format(snapshot)
+                    data_path_be, "Be_snapshot{}.out.npy".format(snapshot)
                 ),
                 simulation_output_type=None,
                 simulation_output_path=None,
@@ -151,7 +151,7 @@ class TestInterfaces:
         for snapshot in range(2):
             for i_o in ["in", "out"]:
                 original = os.path.join(
-                    data_path, "Be_snapshot{}.{}.npy".format(snapshot, i_o)
+                    data_path_be, "Be_snapshot{}.{}.npy".format(snapshot, i_o)
                 )
                 roundtrip = (
                     "verify_against_original_numpy_data_{}.{}.npy".format(
@@ -198,7 +198,7 @@ class TestInterfaces:
         test_parameters.descriptors.descriptor_type = "Bispectrum"
         test_parameters.descriptors.bispectrum_twojmax = 10
         test_parameters.descriptors.bispectrum_cutoff = 4.67637
-        test_parameters.targets.pseudopotential_path = data_path
+        test_parameters.targets.pseudopotential_path = data_path_be
 
         ####################
         # DATA
@@ -207,16 +207,16 @@ class TestInterfaces:
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             "tr",
         )
         data_handler.add_snapshot(
             "Be_snapshot2.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot2.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.prepare_data()
@@ -243,12 +243,12 @@ class TestInterfaces:
         ####################
 
         # Set up the ASE objects.
-        atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
+        atoms = read(os.path.join(data_path_be, "Be_snapshot1.out"))
         calculator = mala.MALA(
             test_parameters,
             test_network,
             data_handler,
-            reference_data=os.path.join(data_path, "Be_snapshot1.out"),
+            reference_data=os.path.join(data_path_be, "Be_snapshot1.out"),
         )
         total_energy_dft_calculation = (
             calculator._data_handler.target_calculator.total_energy_dft_calculation
@@ -264,7 +264,7 @@ class TestInterfaces:
         test_parameters = mala.Parameters()
         ldos_calculator = mala.LDOS(test_parameters)
         ldos_calculator.read_additional_calculation_data(
-            os.path.join(data_path, "Be_snapshot1.out"), "espresso-out"
+            os.path.join(data_path_be, "Be_snapshot1.out"), "espresso-out"
         )
         ldos_calculator.write_additional_calculation_data(
             "additional_calculation_data.json"

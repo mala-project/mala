@@ -3,7 +3,7 @@ import os
 import mala
 from mala import printout
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 """
 Shows how a NN training by MALA can be visualized using
@@ -33,19 +33,19 @@ parameters.running.validate_every_n_epochs = 5
 data_handler = mala.DataHandler(parameters)
 data_handler.add_snapshot(
     "Be_snapshot0.in.npy",
-    data_path,
+    data_path_be,
     "Be_snapshot0.out.npy",
-    data_path,
+    data_path_be,
     "tr",
-    calculation_output_file=os.path.join(data_path, "Be_snapshot0.out"),
+    calculation_output_file=os.path.join(data_path_be, "Be_snapshot0.out"),
 )
 data_handler.add_snapshot(
     "Be_snapshot1.in.npy",
-    data_path,
+    data_path_be,
     "Be_snapshot1.out.npy",
-    data_path,
+    data_path_be,
     "va",
-    calculation_output_file=os.path.join(data_path, "Be_snapshot1.out"),
+    calculation_output_file=os.path.join(data_path_be, "Be_snapshot1.out"),
 )
 data_handler.prepare_data()
 parameters.network.layer_sizes = [

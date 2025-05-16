@@ -1,7 +1,7 @@
 import os
 
 import mala
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 """
 Shows how MALA can be used to optimize descriptor
@@ -32,16 +32,16 @@ hyperoptimizer.add_hyperparameter(
 ####################
 hyperoptimizer.add_snapshot(
     "espresso-out",
-    os.path.join(data_path, "Be_snapshot1.out"),
+    os.path.join(data_path_be, "Be_snapshot1.out"),
     "numpy",
-    os.path.join(data_path, "Be_snapshot1.out.npy"),
+    os.path.join(data_path_be, "Be_snapshot1.out.npy"),
     target_units="1/(Ry*Bohr^3)",
 )
 hyperoptimizer.add_snapshot(
     "espresso-out",
-    os.path.join(data_path, "Be_snapshot2.out"),
+    os.path.join(data_path_be, "Be_snapshot2.out"),
     "numpy",
-    os.path.join(data_path, "Be_snapshot2.out.npy"),
+    os.path.join(data_path_be, "Be_snapshot2.out.npy"),
     target_units="1/(Ry*Bohr^3)",
 )
 

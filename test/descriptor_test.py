@@ -6,7 +6,7 @@ import mala
 import numpy as np
 import pytest
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 # Accuracy of test.
 accuracy_descriptors = 5e-8
@@ -26,7 +26,7 @@ class TestDescriptorImplementation:
         params.descriptors.bispectrum_twojmax = 4
 
         bispectrum_calculator = mala.descriptors.Bispectrum(params)
-        atoms = read(os.path.join(data_path, "Be_snapshot3.out"))
+        atoms = read(os.path.join(data_path_be, "Be_snapshot3.out"))
 
         descriptors, ngrid = bispectrum_calculator.calculate_from_atoms(
             atoms=atoms, grid_dimensions=[18, 18, 27]
@@ -67,7 +67,7 @@ class TestDescriptorImplementation:
         params.descriptors.atomic_density_cutoff = 4.67637
 
         bispectrum_calculator = mala.descriptors.AtomicDensity(params)
-        atoms = read(os.path.join(data_path, "Be_snapshot3.out"))
+        atoms = read(os.path.join(data_path_be, "Be_snapshot3.out"))
 
         descriptors, ngrid = bispectrum_calculator.calculate_from_atoms(
             atoms=atoms, grid_dimensions=[18, 18, 27]
@@ -112,7 +112,7 @@ class TestDescriptorImplementation:
         params.descriptors.ace_minimum_l_per_rank = [0, 0, 0]
 
         ace_calculator = mala.ACE(params)
-        atoms = read(os.path.join(data_path, "Be_snapshot0.out"))
+        atoms = read(os.path.join(data_path_be, "Be_snapshot0.out"))
 
         descriptors, ngrid = ace_calculator.calculate_from_atoms(
             atoms=atoms, grid_dimensions=[18, 18, 27]
@@ -122,7 +122,7 @@ class TestDescriptorImplementation:
         # Disabling coordinate cutting because we want to compare raw data.
         params.descriptors.descriptors_contain_xyz = False
         descriptors_old = ace_calculator2.read_from_numpy_file(
-            os.path.join(data_path, "Be_snapshot0_ACE.in.npy")
+            os.path.join(data_path_be, "Be_snapshot0_ACE.in.npy")
         )
         assert (
             np.abs(

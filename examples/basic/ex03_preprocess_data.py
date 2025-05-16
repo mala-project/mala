@@ -2,7 +2,7 @@ import os
 
 import mala
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 """
 Shows how this framework can be used to preprocess
@@ -59,8 +59,8 @@ parameters.targets.ldos_gridoffset_ev = -5
 ####################
 
 data_converter = mala.DataConverter(parameters)
-outfile = os.path.join(data_path, "Be_snapshot0.out")
-ldosfile = os.path.join(data_path, "cubes/tmp.pp*Be_ldos.cube")
+outfile = os.path.join(data_path_be, "Be_snapshot0.out")
+ldosfile = os.path.join(data_path_be, "cubes/tmp.pp*Be_ldos.cube")
 
 # Converting a snapshot for training on precomputed descriptor data.
 data_converter.add_snapshot(
@@ -101,9 +101,9 @@ data_converter.convert_snapshots(
     # calculated on-the-fly during training.
     descriptor_save_path="./",
     naming_scheme="Be_snapshot*.npy",
-    descriptor_calculation_kwargs={"working_directory": data_path},
+    descriptor_calculation_kwargs={"working_directory": data_path_be},
 )
 # data_converter.convert_snapshots(complete_save_path="./",
 #                                  naming_scheme="Be_snapshot*.npy",
 #                                  descriptor_calculation_kwargs=
-#                                  {"working_directory": data_path})
+#                                  {"working_directory": data_path_be})

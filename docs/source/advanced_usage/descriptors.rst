@@ -76,11 +76,11 @@ An example would be this:
 
       .. code-block:: python
 
-            hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path, "Be_snapshot1.out"),
-                                        "numpy", os.path.join(data_path, "Be_snapshot1.out.npy"),
+            hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path_be, "Be_snapshot1.out"),
+                                        "numpy", os.path.join(data_path_be, "Be_snapshot1.out.npy"),
                                         target_units="1/(Ry*Bohr^3)")
-            hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path, "Be_snapshot2.out"),
-                                        "numpy", os.path.join(data_path, "Be_snapshot2.out.npy"),
+            hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path_be, "Be_snapshot2.out"),
+                                        "numpy", os.path.join(data_path_be, "Be_snapshot2.out.npy"),
                                         target_units="1/(Ry*Bohr^3)")
 
 Once this is done, you can start the optimization via

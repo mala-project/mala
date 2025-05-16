@@ -6,7 +6,7 @@ import numpy as np
 from ase.io import read
 import pytest
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 # Control the various accuracies..
 accuracy_snaps = 1e-4
@@ -35,7 +35,7 @@ class TestParallel:
         test_parameters.descriptors.bispectrum_cutoff = 4.67637
         test_parameters.descriptors.descriptors_contain_xyz = True
 
-        atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
+        atoms = read(os.path.join(data_path_be, "Be_snapshot1.out"))
 
         snap_calculator = mala.Bispectrum(test_parameters)
         snaps_serial, snapsize = snap_calculator.calculate_from_atoms(

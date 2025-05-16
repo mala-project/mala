@@ -6,7 +6,7 @@ import numpy as np
 import scipy as sp
 import pytest
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 # In order to test the integration capabilities of MALA we need a
 # QuantumEspresso
@@ -18,10 +18,10 @@ from mala.datahandling.data_repo import data_path
 # Scripts to reproduce the data files used in this test script can be found
 # in the data repo.
 
-path_to_out = os.path.join(data_path, "Be_snapshot0.out")
-path_to_ldos_npy = os.path.join(data_path, "Be_snapshot0.out.npy")
-path_to_dos_npy = os.path.join(data_path, "Be_snapshot0.dos.npy")
-path_to_dens_npy = os.path.join(data_path, "Be_snapshot0.dens.npy")
+path_to_out = os.path.join(data_path_be, "Be_snapshot0.out")
+path_to_ldos_npy = os.path.join(data_path_be, "Be_snapshot0.out.npy")
+path_to_dos_npy = os.path.join(data_path_be, "Be_snapshot0.dos.npy")
+path_to_dens_npy = os.path.join(data_path_be, "Be_snapshot0.dens.npy")
 
 # We can read from numpy arrays or directly from QE data.
 # In the later case, numpy arrays will be saved for the subsqeuent run.

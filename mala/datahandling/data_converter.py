@@ -111,7 +111,7 @@ class DataConverter:
             See mala.datahandling.data_converter.target_input_types
             for options.
 
-        target_input_path : string
+        target_input_path : string or list
             Path of target data to be processed.
 
         simulation_output_type : string

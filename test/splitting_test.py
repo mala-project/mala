@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 import mala
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 
 class TestSplitting:
@@ -22,7 +22,7 @@ class TestSplitting:
         ]
         parameters3.targets.ldos_gridoffset_ev = [-5, 0, 5]
         parameters3.targets.ldos_gridspacing_ev = [2.5, 2.5, 2.5]
-        cubes_path = os.path.join(data_path, "cubes")
+        cubes_path = os.path.join(data_path_be, "cubes")
         ldos_calculator3 = mala.LDOS(parameters3)
         ldos_calculator3.read_from_cube(
             [
@@ -59,10 +59,10 @@ class TestSplitting:
         ]
         parameters3.targets.ldos_gridoffset_ev = [-5, 0, 5]
         parameters3.targets.ldos_gridspacing_ev = [2.5, 2.5, 2.5]
-        cubes_path = os.path.join(data_path, "cubes")
+        cubes_path = os.path.join(data_path_be, "cubes")
         dos_calculator3 = mala.DOS(parameters3)
         dos_calculator3.read_from_qe_out(
-            os.path.join(data_path, "Be_snapshot1.out"),
+            os.path.join(data_path_be, "Be_snapshot1.out"),
             smearing_factor=[2, 2, 2],
         )
 
@@ -72,7 +72,7 @@ class TestSplitting:
         parameters.targets.ldos_gridoffset_ev = -5
         dos_calculator = mala.DOS(parameters)
         dos_calculator.read_from_qe_out(
-            os.path.join(data_path, "Be_snapshot1.out")
+            os.path.join(data_path_be, "Be_snapshot1.out")
         )
 
         print(

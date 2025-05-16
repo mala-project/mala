@@ -2,7 +2,7 @@ import os
 
 import mala
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 """
 Shows how ACE descriptors can be calculated with MALA. ACE descriptors 
@@ -44,7 +44,7 @@ parameters.descriptors.ace_minimum_l_per_rank = [0, 0, 0]
 ####################
 
 data_converter = mala.DataConverter(parameters)
-outfile = os.path.join(data_path, "Be_snapshot0.out")
+outfile = os.path.join(data_path_be, "Be_snapshot0.out")
 
 # Converting a snapshot for training on precomputed descriptor data.
 data_converter.add_snapshot(
@@ -61,5 +61,5 @@ data_converter.add_snapshot(
 data_converter.convert_snapshots(
     descriptor_save_path="./",
     naming_scheme="Be_snapshot*_ACE.npy",
-    descriptor_calculation_kwargs={"working_directory": data_path},
+    descriptor_calculation_kwargs={"working_directory": data_path_be},
 )

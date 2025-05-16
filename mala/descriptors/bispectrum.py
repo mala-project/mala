@@ -391,7 +391,7 @@ class Bispectrum(Descriptor):
             "large systems."
         )
 
-        if len(set(self.atoms.numbers)) > 1:
+        if len(set(self._atoms.numbers)) > 1:
             raise ValueError(
                 " MALA cannot compute bispectrum descriptors for "
                 "multi-element systems with python currently."
