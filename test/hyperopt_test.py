@@ -207,7 +207,7 @@ class TestHyperparameterOptimization:
         hyperoptimizer.add_hyperparameter("bispectrum_twojmax", [2, 6])
         hyperoptimizer.add_hyperparameter("bispectrum_cutoff", [1.0])
         hyperoptimizer.add_hyperparameter(
-            "bispectrum_element_weights", "1.0,1.0"
+            "bispectrum_element_weights", ["1.0,1.0"]
         )
         # hyperoptimizer.add_hyperparameter("bispectrum_twojmax", [6, 8])
         # hyperoptimizer.add_hyperparameter("bispectrum_cutoff", [1.0, 3.0])

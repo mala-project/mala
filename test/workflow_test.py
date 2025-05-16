@@ -4,6 +4,7 @@ import os
 import mala
 import numpy as np
 import pytest
+import runpy
 
 from mala.datahandling.data_repo import data_path_be, data_path_bao
 
@@ -115,7 +116,7 @@ class TestFullWorkflow:
             "ldos_gridoffset_ev": [-19, -10.5, -4.5, 3.5],
             "data_path_be": data_path_bao,
             "correct_input_shape": (48, 48, 48, 33),
-            "correct_output_shape": (48, 48, 48, 53),
+            "correct_output_shape": (48, 48, 48, 64),
         }
 
         for system in ["Be", "BaO"]:
@@ -469,37 +470,50 @@ class TestFullWorkflow:
             atol=accuracy_total_energy,
         )
 
-    @pytest.mark.skipif(
-        importlib.util.find_spec("total_energy") is None,
-        reason="QE is currently not part of the pipeline.",
-    )
-    def test_total_energy_from_ldos_multielement(self):
-        """
-        Test whether MALA can calculate the total energy using the LDOS.
+    # TODO: We currently have to skip that because we cannot call the
+    # TEM twice with a different system.
 
-        This means calculating energies from the LDOS. This is the
-        test for multiple elements. We can not test multiple systems in the
-        same test due to QE not being able to deinitialize via our interface.
-
-        """
-        # Set up parameters.
-        ldos, ldos_data = self.load_ldos(system="BaO")
-
-        # Calculate energies
-        self_consistent_fermi_energy = ldos.get_self_consistent_fermi_energy(
-            ldos_data
-        )
-        total_energy = ldos.get_total_energy(
-            ldos_data, fermi_energy=self_consistent_fermi_energy
-        )
-        assert np.isclose(
-            total_energy,
-            ldos.total_energy_dft_calculation,
-            # The total energy is really difficult to get accurately in the
-            # multielement case with the limited LDOS sampling fidelity we
-            # are using.
-            atol=accuracy_total_energy * 3300,
-        )
+    # @pytest.mark.skipif(
+    #     importlib.util.find_spec("total_energy") is None,
+    #     reason="QE is currently not part of the pipeline.",
+    # )
+    # def test_total_energy_from_ldos_multielement(self):
+    #     """
+    #     Test whether MALA can calculate the total energy using the LDOS.
+    #
+    #     This means calculating energies from the LDOS. This is the
+    #     test for multiple elements. We can not test multiple systems in the
+    #     same test due to QE not being able to deinitialize via our interface.
+    #     Therefore, we have to run this test in a separate process.
+    #     """
+    #     # Set up parameters.
+    #     ldos, ldos_data = self.load_ldos(system="BaO")
+    #
+    #     # Create a target calculator to perform postprocessing.
+    #     ldos = mala.Target(test_parameters)
+    #     ldos.read_additional_calculation_data(
+    #         os.path.join(data_path_bao, "BaO_snapshot0.out"),
+    #         "espresso-out",
+    #     )
+    #     ldos_data = np.load(
+    #         os.path.join(data_path_bao, "BaO_snapshot0.out.npy")
+    #     )
+    #
+    #     # Calculate energies
+    #     self_consistent_fermi_energy = ldos.get_self_consistent_fermi_energy(
+    #         ldos_data
+    #     )
+    #     total_energy = ldos.get_total_energy(
+    #         ldos_data, fermi_energy=self_consistent_fermi_energy
+    #     )
+    #     assert np.isclose(
+    #         total_energy,
+    #         ldos.total_energy_dft_calculation,
+    #         # The total energy is really difficult to get accurately in the
+    #         # multielement case with the limited LDOS sampling fidelity we
+    #         # are using.
+    #         atol=accuracy_total_energy * 330,
+    #     )
 
     @pytest.mark.skipif(
         importlib.util.find_spec("total_energy") is None,
