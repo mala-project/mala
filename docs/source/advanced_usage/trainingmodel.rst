@@ -71,13 +71,13 @@ is directly outputted by MALA. By default, this validation loss gives the
 mean squared error between LDOS prediction and actual value. From a purely
 ML point of view, this is fine; however, the correctness of the LDOS itself
 does not hold much physical virtue. Thus, MALA implements physical validation
-metrics to be accessed before and after the training routine.
+metrics which can be evaluated for example after the training.
 
 Specifically, when setting
 
       .. code-block:: python
 
-            parameters.running.after_training_metric = "band_energy"
+            parameters.running.final_validation_metric = "band_energy"
 
 the error in the band energy between actual and predicted LDOS will be
 calculated and printed before and after network training (in meV/atom).
@@ -212,7 +212,7 @@ in the file ``advanced/ex03_tensor_board``. Simply select a logger prior to trai
       .. code-block:: python
 
             parameters.running.logger = "tensorboard"
-            parameters.running.logging_dir = "mala_vis"
+            parameters.running.logging_dir = "mala_logs"
 
 or
 
@@ -224,14 +224,14 @@ or
                   entity="your_wandb_entity"
             )
             parameters.running.logger = "wandb"
-            parameters.running.logging_dir = "mala_vis"
+            parameters.running.logging_dir = "mala_logs"
 
 where ``logging_dir`` specifies some directory in which to save the
 MALA logging data. You can also select which metrics to record via
 
       .. code-block:: python
 
-            parameters.validation_metrics = ["ldos", "dos", "density", "total_energy"]
+            parameters.logging_metrics = ["ldos", "dos", "density", "total_energy"]
 
 Full list of available metrics:
       - "ldos": MSE of the LDOS.
@@ -249,14 +249,14 @@ To save time and resources you can specify the logging interval via
 
       .. code-block:: python
 
-            parameters.running.validate_every_n_epochs = 10
+            parameters.running.logging_metrics_interval = 10
 
 If you want to monitor the degree to which the model overfits to the training data,
 you can use the option
 
       .. code-block:: python
             
-            parameters.running.validate_on_training_data = True
+            parameters.running.log_metrics_on_train_set = True
 
 MALA will evaluate the validation metrics on the training set as well as the validation set.
 

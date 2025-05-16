@@ -57,10 +57,10 @@ def initial_setup():
         data_handler.output_dimension,
     ]
 
-    test_network = mala.Network(parameters)
-    test_trainer = mala.Trainer(parameters, test_network, data_handler)
+    network = mala.Network(parameters)
+    trainer = mala.Trainer(parameters, network, data_handler)
 
-    return parameters, test_network, data_handler, test_trainer
+    return parameters, network, data_handler, trainer
 
 
 if mala.Trainer.run_exists("ex01_checkpoint", path="./"):

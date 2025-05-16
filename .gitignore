@@ -153,6 +153,7 @@ cython_debug/
 *.out
 *.npy
 *.pkl
+*.pk
 *.pth
 *.json
 
