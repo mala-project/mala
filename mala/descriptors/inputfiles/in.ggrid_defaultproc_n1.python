@@ -12,7 +12,7 @@ mass * 1.0
 
 # is this important? or does it just need to be big enough?
 variable	radelem1 equal 0.5
-variable rcutneigh equal 2.0*${rcutfac}*${radelem}
+variable rcutneigh equal 2.0*${rcutfac}*${radelem1}
 
 pair_style zero ${rcutneigh}
 pair_coeff * *
