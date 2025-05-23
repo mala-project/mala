@@ -21,7 +21,7 @@ RUN conda env create -f mala_${DEVICE}_environment.yml && rm -rf /opt/conda/pkgs
 RUN /opt/conda/envs/mala-${DEVICE}/bin/pip install --no-input --no-cache-dir \
     pytest \
     pytest-cov \
-    oapackage==2.6.8 \
+    oapackage==2.7.14 \
     pqkmeans
 
 RUN echo "source activate mala-${DEVICE}" > ~/.bashrc
