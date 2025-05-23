@@ -639,7 +639,7 @@
             <span class="n">atoms_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">atoms_object</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">)</span>
-        <span class="n">kweights</span> <span class="o">=</span> <span class="n">atoms_object</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span><span class="o">.</span><span class="n">get_k_point_weights</span><span class="p">()</span>
+        <span class="n">kweights</span> <span class="o">=</span> <span class="n">atoms_object</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">get_k_point_weights</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">kweights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                 <span class="s2">&quot;QE output file does not contain band information.&quot;</span>
@@ -671,9 +671,7 @@
 
             <span class="n">dos_per_band</span> <span class="o">=</span> <span class="n">gaussians</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span><span class="p">[</span><span class="n">previous_beginning</span><span class="p">:</span><span class="n">size_for_spacing</span><span class="p">],</span>
-                <span class="n">atoms_object</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">band_structure</span><span class="p">()</span>
-                <span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span>
+                <span class="n">atoms_object</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">band_structure</span><span class="p">()</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span>
                 <span class="n">_smearing_factors</span><span class="p">[</span><span class="n">spacing_idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">grid_spacing</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">dos_per_band</span> <span class="o">=</span> <span class="n">kweights</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">dos_per_band</span>

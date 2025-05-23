@@ -103,6 +103,13 @@ installation, for which to install the Python bindings. This module has been
 tested with version <code class="docutils literal notranslate"><span class="pre">7.2.</span></code>, the most recent version at the time of this
 release of MALA. Newer versions may work (untested), but installation
 instructions may vary.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">build_total_energy_module.sh</span></code> script uses <code class="docutils literal notranslate"><span class="pre">meson</span></code> and <code class="docutils literal notranslate"><span class="pre">ninja</span></code>
+as a build system, which may cause problems with older python versions
+(i.e., 3.10.* and 3.11.*). If you encounter problems, please use
+<code class="docutils literal notranslate"><span class="pre">build_total_energy_module_legacy.sh</span></code> located in the same folder.</p>
+</div>
 <p>Make sure you have an (MPI-aware) F90 compiler such as <code class="docutils literal notranslate"><span class="pre">mpif90</span></code> (e.g.
 Debian-ish machine: <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">install</span> <span class="pre">openmpi-bin</span></code>, on an HPC cluster something
 like <code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">openmpi</span> <span class="pre">gcc</span></code>). Make sure to use the same compiler

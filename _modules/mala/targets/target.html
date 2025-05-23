@@ -507,9 +507,7 @@
             <span class="c1"># Read the file.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">)</span>
             <span class="n">vol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span><span class="o">.</span><span class="n">get_fermi_level</span><span class="p">()</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">get_fermi_level</span><span class="p">()</span>
             <span class="c1"># The forces may not have been computed. If they are indeed</span>
             <span class="c1"># not computed, ASE will by default throw an PropertyNotImplementedError</span>
             <span class="c1"># error</span>
@@ -659,11 +657,9 @@
             <span class="c1"># the output file.</span>
             <span class="k">if</span> <span class="n">bands_included</span><span class="p">:</span>
                 <span class="n">eigs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span>
-                    <span class="o">.</span><span class="n">band_structure</span><span class="p">()</span>
-                    <span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">band_structure</span><span class="p">()</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
                 <span class="p">)</span>
-                <span class="n">kweights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span><span class="o">.</span><span class="n">get_k_point_weights</span><span class="p">()</span>
+                <span class="n">kweights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">get_k_point_weights</span><span class="p">()</span>
                 <span class="n">eband_per_band</span> <span class="o">=</span> <span class="n">eigs</span> <span class="o">*</span> <span class="n">fermi_function</span><span class="p">(</span>
                     <span class="n">eigs</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span><span class="p">,</span>

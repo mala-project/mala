@@ -749,7 +749,7 @@
 <span class="sd">        lmb_def_str : str</span>
 <span class="sd">            String with default lambda values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1">#for each bond type, determine what cutoff radii should be allowed</span>
+        <span class="c1"># for each bond type, determine what cutoff radii should be allowed</span>
         <span class="c1"># these values (and ranges of values) are determined based on the element type with some defaults provided below</span>
         <span class="n">rc_range</span> <span class="o">=</span> <span class="p">{</span><span class="n">bp</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">bp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bonds</span><span class="p">}</span>
         <span class="n">rin_def</span> <span class="o">=</span> <span class="p">{</span><span class="n">bp</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">bp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bonds</span><span class="p">}</span>
@@ -943,7 +943,7 @@
             <span class="p">)</span>
         <span class="p">)</span>
         <span class="n">lmaxes</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">raw_list</span>
         <span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lmaxes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1015,7 +1015,7 @@
             <span class="p">)</span>
         <span class="p">)</span>
         <span class="n">lmaxes</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">raw_list</span>
         <span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lmaxes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1080,7 +1080,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__init_element_lists</span><span class="p">():</span>
-        <span class="c1">#initially, the hard-coded values included vdW radii for elements where available (thus the weird definition of metal here). Where they werent available, other radii were used. We may use ionic radii instead, but we may want to change the factor by which we multiply the radii by to get the default cutoffs. Having them be ~2x the vdW radii is usually a good starting point.</span>
+        <span class="c1"># initially, the hard-coded values included vdW radii for elements where available (thus the weird definition of metal here). Where they werent available, other radii were used. We may use ionic radii instead, but we may want to change the factor by which we multiply the radii by to get the default cutoffs. Having them be ~2x the vdW radii is usually a good starting point.</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize a dictionary with ionic/vdW radii and list of metals.</span>
 

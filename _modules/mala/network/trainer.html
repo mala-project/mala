@@ -669,7 +669,7 @@
                 <span class="p">):</span>
                     <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Checkpointing training.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_last_epoch</span> <span class="o">=</span> <span class="n">epoch</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_last_loss</span> <span class="o">=</span> <span class="n">vloss_old</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_last_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">vloss_old</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__create_training_checkpoint</span><span class="p">()</span>
                     <span class="n">checkpoint_counter</span> <span class="o">=</span> <span class="mi">0</span>
 
