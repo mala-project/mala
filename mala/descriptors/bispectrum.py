@@ -207,6 +207,12 @@ class Bispectrum(Descriptor):
         # general LAMMPS import.
         from lammps import constants as lammps_constants
 
+        if len(set(self._atoms.numbers)) > 3:
+            raise ValueError(
+                "MALA can only compute bispectrum descriptors up to "
+                "3-element systems currently."
+            )
+
         use_fp64 = kwargs.get("use_fp64", False)
         keep_logs = kwargs.get("keep_logs", False)
 
@@ -226,6 +232,33 @@ class Bispectrum(Descriptor):
             "twojmax": self.parameters.bispectrum_twojmax,
             "rcutfac": self.parameters.bispectrum_cutoff,
         }
+        if len(set(self._atoms.numbers)) > 1:
+
+            if self.parameters.bispectrum_element_weights is None:
+                self.parameters.bispectrum_element_weights = [1] * len(
+                    set(self._atoms.numbers)
+                )
+                printout(
+                    "Multielement system selected without providing elemental "
+                    "weights. Set weights to: ",
+                    self.parameters.bispectrum_element_weights,
+                )
+            if (
+                self.parameters._configuration["gpu"]
+                and np.all(self.parameters.bispectrum_element_weights == 1.0)
+                is False
+            ):
+                raise ValueError(
+                    "MALA cannot compute bispectrum descriptors for "
+                    "multi-element systems with GPU currently if weights "
+                    "are not all 1.0. Please adjust weights or disable GPU."
+                    ""
+                )
+
+            for i in range(len(self.parameters.bispectrum_element_weights)):
+                lammps_dict["wj" + str(i + 1)] = (
+                    self.parameters.bispectrum_element_weights[i]
+                )
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # An empty string means that the user wants to use the standard input.
@@ -239,15 +272,25 @@ class Bispectrum(Descriptor):
             if self.parameters._configuration["mpi"]:
                 if self.parameters.use_z_splitting:
                     lammps_compute_file = os.path.join(
-                        filepath, "in.bgridlocal.python"
+                        filepath,
+                        "in.bgridlocal_n{0}.python".format(
+                            len(set(self._atoms.numbers))
+                        ),
                     )
                 else:
                     lammps_compute_file = os.path.join(
-                        filepath, "in.bgridlocal_defaultproc.python"
+                        filepath,
+                        "in.bgridlocal_defaultproc_n{0}.python".format(
+                            len(set(self._atoms.numbers))
+                        ),
                     )
             else:
-                lammps_compute_file = os.path.join(filepath, "in.bgrid.python")
-
+                lammps_compute_file = os.path.join(
+                    filepath,
+                    "in.bgrid_n{0}.python".format(
+                        len(set(self._atoms.numbers))
+                    ),
+                )
         # Do the LAMMPS calculation and clean up.
         lmp.file(lammps_compute_file)
         self.feature_size = self.__get_feature_size()
@@ -348,6 +391,12 @@ class Bispectrum(Descriptor):
             "The resulting calculation will be slow for "
             "large systems."
         )
+
+        if len(set(self._atoms.numbers)) > 1:
+            raise ValueError(
+                " MALA cannot compute bispectrum descriptors for "
+                "multi-element systems with python currently."
+            )
 
         # The entire bispectrum calculation may be extensively profiled.
         profile_calculation = kwargs.get("profile_calculation", False)

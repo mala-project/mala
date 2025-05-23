@@ -63,7 +63,9 @@ class ACSDAnalyzer(DescriptorScoringOptimizer):
 
     def _get_best_trial(self):
         """Determine the best trial as given by this study."""
-        return self._study[np.argmin(self._study[:, -1])]
+        return self.averaged_study[
+            np.argmin(np.float64(np.array(self.averaged_study)[:, -1]))
+        ]
 
     @staticmethod
     def _calculate_cosine_similarities(

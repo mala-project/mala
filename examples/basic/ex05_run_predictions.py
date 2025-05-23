@@ -1,10 +1,11 @@
 import os
+from importlib.util import find_spec
 
 from ase.io import read
 import mala
 from mala import printout
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 """
 Show how a prediction can be made using MALA, based on only a trained network and atomic
@@ -15,7 +16,7 @@ REQUIRES LAMMPS (and potentially the total energy module).
 """
 
 model_name = "Be_model"
-model_path = "./" if os.path.exists("Be_model.zip") else data_path
+model_path = "./" if os.path.exists("Be_model.zip") else data_path_be
 
 
 ####################
@@ -34,12 +35,16 @@ parameters, network, data_handler, predictor = mala.Predictor.load_run(
 # Predict the LDOS from it, and then use the LDOS calculator to calculate
 # quantities of interest.
 ####################
-atoms = read(os.path.join(data_path, "Be_snapshot3.out"))
+atoms = read(os.path.join(data_path_be, "Be_snapshot3.out"))
 ldos = predictor.predict_for_atoms(atoms)
 ldos_calculator: mala.LDOS = predictor.target_calculator
 ldos_calculator.read_from_array(ldos)
 printout("Predicted band energy: ", ldos_calculator.band_energy)
+
 # If the total energy module is installed, the total energy can also be
 # calculated.
-# parameters.targets.pseudopotential_path = data_path
-# printout("Predicted total energy", ldos_calculator.total_energy)
+if find_spec("total_energy"):
+    parameters.targets.pseudopotential_path = data_path_be
+    printout("Predicted total energy", ldos_calculator.total_energy)
+else:
+    print("total_energy module not found, skipping total energy calculation")

@@ -14,7 +14,7 @@ RUN apt-get --allow-releaseinfo-change update && apt-get upgrade -y && \
 
 # Choose 'cpu' or 'gpu'
 ARG DEVICE=cpu
-COPY install/mala_${DEVICE}_environment.yml .
+COPY pipeline/mala_${DEVICE}_environment.yml .
 RUN conda env create -f mala_${DEVICE}_environment.yml && rm -rf /opt/conda/pkgs/*
 
 # Install optional MALA dependencies into Conda environment with pip

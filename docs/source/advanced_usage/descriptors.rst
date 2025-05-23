@@ -76,22 +76,19 @@ An example would be this:
 
       .. code-block:: python
 
-            hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path, "Be_snapshot1.out"),
-                                        "numpy", os.path.join(data_path, "Be_snapshot1.out.npy"),
+            hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path_be, "Be_snapshot1.out"),
+                                        "numpy", os.path.join(data_path_be, "Be_snapshot1.out.npy"),
                                         target_units="1/(Ry*Bohr^3)")
-            hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path, "Be_snapshot2.out"),
-                                        "numpy", os.path.join(data_path, "Be_snapshot2.out.npy"),
+            hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path_be, "Be_snapshot2.out"),
+                                        "numpy", os.path.join(data_path_be, "Be_snapshot2.out.npy"),
                                         target_units="1/(Ry*Bohr^3)")
 
 Once this is done, you can start the optimization via
 
       .. code-block:: python
 
-            hyperoptimizer.perform_study(return_plotting=False)
+            hyperoptimizer.perform_study()
             hyperoptimizer.set_optimal_parameters()
-
-If ``return_plotting`` is set to ``True``, relevant plotting data for the
-analysis are returned. This is useful for exploratory searches.
 
 Since the ACSD re-calculates the bispectrum descriptors for each combination
 of hyperparameters, it is useful to use parallel descriptor calculation.

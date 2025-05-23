@@ -3,7 +3,7 @@ import os
 import numpy as np
 from mala import Tester, Runner
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 accuracy_strict = 1e-16
 accuracy_coarse = 5e-7
@@ -16,16 +16,16 @@ class TestInference:
     def test_unit_conversion(self):
         """Test that RAM inexpensive unit conversion works."""
         parameters, network, data_handler = Runner.load_run(
-            "Be_model", load_runner=False, path=data_path
+            "Be_model", load_runner=False, path=data_path_be
         )
         parameters.data.use_lazy_loading = False
         parameters.running.mini_batch_size = 50
 
         data_handler.add_snapshot(
             "Be_snapshot0.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
             "te",
         )
 
@@ -35,12 +35,12 @@ class TestInference:
 
         from_file_1 = data_handler.target_calculator.convert_units(
             np.load(
-                os.path.join(data_path, "Be_snapshot" + str(0) + ".out.npy")
+                os.path.join(data_path_be, "Be_snapshot" + str(0) + ".out.npy")
             ),
             in_units="1/(eV*Bohr^3)",
         )
         from_file_2 = np.load(
-            os.path.join(data_path, "Be_snapshot" + str(0) + ".out.npy")
+            os.path.join(data_path_be, "Be_snapshot" + str(0) + ".out.npy")
         ) * data_handler.target_calculator.convert_units(
             1, in_units="1/(eV*Bohr^3)"
         )
@@ -97,23 +97,23 @@ class TestInference:
     def __run(use_lazy_loading=False, batchsize=46):
         # First we load Parameters and network.
         parameters, network, data_handler, tester = Tester.load_run(
-            "Be_model", path=data_path
+            "Be_model", path=data_path_be
         )
         parameters.data.use_lazy_loading = use_lazy_loading
         parameters.running.mini_batch_size = batchsize
 
         data_handler.add_snapshot(
             "Be_snapshot0.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
             "te",
         )
         data_handler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             "te",
         )
 
@@ -125,12 +125,12 @@ class TestInference:
         # Compare actual_ldos with file directly.
         # This is the only comparison that counts.
         from_file = np.load(
-            os.path.join(data_path, "Be_snapshot" + str(0) + ".out.npy")
+            os.path.join(data_path_be, "Be_snapshot" + str(0) + ".out.npy")
         )
 
         # Test if prediction still works.
         raw_predicted_outputs = np.load(
-            os.path.join(data_path, "Be_snapshot" + str(0) + ".in.npy")
+            os.path.join(data_path_be, "Be_snapshot" + str(0) + ".in.npy")
         )
         raw_predicted_outputs = (
             data_handler.raw_numpy_to_converted_scaled_tensor(

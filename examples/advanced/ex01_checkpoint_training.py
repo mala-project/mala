@@ -3,7 +3,7 @@ import os
 import mala
 from mala import printout
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 """
 Shows how a training run can be paused and
@@ -37,16 +37,16 @@ def initial_setup():
     data_handler = mala.DataHandler(parameters)
     data_handler.add_snapshot(
         "Be_snapshot0.in.npy",
-        data_path,
+        data_path_be,
         "Be_snapshot0.out.npy",
-        data_path,
+        data_path_be,
         "tr",
     )
     data_handler.add_snapshot(
         "Be_snapshot1.in.npy",
-        data_path,
+        data_path_be,
         "Be_snapshot1.out.npy",
-        data_path,
+        data_path_be,
         "va",
     )
     data_handler.prepare_data()
@@ -57,10 +57,10 @@ def initial_setup():
         data_handler.output_dimension,
     ]
 
-    test_network = mala.Network(parameters)
-    test_trainer = mala.Trainer(parameters, test_network, data_handler)
+    network = mala.Network(parameters)
+    trainer = mala.Trainer(parameters, network, data_handler)
 
-    return parameters, test_network, data_handler, test_trainer
+    return parameters, network, data_handler, trainer
 
 
 if mala.Trainer.run_exists("ex01_checkpoint", path="./"):

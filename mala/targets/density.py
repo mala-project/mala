@@ -1102,7 +1102,8 @@ class Density(Target):
                 "Using 1D density to calculate the total energy"
                 " requires reshaping of this data. "
                 "This is unproblematic, as long as you provided t"
-                "he correct grid_dimensions."
+                "he correct grid_dimensions.",
+                min_verbosity=2,
             )
             density_for_qe = self.get_density(
                 density_data, convert_to_threedimensional=True
@@ -1214,7 +1215,7 @@ class Density(Target):
             t0 = time.perf_counter()
             gaussian_descriptors = np.reshape(
                 gaussian_descriptors,
-                [number_of_gridpoints_mala, 1],
+                [number_of_gridpoints_mala, len(set(self.atoms.numbers))],
                 order="F",
             )
             reference_gaussian_descriptors = np.reshape(
@@ -1244,7 +1245,7 @@ class Density(Target):
                 reference_gaussian_descriptors,
                 sigma,
                 number_of_gridpoints,
-                1,
+                len(set(self.atoms.numbers)),
             )
             barrier()
             printout(

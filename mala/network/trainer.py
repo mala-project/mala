@@ -460,16 +460,16 @@ class Trainer(Runner):
                         total_batch_id += 1
 
             dataset_fractions = ["validation"]
-            if self.parameters.validate_on_training_data:
+            if self.parameters.log_metrics_on_train_set:
                 dataset_fractions.append("train")
-            validation_metrics = ["ldos"]
+            logging_metrics = ["ldos"]
             if (
                 epoch != 0
-                and (epoch - 1) % self.parameters.validate_every_n_epochs == 0
+                and (epoch - 1) % self.parameters.logging_metrics_interval == 0
             ):
-                validation_metrics = self.parameters.validation_metrics
-            errors = self._validate_network(
-                dataset_fractions, validation_metrics
+                logging_metrics = self.parameters.logging_metrics
+            errors = self._evaluate_metrics(
+                dataset_fractions, logging_metrics
             )
             for dataset_fraction in dataset_fractions:
                 for metric in errors[dataset_fraction]:
@@ -477,7 +477,7 @@ class Trainer(Runner):
                         np.abs(errors[dataset_fraction][metric])
                     )
             vloss = errors["validation"][
-                self.parameters.during_training_metric
+                self.parameters.validation_metric
             ]
             if self.parameters_full.use_ddp:
                 vloss = self.__average_validation(
@@ -589,17 +589,17 @@ class Trainer(Runner):
         ############################
         # CALCULATE FINAL METRICS
         ############################
-        if self.parameters.after_training_metric in errors["validation"]:
+        if self.parameters.final_validation_metric in errors["validation"]:
             self.final_validation_loss = errors["validation"][
-                self.parameters.after_training_metric
+                self.parameters.final_validation_metric
             ]
         else:
-            final_errors = self._validate_network(
-                ["validation"], [self.parameters.after_training_metric]
+            final_errors = self._evaluate_metrics(
+                ["validation"], [self.parameters.final_validation_metric]
             )
             vloss = np.mean(
                 final_errors["validation"][
-                    self.parameters.after_training_metric
+                    self.parameters.final_validation_metric
                 ]
             )
 
@@ -619,7 +619,7 @@ class Trainer(Runner):
             self._training_data_loaders.cleanup()
             self._validation_data_loaders.cleanup()
 
-    def _validate_network(self, data_set_fractions, metrics):
+    def _evaluate_metrics(self, data_set_fractions, metrics):
         """
         Validate a network, using train or validation data.
 
@@ -770,11 +770,11 @@ class Trainer(Runner):
         """
         Calculate the validation error for the LDOS only.
 
-        This is a specialization of _validate_network that ONLY computes
+        This is a specialization of _evaluate_metrics that ONLY computes
         one error, namely the LDOS error. It is more efficient, especially
         in the distributed case, than the implementation called from
-        _validate_network. As such it is mostly "legacy" code for now, until
-        we adapt _validate_network.
+        _evaluate_metrics. As such it is mostly "legacy" code for now, until
+        we adapt _evaluate_metrics.
 
         Parameters
         ----------

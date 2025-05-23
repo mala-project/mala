@@ -8,7 +8,7 @@ from importlib.util import find_spec
 import numpy as np
 from scipy.spatial import distance
 
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, parallel_warn
 from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
 
@@ -204,13 +204,18 @@ class AtomicDensity(Descriptor):
 
         # Create LAMMPS instance.
         lammps_dict = {
-            "sigma": self.parameters.atomic_density_sigma,
             "rcutfac": self.parameters.atomic_density_cutoff,
         }
+        for i in range(len(set(self._atoms.numbers))):
+            lammps_dict["sigma" + str(i + 1)] = (
+                self.parameters.atomic_density_sigma
+            )
+
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # For now the file is chosen automatically, because this is used
         # mostly under the hood anyway.
+
         if self.parameters.custom_lammps_compute_file != "":
             lammps_compute_file = self.parameters.custom_lammps_compute_file
         else:
@@ -218,15 +223,24 @@ class AtomicDensity(Descriptor):
             if self.parameters._configuration["mpi"]:
                 if self.parameters.use_z_splitting:
                     lammps_compute_file = os.path.join(
-                        filepath, "in.ggrid.python"
+                        filepath,
+                        "in.ggrid_n{0}.python".format(
+                            len(set(self._atoms.numbers))
+                        ),
                     )
                 else:
                     lammps_compute_file = os.path.join(
-                        filepath, "in.ggrid_defaultproc.python"
+                        filepath,
+                        "in.ggrid_defaultproc_n{0}.python".format(
+                            len(set(self._atoms.numbers))
+                        ),
                     )
             else:
                 lammps_compute_file = os.path.join(
-                    filepath, "in.ggrid_defaultproc.python"
+                    filepath,
+                    "in.ggrid_defaultproc_n{0}.python".format(
+                        len(set(self._atoms.numbers))
+                    ),
                 )
 
         # Do the LAMMPS calculation and clean up.
@@ -254,7 +268,26 @@ class AtomicDensity(Descriptor):
             array_shape=(nrows_ggrid, ncols_ggrid),
             use_fp64=use_fp64,
         )
+
         self._clean_calculation(lmp, keep_logs)
+
+        if len(set(self._atoms.numbers)) > 1:
+            parallel_warn(
+                "Atomic density formula and multielement system detected: "
+                "Quantum ESPRESSO has a different internal order "
+                "for structure factors and atomic positions. "
+                "MALA recovers the correct ordering for multielement "
+                "systems, but the algorithm to do so is still "
+                "experimental. Please test on a small system before "
+                "using the atomic density formula at scale."
+            )
+            symbols, indices = np.unique(
+                [atom.symbol for atom in self._atoms], return_index=True
+            )
+            permutation = np.concatenate(
+                ([0, 1, 2, 3, 4, 5], np.argsort(indices) + 6)
+            )
+            gaussian_descriptors_np = gaussian_descriptors_np[:, permutation]
 
         # In comparison to bispectrum, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments
@@ -282,7 +315,7 @@ class AtomicDensity(Descriptor):
                         self.grid_dimensions[2],
                         self.grid_dimensions[1],
                         self.grid_dimensions[0],
-                        7,
+                        6 + len(set(self._atoms.numbers)),
                     )
                 )
                 gaussian_descriptors_np = gaussian_descriptors_np.transpose(

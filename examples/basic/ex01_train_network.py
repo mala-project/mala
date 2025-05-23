@@ -2,7 +2,7 @@ import os
 
 import mala
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 """
 This example shows how a neural network can be trained on material
@@ -63,25 +63,33 @@ data_handler = mala.DataHandler(parameters)
 
 # Add precomputed snapshots.
 data_handler.add_snapshot(
-    "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path, "tr"
+    "Be_snapshot0.in.npy",
+    data_path_be,
+    "Be_snapshot0.out.npy",
+    data_path_be,
+    "tr",
 )
 data_handler.add_snapshot(
-    "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path, "va"
+    "Be_snapshot1.in.npy",
+    data_path_be,
+    "Be_snapshot1.out.npy",
+    data_path_be,
+    "va",
 )
 # Add snapshots with "raw" (=MALA formatted) JSON, computation of descriptors
 # will be performed "on-the-fly".
 # data_handler.add_snapshot(
 #     "Be_snapshot0.info.json",
-#     data_path,
+#     data_path_be,
 #     "Be_snapshot0.out.npy",
-#     data_path,
+#     data_path_be,
 #     "tr",
 # )
 # data_handler.add_snapshot(
 #     "Be_snapshot1.info.json",
-#     data_path,
+#     data_path_be,
 #     "Be_snapshot1.out.npy",
-#     data_path,
+#     data_path_be,
 #     "va",
 # )
 
@@ -101,7 +109,7 @@ parameters.network.layer_sizes = [
     100,
     data_handler.output_dimension,
 ]
-test_network = mala.Network(parameters)
+network = mala.Network(parameters)
 
 ####################
 # 4. TRAINING THE NETWORK
@@ -113,9 +121,9 @@ test_network = mala.Network(parameters)
 # side the model. This makes inference easier.
 ####################
 
-test_trainer = mala.Trainer(parameters, test_network, data_handler)
-test_trainer.train_network()
-additional_calculation_data = os.path.join(data_path, "Be_snapshot0.out")
-test_trainer.save_run(
+trainer = mala.Trainer(parameters, network, data_handler)
+trainer.train_network()
+additional_calculation_data = os.path.join(data_path_be, "Be_snapshot0.out")
+trainer.save_run(
     "Be_model", additional_calculation_data=additional_calculation_data
 )

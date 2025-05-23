@@ -96,6 +96,34 @@ are started with ``wait_time`` time interval in between (to avoid race
 conditions when accessing the same data base) and further only use the data
 base, not MPI, for communication.
 
+The batch job on your HPC cluster will get killed after the designated runtime.
+Then unfinished trials will remain in the Optuna database in state RUNNING.
+
+The current workflow for resuming the study which makes use of MALA's own
+resume tooling
+(see ``examples/advanced/ex05_checkpoint_hyperparameter_optimization.py``) is
+this: before submitting the batch job again and let the script do the resume
+work, a user needs to modify the database like so:
+
+    .. code-block:: bash
+
+        python3 -c "import mala; mala.HyperOptOptuna.requeue_zombie_trials('hyperopt01', 'sqlite:///hyperopt.db')"
+
+which will set the RUNNING trials to state WAITING.
+When Optuna resumes, it will pick up and re-run those, before carrying on
+running the resumed study.
+
+Common questions related to this feature:
+
+- "Does "injecting" jobs like this disturb Optuna's operation in any way?":
+  No, the study object takes all of its information directly from the
+  data base, which in this case has "WAITING" trials now.
+- "Do those trials have to be run?": Technically not. One could simply ignore
+  them and re-run without them. The problem is that in this case, the study
+  will have missing data points from trials that have been suggested for a
+  reason, so even if Optuna would resume fine, we still want to re-run them
+  from an optimization point of view.
+
 If you do distributed hyperparameter optimization, another useful option
 is
 
@@ -114,7 +142,7 @@ a physical validation metric such as
 
       .. code-block:: python
 
-            parameters.running.after_training_metric = "band_energy"
+            parameters.running.final_validation_metric = "band_energy"
 
 Advanced optimization algorithms
 ********************************
