@@ -576,7 +576,7 @@ class Trainer(Runner):
                 ):
                     printout("Checkpointing training.", min_verbosity=0)
                     self._last_epoch = epoch
-                    self._last_loss = vloss_old
+                    self._last_loss = torch.tensor(vloss_old)
                     self.__create_training_checkpoint()
                     checkpoint_counter = 0
 

@@ -72,12 +72,8 @@ SUBROUTINE run_pwscf_setup ( exit_status, calculate_eigts)
   USE control_flags,    ONLY : conv_ions, istep, nstep, restart, lmd, lbfgs, &
                                lforce => tprnfor
   USE command_line_options, ONLY : command_line
-  USE force_mod,        ONLY : sigma, force
   USE check_stop,       ONLY : check_stop_init, check_stop_now
   USE mp_images,        ONLY : intra_image_comm
-  USE extrapolation,    ONLY : update_file, update_pot
-  USE scf,              ONLY : rho
-  USE lsda_mod,         ONLY : nspin
   USE fft_base,         ONLY : dfftp
   USE qmmm,             ONLY : qmmm_initialization, qmmm_shutdown, &
                                qmmm_update_positions, qmmm_update_forces
@@ -176,9 +172,6 @@ SUBROUTINE init_run_setup(calculate_eigts)
   !! modifications by Normand Modine, August 2020
   !
   USE kinds,              ONLY : DP
-  USE klist,              ONLY : nkstot
-  USE symme,              ONLY : sym_rho_init
-  USE wvfct,              ONLY : nbnd, et, wg, btype
   USE control_flags,      ONLY : lmd, gamma_only, smallmem, ts_vdw
   USE gvect,              ONLY : g, gg, eigts1, eigts2, eigts3, mill, gcutm, ig_l2g, ngm, ngm_g, &
                                  gshells, gstart ! to be comunicated to the Solvers if gamma_only

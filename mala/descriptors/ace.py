@@ -655,7 +655,7 @@ class ACE(Descriptor):
         lmb_def_str : str
             String with default lambda values.
         """
-        #for each bond type, determine what cutoff radii should be allowed
+        # for each bond type, determine what cutoff radii should be allowed
         # these values (and ranges of values) are determined based on the element type with some defaults provided below
         rc_range = {bp: None for bp in self.__bonds}
         rin_def = {bp: None for bp in self.__bonds}
@@ -849,7 +849,7 @@ class ACE(Descriptor):
             )
         )
         lmaxes = [
-            int(os.path.basename(x.split("_")[1].split(".")[0]))
+            int(os.path.basename(x).split("_")[1].split(".")[0])
             for x in raw_list
         ]
         if len(lmaxes) > 0:
@@ -921,7 +921,7 @@ class ACE(Descriptor):
             )
         )
         lmaxes = [
-            int(os.path.basename(x.split("_")[1].split(".")[0]))
+            int(os.path.basename(x).split("_")[1].split(".")[0])
             for x in raw_list
         ]
         if len(lmaxes) > 0:
@@ -986,7 +986,7 @@ class ACE(Descriptor):
 
     @staticmethod
     def __init_element_lists():
-        #initially, the hard-coded values included vdW radii for elements where available (thus the weird definition of metal here). Where they werent available, other radii were used. We may use ionic radii instead, but we may want to change the factor by which we multiply the radii by to get the default cutoffs. Having them be ~2x the vdW radii is usually a good starting point.
+        # initially, the hard-coded values included vdW radii for elements where available (thus the weird definition of metal here). Where they werent available, other radii were used. We may use ionic radii instead, but we may want to change the factor by which we multiply the radii by to get the default cutoffs. Having them be ~2x the vdW radii is usually a good starting point.
         """
         Initialize a dictionary with ionic/vdW radii and list of metals.
 

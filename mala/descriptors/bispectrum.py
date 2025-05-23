@@ -1,5 +1,6 @@
 """Bispectrum descriptor class."""
 
+import math
 import os
 
 import ase
@@ -659,11 +660,11 @@ class Bispectrum(Descriptor):
         # Needed for the Clebsch-Gordan product matrices (below)
 
         def deltacg(j1, j2, j):
-            sfaccg = np.math.factorial((j1 + j2 + j) // 2 + 1)
+            sfaccg = math.factorial((j1 + j2 + j) // 2 + 1)
             return np.sqrt(
-                np.math.factorial((j1 + j2 - j) // 2)
-                * np.math.factorial((j1 - j2 + j) // 2)
-                * np.math.factorial((-j1 + j2 + j) // 2)
+                math.factorial((j1 + j2 - j) // 2)
+                * math.factorial((j1 - j2 + j) // 2)
+                * math.factorial((-j1 + j2 + j) // 2)
                 / sfaccg
             )
 
@@ -892,26 +893,22 @@ class Bispectrum(Descriptor):
                             ):
                                 ifac = -1 if z % 2 else 1
                                 cgsum += ifac / (
-                                    np.math.factorial(z)
-                                    * np.math.factorial((j1 + j2 - j) // 2 - z)
-                                    * np.math.factorial((j1 - aa2) // 2 - z)
-                                    * np.math.factorial((j2 + bb2) // 2 - z)
-                                    * np.math.factorial(
-                                        (j - j2 + aa2) // 2 + z
-                                    )
-                                    * np.math.factorial(
-                                        (j - j1 - bb2) // 2 + z
-                                    )
+                                    math.factorial(z)
+                                    * math.factorial((j1 + j2 - j) // 2 - z)
+                                    * math.factorial((j1 - aa2) // 2 - z)
+                                    * math.factorial((j2 + bb2) // 2 - z)
+                                    * math.factorial((j - j2 + aa2) // 2 + z)
+                                    * math.factorial((j - j1 - bb2) // 2 + z)
                                 )
                             cc2 = 2 * m - j
                             dcg = deltacg(j1, j2, j)
                             sfaccg = np.sqrt(
-                                np.math.factorial((j1 + aa2) // 2)
-                                * np.math.factorial((j1 - aa2) // 2)
-                                * np.math.factorial((j2 + bb2) // 2)
-                                * np.math.factorial((j2 - bb2) // 2)
-                                * np.math.factorial((j + cc2) // 2)
-                                * np.math.factorial((j - cc2) // 2)
+                                math.factorial((j1 + aa2) // 2)
+                                * math.factorial((j1 - aa2) // 2)
+                                * math.factorial((j2 + bb2) // 2)
+                                * math.factorial((j2 - bb2) // 2)
+                                * math.factorial((j + cc2) // 2)
+                                * math.factorial((j - cc2) // 2)
                                 * (j + 1)
                             )
                             self.__cglist[idxcg_count] = cgsum * dcg * sfaccg

@@ -414,9 +414,7 @@ class Target(PhysicalData):
             # Read the file.
             self.atoms = ase.io.read(data, format="espresso-out")
             vol = self.atoms.get_volume()
-            self.fermi_energy_dft = (
-                self.atoms.get_calculator().get_fermi_level()
-            )
+            self.fermi_energy_dft = self.atoms.calc.get_fermi_level()
             # The forces may not have been computed. If they are indeed
             # not computed, ASE will by default throw an PropertyNotImplementedError
             # error
@@ -566,11 +564,9 @@ class Target(PhysicalData):
             # the output file.
             if bands_included:
                 eigs = np.transpose(
-                    self.atoms.get_calculator()
-                    .band_structure()
-                    .energies[0, :, :]
+                    self.atoms.calc.band_structure().energies[0, :, :]
                 )
-                kweights = self.atoms.get_calculator().get_k_point_weights()
+                kweights = self.atoms.calc.get_k_point_weights()
                 eband_per_band = eigs * fermi_function(
                     eigs,
                     self.fermi_energy_dft,

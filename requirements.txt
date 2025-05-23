@@ -3,9 +3,14 @@
 # such that a pre-installed torch is not found.
 torch
 
+# We need a recent numpy to build external_modules/total_energy_module using
+# numpy's f2py. See
+# https://github.com/mala-project/mala/issues/559#issuecomment-2864133103
+# for details.
+numpy >= 2
+
 ase
 mpmath
-numpy
 optuna
 scipy
 pandas
@@ -15,3 +20,6 @@ scikit-spatial
 tqdm
 mendeleev
 sympy
+meson
+ninja
+

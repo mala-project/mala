@@ -3,14 +3,14 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.10.4
+  - python=3.13.3
   - pip
   - numpy
   - scipy
   - optuna
   - pandas
   - ase
-  - pytorch-cpu<2.6.0
+  - pytorch-cpu<=2.6.0
   - mpmath
   - tensorboard
   - scikit-spatial
