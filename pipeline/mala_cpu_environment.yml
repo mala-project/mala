@@ -1,6 +1,7 @@
 name: mala-cpu
 channels:
   - conda-forge
+  - defaults
 dependencies:
   - _openmp_mutex=4.5
   - absl-py=2.2.0
