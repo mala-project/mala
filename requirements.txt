@@ -20,3 +20,6 @@ scikit-spatial
 tqdm
 mendeleev
 sympy
+meson
+ninja
+
