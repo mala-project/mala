@@ -71,10 +71,12 @@ cp $root_dir/XClib/xc_lib.a $here/libs/libxclib.a
 # seems.
 ar rcs $tmp_lib_dir/liballobjs.a $pwobjs $utilobjs $modobjs
 
+# LDFLAGS: "-z noexecstack" because of
+# https://github.com/mala-project/mala/issues/667
 FC="$f_compiler" \
 CC="$c_compiler" \
 FFLAGS="-I$tmp_lib_dir -I$pw_src_path $qe_inc_dirs" \
-LDFLAGS="-L$tmp_lib_dir -L$pw_src_path $qe_lib_dirs" \
+LDFLAGS="-L$tmp_lib_dir -L$pw_src_path $qe_lib_dirs -z noexecstack" \
 python3 -m numpy.f2py \
     --backend meson \
     --dep mpi \
