@@ -1,9 +1,11 @@
 """Runner class for running networks."""
 
 import os
+import tempfile
 from zipfile import ZipFile, ZIP_STORED
 
 from mala.common.parallelizer import printout
+from mala.common.parallelizer import parallel_warn
 
 import numpy as np
 import torch
@@ -580,8 +582,8 @@ class Runner:
         # performed on rank 0.
         if get_rank() == 0:
             model_file = run_name + ".network.pth"
-            iscaler_file = run_name + ".iscaler.pkl"
-            oscaler_file = run_name + ".oscaler.pkl"
+            iscaler_file = run_name + ".iscaler.json"
+            oscaler_file = run_name + ".oscaler.json"
             params_file = run_name + ".params.json"
             if save_runner:
                 optimizer_file = run_name + ".optimizer.pth"
@@ -632,17 +634,30 @@ class Runner:
         path="./",
         zip_run=True,
         params_format="json",
+        scalers_format="json",
         load_runner=True,
         prepare_data=False,
         load_with_mpi=None,
         load_with_gpu=None,
         load_with_ddp=None,
+        activation_list_legacy_load=False,
     ):
         """
         Load a run.
 
         Parameters
         ----------
+        activation_list_legacy_load : bool
+            Enables correct loading of old (<v1.3.1) MALA models, if these
+            models used only a single activation function for all layers.
+            In older MALA versions, the usage of the same activation function
+            across all layers was denoted via a list with only a single
+            element. Beginning with MALA v1.3.1, this is denoted by
+            the layer_activations being a single string rather than a list.
+            If activation_list_legacy_load is set to True, and a list with
+            a single element is found in the stored model, than this list will
+            be transformed into a single string.
+
         run_name : str
             Name under which the run is saved.
 
@@ -654,6 +669,10 @@ class Runner:
             then separate files will be attempted to be loaded.
 
         params_format : str
+            Can be "json" or "pkl", depending on what was saved by the model.
+            Default is "json".
+
+        scalers_format: str
             Can be "json" or "pkl", depending on what was saved by the model.
             Default is "json".
 
@@ -707,17 +726,31 @@ class Runner:
         loaded_info = None
         if zip_run is True:
             loaded_network = run_name + ".network.pth"
-            loaded_iscaler = run_name + ".iscaler.pkl"
-            loaded_oscaler = run_name + ".oscaler.pkl"
+            loaded_iscaler = run_name + ".iscaler." + scalers_format
+            loaded_oscaler = run_name + ".oscaler." + scalers_format
             loaded_params = run_name + ".params." + params_format
             loaded_info = run_name + ".info.json"
+
+            iscale_pickle_flag = False
+            oscale_pickle_flag = False
 
             zip_path = os.path.join(path, run_name + ".zip")
             with ZipFile(zip_path, "r") as zip_obj:
                 loaded_params = zip_obj.open(loaded_params)
                 loaded_network = zip_obj.open(loaded_network)
-                loaded_iscaler = zip_obj.open(loaded_iscaler)
-                loaded_oscaler = zip_obj.open(loaded_oscaler)
+                
+                # If json scaler files not found, try pickle format
+                try:
+                    loaded_iscaler = zip_obj.open(loaded_iscaler)
+                except KeyError:
+                    iscale_pickle_flag = True
+                    loaded_iscaler = zip_obj.open(loaded_iscaler.replace(".json", ".pkl"))   
+                try:
+                    loaded_oscaler = zip_obj.open(loaded_oscaler)
+                except KeyError:
+                    oscale_pickle_flag = True
+                    loaded_oscaler = zip_obj.open(loaded_oscaler.replace(".json", ".pkl"))
+
                 if loaded_info in zip_obj.namelist():
                     loaded_info = zip_obj.open(loaded_info)
                 else:
@@ -725,8 +758,12 @@ class Runner:
 
         else:
             loaded_network = os.path.join(path, run_name + ".network.pth")
-            loaded_iscaler = os.path.join(path, run_name + ".iscaler.pkl")
-            loaded_oscaler = os.path.join(path, run_name + ".oscaler.pkl")
+            loaded_iscaler = os.path.join(
+                path, run_name + ".iscaler." + scalers_format
+            )
+            loaded_oscaler = os.path.join(
+                path, run_name + ".oscaler." + scalers_format
+            )
             loaded_params = os.path.join(
                 path, run_name + ".params." + params_format
             )
@@ -739,6 +776,18 @@ class Runner:
                 loaded_params, force_no_ddp=True
             )
 
+        # In older MALA versions, the usage of the same activation function
+        # across all layers was denoted via a list with only a single element.
+        # This was changed prior to the release of v1.3.1, and a list with
+        # a single element is now interpreted as exactly that. For backwards
+        # compatability the expected behavior can be recovered by extracting
+        # the one and only element of the list.
+        if activation_list_legacy_load:
+            if len(loaded_params.network.layer_activations) == 1:
+                loaded_params.network.layer_activations = (
+                    loaded_params.network.layer_activations[0]
+                )
+
         # MPI has to be specified upon loading, in contrast to GPU.
         if load_with_mpi is not None:
             loaded_params.use_mpi = load_with_mpi
@@ -748,6 +797,37 @@ class Runner:
         loaded_network = Network.load_from_file(loaded_params, loaded_network)
         loaded_iscaler = DataScaler.load_from_file(loaded_iscaler)
         loaded_oscaler = DataScaler.load_from_file(loaded_oscaler)
+
+        # only on rank 0, if pickle scaler files are found,
+        # add their json versions to the existing zip file
+        if get_rank() == 0 and (zip_run and (iscale_pickle_flag or oscale_pickle_flag)):
+            parallel_warn(
+                        "Pickle file has been automatically converted to JSON format.",
+                        min_verbosity=0,
+                        category=FutureWarning,
+                    )
+            with tempfile.TemporaryDirectory() as temp_dir:
+                with ZipFile(zip_path, 'r') as zip_read:
+                    zip_read.extractall(temp_dir)
+
+                iscaler_file = run_name + ".iscaler.json"
+                oscaler_file = run_name + ".oscaler.json"
+                
+                loaded_iscaler.save(os.path.join(temp_dir, iscaler_file))
+                loaded_oscaler.save(os.path.join(temp_dir, oscaler_file))
+
+                temp_zip_path = zip_path + ".temp"
+                with ZipFile(temp_zip_path, 'w') as zip_write:
+                    for foldername, subfolders, filenames in os.walk(temp_dir):
+                        for filename in filenames:
+                            file_path = os.path.join(foldername, filename)
+                            arcname = os.path.relpath(file_path, temp_dir)
+                            zip_write.write(file_path, arcname)
+
+                os.replace(temp_zip_path, zip_path)
+            
+
+
         new_datahandler = DataHandler(
             loaded_params,
             input_data_scaler=loaded_iscaler,
@@ -825,6 +905,32 @@ class Runner:
 
     @classmethod
     def _load_from_run(cls, params, network, data, file=None):
+        """
+        Instantiaties a Runner (or derived) object from loaded objects.
+
+        This processes already load Parameters, Network and DataHandler
+        objects.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters object from which to create the run.
+
+        network : mala.network.network.Network
+            Network object from which to create the run.
+
+        data : mala.datahandling.data_handler.DataHandler
+            DataHandler object from which to create the run.
+
+        file : str
+            File from which to load the runner. This is only used for the
+            Trainer class, where the optimizer is loaded from a file.
+
+        Returns
+        -------
+        loaded_runner : cls
+            The loaded runner object.
+        """
         # Simply create a new runner. If the child classes have to implement
         # it theirselves.
         loaded_runner = cls(params, network, data)
@@ -953,6 +1059,19 @@ class Runner:
         For testing snapshot the batch size needs to be such that
         data_per_snapshot / batch_size will result in an integer division
         without any residual value.
+
+        Parameters
+        ----------
+        datasize : int
+            Size of the data.
+
+        batchsize : int
+            Uncorrected mini batch size.
+
+        Returns
+        -------
+        new_batchsize : int
+            Corrected mini batch size.
         """
         new_batch_size = batchsize
         if datasize % new_batch_size != 0:

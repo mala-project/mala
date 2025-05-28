@@ -5,16 +5,18 @@ Prerequisites
 **************
 
 MALA supports any Python version starting from ``3.10.4``. No upper limit on
-Python versions are enforced. The most recent *tested* version is ``3.10.12``.
-
-MALA requires ``torch`` in order to function. As the installation of torch
-depends highly on the architecture you are using, ``torch`` will not
-automatically be installed alongside MALA. Please obtain a suitable version
-of ``torch`` from the `official website <https://pytorch.org/>`_ before
-continuing.
+Python versions are enforced. The most recent *tested* version is
+``3.13.3``.
 
 Installing the Python library
 *****************************
+
+MALA requires ``torch`` (https://pytorch.org). We install the latest
+GPU-enabled version (see ``requirements.txt``),
+unless you have ``torch`` already installed (for example a version that supports
+AMD's ROCm a specific CUDA version).
+
+To install the MALA package
 
 * Download the MALA repository, e.g., with ``git clone git@github.com:mala-project/mala.git``
 * Change into the directory you cloned the repository to
@@ -26,6 +28,7 @@ The following options are available:
   the version and thus needed for large code development (developers)
 - ``opt``: Installs ``oapackage``, so that the orthogonal array
   method may be used for large scale hyperparameter optimization (advanced users)
+- ``mpi``: Installs ``mpi4py`` for MPI parallelization (advanced users)
 - ``test``: Installs ``pytest`` which allows users to test the code (developers)
 - ``doc``: Installs all dependencies for building the documentary locally (developers)
 
@@ -43,7 +46,7 @@ itself is subject to ongoing development as well.
 
     git clone https://github.com/mala-project/test-data ~/path/to/data/repo
     cd ~/path/to/data/repo
-    git checkout v1.8.1
+    git checkout 2.0.0
 
 * Export the path to that repo by ``export MALA_DATA_REPO=~/path/to/data/repo``
 

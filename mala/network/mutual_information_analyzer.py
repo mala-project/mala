@@ -47,9 +47,22 @@ class MutualInformationAnalyzer(DescriptorScoringOptimizer):
 
     def _get_best_trial(self):
         """Determine the best trial as given by this study."""
-        return self._study[np.argmax(self._study[:, -1])]
+        return self.averaged_study[
+            np.argmax(np.array(self.averaged_study[:, -1]))
+        ]
 
     def _update_logging(self, score, index):
+        """
+        Update logging information with current score and index.
+
+        Parameters
+        ----------
+        score : float
+            The score of the current trial.
+
+        index :
+            The index of the current trial.
+        """
         if self.best_score is None:
             self.best_score = score
             self.best_trial_index = index
@@ -58,6 +71,22 @@ class MutualInformationAnalyzer(DescriptorScoringOptimizer):
             self.best_trial_index = index
 
     def _calculate_score(self, descriptor, target):
+        """
+        Calculate score of a descriptor/target pair.
+
+        Parameters
+        ----------
+        descriptor : numpy.ndarray
+            The descriptor data.
+
+        target : numpy.ndarray
+            The target data.
+
+        Returns
+        -------
+        score : float
+            The score of this descriptor/target pair.
+        """
         return self._calculate_mutual_information(
             descriptor,
             target,
@@ -132,6 +161,21 @@ class MutualInformationAnalyzer(DescriptorScoringOptimizer):
 
     @staticmethod
     def _normalize(data):
+        """
+        Normalize the data to have zero mean and unit variance.
+
+        The normalization is done in-place.
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            The data to be normalized.
+
+        Returns
+        -------
+        data : numpy.ndarray
+            The normalized data.
+        """
         mean = np.mean(data, axis=0)
         std = np.std(data, axis=0)
         std_nonzero = std > 1e-6
@@ -151,6 +195,42 @@ class MutualInformationAnalyzer(DescriptorScoringOptimizer):
         covariance_type="diag",
         normalize_data=False,
     ):
+        """
+        Calculate the Mutual Information for given input (X) and output (Y).
+
+        Mutual information is calculated by fitting Gaussian mixture models to
+        combined and individual data distributions.
+
+        Parameters
+        ----------
+        X : numpy.ndarray
+            Input data.
+
+        Y : numpy.ndarray
+            Output data.
+
+        n_components : int
+            Number of components in the Gaussian mixture model.
+
+        max_iter : int
+            Maximum number of iterations for the Gaussian mixture model.
+
+        n_samples : int
+            Number of samples to use for the calculation.
+
+        covariance_type : str
+            Type of covariance matrix to use in the Gaussian mixture model.
+            Currently, only "diag" is supported.
+
+        normalize_data : bool
+            If True, the data is normalized to have zero mean and unit
+            variance. This can help with robustness.
+
+        Returns
+        -------
+        mi : float
+            The mutual information between the input and output data.
+        """
         import sklearn.mixture
         import sklearn.covariance
 

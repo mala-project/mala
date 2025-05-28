@@ -3,7 +3,7 @@ import os
 import mala
 import numpy as np
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 # Accuracy for the shuffling test.
 accuracy = np.finfo(float).eps
@@ -20,10 +20,16 @@ class TestDataShuffling:
 
         # Add a snapshot we want to use in to the list.
         data_shuffler.add_snapshot(
-            "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path
+            "Be_snapshot0.in.npy",
+            data_path_be,
+            "Be_snapshot0.out.npy",
+            data_path_be,
         )
         data_shuffler.add_snapshot(
-            "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path
+            "Be_snapshot1.in.npy",
+            data_path_be,
+            "Be_snapshot1.out.npy",
+            data_path_be,
         )
 
         # After shuffling, these snapshots can be loaded as regular snapshots
@@ -36,10 +42,16 @@ class TestDataShuffling:
 
         # Add a snapshot we want to use in to the list.
         data_shuffler.add_snapshot(
-            "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path
+            "Be_snapshot0.in.npy",
+            data_path_be,
+            "Be_snapshot0.out.npy",
+            data_path_be,
         )
         data_shuffler.add_snapshot(
-            "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path
+            "Be_snapshot1.in.npy",
+            data_path_be,
+            "Be_snapshot1.out.npy",
+            data_path_be,
         )
 
         # After shuffling, these snapshots can be loaded as regular snapshots
@@ -66,16 +78,16 @@ class TestDataShuffling:
         # Add a snapshot we want to use in to the list.
         data_shuffler.add_snapshot(
             "Be_snapshot0.in.h5",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.h5",
-            data_path,
+            data_path_be,
             snapshot_type="openpmd",
         )
         data_shuffler.add_snapshot(
             "Be_snapshot1.in.h5",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.h5",
-            data_path,
+            data_path_be,
             snapshot_type="openpmd",
         )
 
@@ -90,16 +102,16 @@ class TestDataShuffling:
         # Add a snapshot we want to use in to the list.
         data_shuffler.add_snapshot(
             "Be_snapshot0.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
             snapshot_type="numpy",
         )
         data_shuffler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             snapshot_type="numpy",
         )
 
@@ -120,7 +132,7 @@ class TestDataShuffling:
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "minmax"
-        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.network.layer_activations = "ReLU"
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
@@ -132,16 +144,16 @@ class TestDataShuffling:
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot(
             "Be_snapshot0.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
             "tr",
         )
         data_handler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.prepare_data()
@@ -164,7 +176,7 @@ class TestDataShuffling:
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "minmax"
-        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.network.layer_activations = "ReLU"
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
@@ -175,10 +187,16 @@ class TestDataShuffling:
 
         # Add a snapshot we want to use in to the list.
         data_shuffler.add_snapshot(
-            "Be_snapshot0.in.npy", data_path, "Be_snapshot0.out.npy", data_path
+            "Be_snapshot0.in.npy",
+            data_path_be,
+            "Be_snapshot0.out.npy",
+            data_path_be,
         )
         data_shuffler.add_snapshot(
-            "Be_snapshot1.in.npy", data_path, "Be_snapshot1.out.npy", data_path
+            "Be_snapshot1.in.npy",
+            data_path_be,
+            "Be_snapshot1.out.npy",
+            data_path_be,
         )
 
         # After shuffling, these snapshots can be loaded as regular snapshots
@@ -216,7 +234,7 @@ class TestDataShuffling:
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "minmax"
-        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.network.layer_activations = "ReLU"
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
@@ -228,17 +246,17 @@ class TestDataShuffling:
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot(
             "Be_snapshot0.in.h5",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.h5",
-            data_path,
+            data_path_be,
             "tr",
             snapshot_type="openpmd",
         )
         data_handler.add_snapshot(
             "Be_snapshot1.in.h5",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.h5",
-            data_path,
+            data_path_be,
             "va",
             snapshot_type="openpmd",
         )
@@ -262,7 +280,7 @@ class TestDataShuffling:
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "minmax"
-        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.network.layer_activations = "ReLU"
         test_parameters.running.max_number_epochs = 50
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
@@ -275,16 +293,16 @@ class TestDataShuffling:
         # Add a snapshot we want to use in to the list.
         data_shuffler.add_snapshot(
             "Be_snapshot0.in.h5",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.h5",
-            data_path,
+            data_path_be,
             snapshot_type="openpmd",
         )
         data_shuffler.add_snapshot(
             "Be_snapshot1.in.h5",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.h5",
-            data_path,
+            data_path_be,
             snapshot_type="openpmd",
         )
 
@@ -327,7 +345,9 @@ class TestDataShuffling:
         new_loss = test_trainer.final_validation_loss
         assert old_loss > new_loss
 
-    def test_arbitrary_number_snapshots(self):
+    def worker_arbitrary_number_snapshots(
+        self, ext_in, ext_out, snapshot_type
+    ):
         parameters = mala.Parameters()
 
         # This ensures reproducibility of the created data sets.
@@ -337,20 +357,49 @@ class TestDataShuffling:
 
         for i in range(5):
             data_shuffler.add_snapshot(
-                "Be_snapshot0.in.npy",
-                data_path,
-                "Be_snapshot0.out.npy",
-                data_path,
+                f"Be_snapshot0.in.{ext_in}",
+                data_path_be,
+                f"Be_snapshot0.out.{ext_in}",
+                data_path_be,
+                snapshot_type=snapshot_type,
             )
         data_shuffler.shuffle_snapshots(
             complete_save_path=".",
-            save_name="Be_shuffled*",
+            save_name=f"Be_shuffled*{ext_out}",
             number_of_shuffled_snapshots=5,
         )
-        for i in range(4):
+
+    def test_arbitrary_number_snapshots(self):
+        self.worker_arbitrary_number_snapshots("npy", "", "numpy")
+        for i in range(5):
             bispectrum = np.load("Be_shuffled" + str(i) + ".in.npy")
             ldos = np.load("Be_shuffled" + str(i) + ".out.npy")
             assert not np.any(np.where(np.all(ldos == 0, axis=-1).squeeze()))
             assert not np.any(
                 np.where(np.all(bispectrum == 0, axis=-1).squeeze())
             )
+        self.worker_arbitrary_number_snapshots("h5", ".h5", "openpmd")
+        import openpmd_api as opmd
+
+        bispectrum_series = opmd.Series(
+            "Be_shuffled%T.in.h5", opmd.Access.read_only
+        )
+        ldos_series = opmd.Series(
+            "Be_shuffled%T.out.h5", opmd.Access.read_only
+        )
+        for i in range(5):
+            for name, series in [
+                ("Bispectrum", bispectrum_series),
+                ("LDOS", ldos_series),
+            ]:
+                loaded_array = [
+                    component.load_chunk().squeeze()
+                    for _, component in series.iterations[i]
+                    .meshes[name]
+                    .items()
+                ]
+                series.flush()
+                loaded_array = np.array(loaded_array)
+                assert not np.any(
+                    np.where(np.all(loaded_array == 0, axis=0).squeeze())
+                )

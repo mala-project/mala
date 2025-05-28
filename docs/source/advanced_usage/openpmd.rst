@@ -33,16 +33,16 @@ be left untouched. Specifically, set
             ...
             # Changes for DataHandler
             data_handler = mala.DataHandler(parameters)
-            data_handler.add_snapshot("Be_snapshot0.in.h5", data_path,
-                                       "Be_snapshot0.out.h5", data_path, "tr",
+            data_handler.add_snapshot("Be_snapshot0.in.h5", data_path_be,
+                                       "Be_snapshot0.out.h5", data_path_be, "tr",
                                        snapshot_type="openpmd")
             ...
             # Changes for DataShuffler
             data_shuffler = mala.DataShuffler(parameters)
             # Data can be shuffle FROM and TO openPMD - but also from
             # numpy to openPMD.
-            data_shuffler.add_snapshot("Be_snapshot0.in.h5", data_path,
-                                        "Be_snapshot0.out.h5", data_path,
+            data_shuffler.add_snapshot("Be_snapshot0.in.h5", data_path_be,
+                                        "Be_snapshot0.out.h5", data_path_be,
                                         snapshot_type="openpmd")
             data_shuffler.shuffle_snapshots(...,
                                             save_name="Be_shuffled*.h5")

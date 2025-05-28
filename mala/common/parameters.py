@@ -41,6 +41,7 @@ class ParametersBase(JSONSerializable):
             "openpmd_granularity": 1,
             "lammps": True,
             "atomic_density_formula": False,
+            "manual_seed": 0,
         }
         pass
 
@@ -69,33 +70,129 @@ class ParametersBase(JSONSerializable):
                     )
 
     def _update_gpu(self, new_gpu):
+        """
+        Propagate new GPU setting to parameter subclasses.
+
+        Parameters
+        ----------
+        new_gpu : bool
+            New GPU setting.
+        """
         self._configuration["gpu"] = new_gpu
 
     def _update_ddp(self, new_ddp):
+        """
+        Propagate new DDP setting to parameter subclasses.
+
+        Parameters
+        ----------
+        new_ddp : bool
+            New DDP setting.
+        """
         self._configuration["ddp"] = new_ddp
 
     def _update_mpi(self, new_mpi):
+        """
+        Propagate new MPI setting to parameter subclasses.
+
+        Parameters
+        ----------
+        new_mpi : bool
+            New MPI setting.
+        """
         self._configuration["mpi"] = new_mpi
 
     def _update_device(self, new_device):
+        """
+        Propagate new device setting to parameter subclasses.
+
+        Parameters
+        ----------
+        new_device : str
+            New device setting. Can be "cpu" or "cuda:x", where x is some
+            integer.
+        """
         self._configuration["device"] = new_device
 
     def _update_openpmd_configuration(self, new_openpmd):
+        """
+        Propagate new openPMD configuration to parameter subclasses.
+
+        Parameters
+        ----------
+        new_openpmd : dict
+            New openPMD configuration, which is a dict containing different
+            settings.
+        """
         self._configuration["openpmd_configuration"] = new_openpmd
 
     def _update_openpmd_granularity(self, new_granularity):
+        """
+        Propagate new openPMD granularity to parameter subclasses.
+
+        Parameters
+        ----------
+        new_granularity : int
+            New openPMD granularity.
+        """
         self._configuration["openpmd_granularity"] = new_granularity
 
     def _update_lammps(self, new_lammps):
+        """
+        Propagate new LAMMPS setting to parameter subclasses.
+
+        Parameters
+        ----------
+        new_lammps : bool
+            New LAMMPS setting. Setting here means whether LAMMPS
+            will be used.
+        """
         self._configuration["lammps"] = new_lammps
 
     def _update_atomic_density_formula(self, new_atomic_density_formula):
+        """
+        Propagate new atomic density formula setting to parameter subclasses.
+
+        Parameters
+        ----------
+        new_atomic_density_formula : bool
+            New atomic density formula setting, i.e., whether to use this
+            option.
+        """
         self._configuration["atomic_density_formula"] = (
             new_atomic_density_formula
         )
 
+    def _update_manual_seed(self, new_seed):
+        """
+        Propagate new random seed to parameter subclasses.
+
+        Parameters
+        ----------
+        new_seed : bool
+            New random seed.
+        """
+        self._configuration["manual_seed"] = new_seed
+
     @staticmethod
     def _member_to_json(member):
+        """
+        Convert a member to a JSON serializable object.
+
+        For a class that inherits from JSONSerializable, this will call the
+        to_json method of that class. Otherwise, it will return the member
+        itself (for basic data types)
+
+        Parameters
+        ----------
+        member : any, JSONSerializable
+            Member to be converted to JSON serializable object.
+
+        Returns
+        -------
+        json_serializable : any
+            JSON serializable object.
+        """
         if isinstance(member, (int, float, type(None), str)):
             return member
         else:
@@ -147,6 +244,24 @@ class ParametersBase(JSONSerializable):
 
     @staticmethod
     def _json_to_member(json_value):
+        """
+        Convert a JSON dictionary to a member.
+
+        This function is used to convert a JSON dictionary to a member of this
+        class. If the member is a JSONSerializable object, it will call the
+        from_json method of that class. Otherwise, it will return the member
+        directly (for basic data types)
+
+        Parameters
+        ----------
+        json_value : any
+            JSON value/dictionary entry to be converted to a member.
+
+        Returns
+        -------
+        member : any
+            Loaded member of this class.
+        """
         if isinstance(json_value, (int, float, type(None), str)):
             return json_value
         else:
@@ -181,7 +296,6 @@ class ParametersBase(JSONSerializable):
         -------
         deserialized_object : JSONSerializable
             The object as read from the JSON file.
-
         """
         deserialized_object = cls()
         for key in json_dict:
@@ -242,16 +356,33 @@ class ParametersNetwork(ParametersBase):
         network. Please note that the input layer is included therein.
         Default: [10,10,0]
 
-    layer_activations : list
-        A list of strings detailing the activation functions to be used
-        by the neural network. If the dimension of layer_activations is
-        smaller than the dimension of layer_sizes-1, than the first entry
-        is used for all layers.
-        Currently supported activation functions are:
+    layer_activations : list or str or class or nn.Module
+        Detailing the activation functions to be used
+        by the neural network. If a single object is supplied, then this
+        activation function is used for all layers (whether this applies to the
+        output layer is controlled by layer_activations_include_output_layer).
+        Otherwise, the activation functions are added layer by layer.
+        Note that no activation function is applied between input layer and
+        first hidden layer!
+        The items in the list can either be strings (=names of torch.nn.Module
+        activation functions), which MALA will map to the correct activation
+        functions, torch.nn.Module objects, torch.nn.Module classes (which MALA
+        will instantiate) OR None, in which case no activation function is
+        used.
+        The None can be ommitted at the end, but is useful when layers without
+        activation functions are to be skipped in the middle.
+        Note that output from the output layer is by default restricted to
+        only have positive values via restrict_targets in the ParameterTargets
+        subclass. This is similar to having a ReLU function as a final
+        activation function and ensures the physicality of the outputs (since
+        the (L)DOS can never be negative).
 
-            - Sigmoid (default)
-            - ReLU
-            - LeakyReLU
+    layer_activations_include_output_layer : bool
+        If False, no activation function is added to the output layer. This
+        can of course also be done by supplying just the right amount of
+        activation functions and this parameter mainly exist to control the
+        last layer of activation functions in the case of using
+        layer_activations with only a single object.
 
     loss_function_type : string
         Loss function for the neural network
@@ -286,7 +417,8 @@ class ParametersNetwork(ParametersBase):
         super(ParametersNetwork, self).__init__()
         self.nn_type = "feed-forward"
         self.layer_sizes = [10, 10, 10]
-        self.layer_activations = ["Sigmoid"]
+        self.layer_activations = "LeakyReLU"
+        self.layer_activations_include_output_layer = True
         self.loss_function_type = "mse"
 
         # for LSTM/Gru
@@ -344,10 +476,11 @@ class ParametersDescriptors(ParametersBase):
         mainly exists for debugging purposes. If the atomic density is instead
         used for model training itself, this parameter needs to be set.
 
-    lammps_compute_file : str
-        Path to a LAMMPS compute file for the bispectrum descriptor
-        calculation. MALA has its own collection of compute files which are
-        used by default. Setting this parameter is thus not necessarys for
+    custom_lammps_compute_file : str
+        Path to a LAMMPS compute file for the descriptor calculation.
+        MALA has its own collection of compute files which are
+        used by default, i.e., when this string is empty.
+        Setting this parameter is thus not necessarys for
         model training and inference, and it exists mainly for debugging
         purposes.
 
@@ -366,6 +499,68 @@ class ParametersDescriptors(ParametersBase):
     minterpy_polynomial_degree : int
         WILL BE DEPRECATED IN MALA v1.4.0 - polynomial degree for minterpy
         descriptor calculation.
+
+    ace_included_expansion_ranks : list
+        List of all included expansion ranks for the ACE descriptors.
+        These expansion ranks correspond to the many body order in the
+        expansion of the atomic energy in many body terms. The list does
+        can exclude terms, i.e., [1,2,4] is a valid option.
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
+
+    ace_maximum_n_per_rank  : list
+        Maximum n for each expansion rank in the ACE descriptors. These
+        n correspond to the n starting from equation 27 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104)
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
+
+    ace_maximum_l_per_rank : list
+        Maximum l for each expansion rank in the ACE descriptors. These
+        n correspond to the n starting from equation 27 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104).
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
+
+    ace_minimum_l_per_rank : list
+        Minimum l for each expansion rank in the ACE descriptors. These
+        n correspond to the n starting from equation 27 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104)
+        Lengths have to be consistent between ace_included_expansion_ranks,
+        ace_maximum_n_per_rank, ace_maximum_l_per_rank and
+        ace_minimum_l_per_rank.
+
+    ace_balance_cutoff_radii_for_elements : bool
+        If True, cutoff radii will be balanced between element types.
+        This is helpful when dealing with elements varying drastically in size.
+
+    ace_larger_cutoff_for_metals : list
+        If True (default) a slightly larger cutoff is used for metals. This
+        is recommended.
+
+    ace_use_maximum_cutoff_per_element : list
+        If True, the maximum chemically reasonable cutoff will be used
+        for all bonds. These maximum cutoff radii are based on the
+        Van-der-Waals radii. Note that this may increase computation time!
+
+    ace_coupling_coefficients_type : str
+        Coupling type used for reduction of spherical harmonic products.
+        These come into play starting from equation 28 in the original
+        ACE paper (doi.org/10.1103/PhysRevB.99.014104).
+        Can be "clebsch_gordan" or "wigner_3j". This parameter usually does
+        not have to be changed. The default is "clebsch_gordan".
+
+    ace_coupling_coefficients_maximum_l : int
+        The maximum l up to which to precompute the Clebsch-Gordan/Wigner 3j
+        symbols. These are precomputed within MALA to reduce overall
+        computation time, but to save on storage space, precomputation is only
+        done to a certain l (for the meaning of l, refer to the original ACE
+        paper, doi.org/10.1103/PhysRevB.99.014104, page 5). MALA automatically
+        recomputes the coefficients if ace_coupling_coefficients_maximum_l is
+        increased.
     """
 
     def __init__(self):
@@ -374,7 +569,7 @@ class ParametersDescriptors(ParametersBase):
 
         # These affect all descriptors, at least as long all descriptors
         # use LAMMPS (which they currently do).
-        self.lammps_compute_file = ""
+        self.custom_lammps_compute_file = ""
         self.descriptors_contain_xyz = True
 
         # TODO: I would rather handle the parallelization info automatically
@@ -389,6 +584,7 @@ class ParametersDescriptors(ParametersBase):
         self.bispectrum_twojmax = 10
         self.bispectrum_cutoff = 4.67637
         self.bispectrum_switchflag = 1
+        self.bispectrum_element_weights = None
 
         # Everything pertaining to the atomic density.
         # Seperate cutoff given here because bispectrum descriptors and
@@ -403,6 +599,24 @@ class ParametersDescriptors(ParametersBase):
         self.minterpy_cutoff_cube_size = 0.0
         self.minterpy_polynomial_degree = 4
         self.minterpy_lp_norm = 2
+
+        # Everything pertaining to the ACE descriptors.
+        self.ace_cutoff_factor = 2.0
+
+        # Many body orders
+        self.ace_included_expansion_ranks = [1, 2, 3]
+        self.ace_maximum_n_per_rank = [6, 2, 2]
+        self.ace_maximum_l_per_rank = [0, 2, 2]
+        self.ace_minimum_l_per_rank = [0, 0, 0]
+
+        # Flavors/extra options for the ACE descriptors.
+        self.ace_balance_cutoff_radii_for_elements = False
+        self.ace_larger_cutoff_for_metals = True
+        self.ace_use_maximum_cutoff_per_element = False
+
+        # Other value could be "wigner3j".
+        self.ace_coupling_coefficients_type = "clebsch_gordan"
+        self.ace_coupling_coefficients_maximum_l = 12
 
     @property
     def use_z_splitting(self):
@@ -454,6 +668,32 @@ class ParametersDescriptors(ParametersBase):
         self.atomic_density_cutoff = value
 
     @property
+    def ace_cutoff_factor(self):
+        """
+        Cutoff radius factor for ACE descriptor calculation.
+
+        This is NOT a cutoff radius itself. Rather, ACE computes on cutoff
+        radius for every bond between element types (with grid points counting
+        as an element type). These cutoff radii are then multiplied by this
+        factor to get the actual cutoff radii. This factor is a global factor,
+        and by default 2.0. Chage it carefully, since changing it may lead to
+        an increase in computation time.
+        """
+        return self._ace_cutoff
+
+    @ace_cutoff_factor.setter
+    def ace_cutoff_factor(self, value):
+        if value <= 0.0:
+            printout(
+                "ACE cutoff factor must be larger than 0.0, defaulting"
+                " to 2.0.",
+                min_verbosity=0,
+            )
+            self._ace_cutoff = 2.0
+        else:
+            self._ace_cutoff = value
+
+    @property
     def bispectrum_switchflag(self):
         """
         Switchflag for the bispectrum calculation.
@@ -473,12 +713,46 @@ class ParametersDescriptors(ParametersBase):
         if _int_value > 0:
             self._snap_switchflag = 1
 
+    @property
+    def bispectrum_element_weights(self):
+        """
+        Element species weights for the bispectrum calculation.
+
+        They are provided as an ordered list, and will be assigned to the
+        elements alphabetically, i.e., the first entry will go to the element
+        coming first in the alphabet and so on. Weights are always relative, so
+        the list will be rescaled such that the largest value is 1 and all
+        the other ones are scaled accordingly.
+        """
+        return self._bispectrum_element_weights
+
+    @bispectrum_element_weights.setter
+    def bispectrum_element_weights(self, value):
+        if not isinstance(value, list) and value is not None:
+            raise ValueError("Bispectrum element weights must be list.")
+        if value is not None:
+            if np.max(value) != 1.0:
+                max = np.max(value)
+                for element in range(len(value)):
+                    value[element] /= max
+        self._bispectrum_element_weights = value
+
     def _update_mpi(self, new_mpi):
+        """
+        Propagate new MPI setting to parameter subclasses.
+
+        Also deletes old inputs files that are no longer valid.
+
+        Parameters
+        ----------
+        new_mpi : bool
+            New MPI setting.
+        """
         self._configuration["mpi"] = new_mpi
 
         # There may have been a serial or parallel run before that is now
         # no longer valid.
-        self.lammps_compute_file = ""
+        self.custom_lammps_compute_file = ""
 
 
 class ParametersTargets(ParametersBase):
@@ -491,14 +765,31 @@ class ParametersTargets(ParametersBase):
         Number of points in the energy grid that is used to calculate the
         (L)DOS.
 
-    ldos_gridsize : int
-        Gridsize of the LDOS.
+    ldos_gridsize : int or list
+        Gridsize of the LDOS. Can either be an int or a list of ints,
+        in which case splitting of the (L)DOS along the energy axis is assumed.
+        Note that this splitting feature is currently experimental and the
+        interface may change in the future. Further, if this type of splitting
+        is used, please make sure that ldos_gridsize, ldos_gridspacing_ev
+        and ldos_gridoffset_ev are lists of the same length.
 
-    ldos_gridspacing_ev: float
+    ldos_gridspacing_ev: float or list
         Gridspacing of the energy grid the (L)DOS is evaluated on [eV].
+        Can either be a float or a list of floats, in which case splitting of
+        the (L)DOS along the energy axis is assumed.
+        Note that this splitting feature is currently experimental and the
+        interface may change in the future. Further, if this type of splitting
+        is used, please make sure that ldos_gridsize, ldos_gridspacing_ev
+        and ldos_gridoffset_ev are lists of the same length.
 
-    ldos_gridoffset_ev: float
+    ldos_gridoffset_ev: float or list
         Lowest energy value on the (L)DOS energy grid [eV].
+        Can either be a float or a list of floats, in which case splitting of
+        the (L)DOS along the energy axis is assumed.
+        Note that this splitting feature is currently experimental and the
+        interface may change in the future. Further, if this type of splitting
+        is used, please make sure that ldos_gridsize, ldos_gridspacing_ev
+        and ldos_gridoffset_ev are lists of the same length.
 
     pseudopotential_path : string
         Path at which pseudopotentials are located (for TEM).
@@ -751,6 +1042,9 @@ class ParametersRunning(ParametersBase):
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
 
+    checkpoint_path : string
+        Path where the checkpoints will be saved (and loaded from)
+
     run_name : string
         Name of the run used for logging.
 
@@ -769,8 +1063,8 @@ class ParametersRunning(ParametersBase):
             - "tensorboard": Tensorboard logger.
             - "wandb": Weights and Biases logger.
 
-    validation_metrics : list
-        List of metrics to be used for validation. Default is ["ldos"].
+    logging_metrics : list
+        List of metrics to be used for logging. Default is ["ldos"].
         Possible options are:
 
             - "ldos": MSE of the LDOS.
@@ -780,15 +1074,21 @@ class ParametersRunning(ParametersBase):
             - "total_energy_actual_fe": Total energy computed with ground truth Fermi energy.
             - "fermi_energy": Fermi energy.
             - "density": Electron density.
-            - "density_relative": Rlectron density (MAPE).
+            - "density_relative": Electron density (MAPE).
             - "dos": Density of states.
             - "dos_relative": Density of states (MAPE).
+            
+        The units for energy metrics are meV/atom.
+        Selected metrics are evalauted every `logging_metrics_interval` (see below) epochs.
+        To use the energy metrics the validation snapshots need not be shuffled.
+        Note that evaluating the energy metrics takes considerably longer than just LDOS
+        and therefore it is discouraged.
 
-    validate_on_training_data : bool
-        Whether to validate on the training data as well. Default is False.
+    log_metrics_on_train_set : bool
+        Whether to also log metrics evaluated on the training set. Default is False.
 
-    validate_every_n_epochs : int
-        Determines how often validation is performed. Default is 1.
+    logging_metrics_interval : int
+        Determines how often (in the unit of epochs) metrics are logged. Default is 1.
 
     training_log_interval : int
         Determines how often detailed performance info is printed during
@@ -834,21 +1134,22 @@ class ParametersRunning(ParametersBase):
         self.learning_rate_scheduler = None
         self.learning_rate_decay = 0.1
         self.learning_rate_patience = 0
-        self._during_training_metric = "ldos"
-        self._after_training_metric = "ldos"
+        self._validation_metric = "ldos"
+        self._final_validation_metric = "ldos"
         # self.use_compression = False
         self.num_workers = 0
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
         # self.checkpoint_best_so_far = False
         self.checkpoint_name = "checkpoint_mala"
+        self.checkpoint_path = "./"
         self.run_name = ""
         self.logging_dir = "./mala_logging"
         self.logging_dir_append_date = True
         self.logger = None
-        self.validation_metrics = ["ldos"]
-        self.validate_on_training_data = False
-        self.validate_every_n_epochs = 1
+        self.logging_metrics = ["ldos"]
+        self.log_metrics_on_train_set = False
+        self.logging_metrics_interval = 1
         self.inference_data_grid = [0, 0, 0]
         self.use_mixed_precision = False
         self.use_graphs = False
@@ -856,61 +1157,86 @@ class ParametersRunning(ParametersBase):
         self.profiler_range = [1000, 2000]
 
     def _update_ddp(self, new_ddp):
+        """
+        Propagate new DDP setting to parameter subclasses.
+
+        Also ensures only metrics are used which work with DDP.
+
+        Parameters
+        ----------
+        new_ddp : bool
+            New DDP setting.
+        """
         super(ParametersRunning, self)._update_ddp(new_ddp)
-        self.during_training_metric = self.during_training_metric
-        self.after_training_metric = self.after_training_metric
+        self.validation_metric = self.validation_metric
+        self.final_validation_metric = self.final_validation_metric
 
     @property
-    def during_training_metric(self):
+    def validation_metric(self):
         """
-        Control the metric used during training.
+        Control the metric used for validation.
 
-        Metric for evaluated on the validation set during training.
+        Metric to be evaluated on the validation set during training.
         Default is "ldos", meaning that the regular loss on the LDOS will be
-        used as a metric. Possible options are "band_energy" and
-        "total_energy". For these, the band resp. total energy of the
-        validation snapshots will be calculated and compared to the provided
-        DFT results. Of these, the mean average error in eV/atom will be
-        calculated.
-        """
-        return self._during_training_metric
+        used as a metric.
+        
+        Possible options are:
 
-    @during_training_metric.setter
-    def during_training_metric(self, value):
+            - "ldos": MSE of the LDOS.
+            - "band_energy": Band energy.
+            - "band_energy_actual_fe": Band energy computed with ground truth Fermi energy.
+            - "total_energy": Total energy.
+            - "total_energy_actual_fe": Total energy computed with ground truth Fermi energy.
+            - "fermi_energy": Fermi energy.
+            - "density": Electron density.
+            - "density_relative": Electron density (MAPE).
+            - "dos": Density of states.
+            - "dos_relative": Density of states (MAPE).
+        
+        The units for energy metrics are meV/atom.
+        Selected metric is evalauted after every epoch on the validation set.
+        The validation metric is used as a criterion for early stopping and also
+        for checkpointing the best model.
+        Note that evaluating the energy metrics takes considerably longer than LDOS
+        and therefore it is discouraged.
+        """
+        return self._validation_metric
+
+    @validation_metric.setter
+    def validation_metric(self, value):
         if value != "ldos":
             if self._configuration["ddp"]:
                 raise Exception(
                     "Currently, MALA can only operate with the "
                     '"ldos" metric for ddp runs.'
                 )
-            if value not in self.validation_metrics:
-                self.validation_metrics.append(value)
-        self._during_training_metric = value
+            if value not in self.logging_metrics:
+                self.logging_metrics.append(value)
+        self._validation_metric = value
 
     @property
-    def after_training_metric(self):
+    def final_validation_metric(self):
         """
-        Get the metric used during training.
+        Metric for final model evaluation.
 
-        Metric for evaluated on the validation and test set before and after
-        training. Default is "LDOS", meaning that the regular loss on the LDOS
-        will be used as a metric. Possible options are "band_energy" and
-        "total_energy". For these, the band resp. total energy of the
-        validation snapshots will be calculated and compared to the provided
-        DFT results. Of these, the mean average error in eV/atom will be
-        calculated.
+        This metric is evaluated on the validation set after training.
+        Available options are the same as for `validation_metric`.
+        Default is "LDOS", meaning that MSE of the LDOS
+        will be used as a metric.
+        The final validation metric is used as a target
+        for hyperparameter optimization.
         """
-        return self._after_training_metric
+        return self._final_validation_metric
 
-    @after_training_metric.setter
-    def after_training_metric(self, value):
+    @final_validation_metric.setter
+    def final_validation_metric(self, value):
         if value != "ldos":
             if self._configuration["ddp"]:
                 raise Exception(
                     "Currently, MALA can only operate with the "
                     '"ldos" metric for ddp runs.'
                 )
-        self._after_training_metric = value
+        self._final_validation_metric = value
 
     @property
     def use_graphs(self):
@@ -1284,10 +1610,6 @@ class Parameters:
     hyperparameters : ParametersHyperparameterOptimization
         Parameters used for hyperparameter optimization.
 
-    manual_seed: int
-        If not none, this value is used as manual seed for the neural networks.
-        Can be used to make experiments comparable. Default: None.
-
     datageneration : ParametersDataGeneration
         Parameters used for data generation routines.
     """
@@ -1470,6 +1792,26 @@ class Parameters:
         self.data._update_mpi(self.use_mpi)
         self.running._update_mpi(self.use_mpi)
         self.hyperparameters._update_mpi(self.use_mpi)
+
+    @property
+    def manual_seed(self):
+        """
+        If not none, this value is used as manual seed for the neural networks.
+
+        Can be used to make experiments comparable. Default: None.
+        """
+        return self._manual_seed
+
+    @manual_seed.setter
+    def manual_seed(self, value):
+        self._manual_seed = value
+
+        self.network._update_manual_seed(self.manual_seed)
+        self.descriptors._update_manual_seed(self.manual_seed)
+        self.targets._update_manual_seed(self.manual_seed)
+        self.data._update_manual_seed(self.manual_seed)
+        self.running._update_manual_seed(self.manual_seed)
+        self.hyperparameters._update_manual_seed(self.manual_seed)
 
     @property
     def openpmd_configuration(self):

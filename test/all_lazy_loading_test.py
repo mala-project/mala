@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import pytest
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 # This test compares the data scaling using the regular scaling procedure and
 # the lazy-loading one (incremental fitting).
@@ -34,7 +34,7 @@ class TestLazyLoading:
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.descriptors.bispectrum_twojmax = 11
         test_parameters.targets.ldos_gridsize = 10
-        test_parameters.network.layer_activations = ["LeakyReLU"]
+        test_parameters.network.layer_activations = "LeakyReLU"
         test_parameters.running.max_number_epochs = 3
         test_parameters.running.mini_batch_size = 512
         test_parameters.running.learning_rate = 0.00001
@@ -70,37 +70,37 @@ class TestLazyLoading:
                 data_handler = DataHandler(test_parameters)
                 data_handler.add_snapshot(
                     "Be_snapshot0.in.npy",
-                    data_path,
+                    data_path_be,
                     "Be_snapshot0.out.npy",
-                    data_path,
+                    data_path_be,
                     "tr",
                 )
                 data_handler.add_snapshot(
                     "Be_snapshot1.in.npy",
-                    data_path,
+                    data_path_be,
                     "Be_snapshot1.out.npy",
-                    data_path,
+                    data_path_be,
                     "tr",
                 )
                 data_handler.add_snapshot(
                     "Be_snapshot2.in.npy",
-                    data_path,
+                    data_path_be,
                     "Be_snapshot2.out.npy",
-                    data_path,
+                    data_path_be,
                     "tr",
                 )
                 data_handler.add_snapshot(
                     "Be_snapshot1.in.npy",
-                    data_path,
+                    data_path_be,
                     "Be_snapshot1.out.npy",
-                    data_path,
+                    data_path_be,
                     "va",
                 )
                 data_handler.add_snapshot(
                     "Be_snapshot2.in.npy",
-                    data_path,
+                    data_path_be,
                     "Be_snapshot2.out.npy",
-                    data_path,
+                    data_path_be,
                     "te",
                 )
                 data_handler.prepare_data()
@@ -256,7 +256,7 @@ class TestLazyLoading:
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "minmax"
-        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.network.layer_activations = "ReLU"
         test_parameters.manual_seed = 1234
         test_parameters.running.max_number_epochs = 100
         test_parameters.running.mini_batch_size = 40
@@ -271,30 +271,30 @@ class TestLazyLoading:
         # Add a snapshot we want to use in to the list.
         data_handler.add_snapshot(
             "Be_snapshot0.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
             "tr",
         )
         data_handler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             "tr",
         )
         data_handler.add_snapshot(
             "Be_snapshot2.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot2.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.add_snapshot(
             "Be_snapshot3.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot3.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.prepare_data()

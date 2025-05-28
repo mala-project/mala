@@ -1,7 +1,7 @@
 .. _tuning descriptors:
 
-Improved data conversion
-========================
+Advanced descriptor options
+===========================
 
 As a general remark please be reminded that if you have not used LAMMPS
 for your first steps in MALA, and instead used the python-based descriptor
@@ -76,22 +76,19 @@ An example would be this:
 
       .. code-block:: python
 
-            hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path, "Be_snapshot1.out"),
-                                        "numpy", os.path.join(data_path, "Be_snapshot1.out.npy"),
+            hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path_be, "Be_snapshot1.out"),
+                                        "numpy", os.path.join(data_path_be, "Be_snapshot1.out.npy"),
                                         target_units="1/(Ry*Bohr^3)")
-            hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path, "Be_snapshot2.out"),
-                                        "numpy", os.path.join(data_path, "Be_snapshot2.out.npy"),
+            hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path_be, "Be_snapshot2.out"),
+                                        "numpy", os.path.join(data_path_be, "Be_snapshot2.out.npy"),
                                         target_units="1/(Ry*Bohr^3)")
 
 Once this is done, you can start the optimization via
 
       .. code-block:: python
 
-            hyperoptimizer.perform_study(return_plotting=False)
+            hyperoptimizer.perform_study()
             hyperoptimizer.set_optimal_parameters()
-
-If ``return_plotting`` is set to ``True``, relevant plotting data for the
-analysis are returned. This is useful for exploratory searches.
 
 Since the ACSD re-calculates the bispectrum descriptors for each combination
 of hyperparameters, it is useful to use parallel descriptor calculation.
@@ -118,3 +115,44 @@ Parallelization may also generally be used for data conversion via the
 prior to using the ``DataConverter`` class. Then, all processing will
 be done in parallel - both the descriptor calculation as well as the LDOS
 parsing.
+
+ACE Descriptors
+******************
+
+.. note::
+
+    To use ACE descriptors with MALA, you need to install LAMMPS from source
+    using the ACE descriptor development branch, since the ACE descriptors
+    are not yet part of the descriptor calculation code the MALA team has
+    integrated into mainline LAMMPS. You can find the code here:
+    https://github.com/jmgoff/lammps_compute_PACE/tree/mala-ace-grid.
+
+Recently, and as described in the
+`MALA technical paper <https://arxiv.org/abs/2411.19617>`_ ACE descriptors
+have been implemented as an alternative to bispectrum descriptors. They
+follow the Atomic Cluster Expansion (ACE) formalism, introduced by
+the `eponymous publication <https://journals.aps.org/prb/abstract/10.1103/PhysRevB.99.014104>`_
+by Ralf Drautz. ACE descriptors hold the promise of being more descriptive and
+accurate than bispectrum descriptors and are currently being investigated by
+the MALA team. MALA already implements most functionalities of bispectrum
+descriptors for ACE descriptors. You can use them in the same fashion as
+the bispectrum descriptors, with the only difference being the hyperparameters
+you need to set.
+
+Specifically, by replacing all bispectrum hyperparameters in your script
+with code such as this
+
+        .. code-block:: python
+
+            parameters.descriptors.descriptor_type = "ACE"
+            parameters.descriptors.ace_cutoff = 5.8
+            parameters.descriptors.ace_included_expansion_ranks = [1, 2, 3]
+            parameters.descriptors.ace_maximum_l_per_rank = [0, 1, 1]
+            parameters.descriptors.ace_maximum_n_per_rank = [1, 1, 1]
+            parameters.descriptors.ace_minimum_l_per_rank = [0, 0, 0]
+
+ACE descriptors will be used in your processing/training/testing scripts.
+ACE_DOCS_MISSING: Describe what the parameters mean/how to best tune them.
+
+A known current limitation is that ACE descriptors can only be run on CPU.
+A GPU version is currently being developed.

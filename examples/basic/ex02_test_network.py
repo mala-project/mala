@@ -3,7 +3,7 @@ import os
 import mala
 from mala import printout
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 """
 This example shows how a trained network can be tested
@@ -12,7 +12,7 @@ or download the appropriate model from the provided test data repo.
 """
 
 model_name = "Be_model"
-model_path = "./" if os.path.exists("Be_model.zip") else data_path
+model_path = "./" if os.path.exists("Be_model.zip") else data_path_be
 
 ####################
 # 1. LOADING A NETWORK
@@ -40,22 +40,47 @@ parameters.data.use_lazy_loading = True
 # When preparing the data, make sure to select "reparametrize_scalers=False",
 # since data scaling was initialized during model training.
 ####################
+
+# Add precomputed snapshots.
 data_handler.add_snapshot(
     "Be_snapshot2.in.npy",
-    data_path,
+    data_path_be,
     "Be_snapshot2.out.npy",
-    data_path,
+    data_path_be,
     "te",
-    calculation_output_file=os.path.join(data_path, "Be_snapshot2.out"),
+    calculation_output_file=os.path.join(
+        data_path_be, "Be_snapshot2.info.json"
+    ),
 )
 data_handler.add_snapshot(
     "Be_snapshot3.in.npy",
-    data_path,
+    data_path_be,
     "Be_snapshot3.out.npy",
-    data_path,
+    data_path_be,
     "te",
-    calculation_output_file=os.path.join(data_path, "Be_snapshot3.out"),
+    calculation_output_file=os.path.join(
+        data_path_be, "Be_snapshot3.info.json"
+    ),
 )
+
+# Add snapshots with "raw" (=MALA formatted) JSON, computation of descriptors
+# will be performed "on-the-fly".
+# data_handler.add_snapshot(
+#     "Be_snapshot2.info.json",
+#     data_path_be,
+#     "Be_snapshot2.out.npy",
+#     data_path_be,
+#     "te",
+#     calculation_output_file=os.path.join(data_path_be, "Be_snapshot2.info.json"),
+# )
+# data_handler.add_snapshot(
+#     "Be_snapshot3.info.json",
+#     data_path_be,
+#     "Be_snapshot3.out.npy",
+#     data_path_be,
+#     "te",
+#     calculation_output_file=os.path.join(data_path_be, "Be_snapshot3.info.json"),
+# )
 data_handler.prepare_data(reparametrize_scaler=False)
 
 

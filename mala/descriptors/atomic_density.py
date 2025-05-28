@@ -8,7 +8,7 @@ from importlib.util import find_spec
 import numpy as np
 from scipy.spatial import distance
 
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, parallel_warn
 from mala.descriptors.lammps_utils import extract_compute_np
 from mala.descriptors.descriptor import Descriptor
 
@@ -46,7 +46,7 @@ class AtomicDensity(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data for which the units should be converted.
 
         in_units : string
@@ -54,7 +54,7 @@ class AtomicDensity(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in MALA units.
         """
         if in_units == "None" or in_units is None:
@@ -71,7 +71,7 @@ class AtomicDensity(Descriptor):
 
         Parameters
         ----------
-        array : numpy.array
+        array : numpy.ndarray
             Data in MALA units.
 
         out_units : string
@@ -79,7 +79,7 @@ class AtomicDensity(Descriptor):
 
         Returns
         -------
-        converted_array : numpy.array
+        converted_array : numpy.ndarray
             Data in out_units.
         """
         if out_units == "None":
@@ -107,6 +107,27 @@ class AtomicDensity(Descriptor):
         ) * optimal_sigma_aluminium
 
     def _calculate(self, outdir, **kwargs):
+        """
+        Perform Gaussian descriptor calculation.
+
+        This function is the main entry point for the calculation of the
+        Gaussian descriptors. It will decide whether to use LAMMPS or
+        a python implementation based on the availability of LAMMPS (and
+        user specifications).
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        gaussian_descriptors_np : numpy.ndarray
+            The calculated Gaussian descriptors.
+        """
         if self.parameters._configuration["lammps"]:
             if find_spec("lammps") is None:
                 printout(
@@ -119,8 +140,41 @@ class AtomicDensity(Descriptor):
         else:
             return self.__calculate_python(**kwargs)
 
+    def _read_feature_dimension_from_json(self, json_dict):
+        """
+        Read the feature dimension from a saved JSON file.
+
+        Always returns (number of coordinate dimensions xyz = 3) +
+        (number of species), so for a single species system 4.
+
+        Parameters
+        ----------
+        json_dict : dict
+            Dictionary containing info loaded from the JSON file.
+        """
+        return 4
+
     def __calculate_lammps(self, outdir, **kwargs):
-        """Perform actual Gaussian descriptor calculation."""
+        """
+        Perform actual Gaussian descriptor calculation using LAMMPS.
+
+        Creates a LAMMPS instance with appropriate call parameters and uses
+        it for the calculation.
+
+        Parameters
+        ----------
+        outdir : string
+            Path to the output directory.
+
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        gaussian_descriptors_np : numpy.ndarray
+            The calculated Gaussian descriptors.
+
+        """
         # For version compatibility; older lammps versions (the serial version
         # we still use on some machines) have these constants as part of the
         # general LAMMPS import.
@@ -150,30 +204,47 @@ class AtomicDensity(Descriptor):
 
         # Create LAMMPS instance.
         lammps_dict = {
-            "sigma": self.parameters.atomic_density_sigma,
             "rcutfac": self.parameters.atomic_density_cutoff,
         }
+        for i in range(len(set(self._atoms.numbers))):
+            lammps_dict["sigma" + str(i + 1)] = (
+                self.parameters.atomic_density_sigma
+            )
+
         lmp = self._setup_lammps(nx, ny, nz, lammps_dict)
 
         # For now the file is chosen automatically, because this is used
         # mostly under the hood anyway.
-        filepath = __file__.split("atomic_density")[0]
-        if self.parameters._configuration["mpi"]:
-            if self.parameters.use_z_splitting:
-                self.parameters.lammps_compute_file = os.path.join(
-                    filepath, "in.ggrid.python"
-                )
-            else:
-                self.parameters.lammps_compute_file = os.path.join(
-                    filepath, "in.ggrid_defaultproc.python"
-                )
+
+        if self.parameters.custom_lammps_compute_file != "":
+            lammps_compute_file = self.parameters.custom_lammps_compute_file
         else:
-            self.parameters.lammps_compute_file = os.path.join(
-                filepath, "in.ggrid_defaultproc.python"
-            )
+            filepath = os.path.join(os.path.dirname(__file__), "inputfiles")
+            if self.parameters._configuration["mpi"]:
+                if self.parameters.use_z_splitting:
+                    lammps_compute_file = os.path.join(
+                        filepath,
+                        "in.ggrid_n{0}.python".format(
+                            len(set(self._atoms.numbers))
+                        ),
+                    )
+                else:
+                    lammps_compute_file = os.path.join(
+                        filepath,
+                        "in.ggrid_defaultproc_n{0}.python".format(
+                            len(set(self._atoms.numbers))
+                        ),
+                    )
+            else:
+                lammps_compute_file = os.path.join(
+                    filepath,
+                    "in.ggrid_defaultproc_n{0}.python".format(
+                        len(set(self._atoms.numbers))
+                    ),
+                )
 
         # Do the LAMMPS calculation and clean up.
-        lmp.file(self.parameters.lammps_compute_file)
+        lmp.file(lammps_compute_file)
 
         # Extract the data.
         nrows_ggrid = extract_compute_np(
@@ -197,7 +268,26 @@ class AtomicDensity(Descriptor):
             array_shape=(nrows_ggrid, ncols_ggrid),
             use_fp64=use_fp64,
         )
+
         self._clean_calculation(lmp, keep_logs)
+
+        if len(set(self._atoms.numbers)) > 1:
+            parallel_warn(
+                "Atomic density formula and multielement system detected: "
+                "Quantum ESPRESSO has a different internal order "
+                "for structure factors and atomic positions. "
+                "MALA recovers the correct ordering for multielement "
+                "systems, but the algorithm to do so is still "
+                "experimental. Please test on a small system before "
+                "using the atomic density formula at scale."
+            )
+            symbols, indices = np.unique(
+                [atom.symbol for atom in self._atoms], return_index=True
+            )
+            permutation = np.concatenate(
+                ([0, 1, 2, 3, 4, 5], np.argsort(indices) + 6)
+            )
+            gaussian_descriptors_np = gaussian_descriptors_np[:, permutation]
 
         # In comparison to bispectrum, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments
@@ -225,7 +315,7 @@ class AtomicDensity(Descriptor):
                         self.grid_dimensions[2],
                         self.grid_dimensions[1],
                         self.grid_dimensions[0],
-                        7,
+                        6 + len(set(self._atoms.numbers)),
                     )
                 )
                 gaussian_descriptors_np = gaussian_descriptors_np.transpose(
@@ -254,6 +344,16 @@ class AtomicDensity(Descriptor):
               and doesn't scale too great
             - It only works for ONE chemical element
             - It has no MPI or GPU support
+
+        Parameters
+        ----------
+        kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        gaussian_descriptors_np : numpy.ndarray
+            The calculated Gaussian descriptors.
         """
         printout(
             "Using python for descriptor calculation. "

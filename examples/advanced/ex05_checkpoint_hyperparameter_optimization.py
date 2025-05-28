@@ -2,7 +2,7 @@ import os
 
 import mala
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 """
 Shows how a hyperparameter optimization run can
@@ -29,16 +29,16 @@ def initial_setup():
     data_handler = mala.DataHandler(parameters)
     data_handler.add_snapshot(
         "Be_snapshot0.in.npy",
-        data_path,
+        data_path_be,
         "Be_snapshot0.out.npy",
-        data_path,
+        data_path_be,
         "tr",
     )
     data_handler.add_snapshot(
         "Be_snapshot1.in.npy",
-        data_path,
+        data_path_be,
         "Be_snapshot1.out.npy",
-        data_path,
+        data_path_be,
         "va",
     )
     data_handler.prepare_data()

@@ -118,7 +118,7 @@ jobs:
 
   cpu-tests:
     needs: build-docker-image-cpu
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       IMAGE_REPO: ${{ needs.build-docker-image-cpu.outputs.image-repo }}
       DOCKER_TAG: ${{ needs.build-docker-image-cpu.outputs.docker-tag }}
@@ -183,7 +183,7 @@ jobs:
           # be there before it has been installed.
           sed -i '/materials-learning-algorithms/d' ./env_after.yml
 
-          # if comparison fails, `install/mala_cpu_[base]_environment.yml` needs to be aligned with
+          # if comparison fails, `pipeline/mala_cpu_[base]_environment.yml` needs to be aligned with
           # `requirements.txt` and/or extra dependencies are missing in the Docker Conda environment
 
           if diff --brief env_before.yml env_after.yml
@@ -230,7 +230,7 @@ jobs:
 
       - name: Test mala
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
-        run: MALA_DATA_REPO=$(pwd)/mala_data pytest --cov=mala --cov-fail-under=60 -m "not examples" --disable-warnings
+        run: MALA_DATA_REPO=$(pwd)/mala_data pytest --cov=mala --cov-fail-under=50 -m "not examples" --disable-warnings
 
   retag-docker-image-cpu:
     needs: [cpu-tests, build-docker-image-cpu]

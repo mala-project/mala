@@ -4,7 +4,7 @@ import mala
 import numpy as np
 import torch
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 # This test checks that all scaling options are working and are not messing
 # up the data.
@@ -22,14 +22,14 @@ class TestScaling:
             "minmax",
             "feature-wise-minmax",
         ]:
-            data = np.load(os.path.join(data_path, "Be_snapshot2.out.npy"))
+            data = np.load(os.path.join(data_path_be, "Be_snapshot2.out.npy"))
             data = data.astype(np.float32)
             data = data.reshape(
                 [np.prod(np.shape(data)[0:3]), np.shape(data)[3]]
             )
             data = torch.from_numpy(data).float()
 
-            data2 = np.load(os.path.join(data_path, "Be_snapshot2.out.npy"))
+            data2 = np.load(os.path.join(data_path_be, "Be_snapshot2.out.npy"))
             data2 = data2.astype(np.float32)
             data2 = data2.reshape(
                 [np.prod(np.shape(data2)[0:3]), np.shape(data2)[3]]
@@ -55,7 +55,7 @@ class TestScaling:
             "minmax",
             "feature-wise-minmax",
         ]:
-            data = np.load(os.path.join(data_path, "Be_snapshot2.in.npy"))
+            data = np.load(os.path.join(data_path_be, "Be_snapshot2.in.npy"))
             data = data.astype(np.float32)
             data = data.reshape(
                 [np.prod(np.shape(data)[0:3]), np.shape(data)[3]]

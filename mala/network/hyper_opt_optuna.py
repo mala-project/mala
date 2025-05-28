@@ -308,7 +308,20 @@ class HyperOptOptuna(HyperOpt):
         return loaded_hyperopt
 
     def __get_number_of_completed_trials(self, study):
-        """Get the number of maximum trials."""
+        """
+        Get the number of completed trials from a study.
+
+        Parameters
+        ----------
+        study : optuna.study.Study
+            Study from which the number of completed trials should be
+            extracted.
+
+        Returns
+        -------
+        number_of_completed_trials : int
+            Number of completed trials.
+        """
         # How to calculate this depends on whether or not a heartbeat was
         # used. If one was used, then both COMPLETE and RUNNING trials
         # Can be taken into account, as it can be expected that RUNNING
@@ -334,7 +347,19 @@ class HyperOptOptuna(HyperOpt):
             )
 
     def __check_stopping(self, study, trial):
-        """Check if this trial was already the maximum number of trials."""
+        """
+        Check if this trial was already the maximum number of trials.
+
+        If so, stop the study.
+
+        Parameters
+        ----------
+        study : optuna.study.Study
+            Study in which the trial is running.
+
+        trial : optuna.trial.FrozenTrial
+            Trial for which the stopping condition should be tested.
+        """
         # How to check for this depends on whether or not a heartbeat was
         # used. If one was used, then both COMPLETE and RUNNING trials
         # Can be taken into account, as it can be expected that RUNNING
@@ -368,7 +393,19 @@ class HyperOptOptuna(HyperOpt):
                     self.study.stop()
 
     def __create_checkpointing(self, study, trial):
-        """Create a checkpoint of optuna study, if necessary."""
+        """
+        Create a checkpoint of optuna study, if necessary.
+
+        This is done based on an internal checkpoint counter.
+
+        Parameters
+        ----------
+        study : optuna.study.Study
+            Study in which the trial is running.
+
+        trial : optuna.trial.FrozenTrial
+            Trial for which the checkpoint may be created.
+        """
         self._checkpoint_counter += 1
         need_to_checkpoint = False
 

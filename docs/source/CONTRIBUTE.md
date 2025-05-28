@@ -16,11 +16,14 @@ nature of your contribution:
 
 - Bartosz Brzoza (Bugfixes, GNN implementation)
 - Timothy Callow (Grid-size transferability)
+- Petr Cagas (Sample data management and data generation)
+- Matthew Campbell (Active learning)
 - Attila Cangi (Scientific supervision)
 - Austin Ellis (General code infrastructure)
 - Omar Faruk (Training parallelization via horovod)
 - Lenz Fiedler (General code development and maintenance)
 - James Fox (GNN implementation)
+- James Goff (ACE descriptors and forces)
 - Nils Hoffmann (NASWOT method)
 - Kyle Miller (Data shuffling)
 - Daniel Kotik (Documentation and CI)
@@ -33,7 +36,7 @@ nature of your contribution:
 - Siva Rajamanickam (Scientific supervision)
 - Josh Romero (GPU usage improvement for model tuning)
 - Steve Schmerler (Uncertainty quantification)
-- Adam Stephens (Uncertainty quantification work)
+- Adam Stephens (Uncertainty quantification)
 - Hossein Tahmasbi (Minterpy descriptors)
 - Aidan Thompson (Descriptor calculation)
 - Sneha Verma (Tensorboard interface)
@@ -113,7 +116,7 @@ If you add additional dependencies, make sure to add them to `requirements.txt`
 if they are required or to `setup.py` under the appropriate `extras` tag if
 they are not.
 Further, in order for them to be available during the CI tests, make sure to
-add _required_ dependencies to the appropriate environment files in folder `install/` and _extra_ requirements directly in the `Dockerfile` for the `conda` environment build.
+add _required_ dependencies to the appropriate environment files in folder `pipeline/` and _extra_ requirements directly in the `Dockerfile` for the `conda` environment build.
 
 ## Pull Requests
 We actively welcome pull requests.

@@ -2,7 +2,7 @@ import os
 
 import mala
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 """
 ex09_distributed_hyperopt.py: Shows how a hyperparameter
@@ -36,33 +36,38 @@ parameters.hyperparameters.hyper_opt_method = "optuna"
 parameters.hyperparameters.study_name = "ex06"
 parameters.hyperparameters.rdb_storage = "sqlite:///ex06.db"
 
-# Hyperparameter optimization can be further refined by using ensemble training
-# at each step and by using a different metric then the validation loss
-# (e.g. the band energy). It is recommended not to use the ensemble training
-# method in Single-GPU use, as it naturally drastically decreases performance.
 parameters.targets.ldos_gridsize = 11
 parameters.targets.ldos_gridspacing_ev = 2.5
 parameters.targets.ldos_gridoffset_ev = -5
 parameters.hyperparameters.number_training_per_trial = 3
-parameters.running.after_training_metric = "band_energy"
+
+# Hyperparameter optimization can be further refined by using ensemble training
+# at each step and by using a different metric then the test metric
+# (e.g. the band energy). It is recommended not to use the ensemble training
+# method in Single-GPU use, as it naturally drastically decreases performance.
+# For this small example setting, using the band energy as the test
+# metric is not recommended, since the small data size makes
+# an accurate hyperparameter search difficult. For larger systems, enabling
+# this option is recommended.
+# parameters.running.final_validation_metric = "band_energy"
 
 data_handler = mala.DataHandler(parameters)
 
 data_handler.add_snapshot(
     "Be_snapshot1.in.npy",
-    data_path,
+    data_path_be,
     "Be_snapshot1.out.npy",
-    data_path,
+    data_path_be,
     "tr",
-    calculation_output_file=os.path.join(data_path, "Be_snapshot1.out"),
+    calculation_output_file=os.path.join(data_path_be, "Be_snapshot1.out"),
 )
 data_handler.add_snapshot(
     "Be_snapshot2.in.npy",
-    data_path,
+    data_path_be,
     "Be_snapshot2.out.npy",
-    data_path,
+    data_path_be,
     "va",
-    calculation_output_file=os.path.join(data_path, "Be_snapshot2.out"),
+    calculation_output_file=os.path.join(data_path_be, "Be_snapshot2.out"),
 )
 data_handler.prepare_data()
 

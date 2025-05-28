@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from torch.utils.data import TensorDataset
 
-from mala.common.parallelizer import printout, barrier
+from mala.common.parallelizer import printout, barrier, get_rank
 from mala.common.parameters import Parameters, DEFAULT_NP_DATA_DTYPE
 from mala.datahandling.data_handler_base import DataHandlerBase
 from mala.datahandling.data_scaler import DataScaler
@@ -227,16 +227,8 @@ class DataHandler(DataHandlerBase):
             printout("Initializing the data scalers.", min_verbosity=1)
             self.__parametrize_scalers()
             printout("Data scalers initialized.", min_verbosity=0)
-        elif (
-            self.parameters.use_lazy_loading is False
-            and self.nr_training_data != 0
-        ):
-            printout(
-                "Data scalers already initilized, loading data to RAM.",
-                min_verbosity=0,
-            )
-            self.__load_data("training", "inputs")
-            self.__load_data("training", "outputs")
+        elif self.nr_training_data != 0:
+            self.__parametrized_load_training_data()
 
         # Build Datasets.
         printout("Build datasets.", min_verbosity=1)
@@ -252,6 +244,11 @@ class DataHandler(DataHandlerBase):
         # an elongated wait time at this barrier, check that your file system
         # allows for parallel I/O.
         barrier()
+
+        # In the RAM case, there is no reason not to delete all temporary files
+        # now.
+        if self.parameters.use_lazy_loading is False:
+            self.delete_temporary_inputs()
 
     def prepare_for_testing(self):
         """
@@ -353,7 +350,7 @@ class DataHandler(DataHandlerBase):
 
         Parameters
         ----------
-        numpy_array : np.array
+        numpy_array : numpy.ndarray
             Array that is to be converted.
 
         data_type : string
@@ -517,6 +514,11 @@ class DataHandler(DataHandlerBase):
         )
 
     def __allocate_arrays(self):
+        """
+        Allocate arrays for data used during training.
+
+        Preallocating arrays before loading reduces overall memory footprint.
+        """
         if self.nr_training_data > 0:
             self._training_data_inputs = np.zeros(
                 (self.nr_training_data, self.input_dimension),
@@ -557,6 +559,7 @@ class DataHandler(DataHandlerBase):
         ----------
         function : string
             Can be "tr", "va" or "te.
+
         data_type : string
             Can be "input" or "output".
         """
@@ -595,6 +598,15 @@ class DataHandler(DataHandlerBase):
                         snapshot.input_npy_directory, snapshot.input_npy_file
                     )
                     units = snapshot.input_units
+
+                    # If the input for the descriptors is actually a JSON
+                    # file then we need to calculate the descriptors.
+                    if (
+                        snapshot.snapshot_type == "json+numpy"
+                        or snapshot.snapshot_type == "json+openpmd"
+                    ):
+                        self._calculate_temporary_inputs(snapshot)
+                        file = snapshot.temporary_input_file
                 else:
                     file = os.path.join(
                         snapshot.output_npy_directory,
@@ -602,7 +614,10 @@ class DataHandler(DataHandlerBase):
                     )
                     units = snapshot.output_units
 
-                if snapshot.snapshot_type == "numpy":
+                if (
+                    snapshot.snapshot_type == "numpy"
+                    or snapshot.snapshot_type == "json+numpy"
+                ):
                     calculator.read_from_numpy_file(
                         file,
                         units=units,
@@ -617,6 +632,22 @@ class DataHandler(DataHandlerBase):
                             file, units=units
                         ).reshape([gs_new, feature_dimension])
                     )
+                elif snapshot.snapshot_type == "json+openpmd":
+                    if data_type == "inputs":
+                        calculator.read_from_numpy_file(
+                            file,
+                            units=units,
+                            array=getattr(self, array)[
+                                gs_old : gs_old + gs_new, :
+                            ],
+                            reshape=True,
+                        )
+                    else:
+                        getattr(self, array)[gs_old : gs_old + gs_new] = (
+                            calculator.read_from_openpmd_file(
+                                file, units=units
+                            ).reshape([gs_new, feature_dimension])
+                        )
                 else:
                     raise Exception("Unknown snapshot file type.")
                 snapshot_counter += 1
@@ -716,11 +747,26 @@ class DataHandler(DataHandlerBase):
                     self.training_data_sets[0].add_snapshot_to_dataset(
                         snapshot
                     )
+                # For training snapshots, temporary files (if needed) have
+                # already been built during parametrization, for all other
+                # snapshot types, this has to be done here.
                 if snapshot.snapshot_function == "va":
+                    if (
+                        snapshot.snapshot_type == "json+numpy"
+                        or snapshot.snapshot_type == "json+openpmd"
+                    ):
+                        self._calculate_temporary_inputs(snapshot)
+
                     self.validation_data_sets[0].add_snapshot_to_dataset(
                         snapshot
                     )
                 if snapshot.snapshot_function == "te":
+                    if (
+                        snapshot.snapshot_type == "json+numpy"
+                        or snapshot.snapshot_type == "json+openpmd"
+                    ):
+                        self._calculate_temporary_inputs(snapshot)
+
                     self.test_data_sets[0].add_snapshot_to_dataset(snapshot)
 
             # I don't think we need to mix them here. We can use the standard
@@ -765,6 +811,12 @@ class DataHandler(DataHandlerBase):
                             self._use_ddp,
                         )
                     )
+                    if (
+                        snapshot.snapshot_type == "json+numpy"
+                        or snapshot.snapshot_type == "json+openpmd"
+                    ):
+                        self._calculate_temporary_inputs(snapshot)
+
                 if snapshot.snapshot_function == "te":
                     self.test_data_sets.append(
                         LazyLoadDatasetSingle(
@@ -780,6 +832,11 @@ class DataHandler(DataHandlerBase):
                             input_requires_grad=True,
                         )
                     )
+                    if (
+                        snapshot.snapshot_type == "json+numpy"
+                        or snapshot.snapshot_type == "json+openpmd"
+                    ):
+                        self._calculate_temporary_inputs(snapshot)
 
         else:
             if self.nr_training_data != 0:
@@ -878,6 +935,15 @@ class DataHandler(DataHandlerBase):
                                 )
                             )
                         )
+                    elif (
+                        snapshot.snapshot_type == "json+numpy"
+                        or snapshot.snapshot_type == "json+openpmd"
+                    ):
+                        self._calculate_temporary_inputs(snapshot)
+                        tmp = self.descriptor_calculator.read_from_numpy_file(
+                            snapshot.temporary_input_file,
+                            units=snapshot.input_units,
+                        )
                     else:
                         raise Exception("Unknown snapshot file type.")
 
@@ -919,7 +985,10 @@ class DataHandler(DataHandlerBase):
             for snapshot in self.parameters.snapshot_directories_list:
                 # Data scaling is only performed on the training data sets.
                 if snapshot.snapshot_function == "tr":
-                    if snapshot.snapshot_type == "numpy":
+                    if (
+                        snapshot.snapshot_type == "numpy"
+                        or snapshot.snapshot_type == "json+numpy"
+                    ):
                         tmp = self.target_calculator.read_from_numpy_file(
                             os.path.join(
                                 snapshot.output_npy_directory,
@@ -927,7 +996,10 @@ class DataHandler(DataHandlerBase):
                             ),
                             units=snapshot.output_units,
                         )
-                    elif snapshot.snapshot_type == "openpmd":
+                    elif (
+                        snapshot.snapshot_type == "openpmd"
+                        or snapshot.snapshot_type == "json+openpmd"
+                    ):
                         tmp = self.target_calculator.read_from_openpmd_file(
                             os.path.join(
                                 snapshot.output_npy_directory,
@@ -958,10 +1030,55 @@ class DataHandler(DataHandlerBase):
 
         printout("Output scaler parametrized.", min_verbosity=1)
 
+    def __parametrized_load_training_data(self):
+        """
+        Load training data and scale it with the already parametrized scalers.
+
+        This is mostly used when resuming an interrupted training run.
+        """
+        if self.parameters.use_lazy_loading:
+            printout(
+                "Data scalers already initilized, preparing input data.",
+                min_verbosity=0,
+            )
+            for snapshot in self.parameters.snapshot_directories_list:
+                # Data scaling is only performed on the training data sets.
+                if snapshot.snapshot_function == "tr" and (
+                    snapshot.snapshot_type == "json+numpy"
+                    or snapshot.snapshot_type == "json+openpmd"
+                ):
+                    self._calculate_temporary_inputs(snapshot)
+        else:
+            printout(
+                "Data scalers already initilized, loading data to RAM.",
+                min_verbosity=0,
+            )
+            self.__load_data("training", "inputs")
+            self.__load_data("training", "outputs")
+
     def __raw_numpy_to_converted_numpy(
         self, numpy_array, data_type="in", units=None
     ):
-        """Convert a raw numpy array containing into the correct units."""
+        """
+        Convert a raw numpy array into the correct units.
+
+        Parameters
+        ----------
+        numpy_array : numpy.ndarray
+            Array that is to be converted.
+
+        data_type : string
+            Can be "in" or "out", depending if input or output data is
+            processed.
+
+        units : string
+            Units of the data that is processed.
+
+        Returns
+        -------
+        converted_numpy_array: numpy.ndarray
+            The fully converted numpy array.
+        """
         if data_type == "in":
             if (
                 data_type == "in"
@@ -990,6 +1107,24 @@ class DataHandler(DataHandlerBase):
 
         This tensor that can simply be put into a MALA network.
         No unit conversion is done here.
+
+        Parameters
+        ----------
+        numpy_array : numpy.ndarray
+            Array that is to be converted.
+
+        desired_dimensions : tuple
+            Desired dimensions of the array. If None, the array will not be
+            reshaped.
+
+        data_type : string
+            Can be "in" or "out", depending if input or output data is
+            processed.
+
+        Returns
+        -------
+        converted_tensor: torch.Tensor
+            The converted and scaled tensor.
         """
         numpy_array = numpy_array.astype(DEFAULT_NP_DATA_DTYPE)
         if desired_dimensions is not None:

@@ -1,14 +1,14 @@
 import importlib
 import os
 
-from ase.io import read
+from ase.io import read, write
 import mala
 from mala.common.parameters import ParametersBase
 import numpy as np
 import pytest
 
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 
 # This test checks whether MALA interfaces to other codes, mainly the ASE
@@ -60,10 +60,10 @@ class TestInterfaces:
 
         # Read an LDOS and some additional data for it.
         ldos_calculator = mala.LDOS.from_numpy_file(
-            params, os.path.join(data_path, "Be_snapshot1.out.npy")
+            params, os.path.join(data_path_be, "Be_snapshot1.out.npy")
         )
         ldos_calculator.read_additional_calculation_data(
-            os.path.join(data_path, "Be_snapshot1.out"), "espresso-out"
+            os.path.join(data_path_be, "Be_snapshot1.out"), "espresso-out"
         )
 
         # Write and then read in via OpenPMD and make sure all the info is
@@ -102,21 +102,21 @@ class TestInterfaces:
             data_converter.add_snapshot(
                 descriptor_input_type="numpy",
                 descriptor_input_path=os.path.join(
-                    data_path, "Be_snapshot{}.in.npy".format(snapshot)
+                    data_path_be, "Be_snapshot{}.in.npy".format(snapshot)
                 ),
                 target_input_type="numpy",
                 target_input_path=os.path.join(
-                    data_path, "Be_snapshot{}.out.npy".format(snapshot)
+                    data_path_be, "Be_snapshot{}.out.npy".format(snapshot)
                 ),
-                additional_info_input_type=None,
-                additional_info_input_path=None,
+                simulation_output_type=None,
+                simulation_output_path=None,
                 target_units=None,
             )
 
         data_converter.convert_snapshots(
             descriptor_save_path="./",
             target_save_path="./",
-            additional_info_save_path="./",
+            simulation_output_save_path="./",
             naming_scheme="converted_from_numpy_*.h5",
             descriptor_calculation_kwargs={"working_directory": "./"},
         )
@@ -135,15 +135,15 @@ class TestInterfaces:
                 target_input_path="converted_from_numpy_{}.out.h5".format(
                     snapshot
                 ),
-                additional_info_input_type=None,
-                additional_info_input_path=None,
+                simulation_output_type=None,
+                simulation_output_path=None,
                 target_units=None,
             )
 
         data_converter.convert_snapshots(
             descriptor_save_path="./",
             target_save_path="./",
-            additional_info_save_path="./",
+            simulation_output_save_path="./",
             naming_scheme="verify_against_original_numpy_data_*.npy",
             descriptor_calculation_kwargs={"working_directory": "./"},
         )
@@ -151,7 +151,7 @@ class TestInterfaces:
         for snapshot in range(2):
             for i_o in ["in", "out"]:
                 original = os.path.join(
-                    data_path, "Be_snapshot{}.{}.npy".format(snapshot, i_o)
+                    data_path_be, "Be_snapshot{}.{}.npy".format(snapshot, i_o)
                 )
                 roundtrip = (
                     "verify_against_original_numpy_data_{}.{}.npy".format(
@@ -185,7 +185,7 @@ class TestInterfaces:
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "minmax"
-        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.network.layer_activations = "ReLU"
         test_parameters.running.max_number_epochs = 100
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
@@ -198,7 +198,7 @@ class TestInterfaces:
         test_parameters.descriptors.descriptor_type = "Bispectrum"
         test_parameters.descriptors.bispectrum_twojmax = 10
         test_parameters.descriptors.bispectrum_cutoff = 4.67637
-        test_parameters.targets.pseudopotential_path = data_path
+        test_parameters.targets.pseudopotential_path = data_path_be
 
         ####################
         # DATA
@@ -207,16 +207,16 @@ class TestInterfaces:
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             "tr",
         )
         data_handler.add_snapshot(
             "Be_snapshot2.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot2.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.prepare_data()
@@ -243,12 +243,12 @@ class TestInterfaces:
         ####################
 
         # Set up the ASE objects.
-        atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
+        atoms = read(os.path.join(data_path_be, "Be_snapshot1.out"))
         calculator = mala.MALA(
             test_parameters,
             test_network,
             data_handler,
-            reference_data=os.path.join(data_path, "Be_snapshot1.out"),
+            reference_data=os.path.join(data_path_be, "Be_snapshot1.out"),
         )
         total_energy_dft_calculation = (
             calculator._data_handler.target_calculator.total_energy_dft_calculation
@@ -264,7 +264,7 @@ class TestInterfaces:
         test_parameters = mala.Parameters()
         ldos_calculator = mala.LDOS(test_parameters)
         ldos_calculator.read_additional_calculation_data(
-            os.path.join(data_path, "Be_snapshot1.out"), "espresso-out"
+            os.path.join(data_path_be, "Be_snapshot1.out"), "espresso-out"
         )
         ldos_calculator.write_additional_calculation_data(
             "additional_calculation_data.json"
@@ -357,3 +357,37 @@ class TestInterfaces:
                     new_ldos_calculator.atoms.get_positions()[i, j],
                     rtol=accuracy_fine,
                 )
+
+    def test_atoms_to_lammps_data_multielement(self):
+        """
+        Test if the atoms to LAMMPS interface gives alphabetical ordering.
+
+        If I am not misunderstanding anything than how the element ordering
+        is transferred from an atoms object to LAMMPS is not necessarily
+        well-defined. In the current interface, it seems to simply be
+        alphabetical ordering. We need to check whether this holds.
+        It could change, and since LAMMPS itself does not name the elements
+        in its data file, one would not notice.
+        """
+        vasp_source_file = open("test_element.vasp", mode="w")
+        vasp_source_file.write(
+            "O  Al Te H\n 1.0000000000000000\n     6.0000000000000000    0.0000000000000000    0.0000000000000000\n     0.0000000000000000    6.0000000000000000    0.0000000000000000\n     0.0000000000000000    0.0000000000000000    6.0000000000000000\nO  Al Te H\n   1   1   1   1\nCartesian\n  0.0 0.0 1.0\n  0.0 0.0 2.0\n  0.0 0.0 3.0\n  0.0 0.0 4.0 \n"
+        )
+        vasp_source_file.close()
+        atoms = read("test_element.vasp", format="vasp")
+        write("test_element.lammps", atoms, format="lammps-data")
+
+        raw_file = open("test_element.lammps")
+        lines = raw_file.readlines()
+        found_atoms = 0
+        for idx, line in enumerate(lines):
+            if "Atoms" in line:
+                found_atoms = idx
+
+        alphabetical_order_elements = [3, 1, 4, 2]
+
+        for i in range(2, 6):
+            assert (
+                int(lines[found_atoms + i].split()[1])
+                == alphabetical_order_elements[i - 2]
+            )

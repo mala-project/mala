@@ -85,8 +85,6 @@ class LDOSAligner(DataHandlerBase):
             snapshot_type=snapshot_type,
         )
 
-        if snapshot_type != "numpy":
-            raise Exception("Snapshot type must be numpy for LDOS alignment")
 
     def align_ldos_to_ref(
         self,
@@ -136,6 +134,9 @@ class LDOSAligner(DataHandlerBase):
             comm = get_comm()
             rank = comm.rank
             size = comm.size
+            import sys
+            print(
+                "[mala.LDOSAligner.align_ldos_to_ref] Warning: MPI support is experimental. Use with caution.")
         else:
             comm = None
             rank = 0
@@ -146,13 +147,23 @@ class LDOSAligner(DataHandlerBase):
             snapshot_ref = self.parameters.snapshot_directories_list[
                 reference_index
             ]
-            ldos_ref = np.load(
-                os.path.join(
-                    snapshot_ref.output_npy_directory,
-                    snapshot_ref.output_npy_file,
-                ),
-                mmap_mode="r",
-            )
+            if snapshot_ref.snapshot_type == 'numpy':
+                ldos_ref = self.target_calculator.read_from_numpy_file(
+                    os.path.join(
+                        snapshot_ref.output_npy_directory,
+                        snapshot_ref.output_npy_file,
+                    )
+                )
+            elif snapshot_ref.snapshot_type == 'openpmd':
+                ldos_ref = self.target_calculator.read_from_openpmd_file(
+                    os.path.join(
+                        snapshot_ref.output_npy_directory,
+                        snapshot_ref.output_npy_file,
+                    )
+                )
+            else:
+                raise Exception(
+                    "Unknown snapshot type '{snapshot_ref.snapshot_type}'.")
 
             # get the mean
             n_target = ldos_ref.shape[-1]
@@ -205,13 +216,23 @@ class LDOSAligner(DataHandlerBase):
         for idx in local_snapshots:
             snapshot = self.parameters.snapshot_directories_list[idx]
             print(f"Aligning snapshot {idx+1} of {N_snapshots}")
-            ldos = np.load(
-                os.path.join(
-                    snapshot.output_npy_directory,
-                    snapshot.output_npy_file,
-                ),
-                mmap_mode="r",
-            )
+            if snapshot_ref.snapshot_type == 'numpy':
+                ldos = self.target_calculator.read_from_numpy_file(
+                    os.path.join(
+                        snapshot.output_npy_directory,
+                        snapshot.output_npy_file,
+                    )
+                )
+            elif snapshot_ref.snapshot_type == 'openpmd':
+                ldos = self.target_calculator.read_from_openpmd_file(
+                    os.path.join(
+                        snapshot.output_npy_directory,
+                        snapshot.output_npy_file,
+                    )
+                )
+            else:
+                raise Exception(
+                    "Unknown snapshot type '{snapshot_ref.snapshot_type}'.")
 
             # get the mean
             nx = ldos.shape[0]
@@ -226,7 +247,6 @@ class LDOSAligner(DataHandlerBase):
 
             # shift the ldos
             optimal_shift = self.calc_optimal_ldos_shift(
-                e_grid,
                 ldos_mean,
                 ldos_mean_ref,
                 left_index,
@@ -280,30 +300,34 @@ class LDOSAligner(DataHandlerBase):
                 snapshot.output_npy_directory, save_path_ext
             )
             save_name = snapshot.output_npy_file
-
-            stripped_output_file_name = snapshot.output_npy_file.replace(
-                ".out", ""
-            )
-            ldos_shift_info_save_name = stripped_output_file_name.replace(
-                ".npy", ".ldos_shift.info.json"
-            )
-
+            target_name = os.path.join(save_path, save_name)
             os.makedirs(save_path, exist_ok=True)
 
-            if "*" in save_name:
-                save_name = save_name.replace("*", str(idx))
-                ldos_shift_info_save_name.replace("*", str(idx))
+            self.ldos_parameters.ldos_gridsize = ldos_shifted.shape[-1]
 
-            target_name = os.path.join(save_path, save_name)
+            if snapshot.snapshot_type == 'numpy':
+                stripped_output_file_name = snapshot.output_npy_file.replace(
+                    ".out", ""
+                )
+                ldos_shift_info_save_name = stripped_output_file_name.replace(
+                    ".npy", ".ldos_shift.info.json"
+                )
 
-            self.target_calculator.write_to_numpy_file(
-                target_name, ldos_shifted
-            )
+                if "*" in save_name:
+                    save_name = save_name.replace("*", str(idx))
+                    ldos_shift_info_save_name.replace("*", str(idx))
 
-            with open(
-                os.path.join(save_path, ldos_shift_info_save_name), "w"
-            ) as f:
-                json.dump(ldos_shift_info, f, indent=2)
+                self.target_calculator.write_to_numpy_file(
+                    target_name, ldos_shifted
+                )
+
+                with open(
+                    os.path.join(save_path, ldos_shift_info_save_name), "w"
+                ) as f:
+                    json.dump(ldos_shift_info, f, indent=2)
+            else:
+                self.target_calculator.write_to_openpmd_file(
+                    target_name, ldos_shifted, additional_attributes=ldos_shift_info)
 
         barrier()
 

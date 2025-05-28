@@ -13,7 +13,7 @@ def set_cmdlinevars(cmdargs, argdict):
 
     Parameters
     ----------
-    cmdargs : list
+    cmdargs : List
         Command line argument string. Will be mutated by this function.
 
     argdict : dict
@@ -21,7 +21,7 @@ def set_cmdlinevars(cmdargs, argdict):
 
     Returns
     -------
-    cmdargs : list
+    cmdargs : List
         New command line argument string.
     """
     for key in argdict.keys():

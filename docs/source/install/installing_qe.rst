@@ -10,6 +10,12 @@ tested with version ``7.2.``, the most recent version at the time of this
 release of MALA. Newer versions may work (untested), but installation
 instructions may vary.
 
+.. note::
+    The ``build_total_energy_module.sh`` script uses ``meson`` and ``ninja``
+    as a build system, which may cause problems with older python versions
+    (i.e., 3.10.* and 3.11.*). If you encounter problems, please use
+    ``build_total_energy_module_legacy.sh`` located in the same folder.
+
 Make sure you have an (MPI-aware) F90 compiler such as ``mpif90`` (e.g.
 Debian-ish machine: ``apt install openmpi-bin``, on an HPC cluster something
 like ``module load openmpi gcc``). Make sure to use the same compiler

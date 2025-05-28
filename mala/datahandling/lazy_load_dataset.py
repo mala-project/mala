@@ -163,6 +163,18 @@ class LazyLoadDataset(Dataset):
                 ),
                 units=self._snapshot_list[file_index].output_units,
             )
+        elif self._snapshot_list[file_index].snapshot_type == "json+numpy":
+            self.input_data = self._descriptor_calculator.read_from_numpy_file(
+                self._snapshot_list[file_index].temporary_input_file,
+                units=self._snapshot_list[file_index].input_units,
+            )
+            self.output_data = self._target_calculator.read_from_numpy_file(
+                os.path.join(
+                    self._snapshot_list[file_index].output_npy_directory,
+                    self._snapshot_list[file_index].output_npy_file,
+                ),
+                units=self._snapshot_list[file_index].output_units,
+            )
 
         elif self._snapshot_list[file_index].snapshot_type == "openpmd":
             self.input_data = (
@@ -172,6 +184,18 @@ class LazyLoadDataset(Dataset):
                         self._snapshot_list[file_index].input_npy_file,
                     )
                 )
+            )
+            self.output_data = self._target_calculator.read_from_openpmd_file(
+                os.path.join(
+                    self._snapshot_list[file_index].output_npy_directory,
+                    self._snapshot_list[file_index].output_npy_file,
+                )
+            )
+
+        elif self._snapshot_list[file_index].snapshot_type == "json+openpmd":
+            self.input_data = self._descriptor_calculator.read_from_numpy_file(
+                self._snapshot_list[file_index].temporary_input_file,
+                units=self._snapshot_list[file_index].input_units,
             )
             self.output_data = self._target_calculator.read_from_openpmd_file(
                 os.path.join(
@@ -206,6 +230,31 @@ class LazyLoadDataset(Dataset):
         self.currently_loaded_file = file_index
 
     def _get_file_index(self, idx, is_slice=False, is_start=False):
+        """
+        Get the file index and the index in the file.
+
+        These indices are determined from the index within the data set.
+        Also supports slices as indices.
+
+        Parameters
+        ----------
+        idx : int
+            Index within the data set.
+
+        is_slice : bool
+            If True, the index is a slice.
+
+        is_start : bool
+            If True, the slice starts at the beginning of the file.
+
+        Returns
+        -------
+        file_index : int
+            Index of the file that contains the requested data.
+
+        index_in_file : int
+            Index within the file.
+        """
         file_index = None
         index_in_file = idx
         if is_slice:

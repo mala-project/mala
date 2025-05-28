@@ -3,7 +3,7 @@ import os
 from ase.io import read
 import mala
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 """
 Shows how MALA can be used as an ASE calculator.
@@ -14,7 +14,7 @@ REQUIRES LAMMPS AND QUANTUM ESPRESSO (TOTAL ENERGY MODULE).
 """
 
 model_name = "Be_model"
-model_path = "./" if os.path.exists("Be_model.zip") else data_path
+model_path = "./" if os.path.exists("Be_model.zip") else data_path_be
 
 
 ####################
@@ -24,7 +24,7 @@ model_path = "./" if os.path.exists("Be_model.zip") else data_path
 # data generation-
 ####################
 calculator = mala.MALA.load_model(run_name=model_name, path=model_path)
-calculator.mala_parameters.targets.pseudopotential_path = data_path
+calculator.mala_parameters.targets.pseudopotential_path = data_path_be
 
 ####################
 # 2. MAKING A PREDICTION
@@ -32,6 +32,6 @@ calculator.mala_parameters.targets.pseudopotential_path = data_path
 # an ASE atoms object, setting the calculator and using the regular ASE
 # interface.
 ####################
-atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
+atoms = read(os.path.join(data_path_be, "Be_snapshot1.out"))
 atoms.set_calculator(calculator)
 mala.printout(atoms.get_potential_energy())

@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+__pycache__
 *.py[cod]
 *$py.class
 
@@ -152,6 +153,7 @@ cython_debug/
 *.out
 *.npy
 *.pkl
+*.pk
 *.pth
 *.json
 
@@ -186,3 +188,7 @@ wandb/
 
 *.zip
 *~
+
+# ACE files & libraries
+*.pkl
+

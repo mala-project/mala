@@ -10,9 +10,9 @@ from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
 from mala.version import __version__ as mala_version
 
-descriptor_input_types = ["espresso-out", "openpmd", "numpy"]
+descriptor_input_types = ["espresso-out", "openpmd", "numpy", "json"]
 target_input_types = [".cube", ".xsf", "openpmd", "numpy"]
-additional_info_input_types = ["espresso-out"]
+simulation_output_types = ["espresso-out"]
 
 
 class DataConverter:
@@ -78,7 +78,7 @@ class DataConverter:
         # Keep track of what has to be done by this data converter.
         self.__process_descriptors = False
         self.__process_targets = False
-        self.__process_additional_info = False
+        self.__process_simulation_output = False
 
     def add_snapshot(
         self,
@@ -86,8 +86,8 @@ class DataConverter:
         descriptor_input_path=None,
         target_input_type=None,
         target_input_path=None,
-        additional_info_input_type=None,
-        additional_info_input_path=None,
+        simulation_output_type=None,
+        simulation_output_path=None,
         descriptor_units=None,
         metadata_input_type=None,
         metadata_input_path=None,
@@ -111,25 +111,25 @@ class DataConverter:
             See mala.datahandling.data_converter.target_input_types
             for options.
 
-        target_input_path : string
+        target_input_path : string or list
             Path of target data to be processed.
 
-        additional_info_input_type : string
+        simulation_output_type : string
             Type of additional info data to be processed.
-            See mala.datahandling.data_converter.additional_info_input_types
+            See mala.datahandling.data_converter.simulation_output_types
             for options.
 
-        additional_info_input_path : string
+        simulation_output_path : string
             Path of additional info data to be processed.
 
         metadata_input_type : string
             Type of additional metadata to be processed.
-            See mala.datahandling.data_converter.additional_info_input_types
+            See mala.datahandling.data_converter.simulation_output_types
             for options.
-            This is essentially the same as additional_info_input_type,
+            This is essentially the same as simulation_output_type,
             but will not affect saving; i.e., the data given here will
             only be saved in OpenPMD files, not saved separately.
-            If additional_info_input_type is set, this argument will be
+            If simulation_output_type is set, this argument will be
             ignored.
 
         metadata_input_path : string
@@ -161,20 +161,20 @@ class DataConverter:
                 raise Exception("Cannot process this type of target data.")
             self.__process_targets = True
 
-        if additional_info_input_type is not None:
-            metadata_input_type = additional_info_input_type
-            if additional_info_input_path is None:
+        if simulation_output_type is not None:
+            metadata_input_type = simulation_output_type
+            if simulation_output_path is None:
                 raise Exception(
                     "Cannot process additional info data with "
                     "no path given."
                 )
-            if additional_info_input_type not in additional_info_input_types:
+            if simulation_output_type not in simulation_output_types:
                 raise Exception(
                     "Cannot process this type of additional info data."
                 )
-            self.__process_additional_info = True
+            self.__process_simulation_output = True
 
-            metadata_input_path = additional_info_input_path
+            metadata_input_path = simulation_output_path
 
         if metadata_input_type is not None:
             if metadata_input_path is None:
@@ -182,7 +182,7 @@ class DataConverter:
                     "Cannot process additional info data with "
                     "no path given."
                 )
-            if metadata_input_type not in additional_info_input_types:
+            if metadata_input_type not in simulation_output_types:
                 raise Exception(
                     "Cannot process this type of additional info data."
                 )
@@ -192,7 +192,7 @@ class DataConverter:
             {
                 "input": descriptor_input_path,
                 "output": target_input_path,
-                "additional_info": additional_info_input_path,
+                "simulation_output": simulation_output_path,
                 "metadata": metadata_input_path,
             }
         )
@@ -200,7 +200,7 @@ class DataConverter:
             {
                 "input": descriptor_input_type,
                 "output": target_input_type,
-                "additional_info": additional_info_input_type,
+                "simulation_output": simulation_output_type,
                 "metadata": metadata_input_type,
             }
         )
@@ -213,7 +213,7 @@ class DataConverter:
         complete_save_path=None,
         descriptor_save_path=None,
         target_save_path=None,
-        additional_info_save_path=None,
+        simulation_output_save_path=None,
         naming_scheme="ELEM_snapshot*.npy",
         starts_at=0,
         file_based_communication=False,
@@ -231,7 +231,7 @@ class DataConverter:
         complete_save_path : string
             If not None: the directory in which all snapshots will be saved.
             Overwrites descriptor_save_path, target_save_path and
-            additional_info_save_path if set.
+            simulation_output_save_path if set.
 
         descriptor_save_path : string
             Directory in which to save descriptor data.
@@ -239,7 +239,7 @@ class DataConverter:
         target_save_path : string
             Directory in which to save target data.
 
-        additional_info_save_path : string
+        simulation_output_save_path : string
             Directory in which to save additional info data.
 
         naming_scheme : string
@@ -304,7 +304,7 @@ class DataConverter:
         if complete_save_path is not None:
             descriptor_save_path = complete_save_path
             target_save_path = complete_save_path
-            additional_info_save_path = complete_save_path
+            simulation_output_save_path = complete_save_path
         else:
             if self.__process_targets is True and target_save_path is None:
                 raise Exception(
@@ -318,8 +318,8 @@ class DataConverter:
                     "No descriptor path specified, cannot process data."
                 )
             if (
-                self.__process_additional_info is True
-                and additional_info_save_path is None
+                self.__process_simulation_output is True
+                and simulation_output_save_path is None
             ):
                 raise Exception(
                     "No additional info path specified, cannot "
@@ -393,9 +393,9 @@ class DataConverter:
             snapshot_name = snapshot_name.replace("*", str(snapshot_number))
 
             # Create the paths as needed.
-            if self.__process_additional_info:
+            if self.__process_simulation_output:
                 info_path = os.path.join(
-                    additional_info_save_path, snapshot_name + ".info.json"
+                    simulation_output_save_path, snapshot_name + ".info.json"
                 )
             else:
                 info_path = None
@@ -454,7 +454,7 @@ class DataConverter:
                 use_memmap=memmap,
                 input_iteration=input_iteration,
                 output_iteration=output_iteration,
-                additional_info_path=info_path,
+                simulation_output_info_path=info_path,
                 use_fp64=use_fp64,
             )
 
@@ -479,7 +479,7 @@ class DataConverter:
         target_calculator_kwargs,
         input_path=None,
         output_path=None,
-        additional_info_path=None,
+        simulation_output_info_path=None,
         use_memmap=None,
         output_iteration=None,
         input_iteration=None,
@@ -530,10 +530,10 @@ class DataConverter:
 
         Returns
         -------
-        inputs : numpy.array , optional
+        inputs : numpy.ndarray , optional
             Numpy array containing the preprocessed inputs.
 
-        outputs : numpy.array , optional
+        outputs : numpy.ndarray , optional
             Numpy array containing the preprocessed outputs.
         """
         snapshot = self.__snapshots_to_convert[snapshot_number]
@@ -547,6 +547,15 @@ class DataConverter:
 
             tmp_input, local_size = (
                 self.descriptor_calculator.calculate_from_qe_out(
+                    snapshot["input"], **descriptor_calculation_kwargs
+                )
+            )
+        elif description["input"] == "json":
+            descriptor_calculation_kwargs["units"] = original_units["input"]
+            descriptor_calculation_kwargs["use_fp64"] = use_fp64
+
+            tmp_input, local_size = (
+                self.descriptor_calculator.calculate_from_json(
                     snapshot["input"], **descriptor_calculation_kwargs
                 )
             )
@@ -719,11 +728,11 @@ class DataConverter:
             del tmp_output
 
         # Parse and/or calculate the additional info.
-        if description["additional_info"] is not None:
+        if description["simulation_output"] is not None:
             # Parsing and saving is done using the target calculator.
             self.target_calculator.read_additional_calculation_data(
-                snapshot["additional_info"], description["additional_info"]
+                snapshot["simulation_output"], description["simulation_output"]
             )
             self.target_calculator.write_additional_calculation_data(
-                additional_info_path
+                simulation_output_info_path
             )

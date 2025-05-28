@@ -7,7 +7,7 @@ import optuna
 import mala
 import numpy as np
 
-from mala.datahandling.data_repo import data_path
+from mala.datahandling.data_repo import data_path_be
 
 # Control how much the loss should be better after hyperopt compared to
 # before. This value is fairly high, but we're training on absolutely
@@ -50,23 +50,23 @@ class TestHyperparameterOptimization:
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot(
             "Be_snapshot0.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
             "tr",
         )
         data_handler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.add_snapshot(
             "Be_snapshot2.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot2.out.npy",
-            data_path,
+            data_path_be,
             "te",
         )
         data_handler.prepare_data()
@@ -145,23 +145,23 @@ class TestHyperparameterOptimization:
         # Add all the snapshots we want to use in to the list.
         data_handler.add_snapshot(
             "Be_snapshot0.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
             "tr",
         )
         data_handler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.add_snapshot(
             "Be_snapshot2.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot2.out.npy",
-            data_path,
+            data_path_be,
             "te",
         )
         data_handler.prepare_data()
@@ -206,21 +206,24 @@ class TestHyperparameterOptimization:
         hyperoptimizer = mala.ACSDAnalyzer(test_parameters)
         hyperoptimizer.add_hyperparameter("bispectrum_twojmax", [2, 6])
         hyperoptimizer.add_hyperparameter("bispectrum_cutoff", [1.0])
+        hyperoptimizer.add_hyperparameter(
+            "bispectrum_element_weights", ["1.0,1.0"]
+        )
         # hyperoptimizer.add_hyperparameter("bispectrum_twojmax", [6, 8])
         # hyperoptimizer.add_hyperparameter("bispectrum_cutoff", [1.0, 3.0])
 
         hyperoptimizer.add_snapshot(
             "espresso-out",
-            os.path.join(data_path, "Be_snapshot1.out"),
+            os.path.join(data_path_be, "Be_snapshot1.out"),
             "numpy",
-            os.path.join(data_path, "Be_snapshot1.in.npy"),
+            os.path.join(data_path_be, "Be_snapshot1.in.npy"),
             target_units="1/(Ry*Bohr^3)",
         )
         hyperoptimizer.add_snapshot(
             "espresso-out",
-            os.path.join(data_path, "Be_snapshot2.out"),
+            os.path.join(data_path_be, "Be_snapshot2.out"),
             "numpy",
-            os.path.join(data_path, "Be_snapshot2.in.npy"),
+            os.path.join(data_path_be, "Be_snapshot2.in.npy"),
             target_units="1/(Ry*Bohr^3)",
         )
         hyperoptimizer.perform_study()
@@ -250,16 +253,16 @@ class TestHyperparameterOptimization:
 
         data_handler.add_snapshot(
             "Be_snapshot0.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
             "tr",
         )
         data_handler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.prepare_data()
@@ -318,23 +321,23 @@ class TestHyperparameterOptimization:
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot(
             "Be_snapshot0.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
             "tr",
         )
         data_handler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.add_snapshot(
             "Be_snapshot2.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot2.out.npy",
-            data_path,
+            data_path_be,
             "te",
         )
         data_handler.prepare_data()
@@ -403,23 +406,23 @@ class TestHyperparameterOptimization:
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot(
             "Be_snapshot0.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot0.out.npy",
-            data_path,
+            data_path_be,
             "tr",
         )
         data_handler.add_snapshot(
             "Be_snapshot1.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot1.out.npy",
-            data_path,
+            data_path_be,
             "va",
         )
         data_handler.add_snapshot(
             "Be_snapshot2.in.npy",
-            data_path,
+            data_path_be,
             "Be_snapshot2.out.npy",
-            data_path,
+            data_path_be,
             "te",
         )
         data_handler.prepare_data()
