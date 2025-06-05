@@ -245,7 +245,9 @@ class Bispectrum(Descriptor):
                 )
             if (
                 self.parameters._configuration["gpu"]
-                and np.all(self.parameters.bispectrum_element_weights == 1.0)
+                and np.all(
+                    np.array(self.parameters.bispectrum_element_weights == 1.0)
+                )
                 is False
             ):
                 raise ValueError(
