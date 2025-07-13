@@ -46,11 +46,13 @@ A full list of contributors can be found [here](docs/source/CONTRIBUTE.md).
 
 ## Citing MALA
 
-If you publish work which uses or mentions MALA, please cite the following paper:
+If you publish work which uses or mentions MALA, please cite this repository and the following papers:
 
-J. A. Ellis, L. Fiedler, G. A. Popoola, N. A. Modine, J. A. Stephens, A. P. Thompson,
-A. Cangi, S. Rajamanickam (2021). Accelerating Finite-temperature
-Kohn-Sham Density Functional Theory with Deep Neural Networks.
-[Phys. Rev. B 104, 035120 (2021)](https://doi.org/10.1103/PhysRevB.104.035120)
+- A. Cangi, L. Fiedler, B. Brzoza, K. Shah, T. J. Callow, D. Kotik, S. Schmerler, M. C. Barry, J. M. Goff, A. Rohskopf, D. J. Vogel, N. Modine, A. P. Thompson, S. Rajamanickam,
+Materials Learning Algorithms (MALA): Scalable Machine Learning for Electronic Structure Calculations in Large-Scale Atomistic Simulations,
+[Comp. Phys. Commun. 314, 109654 (2025)](https://doi.org/10.1016/j.cpc.2025.109654).
 
-alongside this repository.
+- J. A. Ellis, L. Fiedler, G. A. Popoola, N. A. Modine, J. A. Stephens, A. P. Thompson,
+A. Cangi, S. Rajamanickam, Accelerating Finite-Temperature Kohn-Sham Density Functional Theory with Deep Neural Networks,
+[Phys. Rev. B 104, 035120 (2021)](https://doi.org/10.1103/PhysRevB.104.035120).
+
