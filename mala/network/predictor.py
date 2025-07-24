@@ -114,8 +114,8 @@ class Predictor(Runner):
             # We only need the diagonal elements.
             factor = np.diag(new_cell) / np.diag(old_cell)
             factor = factor.astype(int)
-            self.data.grid_dimension = (
-                factor * self.data.target_calculator.grid_dimensions
+            self.data.grid_dimension = list(
+                map(int, factor * self.data.target_calculator.grid_dimensions)
             )
 
         self.data.grid_size = np.prod(self.data.grid_dimension)
