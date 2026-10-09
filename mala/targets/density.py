@@ -689,7 +689,9 @@ class Density(Target):
                     np.sum(density_data, axis=0) * voxel.volume
                 )
 
-        return np.squeeze(number_of_electrons)
+        # Return a scalar float, as DOS/LDOS and the target attributes do,
+        # rather than the 0-d ndarray np.squeeze yields for a scalar input.
+        return np.float64(np.squeeze(number_of_electrons))
 
     def get_density(
         self,
